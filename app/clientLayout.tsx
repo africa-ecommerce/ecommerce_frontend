@@ -8,6 +8,7 @@ import Link from "next/link"
 import { Home, Search, LayoutGrid, ShoppingCart, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeProvider } from "@/components/theme-provider"
+import { ShoppingCartProvider } from "./_components/provider/shoppingCartProvider"
 
 interface NavItemProps {
   href: string
@@ -55,8 +56,20 @@ export default function ClientLayout({
     setMounted(true)
   }, [])
 
-  // Determine if we're on an auth page
-  const isAuthPage = pathname?.startsWith("/auth") || pathname?.startsWith("/onboarding")
+  const homePage = "/"
+
+  // Determine if we're on an public page
+  const isPublicPage = pathname?.startsWith("/auth") || pathname?.startsWith("/onboarding") || pathname == homePage
+
+  const excludedPaths = [
+    "/checkout",
+    "/payment",
+    "/admin/*", // Excludes all paths that start with /admin/
+    "/account/settings",
+    "/",
+    "/auth/*",
+    "/onboarding"
+  ];
 
   return (
     <html lang="en">
@@ -65,15 +78,24 @@ export default function ClientLayout({
           <div className="flex flex-col min-h-screen">
             <div className="flex-1 flex flex-col">
               <main className="flex-1 pb-16 md:pb-0">
-                <Suspense fallback={<div className="p-4">Loading...</div>}>{children}</Suspense>
+                <Suspense fallback={<div className="p-4">Loading...</div>}>
+                <ShoppingCartProvider excludePaths={excludedPaths}>
+                  {children}
+                  </ShoppingCartProvider>
+                </Suspense>
               </main>
             </div>
 
             {/* Mobile Bottom Navigation - Fixed at bottom */}
-            {mounted && !isAuthPage && (
+            {mounted && !isPublicPage && (
               <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md border-t shadow-lg md:hidden z-50">
                 <nav className="flex justify-between items-center px-3 py-2">
-                  <NavItem href="/" icon={<Home className="w-5 h-5" />} label="Home" isActive={pathname === "/"} />
+                  <NavItem
+                    href="/"
+                    icon={<Home className="w-5 h-5" />}
+                    label="Home"
+                    isActive={pathname === "/"}
+                  />
                   <NavItem
                     href="/search"
                     icon={<Search className="w-5 h-5" />}
@@ -106,6 +128,6 @@ export default function ClientLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
 

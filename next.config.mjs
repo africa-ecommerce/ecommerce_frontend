@@ -7,6 +7,14 @@ try {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*", // Match all /api requests
+        destination: "http://localhost:5000/api/:path*", // Forward to backend
+      },
+    ];
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },

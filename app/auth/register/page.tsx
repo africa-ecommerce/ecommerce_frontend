@@ -1,50 +1,58 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { Eye, EyeOff, Check } from "lucide-react"
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RegisterSchema } from "@/zod/schema";
+import { useRegister } from "@/hooks/authManagement/useRegister";
+import { useRouter } from "next/navigation";
+import * as z from "zod";
+
+type RegisterInput = z.infer<typeof RegisterSchema>;
+
+const registerUser = async (data: RegisterInput) => {
+  const response = await fetch("/api/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error("Registration failed");
+  }
+
+  return response.json();
+};
 
 export default function RegisterPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [fullName, setFullName] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [password, setPassword] = useState("")
-  const [accountType, setAccountType] = useState("buyer")
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [accountType, setAccountType] = useState("buyer");
+  const [policyChecked, setPolicyChecked] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle registration logic here
-    console.log("Register with:", { fullName, email, phone, password, accountType })
-  }
+  const {
+    form: { register, setValue, submit, errors, isSubmitting },
+  } = useRegister(registerUser, RegisterSchema, (data) =>
+    router.push("/login")
+  );
 
-  // Password strength checker
-  const getPasswordStrength = () => {
-    if (!password) return { strength: 0, text: "" }
+  useEffect(() => {
+    setValue("policy", policyChecked);
+  }, [policyChecked, setValue]);
 
-    let strength = 0
-    if (password.length >= 8) strength += 1
-    if (/[A-Z]/.test(password)) strength += 1
-    if (/[0-9]/.test(password)) strength += 1
-    if (/[^A-Za-z0-9]/.test(password)) strength += 1
-
-    const strengthText = ["Weak", "Fair", "Good", "Strong"]
-
-    return {
-      strength,
-      text: strengthText[strength - 1] || "",
-    }
-  }
-
-  const passwordStrength = getPasswordStrength()
+  // Fixed handleSubmit function with correct type
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await submit(e);
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -67,14 +75,19 @@ export default function RegisterPage() {
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-card px-6 py-8 shadow sm:rounded-lg sm:px-8">
-            <Tabs defaultValue="buyer" onValueChange={setAccountType} className="w-full mb-6">
+            <Tabs
+              defaultValue="buyer"
+              onValueChange={setAccountType}
+              className="w-full mb-6"
+            >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="buyer">I'm a Buyer</TabsTrigger>
                 <TabsTrigger value="seller">I'm a Seller</TabsTrigger>
               </TabsList>
               <TabsContent value="buyer">
                 <p className="text-sm text-muted-foreground mt-2">
-                  Create an account to shop from thousands of African businesses.
+                  Create an account to shop from thousands of African
+                  businesses.
                 </p>
               </TabsContent>
               <TabsContent value="seller">
@@ -86,54 +99,60 @@ export default function RegisterPage() {
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
-                <label htmlFor="fullName" className="block text-sm font-medium leading-6">
+                <label
+                  htmlFor="fullName"
+                  className="block text-sm font-medium leading-6"
+                >
                   Full Name
                 </label>
-                <div className="mt-2">
+                <div className="mt-1">
                   <Input
                     id="fullName"
-                    name="fullName"
-                    type="text"
-                    autoComplete="name"
-                    required
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    {...register("fullname")}
                     className="block w-full"
                   />
+                  {errors.fullname && (
+                    <p className="text-xs text-red-500">
+                      {errors.fullname.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium leading-6">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium leading-6"
+                >
                   Email Address
                 </label>
-                <div className="mt-2">
+                <div className="mt-1">
                   <Input
                     id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    {...register("email")}
                     className="block w-full"
+                    placeholder="johndoe@gmail.com"
                   />
+                  {errors.email && (
+                    <p className="text-xs text-red-500">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium leading-6">
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium leading-6"
+                >
                   Phone Number
+                  <span className="text-xs text-gray-500">(Optional)</span>
                 </label>
-                <div className="mt-2">
+                <div className="mt-1">
                   <Input
                     id="phone"
-                    name="phone"
-                    type="tel"
-                    autoComplete="tel"
-                    required
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    {...register("phone")}
                     className="block w-full"
                     placeholder="+234"
                   />
@@ -141,19 +160,19 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium leading-6">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium leading-6"
+                >
                   Password
                 </label>
-                <div className="mt-2 relative">
+                <div className="mt-1 relative">
                   <Input
                     id="password"
-                    name="password"
                     type={showPassword ? "text" : "password"}
-                    autoComplete="new-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    {...register("password")}
                     className="block w-full pr-10"
+                    placeholder="********"
                   />
                   <button
                     type="button"
@@ -167,64 +186,10 @@ export default function RegisterPage() {
                     )}
                   </button>
                 </div>
-
-                {password && (
-                  <div className="mt-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="text-xs">Password strength: {passwordStrength.text}</div>
-                      <div className="text-xs">{password.length}/8+ chars</div>
-                    </div>
-                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-300 ${
-                          passwordStrength.strength === 1
-                            ? "bg-red-500 w-1/4"
-                            : passwordStrength.strength === 2
-                              ? "bg-yellow-500 w-2/4"
-                              : passwordStrength.strength === 3
-                                ? "bg-green-500 w-3/4"
-                                : passwordStrength.strength === 4
-                                  ? "bg-green-600 w-full"
-                                  : ""
-                        }`}
-                      ></div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                      <div className="flex items-center text-xs">
-                        <div
-                          className={`w-4 h-4 rounded-full mr-2 flex items-center justify-center ${/[A-Z]/.test(password) ? "bg-green-500 text-white" : "bg-muted"}`}
-                        >
-                          {/[A-Z]/.test(password) && <Check className="h-3 w-3" />}
-                        </div>
-                        <span>Capital letter</span>
-                      </div>
-                      <div className="flex items-center text-xs">
-                        <div
-                          className={`w-4 h-4 rounded-full mr-2 flex items-center justify-center ${/[0-9]/.test(password) ? "bg-green-500 text-white" : "bg-muted"}`}
-                        >
-                          {/[0-9]/.test(password) && <Check className="h-3 w-3" />}
-                        </div>
-                        <span>Number</span>
-                      </div>
-                      <div className="flex items-center text-xs">
-                        <div
-                          className={`w-4 h-4 rounded-full mr-2 flex items-center justify-center ${password.length >= 8 ? "bg-green-500 text-white" : "bg-muted"}`}
-                        >
-                          {password.length >= 8 && <Check className="h-3 w-3" />}
-                        </div>
-                        <span>8+ characters</span>
-                      </div>
-                      <div className="flex items-center text-xs">
-                        <div
-                          className={`w-4 h-4 rounded-full mr-2 flex items-center justify-center ${/[^A-Za-z0-9]/.test(password) ? "bg-green-500 text-white" : "bg-muted"}`}
-                        >
-                          {/[^A-Za-z0-9]/.test(password) && <Check className="h-3 w-3" />}
-                        </div>
-                        <span>Special character</span>
-                      </div>
-                    </div>
-                  </div>
+                {errors.password && (
+                  <p className="text-xs text-red-500">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
@@ -234,22 +199,38 @@ export default function RegisterPage() {
                   name="terms"
                   type="checkbox"
                   required
+                  onClick={() => {
+                    setPolicyChecked(true);
+                  }}
                   className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                 />
-                <label htmlFor="terms" className="ml-2 block text-sm text-muted-foreground">
+                <label
+                  htmlFor="terms"
+                  className="ml-2 block text-sm text-muted-foreground"
+                >
                   I agree to the{" "}
-                  <Link href="/terms" className="text-primary hover:text-primary/90">
+                  <Link
+                    href="/terms"
+                    className="text-primary hover:text-primary/90"
+                  >
                     Terms of Service
                   </Link>{" "}
                   and{" "}
-                  <Link href="/privacy" className="text-primary hover:text-primary/90">
+                  <Link
+                    href="/privacy"
+                    className="text-primary hover:text-primary/90"
+                  >
                     Privacy Policy
                   </Link>
                 </label>
               </div>
 
               <div>
-                <Button type="submit" className="w-full">
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={!policyChecked || isSubmitting}
+                >
                   Create Account
                 </Button>
               </div>
@@ -261,20 +242,32 @@ export default function RegisterPage() {
                   <Separator className="w-full" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                  <span className="bg-card px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
                 </div>
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <Button variant="outline" className="w-full">
                   <div className="mr-2 h-5 w-5 relative">
-                    <Image src="/placeholder.svg?height=20&width=20&text=G" alt="Google" width={20} height={20} />
+                    <Image
+                      src="/placeholder.svg?height=20&width=20&text=G"
+                      alt="Google"
+                      width={20}
+                      height={20}
+                    />
                   </div>
                   Google
                 </Button>
                 <Button variant="outline" className="w-full">
                   <div className="mr-2 h-5 w-5 relative">
-                    <Image src="/placeholder.svg?height=20&width=20&text=W" alt="WhatsApp" width={20} height={20} />
+                    <Image
+                      src="/placeholder.svg?height=20&width=20&text=W"
+                      alt="WhatsApp"
+                      width={20}
+                      height={20}
+                    />
                   </div>
                   WhatsApp
                 </Button>
@@ -283,7 +276,10 @@ export default function RegisterPage() {
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
               Already have an account?{" "}
-              <Link href="/auth/login" className="font-medium text-primary hover:text-primary/90">
+              <Link
+                href="/auth/login"
+                className="font-medium text-primary hover:text-primary/90"
+              >
                 Sign in
               </Link>
             </div>
@@ -291,6 +287,5 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-
