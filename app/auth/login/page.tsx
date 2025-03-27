@@ -1,36 +1,50 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { Eye, EyeOff } from "lucide-react"
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
+import * as z from "zod";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { useLogin } from "@/hooks/authManagement/useLogin";
+import { LoginSchema } from "@/zod/schema";
 
 
 
- 
+type LoginInput = z.infer<typeof LoginSchema>;
 
+const loginUser = async (data: LoginInput) => {
+  const response = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 
+  if (!response.ok) {
+    throw new Error("Login failed. Please check your credentials.");
+  }
 
+  return response.json();
+};
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
 
+  const {
+    form: { register, submit, errors, isSubmitting },
+  } = useLogin(loginUser, LoginSchema, (data) => router.push("/dashboard"));
 
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-
- 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle login logic here
-    console.log("Login with:", email, password)
-  }
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await submit(e);
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -43,51 +57,61 @@ export default function LoginPage() {
               </div>
             </div>
           </div>
-          <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight">Welcome back to AfriConnect</h2>
-          <p className="mt-2 text-center text-sm text-muted-foreground">Sign in to continue your shopping experience</p>
+          <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight">
+            Welcome back to AfriConnect
+          </h2>
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            Sign in to continue your shopping experience
+          </p>
         </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-card px-6 py-8 shadow sm:rounded-lg sm:px-8">
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium leading-6">
-                  Email or Phone Number
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium leading-6"
+                >
+                  Email Address
                 </label>
-                <div className="mt-2">
+                <div className="mt-1">
                   <Input
                     id="email"
-                    name="email"
-                    type="text"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    {...register("email")}
                     className="block w-full"
+                    placeholder="johndoe@gmail.com"
                   />
+                  {errors.email && (
+                    <p className="text-xs text-red-500">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="block text-sm font-medium leading-6">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium leading-6"
+                  >
                     Password
                   </label>
                   <div className="text-sm">
-                    <Link href="/auth/forgot-password" className="font-medium text-primary hover:text-primary/90">
+                    <Link
+                      href="/auth/forgot-password"
+                      className="font-medium text-primary hover:text-primary/90"
+                    >
                       Forgot password?
                     </Link>
                   </div>
                 </div>
-                <div className="mt-2 relative">
+                <div className="mt-1 relative">
                   <Input
                     id="password"
-                    name="password"
                     type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    {...register("password")}
                     className="block w-full pr-10"
                   />
                   <button
@@ -102,10 +126,19 @@ export default function LoginPage() {
                     )}
                   </button>
                 </div>
+                {errors.password && (
+                  <p className="text-xs text-red-500">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
 
               <div>
-                <Button type="submit" className="w-full">
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
                   Sign in
                 </Button>
               </div>
@@ -117,20 +150,32 @@ export default function LoginPage() {
                   <Separator className="w-full" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                  <span className="bg-card px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
                 </div>
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-3">
                 <Button variant="outline" className="w-full">
                   <div className="mr-2 h-5 w-5 relative">
-                    <Image src="/placeholder.svg?height=20&width=20&text=G" alt="Google" width={20} height={20} />
+                    <Image
+                      src="/placeholder.svg?height=20&width=20&text=G"
+                      alt="Google"
+                      width={20}
+                      height={20}
+                    />
                   </div>
                   Google
                 </Button>
                 <Button variant="outline" className="w-full">
                   <div className="mr-2 h-5 w-5 relative">
-                    <Image src="/placeholder.svg?height=20&width=20&text=W" alt="WhatsApp" width={20} height={20} />
+                    <Image
+                      src="/placeholder.svg?height=20&width=20&text=W"
+                      alt="WhatsApp"
+                      width={20}
+                      height={20}
+                    />
                   </div>
                   WhatsApp
                 </Button>
@@ -139,7 +184,10 @@ export default function LoginPage() {
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
               Don't have an account?{" "}
-              <Link href="/auth/register" className="font-medium text-primary hover:text-primary/90">
+              <Link
+                href="/auth/register"
+                className="font-medium text-primary hover:text-primary/90"
+              >
                 Sign up
               </Link>
             </div>
@@ -158,6 +206,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-

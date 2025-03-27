@@ -1,14 +1,12 @@
 
 import * as z from "zod";
 
+
+
+// Define LoginSchema similar to RegisterSchema
 export const LoginSchema = z.object({
-  email: z.string().email({
-    message: "Email is required",
-  }),
-  password: z.string().min(1, {
-    message: "Password is required",
-  }),
-  code: z.optional(z.string()),
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
 });
 
 export const RegisterSchema = z.object({

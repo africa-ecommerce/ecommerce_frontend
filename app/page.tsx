@@ -1,593 +1,521 @@
-import type React from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { Search, ArrowRight, ShoppingBag, Globe, TrendingUp } from "lucide-react"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import Header from "./_components/header"
+import Link from "next/link";
+import Image from "next/image";
+import {
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  CheckCircle,
+} from "lucide-react";
+import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
-export default function Home() {
+export default function WelcomePage() {
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  const nextSlide = () => {
+    setActiveSlide((prev) => (prev === 2 ? 0 : prev + 1));
+  };
+
+  const prevSlide = () => {
+    setActiveSlide((prev) => (prev === 0 ? 2 : prev - 1));
+  };
+
+  const goToSlide = (index: number) => {
+    setActiveSlide(index);
+  };
+
   return (
-       <div>
-        <Header/>
-      <div className="flex flex-col w-full">
-        {/* Hero Section */}
-        <section className="relative w-full h-[50vh] min-h-[400px] md:min-h-[500px]">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-accent/80 z-0"></div>
-          <div className="absolute inset-0 bg-[url('/placeholder.svg?height=500&width=800')] bg-cover bg-center mix-blend-overlay z-0"></div>
-
-          <div className="relative z-10 container mx-auto px-4 flex flex-col justify-center h-full text-white">
-            <h1 className="text-3xl md:text-5xl font-bold leading-tight max-w-xl">
-              Bridging Digital and Physical Commerce for African Businesses
-            </h1>
-            <p className="mt-4 text-lg md:text-xl max-w-lg text-white/90">
-              Empower your SME with a seamless online presence that grows your
-              business across Africa
-            </p>
-
-            <div className="mt-8">
-              <SearchBar />
-            </div>
-          </div>
-        </section>
-
-        {/* Key Benefits */}
-        <section className="py-12 md:py-16 px-4 container mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-            Grow Your Business with AfriConnect
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <BenefitCard
-              icon={<Globe className="h-10 w-10 text-primary" />}
-              title="Expand Your Reach"
-              description="Connect with millions of potential customers across Africa and beyond."
-            />
-            <BenefitCard
-              icon={<ShoppingBag className="h-10 w-10 text-primary" />}
-              title="Sell Anywhere"
-              description="Manage sales through your website, WhatsApp, or physical store."
-            />
-            <BenefitCard
-              icon={<TrendingUp className="h-10 w-10 text-primary" />}
-              title="Grow Your Business"
-              description="Increase sales and build a loyal customer base with powerful tools."
-            />
-          </div>
-        </section>
-
-        {/* How It Works */}
-        <section className="py-12 bg-muted/50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-              How It Works
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-              <StepCard
-                number="1"
-                title="Create Your Store"
-                description="Sign up and build your digital storefront in minutes, no technical skills required."
-              />
-              <StepCard
-                number="2"
-                title="Add Your Products"
-                description="Upload your inventory with photos, descriptions, and prices."
-              />
-              <StepCard
-                number="3"
-                title="Start Selling"
-                description="Accept orders online, through WhatsApp, or connect your physical store."
-              />
-            </div>
-
-            <div className="mt-12 text-center">
-              <Button size="lg" className="rounded-full px-8">
-                Start Selling Today <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials */}
-        <section className="py-12 md:py-16 container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-3">
-            Success Stories
-          </h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-            See how businesses across Africa are thriving with AfriConnect
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <TestimonialCard
-              quote="AfriConnect increased my sales by 200% in just 3 months. Now customers find me online and in my physical shop."
-              name="Grace Okafor"
-              business="Fashion Retailer"
-              location="Lagos, Nigeria"
-              image="/placeholder.svg?height=80&width=80"
-            />
-            <TestimonialCard
-              quote="I can now sell to customers across East Africa. The WhatsApp integration makes communication so easy."
-              name="Daniel Mwangi"
-              business="Artisan Crafts"
-              location="Nairobi, Kenya"
-              image="/placeholder.svg?height=80&width=80"
-            />
-            <TestimonialCard
-              quote="My market stall now has an online presence. Customers scan my QR code to see all my products."
-              name="Amina Diallo"
-              business="Spice Vendor"
-              location="Dakar, Senegal"
-              image="/placeholder.svg?height=80&width=80"
-            />
-          </div>
-        </section>
-
-        {/* Featured Businesses */}
-        <section className="py-12 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-              Featured Businesses
-            </h2>
-
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <BusinessCard
-                  key={i}
-                  name={`Store ${i}`}
-                  category={i % 2 === 0 ? "Fashion" : "Home Goods"}
-                  location={i % 3 === 0 ? "Ghana" : "Nigeria"}
-                  image="/placeholder.svg?height=120&width=200"
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Stats */}
-        <section className="py-12 md:py-20 bg-primary text-primary-foreground">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-              <div>
-                <div className="text-4xl md:text-5xl font-bold">44M+</div>
-                <div className="mt-2 text-primary-foreground/90">
-                  SMEs across Africa
-                </div>
-              </div>
-              <div>
-                <div className="text-4xl md:text-5xl font-bold">500+</div>
-                <div className="mt-2 text-primary-foreground/90">
-                  Active merchants
-                </div>
-              </div>
-              <div>
-                <div className="text-4xl md:text-5xl font-bold">180%</div>
-                <div className="mt-2 text-primary-foreground/90">
-                  Average sales increase
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing */}
-        <section id="pricing" className="py-12 md:py-16 container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-3">
-            Simple, Affordable Pricing
-          </h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-            Plans that grow with your business
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <PricingCard
-              title="Free"
-              price="₦0"
-              description="Perfect for starting your online journey"
-              features={[
-                "Up to 5 products",
-                "Basic subdomain",
-                "Standard website template",
-                "Basic payment integration",
-                "Community support",
-              ]}
-              buttonText="Start Free"
-              buttonVariant="outline"
-            />
-            <PricingCard
-              title="Premium"
-              price="₦2,500"
-              description="Most popular for growing businesses"
-              features={[
-                "Up to 50 products",
-                "Custom domain option",
-                "Advanced website templates",
-                "Multiple payment gateways",
-                "Priority support",
-                "Featured in directory",
-              ]}
-              buttonText="Try Premium"
-              buttonVariant="default"
-              highlighted={true}
-            />
-            <PricingCard
-              title="Business"
-              price="₦5,000"
-              description="Advanced tools for established businesses"
-              features={[
-                "Unlimited products",
-                "Priority SEO optimization",
-                "Advanced analytics",
-                "Inventory management",
-                "Multiple user accounts",
-                "Premium support",
-                "Marketing tools",
-              ]}
-              buttonText="Get Business"
-              buttonVariant="outline"
-            />
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="py-16 md:py-20 bg-accent text-accent-foreground">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-2xl md:text-4xl font-bold mb-6">
-              Ready to Start Selling?
-            </h2>
-            <p className="text-lg md:text-xl mb-8 max-w-2xl mx-auto text-accent-foreground/90">
-              Join thousands of African businesses already growing with
-              AfriConnect
-            </p>
-            <Button
-              size="lg"
-              className="rounded-full px-8 bg-white text-accent hover:bg-white/90"
-            >
-              Start Selling Today <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </section>
-
-        {/* Footer */}
-        <footer className="py-12 bg-muted/80">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <div>
-                <h3 className="font-bold mb-4">AfriConnect</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <Link
-                      href="/"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Home
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/about"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      About Us
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/features"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Features
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/pricing"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Pricing
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-bold mb-4">Resources</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <Link
-                      href="/blog"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Blog
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/help"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Help Center
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/guides"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Seller Guides
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/success-stories"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Success Stories
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-bold mb-4">Company</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <Link
-                      href="/contact"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Contact Us
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/careers"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Careers
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/partners"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Partners
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/press"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Press
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-bold mb-4">Legal</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <Link
-                      href="/terms"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Terms of Service
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/privacy"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Privacy Policy
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/cookies"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      Cookie Policy
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div className="mt-12 pt-6 border-t text-center text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} AfriConnect. All rights
-              reserved.
-            </div>
-          </div>
-        </footer>
-      </div>
-      </div>
-  );
-}
-
-function SearchBar() {
-  return (
-    <Tabs defaultValue="products" className="w-full max-w-2xl bg-white/95 rounded-lg shadow-lg">
-      <TabsList className="grid w-full grid-cols-2 mb-2">
-        <TabsTrigger value="products">Find Products</TabsTrigger>
-        <TabsTrigger value="stores">Find Stores</TabsTrigger>
-      </TabsList>
-      <TabsContent value="products" className="p-4">
-        <div className="flex items-center gap-2">
-          <Input placeholder="Search for products..." className="min-h-11" />
-          <Button size="lg" className="shrink-0">
-            <Search className="mr-2 h-4 w-4" /> Search
-          </Button>
-        </div>
-      </TabsContent>
-      <TabsContent value="stores" className="p-4">
-        <div className="flex items-center gap-2">
-          <Input placeholder="Search for stores..." className="min-h-11" />
-          <Button size="lg" className="shrink-0">
-            <Search className="mr-2 h-4 w-4" /> Search
-          </Button>
-        </div>
-      </TabsContent>
-    </Tabs>
-  )
-}
-
-function BenefitCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
-  return (
-    <Card className="overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow">
-      <CardContent className="p-6 flex flex-col items-center text-center">
-        <div className="p-3 rounded-full bg-primary/10 mb-4">{icon}</div>
-        <h3 className="font-bold text-xl mb-2">{title}</h3>
-        <p className="text-muted-foreground">{description}</p>
-      </CardContent>
-    </Card>
-  )
-}
-
-function StepCard({ number, title, description }: { number: string; title: string; description: string }) {
-  return (
-    <div className="flex flex-col items-center text-center">
-      <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold mb-4">
-        {number}
-      </div>
-      <h3 className="font-bold text-xl mb-2">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
-    </div>
-  )
-}
-
-function TestimonialCard({
-  quote,
-  name,
-  business,
-  location,
-  image,
-}: {
-  quote: string
-  name: string
-  business: string
-  location: string
-  image: string
-}) {
-  return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-6">
-        <div className="flex flex-col h-full">
-          <div className="mb-4 flex-1">
-            <p className="italic text-muted-foreground">"{quote}"</p>
-          </div>
-          <div className="flex items-center mt-4">
-            <div className="mr-4">
-              <div className="w-12 h-12 rounded-full overflow-hidden">
-                <Image src={image || "/placeholder.svg"} alt={name} width={48} height={48} className="object-cover" />
-              </div>
-            </div>
-            <div>
-              <p className="font-bold">{name}</p>
-              <p className="text-sm text-muted-foreground">
-                {business}, {location}
-              </p>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function BusinessCard({
-  name,
-  category,
-  location,
-  image,
-}: {
-  name: string
-  category: string
-  location: string
-  image: string
-}) {
-  return (
-    <Card className="overflow-hidden h-full hover:shadow-md transition-shadow">
-      <div className="aspect-[4/3] relative">
-        <Image src={image || "/placeholder.svg"} alt={name} fill className="object-cover" />
-      </div>
-      <CardContent className="p-4">
-        <h3 className="font-medium text-base">{name}</h3>
-        <div className="flex justify-between items-center mt-1">
-          <span className="text-xs text-muted-foreground">{category}</span>
-          <span className="text-xs text-muted-foreground">{location}</span>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-function PricingCard({
-  title,
-  price,
-  description,
-  features,
-  buttonText,
-  buttonVariant,
-  highlighted = false,
-}: {
-  title: string
-  price: string
-  description: string
-  features: string[]
-  buttonText: string
-  buttonVariant: "default" | "outline"
-  highlighted?: boolean
-}) {
-  return (
-    <Card className={`overflow-hidden h-full ${highlighted ? "ring-2 ring-primary shadow-lg relative" : ""}`}>
-      {highlighted && (
-        <div className="absolute top-0 left-0 right-0 bg-primary text-primary-foreground text-center py-1 text-sm font-medium">
-          Most Popular
-        </div>
-      )}
-      <CardContent className={`p-6 flex flex-col h-full ${highlighted ? "pt-10" : ""}`}>
-        <div className="mb-4">
-          <h3 className="text-xl font-bold">{title}</h3>
-          <div className="mt-2 flex items-baseline">
-            <span className="text-3xl font-bold">{price}</span>
-            <span className="ml-1 text-muted-foreground">/month</span>
-          </div>
-          <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-        </div>
-
-        <ul className="mt-4 space-y-3 flex-1">
-          {features.map((feature, i) => (
-            <li key={i} className="flex items-start">
-              <div className="mr-2 mt-1 h-5 w-5 shrink-0 rounded-full bg-primary/10 flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
+    <div className="flex min-h-screen flex-col bg-white overflow-x-hidden">
+      {/* Mobile-Optimized Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-md bg-orange-500 flex items-center justify-center">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="text-white"
+              >
+                <path
+                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
                   stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-3.5 w-3.5 text-primary"
-                >
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-              </div>
-              <span className="text-sm">{feature}</span>
-            </li>
-          ))}
-        </ul>
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+            <span className="font-bold text-xl">Pluggn</span>
+          </div>
 
-        <div className="mt-6">
-          <Button variant={buttonVariant} className="w-full" size="lg">
-            {buttonText}
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden xs:inline-flex"
+              asChild
+            >
+              <Link href="/login">Log In</Link>
+            </Button>
+            <Button
+              size="sm"
+              className="bg-orange-500 hover:bg-orange-600 hidden xs:inline-flex"
+              asChild
+            >
+              <Link href="/onboarding/user-type">Sign Up</Link>
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section with Improved Mobile Responsiveness */}
+      <section className="pt-20 pb-8 md:pt-32 md:pb-16">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-center gap-8">
+            <div className="md:w-1/2 order-2 md:order-1">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-4 text-center sm:text-left">
+                Empower Your{" "}
+                <span className="text-orange-500">Digital Business</span>{" "}
+                Journey
+              </h1>
+              <p className="text-base text-gray-600 mb-6 text-center sm:text-left">
+                Connect with customers across Africa. Sell online, in-store, or 
+                through WhatsApp with Pluggn's all-in-one platform.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 mb-8 justify-center sm:justify-start">
+                <Button
+                  className="bg-orange-500 hover:bg-orange-600 w-full sm:w-auto"
+                  asChild
+                >
+                  <Link href="/onboarding/user-type">
+                    Start Free <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                  asChild
+                >
+                  <Link href="#demo" className="flex items-center justify-center">
+                    <Play className="mr-2 h-5 w-5 text-orange-500" /> Watch Demo
+                  </Link>
+                </Button>
+              </div>
+              <div className="flex flex-col items-center sm:items-start sm:flex-row sm:justify-start gap-4">
+                <div className="flex -space-x-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="h-8 w-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center overflow-hidden"
+                    >
+                      <Image
+                        src="/placeholder.svg?height=40&width=40"
+                        alt={`User ${i}`}
+                        width={40}
+                        height={40}
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="text-center sm:text-left">
+                  <p className="font-medium text-sm">
+                    Trusted by 10,000+ entrepreneurs
+                  </p>
+                  <div className="flex items-center justify-center sm:justify-start">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <svg
+                        key={i}
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="text-orange-500"
+                      >
+                        <path
+                          d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    ))}
+                    <span className="ml-1 text-xs text-gray-600">
+                      4.9/5
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="relative md:w-1/2 order-1 md:order-2 mb-6 md:mb-0 flex justify-center">
+              <div className="absolute -top-10 -left-10 h-40 w-40 bg-orange-100 rounded-full opacity-50 blur-3xl hidden sm:block"></div>
+              <div className="absolute -bottom-10 -right-10 h-40 w-40 bg-orange-100 rounded-full opacity-50 blur-3xl hidden sm:block"></div>
+              <div className="relative bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 max-w-[500px] w-full">
+                <Image
+                  src="/placeholder.svg?height=600&width=500"
+                  alt="Pluggn platform preview"
+                  width={500}
+                  height={600}
+                  className="object-cover w-full"
+                />
+                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-medium text-orange-500 border border-orange-100">
+                  New Features
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile-Optimized Mockup Image Explainer Section */}
+      <section id="features" className="py-12 md:py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">
+              Everything You Need to Succeed
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
+              Pluggn provides all the tools you need to build, manage, and grow
+              your digital business in one place.
+            </p>
+          </div>
+
+          {/* Mobile-Optimized Mockup Carousel */}
+          <div className="relative">
+            <div className="mockup-carousel overflow-hidden rounded-xl">
+              <div
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{ transform: `translateX(-${activeSlide * 100}%)` }}
+              >
+                {/* Mockup 1 */}
+                <div className="w-full flex-shrink-0 px-2 md:px-4">
+                  <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-8">
+                    <div className="md:w-1/2 order-2 md:order-1">
+                      <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">
+                        Seamless Onboarding
+                      </h3>
+                      <p className="text-gray-600 mb-4 md:mb-6 text-sm md:text-base">
+                        Get started in minutes with our intuitive onboarding
+                        process. We'll guide you through every step of setting
+                        up your digital business.
+                      </p>
+                      <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
+                        {[
+                          "User-friendly interface",
+                          "Step-by-step guidance",
+                          "Customizable options",
+                        ].map((item, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-green-500 mt-0.5" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="md:w-1/2 order-1 md:order-2 mb-4 md:mb-0">
+                      <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                        <Image
+                          src="/placeholder.svg?height=400&width=500"
+                          alt="Onboarding mockup"
+                          width={500}
+                          height={400}
+                          className="object-cover w-full"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mockup 2 */}
+                <div className="w-full flex-shrink-0 px-2 md:px-4">
+                  <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-8">
+                    <div className="md:w-1/2 order-2 md:order-1">
+                      <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">
+                        Powerful Store Management
+                      </h3>
+                      <p className="text-gray-600 mb-4 md:mb-6 text-sm md:text-base">
+                        Manage your products, inventory, and orders with our
+                        powerful dashboard. Get insights into your business
+                        performance.
+                      </p>
+                      <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
+                        {[
+                          "Inventory tracking",
+                          "Order management",
+                          "Analytics dashboard",
+                        ].map((item, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-green-500 mt-0.5" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="md:w-1/2 order-1 md:order-2 mb-4 md:mb-0">
+                      <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                        <Image
+                          src="/placeholder.svg?height=400&width=500"
+                          alt="Store management mockup"
+                          width={500}
+                          height={400}
+                          className="object-cover w-full"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mockup 3 */}
+                <div className="w-full flex-shrink-0 px-2 md:px-4">
+                  <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-8">
+                    <div className="md:w-1/2 order-2 md:order-1">
+                      <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">
+                        Multi-Channel Selling
+                      </h3>
+                      <p className="text-gray-600 mb-4 md:mb-6 text-sm md:text-base">
+                        Sell your products across multiple channels including
+                        your online store, social media, and WhatsApp.
+                      </p>
+                      <ul className="space-y-2 md:space-y-3 text-sm md:text-base">
+                        {[
+                          "Online store",
+                          "Social media integration",
+                          "WhatsApp business",
+                        ].map((item, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <CheckCircle className="h-4 w-4 md:h-5 md:w-5 text-green-500 mt-0.5" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="md:w-1/2 order-1 md:order-2 mb-4 md:mb-0">
+                      <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                        <Image
+                          src="/placeholder.svg?height=400&width=500"
+                          alt="Multi-channel selling mockup"
+                          width={500}
+                          height={400}
+                          className="object-cover w-full"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile-Optimized Carousel Controls */}
+            <div className="flex justify-center mt-6 md:mt-8 gap-2">
+              {[0, 1, 2].map((index) => (
+                <button
+                  key={index}
+                  className={`carousel-dot ${
+                    activeSlide === index ? "active" : ""
+                  }`}
+                  onClick={() => goToSlide(index)}
+                  aria-label={`Go to slide ${index + 1}`}
+                ></button>
+              ))}
+            </div>
+
+            <button
+              className="absolute top-1/2 left-0 md:left-4 -translate-y-1/2 h-8 w-8 md:h-10 md:w-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-600 hover:text-orange-500 focus:outline-none"
+              onClick={prevSlide}
+              aria-label="Previous slide"
+            >
+              <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
+            </button>
+            <button
+              className="absolute top-1/2 right-0 md:right-4 -translate-y-1/2 h-8 w-8 md:h-10 md:w-10 rounded-full bg-white shadow-md flex items-center justify-center text-gray-600 hover:text-orange-500 focus:outline-none"
+              onClick={nextSlide}
+              aria-label="Next slide"
+            >
+              <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile-Optimized Stats Section */}
+      <section className="py-10 md:py-16">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+            {[
+              { number: "10K+", label: "Entrepreneurs" },
+              { number: "25+", label: "Countries" },
+              { number: "$2M+", label: "Sales Generated" },
+              { number: "99%", label: "Customer Satisfaction" },
+            ].map((stat, i) => (
+              <Card
+                key={i}
+                className="p-4 md:p-6 text-center border-none shadow-md"
+              >
+                <p className="text-xl md:text-3xl font-bold text-orange-500 mb-1 md:mb-2">
+                  {stat.number}
+                </p>
+                <p className="text-gray-600 text-xs md:text-base">
+                  {stat.label}
+                </p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile-Optimized CTA Section */}
+      <section className="py-10 md:py-16 bg-orange-50">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">
+            Ready to Start Your Digital Business?
+          </h2>
+          <p className="text-gray-600 max-w-2xl mx-auto mb-6 md:mb-8 text-sm md:text-base">
+            Join thousands of entrepreneurs across Africa who are building
+            successful digital businesses with Pluggn.
+          </p>
+          <Button
+            className="bg-orange-500 hover:bg-orange-600 py-5 md:py-6 px-6 md:px-8 text-base md:text-lg w-full sm:w-auto"
+            asChild
+          >
+            <Link href="/onboarding/user-type">
+              Get Started Now <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
           </Button>
         </div>
-      </CardContent>
-    </Card>
-  )
-}
+      </section>
 
+      {/* Mobile-Optimized Footer */}
+      <footer className="py-10 md:py-12 bg-gray-900 text-white">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-8 w-8 rounded-md bg-orange-500 flex items-center justify-center">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="text-white"
+                  >
+                    <path
+                      d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      fill="currentColor"
+                    />
+                  </svg>
+                </div>
+                <span className="font-bold text-xl">Pluggn</span>
+              </div>
+              <p className="text-gray-400 mb-4 text-sm md:text-base">
+                Empowering African digital entrepreneurs to build successful
+                online businesses.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-bold mb-3 md:mb-4 text-sm md:text-base">
+                Product
+              </h3>
+              <ul className="space-y-2">
+                {["Features", "Pricing", "Testimonials", "FAQ"].map(
+                  (item, i) => (
+                    <li key={i}>
+                      <Link
+                        href="#"
+                        className="text-gray-400 hover:text-white transition-colors text-xs md:text-sm"
+                      >
+                        {item}
+                      </Link>
+                    </li>
+                  )
+                )}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold mb-3 md:mb-4 text-sm md:text-base">
+                Company
+              </h3>
+              <ul className="space-y-2">
+                {["About Us", "Careers", "Blog", "Contact"].map((item, i) => (
+                  <li key={i}>
+                    <Link
+                      href="#"
+                      className="text-gray-400 hover:text-white transition-colors text-xs md:text-sm"
+                    >
+                      {item}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold mb-3 md:mb-4 text-sm md:text-base">
+                Legal
+              </h3>
+              <ul className="space-y-2">
+                {["Terms of Service", "Privacy Policy", "Cookie Policy"].map(
+                  (item, i) => (
+                    <li key={i}>
+                      <Link
+                        href="#"
+                        className="text-gray-400 hover:text-white transition-colors text-xs md:text-sm"
+                      >
+                        {item}
+                      </Link>
+                    </li>
+                  )
+                )}
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-6 text-center text-gray-400 text-xs md:text-sm">
+            <p>© {new Date().getFullYear()} Pluggn. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+
+      {/* Custom CSS for carousel dots */}
+      <style jsx global>{`
+        .carousel-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: #e5e7eb;
+          border: none;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .carousel-dot.active {
+          background-color: #f97316;
+          width: 20px;
+          border-radius: 4px;
+        }
+
+        @media (min-width: 768px) {
+          .carousel-dot {
+            width: 12px;
+            height: 12px;
+          }
+
+          .carousel-dot.active {
+            width: 24px;
+            border-radius: 6px;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}

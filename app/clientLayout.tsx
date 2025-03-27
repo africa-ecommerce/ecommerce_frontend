@@ -9,6 +9,39 @@ import { Home, Search, LayoutGrid, ShoppingCart, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ShoppingCartProvider } from "./_components/provider/shoppingCartProvider"
+import { ToasterAdvanced } from "@/components/toaster-advanced";
+import { GlobalLoadingIndicatorAdvanced } from "@/components/ui/loading-indicator-advanced";
+
+import {
+  Inter,
+  Roboto_Mono,
+  Playfair_Display,
+  Poppins,
+} from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: '--font-inter',
+});
+
+const robotoMono = Roboto_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: '--font-roboto-mono',
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: '--font-playfair',
+});
+
+const poppins = Poppins({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: '--font-poppins',
+});
 
 interface NavItemProps {
   href: string
@@ -68,19 +101,25 @@ export default function ClientLayout({
     "/account/settings",
     "/",
     "/auth/*",
-    "/onboarding"
+    "/onboarding/*"
   ];
 
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-background">
+<html lang="en" className={`${inter.variable} ${robotoMono.variable} ${playfair.variable} ${poppins.variable}`}>   
+     <body className="min-h-screen bg-background">
         <ThemeProvider attribute="class" defaultTheme="light">
           <div className="flex flex-col min-h-screen">
             <div className="flex-1 flex flex-col">
               <main className="flex-1 pb-16 md:pb-0">
-                <Suspense fallback={<div className="p-4">Loading...</div>}>
-                <ShoppingCartProvider excludePaths={excludedPaths}>
-                  {children}
+                <Suspense
+                  fallback={
+                    <div className="flex items-center justify-center min-h-[50vh]">
+                      <GlobalLoadingIndicatorAdvanced />
+                    </div>
+                  }
+                >
+                  <ShoppingCartProvider excludePaths={excludedPaths}>
+                    {children}
                   </ShoppingCartProvider>
                 </Suspense>
               </main>
@@ -125,6 +164,7 @@ export default function ClientLayout({
               </div>
             )}
           </div>
+          <ToasterAdvanced />
         </ThemeProvider>
       </body>
     </html>
