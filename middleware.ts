@@ -7,7 +7,7 @@ import {
 
 import { NextResponse, NextRequest } from "next/server";
 
-export const auth = (req: NextRequest) => {
+ const auth = (req: NextRequest) => {
   const { nextUrl } = req;
 
   // Check if access token exists in cookies
@@ -45,6 +45,8 @@ export const auth = (req: NextRequest) => {
 
   return;
 };
+
+export default auth;
 
 // Optionally, don't invoke Middleware on some paths
 export const config = {

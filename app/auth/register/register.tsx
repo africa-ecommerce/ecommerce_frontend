@@ -5,66 +5,74 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Eye, EyeOff, Clock, RefreshCw } from "lucide-react";
-
+import { RegisterSchema } from "@/zod/schema";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { RegisterSchema } from "@/zod/schema";
 import { useRegister } from "@/hooks/authManagement/useRegister";
 import { useRouter } from "next/navigation";
-import { handleOAuthLogin, registerUser, resendVerificationEmail } from "@/app/actions/auth";
+import { ResendVerificationEmail } from "../resendEmailVerification";
 
 
 
-const ResendVerificationEmail = ({ email }: { email: string }) => {
-  const [countdown, setCountdown] = useState(60);
-  const [canResend, setCanResend] = useState(false);
+// OAuth Login Handler
+export const handleOAuthLogin = async (provider: "google" | "facebook") => {
+  try {
+    const response = await fetch(`/api/auth/${provider}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setCanResend(true);
+    if (!response.ok) {
+      throw new Error(
+        `${provider.charAt(0).toUpperCase() + provider.slice(1)} login failed`
+      );
     }
-  }, [countdown]);
 
-  const handleResendEmail = async () => {
-    try {
-      
-      await resendVerificationEmail(email)
-      setCountdown(60);
-      setCanResend(false);
-    } catch (err) {
-     
+    const data = await response.json();
+
+    // Redirect to OAuth provider's authorization page
+    if (data.authorizationUrl) {
+      window.location.href = data.authorizationUrl;
     }
-  };
-
-  return (
-    <div className="text-center space-y-4">
-      <div className="flex items-center justify-center space-x-2">
-        <Clock className="h-5 w-5 text-muted-foreground" />
-        <p>Resend email in {countdown} seconds</p>
-      </div>
-      <Button
-        onClick={handleResendEmail}
-        disabled={!canResend}
-        variant={canResend ? "default" : "outline"}
-        className="w-full"
-      >
-        <RefreshCw className="mr-2 h-4 w-4" />
-        Resend Verification Email
-      </Button>
-    </div>
-  );
+  } catch (error) {
+    console.error(`${provider} login error:`, error);
+    // You might want to add a toast or error notification here
+  }
 };
 
-export default function Register() {
+
+
+
+
+export default function RegisterPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [policyChecked, setPolicyChecked] = useState(false);
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
+
+
+
+type RegisterInput = z.infer<typeof RegisterSchema>;
+
+ const registerUser = async (data: RegisterInput) => {
+  const response = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Registration failed");
+  }
+
+  return response.json();
+};
 
   const {
     form: { register, setValue, submit, errors, isSubmitting },

@@ -3,5 +3,6 @@ export type VerificationStatus = {
   code: string
   message: string
   details: string
+  redirectUrl: string
 }
 

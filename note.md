@@ -1,1 +1,1 @@
-1) i need to receive the
+1) resend email verification reload wierdness

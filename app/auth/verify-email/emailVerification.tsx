@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import type { VerificationStatus } from "./types"
 
-export function VerifyEmailClient({ result }: { result: VerificationStatus }) {
+export function VerifyEmailContent({ result }: { result: VerificationStatus }) {
   const [animateIn, setAnimateIn] = useState(false)
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export function VerifyEmailClient({ result }: { result: VerificationStatus }) {
     if (result.status === "success") {
       return (
         <Button className="w-full group" asChild>
-          <Link href="/auth/login">
+          <Link href={result.redirectUrl ? `/auth${result.redirectUrl}` : "/auth/login"}>
             Continue
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
           </Link>
@@ -47,12 +47,12 @@ export function VerifyEmailClient({ result }: { result: VerificationStatus }) {
 
     return (
       <>
-        <Button className="w-full group" asChild>
+        {/* <Button className="w-full group" asChild>
           <Link href="/auth/resend-verification">
             <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
             Resend Verification Email
           </Link>
-        </Button>
+        </Button> */}
         <Button variant="outline" className="w-full" asChild>
           <Link href="/help">
             <HelpCircle className="mr-2 h-4 w-4" aria-hidden="true" />
@@ -71,13 +71,6 @@ export function VerifyEmailClient({ result }: { result: VerificationStatus }) {
         } transition-all duration-500 ${animateIn ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
       >
         <div className="flex flex-col items-center text-center">
-           {/* <div className="mb-6"> */}
-            {/* Logo placeholder - replace with your actual logo */}
-            {/* <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-primary font-bold text-xl">A</span>
-            </div>
-          </div>  */}
-
           <div className="mb-8" role="status" aria-live="polite">
             <StatusIcon />
 
@@ -102,4 +95,3 @@ export function VerifyEmailClient({ result }: { result: VerificationStatus }) {
     </div>
   )
 }
-

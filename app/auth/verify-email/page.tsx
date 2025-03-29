@@ -1,54 +1,66 @@
-'use client'
-import { redirect, useSearchParams } from "next/navigation";
-import type { VerificationStatus } from "./types";
-import { VerifyEmailClient } from "./emailVerification";
-import { verifyEmail } from "@/app/actions/auth";
+// pages/auth/verify-email/page.tsx
+"use client"
 
-// Server action to verify the email token
-async function verifyEmailToken(token: string, source: string): Promise<VerificationStatus> {
-  try {
-   
-     const response = await verifyEmail(token, source)
-    if (!response.ok) {
-      return {
-        status: "error",
-        code: "token_expired",
-        message: "Your verification link is invalid or has expired.",
-        details:
-          "The verification token is not recognized. Please use the latest email verification link or request a new one.",
-      };
+import { useSearchParams } from "next/navigation"
+import { useEffect, useState } from "react"
+import type { VerificationStatus } from "./types"
+import { verifyEmailToken } from "./actions"
+import { VerifyEmailContent } from "./emailVerification"
+
+export default function VerifyEmailPage() {
+  const searchParams = useSearchParams()
+  const token = searchParams.get("token")
+  const source = searchParams.get("source")
+  
+  
+  const [result, setResult] = useState<VerificationStatus | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const verifyToken = async () => {
+      if (!token || !source) {
+        // Handle missing parameters
+        setResult({
+          status: "error",
+          code: "missing_token",
+          message: "Missing verification parameters",
+          details: "The verification link is incomplete. Please use the complete link from your email.",
+          redirectUrl: ""
+        })
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        // Call the server action to verify the token
+        const verificationResult = await verifyEmailToken(token, source)
+        setResult(verificationResult)
+      } catch (error) {
+        setResult({
+          status: "error",
+          code: "server_error",
+          message: "A server error occurred.",
+          details: "We encountered an issue while verifying your email. Please try again later.",
+          redirectUrl: ""
+        })
+      } finally {
+        setIsLoading(false)
+      }
     }
 
-    return {
-      status: "success",
-      code: "verified",
-      message: "Email verified successfully.",
-      details: "Your email address has been verified. You can now access all features of your account.",
-    };
-  } catch (error) {
-    console.error("Error verifying email token:", error);
-    return {
-      status: "error",
-      code: "server_error",
-      message: "A server error occurred.",
-      details: "We encountered an issue while verifying your email. Please try again later.",
-    };
-  }
-}
+    verifyToken()
+  }, [token, source])
 
-export default async function VerifyEmailPage({
-  searchParams,
-}: {
-  searchParams: { token?: string; source?: string };
-}) {
-  const { token, source } = searchParams;
-
-  if (!token || !source) {
-    redirect("/auth/login?error=missing_token");
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-gray-50 to-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-gray-600">Verifying your email...</p>
+        </div>
+      </div>
+    )
   }
 
-  // Verify the token
-  const result = await verifyEmailToken(token, source);
-
-  return <VerifyEmailClient result={result} />;
+  return <VerifyEmailContent result={result!} />
 }
