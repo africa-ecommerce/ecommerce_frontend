@@ -1,18 +1,14 @@
-import { redirect } from "next/navigation";
+'use client'
+import { redirect, useSearchParams } from "next/navigation";
 import type { VerificationStatus } from "./types";
 import { VerifyEmailClient } from "./emailVerification";
+import { verifyEmail } from "@/app/actions/auth";
 
 // Server action to verify the email token
-async function verifyEmailToken(token: string, callbackUrl: string): Promise<VerificationStatus> {
+async function verifyEmailToken(token: string, source: string): Promise<VerificationStatus> {
   try {
-    const apiUrl = `${process.env.BACKEND_URL}/auth/verify-email`;
-
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, callbackUrl }),
-    });
-
+   
+     const response = await verifyEmail(token, source)
     if (!response.ok) {
       return {
         status: "error",
@@ -43,16 +39,16 @@ async function verifyEmailToken(token: string, callbackUrl: string): Promise<Ver
 export default async function VerifyEmailPage({
   searchParams,
 }: {
-  searchParams: { token?: string; callbackUrl?: string };
+  searchParams: { token?: string; source?: string };
 }) {
-  const { token, callbackUrl } = searchParams;
+  const { token, source } = searchParams;
 
-  if (!token || !callbackUrl) {
+  if (!token || !source) {
     redirect("/auth/login?error=missing_token");
   }
 
   // Verify the token
-  const result = await verifyEmailToken(token, callbackUrl);
+  const result = await verifyEmailToken(token, source);
 
   return <VerifyEmailClient result={result} />;
 }
