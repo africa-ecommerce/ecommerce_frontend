@@ -6,20 +6,37 @@ import * as z from "zod";
 // Define LoginSchema similar to RegisterSchema
 export const LoginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters long"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
 export const RegisterSchema = z.object({
   email: z.string().email({
     message: "Email is required",
   }),
-  password: z.string().min(8, {
+  password: z.string().min(6, {
     message: "Minimum 6 characters required",
   }),
-  fullname: z.string().min(1, {
-    message: "Name is required",
-  }),
-  phone: z.string().optional(),
+  name: z.string()
+    // Trim to remove leading/trailing whitespace
+    .trim()
+    // Ensure non-empty after trimming
+    .min(2, { message: "Full name must be at least 2 characters long" })
+    // Maximum length to prevent extremely long names
+    .max(50, { message: "Full name cannot exceed 50 characters" })
+    // Regex to validate name format
+    .regex(/^[A-Za-z\s'-]+$/, { 
+      message: "Full name can only contain letters, spaces, hyphens, and apostrophes" 
+    })
+    // Custom refinement for more complex validation
+    .refine(
+      (name) => {
+        // Split the name and check for multiple words
+        const parts = name.split(/\s+/);
+        return parts.length >= 2;
+      }, 
+      { message: "Please provide both first and last name" }
+    ),
+  // phone: z.string().optional(),
   policy: z.boolean()
 });
 

@@ -11,7 +11,7 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*", // Match all /api requests
-        destination: "http://localhost:5000/api/:path*", // Forward to backend
+        destination: "http://localhost:5000/:path*", // Forward to backend
       },
     ];
   },

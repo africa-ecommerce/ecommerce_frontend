@@ -64,14 +64,14 @@ export default function WelcomePage() {
               className="hidden xs:inline-flex"
               asChild
             >
-              <Link href="/login">Log In</Link>
+              <Link href="/auth/register">Sign Up</Link>
             </Button>
             <Button
               size="sm"
               className="bg-orange-500 hover:bg-orange-600 hidden xs:inline-flex"
               asChild
             >
-              <Link href="/onboarding/user-type">Sign Up</Link>
+              <Link href="/dashboard">Get Started</Link>
             </Button>
           </div>
         </div>
@@ -385,7 +385,7 @@ export default function WelcomePage() {
             className="bg-orange-500 hover:bg-orange-600 py-5 md:py-6 px-6 md:px-8 text-base md:text-lg w-full sm:w-auto"
             asChild
           >
-            <Link href="/onboarding/user-type">
+            <Link href="/dashboard">
               Get Started Now <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>

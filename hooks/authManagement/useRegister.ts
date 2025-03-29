@@ -1,3 +1,4 @@
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { ZodSchema } from "zod";
@@ -28,7 +29,8 @@ export function useRegister<T extends Record<string, any>>(
 
       // Reset the form
       form.reset();
-
+       
+      successToast(result.message)
       // Execute success callback if provided
       if (onSuccess) {
         onSuccess(result);
@@ -37,9 +39,10 @@ export function useRegister<T extends Record<string, any>>(
       return { success: true, data: result, error: null };
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      console.error("Registration error:", errorMessage);
-
+        error instanceof Error ? error.message : String(error)
+      // console.error("Registration error:", errorMessage);
+      errorToast(errorMessage)
+     
       return { success: false, data: null, error: errorMessage };
     }
   };
