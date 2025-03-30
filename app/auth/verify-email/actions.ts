@@ -34,7 +34,7 @@ export async function verifyEmailToken(token: string, callbackUrl: string): Prom
       redirectUrl: data.redirectUrl || ""
     }
   } catch (error) {
-    console.error("Error verifying email token:", error)
+    console.error(error)
     return {
       status: "error",
       code: "server_error",

@@ -1,1 +1,1 @@
-1) resend email verification reload wierdness
+1) Error: Cannot set headers after they are sent to the client

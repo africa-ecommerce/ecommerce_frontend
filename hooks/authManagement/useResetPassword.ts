@@ -1,6 +1,7 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodSchema } from "zod";
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 
 /**
  * Hook for password reset with form validation
@@ -29,6 +30,9 @@ export function useResetPassword<T extends Record<string, any>>(
       // Reset the form
       form.reset();
 
+      // Show success toast
+      successToast(result.message || "Password reset successful");
+
       // Execute success callback if provided
       if (onSuccess) {
         onSuccess(result);
@@ -39,6 +43,9 @@ export function useResetPassword<T extends Record<string, any>>(
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       console.error("Password reset error:", errorMessage);
+
+      // Show error toast
+      errorToast(errorMessage);
 
       return { success: false, data: null, error: errorMessage };
     }

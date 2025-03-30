@@ -14,65 +14,49 @@ import { useRegister } from "@/hooks/authManagement/useRegister";
 import { useRouter } from "next/navigation";
 import { ResendVerificationEmail } from "../resendEmailVerification";
 
-
-
 // OAuth Login Handler
-export const handleOAuthLogin = async (provider: "google" | "facebook") => {
+export const handleOAuthLogin =  (provider: "google" | "facebook") => {
   try {
-    const response = await fetch(`/api/auth/${provider}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+   const urlParams = new URLSearchParams(window.location.search);
+   const nestedCallback = urlParams.get("callbackUrl") || "/dashboard";
 
-    if (!response.ok) {
-      throw new Error(
-        `${provider.charAt(0).toUpperCase() + provider.slice(1)} login failed`
-      );
-    }
+   const finalCallback = encodeURIComponent(nestedCallback);
+    const redirectUrl = `api/auth/${provider}?callbackUrl=${finalCallback}`;
+    window.location.href = redirectUrl
 
-    const data = await response.json();
-
-    // Redirect to OAuth provider's authorization page
-    if (data.authorizationUrl) {
-      window.location.href = data.authorizationUrl;
-    }
-  } catch (error) {
+    } catch (error) {
     console.error(`${provider} login error:`, error);
     // You might want to add a toast or error notification here
   }
 };
 
-
-
-
-
 export default function RegisterPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [policyChecked, setPolicyChecked] = useState(false);
+  // const [policyChecked, setPolicyChecked] = useState(false);
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
 
+  type RegisterInput = z.infer<typeof RegisterSchema>;
 
+  const registerUser = async (data: RegisterInput) => {
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
 
-type RegisterInput = z.infer<typeof RegisterSchema>;
-
- const registerUser = async (data: RegisterInput) => {
-  const response = await fetch("/api/auth/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "Registration failed");
-  }
-
-  return response.json();
-};
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Registration failed");
+      }
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      throw new Error("Something went wrong");
+    }
+  };
 
   const {
     form: { register, setValue, submit, errors, isSubmitting },
@@ -82,9 +66,9 @@ type RegisterInput = z.infer<typeof RegisterSchema>;
     setRegistrationComplete(true);
   });
 
-  useEffect(() => {
-    setValue("policy", policyChecked);
-  }, [policyChecked, setValue]);
+  // useEffect(() => {
+  //   setValue("policy", policyChecked);
+  // }, [policyChecked, setValue]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -186,7 +170,7 @@ type RegisterInput = z.infer<typeof RegisterSchema>;
                   )}
                 </div>
 
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <input
                     id="terms"
                     name="terms"
@@ -215,13 +199,13 @@ type RegisterInput = z.infer<typeof RegisterSchema>;
                       Privacy Policy
                     </Link>
                   </label>
-                </div>
+                </div> */}
 
                 <div>
                   <Button
                     type="submit"
                     className="w-full"
-                    disabled={!policyChecked || isSubmitting}
+                    disabled={isSubmitting}
                   >
                     Create Account
                   </Button>
@@ -284,6 +268,17 @@ type RegisterInput = z.infer<typeof RegisterSchema>;
                 </Link>
               </div>
             </div>
+
+             <div className="mt-8 text-center text-xs text-muted-foreground">
+                        By signing in, you agree to our{" "}
+                        <Link href="/terms" className="text-primary hover:text-primary/90">
+                          Terms of Service
+                        </Link>{" "}
+                        and{" "}
+                        <Link href="/privacy" className="text-primary hover:text-primary/90">
+                          Privacy Policy
+                        </Link>
+                      </div>
           </div>
         </div>
       </div>

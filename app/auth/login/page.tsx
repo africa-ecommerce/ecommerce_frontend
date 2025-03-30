@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,22 +14,53 @@ import { Separator } from "@/components/ui/separator";
 import { useLogin } from "@/hooks/authManagement/useLogin";
 import { LoginSchema } from "@/zod/schema";
 
+// OAuth Login Handler
+export const handleOAuthLogin = async (provider: "google" | "facebook") => {
+  try {
+    const response = await fetch(`/api/auth/${provider}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
+    if (!response.ok) {
+      throw new Error(
+        `${provider.charAt(0).toUpperCase() + provider.slice(1)} login failed`
+      );
+    }
+
+    const data = await response.json();
+
+    // Redirect to OAuth provider's authorization page
+    if (data.authorizationUrl) {
+      window.location.href = data.authorizationUrl;
+    }
+  } catch (error) {
+    console.error(`${provider} login error:`, error);
+    // You might want to add a toast or error notification here
+  }
+};
 
 type LoginInput = z.infer<typeof LoginSchema>;
 
 const loginUser = async (data: LoginInput) => {
-  const response = await fetch("/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  try {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
 
-  if (!response.ok) {
-    throw new Error("Login failed. Please check your credentials.");
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Login failed. Please check your credentials.");
+    }
+    return response.json();
+  } catch (error) {
+    console.error(error);
+    throw new Error("Something went wrong");
   }
-
-  return response.json();
 };
 
 export default function LoginPage() {
@@ -50,18 +80,11 @@ export default function LoginPage() {
     <div className="flex min-h-screen flex-col">
       <div className="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="flex justify-center">
-            <div className="w-16 h-16 relative">
-              <div className="absolute inset-0 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-2xl font-bold">
-                A
-              </div>
-            </div>
-          </div>
           <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight">
-            Welcome back to AfriConnect
+            Sign in to your Pluggn account
           </h2>
           <p className="mt-2 text-center text-sm text-muted-foreground">
-            Sign in to continue your shopping experience
+            Access your business dashboard
           </p>
         </div>
 
@@ -83,7 +106,7 @@ export default function LoginPage() {
                     placeholder="johndoe@gmail.com"
                   />
                   {errors.email && (
-                    <p className="text-xs text-red-500">
+                    <p className="text-xs mt-1 text-red-500">
                       {errors.email.message}
                     </p>
                   )}
@@ -113,6 +136,7 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     {...register("password")}
                     className="block w-full pr-10"
+                    placeholder="******"
                   />
                   <button
                     type="button"
@@ -127,7 +151,7 @@ export default function LoginPage() {
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-xs text-red-500">
+                  <p className="text-xs mt-1 text-red-500">
                     {errors.password.message}
                   </p>
                 )}
@@ -157,24 +181,32 @@ export default function LoginPage() {
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-3">
-                <Button variant="outline" className="w-full">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handleOAuthLogin("google")}
+                >
                   <div className="mr-2 h-5 w-5 relative">
                     <Image
-                      src="/placeholder.svg?height=20&width=20&text=G"
+                      src="/google.svg"
                       alt="Google"
-                      width={20}
-                      height={20}
+                      width={26}
+                      height={26}
                     />
                   </div>
                   Google
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handleOAuthLogin("facebook")}
+                >
                   <div className="mr-2 h-5 w-5 relative">
                     <Image
-                      src="/placeholder.svg?height=20&width=20&text=W"
+                      src="/whatsapp.svg"
                       alt="WhatsApp"
-                      width={20}
-                      height={20}
+                      width={26}
+                      height={26}
                     />
                   </div>
                   WhatsApp
@@ -188,18 +220,18 @@ export default function LoginPage() {
                 href="/auth/register"
                 className="font-medium text-primary hover:text-primary/90"
               >
-                Sign up
+                Create account
               </Link>
             </div>
           </div>
 
           <div className="mt-8 text-center text-xs text-muted-foreground">
             By signing in, you agree to our{" "}
-            <Link href="/terms" className="underline underline-offset-4">
+            <Link href="/terms" className="text-primary hover:text-primary/90">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="underline underline-offset-4">
+            <Link href="/privacy" className="text-primary hover:text-primary/90">
               Privacy Policy
             </Link>
           </div>

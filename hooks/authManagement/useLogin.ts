@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodSchema } from "zod";
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 
 
 /**
@@ -29,8 +30,10 @@ export function useLogin<T extends Record<string, any>>(
 
       // Reset the form
       form.reset();
-
+ 
+       successToast(result.message)
       // Execute success callback if provided
+
       if (onSuccess) {
         onSuccess(result);
       }
@@ -40,6 +43,7 @@ export function useLogin<T extends Record<string, any>>(
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       console.error("Login error:", errorMessage);
+      errorToast(errorMessage)
 
       return { success: false, data: null, error: errorMessage };
     }

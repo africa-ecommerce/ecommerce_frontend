@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { CheckCircle, XCircle, AlertTriangle, ArrowRight, RefreshCw, HelpCircle } from "lucide-react"
+import { CheckCircle, XCircle, AlertTriangle, ArrowRight, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import type { VerificationStatus } from "./types"
@@ -47,12 +47,7 @@ export function VerifyEmailContent({ result }: { result: VerificationStatus }) {
 
     return (
       <>
-        {/* <Button className="w-full group" asChild>
-          <Link href="/auth/resend-verification">
-            <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
-            Resend Verification Email
-          </Link>
-        </Button> */}
+        
         <Button variant="outline" className="w-full" asChild>
           <Link href="/help">
             <HelpCircle className="mr-2 h-4 w-4" aria-hidden="true" />

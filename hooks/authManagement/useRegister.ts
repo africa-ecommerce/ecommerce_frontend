@@ -40,7 +40,7 @@ export function useRegister<T extends Record<string, any>>(
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error)
-      // console.error("Registration error:", errorMessage);
+      console.error("Registration error:", errorMessage);
       errorToast(errorMessage)
      
       return { success: false, data: null, error: errorMessage };
