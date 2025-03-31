@@ -5,71 +5,78 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-import { RegisterSchema } from "@/zod/schema";
+import { useRouter, useSearchParams } from "next/navigation";
 import * as z from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useFormResolver } from "@/hooks/useFormResolver";
-import { useRouter } from "next/navigation";
-import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
+import { LoginSchema } from "@/zod/schema";
+import { handleOAuthLogin } from "../register/register";
+import { successToast, errorToast } from "@/components/ui/use-toast-advanced";
+import { isValidCallbackUrl } from "@/lib/utils";
 
 
-// OAuth Login Handler
-export const handleOAuthLogin = (provider: "google" | "facebook") => {
-  try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const nestedCallback = urlParams.get("callbackUrl") || "/dashboard";
+  
 
-    const finalCallback = encodeURIComponent(nestedCallback);
-    const redirectUrl = `http://localhost:5000/auth/${provider}?callbackUrl=${finalCallback}`;
-    window.location.href = redirectUrl;
-  } catch (error) {
-    console.error(`${provider} login error:`, error);
-    // You might want to add a toast or error notification here
-  }
-};
+type LoginInput = z.infer<typeof LoginSchema>;
 
-export default function RegisterPage() {
+
+
+export default function Login() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const searchParams = useSearchParams()
+    const callbackUrl = searchParams.get("callbackUrl")
 
-  type RegisterInput = z.infer<typeof RegisterSchema>;
-
-  const registerUser = async (data: RegisterInput) => {
+  const loginUser = async (data: LoginInput) => {
     try {
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
       const result = await response.json();
+
       if (!response.ok) {
-        errorToast(result.error || "Registration failed");
-        return null; // Return null to indicate failure
+        const status = response.status;
+        if (status === 403) {
+          successToast(result.message);
+          return { ...result, redirectUrl: "/auth/resend-email-verification" };
+        }
+
+        errorToast(
+          result.error || "Login failed. Please check your credentials."
+        );
+        return null;
       }
 
       successToast(result.message);
-      return result; // Return the result to be passed to onSuccess
+       
+            
+      if (
+        callbackUrl &&
+        typeof callbackUrl === "string" &&
+        isValidCallbackUrl(callbackUrl)
+      ) {
+        const decodeCallback = decodeURIComponent(callbackUrl);
+        return { ...result, redirectUrl: decodeCallback };
+      }
+      return {...result, redirectUrl: "/dashboard"}
     } catch (error) {
       console.error(error);
       errorToast("Something went wrong");
-      return null; // Return null to indicate failure
+      return null;
     }
   };
-
   const {
-    form: { register, setValue, submit, errors, isSubmitting },
-  } = useFormResolver(registerUser, RegisterSchema, (data) => {
-    console.log("Registration data:", data);
-    // Redirect to verification page after successful registration
-    router.push("/auth/resend-email-verification");
+    form: { register, submit, errors, isSubmitting },
+  } = useFormResolver(loginUser, LoginSchema, (data) => {
+    console.log(data.redirectUrl);
+    router.push(`${data.redirectUrl}`);
   });
-
-  // useEffect(() => {
-  //   setValue("policy", policyChecked);
-  // }, [policyChecked, setValue]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -81,38 +88,16 @@ export default function RegisterPage() {
       <div className="flex flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight">
-            Create your Pluggn account
+            Sign in to your Pluggn account
           </h2>
           <p className="mt-2 text-center text-sm text-muted-foreground">
-            Join thousands of businesses
+            Access your business dashboard
           </p>
         </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-card px-6 py-8 shadow sm:rounded-lg sm:px-8">
             <form className="space-y-6" onSubmit={handleSubmit} method={"POST"}>
-              <div>
-                <label
-                  htmlFor="fullName"
-                  className="block text-sm font-medium leading-6"
-                >
-                  Full Name
-                </label>
-                <div className="mt-1">
-                  <Input
-                    id="fullName"
-                    {...register("name")}
-                    className="block w-full"
-                    placeholder="john doe"
-                  />
-                  {errors.name && (
-                    <p className="text-xs mt-1 text-red-500">
-                      {errors.name.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
               <div>
                 <label
                   htmlFor="email"
@@ -136,12 +121,22 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium leading-6"
-                >
-                  Password
-                </label>
+                <div className="flex items-center justify-between">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium leading-6"
+                  >
+                    Password
+                  </label>
+                  <div className="text-sm">
+                    <Link
+                      href="/auth/forgot-password"
+                      className="font-medium text-primary hover:text-primary/90"
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                </div>
                 <div className="mt-1 relative">
                   <Input
                     id="password"
@@ -175,7 +170,7 @@ export default function RegisterPage() {
                   className="w-full"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Creating Account..." : "Create Account"}
+                  Sign in
                 </Button>
               </div>
             </form>
@@ -227,18 +222,18 @@ export default function RegisterPage() {
             </div>
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
+              Don't have an account?{" "}
               <Link
-                href="/auth/login"
+                href="/auth/register"
                 className="font-medium text-primary hover:text-primary/90"
               >
-                Sign in
+                Create account
               </Link>
             </div>
           </div>
 
           <div className="mt-8 text-center text-xs text-muted-foreground">
-            By signing up, you agree to our{" "}
+            By signing in, you agree to our{" "}
             <Link href="/terms" className="text-primary hover:text-primary/90">
               Terms of Service
             </Link>{" "}

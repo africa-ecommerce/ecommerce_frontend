@@ -24,29 +24,20 @@ export function useLogin<T extends Record<string, any>>(
 
   // Handle form submission
   const handleSubmit = async (credentials: T) => {
-    try {
       // Authenticate the user
       const result = await loginFn(credentials);
 
       // Reset the form
       form.reset();
  
-       successToast(result.message)
-      // Execute success callback if provided
+      
 
       if (onSuccess) {
         onSuccess(result);
       }
 
       return { success: true, data: result, error: null };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      console.error("Login error:", errorMessage);
-      errorToast(errorMessage)
-
-      return { success: false, data: null, error: errorMessage };
-    }
+   
   };
 
   return {

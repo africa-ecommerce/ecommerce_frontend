@@ -1,17 +1,17 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodSchema } from "zod";
 
 /**
- * Hook for user registration with form validation
+ * Hook for form with validation
  *
- * @param registerFn - Function to register a new user
- * @param schema - Zod schema for validating registration input
- * @param onSuccess - Optional callback function to execute after successful registration
+ * @param formFn - Function to be called when submitted
+ * @param schema - Zod schema for validating reset input
+ * @param onSuccess - Optional callback function to execute after successful formFn
  * @returns Form utilities and submission handler
  */
-export function useRegister<T extends Record<string, any>>(
-  registerFn: (input: T) => Promise<any>,
+export function useFormResolver<T extends Record<string, any>>(
+  formFn: (data: T) => Promise<any>,
   schema: ZodSchema<T>,
   onSuccess?: (data: any) => void
 ) {
@@ -22,12 +22,14 @@ export function useRegister<T extends Record<string, any>>(
 
   // Handle form submission
   const handleSubmit = async (formData: T) => {
-      // Register the user
-      const result = await registerFn(formData);
+      // Reset password
+      const result = await formFn(formData);
 
       // Reset the form
       form.reset();
-       
+
+      
+
       // Execute success callback if provided
       if (onSuccess) {
         onSuccess(result);
@@ -35,7 +37,6 @@ export function useRegister<T extends Record<string, any>>(
 
       return { success: true, data: result, error: null };
     
-     
   };
 
   return {

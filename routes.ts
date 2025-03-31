@@ -9,7 +9,8 @@ export const authRoutes = [
   "/auth/error", //-----> callback error page
   "/auth/verify-email",
   "/auth/reset-password",
-  "/auth/forgot-password"
+  "/auth/forgot-password",
+  "/auth/resend-email-verification"
 ];
 
 /**@type {string}*/

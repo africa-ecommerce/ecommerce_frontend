@@ -3,14 +3,14 @@
 
 import type { VerificationStatus } from "./types"
 
-export async function verifyEmailToken(token: string, callbackUrl: string): Promise<VerificationStatus> {
+export async function verifyEmailToken(token: string): Promise<VerificationStatus> {
   try {
     const apiUrl = `${process.env.BACKEND_URL}/auth/verify-email`
 
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, callbackUrl }),
+      body: JSON.stringify({ token }),
     })
 
     const data = await response.json()
@@ -22,7 +22,6 @@ export async function verifyEmailToken(token: string, callbackUrl: string): Prom
         message: "Your verification link is invalid or has expired.",
         details:
           "The verification token is not recognized. Please use the latest email verification link or request a new one.",
-        redirectUrl: ""
       }
     }
 
@@ -31,7 +30,6 @@ export async function verifyEmailToken(token: string, callbackUrl: string): Prom
       code: "verified",
       message: "Email verified successfully.",
       details: "Your email address has been verified. You can now access all features of your account.",
-      redirectUrl: data.redirectUrl || ""
     }
   } catch (error) {
     console.error(error)
@@ -40,7 +38,6 @@ export async function verifyEmailToken(token: string, callbackUrl: string): Prom
       code: "server_error",
       message: "A server error occurred.",
       details: "We encountered an issue while verifying your email. Please try again later.",
-      redirectUrl: ""
     }
   }
 }

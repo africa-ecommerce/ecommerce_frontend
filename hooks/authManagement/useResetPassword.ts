@@ -23,15 +23,13 @@ export function useResetPassword<T extends Record<string, any>>(
 
   // Handle form submission
   const handleSubmit = async (formData: T) => {
-    try {
       // Reset password
       const result = await resetFn(formData);
 
       // Reset the form
       form.reset();
 
-      // Show success toast
-      successToast(result.message || "Password reset successful");
+      
 
       // Execute success callback if provided
       if (onSuccess) {
@@ -39,16 +37,7 @@ export function useResetPassword<T extends Record<string, any>>(
       }
 
       return { success: true, data: result, error: null };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      console.error("Password reset error:", errorMessage);
-
-      // Show error toast
-      errorToast(errorMessage);
-
-      return { success: false, data: null, error: errorMessage };
-    }
+    
   };
 
   return {

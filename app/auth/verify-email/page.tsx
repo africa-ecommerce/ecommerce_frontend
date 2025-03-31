@@ -10,7 +10,7 @@ import { VerifyEmailContent } from "./emailVerification"
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
-  const source = searchParams.get("source")
+  // const source = searchParams.get("source")
   
   
   const [result, setResult] = useState<VerificationStatus | null>(null)
@@ -18,14 +18,14 @@ export default function VerifyEmailPage() {
 
   useEffect(() => {
     const verifyToken = async () => {
-      if (!token || !source) {
+      if (!token ) {
         // Handle missing parameters
         setResult({
           status: "error",
           code: "missing_token",
           message: "Missing verification parameters",
           details: "The verification link is incomplete. Please use the complete link from your email.",
-          redirectUrl: ""
+         
         })
         setIsLoading(false)
         return
@@ -33,7 +33,7 @@ export default function VerifyEmailPage() {
 
       try {
         // Call the server action to verify the token
-        const verificationResult = await verifyEmailToken(token, source)
+        const verificationResult = await verifyEmailToken(token)
         setResult(verificationResult)
       } catch (error) {
         setResult({
@@ -41,7 +41,7 @@ export default function VerifyEmailPage() {
           code: "server_error",
           message: "A server error occurred.",
           details: "We encountered an issue while verifying your email. Please try again later.",
-          redirectUrl: ""
+          
         })
       } finally {
         setIsLoading(false)
@@ -49,7 +49,7 @@ export default function VerifyEmailPage() {
     }
 
     verifyToken()
-  }, [token, source])
+  }, [token])
 
   if (isLoading) {
     return (
