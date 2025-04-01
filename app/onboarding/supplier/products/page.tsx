@@ -67,7 +67,7 @@ export default function ProductsPage() {
                 htmlFor="product-description"
                 className="text-sm font-medium"
               >
-                Description <span className="text-red-500">*</span>
+                Description <span className="text-red-500">*</span><span className="text-gray-500">{" "}(Recommended)</span>
               </Label>
               <Textarea
                 id="product-description"

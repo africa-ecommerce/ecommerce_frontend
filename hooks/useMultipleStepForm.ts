@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, DefaultValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodSchema } from "zod";
 
@@ -10,30 +10,34 @@ import { ZodSchema } from "zod";
  * @param onSuccess - Optional callback function to execute after successful formFn
  * @returns Form utilities and submission handler
  */
-export function useFormResolver<T extends Record<string, any>>(
+export function useMultipleStepForm<T extends Record<string, any>>(
   formFn: (data: T) => Promise<any>,
   schema: ZodSchema<T>,
-  onSuccess?: (data: any) => void
+  onSuccess?: (data: any) => void,
+  defaultValues?: DefaultValues<T>
 ) {
   // Setup form with Zod validation
   const form = useForm<T>({
     resolver: zodResolver(schema),
+   defaultValues: defaultValues as DefaultValues<T> || {},
+    mode: "onSubmit",
   });
 
   // Handle form submission
   const handleSubmit = async (formData: T) => {
-    // Reset password
-    const result = await formFn(formData);
+    try {
+      // Process the form data
+      const result = await formFn(formData);
 
-    // Reset the form
-    if (result) {
-      form.reset();
-      if (onSuccess) {
+      // Call onSuccess callback if provided
+      if (result && onSuccess) {
         onSuccess(result);
       }
-    }
 
-    return { success: true, data: result, error: null };
+      return { success: true, data: result, error: null };
+    } catch (error) {
+      return { success: false, data: null, error };
+    }
   };
 
   return {

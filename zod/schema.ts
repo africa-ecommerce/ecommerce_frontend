@@ -60,45 +60,98 @@ export const ResetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
+  export const userTypeSchema = z.object({
+  userType: z.enum(["supplier", "plug"]),
+});
+
+export const plugInfoSchema = z.object({
+  niches: z.array(z.string()).optional(), // Make it optional
+  generalMerchant: z.boolean().optional(),
+  otherNiche: z.string().optional(),
+}).refine(
+  (data) => data.generalMerchant || (data.niches && data.niches.length > 0), 
+  { message: "Select at least one niche or choose to be a general merchant", path: ["niches"] }
+).refine(
+  (data) => !(data.niches?.includes("other") && !data.otherNiche?.trim()), 
+  { message: "Please specify your niche", path: ["otherNiche"] }
+);
+
+
+
+// In your schema file
+export const profileSchema = z.object({ 
+  avatar: z.string().optional(),
+  businessName: z.string().min(2, { message: "Please provide your business name" }),
+  phone: z.string().optional(),
+  bio: z.string().optional(),
+  state: z.enum([
+    "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River", "Delta",
+    "Ebonyi", "Edo", "Ekiti", "Enugu", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi",
+    "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau",
+    "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara", "FCT"
+  ], { message: "Please select a valid state" })
+});
+
+export const productSchema = z.object({
+  // Required fields
+  productName: z
+    .string()
+    .min(3, { message: "Product name must be at least 3 characters" })
+    .max(100, { message: "Product name cannot exceed 100 characters" }),
+  
+  description: z
+    .string()
+    .min(10, { message: "Description must be at least 10 characters" })
+    .max(1000, { message: "Description cannot exceed 1000 characters" }),
+  
+  price: z
+    .union([
+      z.string().refine(val => !isNaN(parseFloat(val)) && parseFloat(val) >= 0, {
+        message: "Price must be a positive number"
+      }),
+      z.number().min(0, { message: "Price must be a positive number" })
+    ])
+    .transform(val => typeof val === "string" ? parseFloat(val) : val),
+  
+  quantity: z
+    .union([
+      z.string().refine(val => !isNaN(parseInt(val)) && parseInt(val) >= 0, {
+        message: "Quantity must be a positive integer"
+      }),
+      z.number().int().min(0, { message: "Quantity must be a positive integer" })
+    ])
+    .transform(val => typeof val === "string" ? parseInt(val) : val),
+  
+  category: z
+    .string({ required_error: "Category is required" })
+    .min(1, { message: "Please select a category" }),
+  
+  shippingRegions: z
+    .string({ required_error: "Shipping region is required" })
+    .min(1, { message: "Please select a shipping region" }),
+  
+  // Optional fields with validation
+  images: z
+    .array(z.string().url({ message: "Invalid image URL" }))
+    .min(1, { message: "At least one product image is required" })
+    .optional(),
+
+  // For bulk upload (optional)
+  bulkFile: z.any().optional(),
+});
+
+export const supplierInfoSchema = z.object({
+  // Business type is required - must be one of the specified options
+  businessType: z
+    .enum(["Warehouse", "Wholesaler", "Importer", "Local Store"], {
+      required_error: "Please select a business type",
+      invalid_type_error: "Business type must be a valid option",
+    })
+    .describe("The type of business the supplier operates"),
+});
 
 
 
 
-
-// export const SettingsSchema = z
-//   .object({
-//     name: z.optional(z.string()),
-//     isTwoFactorEnabled: z.optional(z.boolean()),
-//     role: z.enum([UserRole.ADMIN, UserRole.USER]),
-//     email: z.optional(z.string().email()),
-//     password: z.optional(z.string().min(6)),
-//     newPassword: z.optional(z.string().min(6)),
-//   })
-//   .refine(
-//     (data) => {
-//       if (data.password && !data.newPassword) {
-//         return false;
-//       }
-
-//       return true;
-//     },
-//     {
-//       message: "New password is required",
-//       path: ["newPassword"],
-//     }
-//   )
-//   .refine(
-//     (data) => {
-//       if (data.newPassword && !data.password) {
-//         return false;
-//       }
-
-//       return true;
-//     },
-//     {
-//       message: "Password is required",
-//       path: ["password"],
-//     }
-//   );
 
 

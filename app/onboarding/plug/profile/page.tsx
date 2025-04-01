@@ -54,16 +54,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="first-name">First Name</Label>
-                <Input id="first-name" placeholder="Enter your first name" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="last-name">Last Name</Label>
-                <Input id="last-name" placeholder="Enter your last name" />
-              </div>
-            </div>
+            
 
             <div className="space-y-2">
               <Label htmlFor="business-name">Business Name</Label>
@@ -73,56 +64,22 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input id="email" type="email" placeholder="you@example.com" />
-            </div>
+            
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone">Phone Number<span className="text-gray-500">{" "}(Optional)</span></Label>
               <Input id="phone" placeholder="Enter your phone number" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="country">Country</Label>
-                <Select>
-                  <SelectTrigger id="country">
-                    <SelectValue placeholder="Select country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="nigeria">Nigeria</SelectItem>
-                    <SelectItem value="kenya">Kenya</SelectItem>
-                    <SelectItem value="ghana">Ghana</SelectItem>
-                    <SelectItem value="south-africa">South Africa</SelectItem>
-                    <SelectItem value="egypt">Egypt</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="">
+              
               <div className="space-y-2">
                 <Label htmlFor="city">City</Label>
                 <Input id="city" placeholder="Enter your city" />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="language">Primary Language</Label>
-              <Select>
-                <SelectTrigger id="language">
-                  <SelectValue placeholder="Select language" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="english">English</SelectItem>
-                  <SelectItem value="french">French</SelectItem>
-                  <SelectItem value="swahili">Swahili</SelectItem>
-                  <SelectItem value="yoruba">Yoruba</SelectItem>
-                  <SelectItem value="hausa">Hausa</SelectItem>
-                  <SelectItem value="igbo">Igbo</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            
 
             <div className="space-y-2">
               <Label htmlFor="digital-skills">Digital Skills Assessment</Label>
@@ -148,7 +105,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bio">About Your Business</Label>
+              <Label htmlFor="bio">About Your Business<span className="text-gray-500">{" "}(Optional)</span></Label>
               <Textarea
                 id="bio"
                 placeholder="Tell us about your business and goals"
