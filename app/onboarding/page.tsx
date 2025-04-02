@@ -61,41 +61,42 @@ const Page = () => {
     setStep((prev) => Math.min(prev + 1, totalSteps));
   };
 
-  const handleSubmitSupplier = async (data: FormData) => {
-    // Check if data is SupplierData type before accessing supplierInfo
-    if ("supplierInfo" in data) {
-      console.log("submitted supplier data", data);
-      try {
-        const response = await fetch("/api/onboarding", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userType: data.userType,
-            supplierInfo: data.supplierInfo,
-            ...(data.productStep && { productStep: data.productStep }),
-          }),
-        });
+ const handleSubmitSupplier = async (data: FormData): Promise<any> => {
+   // Check if data is SupplierData type before accessing supplierInfo
+   if ("supplierInfo" in data) {
+     console.log("submitted supplier data", data);
+     try {
+       const response = await fetch("/api/onboarding", {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({
+           userType: data.userType,
+           supplierInfo: data.supplierInfo,
+           ...(data.productStep && { productStep: data.productStep }),
+         }),
+       });
 
-        const result = await response.json();
-        if (!response.ok) {
-          errorToast(result.error);
-          return null; // Return null to indicate failure
-        }
+       const result = await response.json();
+       if (!response.ok) {
+         errorToast(result.error);
+         return null; // Return null to indicate failure
+       }
 
-        successToast(result.message);
-        return result; // Return the result to be passed to onSuccess
-      } catch (error) {
-        console.error(error);
-        errorToast("Something went wrong");
-        return null; // Return null to indicate failure
-      }
-    } else {
-      errorToast("Invalid supplier data");
-      return null;
-    }
-  };
+       successToast(result.message);
+       return result; // Return the result to be passed to onSuccess
+     } catch (error) {
+       console.error(error);
+       errorToast("Something went wrong");
+       return null; // Return null to indicate failure
+     }
+   } else {
+     errorToast("Invalid supplier data");
+     return null;
+   }
+ };
 
-const handleSubmitPlug = async (data: FormData) => {
+
+const handleSubmitPlug = async (data: FormData): Promise<any> => {
   // Check if data is PlugData type before accessing plugInfo
   if ("plugInfo" in data) {
     const plugData = data.plugInfo || {};

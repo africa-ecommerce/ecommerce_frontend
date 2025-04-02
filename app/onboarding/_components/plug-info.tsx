@@ -38,12 +38,13 @@ export default function PlugInfo({
   initialData,
 }: PlugTypeProps) {
   const {
-    form: { register, submit, watch, setValue, control, errors },
+    form: { register, submit, watch, setValue, getValues, control, errors },
   } = useFormResolver((data) => {
     update({ plugInfo: data });
     onNext();
     return Promise.resolve(true);
-  }, plugInfoSchema);
+  }, plugInfoSchema
+);
 
   const niches = [
     {

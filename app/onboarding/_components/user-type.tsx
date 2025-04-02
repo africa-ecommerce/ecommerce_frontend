@@ -33,7 +33,7 @@ export default function UserType({ onNext, update, initialData }: UserTypeProps)
   // Set initial data if available
   useEffect(() => {
     if (initialData?.userType) {
-      setValue("userType", initialData.userType  as "supplier" | "plug");
+      setValue("userType", initialData.userType  as "SUPPLIER" | "PLUG");
     }
   }, [initialData, setValue]);
 
@@ -53,10 +53,10 @@ export default function UserType({ onNext, update, initialData }: UserTypeProps)
       <div className="space-y-4">
         <Card
           className={`p-6 border-2 hover:border-orange-500 cursor-pointer transition-all ${
-            userType === "supplier" ? "border-orange-500" : ""
+            userType === "SUPPLIER" ? "border-orange-500" : ""
           }`}
           onClick={() => {
-            setValue("userType", "supplier");
+            setValue("userType", "SUPPLIER");
           }}
         >
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-50">
@@ -72,10 +72,10 @@ export default function UserType({ onNext, update, initialData }: UserTypeProps)
 
         <Card
           className={`p-6 border-2 hover:border-orange-500 cursor-pointer transition-all ${
-            userType === "plug" ? "border-orange-500" : ""
+            userType === "PLUG" ? "border-orange-500" : ""
           }`}
           onClick={() => {
-            setValue("userType", "plug");
+            setValue("userType", "PLUG");
           }}
         >
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-50">

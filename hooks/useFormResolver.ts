@@ -22,18 +22,25 @@ export function useFormResolver<T extends Record<string, any>>(
 
   // Handle form submission
   const handleSubmit = async (formData: T) => {
-    // Reset password
-    const result = await formFn(formData);
+    try {
+      // Call form function and get result
+      const result = await formFn(formData);
 
-    // Reset the form
-    if (result) {
-      form.reset();
-      if (onSuccess) {
-        onSuccess(result);
+      // Only proceed if result is not null (indicating success)
+      if (result !== null) {
+        form.reset();
+        if (onSuccess) {
+          onSuccess(result);
+        }
+        return { success: true, data: result, error: null };
       }
-    }
 
-    return { success: true, data: result, error: null };
+      // If result is null, there was an error but it was already handled
+      return { success: false, data: null, error: "Operation failed" };
+    } catch (error) {
+      console.error("Form submission error:", error);
+      return { success: false, data: null, error };
+    }
   };
 
   return {

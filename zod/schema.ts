@@ -83,7 +83,7 @@ export const profileSchema = z.object({
   avatar: z.string().optional(),
   businessName: z.string().min(2, { message: "Please provide your business name" }),
   phone: z.string().optional(),
-  bio: z.string().optional(),
+  aboutBusiness: z.string().optional(),
   state: z.enum([
     "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River", "Delta",
     "Ebonyi", "Edo", "Ekiti", "Enugu", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi",

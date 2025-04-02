@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import {  ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { profileSchema } from "@/zod/schema";
 import { FormData } from "../page";
@@ -18,10 +18,10 @@ import {
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Controller } from "react-hook-form";
-import { z } from "zod";
+import { useRouter } from "next/navigation";
 
 interface ProfileProps {
-  onSubmit: (data: FormData) => void;
+  onSubmit: (data: FormData) => Promise<any>;
   onPrev: () => void;
   formData: FormData; // Add this line to receive existing form data
 }
@@ -30,18 +30,23 @@ export default function ProfileStep({
   onPrev,
   formData, // Add this parameter
 }: ProfileProps) {
-  const handleFormSubmit = (profileData: z.infer<typeof profileSchema>) => {
-    // Merge existing formData with new profile data
-    onSubmit({ ...formData, profile: profileData } as FormData);
-  };
+  const router = useRouter();
+  
 
   const {
-    form: { register, submit, control, errors },
-  } = useFormResolver((data) => {
-    handleFormSubmit(data);
-    return Promise.resolve(true);
-  }, profileSchema);
-
+    form: { register, submit, control, errors, isSubmitting },
+  } = useFormResolver(
+    async (data) => {
+      // Merge existing formData with new supplier info
+      const result = await onSubmit({
+        ...formData,
+        profile: data,
+      } as FormData);
+      return result;
+    },
+    profileSchema, 
+    () => router.push("/onboarding/success")
+  );
 
   return (
     <>
@@ -80,9 +85,8 @@ export default function ProfileStep({
                 placeholder="Enter your phone number"
                 {...register("phone")}
               />
-              {errors.phone && (
-                <p className="text-red-500 text-sm">{errors.phone.message}</p>
-              )}
+             
+              
             </div>
 
             <div className="space-y-2">
@@ -158,11 +162,9 @@ export default function ProfileStep({
                 id="bio"
                 placeholder="Tell us about your business and goals"
                 rows={3}
-                {...register("bio")}
+                {...register("aboutBusiness")}
               />
-              {errors.bio && (
-                <p className="text-red-500 text-sm">{errors.bio.message}</p>
-              )}
+              
             </div>
           </div>
         </form>
@@ -173,10 +175,11 @@ export default function ProfileStep({
           <ArrowLeft className="mr-2 h-5 w-5" /> Back
         </Button>
         <Button
-          className="bg-orange-500 hover:bg-orange-600 px-6"
           onClick={submit}
+          disabled={ isSubmitting}
+          className="bg-orange-500 hover:bg-orange-600 px-6"
         >
-          Submit
+          {isSubmitting ? "Submitting..." : "Submit"}
         </Button>
       </div>
     </>

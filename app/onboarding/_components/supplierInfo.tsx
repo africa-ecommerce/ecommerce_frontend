@@ -1,18 +1,13 @@
-"use client"
+"use client";
 import { useEffect, useState } from "react";
-import {
-  ArrowLeft,
-  Building2,
-  Warehouse,
-  Store,
-  Ship,
-} from "lucide-react";
+import { ArrowLeft, Building2, Warehouse, Store, Ship } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { supplierInfoSchema } from "@/zod/schema";
 import { FormData } from "../page";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 
 export type BusinessType =
   | "Warehouse"
@@ -21,40 +16,42 @@ export type BusinessType =
   | "Local Store";
 
 interface SupplierInfoProps {
-  onSubmit: (data: FormData) => void;
+  onSubmit: (data: FormData) => Promise<any>; // Changed to Promise<any>
   onPrev: () => void;
-  formData: FormData; // Add this line
+  formData: FormData;
   initialData?: { businessType?: BusinessType };
 }
 
 export default function SupplierInfo({
   onSubmit,
   onPrev,
-  formData, // Add this parameter
+  formData,
   initialData,
 }: SupplierInfoProps) {
-  const handleFormSubmit = (
-    supplierInfoData: z.infer<typeof supplierInfoSchema>
-  ) => {
-    // Merge existing formData with new supplier info
-    onSubmit({ ...formData, supplierInfo: supplierInfoData } as FormData);
-  };
+  const router = useRouter();
   const [selectedType, setSelectedType] = useState<BusinessType | undefined>(
     initialData?.businessType
   );
 
   const {
-    form: { setValue, submit, watch },
-  } = useFormResolver((data) => {
-    // update(data);
-    handleFormSubmit(data);
-    return Promise.resolve(true);
-  }, supplierInfoSchema);
+    form: { setValue, submit, watch, isSubmitting },
+  } = useFormResolver(
+    async (data) => {
+      // Merge existing formData with new supplier info
+      const result = await onSubmit({ 
+        ...formData, 
+        supplierInfo: data 
+      } as FormData);
+      
+      // Return the result (null or actual result) to indicate success/failure
+      return result;
+    },
+    supplierInfoSchema,
+    () => router.push("/onboarding/success")
+  );
 
   // Watch the form value
   const businessType = watch("businessType");
-
-  
 
   // Keep local state in sync with form state
   useEffect(() => {
@@ -68,8 +65,6 @@ export default function SupplierInfo({
     setValue("businessType", type);
     setSelectedType(type);
   };
-
-  
 
   return (
     <>
@@ -124,15 +119,20 @@ export default function SupplierInfo({
       </div>
 
       <div className="mt-8 flex justify-between">
-        <Button onClick={onPrev} variant="outline" className="px-6">
+        <Button
+          onClick={onPrev}
+          variant="outline"
+          className="px-6"
+          disabled={isSubmitting}
+        >
           <ArrowLeft className="mr-2 h-5 w-5" /> Back
         </Button>
         <Button
           onClick={submit}
-          disabled={!selectedType}
+          disabled={!selectedType || isSubmitting}
           className="bg-orange-500 hover:bg-orange-600 px-6"
         >
-          Submit
+          {isSubmitting ? "Submitting..." : "Submit"}
         </Button>
       </div>
     </>
