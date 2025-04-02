@@ -44,9 +44,9 @@ const Page = () => {
 
   // Get the appropriate step array based on user type
   const getSteps = () => {
-    if (formData.userType === "plug") {
+    if (formData.userType === "PLUG") {
       return plugSteps;
-    } else if (formData.userType === "supplier") {
+    } else if (formData.userType === "SUPPLIER") {
       return supplierSteps;
     } else {
       // Default to plug steps before selection
@@ -195,7 +195,7 @@ const handleSubmitPlug = async (data: FormData) => {
     }
 
     // Narrow the type explicitly
-    if (formData.userType === "plug") {
+    if (formData.userType === "PLUG") {
       const plugData = formData as PlugData; // Explicitly tell TypeScript this is PlugData
 
       switch (step) {
@@ -221,7 +221,7 @@ const handleSubmitPlug = async (data: FormData) => {
       }
     }
 
-    if (formData.userType === "supplier") {
+    if (formData.userType === "SUPPLIER") {
       const supplierData = formData as SupplierData; // Explicitly tell TypeScript this is SupplierData
 
       switch (step) {

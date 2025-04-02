@@ -61,7 +61,7 @@ export const ResetPasswordSchema = z
   });
 
   export const userTypeSchema = z.object({
-  userType: z.enum(["supplier", "plug"]),
+  userType: z.enum(["SUPPLIER", "PLUG"]),
 });
 
 export const plugInfoSchema = z.object({
