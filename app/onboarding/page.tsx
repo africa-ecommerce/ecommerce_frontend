@@ -10,7 +10,7 @@ import { z } from "zod";
 import PlugInfo from "./_components/plug-info";
 import ProfileStep from "./_components/profile-step";
 import SupplierInfo from "./_components/supplierInfo";
-import ProductStep from "./_components/product-step";
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 
 // Extract the actual type from the schema
 type UserTypeValue = z.infer<typeof userTypeSchema>["userType"];
@@ -19,16 +19,16 @@ type UserTypeData = {
   userType?: UserTypeValue;
 };
 
-type PlugData = UserTypeData & {
+export type PlugData = {
+  userType?: UserTypeValue;
   plugInfo?: z.infer<typeof plugInfoSchema>;
   profile?: z.infer<typeof profileSchema>;
-  
 };
 
-type SupplierData = UserTypeData & {
+export type SupplierData = {
+  userType?: UserTypeValue;
   supplierInfo?: z.infer<typeof supplierInfoSchema>;
   productStep?: z.infer<typeof productSchema>;
- 
 };
 
 export type FormData = PlugData | SupplierData;
@@ -61,100 +61,195 @@ const Page = () => {
     setStep((prev) => Math.min(prev + 1, totalSteps));
   };
 
+  const handleSubmitSupplier = async (data: FormData) => {
+    // Check if data is SupplierData type before accessing supplierInfo
+    if ("supplierInfo" in data) {
+      console.log("submitted supplier data", data);
+      try {
+        const response = await fetch("/api/onboarding", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userType: data.userType,
+            supplierInfo: data.supplierInfo,
+            ...(data.productStep && { productStep: data.productStep }),
+          }),
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          errorToast(result.error);
+          return null; // Return null to indicate failure
+        }
+
+        successToast(result.message);
+        return result; // Return the result to be passed to onSuccess
+      } catch (error) {
+        console.error(error);
+        errorToast("Something went wrong");
+        return null; // Return null to indicate failure
+      }
+    } else {
+      errorToast("Invalid supplier data");
+      return null;
+    }
+  };
+
+const handleSubmitPlug = async (data: FormData) => {
+  // Check if data is PlugData type before accessing plugInfo
+  if ("plugInfo" in data) {
+    const plugData = data.plugInfo || {};
+
+    // Pre-process data before sending to backend
+    let processedNiches: string[] = [];
+
+    // If generalMerchant is chosen, niches should be empty
+    if (plugData.generalMerchant) {
+      processedNiches = [];
+    }
+    // If not generalMerchant, handle niches and otherNiche
+    else {
+      // Start with selected niches but filter out "other"
+      // Use type assertion to make TypeScript understand niches is a string array
+      processedNiches = ((plugData.niches || []) as string[]).filter(
+        (niche) => niche !== "other"
+      );
+
+      // If otherNiche is provided and not empty, add its value to niches array
+      if (plugData.otherNiche?.trim()) {
+        processedNiches.push(plugData.otherNiche.trim());
+      }
+    }
+
+    const processedData = {
+      userType: data.userType,
+      niches: processedNiches,
+      generalMerchant: Boolean(plugData.generalMerchant),
+      // Include profile data if available
+      ...(data.profile && { profile: data.profile }),
+    };
+
+    // Send optimized data to backend
+    console.log("data", processedData);
+    try {
+      const response = await fetch("/api/onboarding", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(processedData),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        errorToast(result.error);
+        return null; // Return null to indicate failure
+      }
+
+      successToast(result.message);
+      return result; // Return the result to be passed to onSuccess
+    } catch (error) {
+      console.error(error);
+      errorToast("Something went wrong");
+      return null; // Return null to indicate failure
+    }
+  } else {
+    errorToast("Invalid form data");
+    return null;
+  }
+};
+
+
+  // Replace your existing form submission with this
+  
+
   const handlePrev = () => {
     setDirection(-1);
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
   const updateFormData = (newData: Partial<FormData>) => {
-    setFormData((prev) => ({ ...prev, ...newData }));
+    // If userType is changing, reset the form data
+    if ("userType" in newData && newData.userType !== formData.userType) {
+      // Reset form data but keep the new user type
+      setFormData({ userType: newData.userType } as FormData);
+    } else {
+      // Normal update without changing user type
+      setFormData((prev) => ({ ...prev, ...newData }));
+    }
   };
 
   // Render the appropriate component based on user type and current step
-  // Render the appropriate component based on user type and current step
-const renderStep = () => {
-  // First step is always UserType
-  if (step === 1) {
-    return (
-      <UserType
-        onNext={handleNext}
-        update={updateFormData}
-        initialData={
-          formData.userType ? { userType: formData.userType } : undefined
-        }
-      />
-    );
-  }
-
-  // Narrow the type explicitly
-  if (formData.userType === "plug") {
-    const plugData = formData as PlugData; // Explicitly tell TypeScript this is PlugData
-
-    switch (step) {
-      case 2:
-        return (
-          <PlugInfo
-            onNext={handleNext}
-            onPrev={handlePrev}
-            update={updateFormData}
-            initialData={plugData.plugInfo} // Now it's safe to access plugInfo
-          />
-        );
-      case 3:
-        return (
-          <ProfileStep
-            onNext={handleNext}
-            onPrev={handlePrev}
-            update={updateFormData}
-            initialData={plugData.profile}
-          />
-        );
-      default:
-        return null;
-    }
-  }
-
-  if (formData.userType === "supplier") {
-    const supplierData = formData as SupplierData; // Explicitly tell TypeScript this is SupplierData
-    
-    switch(step) {
-      case 2:
-        return (
-          <SupplierInfo
-            onNext={handleNext}
-            onPrev={handlePrev}
-            update={updateFormData}
-            initialData={supplierData.supplierInfo} // Now it's safe to access plugInfo
-          />
-        );
-      // case 3:
-      //   return (
-      //     <ProductStep
-      //       onNext={handleNext}
-      //       onPrev={handlePrev}
-      //       update={updateFormData}
-      //       initialData={supplierData.productStep}
-      //     />
-      //   );
-      default:
-        return null;
+  const renderStep = () => {
+    // First step is always UserType
+    if (step === 1) {
+      return (
+        <UserType
+          onNext={handleNext}
+          update={updateFormData}
+          initialData={
+            formData.userType ? { userType: formData.userType } : undefined
+          }
+        />
+      );
     }
 
+    // Narrow the type explicitly
+    if (formData.userType === "plug") {
+      const plugData = formData as PlugData; // Explicitly tell TypeScript this is PlugData
 
-}
-  return null;
+      switch (step) {
+        case 2:
+          return (
+            <PlugInfo
+              onNext={handleNext}
+              onPrev={handlePrev}
+              update={updateFormData}
+              initialData={plugData.plugInfo} // Now it's safe to access plugInfo
+            />
+          );
+        case 3:
+          return (
+            <ProfileStep
+              onSubmit={handleSubmitPlug}
+              onPrev={handlePrev}
+              formData={formData} // Pass the current formData to the component
+            />
+          );
+        default:
+          return null;
+      }
+    }
 
-}
+    if (formData.userType === "supplier") {
+      const supplierData = formData as SupplierData; // Explicitly tell TypeScript this is SupplierData
 
+      switch (step) {
+        case 2:
+          return (
+            <SupplierInfo
+              onSubmit={handleSubmitSupplier}
+              onPrev={handlePrev}
+              formData={formData} // Pass the current formData
+              initialData={supplierData.supplierInfo}
+            />
+          );
+       
+        default:
+          return null;
+      }
+    }
+    return null;
+  };
+
+  
+  
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white">
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-orange-400" />
       <div className="w-full max-w-md px-4 py-8">
         <div className="mb-8">
           <div className="flex justify-between items-center mb-2">
-            {/* <span className="text-sm font-medium text-gray-500">
-               ({step} of {totalSteps})
-            </span> */}
             <span className="text-sm font-medium text-gray-500">
               {Math.round((step / totalSteps) * 100)}% Complete
             </span>

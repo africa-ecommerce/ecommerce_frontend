@@ -1,7 +1,6 @@
-import Link from "next/link";
+"use client"
 import { useEffect, useState } from "react";
 import {
-  ArrowRight,
   ArrowLeft,
   Building2,
   Warehouse,
@@ -9,10 +8,11 @@ import {
   Ship,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { supplierInfoSchema } from "@/zod/schema";
+import { FormData } from "../page";
+import { z } from "zod";
 
 export type BusinessType =
   | "Warehouse"
@@ -21,41 +21,40 @@ export type BusinessType =
   | "Local Store";
 
 interface SupplierInfoProps {
-  onNext: () => void;
+  onSubmit: (data: FormData) => void;
   onPrev: () => void;
-  update: (data: any) => void;
+  formData: FormData; // Add this line
   initialData?: { businessType?: BusinessType };
 }
 
 export default function SupplierInfo({
-  onNext,
+  onSubmit,
   onPrev,
-  update,
+  formData, // Add this parameter
   initialData,
 }: SupplierInfoProps) {
-  // Add local state to ensure UI updates properly
+  const handleFormSubmit = (
+    supplierInfoData: z.infer<typeof supplierInfoSchema>
+  ) => {
+    // Merge existing formData with new supplier info
+    onSubmit({ ...formData, supplierInfo: supplierInfoData } as FormData);
+  };
   const [selectedType, setSelectedType] = useState<BusinessType | undefined>(
     initialData?.businessType
   );
 
   const {
-    form: { setValue, submit, watch, getValues },
+    form: { setValue, submit, watch },
   } = useFormResolver((data) => {
-    update(data);
-    onNext();
+    // update(data);
+    handleFormSubmit(data);
     return Promise.resolve(true);
   }, supplierInfoSchema);
 
   // Watch the form value
   const businessType = watch("businessType");
 
-  // Initialize form from initialData
-  useEffect(() => {
-    if (initialData?.businessType) {
-      setValue("businessType", initialData.businessType);
-      setSelectedType(initialData.businessType);
-    }
-  }, [initialData, setValue]);
+  
 
   // Keep local state in sync with form state
   useEffect(() => {
@@ -70,10 +69,7 @@ export default function SupplierInfo({
     setSelectedType(type);
   };
 
-  // Debugging - log values to see what's happening
-  console.log("Initial Data:", initialData);
-  console.log("Selected Type:", selectedType);
-  console.log("Form Business Type:", businessType);
+  
 
   return (
     <>
@@ -136,7 +132,7 @@ export default function SupplierInfo({
           disabled={!selectedType}
           className="bg-orange-500 hover:bg-orange-600 px-6"
         >
-          Continue <ArrowRight className="ml-2 h-5 w-5" />
+          Submit
         </Button>
       </div>
     </>

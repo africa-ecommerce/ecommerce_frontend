@@ -1,4 +1,4 @@
-
+"use client"
 
 import {  ArrowLeft } from "lucide-react";
 import { useFormResolver } from "@/hooks/useFormResolver";
@@ -18,45 +18,30 @@ import {
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Controller } from "react-hook-form";
-import { useEffect } from "react";
-
+import { z } from "zod";
 
 interface ProfileProps {
-  onNext: () => void;
+  onSubmit: (data: FormData) => void;
   onPrev: () => void;
-  update: (data: FormData) => void;
-  initialData?: any;
+  formData: FormData; // Add this line to receive existing form data
 }
-
 export default function ProfileStep({
-  onNext,
+  onSubmit,
   onPrev,
-  update,
-  initialData,
+  formData, // Add this parameter
 }: ProfileProps) {
+  const handleFormSubmit = (profileData: z.infer<typeof profileSchema>) => {
+    // Merge existing formData with new profile data
+    onSubmit({ ...formData, profile: profileData } as FormData);
+  };
+
   const {
-    form: { register, submit, watch, setValue, control, errors },
+    form: { register, submit, control, errors },
   } = useFormResolver((data) => {
-    update({ profile: data });
-    onNext();
+    handleFormSubmit(data);
     return Promise.resolve(true);
   }, profileSchema);
 
-
-  // Set initial data if available
-  useEffect(() => {
-    if (initialData) {
-      if (initialData.avatar) setValue("avatar", initialData.avatar);
-      if (initialData.businessName)
-        setValue("businessName", initialData.businessName);
-      if (initialData.phone) setValue("phone", initialData.phone);
-      if (initialData.city) setValue("state", initialData.state);
-      if (initialData.digitalSkills) setValue("state", initialData.state);
-      if (initialData.bio) setValue("bio", initialData.bio);
-    }
-  }, [initialData, setValue]);
-
- 
 
   return (
     <>
@@ -70,8 +55,6 @@ export default function ProfileStep({
       <Card className="p-6 mb-8">
         <form onSubmit={submit}>
           <div className="space-y-6">
-           
-
             {/* Business Name */}
             <div className="space-y-2">
               <Label htmlFor="businessName">Business Name</Label>
