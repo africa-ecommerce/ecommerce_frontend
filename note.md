@@ -1,1 +1,1 @@
-1) Error: Cannot set headers after they are sent to the client                                                                                                                                                                                                                      2)\y
+1) create oauth error page 

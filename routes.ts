@@ -17,4 +17,4 @@ export const authRoutes = [
 export const apiAuthPrefix = "/api/auth";
 
 /**@type {string}*/
-export const DEFAULT_LOGIN_REDIRECT = "/"; /////----> /dashboard or onboarding
+export const DEFAULT_LOGIN_REDIRECT = "/dashboard"; /////----> /dashboard or onboarding

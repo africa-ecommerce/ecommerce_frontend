@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { supplierInfoSchema } from "@/zod/schema";
 import { FormData } from "../page";
-import { z } from "zod";
 import { useRouter } from "next/navigation";
 
 export type BusinessType =
