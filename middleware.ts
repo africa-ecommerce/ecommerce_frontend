@@ -1,89 +1,145 @@
-// import {
-//   DEFAULT_LOGIN_REDIRECT,
-//   apiAuthPrefix,
-//   authRoutes,
-//   publicRoutes,
-// } from "@/routes";
+
+
+// // // Optionally, don't invoke Middleware on some paths
+// // export const config = {
+// //   matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+// // };
 
 // import { NextResponse, NextRequest } from "next/server";
+// import { authRoutes, publicRoutes, DEFAULT_LOGIN_REDIRECT } from "@/routes";
 
-//  const auth = (req: NextRequest) => {
-//   const { nextUrl } = req;
+// export async function middleware(request: NextRequest) {
+//   const { nextUrl } = request;
+//   const accessToken = request.cookies.get("accessToken");
+//   const refreshToken = request.cookies.get("refreshToken");
 
-//   // Check if access token exists in cookies
-//   const accessToken = req.cookies.get("accessToken");
-
-//   // User is considered logged in if accessToken is present --> full jwt validation in the backend
-//   const isLoggedIn = !!accessToken;
-
-//   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-//   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
-//   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-
-//   if (isApiAuthRoute) {
-//     return;
+//   // Skip middleware for API routes and public assets
+//   if (nextUrl.pathname.startsWith("/api") || nextUrl.pathname.includes(".")) {
+//     return NextResponse.next();
 //   }
 
-//   if (isAuthRoute) {
-//     if (isLoggedIn && nextUrl.pathname !== DEFAULT_LOGIN_REDIRECT) {
-//       return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+//   // Handle authentication routes
+//   if (authRoutes.includes(nextUrl.pathname)) {
+//     if (accessToken || refreshToken) {
+//       return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.pathname));
 //     }
-//     return;
+//     return NextResponse.next();
 //   }
 
-//   if (!isLoggedIn && !isPublicRoute) {
+//   // Handle protected routes
+//   const isAuthenticated = await verifyAuth(request);
+//   if (!isAuthenticated && !publicRoutes.includes(nextUrl.pathname)) {
 //     let callbackUrl = nextUrl.pathname;
-//     if (nextUrl.search) {
-//       callbackUrl += nextUrl.search;
-//     }
+//         if (nextUrl.search) {
+//           callbackUrl += nextUrl.search;
+//         }
 
-//     const encodedCallBackUrl = encodeURIComponent(callbackUrl);
+//         const encodedCallBackUrl = encodeURIComponent(callbackUrl);
 //     return NextResponse.redirect(
-//       new URL(`/auth/login?callbackUrl=${encodedCallBackUrl}`, nextUrl)
+//       new URL(
+//         `/auth/login?callbackUrl=${encodeURIComponent(encodedCallBackUrl)}`,
+//         nextUrl
+//       )
 //     );
 //   }
 
-//   return;
-// };
+//   return NextResponse.next();
+// }
 
-// export default auth;
 
-// // Optionally, don't invoke Middleware on some paths
+
+// async function verifyAuth(request: NextRequest): Promise<boolean> {
+//   try {
+//     // First check access token
+//     const accessToken = request.cookies.get("accessToken")?.value;
+//     if (accessToken) return true;
+
+//     // Attempt refresh if refresh token exists
+//     const refreshToken = request.cookies.get("refreshToken")?.value;
+//     if (refreshToken) {
+//       return await refreshTokens(request);
+//     }
+
+//     return false;
+//   } catch (error) {
+//     console.error("Auth verification failed:", error);
+//     return false;
+//   }
+// }
+
+// async function refreshTokens(request: NextRequest) {
+//   try {
+//     const response = await fetch(
+//       `${process.env.BACKEND_URL}/auth/refresh`,
+//       {
+//         method: "POST",
+//         headers: { Cookie: request.headers.get("Cookie") || "" },
+//         credentials: "include",
+//       }
+//     );
+
+//      if (!response.ok) return false;
+
+//      // If refresh was successful, return true
+//      return true;
+
+
+   
+//   } catch (error) {
+    
+//     console.error("Refresh tokens failed:", error);
+//     return false;
+//   }
+// }
+
 // export const config = {
-//   matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+//   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 // };
 
-// @/middleware.ts
+
+
+
+// FRONTEND MIDDLEWARE
 import { NextResponse, NextRequest } from "next/server";
 import { authRoutes, publicRoutes, DEFAULT_LOGIN_REDIRECT } from "@/routes";
 
+// Global refresh state tracking (for concurrent request handling)
+// This is a server-side cache to prevent multiple simultaneous refresh attempts
+let refreshPromise: Promise<boolean> | null = null;
+let refreshPromiseTimestamp: number = 0;
+const REFRESH_CACHE_TTL = 10000; // 10 seconds in milliseconds
+
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { nextUrl } = request;
   const accessToken = request.cookies.get("accessToken");
   const refreshToken = request.cookies.get("refreshToken");
 
   // Skip middleware for API routes and public assets
-  if (pathname.startsWith("/api") || pathname.includes(".")) {
+  if (nextUrl.pathname.startsWith("/api") || nextUrl.pathname.includes(".")) {
     return NextResponse.next();
   }
 
   // Handle authentication routes
-  if (authRoutes.includes(pathname)) {
+  if (authRoutes.includes(nextUrl.pathname)) {
     if (accessToken || refreshToken) {
-      return NextResponse.redirect(
-        new URL(DEFAULT_LOGIN_REDIRECT, request.url)
-      );
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.pathname));
     }
     return NextResponse.next();
   }
 
   // Handle protected routes
   const isAuthenticated = await verifyAuth(request);
-  if (!isAuthenticated && !publicRoutes.includes(pathname)) {
+  if (!isAuthenticated && !publicRoutes.includes(nextUrl.pathname)) {
+    let callbackUrl = nextUrl.pathname;
+    if (nextUrl.search) {
+      callbackUrl += nextUrl.search;
+    }
+
+    const encodedCallBackUrl = encodeURIComponent(callbackUrl);
     return NextResponse.redirect(
       new URL(
-        `/auth/login?callbackUrl=${encodeURIComponent(pathname)}`,
-        request.url
+        `/auth/login?callbackUrl=${encodedCallBackUrl}`,
+        nextUrl
       )
     );
   }
@@ -100,9 +156,8 @@ async function verifyAuth(request: NextRequest): Promise<boolean> {
     // Attempt refresh if refresh token exists
     const refreshToken = request.cookies.get("refreshToken")?.value;
     if (refreshToken) {
-      const response = NextResponse.next();
-      await refreshTokens(request, response);
-      return true;
+      // FIXED: Implement concurrent request handling
+      return await getRefreshResult(request);
     }
 
     return false;
@@ -112,10 +167,38 @@ async function verifyAuth(request: NextRequest): Promise<boolean> {
   }
 }
 
-async function refreshTokens(request: NextRequest, response: NextResponse) {
+// ADDED: New function to handle concurrent refresh requests
+async function getRefreshResult(request: NextRequest): Promise<boolean> {
+  const currentTime = Date.now();
+  
+  // If there's an existing refresh operation in progress and it's still fresh
+  if (refreshPromise && currentTime - refreshPromiseTimestamp < REFRESH_CACHE_TTL) {
+    console.log("Using cached refresh operation"); // Reusing existing refresh operation
+    return await refreshPromise;
+  }
+  
+  // Start a new refresh operation and cache it
+  refreshPromiseTimestamp = currentTime;
+  refreshPromise = refreshTokens(request);
+  
+  // Set up cleanup of the cache after completion
+  refreshPromise.finally(() => {
+    // Keep the result cached for a short time before clearing
+    setTimeout(() => {
+      if (currentTime === refreshPromiseTimestamp) {
+        refreshPromise = null;
+      }
+    }, REFRESH_CACHE_TTL);
+  });
+  
+  return await refreshPromise;
+}
+
+// FIXED: Simplified refreshTokens function that focuses on one responsibility
+async function refreshTokens(request: NextRequest): Promise<boolean> {
   try {
-    const refreshResponse = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+    const response = await fetch(
+      `${process.env.BACKEND_URL}/auth/refresh`,
       {
         method: "POST",
         headers: { Cookie: request.headers.get("Cookie") || "" },
@@ -123,29 +206,11 @@ async function refreshTokens(request: NextRequest, response: NextResponse) {
       }
     );
 
-    if (!refreshResponse.ok) throw new Error("Refresh failed");
-
-    // Update response cookies from Set-Cookie headers
-    const cookies = refreshResponse.headers.getSetCookie();
-    cookies.forEach((cookie) => {
-      const [keyValue, ...options] = cookie.split("; ");
-      const [key, value] = keyValue.split("=");
-      response.cookies.set(key, value, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        ...Object.fromEntries(
-          options.map((opt) => {
-            const [k, v] = opt.split("=");
-            return [k.trim().toLowerCase(), v?.trim()];
-          })
-        ),
-      });
-    });
+    // FIXED: Clean response handling
+    return response.ok;
   } catch (error) {
-    response.cookies.delete("accessToken");
-    response.cookies.delete("refreshToken");
-    throw error;
+    console.error("Refresh tokens failed:", error);
+    return false;
   }
 }
 
