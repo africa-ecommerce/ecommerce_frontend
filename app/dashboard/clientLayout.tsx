@@ -102,26 +102,26 @@ function DesktopNavigation({ pathname, userType }: DesktopNavigationProps) {
               isActive={pathname === "/dashboard"}
             />
             <NavItem
-              href="/store"
+              href="/dashboard/store"
               icon={<Store className="w-5 h-5" />}
-              isActive={pathname === "/store"}
+              isActive={pathname === "/dashboard/store"}
             />
             <NavItem
-              href="/marketplace"
+              href="/dashboard/marketplace"
               icon={<LayoutGrid className="w-5 h-5" />}
-              isActive={pathname === "/marketplace"}
+              isActive={pathname === "/dashboard/marketplace"}
             />
             <NavItem
-              href="/analytics"
+              href="/dashboard/analytics"
               icon={<ChartNoAxesCombined className="w-5 h-5" />}
-              isActive={pathname === "/analytics"}
+              isActive={pathname === "/dashboard/analytics"}
             />
           </div>
           <div className="mt-auto border-t p-3">
             <NavItem
-              href="/profile"
+              href="/dashboard/profile"
               icon={<User className="w-5 h-5" />}
-              isActive={pathname === "/profile"}
+              isActive={pathname === "/dashboard/profile"}
             />
           </div>
         </>
@@ -134,26 +134,26 @@ function DesktopNavigation({ pathname, userType }: DesktopNavigationProps) {
               isActive={pathname === "/dashboard"}
             />
             <NavItem
-              href="/order"
+              href="/dashboard/order"
               icon={<PackageOpen className="w-5 h-5" />}
-              isActive={pathname === "/order"}
+              isActive={pathname === "/dashboard/order"}
             />
             <NavItem
-              href="/inventory"
+              href="/dashboard/inventory"
               icon={<Boxes className="w-5 h-5" />}
-              isActive={pathname === "/inventory"}
+              isActive={pathname === "/dashboard/inventory"}
             />
             <NavItem
-              href="/analytics"
+              href="/dashboard/analytics"
               icon={<ChartNoAxesCombined className="w-5 h-5" />}
-              isActive={pathname === "/analytics"}
+              isActive={pathname === "/dashboard/analytics"}
             />
           </div>
           <div className="mt-auto border-t p-3">
             <NavItem
-              href="/profile"
+              href="/dashboard/profile"
               icon={<User className="w-5 h-5" />}
-              isActive={pathname === "/profile"}
+              isActive={pathname === "/dashboard/profile"}
             />
           </div>
         </>
@@ -190,31 +190,31 @@ function MobileNavigation({ pathname, userType }: MobileNavigationProps) {
               compact
             />
             <NavItem
-              href="/store"
+              href="/dashboard/store"
               icon={<Store className="w-5 h-5" />}
               label="Store"
-              isActive={pathname === "/store"}
+              isActive={pathname === "/dashboard/store"}
               compact
             />
             <NavItem
-              href="/marketplace"
+              href="/dashboard/marketplace"
               icon={<LayoutGrid className="w-5 h-5" />}
               label="Marketplace"
-              isActive={pathname === "/marketplace"}
+              isActive={pathname === "/dashboard/marketplace"}
               compact
             />
             <NavItem
-              href="/analytics"
+              href="/dashboard/analytics"
               icon={<ChartNoAxesCombined className="w-5 h-5" />}
               label="Analytics"
-              isActive={pathname === "/analytics"}
+              isActive={pathname === "/dashboard/analytics"}
               compact
             />
             <NavItem
-              href="/profile"
+              href="/dashboard/profile"
               icon={<User className="w-5 h-5" />}
               label="Profile"
-              isActive={pathname === "/profile"}
+              isActive={pathname === "/dashboard/profile"}
               compact
             />
           </>
@@ -228,31 +228,31 @@ function MobileNavigation({ pathname, userType }: MobileNavigationProps) {
               compact
             />
             <NavItem
-              href="/order"
+              href="/dashboard/order"
               icon={<PackageOpen className="w-5 h-5" />}
               label="Order"
-              isActive={pathname === "/order"}
+              isActive={pathname === "/dashboard/order"}
               compact
             />
             <NavItem
-              href="/inventory"
+              href="/dashboard/inventory"
               icon={<Boxes className="w-5 h-5" />}
               label="Inventory"
-              isActive={pathname === "/inventory"}
+              isActive={pathname === "/dashboard/inventory"}
               compact
             />
             <NavItem
-              href="/analytics"
+              href="/dashboard/analytics"
               icon={<ChartNoAxesCombined className="w-5 h-5" />}
               label="Analytics"
-              isActive={pathname === "/analytics"}
+              isActive={pathname === "/dashboard/analytics"}
               compact
             />
             <NavItem
-              href="/profile"
+              href="/dashboard/profile"
               icon={<User className="w-5 h-5" />}
               label="Profile"
-              isActive={pathname === "/profile"}
+              isActive={pathname === "/dashboard/profile"}
               compact
             />
           </>

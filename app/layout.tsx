@@ -7,7 +7,6 @@ import {
   Playfair_Display,
   Poppins,
 } from "next/font/google";
-import ClientLayout from "./clientLayout";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -50,7 +49,7 @@ export default function RootLayout({
       className={`${inter.variable} ${robotoMono.variable} ${playfair.variable} ${poppins.variable}`}
     >
       <body className="min-h-screen bg-background">
-        <ClientLayout>{children}</ClientLayout>
+  {children}
       </body>
     </html>
   );

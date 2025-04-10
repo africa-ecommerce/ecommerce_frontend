@@ -151,6 +151,63 @@ export const supplierInfoSchema = z.object({
 });
 
 
+const dimensionSchema = z
+  .object({
+    length: z.string(),
+    width: z.string(),
+    height: z.string(),
+  })
+  .partial()
+  .refine(
+    (data) => {
+      return Object.values(data).some((val) => val !== "");
+    },
+    {
+      message: "At least one dimension is required",
+    }
+  );
+
+const variationSchema = z.object({
+  id: z.string(),
+  size: z.string().optional(),
+  color: z.string().optional(),
+  sku: z.string().min(1, "SKU is required"),
+  stock: z.number().min(0, "Stock cannot be negative"),
+  price: z.number().optional(),
+});
+
+// Main product schema
+export const productFormSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Product name is required")
+    .max(100, "Name is too long"),
+  category: z.string().min(1, "Category is required"),
+  description: z.string().max(1000, "Description is too long").optional(),
+  basePrice: z
+    .string()
+    .min(1, "Price is required")
+    .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
+  salePrice: z
+    .string()
+    .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format")
+    .optional(),
+  sku: z.string().min(1, "SKU is required").max(50, "SKU is too long"),
+  barcode: z.string().max(50, "Barcode is too long").optional(),
+  weight: z
+    .string()
+    .regex(/^\d*\.?\d+$/, "Invalid weight")
+    .optional(),
+  dimensions: dimensionSchema,
+  hasVariations: z.boolean().default(false),
+  variations: z.array(variationSchema).optional(),
+  images: z.array(z.instanceof(File)).optional(),
+  imageUrls: z.array(z.string()).optional(),
+  tags: z.array(z.string().max(20, "Tag is too long")).optional(),
+});
+
+export type ProductFormData = z.infer<typeof productFormSchema>;
+
 
 
 
