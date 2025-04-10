@@ -199,7 +199,8 @@ export const productFormSchema = z.object({
     .regex(/^\d*\.?\d+$/, "Invalid weight")
     .optional(),
   dimensions: dimensionSchema,
-  hasVariations: z.boolean().default(false),
+  // This is the key change - ensure hasVariations is always required and is a boolean
+  hasVariations: z.boolean(),
   variations: z.array(variationSchema).optional(),
   images: z.array(z.instanceof(File)).optional(),
   imageUrls: z.array(z.string()).optional(),
@@ -207,8 +208,3 @@ export const productFormSchema = z.object({
 });
 
 export type ProductFormData = z.infer<typeof productFormSchema>;
-
-
-
-
-
