@@ -1,1 +1,1 @@
-1) create oauth error page 
+1) comeback to look at the add produxt modal and also the schema related to it                                                                               

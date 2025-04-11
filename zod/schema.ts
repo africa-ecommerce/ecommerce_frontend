@@ -151,60 +151,110 @@ export const supplierInfoSchema = z.object({
 });
 
 
-const dimensionSchema = z
-  .object({
-    length: z.string(),
-    width: z.string(),
-    height: z.string(),
-  })
-  .partial()
-  .refine(
-    (data) => {
-      return Object.values(data).some((val) => val !== "");
-    },
-    {
-      message: "At least one dimension is required",
-    }
-  );
+// const dimensionSchema = z
+//   .object({
+//     length: z.string(),
+//     width: z.string(),
+//     height: z.string(),
+//   })
+//   .partial()
+//   .refine(
+//     (data) => {
+//       return Object.values(data).some((val) => val !== "");
+//     },
+//     {
+//       message: "At least one dimension is required",
+//     }
+//   );
+
+// const variationSchema = z.object({
+//   id: z.string(),
+//   size: z.string().optional(),
+//   color: z.string().optional(),
+//   stock: z.number().min(0, "Stock cannot be negative"),
+//   price: z.number().optional(),
+// });
+
+// // Main product schema
+// export const productFormSchema = z.object({
+//   name: z
+//     .string()
+//     .min(1, "Product name is required")
+//     .max(100, "Name is too long"),
+//   category: z.string().min(1, "Category is required"),
+//   description: z.string().max(1000, "Description is too long").optional(),
+//   price: z
+//     .string()
+//     .min(1, "Price is required")
+//     .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
+ 
+//   weight: z
+//     .string()
+//     .regex(/^\d*\.?\d+$/, "Invalid weight")
+//     .optional(),
+//   dimensions: dimensionSchema.optional(),
+//   // This is the key change - ensure hasVariations is always required and is a boolean
+//   hasVariations: z.boolean(),
+//   variations: z.array(variationSchema).optional(),
+//   images: z.array(z.instanceof(File)),
+//   imageUrls: z.array(z.string()),
+//   tags: z.array(z.string().max(20, "Tag is too long")).optional(),
+// });
+
+// export type ProductFormData = z.infer<typeof productFormSchema>;
 
 const variationSchema = z.object({
   id: z.string(),
   size: z.string().optional(),
   color: z.string().optional(),
-  sku: z.string().min(1, "SKU is required"),
   stock: z.number().min(0, "Stock cannot be negative"),
   price: z.number().optional(),
 });
 
+// Define your dimension schema
+const dimensionSchema = z
+  .object({
+    length: z.string().optional(),
+    width: z.string().optional(),
+    height: z.string().optional(),
+  })
+  
 // Main product schema
-export const productFormSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Product name is required")
-    .max(100, "Name is too long"),
-  category: z.string().min(1, "Category is required"),
-  description: z.string().max(1000, "Description is too long").optional(),
-  basePrice: z
-    .string()
-    .min(1, "Price is required")
-    .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
-  salePrice: z
-    .string()
-    .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format")
-    .optional(),
-  sku: z.string().min(1, "SKU is required").max(50, "SKU is too long"),
-  barcode: z.string().max(50, "Barcode is too long").optional(),
-  weight: z
-    .string()
-    .regex(/^\d*\.?\d+$/, "Invalid weight")
-    .optional(),
-  dimensions: dimensionSchema,
-  // This is the key change - ensure hasVariations is always required and is a boolean
-  hasVariations: z.boolean(),
-  variations: z.array(variationSchema).optional(),
-  images: z.array(z.instanceof(File)).optional(),
-  imageUrls: z.array(z.string()).optional(),
-  tags: z.array(z.string().max(20, "Tag is too long")).optional(),
-});
+export const productFormSchema = z
+  .object({
+    name: z.string().min(1).max(100),
+    category: z.string().min(1),
+    description: z.string().max(1000).optional(),
+    price: z
+      .string()
+      .min(1, "Price is required")
+      .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
+    weight: z.string().optional(),
+    dimensions: dimensionSchema.optional(),
+    hasVariations: z.boolean(),
+    variations: z.array(variationSchema),
+    images: z.array(z.instanceof(File)),
+    imageUrls: z.array(z.string()),
+    tags: z.array(z.string().max(20)),
+  })
+  .refine(
+    (data) => {
+      if (data.hasVariations) {
+        return (
+          data.variations.length > 0 &&
+          data.variations.every(
+            (v) =>
+              v.size && v.color && typeof v.stock === "number" && v.stock >= 0
+          )
+        );
+      }
+      return true;
+    },
+    {
+      message: "Please add at least one complete variation",
+      path: ["variations"],
+    }
+  );
 
+// Export the type that exactly matches the schema
 export type ProductFormData = z.infer<typeof productFormSchema>;

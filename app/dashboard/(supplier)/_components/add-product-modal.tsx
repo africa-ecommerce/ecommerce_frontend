@@ -88,6 +88,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { productFormSchema, ProductFormData } from "@/zod/schema";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
+import { z } from "zod";
 
 export function AddProductModal({
   open,
@@ -105,10 +106,24 @@ export function AddProductModal({
   // Define all hooks at the top level, not conditionally
   const addProduct = async (data: ProductFormData) => {
     try {
-      const response = await fetch("/api/product", {
+      console.log("posted data", data);
+
+      const formData = new FormData();
+
+      // 2. Append the images
+      data.images.forEach((file: File) => {
+        formData.append("images", file);
+      });
+
+      // 3. Append all other form data as JSON
+      const { images, imageUrls, ...jsonData } = data;
+      formData.append("productData", JSON.stringify(jsonData));
+      console.log("formData", formData);
+
+      // 4. Send with FormData
+      const response = await fetch("/api/products", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: formData,
       });
 
       const result = await response.json();
@@ -126,11 +141,22 @@ export function AddProductModal({
       return null;
     }
   };
+
   const {
-    form: { register, submit, errors, setValue, isSubmitting, watch },
-  } = useFormResolver<ProductFormData>(addProduct, productFormSchema, () =>
-    onOpenChange(false)
-  );
+  form: { register, submit, errors, setValue, isSubmitting, watch },
+} = useFormResolver<ProductFormData>(
+  addProduct,
+  productFormSchema,
+  () => {
+    onOpenChange(false);
+    setCurrentStep(0);
+  },
+  {
+    hasVariations: false,
+    variations: [],
+    tags: [],
+  }
+);
 
   const formData = watch();
 
@@ -173,15 +199,27 @@ export function AddProductModal({
   }, [open]); // Added open as a dependency
 
   const handleFiles = (files: FileList) => {
-    const imageFiles = Array.from(files).filter((file) =>
-      file.type.startsWith("image/")
+    const currentImages = formData.images || [];
+    const newFiles = Array.from(files).filter(
+      (file) =>
+        (file.type === "image/jpeg" || file.type === "image/png") &&
+        file.size <= 5 * 1024 * 1024 // 5MB
     );
-    if (imageFiles.length === 0) return;
 
-    const newImages = [...(formData.images || []), ...imageFiles];
+    if (newFiles.length === 0) {
+      errorToast("Only JPG/PNG images under 5MB allowed");
+      return;
+    }
+
+    if (currentImages.length + newFiles.length > 5) {
+      errorToast("Maximum 5 images allowed");
+      newFiles.splice(5 - currentImages.length);
+    }
+
+    const newImages = [...currentImages, ...newFiles];
     const newImageUrls = [
       ...(formData.imageUrls || []),
-      ...imageFiles.map((file) => URL.createObjectURL(file)),
+      ...newFiles.map((file) => URL.createObjectURL(file)),
     ];
 
     setValue("images", newImages);
@@ -211,7 +249,7 @@ export function AddProductModal({
       id: `var-${Date.now()}`,
       size: "",
       color: "",
-      sku: `${formData.sku}-${(formData.variations?.length || 0) + 1}`,
+
       stock: 0,
     };
 
@@ -287,52 +325,104 @@ export function AddProductModal({
     { id: "review", title: "Review" },
   ];
 
-  const isStepValid = () => {
-    switch (currentStep) {
-      case 0:
-        return !!formData.category && !errors.category;
-      case 1:
-        return (
-          !!formData.name &&
-          !!formData.basePrice &&
-          !errors.name &&
-          !errors.basePrice
-        );
-      case 2:
-        if (!formData.hasVariations) return true;
-        return (
-          (formData.variations?.length || 0) > 0 &&
-          formData.variations?.every((v) => !!v.sku && v.stock >= 0) &&
-          !errors.variations
-        );
-      case 3:
-        return true;
-      case 4:
-        return true;
-      default:
-        return false;
-    }
-  };
+  // Custom validation function for step 2
+  
 
+  // Change the isStepValid function to properly handle the hasVariations check
+const isStepValid = () => {
+  switch (currentStep) {
+    case 0:
+      return !!formData.category && !errors.category;
+    case 1:
+      // Check price is valid (not negative and matches the required format)
+      const priceValue = formData.price;
+      const isPriceValid =
+        !!priceValue &&
+        !errors.price &&
+        /^\d+(\.\d{1,2})?$/.test(priceValue) &&
+        parseFloat(priceValue) >= 0;
+
+      return !!formData.name && isPriceValid && !errors.name;
+    case 2:
+      // If hasVariations is false, this step is always valid
+      if (!formData.hasVariations) return true;
+
+      // If variations are needed but none exist, it's invalid
+      if (!formData.variations || formData.variations.length === 0) {
+        return false;
+      }
+
+      // Check that each variation has both size and color, and a valid stock
+      return formData.variations.every(
+        (v) =>
+          !!v.size && 
+          !!v.color && 
+          typeof v.stock === "number" &&
+          v.stock >= 0
+      );
+    case 3:
+      // At least one image is required
+      return (
+        (formData.images?.length > 0 || formData.imageUrls?.length > 0) &&
+        !errors.images
+      );
+    case 4:
+      // For the review step, make the validation conditional on hasVariations
+      const baseValidation = 
+        !!formData.category &&
+        !!formData.name &&
+        !!formData.price &&
+        !errors.price &&
+        ((formData.images && formData.images.length > 0) ||
+         (formData.imageUrls && formData.imageUrls.length > 0));
+         
+      // Only check variations if hasVariations is true
+      if (formData.hasVariations) {
+        return baseValidation && 
+               formData.variations && 
+               formData.variations.length > 0 &&
+               formData.variations.every(
+                 v => !!v.size && !!v.color && typeof v.stock === "number" && v.stock >= 0
+               );
+      }
+      
+      return baseValidation;
+    default:
+      return false;
+  }
+};
+
+// Update the handleSubmit function to properly handle the form submission
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  // If hasVariations is false, make sure variations is an empty array
+  if (!formData.hasVariations) {
+    setValue("variations", []);
+  }
+  
+  // Now we can submit the form
+  await submit(e);
+};
   // If modal is not open, render nothing but ensure hooks are called
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center">
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-sm md:items-center">
       <motion.div
         initial={{ y: "100%" }}
         animate={{ y: open ? 0 : "100%" }}
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        className="relative flex h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-background shadow-xl sm:h-[85vh] sm:max-h-[700px] sm:w-[95vw] sm:max-w-2xl sm:rounded-lg"
+        className="relative flex h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-background shadow-xl md:h-[85vh] md:max-h-[700px] md:w-[95vw] md:max-w-2xl md:rounded-lg"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header with swipe indicator for mobile */}
         <div className="sticky top-0 z-10 bg-background">
-          <div className="flex justify-center py-2 sm:hidden">
+          <div className="flex justify-center py-2 md:hidden">
             <div className="h-1 w-10 rounded-full bg-muted-foreground/30"></div>
           </div>
-          <div className="flex items-center justify-between border-b px-4 py-3 sm:px-6">
+          <div className="flex items-center justify-between border-b px-4 py-3 md:px-6">
             <div className="flex items-center gap-2">
               {currentStep > 0 && (
                 <Button
@@ -360,7 +450,7 @@ export function AddProductModal({
         </div>
 
         {/* Progress indicator - simplified for mobile */}
-        <div className="sticky top-[60px] z-10 border-b bg-background px-4 py-2 sm:px-6">
+        <div className="sticky top-[60px] z-10 border-b bg-background px-4 py-2 md:px-6">
           <div className="relative flex items-center justify-between">
             <div className="absolute left-0 right-0 top-1/2 h-[2px] bg-muted">
               <div
@@ -371,9 +461,9 @@ export function AddProductModal({
               />
             </div>
             {steps.map((step, index) => (
-              <button
+              <div
                 key={step.id}
-                onClick={() => setCurrentStep(index)}
+                // onClick={() => setCurrentStep(index)}
                 className={cn(
                   "relative z-10 flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium transition-colors",
                   index < currentStep
@@ -389,10 +479,10 @@ export function AddProductModal({
                   index + 1
                 )}
                 <span className="sr-only">{step.title}</span>
-              </button>
+              </div>
             ))}
           </div>
-          <p className="mt-1 text-center text-xs font-medium text-muted-foreground sm:hidden">
+          <p className="mt-1 text-center text-xs font-medium text-muted-foreground md:hidden">
             {steps[currentStep].title}
           </p>
         </div>
@@ -409,7 +499,7 @@ export function AddProductModal({
                 animate="center"
                 exit="exit"
                 transition={{ type: "tween", duration: 0.3 }}
-                className="h-full p-4 sm:p-6"
+                className="h-full p-4 md:p-6"
               >
                 {/* Step 1: Category - Improved mobile layout */}
                 {currentStep === 0 && (
@@ -424,7 +514,7 @@ export function AddProductModal({
                         <SelectTrigger id="category" className="h-12 text-base">
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="z-[200]">
                           <SelectItem value="skincare" className="text-base">
                             Skincare
                           </SelectItem>
@@ -445,11 +535,6 @@ export function AddProductModal({
                           </SelectItem>
                         </SelectContent>
                       </Select>
-                      {errors.category && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {errors.category.message}
-                        </p>
-                      )}
                     </div>
 
                     {formData.category && (
@@ -481,6 +566,7 @@ export function AddProductModal({
                         id="name"
                         {...register("name")}
                         placeholder="e.g. Shea Butter Moisturizer"
+                        maxLength={100}
                         className="h-12 text-base"
                       />
                       {errors.name && (
@@ -492,12 +578,19 @@ export function AddProductModal({
 
                     <div className="space-y-3">
                       <Label htmlFor="description">Description</Label>
-                      <Textarea
-                        id="description"
-                        {...register("description")}
-                        placeholder="Describe your product..."
-                        className="min-h-[120px] text-base"
-                      />
+                      <div className="relative">
+                        <Textarea
+                          id="description"
+                          {...register("description")}
+                          placeholder="Describe your product..."
+                          className="min-h-[120px] text-base"
+                          maxLength={1000}
+                        />
+                        {/* Character counter */}
+                        <div className="absolute bottom-2 right-2 text-sm text-muted-foreground">
+                          {formData.description?.length || 0}/1000
+                        </div>
+                      </div>
                       {errors.description && (
                         <p className="text-xs text-red-500 mt-1">
                           {errors.description.message}
@@ -507,49 +600,18 @@ export function AddProductModal({
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-3">
-                        <Label htmlFor="basePrice">Price (₦)</Label>
+                        <Label htmlFor="price">Price (₦)</Label>
                         <Input
-                          id="basePrice"
+                          id="price"
                           type="number"
-                          {...register("basePrice")}
+                          min="1"
+                          {...register("price")}
                           placeholder="0.00"
                           className="h-12 text-base"
                         />
-                        {errors.basePrice && (
+                        {errors.price && (
                           <p className="text-xs text-red-500 mt-1">
-                            {errors.basePrice.message}
-                          </p>
-                        )}
-                      </div>
-                      <div className="space-y-3">
-                        <Label htmlFor="salePrice">Sale Price (₦)</Label>
-                        <Input
-                          id="salePrice"
-                          type="number"
-                          {...register("salePrice")}
-                          placeholder="0.00"
-                          className="h-12 text-base"
-                        />
-                        {errors.salePrice && (
-                          <p className="text-xs text-red-500 mt-1">
-                            {errors.salePrice.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-3">
-                        <Label htmlFor="sku">SKU</Label>
-                        <Input
-                          id="sku"
-                          {...register("sku")}
-                          placeholder="e.g. SB-250"
-                          className="h-12 text-base"
-                        />
-                        {errors.sku && (
-                          <p className="text-xs text-red-500 mt-1">
-                            {errors.sku.message}
+                            {errors.price.message}
                           </p>
                         )}
                       </div>
@@ -562,11 +624,6 @@ export function AddProductModal({
                           placeholder="e.g. 250"
                           className="h-12 text-base"
                         />
-                        {errors.weight && (
-                          <p className="text-xs text-red-500 mt-1">
-                            {errors.weight.message}
-                          </p>
-                        )}
                       </div>
                     </div>
 
@@ -589,14 +646,6 @@ export function AddProductModal({
                           className="h-12 text-base"
                         />
                       </div>
-                      {(errors.dimensions?.length ||
-                        errors.dimensions?.width ||
-                        errors.dimensions?.height) && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {errors.dimensions?.message ||
-                            "At least one dimension is required"}
-                        </p>
-                      )}
                     </div>
 
                     <div className="space-y-3">
@@ -621,6 +670,7 @@ export function AddProductModal({
                       <div className="flex gap-2">
                         <Input
                           placeholder="Add tag"
+                          maxLength={20}
                           value={newTag}
                           onChange={(e) => setNewTag(e.target.value)}
                           onKeyDown={(e) => e.key === "Enter" && addTag()}
@@ -704,7 +754,7 @@ export function AddProductModal({
                                 <Trash2 className="h-5 w-5" />
                               </Button>
                             </div>
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                               <div className="space-y-3">
                                 <Label htmlFor={`size-${index}`}>Size</Label>
                                 <Input
@@ -737,22 +787,7 @@ export function AddProductModal({
                                   className="h-12 text-base"
                                 />
                               </div>
-                              <div className="space-y-3">
-                                <Label htmlFor={`sku-${index}`}>SKU</Label>
-                                <Input
-                                  id={`sku-${index}`}
-                                  placeholder="e.g. SB-250-RED"
-                                  value={variation.sku}
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "sku",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                />
-                              </div>
+
                               <div className="space-y-3">
                                 <Label htmlFor={`stock-${index}`}>Stock</Label>
                                 <Input
@@ -783,6 +818,9 @@ export function AddProductModal({
                   <div className="space-y-6">
                     <div className="space-y-3">
                       <Label>Product Images</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Max 5 images (5MB each) - JPG, PNG only
+                      </p>
                       <div
                         ref={dropAreaRef}
                         className="flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-muted-foreground/30 bg-muted/30 p-6 text-center transition-colors hover:border-primary hover:bg-muted/50"
@@ -791,7 +829,7 @@ export function AddProductModal({
                         <input
                           ref={fileInputRef}
                           type="file"
-                          accept="image/*"
+                          accept="image/jpeg, image/png"
                           multiple
                           className="hidden"
                           onChange={handleFileInputChange}
@@ -821,7 +859,7 @@ export function AddProductModal({
                         <Label>
                           Uploaded Images ({formData.imageUrls?.length})
                         </Label>
-                        <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                        <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
                           {formData.imageUrls?.map((url, index) => (
                             <div
                               key={index}
@@ -867,7 +905,7 @@ export function AddProductModal({
                         <h4 className="mb-3 text-sm font-medium">
                           Basic Information
                         </h4>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="grid gap-4 grid-cols-2">
                           <div>
                             <p className="text-sm text-muted-foreground">
                               Name
@@ -884,19 +922,20 @@ export function AddProductModal({
                               {formData.category || "-"}
                             </p>
                           </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">
-                              Description
-                            </p>
-                            <p className="font-medium">
-                              {formData.description ? (
-                                formData.description
-                              ) : (
-                                <span className="text-muted-foreground">
-                                  No description
-                                </span>
-                              )}
-                            </p>
+                          <div className="col-span-2 w-full">
+                            {" "}
+                            {/* Span full width on medium+ screens */}
+                            <div className="rounded-xl border bg-muted/30 w-full p-5">
+                              <h4 className="mb-3 text-sm font-medium">
+                                Description
+                              </h4>
+                              <ScrollArea className="h-[200px] w-full rounded-md border p-2">
+                                <p className="text-muted-foreground whitespace-pre-line break-words">
+                                  {formData.description ||
+                                    "No description provided"}
+                                </p>
+                              </ScrollArea>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -905,29 +944,16 @@ export function AddProductModal({
                         <h4 className="mb-3 text-sm font-medium">
                           Pricing & Inventory
                         </h4>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div className="grid gap-4 grid-cols-2">
                           <div>
                             <p className="text-sm text-muted-foreground">
-                              Base Price
+                              Price
                             </p>
                             <p className="font-medium">
-                              ₦{formData.basePrice || "0.00"}
+                              ₦{formData.price || "0.00"}
                             </p>
                           </div>
-                          {formData.salePrice && (
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Sale Price
-                              </p>
-                              <p className="font-medium">
-                                ₦{formData.salePrice}
-                              </p>
-                            </div>
-                          )}
-                          <div>
-                            <p className="text-sm text-muted-foreground">SKU</p>
-                            <p className="font-medium">{formData.sku || "-"}</p>
-                          </div>
+
                           <div>
                             <p className="text-sm text-muted-foreground">
                               Weight
@@ -964,14 +990,7 @@ export function AddProductModal({
                                           : `Variation ${index + 1}`}
                                       </p>
                                     </div>
-                                    <div>
-                                      <p className="text-sm text-muted-foreground">
-                                        SKU
-                                      </p>
-                                      <p className="font-medium">
-                                        {variation.sku}
-                                      </p>
-                                    </div>
+
                                     <div>
                                       <p className="text-sm text-muted-foreground">
                                         Stock
@@ -987,7 +1006,7 @@ export function AddProductModal({
                                       <p className="font-medium">
                                         ₦
                                         {variation.price ||
-                                          formData.basePrice ||
+                                          formData.price ||
                                           "0.00"}
                                       </p>
                                     </div>
@@ -1003,7 +1022,7 @@ export function AddProductModal({
                           <h4 className="mb-3 text-sm font-medium">
                             Images ({formData.imageUrls?.length})
                           </h4>
-                          <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                          <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
                             {formData.imageUrls?.map((url, index) => (
                               <div
                                 key={index}
@@ -1028,42 +1047,32 @@ export function AddProductModal({
         </ScrollArea>
 
         {/* Footer with floating action on mobile */}
-        <div className="sticky bottom-0 border-t bg-background/95 p-4 backdrop-blur-sm sm:p-6">
+        <div className="sticky bottom-0 border-t bg-background/95 p-4 backdrop-blur-sm md:p-6">
           <div className="flex items-center justify-between gap-3">
             <Button
               variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="flex-1 sm:flex-none"
+              onClick={() => goToPreviousStep()}
+              className=""
               type="button"
             >
-              Cancel
+              Back
             </Button>
             <div className="flex items-center gap-3">
-              {currentStep > 0 && (
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={goToPreviousStep}
-                  className="h-11 w-11 rounded-full sm:hidden"
-                  type="button"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </Button>
-              )}
               {currentStep < steps.length - 1 ? (
                 <Button
                   onClick={goToNextStep}
                   disabled={!isStepValid()}
-                  className="flex-1 sm:flex-none"
+                  className="flex-1 md:flex-none"
                   type="button"
                 >
                   Continue <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               ) : (
                 <Button
-                  onClick={submit}
+                  onClick={handleSubmit}
                   disabled={isSubmitting}
-                  className="flex-1 sm:flex-none"
+                  className="flex-1 md:flex-none"
+                   type="button"
                 >
                   {isSubmitting ? (
                     <>
@@ -1071,7 +1080,7 @@ export function AddProductModal({
                       Saving...
                     </>
                   ) : (
-                    "Save Product"
+                    "Add Product"
                   )}
                 </Button>
               )}
