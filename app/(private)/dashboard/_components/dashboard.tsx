@@ -363,16 +363,21 @@
 //   )
 // }
 
+"use client";
 
-import React from 'react'
-import PlugDashboard from './plug-dashboard'
+import React from "react";
+import PlugDashboard from "../(plug)/_components/plug-dashboard";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import SupplierDashboard from "../(supplier)/_components/supplier-dashboard";
 
-const page = () => {
+const Dashboard = () => {
+  const { user } = useCurrentUser();
+
   return (
     <div>
-      <PlugDashboard/>
+      {user?.userType === "PLUG" ? <PlugDashboard /> : <SupplierDashboard />}
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default Dashboard;

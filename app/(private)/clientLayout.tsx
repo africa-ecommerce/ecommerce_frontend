@@ -13,15 +13,16 @@ import {
   Settings,
   HelpCircle,
   PackageOpen,
+  Package,
+  CircleEllipsis,
   Boxes,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ShoppingCartProvider } from "../_components/provider/shoppingCartProvider";
 import { GlobalLoadingIndicatorAdvanced } from "@/components/ui/loading-indicator-advanced";
 import ThemeWrapper from "../themeWrapper";
 
 interface NavItemProps {
-  href: string;
+  href?: string;
   icon: React.ReactNode;
   label?: string;
   isActive: boolean;
@@ -39,7 +40,7 @@ function NavItem({
 }: NavItemProps) {
   return (
     <Link
-      href={href}
+      href={href || ""}
       className={cn(
         "w-full flex",
         compact ? "flex-col items-center" : "items-center px-4 py-3 gap-3"
@@ -82,6 +83,11 @@ function NavItem({
   );
 }
 
+// Helper function to check if path starts with a pattern
+const isPathActive = (pathname: string, pattern: string) => {
+  return pathname.startsWith(pattern);
+};
+
 interface DesktopNavigationProps {
   pathname: string;
   userType: "PLUG" | "SUPPLIER";
@@ -92,36 +98,36 @@ function DesktopNavigation({ pathname, userType }: DesktopNavigationProps) {
   return (
     <div className="hidden md:flex fixed left-0 top-0 bottom-0 w-32 border-r bg-background z-40 flex-col">
       <div className="p-4 flex items-center border-b h-16" />
-      
+
       {userType === "PLUG" ? (
         <>
           <div className="flex flex-col p-3 gap-5 flex-grow overflow-y-auto">
             <NavItem
               href="/dashboard"
               icon={<Home className="w-5 h-5" />}
-              isActive={pathname === "/dashboard"}
+              isActive={isPathActive(pathname, "/dashboard")}
+            />
+            <NavItem
+              href="/marketplace"
+              icon={<LayoutGrid className="w-5 h-5" />}
+              isActive={isPathActive(pathname, "/marketplace")}
             />
             <NavItem
               href="/dashboard/store"
               icon={<Store className="w-5 h-5" />}
-              isActive={pathname === "/dashboard/store"}
+              isActive={isPathActive(pathname, "/dashboard/store")}
             />
+
             <NavItem
-              href="/dashboard/marketplace"
-              icon={<LayoutGrid className="w-5 h-5" />}
-              isActive={pathname === "/dashboard/marketplace"}
-            />
-            <NavItem
-              href="/dashboard/analytics"
-              icon={<ChartNoAxesCombined className="w-5 h-5" />}
-              isActive={pathname === "/dashboard/analytics"}
+              href="/dashboard/products"
+              icon={<Package className="w-5 h-5" />}
+              isActive={isPathActive(pathname, "/dashboard/products")}
             />
           </div>
           <div className="mt-auto border-t p-3">
             <NavItem
-              href="/dashboard/profile"
-              icon={<User className="w-5 h-5" />}
-              isActive={pathname === "/dashboard/profile"}
+              icon={<CircleEllipsis className="w-5 h-5" />}
+              isActive={isPathActive(pathname, "/dashboard/profile")}
             />
           </div>
         </>
@@ -131,29 +137,28 @@ function DesktopNavigation({ pathname, userType }: DesktopNavigationProps) {
             <NavItem
               href="/dashboard"
               icon={<Home className="w-5 h-5" />}
-              isActive={pathname === "/dashboard"}
+              isActive={isPathActive(pathname, "/dashboard")}
+            />
+            <NavItem
+              href="/marketplace"
+              icon={<LayoutGrid className="w-5 h-5" />}
+              isActive={isPathActive(pathname, "/marketplace")}
             />
             <NavItem
               href="/dashboard/order"
               icon={<PackageOpen className="w-5 h-5" />}
-              isActive={pathname === "/dashboard/order"}
+              isActive={isPathActive(pathname, "/dashboard/order")}
             />
             <NavItem
               href="/dashboard/inventory"
               icon={<Boxes className="w-5 h-5" />}
-              isActive={pathname === "/dashboard/inventory"}
-            />
-            <NavItem
-              href="/dashboard/analytics"
-              icon={<ChartNoAxesCombined className="w-5 h-5" />}
-              isActive={pathname === "/dashboard/analytics"}
+              isActive={isPathActive(pathname, "/dashboard/inventory")}
             />
           </div>
           <div className="mt-auto border-t p-3">
             <NavItem
-              href="/dashboard/profile"
-              icon={<User className="w-5 h-5" />}
-              isActive={pathname === "/dashboard/profile"}
+              icon={<CircleEllipsis className="w-5 h-5" />}
+              isActive={isPathActive(pathname, "/dashboard/profile")}
             />
           </div>
         </>
@@ -186,35 +191,36 @@ function MobileNavigation({ pathname, userType }: MobileNavigationProps) {
               href="/dashboard"
               icon={<Home className="w-5 h-5" />}
               label="Dashboard"
-              isActive={pathname === "/dashboard"}
+              isActive={isPathActive(pathname, "/dashboard")}
+              compact
+            />
+
+            <NavItem
+              href="/marketplace"
+              icon={<LayoutGrid className="w-5 h-5" />}
+              label="Marketplace"
+              isActive={isPathActive(pathname, "/marketplace")}
               compact
             />
             <NavItem
               href="/dashboard/store"
               icon={<Store className="w-5 h-5" />}
               label="Store"
-              isActive={pathname === "/dashboard/store"}
+              isActive={isPathActive(pathname, "/dashboard/store")}
+              compact
+            />
+
+            <NavItem
+              href="/dashboard/products"
+              icon={<Package className="w-5 h-5" />}
+              label="Products"
+              isActive={isPathActive(pathname, "/dashboard/products")}
               compact
             />
             <NavItem
-              href="/dashboard/marketplace"
-              icon={<LayoutGrid className="w-5 h-5" />}
-              label="Marketplace"
-              isActive={pathname === "/dashboard/marketplace"}
-              compact
-            />
-            <NavItem
-              href="/dashboard/analytics"
-              icon={<ChartNoAxesCombined className="w-5 h-5" />}
-              label="Analytics"
-              isActive={pathname === "/dashboard/analytics"}
-              compact
-            />
-            <NavItem
-              href="/dashboard/profile"
-              icon={<User className="w-5 h-5" />}
-              label="Profile"
-              isActive={pathname === "/dashboard/profile"}
+              icon={<CircleEllipsis className="w-5 h-5" />}
+              label="More"
+              isActive={isPathActive(pathname, "/dashboard/profile")}
               compact
             />
           </>
@@ -224,35 +230,35 @@ function MobileNavigation({ pathname, userType }: MobileNavigationProps) {
               href="/dashboard"
               icon={<Home className="w-5 h-5" />}
               label="Dashboard"
-              isActive={pathname === "/dashboard"}
+              isActive={isPathActive(pathname, "/dashboard")}
+              compact
+            />
+            <NavItem
+              href="/marketplace"
+              icon={<LayoutGrid className="w-5 h-5" />}
+              label="Marketplace"
+              isActive={isPathActive(pathname, "/marketplace")}
               compact
             />
             <NavItem
               href="/dashboard/order"
               icon={<PackageOpen className="w-5 h-5" />}
               label="Order"
-              isActive={pathname === "/dashboard/order"}
+              isActive={isPathActive(pathname, "/dashboard/order")}
               compact
             />
             <NavItem
               href="/dashboard/inventory"
               icon={<Boxes className="w-5 h-5" />}
               label="Inventory"
-              isActive={pathname === "/dashboard/inventory"}
+              isActive={isPathActive(pathname, "/dashboard/inventory")}
               compact
             />
             <NavItem
-              href="/dashboard/analytics"
-              icon={<ChartNoAxesCombined className="w-5 h-5" />}
-              label="Analytics"
-              isActive={pathname === "/dashboard/analytics"}
-              compact
-            />
-            <NavItem
-              href="/dashboard/profile"
-              icon={<User className="w-5 h-5" />}
-              label="Profile"
-              isActive={pathname === "/dashboard/profile"}
+             
+              icon={<CircleEllipsis className="w-5 h-5" />}
+              label="More"
+              isActive={isPathActive(pathname, "/dashboard/profile")}
               compact
             />
           </>
@@ -273,15 +279,25 @@ export default function ClientLayout({
 }: ClientLayoutProps) {
   const pathname = usePathname();
 
-  const excludedPaths = [
-    "/checkout",
-    "/payment",
-    "/admin/*",
-    "/account/settings",
-    "/",
-    "/auth/*",
-    "/onboarding/*",
-  ];
+  // const excludedPaths = [
+  //   "/checkout",
+  //   "/payment",
+  //   "/admin/*",
+  //   "/account/settings",
+  //   "/",
+  //   "/auth/*",
+  //   "/onboarding/*",
+  // ];
+
+  // // Enhanced path matching for excluded paths
+  // const isExcludedPath = excludedPaths.some(path => {
+  //   // Handle paths with wildcards
+  //   if (path.endsWith('/*')) {
+  //     const basePath = path.replace('/*', '');
+  //     return pathname.startsWith(basePath);
+  //   }
+  //   return pathname === path;
+  // });
 
   return (
     <ThemeWrapper>
@@ -298,9 +314,9 @@ export default function ClientLayout({
                 </div>
               }
             >
-              <ShoppingCartProvider excludePaths={excludedPaths}>
+              {/* <ShoppingCartProvider excludePaths={isExcludedPath ? [pathname] : []}> */}
                 {children}
-              </ShoppingCartProvider>
+              {/* </ShoppingCartProvider> */}
             </Suspense>
           </main>
         </div>
