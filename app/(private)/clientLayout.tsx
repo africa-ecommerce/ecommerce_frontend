@@ -85,7 +85,17 @@ function NavItem({
 
 // Helper function to check if path starts with a pattern
 const isPathActive = (pathname: string, pattern: string) => {
-  return pathname.startsWith(pattern);
+  // Special case for dashboard root
+  if (pattern === "/dashboard") {
+    return pathname === "/dashboard";
+  }
+  
+  // For all other patterns, check if path starts with pattern
+  // and either it's an exact match or the next character is a slash
+  return (
+    pathname === pattern ||
+    pathname.startsWith(pattern + "/")
+  );
 };
 
 interface DesktopNavigationProps {

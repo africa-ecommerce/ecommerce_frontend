@@ -206,36 +206,35 @@ export default function Inventory() {
   }
 
   const getStockStatusBadge = (status: string) => {
-    switch (status) {
-      case "out-of-stock":
-        return (
-          <Badge variant="destructive" className="text-xs py-0 px-2">
-            Out of Stock
-          </Badge>
-        )
-      case "low-stock":
-        return (
-          <Badge
-            variant="outline"
-            className="text-xs py-0 px-2 text-amber-500 border-amber-200 bg-amber-50"
-          >
-            Low Stock
-          </Badge>
-        )
-      case "optimal":
-        return (
-          <Badge
-            variant="outline"
-            className="text-xs py-0 px-2 text-green-500 border-green-200 bg-green-50"
-          >
-            In Stock
-          </Badge>
-        )
-      default:
-        return null
-    }
+  switch (status) {
+    case "out-of-stock":
+      return (
+        <Badge variant="destructive" className="text-xs py-0 px-2 whitespace-nowrap">
+          Out of Stock
+        </Badge>
+      )
+    case "low-stock":
+      return (
+        <Badge
+          variant="outline"
+          className="text-xs py-0 px-2 text-amber-500 border-amber-200 bg-amber-50 whitespace-nowrap"
+        >
+          Low Stock
+        </Badge>
+      )
+    case "optimal":
+      return (
+        <Badge
+          variant="outline"
+          className="text-xs py-0 px-2 text-green-500 border-green-200 bg-green-50 whitespace-nowrap"
+        >
+          In Stock
+        </Badge>
+      )
+    default:
+      return null
   }
-
+}
   const getTrendIcon = (trend: "up" | "down" | "stable") => {
     switch (trend) {
       case "up":
@@ -298,7 +297,9 @@ export default function Inventory() {
               className="h-7 max-w-[360px]:h-6 w-7 max-w-[360px]:w-6 sm:h-8 sm:w-8 md:h-9 md:w-9"
             >
               <RefreshCw
-                className={`h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 ${refreshing ? "animate-spin" : ""}`}
+                className={`h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 ${
+                  refreshing ? "animate-spin" : ""
+                }`}
               />
               <span className="sr-only">Refresh</span>
             </Button>
@@ -366,15 +367,22 @@ export default function Inventory() {
                     <h3 className="text-sm font-medium">Quick Filters</h3>
                     <div className="grid grid-cols-2 gap-2">
                       <Button
-                        variant={selectedFilter === "out-of-stock" ? "default" : "outline"}
+                        variant={
+                          selectedFilter === "out-of-stock"
+                            ? "default"
+                            : "outline"
+                        }
                         size="sm"
                         onClick={() => setSelectedFilter("out-of-stock")}
                         className="justify-start text-xs"
                       >
-                        <AlertCircle className="h-3.5 w-3.5 mr-2" /> Out of Stock
+                        <AlertCircle className="h-3.5 w-3.5 mr-2" /> Out of
+                        Stock
                       </Button>
                       <Button
-                        variant={selectedFilter === "low-stock" ? "default" : "outline"}
+                        variant={
+                          selectedFilter === "low-stock" ? "default" : "outline"
+                        }
                         size="sm"
                         onClick={() => setSelectedFilter("low-stock")}
                         className="justify-start text-xs"
@@ -382,15 +390,20 @@ export default function Inventory() {
                         <AlertCircle className="h-3.5 w-3.5 mr-2" /> Low Stock
                       </Button>
                       <Button
-                        variant={selectedFilter === "optimal" ? "default" : "outline"}
+                        variant={
+                          selectedFilter === "optimal" ? "default" : "outline"
+                        }
                         size="sm"
                         onClick={() => setSelectedFilter("optimal")}
                         className="justify-start text-xs"
                       >
-                        <TrendingUp className="h-3.5 w-3.5 mr-2" /> Optimal Stock
+                        <TrendingUp className="h-3.5 w-3.5 mr-2" /> Optimal
+                        Stock
                       </Button>
                       <Button
-                        variant={selectedFilter === "all" ? "default" : "outline"}
+                        variant={
+                          selectedFilter === "all" ? "default" : "outline"
+                        }
                         size="sm"
                         onClick={() => setSelectedFilter("all")}
                         className="justify-start text-xs"
@@ -403,7 +416,11 @@ export default function Inventory() {
                     <h3 className="text-sm font-medium">Categories</h3>
                     <div className="grid grid-cols-2 gap-2">
                       <Button
-                        variant={selectedCategory === "Skincare" ? "default" : "outline"}
+                        variant={
+                          selectedCategory === "Skincare"
+                            ? "default"
+                            : "outline"
+                        }
                         size="sm"
                         onClick={() => setSelectedCategory("Skincare")}
                         className="justify-start text-xs"
@@ -411,7 +428,11 @@ export default function Inventory() {
                         Skincare
                       </Button>
                       <Button
-                        variant={selectedCategory === "Hair Care" ? "default" : "outline"}
+                        variant={
+                          selectedCategory === "Hair Care"
+                            ? "default"
+                            : "outline"
+                        }
                         size="sm"
                         onClick={() => setSelectedCategory("Hair Care")}
                         className="justify-start text-xs"
@@ -419,7 +440,11 @@ export default function Inventory() {
                         Hair Care
                       </Button>
                       <Button
-                        variant={selectedCategory === "Personal Care" ? "default" : "outline"}
+                        variant={
+                          selectedCategory === "Personal Care"
+                            ? "default"
+                            : "outline"
+                        }
                         size="sm"
                         onClick={() => setSelectedCategory("Personal Care")}
                         className="justify-start text-xs"
@@ -427,7 +452,9 @@ export default function Inventory() {
                         Personal Care
                       </Button>
                       <Button
-                        variant={selectedCategory === "all" ? "default" : "outline"}
+                        variant={
+                          selectedCategory === "all" ? "default" : "outline"
+                        }
                         size="sm"
                         onClick={() => setSelectedCategory("all")}
                         className="justify-start text-xs"
@@ -467,7 +494,6 @@ export default function Inventory() {
           </div>
 
           {/* Mobile Touch-Friendly Stats */}
-          
 
           {/* Tablet/Desktop Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -569,9 +595,7 @@ export default function Inventory() {
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex items-center justify-between">
-              
-            </div>
+            <div className="flex items-center justify-between"></div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -580,7 +604,8 @@ export default function Inventory() {
                 className="text-xs md:text-sm h-7 sm:h-8"
                 disabled={selectedItems.length === 0}
               >
-                <Sliders className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1" /> Bulk Update
+                <Sliders className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1" />{" "}
+                Bulk Update
               </Button>
               <Button
                 variant="outline"
@@ -589,20 +614,21 @@ export default function Inventory() {
                 className="text-xs md:text-sm h-7 sm:h-8"
                 disabled={selectedItems.length === 0}
               >
-                <Tag className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1" /> Promote
+                <Tag className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1" />{" "}
+                Promote
               </Button>
               <Button
                 size="sm"
                 onClick={() => setShowEnhancedAddProduct(true)}
                 className="text-xs md:text-sm h-7 sm:h-8"
               >
-                <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1" /> Add Product
+                <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1" />{" "}
+                Add Product
               </Button>
             </div>
           </div>
 
           {/* Mobile Add Button */}
-          
 
           {/* Filters and Search */}
           <div className="flex flex-col gap-2 max-w-[360px]:gap-1.5 sm:gap-3">
@@ -610,7 +636,9 @@ export default function Inventory() {
               <Search className="absolute left-2.5 max-w-[360px]:left-2 top-1/2 transform -translate-y-1/2 h-3.5 max-w-[360px]:h-3 w-3.5 max-w-[360px]:w-3 text-muted-foreground" />
               <Input
                 placeholder="Search products..."
-                className={`pl-8 max-w-[360px]:pl-7 pr-8 max-w-[360px]:pr-7 text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 transition-all ${isSearchFocused ? "border-primary ring-1 ring-primary" : ""}`}
+                className={`pl-8 max-w-[360px]:pl-7 pr-8 max-w-[360px]:pr-7 text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 transition-all ${
+                  isSearchFocused ? "border-primary ring-1 ring-primary" : ""
+                }`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
@@ -650,16 +678,29 @@ export default function Inventory() {
                       <label className="text-xs max-w-[360px]:text-[11px] font-medium">
                         Category
                       </label>
-                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <Select
+                        value={selectedCategory}
+                        onValueChange={setSelectedCategory}
+                      >
                         <SelectTrigger className="w-full text-xs h-8 max-w-[360px]:h-7">
                           <SelectValue placeholder="Category" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all" className="text-xs">All Categories</SelectItem>
-                          <SelectItem value="Skincare" className="text-xs">Skincare</SelectItem>
-                          <SelectItem value="Hair Care" className="text-xs">Hair Care</SelectItem>
-                          <SelectItem value="Personal Care" className="text-xs">Personal Care</SelectItem>
-                          <SelectItem value="Accessories" className="text-xs">Accessories</SelectItem>
+                          <SelectItem value="all" className="text-xs">
+                            All Categories
+                          </SelectItem>
+                          <SelectItem value="Skincare" className="text-xs">
+                            Skincare
+                          </SelectItem>
+                          <SelectItem value="Hair Care" className="text-xs">
+                            Hair Care
+                          </SelectItem>
+                          <SelectItem value="Personal Care" className="text-xs">
+                            Personal Care
+                          </SelectItem>
+                          <SelectItem value="Accessories" className="text-xs">
+                            Accessories
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -667,15 +708,26 @@ export default function Inventory() {
                       <label className="text-xs max-w-[360px]:text-[11px] font-medium">
                         Stock Status
                       </label>
-                      <Select value={selectedFilter} onValueChange={setSelectedFilter}>
+                      <Select
+                        value={selectedFilter}
+                        onValueChange={setSelectedFilter}
+                      >
                         <SelectTrigger className="w-full text-xs h-8 max-w-[360px]:h-7">
                           <SelectValue placeholder="Stock Status" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all" className="text-xs">All Products</SelectItem>
-                          <SelectItem value="out-of-stock" className="text-xs">Out of Stock</SelectItem>
-                          <SelectItem value="low-stock" className="text-xs">Low Stock</SelectItem>
-                          <SelectItem value="optimal" className="text-xs">Optimal Stock</SelectItem>
+                          <SelectItem value="all" className="text-xs">
+                            All Products
+                          </SelectItem>
+                          <SelectItem value="out-of-stock" className="text-xs">
+                            Out of Stock
+                          </SelectItem>
+                          <SelectItem value="low-stock" className="text-xs">
+                            Low Stock
+                          </SelectItem>
+                          <SelectItem value="optimal" className="text-xs">
+                            Optimal Stock
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -688,18 +740,34 @@ export default function Inventory() {
                           <SelectValue placeholder="Sort By" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="name-asc" className="text-xs">Name (A-Z)</SelectItem>
-                          <SelectItem value="name-desc" className="text-xs">Name (Z-A)</SelectItem>
-                          <SelectItem value="price-asc" className="text-xs">Price (Low to High)</SelectItem>
-                          <SelectItem value="price-desc" className="text-xs">Price (High to Low)</SelectItem>
-                          <SelectItem value="stock-asc" className="text-xs">Stock (Low to High)</SelectItem>
-                          <SelectItem value="stock-desc" className="text-xs">Stock (High to Low)</SelectItem>
+                          <SelectItem value="name-asc" className="text-xs">
+                            Name (A-Z)
+                          </SelectItem>
+                          <SelectItem value="name-desc" className="text-xs">
+                            Name (Z-A)
+                          </SelectItem>
+                          <SelectItem value="price-asc" className="text-xs">
+                            Price (Low to High)
+                          </SelectItem>
+                          <SelectItem value="price-desc" className="text-xs">
+                            Price (High to Low)
+                          </SelectItem>
+                          <SelectItem value="stock-asc" className="text-xs">
+                            Stock (Low to High)
+                          </SelectItem>
+                          <SelectItem value="stock-desc" className="text-xs">
+                            Stock (High to Low)
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                   <div className="flex gap-2 max-w-[360px]:gap-1 mt-2 max-w-[360px]:mt-1">
-                    <Button variant="outline" size="sm" className="flex-1 h-8 max-w-[360px]:h-7">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 h-8 max-w-[360px]:h-7"
+                    >
                       Reset
                     </Button>
                     <Button size="sm" className="flex-1 h-8 max-w-[360px]:h-7">
@@ -718,7 +786,9 @@ export default function Inventory() {
                   All
                 </Button>
                 <Button
-                  variant={selectedFilter === "out-of-stock" ? "default" : "outline"}
+                  variant={
+                    selectedFilter === "out-of-stock" ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => setSelectedFilter("out-of-stock")}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
@@ -726,7 +796,9 @@ export default function Inventory() {
                   Out of Stock
                 </Button>
                 <Button
-                  variant={selectedFilter === "low-stock" ? "default" : "outline"}
+                  variant={
+                    selectedFilter === "low-stock" ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => setSelectedFilter("low-stock")}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
@@ -743,16 +815,38 @@ export default function Inventory() {
                 </Button>
               </div>
               <div className="hidden sm:block">
-                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <Select
+                  value={selectedCategory}
+                  onValueChange={setSelectedCategory}
+                >
                   <SelectTrigger className="w-[120px] md:w-[150px] text-xs md:text-sm h-8 sm:h-9">
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all" className="text-xs md:text-sm">All Categories</SelectItem>
-                    <SelectItem value="Skincare" className="text-xs md:text-sm">Skincare</SelectItem>
-                    <SelectItem value="Hair Care" className="text-xs md:text-sm">Hair Care</SelectItem>
-                    <SelectItem value="Personal Care" className="text-xs md:text-sm">Personal Care</SelectItem>
-                    <SelectItem value="Accessories" className="text-xs md:text-sm">Accessories</SelectItem>
+                    <SelectItem value="all" className="text-xs md:text-sm">
+                      All Categories
+                    </SelectItem>
+                    <SelectItem value="Skincare" className="text-xs md:text-sm">
+                      Skincare
+                    </SelectItem>
+                    <SelectItem
+                      value="Hair Care"
+                      className="text-xs md:text-sm"
+                    >
+                      Hair Care
+                    </SelectItem>
+                    <SelectItem
+                      value="Personal Care"
+                      className="text-xs md:text-sm"
+                    >
+                      Personal Care
+                    </SelectItem>
+                    <SelectItem
+                      value="Accessories"
+                      className="text-xs md:text-sm"
+                    >
+                      Accessories
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -760,7 +854,6 @@ export default function Inventory() {
           </div>
 
           {/* Mobile View Selector Tabs */}
-          
 
           {/* Desktop Product Table */}
           <div className="">
@@ -770,51 +863,68 @@ export default function Inventory() {
                   <table className="w-full text-sm">
                     <thead className="text-xs uppercase bg-muted/50">
                       <tr>
-                        <th className="p-2 sm:p-3 w-10">
+                        <th className="p-2 sm:p-3 w-10 text-left">
                           <Checkbox
-                            checked={selectedItems.length === inventoryItems.length && inventoryItems.length > 0}
+                            checked={
+                              selectedItems.length === inventoryItems.length &&
+                              inventoryItems.length > 0
+                            }
                             onCheckedChange={selectAllItems}
                             aria-label="Select all"
                           />
                         </th>
-                        <th className="p-2 sm:p-3">Product</th>
-                        <th className="p-2 sm:p-3">Category</th>
-                        <th className="p-2 sm:p-3">SKU</th>
-                        <th className="p-2 sm:p-3">Price</th>
-                        <th className="p-2 sm:p-3">Stock</th>
-                        <th className="p-2 sm:p-3">Status</th>
-                        <th className="p-2 sm:p-3">Plugs</th>
-                        <th className="p-2 sm:p-3">Sales</th>
-                        <th className="p-2 sm:p-3">Trend</th>
-                        <th className="p-2 sm:p-3 w-[70px]">Actions</th>
+                        <th className="p-2 sm:p-3 text-left">Product</th>
+                        <th className="p-2 sm:p-3 text-left">Price</th>
+                        <th className="p-2 sm:p-3 text-left">Stock</th>
+                        <th className="p-2 sm:p-3 w-[70px] text-left">Status</th>
+                        <th className="p-2 sm:p-3 text-left">Plugs</th>
+                        <th className="p-2 sm:p-3 text-left">Sales</th>
+                        <th className="p-2 sm:p-3 w-[70px] text-left">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredItems.map((item) => {
-                        const stockStatus = getStockStatus(item)
+                        const stockStatus = getStockStatus(item);
                         return (
-                          <tr key={item.id} className="border-b hover:bg-muted/30">
+                          <tr
+                            key={item.id}
+                            className="border-b hover:bg-muted/30"
+                          >
                             <td className="p-2 sm:p-3">
                               <Checkbox
                                 checked={selectedItems.includes(item.id)}
-                                onCheckedChange={() => toggleItemSelection(item.id)}
+                                onCheckedChange={() =>
+                                  toggleItemSelection(item.id)
+                                }
                                 aria-label={`Select ${item.name}`}
                               />
                             </td>
                             <td className="p-2 sm:p-3">
                               <div className="flex items-center gap-2 sm:gap-3">
                                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
-                                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                  <img
+                                    src={item.image}
+                                    alt={item.name}
+                                    className="w-full h-full object-cover"
+                                  />
                                 </div>
-                                <span className="font-medium text-xs sm:text-sm">{item.name}</span>
+                                <span className="font-medium text-xs sm:text-sm truncate max-w-[150px]">
+                                  {item.name}
+                                </span>
                               </div>
                             </td>
-                            <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.category}</td>
-                            <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.sku}</td>
-                            <td className="p-2 sm:p-3 text-xs sm:text-sm">₦{item.price.toLocaleString()}</td>
+                            <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
+                              ₦{item.price.toLocaleString()}
+                            </td>
                             <td className="p-2 sm:p-3 text-xs sm:text-sm">
                               <div className="flex items-center gap-1">
-                                <span className={getStockStatusColor(stockStatus)}>{item.stock}</span>
+                                <span
+                                  className={getStockStatusColor(stockStatus)}
+                                >
+                                  {item.stock}
+                                </span>
                                 {item.stock > 0 && (
                                   <Tooltip>
                                     <TooltipTrigger asChild>
@@ -827,47 +937,63 @@ export default function Inventory() {
                                 )}
                               </div>
                             </td>
-                            <td className="p-2 sm:p-3">{getStockStatusBadge(stockStatus)}</td>
-                            <td className="p-2 sm:p-3 text-xs sm:text-sm">
+                            <td className="p-2 sm:p-3">
+                              {getStockStatusBadge(stockStatus)}
+                            </td>
+                            <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
                               <div className="flex items-center gap-1">
                                 <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground" />
                                 <span>{item.plugs}</span>
                               </div>
                             </td>
-                            <td className="p-2 sm:p-3 text-xs sm:text-sm">{item.sales}</td>
-                            <td className="p-2 sm:p-3">{getTrendIcon(item.trend)}</td>
+                            <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
+                              {item.sales}
+                            </td>
                             <td className="p-2 sm:p-3">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7 sm:h-8 sm:w-8"
+                                  >
                                     <MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                     <span className="sr-only">Open menu</span>
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel className="text-xs sm:text-sm">Actions</DropdownMenuLabel>
+                                  <DropdownMenuLabel className="text-xs sm:text-sm">
+                                    Actions
+                                  </DropdownMenuLabel>
                                   <DropdownMenuItem className="text-xs sm:text-sm">
-                                    <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Edit
+                                    <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                    Edit
                                   </DropdownMenuItem>
                                   <DropdownMenuItem className="text-xs sm:text-sm">
-                                    <PackagePlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Restock
+                                    <PackagePlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                    Restock
                                   </DropdownMenuItem>
                                   <DropdownMenuItem className="text-xs sm:text-sm">
-                                    <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Promote
+                                    <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                    Promote
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem className="text-destructive text-xs sm:text-sm">
-                                    <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Archive
+                                    <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                    Archive
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </td>
                           </tr>
-                        )
+                        );
                       })}
                       {filteredItems.length === 0 && (
                         <tr>
-                          <td colSpan={11} className="p-4 text-center text-muted-foreground text-xs sm:text-sm">
+                          <td
+                            colSpan={11}
+                            className="p-4 text-center text-muted-foreground text-xs sm:text-sm"
+                          >
                             No products found matching your criteria
                           </td>
                         </tr>
@@ -878,13 +1004,24 @@ export default function Inventory() {
               </CardContent>
               <CardFooter className="flex items-center justify-between p-3 sm:p-4 border-t">
                 <div className="text-xs sm:text-sm text-muted-foreground">
-                  Showing {filteredItems.length} of {inventoryItems.length} products
+                  Showing {filteredItems.length} of {inventoryItems.length}{" "}
+                  products
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" disabled className="h-7 sm:h-8 text-xs">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    className="h-7 sm:h-8 text-xs"
+                  >
                     <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Previous
                   </Button>
-                  <Button variant="outline" size="sm" disabled className="h-7 sm:h-8 text-xs">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    className="h-7 sm:h-8 text-xs"
+                  >
                     Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
                   </Button>
                 </div>
@@ -894,11 +1031,13 @@ export default function Inventory() {
         </section>
 
         {/* Mobile Action Bar */}
-        
 
         {/* Enhanced Add Product Modal */}
-        <AddProductModal open={showEnhancedAddProduct} onOpenChange={setShowEnhancedAddProduct} />
+        <AddProductModal
+          open={showEnhancedAddProduct}
+          onOpenChange={setShowEnhancedAddProduct}
+        />
       </div>
     </TooltipProvider>
-  )
+  );
 }
