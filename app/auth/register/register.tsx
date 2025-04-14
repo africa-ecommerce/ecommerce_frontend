@@ -46,10 +46,11 @@ export default function RegisterPage() {
 
       const result = await response.json();
       if (!response.ok) {
+        console.log("failed")
         errorToast(result.error || "Registration failed");
         return null; // Return null to indicate failure
       }
-
+      console.log("success")
       successToast(result.message);
       return result; // Return the result to be passed to onSuccess
     } catch (error) {

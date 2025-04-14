@@ -3,8 +3,8 @@
 
 import { useState, useEffect } from "react";
 import ClientLayout from "./clientLayout";
-import { GlobalLoadingIndicatorAdvanced } from "@/components/ui/loading-indicator-advanced";
 import { useSwrUser } from "@/hooks/use-current-user";
+import { UserProvider } from "../_components/provider/UserContext";
 
 interface ClientLayoutWrapperProps {
   children: React.ReactNode;
@@ -12,7 +12,6 @@ interface ClientLayoutWrapperProps {
   initialUserData?: any;
 }
 
-// In ClientLayoutWrapper.tsx
 export default function ClientLayoutWrapper({
   children,
   serverUserType,
@@ -29,7 +28,6 @@ export default function ClientLayoutWrapper({
   if (isLoading || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        {/* <GlobalLoadingIndicatorAdvanced /> */}
         loading....
       </div>
     );
@@ -40,11 +38,14 @@ export default function ClientLayoutWrapper({
   if (!userType) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        {/* <GlobalLoadingIndicatorAdvanced /> */}
         loading...
       </div>
     );
   }
 
-  return <ClientLayout userType={userType}>{children}</ClientLayout>;
+  return (
+    <UserProvider  userData={user}>
+      <ClientLayout userType={userType}>{children}</ClientLayout>
+    </UserProvider>
+  );
 }

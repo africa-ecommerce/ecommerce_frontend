@@ -79,19 +79,97 @@ export const plugInfoSchema = z.object({
 
 
 // In your schema file
-export const profileSchema = z.object({ 
+export const profileSchema = z.object({
   avatar: z.string().optional(),
-  businessName: z.string().min(2, { message: "Please provide your business name" }),
-  phone: z.string().optional(),
-  aboutBusiness: z.string().optional(),
-  state: z.enum([
-    "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River", "Delta",
-    "Ebonyi", "Edo", "Ekiti", "Enugu", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi",
-    "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau",
-    "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara", "FCT"
-  ], { message: "Please select a valid state" })
-});
+  businessName: z.string().min(2, {
+    message: "Please provide your business name",
+  }),
+  phone: z
+    .string()
+    .refine(
+      (val) => {
+        // If empty string or undefined, it's valid (optional)
+        if (!val) return true;
 
+        // Otherwise validate as Nigerian phone number
+        return /^(\+?234|0)[\d]{10}$/.test(val);
+      },
+      {
+        message: "Please enter a valid Nigerian phone number",
+      }
+    )
+    .refine(
+      (val) => {
+        // Skip validation if empty
+        if (!val) return true;
+
+        // Check length requirements when value exists
+        return val.length >= 11 && val.length <= 15;
+      },
+      {
+        message: "Phone number must be between 11 and 15 digits",
+      }
+    )
+    .transform((val) => {
+      // Return as is if empty/undefined
+      if (!val) return val;
+
+      // Normalize phone number to standard format
+      if (val.startsWith("0")) {
+        return `+234${val.slice(1)}`;
+      }
+      if (val.startsWith("234")) {
+        return `+${val}`;
+      }
+      return val;
+    })
+    .optional(),
+  aboutBusiness: z.string().optional(),
+  state: z.enum(
+    [
+      "Abia",
+      "Adamawa",
+      "Akwa Ibom",
+      "Anambra",
+      "Bauchi",
+      "Bayelsa",
+      "Benue",
+      "Borno",
+      "Cross River",
+      "Delta",
+      "Ebonyi",
+      "Edo",
+      "Ekiti",
+      "Enugu",
+      "Gombe",
+      "Imo",
+      "Jigawa",
+      "Kaduna",
+      "Kano",
+      "Katsina",
+      "Kebbi",
+      "Kogi",
+      "Kwara",
+      "Lagos",
+      "Nasarawa",
+      "Niger",
+      "Ogun",
+      "Ondo",
+      "Osun",
+      "Oyo",
+      "Plateau",
+      "Rivers",
+      "Sokoto",
+      "Taraba",
+      "Yobe",
+      "Zamfara",
+      "FCT",
+    ],
+    {
+      message: "Please select a valid state",
+    }
+  ),
+});
 export const productSchema = z.object({
   // Required fields
   productName: z
@@ -151,57 +229,6 @@ export const supplierInfoSchema = z.object({
 });
 
 
-// const dimensionSchema = z
-//   .object({
-//     length: z.string(),
-//     width: z.string(),
-//     height: z.string(),
-//   })
-//   .partial()
-//   .refine(
-//     (data) => {
-//       return Object.values(data).some((val) => val !== "");
-//     },
-//     {
-//       message: "At least one dimension is required",
-//     }
-//   );
-
-// const variationSchema = z.object({
-//   id: z.string(),
-//   size: z.string().optional(),
-//   color: z.string().optional(),
-//   stock: z.number().min(0, "Stock cannot be negative"),
-//   price: z.number().optional(),
-// });
-
-// // Main product schema
-// export const productFormSchema = z.object({
-//   name: z
-//     .string()
-//     .min(1, "Product name is required")
-//     .max(100, "Name is too long"),
-//   category: z.string().min(1, "Category is required"),
-//   description: z.string().max(1000, "Description is too long").optional(),
-//   price: z
-//     .string()
-//     .min(1, "Price is required")
-//     .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
- 
-//   weight: z
-//     .string()
-//     .regex(/^\d*\.?\d+$/, "Invalid weight")
-//     .optional(),
-//   dimensions: dimensionSchema.optional(),
-//   // This is the key change - ensure hasVariations is always required and is a boolean
-//   hasVariations: z.boolean(),
-//   variations: z.array(variationSchema).optional(),
-//   images: z.array(z.instanceof(File)),
-//   imageUrls: z.array(z.string()),
-//   tags: z.array(z.string().max(20, "Tag is too long")).optional(),
-// });
-
-// export type ProductFormData = z.infer<typeof productFormSchema>;
 
 const variationSchema = z.object({
   id: z.string(),

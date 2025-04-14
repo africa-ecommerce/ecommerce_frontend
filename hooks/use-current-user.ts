@@ -1,9 +1,7 @@
-// hooks/useCurrentUser.js
-"use client"
-import useSWR from 'swr';
+// hooks/use-current-user.ts
+"use client";
+import useSWR from "swr";
 
-
-// Define the fetcher function once
 const currentUserFetcher = async () => {
   const response = await fetch("/api/auth/current-user");
   if (!response.ok) {
@@ -12,25 +10,24 @@ const currentUserFetcher = async () => {
   return response.json();
 };
 
-// Custom hook that can be called without any parameters
 export function useSwrUser(initialData?: any) {
   const { data, error, isLoading, mutate } = useSWR(
     "/api/auth/current-user",
     currentUserFetcher,
     {
-      fallbackData: initialData, // Use middleware-provided data as fallback
-      revalidateOnFocus: true,
+      fallbackData: initialData,
+      revalidateOnFocus: false, // Changed to false to prevent reloading on focus
       revalidateOnReconnect: true,
-      dedupingInterval: 5000,
-      // Optional: If initial data is complete, don't fetch immediately
-      // This prevents an immediate refetch when initial data is available
+      dedupingInterval: 10000, // Increased to reduce refetching
+      keepPreviousData: true, // Keep showing previous data while revalidating
+      // Don't revalidate if we have initial data
       revalidateIfStale: initialData ? false : true,
     }
   );
 
   return {
     user: data,
-    isLoading,
+    isLoading: isLoading && !data, // Only consider loading if we have no data
     isError: error,
     mutate,
   };

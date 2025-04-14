@@ -19,6 +19,8 @@ import {
 import { Card } from "@/components/ui/card";
 import { Controller } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import PlugSuccess from "./plug-success";
+import { useState } from "react";
 
 interface ProfileProps {
   onSubmit: (data: FormData) => Promise<any>;
@@ -30,7 +32,7 @@ export default function ProfileStep({
   onPrev,
   formData, // Add this parameter
 }: ProfileProps) {
-  const router = useRouter();
+  const [isSuccess, setIsSuccess] = useState(false);
   
 
   const {
@@ -44,9 +46,14 @@ export default function ProfileStep({
       } as FormData);
       return result;
     },
-    profileSchema, 
-    () => router.push("/onboarding/success")
+    profileSchema,
+    () => setIsSuccess(true)
   );
+
+   if (isSuccess) {
+    return <PlugSuccess />;
+  }
+
 
   return (
     <>
@@ -85,7 +92,11 @@ export default function ProfileStep({
                 placeholder="Enter your phone number"
                 {...register("phone")}
               />
-             
+             {errors.phone && (
+                <p className="text-red-500 text-sm">
+                  {errors.phone.message}
+                </p>
+              )}
               
             </div>
 

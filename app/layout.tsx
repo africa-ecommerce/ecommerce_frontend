@@ -7,6 +7,7 @@ import {
   Playfair_Display,
   Poppins,
 } from "next/font/google";
+import { ToastProvider } from "./_components/provider/ClientToastWrapper";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -49,7 +50,7 @@ export default function RootLayout({
       className={`${inter.variable} ${robotoMono.variable} ${playfair.variable} ${poppins.variable}`}
     >
       <body className="min-h-screen bg-background">
-  {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );
