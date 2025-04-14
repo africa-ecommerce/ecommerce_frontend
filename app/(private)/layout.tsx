@@ -1,15 +1,20 @@
-"use client";
-import React, { Suspense } from "react";
-import ClientLayout from "./clientLayout";
-import { useCurrentUser } from "@/hooks/use-current-user";
+// app/(private)/layout.tsx
+import { getUserFromHeaders } from "@/lib/auth-utils";
+import ClientLayoutWrapper from "./clientLayoutWrapper";
 
-const layout = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useCurrentUser();
+export default async function PrivateLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // Get user data from headers (set by middleware)
+      const userData = await getUserFromHeaders();
+
+  const userType = userData?.userType || null;
+
   return (
-    <Suspense fallback={<div>Loading user data...</div>}>
-      <ClientLayout userType={user?.userType}>{children}</ClientLayout>
-    </Suspense>
+    <ClientLayoutWrapper serverUserType={userType} initialUserData={userData}>
+      {children}
+    </ClientLayoutWrapper>
   );
-};
-
-export default layout;
+}

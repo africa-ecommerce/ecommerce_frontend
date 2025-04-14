@@ -1,6 +1,7 @@
 // hooks/useCurrentUser.js
 "use client"
-import { useReadResource } from "./resourceManagement/useReadResources";
+import useSWR from 'swr';
+
 
 // Define the fetcher function once
 const currentUserFetcher = async () => {
@@ -12,17 +13,25 @@ const currentUserFetcher = async () => {
 };
 
 // Custom hook that can be called without any parameters
-export function useCurrentUser() {
-  const { data, error, isLoading, mutate } = useReadResource(
-    "/auth/current-user", 
-    currentUserFetcher
+export function useSwrUser(initialData?: any) {
+  const { data, error, isLoading, mutate } = useSWR(
+    "/api/auth/current-user",
+    currentUserFetcher,
+    {
+      fallbackData: initialData, // Use middleware-provided data as fallback
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 5000,
+      // Optional: If initial data is complete, don't fetch immediately
+      // This prevents an immediate refetch when initial data is available
+      revalidateIfStale: initialData ? false : true,
+    }
   );
-  
+
   return {
-    user: data?.user,
-    error,
+    user: data,
     isLoading,
+    isError: error,
     mutate,
-    isError: !!error,
   };
 }
