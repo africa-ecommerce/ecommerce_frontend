@@ -13,14 +13,14 @@ import useSWR from "swr";
 export function useDeleteResource<T>(
   key: string,
   fetcher: () => Promise<T[]>,
-  deleteFn: (id: string | number) => Promise<void>,
+  deleteFn: (id: string ) => Promise<void>,
   onSuccess?: () => void
 ) {
   // Get the current data from SWR
   const { data: resources, mutate, isLoading, error } = useSWR<T[]>(key, fetcher);
 
   // Handle delete action
-  const handleDelete = async (id: string | number) => {
+  const handleDelete = async (id: string ) => {
     try {
       // Delete the resource
       await deleteFn(id);

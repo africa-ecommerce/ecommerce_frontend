@@ -1,7 +1,13 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { 
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription 
+} from "@/components/ui/alert-dialog";
 import {
   AlertCircle,
   ArrowUpRight,
@@ -26,14 +32,26 @@ import {
   TrendingUp,
   Users,
   X,
-  Menu
-} from "lucide-react"
+  Menu,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,239 +59,217 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { AddProductModal } from "./add-product-modal"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { AddProductModal } from "./add-product-modal";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import useSWR from "swr";
+import Image from "next/image";
+import { useDeleteResource } from "@/hooks/resourceManagement/useDeleteResources";
 
-interface Product {
-  id: string
-  name: string
-  category: string
-  sku: string
-  price: number
-  stock: number
-  reorderPoint: number
-  plugs: number
-  sales: number
-  trend: "up" | "down" | "stable"
-  image: string
-}
+const deleteProductFn = async (id) => {
+  const response = await fetch(`/api/products/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Failed to delete product");
+  }
+};
 
 export default function Inventory() {
   // State management
-  const [refreshing, setRefreshing] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [selectedFilter, setSelectedFilter] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedItems, setSelectedItems] = useState<string[]>([])
-  const [showEnhancedAddProduct, setShowEnhancedAddProduct] = useState(false)
-  const [showBulkUpdate, setShowBulkUpdate] = useState(false)
-  const [showPromotion, setShowPromotion] = useState(false)
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
-  const [isSearchFocused, setIsSearchFocused] = useState(false)
-  const [selectedView, setSelectedView] = useState("grid")
-  const [showMobileActions, setShowMobileActions] = useState(false)
-  const [activeCardId, setActiveCardId] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [showEnhancedAddProduct, setShowEnhancedAddProduct] = useState(false);
+  const [showBulkUpdate, setShowBulkUpdate] = useState(false);
+  const [showPromotion, setShowPromotion] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  // Add state for delete confirmation
+  const [productToDelete, setProductToDelete] = useState<string>("");
 
-  // Sample inventory data
-  const inventoryItems: Product[] = [
-    {
-      id: "prod-001",
-      name: "Shea Butter (250g)",
-      category: "Skincare",
-      sku: "SB-250",
-      price: 2500,
-      stock: 85,
-      reorderPoint: 20,
-      plugs: 24,
-      sales: 156,
-      trend: "up",
-      image: "/placeholder.svg",
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(6);
+
+  const {
+    deleteResource,
+    isLoading: isDeleting,
+    error: deleteError,
+  } = useDeleteResource(
+    "/api/products/supplier/",
+    async () => {
+      const res = await fetch("/api/products/supplier/");
+      if (!res.ok) throw new Error("Failed to fetch products");
+      return res.json();
     },
-    {
-      id: "prod-002",
-      name: "African Black Soap",
-      category: "Skincare",
-      sku: "ABS-100",
-      price: 1500,
-      stock: 12,
-      reorderPoint: 15,
-      plugs: 18,
-      sales: 92,
-      trend: "up",
-      image: "/placeholder.svg",
-    },
-    {
-      id: "prod-003",
-      name: "Hair Growth Oil",
-      category: "Hair Care",
-      sku: "HGO-100",
-      price: 2000,
-      stock: 45,
-      reorderPoint: 10,
-      plugs: 15,
-      sales: 67,
-      trend: "stable",
-      image: "/placeholder.svg",
-    },
-    {
-      id: "prod-004",
-      name: "Body Butter",
-      category: "Skincare",
-      sku: "BB-200",
-      price: 2800,
-      stock: 32,
-      reorderPoint: 15,
-      plugs: 12,
-      sales: 48,
-      trend: "down",
-      image: "/placeholder.svg",
-    },
-    {
-      id: "prod-005",
-      name: "Moringa Hair Mask",
-      category: "Hair Care",
-      sku: "MHM-150",
-      price: 3200,
-      stock: 0,
-      reorderPoint: 10,
-      plugs: 8,
-      sales: 36,
-      trend: "up",
-      image: "/placeholder.svg",
-    },
-    {
-      id: "prod-006",
-      name: "Natural Deodorant",
-      category: "Personal Care",
-      sku: "ND-50",
-      price: 1800,
-      stock: 5,
-      reorderPoint: 12,
-      plugs: 6,
-      sales: 24,
-      trend: "up",
-      image: "/placeholder.svg",
-    },
-  ]
+    deleteProductFn,
+    () => {
+      // Optional success callback
+      // You could show a success toast notification here
+    }
+  );
+
+  // Fetch data
+  const { data, error, isLoading } = useSWR("/api/products/supplier/");
+  console.log(data);
+ const products = data || [];
+   console.log("products", products);
 
   // Filter items based on selected category, filter, and search query
-  const filteredItems = inventoryItems.filter((item) => {
+  const filteredItems = products?.filter((item: any) => {
     if (selectedCategory !== "all" && item.category !== selectedCategory)
-      return false
-    if (selectedFilter === "out-of-stock" && item.stock > 0) return false
+      return false;
+    if (
+      selectedFilter === "out-of-stock" &&
+      (item.stock > 0 || item.stock === undefined)
+    )
+      return false;
     if (
       selectedFilter === "low-stock" &&
-      (item.stock === 0 || item.stock > item.reorderPoint)
+      (item.stock === 0 || item.stock === undefined || item.stock > 5)
     )
-      return false
+      return false;
     if (
       selectedFilter === "optimal" &&
-      (item.stock === 0 || item.stock <= item.reorderPoint)
+      (item.stock === 0 || item.stock === undefined || item.stock <= 10)
     )
-      return false
+      return false;
     if (
       searchQuery &&
-      !item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !item.sku.toLowerCase().includes(searchQuery.toLowerCase())
+      !item.name?.toLowerCase().includes(searchQuery.toLowerCase())
     )
-      return false
-    return true
-  })
+      return false;
+    return true;
+  });
+
+  // Get current items for pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredItems?.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil((filteredItems?.length || 0) / itemsPerPage);
 
   // Helper functions
-  const getStockStatus = (item: Product) => {
-    if (item.stock === 0) return "out-of-stock"
-    if (item.stock <= item.reorderPoint) return "low-stock"
-    return "optimal"
-  }
+  const getStockStatus = (item) => {
+    if (!item.stock && item.stock !== 0) return "unknown";
+    if (item.stock === 0) return "out-of-stock";
+    if (item.stock <= 5) return "low-stock";
+    return "optimal";
+  };
 
-  const getStockStatusColor = (status: string) => {
+  const getStockStatusColor = (status) => {
     switch (status) {
       case "out-of-stock":
-        return "text-destructive"
+        return "text-destructive";
       case "low-stock":
-        return "text-amber-500"
+        return "text-amber-500";
       case "optimal":
-        return "text-green-500"
+        return "text-green-500";
       default:
-        return ""
+        return "text-muted-foreground";
     }
-  }
+  };
 
-  const getStockStatusBadge = (status: string) => {
-  switch (status) {
-    case "out-of-stock":
-      return (
-        <Badge variant="destructive" className="text-xs py-0 px-2 whitespace-nowrap">
-          Out of Stock
-        </Badge>
-      )
-    case "low-stock":
-      return (
-        <Badge
-          variant="outline"
-          className="text-xs py-0 px-2 text-amber-500 border-amber-200 bg-amber-50 whitespace-nowrap"
-        >
-          Low Stock
-        </Badge>
-      )
-    case "optimal":
-      return (
-        <Badge
-          variant="outline"
-          className="text-xs py-0 px-2 text-green-500 border-green-200 bg-green-50 whitespace-nowrap"
-        >
-          In Stock
-        </Badge>
-      )
-    default:
-      return null
-  }
-}
-  const getTrendIcon = (trend: "up" | "down" | "stable") => {
-    switch (trend) {
-      case "up":
-        return <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
-      case "down":
-        return <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-destructive" />
+  const getStockStatusBadge = (status) => {
+    switch (status) {
+      case "out-of-stock":
+        return (
+          <Badge
+            variant="destructive"
+            className="text-xs py-0 px-2 whitespace-nowrap"
+          >
+            Out of Stock
+          </Badge>
+        );
+      case "low-stock":
+        return (
+          <Badge
+            variant="outline"
+            className="text-xs py-0 px-2 text-amber-500 border-amber-200 bg-amber-50 whitespace-nowrap"
+          >
+            Low Stock
+          </Badge>
+        );
+      case "optimal":
+        return (
+          <Badge
+            variant="outline"
+            className="text-xs py-0 px-2 text-green-500 border-green-200 bg-green-50 whitespace-nowrap"
+          >
+            In Stock
+          </Badge>
+        );
       default:
-        return <LineChart className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+        return (
+          <Badge
+            variant="outline"
+            className="text-xs py-0 px-2 text-muted-foreground border-muted bg-muted/50 whitespace-nowrap"
+          >
+            Unknown
+          </Badge>
+        );
     }
-  }
+  };
 
-  const handleRefresh = () => {
-    setRefreshing(true)
-    setTimeout(() => setRefreshing(false), 1500)
-  }
-
-  const toggleItemSelection = (id: string) => {
+  const toggleItemSelection = (id) => {
     if (selectedItems.includes(id)) {
-      setSelectedItems(selectedItems.filter((item) => item !== id))
+      setSelectedItems(selectedItems.filter((item) => item !== id));
     } else {
-      setSelectedItems([...selectedItems, id])
+      setSelectedItems([...selectedItems, id]);
     }
-  }
+  };
 
   const selectAllItems = () => {
-    if (selectedItems.length === inventoryItems.length) {
-      setSelectedItems([])
+    if (
+      selectedItems.length === currentItems.length &&
+      currentItems.length > 0
+    ) {
+      setSelectedItems([]);
     } else {
-      setSelectedItems(inventoryItems.map((item) => item.id))
+      setSelectedItems(currentItems.map((item) => item.id));
     }
-  }
-
-  const handleCardTap = (id: string) => {
-    setActiveCardId(activeCardId === id ? null : id)
-  }
+  };
 
   const clearSearch = () => {
-    setSearchQuery("")
-  }
+    setSearchQuery("");
+  };
+
+  // Pagination controls
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Display value helper
+  const displayValue = (value) => {
+    return value !== undefined && value !== null ? value : "-";
+  };
 
   return (
     <TooltipProvider>
@@ -289,20 +285,6 @@ export default function Inventory() {
             </p>
           </div>
           <div className="flex items-center gap-2 self-end sm:self-auto">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="h-7 max-w-[360px]:h-6 w-7 max-w-[360px]:w-6 sm:h-8 sm:w-8 md:h-9 md:w-9"
-            >
-              <RefreshCw
-                className={`h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 ${
-                  refreshing ? "animate-spin" : ""
-                }`}
-              />
-              <span className="sr-only">Refresh</span>
-            </Button>
             <Button
               variant="outline"
               size="icon"
@@ -476,7 +458,6 @@ export default function Inventory() {
             </Button>
           </div>
         </div>
-
         {/* Inventory Command Center */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
           <div className="flex items-center justify-between">
@@ -591,7 +572,6 @@ export default function Inventory() {
             </Card>
           </div>
         </section>
-
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -627,9 +607,6 @@ export default function Inventory() {
               </Button>
             </div>
           </div>
-
-          {/* Mobile Add Button */}
-
           {/* Filters and Search */}
           <div className="flex flex-col gap-2 max-w-[360px]:gap-1.5 sm:gap-3">
             <div className="relative flex items-center">
@@ -767,10 +744,21 @@ export default function Inventory() {
                       variant="outline"
                       size="sm"
                       className="flex-1 h-8 max-w-[360px]:h-7"
+                      onClick={() => {
+                        setSelectedCategory("all");
+                        setSelectedFilter("all");
+                      }}
                     >
                       Reset
                     </Button>
-                    <Button size="sm" className="flex-1 h-8 max-w-[360px]:h-7">
+                    <Button
+                      size="sm"
+                      className="flex-1 h-8 max-w-[360px]:h-7"
+                      onClick={() => {
+                        // Apply filters logic - already handled by state changes
+                        setCurrentPage(1); // Reset to first page when filters change
+                      }}
+                    >
                       Apply Filters
                     </Button>
                   </div>
@@ -780,7 +768,10 @@ export default function Inventory() {
                 <Button
                   variant={selectedFilter === "all" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setSelectedFilter("all")}
+                  onClick={() => {
+                    setSelectedFilter("all");
+                    setCurrentPage(1);
+                  }}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
                 >
                   All
@@ -790,7 +781,10 @@ export default function Inventory() {
                     selectedFilter === "out-of-stock" ? "default" : "outline"
                   }
                   size="sm"
-                  onClick={() => setSelectedFilter("out-of-stock")}
+                  onClick={() => {
+                    setSelectedFilter("out-of-stock");
+                    setCurrentPage(1);
+                  }}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
                 >
                   Out of Stock
@@ -800,7 +794,10 @@ export default function Inventory() {
                     selectedFilter === "low-stock" ? "default" : "outline"
                   }
                   size="sm"
-                  onClick={() => setSelectedFilter("low-stock")}
+                  onClick={() => {
+                    setSelectedFilter("low-stock");
+                    setCurrentPage(1);
+                  }}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
                 >
                   Low Stock
@@ -808,7 +805,10 @@ export default function Inventory() {
                 <Button
                   variant={selectedFilter === "optimal" ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setSelectedFilter("optimal")}
+                  onClick={() => {
+                    setSelectedFilter("optimal");
+                    setCurrentPage(1);
+                  }}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
                 >
                   In Stock
@@ -817,7 +817,10 @@ export default function Inventory() {
               <div className="hidden sm:block">
                 <Select
                   value={selectedCategory}
-                  onValueChange={setSelectedCategory}
+                  onValueChange={(value) => {
+                    setSelectedCategory(value);
+                    setCurrentPage(1);
+                  }}
                 >
                   <SelectTrigger className="w-[120px] md:w-[150px] text-xs md:text-sm h-8 sm:h-9">
                     <SelectValue placeholder="Category" />
@@ -853,8 +856,6 @@ export default function Inventory() {
             </div>
           </div>
 
-          {/* Mobile View Selector Tabs */}
-
           {/* Desktop Product Table */}
           <div className="">
             <Card>
@@ -866,8 +867,8 @@ export default function Inventory() {
                         <th className="p-2 sm:p-3 w-10 text-left">
                           <Checkbox
                             checked={
-                              selectedItems.length === inventoryItems.length &&
-                              inventoryItems.length > 0
+                              selectedItems.length === currentItems?.length &&
+                              currentItems?.length > 0
                             }
                             onCheckedChange={selectAllItems}
                             aria-label="Select all"
@@ -876,7 +877,9 @@ export default function Inventory() {
                         <th className="p-2 sm:p-3 text-left">Product</th>
                         <th className="p-2 sm:p-3 text-left">Price</th>
                         <th className="p-2 sm:p-3 text-left">Stock</th>
-                        <th className="p-2 sm:p-3 w-[70px] text-left">Status</th>
+                        <th className="p-2 sm:p-3 w-[70px] text-left">
+                          Status
+                        </th>
                         <th className="p-2 sm:p-3 text-left">Plugs</th>
                         <th className="p-2 sm:p-3 text-left">Sales</th>
                         <th className="p-2 sm:p-3 w-[70px] text-left">
@@ -885,113 +888,145 @@ export default function Inventory() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredItems.map((item) => {
-                        const stockStatus = getStockStatus(item);
-                        return (
-                          <tr
-                            key={item.id}
-                            className="border-b hover:bg-muted/30"
-                          >
-                            <td className="p-2 sm:p-3">
-                              <Checkbox
-                                checked={selectedItems.includes(item.id)}
-                                onCheckedChange={() =>
-                                  toggleItemSelection(item.id)
-                                }
-                                aria-label={`Select ${item.name}`}
-                              />
-                            </td>
-                            <td className="p-2 sm:p-3">
-                              <div className="flex items-center gap-2 sm:gap-3">
-                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
-                                  <img
-                                    src={item.image}
-                                    alt={item.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <span className="font-medium text-xs sm:text-sm truncate max-w-[150px]">
-                                  {item.name}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                              ₦{item.price.toLocaleString()}
-                            </td>
-                            <td className="p-2 sm:p-3 text-xs sm:text-sm">
-                              <div className="flex items-center gap-1">
-                                <span
-                                  className={getStockStatusColor(stockStatus)}
-                                >
-                                  {item.stock}
-                                </span>
-                                {item.stock > 0 && (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Reorder point: {item.reorderPoint}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                )}
-                              </div>
-                            </td>
-                            <td className="p-2 sm:p-3">
-                              {getStockStatusBadge(stockStatus)}
-                            </td>
-                            <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                              <div className="flex items-center gap-1">
-                                <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground" />
-                                <span>{item.plugs}</span>
-                              </div>
-                            </td>
-                            <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                              {item.sales}
-                            </td>
-                            <td className="p-2 sm:p-3">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 sm:h-8 sm:w-8"
-                                  >
-                                    <MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                    <span className="sr-only">Open menu</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel className="text-xs sm:text-sm">
-                                    Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuItem className="text-xs sm:text-sm">
-                                    <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
-                                    Edit
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-xs sm:text-sm">
-                                    <PackagePlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
-                                    Restock
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-xs sm:text-sm">
-                                    <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
-                                    Promote
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-destructive text-xs sm:text-sm">
-                                    <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
-                                    Archive
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {filteredItems.length === 0 && (
+                      {isLoading ? (
+                        <tr>
+                          <td colSpan={8} className="p-4 text-center">
+                            <div className="flex justify-center items-center">
+                              <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+                              <span className="text-muted-foreground text-sm">
+                                Loading products...
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : error ? (
                         <tr>
                           <td
-                            colSpan={11}
+                            colSpan={8}
+                            className="p-4 text-center text-destructive text-sm"
+                          >
+                            Error loading products. Please try again.
+                          </td>
+                        </tr>
+                      ) : currentItems?.length > 0 ? (
+                        currentItems.map((item) => {
+                          const stockStatus = getStockStatus(item);
+                          return (
+                            <tr
+                              key={item.id}
+                              className="border-b hover:bg-muted/30"
+                            >
+                              <td className="p-2 sm:p-3">
+                                <Checkbox
+                                  checked={selectedItems.includes(item.id)}
+                                  onCheckedChange={() =>
+                                    toggleItemSelection(item.id)
+                                  }
+                                  aria-label={`Select ${item.name}`}
+                                />
+                              </td>
+                              <td className="p-2 sm:p-3">
+                                <div className="flex items-center gap-2 sm:gap-3">
+                                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
+                                    <Image
+                                      src={item.image || "/placeholder.svg"}
+                                      alt={item.name}
+                                      width={32}
+                                      height={32}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                  <span className="font-medium text-xs sm:text-sm truncate max-w-[150px]">
+                                    {item.name || "-"}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
+                                {item.price
+                                  ? `₦${item.price.toLocaleString()}`
+                                  : "-"}
+                              </td>
+                              <td className="p-2 sm:p-3 text-xs sm:text-sm">
+                                <div className="flex items-center gap-1">
+                                  <span
+                                    className={getStockStatusColor(stockStatus)}
+                                  >
+                                    {displayValue(item.stock)}
+                                  </span>
+                                  {item.stock > 0 && item.reorderPoint && (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>
+                                          Reorder point: {item.reorderPoint}
+                                        </p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="p-2 sm:p-3">
+                                {getStockStatusBadge(stockStatus)}
+                              </td>
+                              <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
+                                <div className="flex items-center gap-1">
+                                  <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground" />
+                                  <span>{displayValue(item.plugs)}</span>
+                                </div>
+                              </td>
+                              <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
+                                {displayValue(item.sales)}
+                              </td>
+                              <td className="p-2 sm:p-3">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 sm:h-8 sm:w-8"
+                                    >
+                                      <MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                      <span className="sr-only">Open menu</span>
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel className="text-xs sm:text-sm">
+                                      Actions
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuItem className="text-xs sm:text-sm">
+                                      <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-xs sm:text-sm">
+                                      <PackagePlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Restock
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className="text-xs sm:text-sm">
+                                      <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Promote
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      className="text-destructive text-xs sm:text-sm"
+                                      onClick={() =>
+                                        setProductToDelete(item.id)
+                                      }
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={8}
                             className="p-4 text-center text-muted-foreground text-xs sm:text-sm"
                           >
                             No products found matching your criteria
@@ -1004,14 +1039,15 @@ export default function Inventory() {
               </CardContent>
               <CardFooter className="flex items-center justify-between p-3 sm:p-4 border-t">
                 <div className="text-xs sm:text-sm text-muted-foreground">
-                  Showing {filteredItems.length} of {inventoryItems.length}{" "}
-                  products
+                  Showing {currentItems?.length || 0} of{" "}
+                  {filteredItems?.length || 0} products
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled
+                    disabled={currentPage === 1}
+                    onClick={prevPage}
                     className="h-7 sm:h-8 text-xs"
                   >
                     <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Previous
@@ -1019,7 +1055,8 @@ export default function Inventory() {
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled
+                    disabled={currentPage >= totalPages}
+                    onClick={nextPage}
                     className="h-7 sm:h-8 text-xs"
                   >
                     Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
@@ -1029,14 +1066,67 @@ export default function Inventory() {
             </Card>
           </div>
         </section>
-
-        {/* Mobile Action Bar */}
-
         {/* Enhanced Add Product Modal */}
         <AddProductModal
           open={showEnhancedAddProduct}
           onOpenChange={setShowEnhancedAddProduct}
         />
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog
+          open={!!productToDelete}
+          onOpenChange={(open) => !open && setProductToDelete("")}
+        >
+          <AlertDialogContent className="max-w-[350px] sm:max-w-[425px]">
+            <AlertDialogTitle className="text-base sm:text-lg">
+              Delete Product
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs sm:text-sm">
+              Are you sure you want to delete this product? This action cannot
+              be undone.
+            </AlertDialogDescription>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setProductToDelete("")}
+                className="text-xs h-8"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="text-xs h-8"
+                onClick={async () => {
+                  try {
+                    const result = await deleteResource(productToDelete);
+                    if (result.success) {
+                      setProductToDelete(""); // Clear delete state
+                      // Reset pagination if needed
+                      if (currentItems?.length === 1 && currentPage > 1) {
+                        setCurrentPage(currentPage - 1);
+                      }
+                    }
+                  } catch (error) {
+                    console.error("Delete failed:", error);
+                  }
+                }}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <RefreshCw className="h-3 w-3 mr-1 animate-spin" />{" "}
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-3 w-3 mr-1" /> Delete
+                  </>
+                )}
+              </Button>
+            </div>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </TooltipProvider>
   );

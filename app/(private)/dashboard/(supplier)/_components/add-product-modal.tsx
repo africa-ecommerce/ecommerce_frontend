@@ -89,6 +89,7 @@ import { useFormResolver } from "@/hooks/useFormResolver";
 import { productFormSchema, ProductFormData } from "@/zod/schema";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import { z } from "zod";
+import { mutate } from "swr";
 
 export function AddProductModal({
   open,
@@ -150,6 +151,7 @@ export function AddProductModal({
   () => {
     onOpenChange(false);
     setCurrentStep(0);
+      mutate('/api/products/supplier/');
   },
   {
     hasVariations: false,
