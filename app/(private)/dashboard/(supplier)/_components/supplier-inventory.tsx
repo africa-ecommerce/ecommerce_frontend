@@ -226,13 +226,13 @@ export default function Inventory() {
     }
   };
 
-  const toggleItemSelection = (id) => {
-    if (selectedItems.includes(id)) {
-      setSelectedItems(selectedItems.filter((item) => item !== id));
-    } else {
-      setSelectedItems([...selectedItems, id]);
-    }
-  };
+  // const toggleItemSelection = (id) => {
+  //   if (selectedItems.includes(id)) {
+  //     setSelectedItems(selectedItems.filter((item) => item !== id));
+  //   } else {
+  //     setSelectedItems([...selectedItems, id]);
+  //   }
+  // };
 
   const selectAllItems = () => {
     if (
@@ -860,7 +860,7 @@ export default function Inventory() {
                   <table className="w-full text-sm">
                     <thead className="text-xs uppercase bg-muted/50">
                       <tr>
-                        <th className="p-2 sm:p-3 w-10 text-left">
+                        {/* <th className="p-2 sm:p-3 w-10 text-left">
                           <Checkbox
                             checked={
                               selectedItems.length === currentItems?.length &&
@@ -869,7 +869,7 @@ export default function Inventory() {
                             onCheckedChange={selectAllItems}
                             aria-label="Select all"
                           />
-                        </th>
+                        </th> */}
                         <th className="p-2 sm:p-3 text-left">Product</th>
                         <th className="p-2 sm:p-3 text-left">Price</th>
                         <th className="p-2 sm:p-3 text-left">Stock</th>
@@ -912,7 +912,7 @@ export default function Inventory() {
                               key={item.id}
                               className="border-b hover:bg-muted/30"
                             >
-                              <td className="p-2 sm:p-3">
+                              {/* <td className="p-2 sm:p-3">
                                 <Checkbox
                                   checked={selectedItems.includes(item.id)}
                                   onCheckedChange={() =>
@@ -920,7 +920,7 @@ export default function Inventory() {
                                   }
                                   aria-label={`Select ${item.name}`}
                                 />
-                              </td>
+                              </td> */}
                               <td className="p-2 sm:p-3">
                                 <div className="flex items-center gap-2 sm:gap-3">
                                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
