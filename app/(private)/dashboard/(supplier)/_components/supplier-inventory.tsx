@@ -2,12 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription 
-} from "@/components/ui/alert-dialog";
+
 import {
   AlertCircle,
   ArrowUpRight,
@@ -82,6 +77,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import useSWR from "swr";
 import Image from "next/image";
 import { useDeleteResource } from "@/hooks/resourceManagement/useDeleteResources";
+import DeleteDialog from "./delete-dialog";
 
 const deleteProductFn = async (id) => {
   const response = await fetch(`/api/products/${id}`, {
@@ -132,7 +128,7 @@ export default function Inventory() {
   // Fetch data
   const { data, error, isLoading } = useSWR("/api/products/supplier/");
   console.log(data);
- const products = data || [];
+ const products = Array.isArray(data?.data) ? data?.data : [];
    console.log("products", products);
 
   // Filter items based on selected category, filter, and search query
@@ -953,18 +949,7 @@ export default function Inventory() {
                                   >
                                     {displayValue(item.stock)}
                                   </span>
-                                  {item.stock > 0 && item.reorderPoint && (
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>
-                                          Reorder point: {item.reorderPoint}
-                                        </p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  )}
+                                  
                                 </div>
                               </td>
                               <td className="p-2 sm:p-3">
@@ -1072,61 +1057,12 @@ export default function Inventory() {
           onOpenChange={setShowEnhancedAddProduct}
         />
         {/* Delete Confirmation Dialog */}
-        <AlertDialog
-          open={!!productToDelete}
-          onOpenChange={(open) => !open && setProductToDelete("")}
-        >
-          <AlertDialogContent className="max-w-[350px] sm:max-w-[425px]">
-            <AlertDialogTitle className="text-base sm:text-lg">
-              Delete Product
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs sm:text-sm">
-              Are you sure you want to delete this product? This action cannot
-              be undone.
-            </AlertDialogDescription>
-            <div className="flex justify-end gap-2 mt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setProductToDelete("")}
-                className="text-xs h-8"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                className="text-xs h-8"
-                onClick={async () => {
-                  try {
-                    const result = await deleteResource(productToDelete);
-                    if (result.success) {
-                      setProductToDelete(""); // Clear delete state
-                      // Reset pagination if needed
-                      if (currentItems?.length === 1 && currentPage > 1) {
-                        setCurrentPage(currentPage - 1);
-                      }
-                    }
-                  } catch (error) {
-                    console.error("Delete failed:", error);
-                  }
-                }}
-                disabled={isDeleting}
-              >
-                {isDeleting ? (
-                  <>
-                    <RefreshCw className="h-3 w-3 mr-1 animate-spin" />{" "}
-                    Deleting...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="h-3 w-3 mr-1" /> Delete
-                  </>
-                )}
-              </Button>
-            </div>
-          </AlertDialogContent>
-        </AlertDialog>
+        <DeleteDialog
+        productToDelete={productToDelete}
+        setProductToDelete={setProductToDelete}
+        deleteResource={deleteResource}
+        isDeleting={isDeleting}
+        />
       </div>
     </TooltipProvider>
   );

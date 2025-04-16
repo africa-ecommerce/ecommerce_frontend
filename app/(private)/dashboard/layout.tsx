@@ -12,7 +12,7 @@ const globalFetcher = async (url: string) => {
     throw new Error("Something went wrong");
   }
 
-  const { data } = await response.json();
+  const  data  = await response.json();
   console.log(data);
   console.log("yessssss");
 
