@@ -90,6 +90,7 @@ import { productFormSchema, ProductFormData } from "@/zod/schema";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import { z } from "zod";
 import { mutate } from "swr";
+import { PRODUCT_CATEGORIES } from "@/app/constant";
 
 export function AddProductModal({
   open,
@@ -517,25 +518,16 @@ const handleSubmit = async (e: React.FormEvent) => {
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                         <SelectContent className="z-[200]">
-                          <SelectItem value="skincare" className="text-base">
-                            Skincare
-                          </SelectItem>
-                          <SelectItem value="haircare" className="text-base">
-                            Hair Care
-                          </SelectItem>
-                          <SelectItem value="bodycare" className="text-base">
-                            Body Care
-                          </SelectItem>
-                          <SelectItem value="makeup" className="text-base">
-                            Makeup
-                          </SelectItem>
-                          <SelectItem value="fragrance" className="text-base">
-                            Fragrance
-                          </SelectItem>
-                          <SelectItem value="accessories" className="text-base">
-                            Accessories
-                          </SelectItem>
-                        </SelectContent>
+                            {PRODUCT_CATEGORIES.map((category) => (
+                              <SelectItem 
+                                key={category.value} 
+                                value={category.value}
+                                className="text-xs md:text-sm"
+                              >
+                                {category.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
                       </Select>
                     </div>
 

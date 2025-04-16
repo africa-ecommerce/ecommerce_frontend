@@ -8,13 +8,11 @@ import { SWRConfig } from "swr";
 const globalFetcher = async (url: string) => {
   const response = await fetch(url);
   if (!response.ok) {
-    console.log("noooooo");
     throw new Error("Something went wrong");
   }
 
   const  data  = await response.json();
-  console.log(data);
-  console.log("yessssss");
+  
 
   return data;
 };
@@ -27,10 +25,7 @@ export default function DashboardLayout({
   useEffect(() => {
     // Prefetch multiple data sources using the same fetcher
     preload("/api/products/supplier/", globalFetcher);
-    // preload("/api/user", globalFetcher);
-    // preload("/api/orders", globalFetcher);
-
-    // You can add more preload calls as needed
+    
   }, []);
 
   return (

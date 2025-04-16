@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { 
   AlertDialog,
   AlertDialogContent,
@@ -21,15 +21,17 @@ interface DeleteDialogProps {
         error: string;
       }
   >;
-  isDeleting: boolean;
-}
+    }
+  
 
 const DeleteDialog = ({
   productToDelete,
   setProductToDelete,
-  deleteResource,
-  isDeleting,
+  deleteResource
+  
 }: DeleteDialogProps) => {
+
+  const [isDeleting, setIsDeleting] = useState(false)
   return (
     <div>
       <AlertDialog
@@ -59,6 +61,7 @@ const DeleteDialog = ({
               className="text-xs h-8"
               onClick={async () => {
                 try {
+                  setIsDeleting(true);
                   const result = await deleteResource(productToDelete);
                   if (result.success) {
                     setProductToDelete(""); // Clear delete state
@@ -69,6 +72,8 @@ const DeleteDialog = ({
                   }
                 } catch (error) {
                   console.error("Delete failed:", error);
+                } finally{
+                  setIsDeleting(false);
                 }
               }}
               disabled={isDeleting}

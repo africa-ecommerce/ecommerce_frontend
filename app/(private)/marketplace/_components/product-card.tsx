@@ -87,14 +87,14 @@ export function ProductCard({ product, className }: ProductCardProps) {
         {/* Product Image with Badges */}
         <div className="relative aspect-square overflow-hidden bg-muted">
           <img
-            src={product.image || "/placeholder.svg"}
-            alt={product.name}
+            src={product?.image || "/placeholder.svg"}
+            alt={product?.name}
             className="h-full w-full object-cover transition-transform group-hover:scale-105"
             loading="lazy"
             width={300}
             height={300}
           />
-          {product.trending && (
+          {product?.trending && (
             <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground" variant="secondary">
               Trending
             </Badge>
@@ -114,7 +114,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <div className="flex items-center text-xs text-muted-foreground flex-wrap gap-x-1">
             <div className="flex items-center">
               <ShoppingBag className="mr-0.5 h-3 w-3" />
-              <span className="truncate">{product.sales.toLocaleString()} sold</span>
+              <span className="truncate">{product?.sales?.toLocaleString()} sold</span>
             </div>
           </div>
 
@@ -122,7 +122,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
               <div className="text-xs font-semibold md:text-base">
-                ₦{product.recommendedPrice.toLocaleString()}
+                ₦{product?.recommendedPrice?.toLocaleString()}
               </div>
             </div>
 
@@ -134,7 +134,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
                 >
                   <Users className="h-3 w-3 flex-shrink-0" />
                   <span className="text-[10px] sm:text-xs">
-                    {product.plugsCount} {product.plugsCount === 1 ? 'plug' : 'plugs'}
+                    {product?.plugsCount} {product?.plugsCount === 1 ? 'plug' : 'plugs'}
                   </span>
                 </div>
               </TooltipTrigger>
@@ -148,15 +148,15 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <div className="flex items-center gap-1 pt-1">
             <Avatar className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0">
               <AvatarImage 
-                src={product.supplier.image || "/placeholder.svg"} 
-                alt={product.supplier.name} 
+                src={product?.supplier?.image || "/placeholder.svg"} 
+                alt={product?.supplier?.name} 
               />
               <AvatarFallback>
-                {product.supplier.name.charAt(0).toUpperCase()}
+                {product?.supplier?.name?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <span className="text-xs sm:text-sm truncate max-w-[calc(100%-24px)]">
-              {product.supplier.name}
+              {product?.supplier?.name}
             </span>
           </div>
 

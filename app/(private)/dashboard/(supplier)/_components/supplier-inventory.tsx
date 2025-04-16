@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import {
   AlertCircle,
@@ -11,30 +12,28 @@ import {
   Download,
   Filter,
   HelpCircle,
-  LineChart,
   MoreHorizontal,
   PackagePlus,
   Pencil,
   Plus,
-  QrCode,
   RefreshCw,
   Search,
   Settings,
   Sliders,
   Tag,
   Trash2,
-  TrendingDown,
   TrendingUp,
   Users,
   X,
   Menu,
+  Package,
+  FilterX,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -62,7 +61,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Sheet,
   SheetContent,
@@ -72,22 +70,107 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { AddProductModal } from "./add-product-modal";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import useSWR from "swr";
 import Image from "next/image";
 import { useDeleteResource } from "@/hooks/resourceManagement/useDeleteResources";
 import DeleteDialog from "./delete-dialog";
+import { PRODUCT_CATEGORIES } from "@/app/constant";
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
+import EmptyState from "@/app/_components/empty-state";
 
-const deleteProductFn = async (id) => {
+const LoadingSkeleton = () => (
+  <Card>
+    <CardContent className="p-0">
+      <div className="relative overflow-x-auto">
+        <table className="w-full text-sm">
+          <tbody>
+            {[...Array(6)].map((_, i) => (
+              <tr key={i} className="border-b">
+                <td className="p-2 sm:p-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <Skeleton className="w-8 h-8 sm:w-10 sm:h-10 rounded-md" />
+                    <Skeleton className="h-4 w-[100px]" />
+                  </div>
+                </td>
+                <td className="p-2 sm:p-3">
+                  <Skeleton className="h-4 w-[60px]" />
+                </td>
+                <td className="p-2 sm:p-3">
+                  <Skeleton className="h-4 w-[40px]" />
+                </td>
+                <td className="p-2 sm:p-3">
+                  <Skeleton className="h-6 w-[70px]" />
+                </td>
+                <td className="p-2 sm:p-3">
+                  <Skeleton className="h-4 w-[40px]" />
+                </td>
+                <td className="p-2 sm:p-3">
+                  <Skeleton className="h-4 w-[40px]" />
+                </td>
+                <td className="p-2 sm:p-3">
+                  <Skeleton className="h-7 w-7 sm:h-8 sm:w-8 rounded-md" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const ErrorState = ({ onRetry }: { onRetry?: () => void }) => (
+  <EmptyState
+    icon={<AlertCircle className="h-12 w-12 text-destructive" />}
+    title="Something went wrong"
+    description="There was an error loading the products. Please try again later."
+    actionText="Try Again"
+    onAction={onRetry}
+  />
+);
+
+const EmptyFilterState = ({
+  onResetFilters,
+}: {
+  onResetFilters?: () => void;
+}) => (
+  <EmptyState
+    icon={<FilterX className="h-12 w-12 text-muted-foreground" />}
+    title="No products found matching your criteria"
+    description="Try adjusting your search or filter parameters to find what you're looking for."
+    actionText="Reset Filters"
+    onAction={onResetFilters}
+  />
+);
+
+const EmptyProductsState = ({
+  onAddProduct,
+}: {
+  onAddProduct?: () => void;
+}) => (
+  <EmptyState
+    icon={<Package className="h-12 w-12 text-muted-foreground" />}
+    title="No products yet"
+    description="You haven't added any products to your inventory. Add your first product to get started."
+    actionText="Add Your First Product"
+    onAction={onAddProduct}
+    showBorder={false}
+  />
+);
+
+const deleteProductFn = async (id: string) => {
   const response = await fetch(`/api/products/${id}`, {
     method: "DELETE",
   });
+  const result = await response.json();
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "Failed to delete product");
+    errorToast(result.error);
+    return null;
   }
+  successToast(result.message);
+  return result;
 };
 
 export default function Inventory() {
@@ -107,29 +190,21 @@ export default function Inventory() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
 
-  const {
-    deleteResource,
-    isLoading: isDeleting,
-    error: deleteError,
-  } = useDeleteResource(
+  const { deleteResource } = useDeleteResource(
     "/api/products/supplier/",
     async () => {
       const res = await fetch("/api/products/supplier/");
       if (!res.ok) throw new Error("Failed to fetch products");
       return res.json();
     },
-    deleteProductFn,
-    () => {
-      // Optional success callback
-      // You could show a success toast notification here
-    }
+    deleteProductFn
   );
 
   // Fetch data
-  const { data, error, isLoading } = useSWR("/api/products/supplier/");
+  const { data, error, isLoading, mutate } = useSWR("/api/products/supplier/");
   console.log(data);
- const products = Array.isArray(data?.data) ? data?.data : [];
-   console.log("products", products);
+  const products = Array.isArray(data?.data) ? data?.data : [];
+  console.log("products", products);
 
   // Filter items based on selected category, filter, and search query
   const filteredItems = products?.filter((item: any) => {
@@ -226,25 +301,6 @@ export default function Inventory() {
     }
   };
 
-  // const toggleItemSelection = (id) => {
-  //   if (selectedItems.includes(id)) {
-  //     setSelectedItems(selectedItems.filter((item) => item !== id));
-  //   } else {
-  //     setSelectedItems([...selectedItems, id]);
-  //   }
-  // };
-
-  const selectAllItems = () => {
-    if (
-      selectedItems.length === currentItems.length &&
-      currentItems.length > 0
-    ) {
-      setSelectedItems([]);
-    } else {
-      setSelectedItems(currentItems.map((item) => item.id));
-    }
-  };
-
   const clearSearch = () => {
     setSearchQuery("");
   };
@@ -289,161 +345,7 @@ export default function Inventory() {
               <Download className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
               <span className="sr-only">Export</span>
             </Button>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-7 max-w-[360px]:h-6 w-7 max-w-[360px]:w-6 sm:h-8 sm:w-8 md:h-9 md:w-9 md:hidden"
-                >
-                  <Menu className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 sm:h-3.5 sm:w-3.5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-4/5 sm:max-w-sm">
-                <SheetHeader className="mb-6">
-                  <SheetTitle>Inventory Menu</SheetTitle>
-                  <SheetDescription>
-                    Quick access to inventory features
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="space-y-6">
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-medium">Actions</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowEnhancedAddProduct(true)}
-                        className="justify-start text-xs"
-                      >
-                        <Plus className="h-3.5 w-3.5 mr-2" /> Add Product
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="justify-start text-xs"
-                      >
-                        <PackagePlus className="h-3.5 w-3.5 mr-2" /> Restock
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="justify-start text-xs"
-                      >
-                        <Tag className="h-3.5 w-3.5 mr-2" /> Promotions
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="justify-start text-xs"
-                      >
-                        <Settings className="h-3.5 w-3.5 mr-2" /> Settings
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-medium">Quick Filters</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        variant={
-                          selectedFilter === "out-of-stock"
-                            ? "default"
-                            : "outline"
-                        }
-                        size="sm"
-                        onClick={() => setSelectedFilter("out-of-stock")}
-                        className="justify-start text-xs"
-                      >
-                        <AlertCircle className="h-3.5 w-3.5 mr-2" /> Out of
-                        Stock
-                      </Button>
-                      <Button
-                        variant={
-                          selectedFilter === "low-stock" ? "default" : "outline"
-                        }
-                        size="sm"
-                        onClick={() => setSelectedFilter("low-stock")}
-                        className="justify-start text-xs"
-                      >
-                        <AlertCircle className="h-3.5 w-3.5 mr-2" /> Low Stock
-                      </Button>
-                      <Button
-                        variant={
-                          selectedFilter === "optimal" ? "default" : "outline"
-                        }
-                        size="sm"
-                        onClick={() => setSelectedFilter("optimal")}
-                        className="justify-start text-xs"
-                      >
-                        <TrendingUp className="h-3.5 w-3.5 mr-2" /> Optimal
-                        Stock
-                      </Button>
-                      <Button
-                        variant={
-                          selectedFilter === "all" ? "default" : "outline"
-                        }
-                        size="sm"
-                        onClick={() => setSelectedFilter("all")}
-                        className="justify-start text-xs"
-                      >
-                        <Filter className="h-3.5 w-3.5 mr-2" /> All Products
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-medium">Categories</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        variant={
-                          selectedCategory === "Skincare"
-                            ? "default"
-                            : "outline"
-                        }
-                        size="sm"
-                        onClick={() => setSelectedCategory("Skincare")}
-                        className="justify-start text-xs"
-                      >
-                        Skincare
-                      </Button>
-                      <Button
-                        variant={
-                          selectedCategory === "Hair Care"
-                            ? "default"
-                            : "outline"
-                        }
-                        size="sm"
-                        onClick={() => setSelectedCategory("Hair Care")}
-                        className="justify-start text-xs"
-                      >
-                        Hair Care
-                      </Button>
-                      <Button
-                        variant={
-                          selectedCategory === "Personal Care"
-                            ? "default"
-                            : "outline"
-                        }
-                        size="sm"
-                        onClick={() => setSelectedCategory("Personal Care")}
-                        className="justify-start text-xs"
-                      >
-                        Personal Care
-                      </Button>
-                      <Button
-                        variant={
-                          selectedCategory === "all" ? "default" : "outline"
-                        }
-                        size="sm"
-                        onClick={() => setSelectedCategory("all")}
-                        className="justify-start text-xs"
-                      >
-                        All Categories
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+           
             <Button
               variant="outline"
               size="icon"
@@ -629,137 +531,7 @@ export default function Inventory() {
               )}
             </div>
             <div className="flex items-center gap-2 max-w-[360px]:gap-1 overflow-x-auto pb-1 scrollbar-hide">
-              <Drawer>
-                <DrawerTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap flex items-center"
-                  >
-                    <Filter className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 mr-1.5 max-w-[360px]:mr-1" />
-                    Filters
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent className="px-4 max-w-[360px]:px-3 pb-4 max-w-[360px]:pb-3">
-                  <div className="pt-4 max-w-[360px]:pt-3 pb-2 max-w-[360px]:pb-1 border-b">
-                    <h3 className="font-medium text-sm max-w-[360px]:text-xs">
-                      Filter Products
-                    </h3>
-                  </div>
-                  <div className="py-4 max-w-[360px]:py-3 space-y-4 max-w-[360px]:space-y-3">
-                    <div className="space-y-2 max-w-[360px]:space-y-1">
-                      <label className="text-xs max-w-[360px]:text-[11px] font-medium">
-                        Category
-                      </label>
-                      <Select
-                        value={selectedCategory}
-                        onValueChange={setSelectedCategory}
-                      >
-                        <SelectTrigger className="w-full text-xs h-8 max-w-[360px]:h-7">
-                          <SelectValue placeholder="Category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all" className="text-xs">
-                            All Categories
-                          </SelectItem>
-                          <SelectItem value="Skincare" className="text-xs">
-                            Skincare
-                          </SelectItem>
-                          <SelectItem value="Hair Care" className="text-xs">
-                            Hair Care
-                          </SelectItem>
-                          <SelectItem value="Personal Care" className="text-xs">
-                            Personal Care
-                          </SelectItem>
-                          <SelectItem value="Accessories" className="text-xs">
-                            Accessories
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2 max-w-[360px]:space-y-1">
-                      <label className="text-xs max-w-[360px]:text-[11px] font-medium">
-                        Stock Status
-                      </label>
-                      <Select
-                        value={selectedFilter}
-                        onValueChange={setSelectedFilter}
-                      >
-                        <SelectTrigger className="w-full text-xs h-8 max-w-[360px]:h-7">
-                          <SelectValue placeholder="Stock Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all" className="text-xs">
-                            All Products
-                          </SelectItem>
-                          <SelectItem value="out-of-stock" className="text-xs">
-                            Out of Stock
-                          </SelectItem>
-                          <SelectItem value="low-stock" className="text-xs">
-                            Low Stock
-                          </SelectItem>
-                          <SelectItem value="optimal" className="text-xs">
-                            Optimal Stock
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2 max-w-[360px]:space-y-1">
-                      <label className="text-xs max-w-[360px]:text-[11px] font-medium">
-                        Sort By
-                      </label>
-                      <Select defaultValue="name-asc">
-                        <SelectTrigger className="w-full text-xs h-8 max-w-[360px]:h-7">
-                          <SelectValue placeholder="Sort By" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="name-asc" className="text-xs">
-                            Name (A-Z)
-                          </SelectItem>
-                          <SelectItem value="name-desc" className="text-xs">
-                            Name (Z-A)
-                          </SelectItem>
-                          <SelectItem value="price-asc" className="text-xs">
-                            Price (Low to High)
-                          </SelectItem>
-                          <SelectItem value="price-desc" className="text-xs">
-                            Price (High to Low)
-                          </SelectItem>
-                          <SelectItem value="stock-asc" className="text-xs">
-                            Stock (Low to High)
-                          </SelectItem>
-                          <SelectItem value="stock-desc" className="text-xs">
-                            Stock (High to Low)
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 max-w-[360px]:gap-1 mt-2 max-w-[360px]:mt-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 h-8 max-w-[360px]:h-7"
-                      onClick={() => {
-                        setSelectedCategory("all");
-                        setSelectedFilter("all");
-                      }}
-                    >
-                      Reset
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="flex-1 h-8 max-w-[360px]:h-7"
-                      onClick={() => {
-                        // Apply filters logic - already handled by state changes
-                        setCurrentPage(1); // Reset to first page when filters change
-                      }}
-                    >
-                      Apply Filters
-                    </Button>
-                  </div>
-                </DrawerContent>
-              </Drawer>
+             
               <div className="flex gap-1.5 max-w-[360px]:gap-1">
                 <Button
                   variant={selectedFilter === "all" ? "default" : "outline"}
@@ -810,44 +582,29 @@ export default function Inventory() {
                   In Stock
                 </Button>
               </div>
-              <div className="hidden sm:block">
+              <div className="">
                 <Select
-                  value={selectedCategory}
-                  onValueChange={(value) => {
-                    setSelectedCategory(value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <SelectTrigger className="w-[120px] md:w-[150px] text-xs md:text-sm h-8 sm:h-9">
-                    <SelectValue placeholder="Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all" className="text-xs md:text-sm">
-                      All Categories
-                    </SelectItem>
-                    <SelectItem value="Skincare" className="text-xs md:text-sm">
-                      Skincare
-                    </SelectItem>
-                    <SelectItem
-                      value="Hair Care"
-                      className="text-xs md:text-sm"
-                    >
-                      Hair Care
-                    </SelectItem>
-                    <SelectItem
-                      value="Personal Care"
-                      className="text-xs md:text-sm"
-                    >
-                      Personal Care
-                    </SelectItem>
-                    <SelectItem
-                      value="Accessories"
-                      className="text-xs md:text-sm"
-                    >
-                      Accessories
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+  value={selectedCategory}
+  onValueChange={(value) => {
+    setSelectedCategory(value);
+    setCurrentPage(1);
+  }}
+>
+  <SelectTrigger className="w-[120px] md:w-[150px] text-xs md:text-sm h-8 sm:h-9">
+    <SelectValue placeholder="Category" />
+  </SelectTrigger>
+  <SelectContent>
+    {PRODUCT_CATEGORIES.map((category) => (
+      <SelectItem 
+        key={category.value} 
+        value={category.value}
+        className="text-xs md:text-sm"
+      >
+        {category.label}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
               </div>
             </div>
           </div>
@@ -886,25 +643,37 @@ export default function Inventory() {
                     <tbody>
                       {isLoading ? (
                         <tr>
-                          <td colSpan={8} className="p-4 text-center">
-                            <div className="flex justify-center items-center">
-                              <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-                              <span className="text-muted-foreground text-sm">
-                                Loading products...
-                              </span>
-                            </div>
+                          <td colSpan={8} className="p-0">
+                            <LoadingSkeleton />
                           </td>
                         </tr>
                       ) : error ? (
                         <tr>
-                          <td
-                            colSpan={8}
-                            className="p-4 text-center text-destructive text-sm"
-                          >
-                            Error loading products. Please try again.
+                          <td colSpan={8} className="p-0">
+                            <ErrorState onRetry={() => mutate()} />
                           </td>
                         </tr>
-                      ) : currentItems?.length > 0 ? (
+                      ) : filteredItems?.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="p-0">
+                            {products.length === 0 ? (
+                              <EmptyProductsState
+                                onAddProduct={() =>
+                                  setShowEnhancedAddProduct(true)
+                                }
+                              />
+                            ) : (
+                              <EmptyFilterState
+                                onResetFilters={() => {
+                                  setSelectedCategory("all");
+                                  setSelectedFilter("all");
+                                  setSearchQuery("");
+                                }}
+                              />
+                            )}
+                          </td>
+                        </tr>
+                      ) : (
                         currentItems.map((item) => {
                           const stockStatus = getStockStatus(item);
                           return (
@@ -949,7 +718,6 @@ export default function Inventory() {
                                   >
                                     {displayValue(item.stock)}
                                   </span>
-                                  
                                 </div>
                               </td>
                               <td className="p-2 sm:p-3">
@@ -1008,15 +776,6 @@ export default function Inventory() {
                             </tr>
                           );
                         })
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan={8}
-                            className="p-4 text-center text-muted-foreground text-xs sm:text-sm"
-                          >
-                            No products found matching your criteria
-                          </td>
-                        </tr>
                       )}
                     </tbody>
                   </table>
@@ -1024,7 +783,9 @@ export default function Inventory() {
               </CardContent>
               <CardFooter className="flex items-center justify-between p-3 sm:p-4 border-t">
                 <div className="text-xs sm:text-sm text-muted-foreground">
-                  Showing {currentItems?.length || 0} of{" "}
+                  Showing{" "}
+                  {Math.min(indexOfFirstItem + 1, filteredItems?.length || 0)}-
+                  {Math.min(indexOfLastItem, filteredItems?.length || 0)} of{" "}
                   {filteredItems?.length || 0} products
                 </div>
                 <div className="flex items-center gap-2">
@@ -1058,10 +819,9 @@ export default function Inventory() {
         />
         {/* Delete Confirmation Dialog */}
         <DeleteDialog
-        productToDelete={productToDelete}
-        setProductToDelete={setProductToDelete}
-        deleteResource={deleteResource}
-        isDeleting={isDeleting}
+          productToDelete={productToDelete}
+          setProductToDelete={setProductToDelete}
+          deleteResource={deleteResource}
         />
       </div>
     </TooltipProvider>
