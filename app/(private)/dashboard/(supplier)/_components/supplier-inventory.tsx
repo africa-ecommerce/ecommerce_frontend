@@ -694,7 +694,7 @@ export default function Inventory() {
                                 <div className="flex items-center gap-2 sm:gap-3">
                                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
                                     <Image
-                                      src={item.image || "/placeholder.svg"}
+                                      src={item.images[0] || "/placeholder.svg"}
                                       alt={item.name}
                                       width={32}
                                       height={32}

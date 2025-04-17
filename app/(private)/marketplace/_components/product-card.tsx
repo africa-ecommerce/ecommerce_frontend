@@ -48,24 +48,25 @@ export function ProductCard({ product, className }: ProductCardProps) {
   //   setIsSaved(!isSaved)
   // }
 
-  const navigateToProduct = () => {
-    window.location.href = `/dashboard/marketplace/product/${product.id}`;
-  }
+  // const navigateToProduct = () => {
+  //   window.location.href = `/dashboard/marketplace/product/${product.id}`;
+  // }
 
   return (
     <TooltipProvider>
+      <Link href={`/marketplace/product/${product?.id}`}>
       <Card 
         className={cn(
           "overflow-hidden transition-all hover:shadow-md group relative border-muted cursor-pointer",
           "w-full max-w-[300px] mx-auto h-full flex flex-col", // Fixed height and flex column
           className
         )}
-        onClick={navigateToProduct}
+        // onClick={navigateToProduct}
       >
         {/* Product Image with Badges */}
         <div className="relative aspect-square overflow-hidden bg-muted">
           <Image
-            src={product?.image || "/placeholder.svg"}
+            src={product?.images?.[0] || "/placeholder.svg"}
             alt={product?.name}
             className="h-full w-full object-cover transition-transform group-hover:scale-105"
             loading="lazy"
@@ -84,7 +85,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           {/* Title */}
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-medium text-xs leading-tight md:text-base truncate max-w-full">
-              {product.name}
+              {product?.name}
             </h3>
           </div>
 
@@ -160,6 +161,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </div>
         </div>
       </Card>
+      </Link>
     </TooltipProvider>
   )
 }

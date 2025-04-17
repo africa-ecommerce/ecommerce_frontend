@@ -42,7 +42,7 @@ export interface ProductsResponse {
 }
 
 export interface ProductQueryParams {
-  cursor?: string;
+  cursor: string;
   limit?: number;
   search?: string;
   category?: string;

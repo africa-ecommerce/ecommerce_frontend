@@ -24,7 +24,7 @@ export interface ProductsFilter {
   tags?: string;
 }
 
-export function useProducts(filters: ProductsFilter, limit: number = 20) {
+export function useProducts(filters: ProductsFilter, limit: number = 4) {
   const debouncedSearch = useDebounce(filters.search, 300);
   
   // Convert filters to query params

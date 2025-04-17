@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Product } from "@/types/product";
+import Image from "next/image";
 
 
 
@@ -33,7 +34,7 @@ export function DiscoveryModeDialog({
 }: DiscoveryModeDialogProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"left" | "right" | null>(null);
-  // const [likedProducts, setLikedProducts] = useState<string[]>([]);
+  const [likedProducts, setLikedProducts] = useState<string[]>([]);
   const [savedProducts, setSavedProducts] = useState<string[]>([]);
   const [exitX, setExitX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -42,7 +43,7 @@ export function DiscoveryModeDialog({
   useEffect(() => {
     if (open) {
       setCurrentIndex(0);
-      // setLikedProducts([]);
+      setLikedProducts([]);
       setSavedProducts([]);
     }
   }, [open]);
@@ -71,24 +72,24 @@ export function DiscoveryModeDialog({
     setIsDragging(true);
   };
 
-  // const handleLike = () => {
-  //   if (isDragging) return;
+  const handleLike = () => {
+    if (isDragging) return;
 
-  //   setDirection("right");
-  //   setExitX(500);
-  //   const currentProductId = products[currentIndex].id;
-  //   setLikedProducts((prev) => [...prev, currentProductId]);
+    setDirection("right");
+    setExitX(500);
+    const currentProductId = products[currentIndex].id;
+    setLikedProducts((prev) => [...prev, currentProductId]);
 
-  //   // Move to next product after animation
-  //   setTimeout(() => {
-  //     if (currentIndex < products.length - 1) {
-  //       setCurrentIndex(currentIndex + 1);
-  //     } else {
-  //       onOpenChange(false);
-  //     }
-  //     setDirection(null);
-  //   }, 300);
-  // };
+    // Move to next product after animation
+    setTimeout(() => {
+      if (currentIndex < products.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+      } else {
+        onOpenChange(false);
+      }
+      setDirection(null);
+    }, 300);
+  };
 
   const handleSkip = () => {
     if (isDragging) return;
@@ -126,9 +127,9 @@ export function DiscoveryModeDialog({
           <div className="relative h-full flex flex-col bg-black">
             {/* Header */}
             <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4">
-              <div className="bg-black/70 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
+              {/* <div className="bg-black/70 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
                 {currentIndex + 1} / {products.length}
-              </div>
+              </div> */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -144,7 +145,7 @@ export function DiscoveryModeDialog({
             <div className="flex-1 flex items-center justify-center overflow-hidden touch-none">
               <AnimatePresence initial={false} custom={direction} mode="wait">
                 <motion.div
-                  key={currentProduct.id}
+                  key={currentProduct?.id}
                   className="absolute w-full h-full"
                   custom={direction}
                   initial={{
@@ -182,84 +183,83 @@ export function DiscoveryModeDialog({
                   <div className="relative h-full flex flex-col">
                     {/* Product Image */}
                     <div className="relative flex-1 bg-muted overflow-hidden">
-                      <img
-                        src={currentProduct.image || "/placeholder.svg"}
-                        alt={currentProduct.name}
+                      <Image
+                        src={currentProduct?.images?.[0] || "/placeholder.svg"}
+                        alt={currentProduct?.name}
                         className="h-full w-full object-cover"
                         loading="eager"
                         width={600}
                         height={600}
                       />
-                      {currentProduct.trending && (
+                      {/* {currentProduct.trending && (
                         <Badge
                           className="absolute top-4 sm:top-16 left-4 bg-primary text-primary-foreground"
                           variant="secondary"
                         >
                           Trending
                         </Badge>
-                      )}
+                      )} */}
                     </div>
 
                     {/* Product Info */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-4 text-white">
                       <div className="flex items-center justify-between">
                         <h3 className="text-xl font-bold line-clamp-1">
-                          {currentProduct.name}
+                          {currentProduct?.name}
                         </h3>
                         <div className="flex items-center gap-1 shrink-0 ml-2">
                           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                           <span className="text-sm sm:text-base">
-                            {currentProduct.rating}
+                            {currentProduct?.rating}
                           </span>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 mt-1 text-sm text-white/80 flex-wrap">
-                        <span>{currentProduct.category}</span>
+                        <span>{currentProduct?.category}</span>
                         <span>•</span>
                         <div className="flex items-center">
                           <Users className="mr-1 h-3.5 w-3.5" />
-                          {currentProduct.plugsCount} plugs
+                          {currentProduct?.plugsCount} plugs
                         </div>
                       </div>
 
                       <div className="mt-2 flex items-center justify-between gap-2">
                         <div>
                           <div className="text-lg font-bold sm:text-xl">
-                            ₦{currentProduct.recommendedPrice.toLocaleString()}
+                            ₦{currentProduct?.price?.toLocaleString()}
                           </div>
-                          <div className="flex items-center gap-1 text-xs text-green-400">
+                          {/* <div className="flex items-center gap-1 text-xs text-green-400">
                             <span>
                               ₦{currentProduct.profit.toLocaleString()} profit
                             </span>
                             <span className="rounded-full bg-green-900/50 px-1">
                               {currentProduct.profitMargin}%
                             </span>
-                          </div>
+                          </div> */}
                         </div>
 
                         <div className="flex items-center gap-1 min-w-0">
                           <Avatar className="h-6 w-6 border border-white/20 shrink-0">
                             <AvatarImage
                               src={
-                                currentProduct.supplier.image ||
+                                currentProduct?.supplier?.image ||
                                 "/placeholder.svg"
                               }
-                              alt={currentProduct.supplier.name}
+                              alt={currentProduct?.supplier?.name}
                             />
                             <AvatarFallback>
-                              {currentProduct.supplier.name
-                                .charAt(0)
+                              {currentProduct?.supplier?.name?.charAt(0)
                                 .toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           <span className="text-sm truncate">
-                            {currentProduct.supplier.name}
+                            {currentProduct?.supplier?.name}
                           </span>
                         </div>
                       </div>
 
-                      <div className="mt-2 flex items-center gap-1">
+                      {/* <div className="mt-2 flex items-center gap-1">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between text-xs">
                             <span>Market Fit</span>
@@ -293,7 +293,7 @@ export function DiscoveryModeDialog({
                             </p>
                           </TooltipContent>
                         </Tooltip>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 </motion.div>
@@ -320,13 +320,13 @@ export function DiscoveryModeDialog({
                 className={cn(
                   "h-14 w-14 sm:h-16 sm:w-16 rounded-full bg-white/95 border-amber-200 shadow-lg",
                   "hover:bg-white hover:scale-105 transition-transform",
-                  savedProducts.includes(currentProduct.id)
+                  savedProducts.includes(currentProduct?.id)
                     ? "text-amber-500"
                     : "text-muted-foreground"
                 )}
                 onClick={handleSave}
                 aria-label={
-                  savedProducts.includes(currentProduct.id)
+                  savedProducts.includes(currentProduct?.id)
                     ? "Remove from saved"
                     : "Save product"
                 }
@@ -334,7 +334,7 @@ export function DiscoveryModeDialog({
                 <BookmarkPlus
                   className={cn(
                     "h-6 w-6 sm:h-7 sm:w-7",
-                    savedProducts.includes(currentProduct.id) && "fill-current"
+                    savedProducts.includes(currentProduct?.id) && "fill-current"
                   )}
                 />
               </Button>
