@@ -10,7 +10,6 @@ import Image from "next/image";
 interface ProductImageGalleryProps {
   images: string[];
   videos?: string[];
-  onExpandClick?: () => void;
   onVideoPlayClick?: (videoUrl: string) => void;
   className?: string;
 }
@@ -18,21 +17,16 @@ interface ProductImageGalleryProps {
 export function ProductImageGallery({
   images,
   videos = [],
-  onExpandClick,
   onVideoPlayClick,
   className,
 }: ProductImageGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isZoomed, setIsZoomed] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(0);
   const imageContainerRef = useRef<HTMLDivElement>(null);
-  const expandedViewRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -66,30 +60,20 @@ export function ProductImageGallery({
 
   const handlePrevious = () => {
     setCurrentIndex((prev) => (prev === 0 ? allMedia.length - 1 : prev - 1));
-    setIsZoomed(false);
+   
   };
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === allMedia.length - 1 ? 0 : prev + 1));
-    setIsZoomed(false);
+   
   };
 
   const handleThumbnailClick = (index: number) => {
     setCurrentIndex(index);
-    setIsZoomed(false);
+   
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isZoomed || !imageContainerRef.current) return;
-
-    const { left, top, width, height } =
-      imageContainerRef.current.getBoundingClientRect();
-    const x = ((e.clientX - left) / width) * 100;
-    const y = ((e.clientY - top) / height) * 100;
-
-    setZoomPosition({ x, y });
-  };
-
+  
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX);
   };
@@ -108,23 +92,8 @@ export function ProductImageGallery({
     }
   };
 
-  const toggleZoom = () => {
-    if (allMedia[currentIndex]?.type !== "image") return;
-    setIsZoomed(!isZoomed);
-  };
-
-  const handleExpandClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsExpanded(true);
-    if (onExpandClick) {
-      onExpandClick();
-    }
-  };
-
-  const handleCloseExpand = () => {
-    setIsExpanded(false);
-    setIsZoomed(false);
-  };
+ 
+ 
 
   const handleVideoPlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -155,9 +124,7 @@ export function ProductImageGallery({
         className={cn(
           "relative overflow-hidden bg-muted rounded-lg touch-pan-y mx-auto"
         )}
-        // onClick={toggleZoom}
-        onMouseMove={handleMouseMove}
-        // onMouseLeave={() => setIsZoomed(false)}
+        // onMouseMove={handleMouseMove}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -179,17 +146,8 @@ export function ProductImageGallery({
                   fill
                   sizes="(max-width: 768px) 100vw, 600px"
                   priority={currentIndex === 0}
-                  className={cn(
-                    "object-contain transition-transform duration-300",
-                    isZoomed ? "scale-150" : "scale-100"
-                  )}
-                  style={
-                    isZoomed
-                      ? {
-                          transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
-                        }
-                      : undefined
-                  }
+                  className=
+                    "object-contain transition-transform duration-300 scale-100"                 
                   draggable="false"
                 />
               </div>
@@ -279,7 +237,7 @@ export function ProductImageGallery({
           <div
             className={cn(
               "grid gap-2",
-              isMobile ? "grid-cols-3" : "grid-cols-5"
+              isMobile ? "grid-cols-4" : "grid-cols-4"
             )}
           >
             {allMedia.map((media, index) => (
