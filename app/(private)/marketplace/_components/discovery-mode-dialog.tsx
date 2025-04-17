@@ -16,32 +16,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { Product } from "@/types/product";
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  supplierPrice: number;
-  recommendedPrice: number;
-  profit: number;
-  profitMargin: number;
-  rating: number;
-  reviews: number;
-  sales: number;
-  marketFitScore: number;
-  trending: boolean;
-  stock: number;
-  image: string;
-  supplier: {
-    id: string;
-    name: string;
-    rating: number;
-    fulfillmentRate: number;
-    responseTime: string;
-    image: string;
-  };
-  plugsCount: number;
-}
+
 
 interface DiscoveryModeDialogProps {
   open: boolean;
@@ -56,7 +33,7 @@ export function DiscoveryModeDialog({
 }: DiscoveryModeDialogProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"left" | "right" | null>(null);
-  const [likedProducts, setLikedProducts] = useState<string[]>([]);
+  // const [likedProducts, setLikedProducts] = useState<string[]>([]);
   const [savedProducts, setSavedProducts] = useState<string[]>([]);
   const [exitX, setExitX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -65,7 +42,7 @@ export function DiscoveryModeDialog({
   useEffect(() => {
     if (open) {
       setCurrentIndex(0);
-      setLikedProducts([]);
+      // setLikedProducts([]);
       setSavedProducts([]);
     }
   }, [open]);
@@ -94,24 +71,24 @@ export function DiscoveryModeDialog({
     setIsDragging(true);
   };
 
-  const handleLike = () => {
-    if (isDragging) return;
+  // const handleLike = () => {
+  //   if (isDragging) return;
 
-    setDirection("right");
-    setExitX(500);
-    const currentProductId = products[currentIndex].id;
-    setLikedProducts((prev) => [...prev, currentProductId]);
+  //   setDirection("right");
+  //   setExitX(500);
+  //   const currentProductId = products[currentIndex].id;
+  //   setLikedProducts((prev) => [...prev, currentProductId]);
 
-    // Move to next product after animation
-    setTimeout(() => {
-      if (currentIndex < products.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-      } else {
-        onOpenChange(false);
-      }
-      setDirection(null);
-    }, 300);
-  };
+  //   // Move to next product after animation
+  //   setTimeout(() => {
+  //     if (currentIndex < products.length - 1) {
+  //       setCurrentIndex(currentIndex + 1);
+  //     } else {
+  //       onOpenChange(false);
+  //     }
+  //     setDirection(null);
+  //   }, 300);
+  // };
 
   const handleSkip = () => {
     if (isDragging) return;

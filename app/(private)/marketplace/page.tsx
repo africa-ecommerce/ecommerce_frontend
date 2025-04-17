@@ -830,11 +830,11 @@ export default function MarketplacePage() {
         </main>
 
         {/* Discovery Mode Dialog */}
-        {/* <DiscoveryModeDialog
+        <DiscoveryModeDialog
           open={showDiscoveryMode}
           onOpenChange={setShowDiscoveryMode}
           products={products}
-        /> */}
+        />
       </div>
     </TooltipProvider>
   );

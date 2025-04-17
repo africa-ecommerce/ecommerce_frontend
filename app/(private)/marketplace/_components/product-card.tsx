@@ -11,32 +11,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
+import { Product } from "@/types/product"
 
-interface Product {
-  id: string
-  name: string
-  category: string
-  supplierPrice: number
-  recommendedPrice: number
-  profit: number
-  profitMargin: number
-  rating: number
-  reviews: number
-  sales: number
-  marketFitScore: number
-  trending: boolean
-  stock: number
-  image: string
-  supplier: {
-    id: string
-    name: string
-    rating: number
-    fulfillmentRate: number
-    responseTime: string
-    image: string
-  }
-  plugsCount: number
-}
+
 
 interface ProductCardProps {
   product: Product
@@ -64,11 +42,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
     }, 800)
   }
 
-  const handleSave = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsSaved(!isSaved)
-  }
+  // const handleSave = (e: React.MouseEvent) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   setIsSaved(!isSaved)
+  // }
 
   const navigateToProduct = () => {
     window.location.href = `/dashboard/marketplace/product/${product.id}`;
@@ -86,7 +64,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       >
         {/* Product Image with Badges */}
         <div className="relative aspect-square overflow-hidden bg-muted">
-          <img
+          <Image
             src={product?.image || "/placeholder.svg"}
             alt={product?.name}
             className="h-full w-full object-cover transition-transform group-hover:scale-105"
@@ -94,11 +72,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
             width={300}
             height={300}
           />
-          {product?.trending && (
+          {/* {product?.trending && (
             <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground" variant="secondary">
               Trending
             </Badge>
-          )}
+          )} */}
         </div>
 
         {/* Product Details */}
@@ -122,7 +100,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
               <div className="text-xs font-semibold md:text-base">
-                ₦{product?.recommendedPrice?.toLocaleString()}
+                ₦{product?.price?.toLocaleString()}
               </div>
             </div>
 
