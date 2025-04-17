@@ -290,7 +290,7 @@ export default function ProductDetail() {
               <TabsContent value="description" className="mt-4 space-y-4">
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">About this product</h3>
-                  <p className="text-sm">{product?.description}</p>
+                  <p className="text-sm truncate break-words">{product?.description}</p>
 
                   
                 </div>
