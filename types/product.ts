@@ -24,7 +24,7 @@ export interface Product {
   description?: string;
   tags?: string[];
   createdAt?: string;
-  images?: string[];
+  images: string[];
 
 }
 

@@ -7,10 +7,10 @@ import {
   type ReactNode,
   useEffect,
 } from "react";
-import { ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react";
+import { ShoppingCart, X, Plus, Minus, Trash2, Package, Check, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Sheet,
   SheetContent,
@@ -34,10 +34,11 @@ interface ShoppingCartContextType {
   items: CartItem[];
   itemCount: number;
   totalPrice: number;
-  addItem: (item: CartItem) => void;
+  addItem: (item: CartItem, openCart?: boolean) => void;
   removeItem: (itemId: number) => void;
   updateQuantity: (itemId: number, quantity: number) => void;
   clearCart: () => void;
+  openCart: () => void;
 }
 
 interface ShoppingCartProviderProps {
@@ -55,7 +56,9 @@ export function ShoppingCartProvider({
 }: ShoppingCartProviderProps) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isConfirmMode, setIsConfirmMode] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   // Check if current path should be excluded
   const shouldShowCart = !excludePaths.some((path) => {
@@ -74,7 +77,13 @@ export function ShoppingCartProvider({
     0
   );
 
-  const addItem = (newItem: CartItem) => {
+  // Function to explicitly open the cart
+  const openCart = () => {
+    setIsOpen(true);
+  };
+
+  // Modified addItem to accept an openCart parameter that defaults to false
+  const addItem = (newItem: CartItem, openCart = false) => {
     setItems((prevItems) => {
       // Check if item already exists in cart
       const existingItemIndex = prevItems.findIndex(
@@ -93,8 +102,10 @@ export function ShoppingCartProvider({
       }
     });
 
-    // Open cart when adding items
-    setIsOpen(true);
+    // Only open cart if explicitly requested
+    if (openCart) {
+      setIsOpen(true);
+    }
   };
 
   const removeItem = (itemId: number) => {
@@ -119,6 +130,20 @@ export function ShoppingCartProvider({
       currency: "NGN",
       minimumFractionDigits: 0,
     }).format(price);
+  };
+  
+  const handleConfirm = () => {
+    // Logic for confirming selections
+    // Usually would send to checkout or finalize the store additions
+    // For now, we'll simply route to a success page or close the panel
+    setIsConfirmMode(false);
+    setIsOpen(false);
+    
+    // You could redirect here if needed
+    // router.push('/marketplace/success');
+    
+    // Or show a success notification
+    // toast.success("Products successfully added to your store!");
   };
 
   // Use effect to persist cart items in localStorage
@@ -149,6 +174,7 @@ export function ShoppingCartProvider({
         removeItem,
         updateQuantity,
         clearCart,
+        openCart,
       }}
     >
       {children}
@@ -161,7 +187,7 @@ export function ShoppingCartProvider({
               size="icon"
               className="fixed bottom-24 md:bottom-12 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-primary text-primary-foreground hover:bg-primary/90"
             >
-              <ShoppingCart className="h-6 w-6" />
+              <Package className="h-6 w-6" />
               {itemCount > 0 && (
                 <span className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
                   {itemCount}
@@ -171,18 +197,18 @@ export function ShoppingCartProvider({
           </SheetTrigger>
           <SheetContent className="w-full sm:max-w-md flex flex-col">
             <SheetHeader>
-              <SheetTitle>Shopping Cart ({itemCount})</SheetTitle>
+              <SheetTitle>Selected Products ({itemCount})</SheetTitle>
             </SheetHeader>
 
             {items.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-                <ShoppingCart className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-medium text-lg mb-1">Your cart is empty</h3>
+                <Package className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="font-medium text-lg mb-1">No products selected</h3>
                 <p className="text-muted-foreground mb-4">
-                  Start shopping to add items to your cart
+                  Browse the marketplace to add products to your store
                 </p>
                 <SheetClose asChild>
-                  <Button>Continue Shopping</Button>
+                  <Button>Browse Products</Button>
                 </SheetClose>
               </div>
             ) : (
@@ -216,40 +242,33 @@ export function ShoppingCartProvider({
                             </Button>
                           </div>
                           <p className="text-sm text-muted-foreground">
-                            Size: {item.measurement}
+                            {formatPrice(item.price)}
                           </p>
                           <div className="flex items-center justify-between mt-2">
-                            <div className="flex items-center border rounded-md">
+                            <div className="flex items-center space-x-2">
                               <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 rounded-none"
-                                onClick={() =>
-                                  updateQuantity(item.id, item.quantity - 1)
-                                }
-                                disabled={item.quantity <= 1}
+                                variant="outline"
+                                size="sm"
+                                className="h-8 px-2"
+                                onClick={() => {
+                                  // Handle edit logic
+                                  console.log("Edit item", item.id);
+                                }}
                               >
-                                <Minus className="h-3 w-3" />
-                                <span className="sr-only">Decrease</span>
+                                <Pencil className="h-3 w-3 mr-1" />
+                                Edit
                               </Button>
-                              <span className="w-8 text-center text-sm">
-                                {item.quantity}
-                              </span>
+                              
                               <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 rounded-none"
-                                onClick={() =>
-                                  updateQuantity(item.id, item.quantity + 1)
-                                }
+                                variant="outline"
+                                size="sm"
+                                className="h-8 px-2"
+                                onClick={() => removeItem(item.id)}
                               >
-                                <Plus className="h-3 w-3" />
-                                <span className="sr-only">Increase</span>
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                Remove
                               </Button>
                             </div>
-                            <p className="font-medium">
-                              {formatPrice(item.price)}
-                            </p>
                           </div>
                         </div>
                       </div>
@@ -257,23 +276,15 @@ export function ShoppingCartProvider({
                   </div>
                 </div>
 
-                <SheetFooter className="border-t pt-4">
+                <SheetFooter className="border-t pt-4 sticky bottom-0 bg-background pb-4">
                   <div className="space-y-4 w-full">
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="text-muted-foreground">Total Items</span>
                       <span className="font-medium">
-                        {formatPrice(totalPrice)}
+                        {itemCount} item{itemCount !== 1 ? 's' : ''}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Shipping</span>
-                      <span className="text-sm">Calculated at checkout</span>
-                    </div>
-                    <div className="flex items-center justify-between text-lg font-bold">
-                      <span>Total</span>
-                      <span>{formatPrice(totalPrice)}</span>
-                    </div>
-
+                    
                     <div className="grid grid-cols-2 gap-2">
                       <Button
                         variant="outline"
@@ -281,9 +292,15 @@ export function ShoppingCartProvider({
                         onClick={clearCart}
                       >
                         <Trash2 className="h-4 w-4" />
-                        Clear Cart
+                        Clear All
                       </Button>
-                      <Button className="w-full">Checkout</Button>
+                      <Button 
+                        className="w-full gap-1"
+                        onClick={handleConfirm}
+                      >
+                        <Check className="h-4 w-4" />
+                        Confirm
+                      </Button>
                     </div>
                   </div>
                 </SheetFooter>

@@ -289,26 +289,7 @@ export default function ClientLayout({
 }: ClientLayoutProps) {
   const pathname = usePathname();
 
-  // const excludedPaths = [
-  //   "/checkout",
-  //   "/payment",
-  //   "/admin/*",
-  //   "/account/settings",
-  //   "/",
-  //   "/auth/*",
-  //   "/onboarding/*",
-  // ];
-
-  // // Enhanced path matching for excluded paths
-  // const isExcludedPath = excludedPaths.some(path => {
-  //   // Handle paths with wildcards
-  //   if (path.endsWith('/*')) {
-  //     const basePath = path.replace('/*', '');
-  //     return pathname.startsWith(basePath);
-  //   }
-  //   return pathname === path;
-  // });
-
+  
   return (
     <ThemeWrapper>
       <div className="flex flex-col min-h-screen">
@@ -324,7 +305,7 @@ export default function ClientLayout({
                 </div>
               }
             >
-              {/* <ShoppingCartProvider excludePaths={isExcludedPath ? [pathname] : []}> */}
+              
                 {children}
               {/* </ShoppingCartProvider> */}
             </Suspense>
