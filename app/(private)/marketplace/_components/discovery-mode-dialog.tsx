@@ -127,9 +127,7 @@ export function DiscoveryModeDialog({
           <div className="relative h-full flex flex-col bg-black">
             {/* Header */}
             <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between p-4">
-              {/* <div className="bg-black/70 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
-                {currentIndex + 1} / {products.length}
-              </div> */}
+             
               <Button
                 variant="ghost"
                 size="icon"
@@ -229,14 +227,7 @@ export function DiscoveryModeDialog({
                           <div className="text-lg font-bold sm:text-xl">
                             ₦{currentProduct?.price?.toLocaleString()}
                           </div>
-                          {/* <div className="flex items-center gap-1 text-xs text-green-400">
-                            <span>
-                              ₦{currentProduct.profit.toLocaleString()} profit
-                            </span>
-                            <span className="rounded-full bg-green-900/50 px-1">
-                              {currentProduct.profitMargin}%
-                            </span>
-                          </div> */}
+                          
                         </div>
 
                         <div className="flex items-center gap-1 min-w-0">
@@ -259,41 +250,7 @@ export function DiscoveryModeDialog({
                         </div>
                       </div>
 
-                      {/* <div className="mt-2 flex items-center gap-1">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between text-xs">
-                            <span>Market Fit</span>
-                            <span className="font-medium">
-                              {currentProduct.marketFitScore}%
-                            </span>
-                          </div>
-                          <Progress
-                            value={currentProduct.marketFitScore}
-                            className="h-1 bg-white/20"
-                           
-                          />
-                        </div>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6 text-white/80 hover:text-white"
-                              aria-label="Market fit information"
-                            >
-                              <Info className="h-3 w-3" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-[250px]">
-                            <p className="text-xs sm:text-sm">
-                              Market Fit Score ({currentProduct.marketFitScore}
-                              %) indicates how well this product matches your
-                              audience based on your sales history and customer
-                              demographics
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div> */}
+                     
                     </div>
                   </div>
                 </motion.div>

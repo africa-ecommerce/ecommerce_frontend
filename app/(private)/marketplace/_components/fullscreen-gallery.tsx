@@ -33,12 +33,12 @@ export function FullscreenGallery({ images, initialIndex = 0, open, onClose }: F
   }, [open])
 
   const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+    setCurrentIndex((prev) => (prev === 0 ? images?.length - 1 : prev - 1))
     setScale(1)
   }
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+    setCurrentIndex((prev) => (prev === images?.length - 1 ? 0 : prev + 1))
     setScale(1)
   }
 
@@ -67,7 +67,7 @@ export function FullscreenGallery({ images, initialIndex = 0, open, onClose }: F
       {/* Header - optimized for mobile */}
       <div className="flex items-center justify-between p-3 sm:p-4 text-white">
         <div className="text-sm">
-          {currentIndex + 1} / {images.length}
+          {currentIndex + 1} / {images?.length}
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           {!isMobile && (
@@ -116,7 +116,7 @@ export function FullscreenGallery({ images, initialIndex = 0, open, onClose }: F
           >
             <div className="overflow-auto h-full w-full flex items-center justify-center touch-pan-y">
               <motion.img
-                src={images[currentIndex]}
+                src={images?.[currentIndex]}
                 alt={`Product image ${currentIndex + 1}`}
                 className="max-h-[80vh] max-w-full object-contain select-none"
                 style={{ scale }}
@@ -158,7 +158,7 @@ export function FullscreenGallery({ images, initialIndex = 0, open, onClose }: F
       {/* Thumbnails - optimized for mobile */}
       <div className="bg-black/80 p-2 sm:p-4">
         <div className="flex gap-1 sm:gap-2 overflow-x-auto pb-1 sm:pb-2">
-          {images.map((image, index) => (
+          {images?.map((image, index) => (
             <button
               key={index}
               className={cn(
