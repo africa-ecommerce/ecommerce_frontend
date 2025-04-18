@@ -2,7 +2,7 @@
 "use client"
 
 import Link from "next/link";
-import { ArrowRight, ShoppingBag, Store } from "lucide-react";
+import { ArrowRight, Package, Truck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { userTypeSchema } from "@/zod/schema";
@@ -18,7 +18,7 @@ interface UserTypeProps {
 
 export default function UserType({ onNext, update, initialData }: UserTypeProps) {
   const {
-    form: { setValue, submit, watch, errors },
+    form: { setValue, submit, watch },
   } = useFormResolver(
     (data) => {
       update(data);
@@ -60,12 +60,13 @@ export default function UserType({ onNext, update, initialData }: UserTypeProps)
           }}
         >
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-50">
-            <Store className="h-7 w-7 text-orange-500" />
+            <Truck className="h-8 w-8 text-orange-500" />
           </div>
           <div>
             <h3 className="font-semibold text-lg">Supplier</h3>
-            <p className="text-gray-500">
-              I want to sell my products on the platform
+            <p className="text-gray-500 text-sm">
+              I want to sell my products on the platform and connect with plugs
+              who can help expand my market reach.
             </p>
           </div>
         </Card>
@@ -79,17 +80,17 @@ export default function UserType({ onNext, update, initialData }: UserTypeProps)
           }}
         >
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-orange-50">
-            <ShoppingBag className="h-7 w-7 text-orange-500" />
+            <Package className="h-7 w-7 text-orange-500" />
           </div>
           <div>
             <h3 className="font-semibold text-lg">Plug</h3>
-            <p className="text-gray-500">
-              I want to build my business by selling products from suppliers
+            <p className="text-gray-500 text-sm">
+              I want to build my business by reselling products from suppliers
+              without maintaining inventory.
             </p>
           </div>
         </Card>
       </div>
-
 
       <div className="mt-8 text-center">
         <p className="text-sm text-gray-500 mb-4">

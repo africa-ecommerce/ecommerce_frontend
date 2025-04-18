@@ -8,6 +8,7 @@ import {
   Home,
   Palette,
   FileCode,
+  ShoppingCart,
 } from "lucide-react";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { plugInfoSchema } from "@/zod/schema";
@@ -19,6 +20,33 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Controller } from "react-hook-form";
 import { useEffect } from "react";
+import { PRODUCT_CATEGORIES } from "@/app/constant";
+
+// Define a type for the product categories
+type ProductCategory = 'all' | 'electronics' | 'fashion' | 'beauty_skincare';
+
+// Map icons and descriptions to each category
+const NICHE_CONFIG: Record<ProductCategory, {
+  icon: React.FC<any>;
+  description: string;
+}> = {
+  all: {
+    icon: ShoppingCart,
+    description: "Wide range of products"
+  },
+  electronics: {
+    icon: Smartphone,
+    description: "Gadgets & devices"
+  },
+  fashion: {
+    icon: Shirt,
+    description: "Clothing & accessories"
+  },
+  beauty_skincare: {
+    icon: Sparkles,
+    description: "Cosmetics & wellness"
+  }
+};
 
 interface PlugTypeProps {
   onNext: () => void;
@@ -38,52 +66,22 @@ export default function PlugInfo({
   initialData,
 }: PlugTypeProps) {
   const {
-    form: { register, submit, watch, setValue, getValues, control, errors },
+    form: { register, submit, watch, setValue, control, errors },
   } = useFormResolver((data) => {
     update({ plugInfo: data });
     onNext();
     return Promise.resolve(true);
-  }, plugInfoSchema
-);
+  }, plugInfoSchema);
 
-  const niches = [
-    {
-      id: "fashion",
-      icon: Shirt,
-      label: "Fashion",
-      description: "Clothing & accessories",
-    },
-    {
-      id: "electronics",
-      icon: Smartphone,
-      label: "Electronics",
-      description: "Gadgets & devices",
-    },
-    {
-      id: "beauty",
-      icon: Sparkles,
-      label: "Beauty",
-      description: "Cosmetics & wellness",
-    },
-    {
-      id: "home",
-      icon: Home,
-      label: "Home & Living",
-      description: "Decor & furnishings",
-    },
-    {
-      id: "crafts",
-      icon: Palette,
-      label: "Local Crafts",
-      description: "Handmade & artisanal",
-    },
-    {
-      id: "digital",
-      icon: FileCode,
-      label: "Digital Services",
-      description: "Software & digital products",
-    },
-  ];
+  // Extract categories excluding the "all" option which will be handled by generalMerchant
+  const niches = PRODUCT_CATEGORIES
+    .filter(category => category.value !== "all")
+    .map(category => ({
+      id: category.value,
+      icon: NICHE_CONFIG[category.value as ProductCategory].icon,
+      label: category.label,
+      description: NICHE_CONFIG[category.value as ProductCategory].description,
+    }));
 
   const currentNiches = watch("niches") || [];
   const generalMerchant = watch("generalMerchant");
@@ -106,7 +104,7 @@ export default function PlugInfo({
     }
   }, [initialData, setValue]);
 
-  // Fixed type for nicheId parameter
+  // Toggle niche selection
   const toggleNiche = (nicheId: string) => {
     const isSelected = currentNiches.includes(nicheId);
     const updatedNiches = isSelected
@@ -156,7 +154,7 @@ export default function PlugInfo({
             </p>
 
             {/* Niches Selection */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {niches.map((niche) => {
                 const isSelected = currentNiches.includes(niche.id);
 
@@ -173,31 +171,7 @@ export default function PlugInfo({
                         <niche.icon className="h-6 w-6 text-orange-500" />
                       </div>
                       <div>
-                        <div className="flex items-center space-x-2">
-                          <div
-                            className={`h-4 w-4 rounded-sm border flex items-center justify-center ${
-                              isSelected
-                                ? "bg-orange-500 border-orange-500"
-                                : "border-gray-300"
-                            }`}
-                          >
-                            {isSelected && (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                className="h-3 w-3 text-white"
-                              >
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                              </svg>
-                            )}
-                          </div>
-                          <span className="font-medium">{niche.label}</span>
-                        </div>
+                        <span className="font-medium">{niche.label}</span>
                         <p className="text-xs text-gray-500">
                           {niche.description}
                         </p>

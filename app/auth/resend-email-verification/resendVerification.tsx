@@ -42,8 +42,6 @@ const resendVerificationEmail = async (data: VerificationEmailInput) => {
 };
 
 export default function ResendVerification() {
-  const router = useRouter();
-  const [cooldownTime, setCooldownTime] = useState(0);
 
   const {
     form: { register, submit, errors, isSubmitting },
@@ -104,14 +102,9 @@ export default function ResendVerification() {
                 <Button
                   type="submit"
                   className="w-full flex items-center justify-center gap-2"
-                  disabled={isSubmitting || cooldownTime > 0}
+                  disabled={isSubmitting }
                 >
-                  {cooldownTime > 0 ? (
-                    <>
-                      <Clock className="h-4 w-4" />
-                      Resend in {cooldownTime}s
-                    </>
-                  ) : (
+                 
                     <>
                       <RefreshCw
                         className={`h-4 w-4 ${
@@ -122,7 +115,7 @@ export default function ResendVerification() {
                         ? "Sending..."
                         : "Resend Verification Email"}
                     </>
-                  )}
+                  
                 </Button>
               </div>
             </form>

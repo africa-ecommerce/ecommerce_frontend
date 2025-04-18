@@ -10,7 +10,6 @@ import { VerifyEmailContent } from "./emailVerification"
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
-  // const source = searchParams.get("source")
   
   
   const [result, setResult] = useState<VerificationStatus | null>(null)
