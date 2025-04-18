@@ -31,6 +31,7 @@ import { ProductSpecifications } from "./product-specifications";
 import { VideoPlayer } from "./video-player";
 import { CustomerReviews } from "./customer-reviews";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
 
 // Define fetcher function for useSWR
 const fetcher = async (url: string) => {
@@ -131,19 +132,34 @@ export default function ProductDetail() {
   const [isAdded, setIsAdded] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [currentVideoUrl, setCurrentVideoUrl] = useState("");
+    const { items, addItem } = useShoppingCart()
 
-  const handleAddToStore = () => {
-    setIsAdding(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsAdding(false);
-      setIsAdded(true);
-      // Reset after 2 seconds
-      setTimeout(() => {
-        setIsAdded(false);
-      }, 2000);
-    }, 800);
-  };
+      const isInCart = items.some(item => item.id === product?.id)
+
+
+  const handleAddToStore = (e: React.MouseEvent) => {
+    e.preventDefault() // Prevent card click when clicking the button
+    e.stopPropagation() // Stop event propagation
+    
+    if (isInCart) return // Don't add if already in cart
+    
+    setIsAdding(true)
+    
+    // Create cart item from product
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images && product.images.length > 0 ? product.images[0] : "/placeholder.svg",
+     
+    }
+    
+    // Add item to cart after a short delay to show loading state
+     setTimeout(() => {
+      addItem(cartItem, false) // Pass false to prevent opening the cart
+      setIsAdding(false)
+    }, 800)
+  }
 
   const handleVideoPlayClick = (videoUrl: string) => {
     setCurrentVideoUrl(videoUrl);
@@ -203,6 +219,28 @@ export default function ProductDetail() {
           </div>
           <div>
             <Button
+              className={`${
+                isInCart ? "bg-green-100 text-green-800 hover:bg-green-100" : ""
+              }`}
+              onClick={handleAddToStore}
+              disabled={isAdding || isInCart}
+              aria-live="polite"
+            >
+              {isAdding ? (
+                <span className="animate-pulse">Adding...</span>
+              ) : isInCart ? (
+                <>
+                  <Package className="mr-1 h-3 w-3 md:h-4 md:w-4" />
+                  <span className="text-xs sm:text-sm">Added</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-1 h-3 w-3 md:h-4 md:w-4" />
+                  <span className="text-xs sm:text-sm">Add to Store</span>
+                </>
+              )}
+            </Button>
+            {/* <Button
               onClick={handleAddToStore}
               disabled={isAdding || isAdded}
               className="whitespace-nowrap"
@@ -218,7 +256,7 @@ export default function ProductDetail() {
                   <Plus className="mr-2 h-4 w-4" /> Add to Store
                 </>
               )}
-            </Button>
+            </Button> */}
           </div>
         </header>
 
@@ -253,7 +291,10 @@ export default function ProductDetail() {
                 <div className="flex items-center">
                   <ShoppingBag className="mr-1 h-3.5 w-3.5" />
                   {/* Fixed: Show "0 sold" when sales is 0 */}
-                  {product?.sales >= 100 ? "99+" : `${product?.sales || 0}`} sold
+                  {product?.sales >= 100
+                    ? "99+"
+                    : `${product?.sales || 0}`}{" "}
+                  sold
                 </div>
                 <span>•</span>
                 <div className="flex items-center">

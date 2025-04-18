@@ -22,21 +22,19 @@ import {
 } from "@/components/ui/sheet";
 
 interface CartItem {
-  id: number;
+  id: string;
   name: string;
   price: number;
   image: string;
-  measurement: string;
-  quantity: number;
 }
 
 interface ShoppingCartContextType {
   items: CartItem[];
   itemCount: number;
-  totalPrice: number;
+  
   addItem: (item: CartItem, openCart?: boolean) => void;
-  removeItem: (itemId: number) => void;
-  updateQuantity: (itemId: number, quantity: number) => void;
+  removeItem: (itemId: string) => void;
+ 
   clearCart: () => void;
   openCart: () => void;
 }
@@ -58,7 +56,6 @@ export function ShoppingCartProvider({
   const [isOpen, setIsOpen] = useState(false);
   const [isConfirmMode, setIsConfirmMode] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
 
   // Check if current path should be excluded
   const shouldShowCart = !excludePaths.some((path) => {
@@ -70,12 +67,12 @@ export function ShoppingCartProvider({
     return pathname === path;
   });
 
-  const itemCount = items.reduce((total, item) => total + item.quantity, 0);
+  const itemCount = items.length;
 
-  const totalPrice = items.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
+  // const totalPrice = items.reduce(
+  //   (total, item) => total + item.price * item.quantity,
+  //   0
+  // );
 
   // Function to explicitly open the cart
   const openCart = () => {
@@ -88,13 +85,13 @@ export function ShoppingCartProvider({
       // Check if item already exists in cart
       const existingItemIndex = prevItems.findIndex(
         (item) =>
-          item.id === newItem.id && item.measurement === newItem.measurement
+          item.id === newItem.id 
       );
 
       if (existingItemIndex >= 0) {
         // Update quantity of existing item
         const updatedItems = [...prevItems];
-        updatedItems[existingItemIndex].quantity += newItem.quantity;
+        // updatedItems[existingItemIndex].quantity += newItem.quantity;
         return updatedItems;
       } else {
         // Add new item to cart
@@ -108,17 +105,17 @@ export function ShoppingCartProvider({
     }
   };
 
-  const removeItem = (itemId: number) => {
+  const removeItem = (itemId: string) => {
     setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
   };
 
-  const updateQuantity = (itemId: number, quantity: number) => {
-    setItems((prevItems) =>
-      prevItems
-        .map((item) => (item.id === itemId ? { ...item, quantity } : item))
-        .filter((item) => item.quantity > 0)
-    );
-  };
+  // const updateQuantity = (itemId: string) => {
+  //   setItems((prevItems) =>
+  //     prevItems
+  //       .map((item) => (item.id === itemId ? { ...item, quantity } : item))
+  //       .filter((item) => item.quantity > 0)
+  //   );
+  // };
 
   const clearCart = () => {
     setItems([]);
@@ -169,10 +166,10 @@ export function ShoppingCartProvider({
       value={{
         items,
         itemCount,
-        totalPrice,
+        // totalPrice,
         addItem,
         removeItem,
-        updateQuantity,
+        // updateQuantity,
         clearCart,
         openCart,
       }}
@@ -217,7 +214,7 @@ export function ShoppingCartProvider({
                   <div className="space-y-4">
                     {items.map((item) => (
                       <div
-                        key={`${item.id}-${item.measurement}`}
+                        key={`${item.id}`}
                         className="flex gap-4 border-b pb-4"
                       >
                         <div className="relative h-20 w-20 rounded-md overflow-hidden flex-shrink-0">

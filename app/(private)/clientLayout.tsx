@@ -206,7 +206,7 @@ interface DesktopNavigationProps {
 // Desktop sidebar navigation
 function DesktopNavigation({ pathname, userType }: DesktopNavigationProps) {
   return (
-    <div className="hidden md:flex fixed left-0 top-0 bottom-0 w-32 border-r bg-background z-40 flex-col">
+    <div className="hidden md:flex fixed left-0 top-0 bottom-0 w-24 border-r bg-background z-40 flex-col">
       <div className="p-4 flex items-center border-b h-16" />
 
       {userType === "PLUG" ? (
@@ -396,7 +396,7 @@ export default function ClientLayout({
         {/* Desktop sidebar navigation */}
         <DesktopNavigation pathname={pathname} userType={userType} />
 
-        <div className="flex-1 flex flex-col md:ml-32">
+        <div className="flex-1 flex flex-col md:ml-24">
           <main className="flex-1 pb-16 md:pb-0">
             <Suspense
               fallback={
@@ -407,7 +407,6 @@ export default function ClientLayout({
             >
               
                 {children}
-              {/* </ShoppingCartProvider> */}
             </Suspense>
           </main>
         </div>

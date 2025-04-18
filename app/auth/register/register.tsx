@@ -16,17 +16,16 @@ import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 
 
 // OAuth Login Handler
-export const handleOAuthLogin = (provider: "google" | "facebook") => {
+export const handleOAuthLogin = (provider: "google") => {
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const nestedCallback = urlParams.get("callbackUrl") || "/dashboard";
 
     const finalCallback = encodeURIComponent(nestedCallback);
-    const redirectUrl = `http://localhost:5000/auth/${provider}?callbackUrl=${finalCallback}`;
+    const redirectUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/${provider}?callbackUrl=${finalCallback}`;
     window.location.href = redirectUrl;
   } catch (error) {
     console.error(`${provider} login error:`, error);
-    // You might want to add a toast or error notification here
   }
 };
 
@@ -68,9 +67,6 @@ export default function RegisterPage() {
     router.push("/auth/resend-email-verification");
   });
 
-  // useEffect(() => {
-  //   setValue("policy", policyChecked);
-  // }, [policyChecked, setValue]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -193,7 +189,7 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="mt-6">
                 <Button
                   variant="outline"
                   className="w-full"
@@ -209,21 +205,7 @@ export default function RegisterPage() {
                   </div>
                   Google
                 </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => handleOAuthLogin("facebook")}
-                >
-                  <div className="mr-2 h-5 w-5 relative">
-                    <Image
-                      src="/whatsapp.svg"
-                      alt="WhatsApp"
-                      width={26}
-                      height={26}
-                    />
-                  </div>
-                  WhatsApp
-                </Button>
+               
               </div>
             </div>
 

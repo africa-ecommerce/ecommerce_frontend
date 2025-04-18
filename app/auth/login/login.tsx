@@ -17,18 +17,13 @@ import { handleOAuthLogin } from "../register/register";
 import { successToast, errorToast } from "@/components/ui/use-toast-advanced";
 import { isValidCallbackUrl } from "@/lib/utils";
 
-
-  
-
 type LoginInput = z.infer<typeof LoginSchema>;
-
-
 
 export default function Login() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const searchParams = useSearchParams()
-    const callbackUrl = searchParams.get("callbackUrl")
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
 
   const loginUser = async (data: LoginInput) => {
     try {
@@ -54,8 +49,7 @@ export default function Login() {
       }
 
       successToast(result.message);
-       
-            
+
       if (
         callbackUrl &&
         typeof callbackUrl === "string" &&
@@ -64,7 +58,7 @@ export default function Login() {
         const decodeCallback = decodeURIComponent(callbackUrl);
         return { ...result, redirectUrl: decodeCallback };
       }
-      return {...result, redirectUrl: "/dashboard"}
+      return { ...result, redirectUrl: "/dashboard" };
     } catch (error) {
       console.error(error);
       errorToast("Something went wrong");
@@ -74,7 +68,6 @@ export default function Login() {
   const {
     form: { register, submit, errors, isSubmitting },
   } = useFormResolver(loginUser, LoginSchema, (data) => {
-    console.log(data.redirectUrl);
     router.push(`${data.redirectUrl}`);
   });
 
@@ -187,7 +180,7 @@ export default function Login() {
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="mt-6">
                 <Button
                   variant="outline"
                   className="w-full"
@@ -202,21 +195,6 @@ export default function Login() {
                     />
                   </div>
                   Google
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => handleOAuthLogin("facebook")}
-                >
-                  <div className="mr-2 h-5 w-5 relative">
-                    <Image
-                      src="/whatsapp.svg"
-                      alt="WhatsApp"
-                      width={26}
-                      height={26}
-                    />
-                  </div>
-                  WhatsApp
                 </Button>
               </div>
             </div>
@@ -238,7 +216,10 @@ export default function Login() {
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="text-primary hover:text-primary/90">
+            <Link
+              href="/privacy"
+              className="text-primary hover:text-primary/90"
+            >
               Privacy Policy
             </Link>
           </div>

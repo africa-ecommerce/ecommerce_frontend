@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as z from "zod";
@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { ForgotPasswordSchema } from "@/zod/schema";
 import { successToast, errorToast } from "@/components/ui/use-toast-advanced";
-
 
 type VerificationEmailInput = z.infer<typeof ForgotPasswordSchema>;
 
@@ -33,7 +32,7 @@ const resendVerificationEmail = async (data: VerificationEmailInput) => {
     }
 
     successToast(result.message);
-    return result; // Return the parsed result instead of parsing the body again
+    return result;
   } catch (error) {
     console.error(error);
     errorToast("Something went wrong");
@@ -43,18 +42,36 @@ const resendVerificationEmail = async (data: VerificationEmailInput) => {
 
 export default function ResendVerification() {
   const router = useRouter();
-  const [success, setSuccess] = useState(false);
   const [cooldownTime, setCooldownTime] = useState(0);
 
   const {
     form: { register, submit, errors, isSubmitting },
   } = useFormResolver(resendVerificationEmail, ForgotPasswordSchema);
 
+  // Handle the countdown timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (cooldownTime > 0) {
+      interval = setInterval(() => {
+        setCooldownTime((prevTime) => prevTime - 1);
+      }, 1000);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [cooldownTime]);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await submit(e);
+    const result = await submit(e);
+    
+    // If email was sent successfully, start the cooldown
+    if (result) {
+      setCooldownTime(120); // 2 minutes in seconds
     }
-  
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -127,12 +144,6 @@ export default function ResendVerification() {
                 </Button>
               </div>
             </form>
-
-            {success && (
-              <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-md">
-                Verification email has been resent. Please check your inbox.
-              </div>
-            )}
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
               Already verified your email?{" "}

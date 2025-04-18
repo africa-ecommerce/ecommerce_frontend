@@ -11,7 +11,7 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*", // Match all /api requests
-        destination: "http://localhost:5000/:path*", // Forward to backend
+        destination: `${process.env.BACKEND_URL}/:path*`, // Forward to backend using env variable
       },
     ];
   },
@@ -29,6 +29,11 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  env: {
+    BACKEND_URL: process.env.BACKEND_URL,
+    APP_URL: process.env.APP_URL,
+    NEXT_PUBLIC_BACKEND_URL: process.env.BACKEND_URL, // Add this to make it accessible in the browser
+  }
 }
 
 mergeConfig(nextConfig, userConfig)
