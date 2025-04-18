@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as z from "zod";
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { ForgotPasswordSchema } from "@/zod/schema";
 import { successToast, errorToast } from "@/components/ui/use-toast-advanced";
+
 
 type VerificationEmailInput = z.infer<typeof ForgotPasswordSchema>;
 
@@ -32,7 +33,7 @@ const resendVerificationEmail = async (data: VerificationEmailInput) => {
     }
 
     successToast(result.message);
-    return result;
+    return result; // Return the parsed result instead of parsing the body again
   } catch (error) {
     console.error(error);
     errorToast("Something went wrong");
@@ -48,30 +49,11 @@ export default function ResendVerification() {
     form: { register, submit, errors, isSubmitting },
   } = useFormResolver(resendVerificationEmail, ForgotPasswordSchema);
 
-  // Handle the countdown timer
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
-    if (cooldownTime > 0) {
-      interval = setInterval(() => {
-        setCooldownTime((prevTime) => prevTime - 1);
-      }, 1000);
-    }
-    
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [cooldownTime]);
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const result = await submit(e);
-    
-    // If email was sent successfully, start the cooldown
-    if (result) {
-      setCooldownTime(120); // 2 minutes in seconds
+    await submit(e);
     }
-  };
+  
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -144,6 +126,8 @@ export default function ResendVerification() {
                 </Button>
               </div>
             </form>
+
+           
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
               Already verified your email?{" "}
