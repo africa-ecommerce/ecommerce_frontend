@@ -21,6 +21,73 @@ import { cn } from "@/lib/utils";
 import { GlobalLoadingIndicatorAdvanced } from "@/components/ui/loading-indicator-advanced";
 import ThemeWrapper from "../themeWrapper";
 
+
+// interface NavItemProps {
+//   href?: string;
+//   icon: React.ReactNode;
+//   label?: string;
+//   isActive: boolean;
+//   badge?: string;
+//   compact?: boolean;
+// }
+
+// function NavItem({
+//   href,
+//   icon,
+//   label,
+//   isActive,
+//   badge,
+//   compact,
+// }: NavItemProps) {
+//   return (
+//     <Link
+//       href={href || ""}
+//       className={cn(
+//         "w-full flex",
+//         compact ? "flex-col items-center" : "items-center px-4 py-3 gap-3"
+//       )}
+//     >
+//       <div
+//         className={cn(
+//           "relative flex items-center justify-center transition-all duration-200 rounded-lg",
+//           compact
+//             ? "flex-col min-w-[56px] min-h-[44px] p-1.5"
+//             : "flex-row w-full",
+//           isActive
+//             ? "text-primary"
+//             : "text-muted-foreground hover:text-primary hover:bg-muted"
+//         )}
+//       >
+//         <div className={cn("relative", isActive && "animate-pulse-gentle")}>
+//           {icon}
+
+//           {badge && (
+//             <span className="absolute -top-1 -right-1.5 flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-medium bg-primary text-primary-foreground animate-pulse">
+//               {badge}
+//             </span>
+//           )}
+//         </div>
+
+//         <span
+//           className={cn(
+//             compact ? "text-[10px] mt-0.5" : "font-medium text-sm ml-3"
+//           )}
+//         >
+//           {label}
+//         </span>
+
+//         {isActive && (
+//           <span className="absolute inset-0 rounded-lg bg-primary/10 animate-glow"></span>
+//         )}
+//       </div>
+//     </Link>
+//   );
+// }
+
+// Helper function to check if path starts with a pattern
+
+
+
 interface NavItemProps {
   href?: string;
   icon: React.ReactNode;
@@ -28,6 +95,7 @@ interface NavItemProps {
   isActive: boolean;
   badge?: string;
   compact?: boolean;
+  onClick?: () => void;
 }
 
 function NavItem({
@@ -37,53 +105,85 @@ function NavItem({
   isActive,
   badge,
   compact,
+  onClick,
 }: NavItemProps) {
+  const content = (
+    <div
+      className={cn(
+        "relative flex items-center justify-center transition-all duration-200 rounded-lg",
+        compact
+          ? "flex-col min-w-[56px] min-h-[44px] p-1.5"
+          : "flex-row w-full",
+        isActive
+          ? "text-primary"
+          : "text-muted-foreground hover:text-primary hover:bg-muted"
+      )}
+    >
+      <div className={cn("relative", isActive && "animate-pulse-gentle")}>
+        {icon}
+
+        {badge && (
+          <span className="absolute -top-1 -right-1.5 flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-medium bg-primary text-primary-foreground animate-pulse">
+            {badge}
+          </span>
+        )}
+      </div>
+
+      <span
+        className={cn(
+          compact ? "text-[10px] mt-0.5" : "font-medium text-sm ml-3"
+        )}
+      >
+        {label}
+      </span>
+
+      {isActive && (
+        <span className="absolute inset-0 rounded-lg bg-primary/10 animate-glow"></span>
+      )}
+    </div>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        onClick={onClick}
+        className={cn(
+          "w-full flex",
+          compact ? "flex-col items-center" : "items-center px-4 py-3 gap-3"
+        )}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className={cn(
+          "w-full flex",
+          compact ? "flex-col items-center" : "items-center px-4 py-3 gap-3"
+        )}
+      >
+        {content}
+      </Link>
+    );
+  }
+
   return (
-    <Link
-      href={href || ""}
+    <div
       className={cn(
         "w-full flex",
         compact ? "flex-col items-center" : "items-center px-4 py-3 gap-3"
       )}
     >
-      <div
-        className={cn(
-          "relative flex items-center justify-center transition-all duration-200 rounded-lg",
-          compact
-            ? "flex-col min-w-[56px] min-h-[44px] p-1.5"
-            : "flex-row w-full",
-          isActive
-            ? "text-primary"
-            : "text-muted-foreground hover:text-primary hover:bg-muted"
-        )}
-      >
-        <div className={cn("relative", isActive && "animate-pulse-gentle")}>
-          {icon}
-
-          {badge && (
-            <span className="absolute -top-1 -right-1.5 flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-medium bg-primary text-primary-foreground animate-pulse">
-              {badge}
-            </span>
-          )}
-        </div>
-
-        <span
-          className={cn(
-            compact ? "text-[10px] mt-0.5" : "font-medium text-sm ml-3"
-          )}
-        >
-          {label}
-        </span>
-
-        {isActive && (
-          <span className="absolute inset-0 rounded-lg bg-primary/10 animate-glow"></span>
-        )}
-      </div>
-    </Link>
+      {content}
+    </div>
   );
 }
 
-// Helper function to check if path starts with a pattern
+
 const isPathActive = (pathname: string, pattern: string) => {
   // Special case for dashboard root
   if (pattern === "/dashboard") {
