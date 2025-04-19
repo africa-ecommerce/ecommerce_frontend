@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Home,
@@ -21,6 +21,12 @@ import { cn } from "@/lib/utils";
 import { GlobalLoadingIndicatorAdvanced } from "@/components/ui/loading-indicator-advanced";
 import ThemeWrapper from "../themeWrapper";
 import { MorePageContent } from "./dashboard/_components/more-page-content";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Helper function to check if path starts with a pattern
 const isPathActive = (pathname: string, pattern: string) => {
@@ -28,23 +34,21 @@ const isPathActive = (pathname: string, pattern: string) => {
   if (pattern === "/dashboard") {
     return pathname === "/dashboard";
   }
-  
+
   // For all other patterns, check if path starts with pattern
   // and either it's an exact match or the next character is a slash
-  return (
-    pathname === pattern ||
-    pathname.startsWith(pattern + "/")
-  );
+  return pathname === pattern || pathname.startsWith(pattern + "/");
 };
 
 interface NavItemProps {
-  href?: string;
+  href: string;
   icon: React.ReactNode;
-  label?: string;
+  label: string;
   isActive: boolean;
   badge?: string;
   compact?: boolean;
-  onClick?: () => void;
+  closeMorePage: () => void;
+  showTooltip?: boolean;
 }
 
 function NavItem({
@@ -54,8 +58,17 @@ function NavItem({
   isActive,
   badge,
   compact,
-  onClick,
+  closeMorePage,
+  showTooltip = false,
 }: NavItemProps) {
+  const router = useRouter();
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    closeMorePage();
+    router.push(href);
+  };
+
   const content = (
     <div
       className={cn(
@@ -78,13 +91,9 @@ function NavItem({
         )}
       </div>
 
-      <span
-        className={cn(
-          compact ? "text-[10px] mt-0.5" : "font-medium text-sm ml-3"
-        )}
-      >
-        {label}
-      </span>
+      {compact && <span className="text-[10px] mt-0.5">{label}</span>}
+
+      {!compact && <span className="font-medium text-sm ml-3">{label}</span>}
 
       {isActive && (
         <span className="absolute inset-0 rounded-lg bg-primary/10 animate-glow"></span>
@@ -92,43 +101,114 @@ function NavItem({
     </div>
   );
 
-  if (onClick) {
+  if (showTooltip) {
     return (
-      <button
-        onClick={onClick}
-        className={cn(
-          "w-full flex",
-          compact ? "flex-col items-center" : "items-center px-4 py-3 gap-3"
-        )}
-      >
-        {content}
-      </button>
-    );
-  }
-
-  if (href) {
-    return (
-      <Link
-        href={href}
-        className={cn(
-          "w-full flex",
-          compact ? "flex-col items-center" : "items-center px-4 py-3 gap-3"
-        )}
-      >
-        {content}
-      </Link>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link
+              href={href}
+              onClick={handleClick}
+              className={cn(
+                "w-full flex",
+                compact
+                  ? "flex-col items-center"
+                  : "items-center px-4 py-3 gap-3"
+              )}
+            >
+              {content}
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent side="right">{label}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     );
   }
 
   return (
-    <div
+    <Link
+      href={href}
+      onClick={handleClick}
       className={cn(
         "w-full flex",
         compact ? "flex-col items-center" : "items-center px-4 py-3 gap-3"
       )}
     >
       {content}
+    </Link>
+  );
+}
+
+interface MoreButtonProps {
+  isActive: boolean;
+  onClick: () => void;
+  compact?: boolean;
+  showTooltip?: boolean;
+}
+
+function MoreButton({
+  isActive,
+  onClick,
+  compact,
+  showTooltip = false,
+}: MoreButtonProps) {
+  const content = (
+    <div
+      className={cn(
+        "relative flex items-center justify-center transition-all duration-200 rounded-lg",
+        compact
+          ? "flex-col min-w-[56px] min-h-[44px] p-1.5"
+          : "flex-row w-full",
+        isActive
+          ? "text-primary"
+          : "text-muted-foreground hover:text-primary hover:bg-muted"
+      )}
+    >
+      <div className={cn("relative", isActive && "animate-pulse-gentle")}>
+        <CircleEllipsis className="w-5 h-5" />
+      </div>
+
+      {compact && <span className="text-[10px] mt-0.5">More</span>}
+
+      {isActive && (
+        <span className="absolute inset-0 rounded-lg bg-primary/10 animate-glow"></span>
+      )}
     </div>
+  );
+
+  if (showTooltip) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={onClick}
+              className={cn(
+                "w-full flex",
+                compact
+                  ? "flex-col items-center"
+                  : "items-center px-4 py-3 gap-3"
+              )}
+            >
+              {content}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">More Options</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "w-full flex",
+        compact ? "flex-col items-center" : "items-center px-4 py-3 gap-3"
+      )}
+    >
+      {content}
+    </button>
   );
 }
 
@@ -137,10 +217,17 @@ interface DesktopNavigationProps {
   userType: "PLUG" | "SUPPLIER";
   onMoreClick: () => void;
   isMoreActive: boolean;
+  closeMorePage: () => void;
 }
 
 // Desktop sidebar navigation
-function DesktopNavigation({ pathname, userType, onMoreClick, isMoreActive }: DesktopNavigationProps) {
+function DesktopNavigation({
+  pathname,
+  userType,
+  onMoreClick,
+  isMoreActive,
+  closeMorePage,
+}: DesktopNavigationProps) {
   return (
     <div className="hidden md:flex fixed left-0 top-0 bottom-0 w-24 border-r bg-background z-40 flex-col">
       <div className="p-4 flex items-center border-b h-16" />
@@ -151,30 +238,45 @@ function DesktopNavigation({ pathname, userType, onMoreClick, isMoreActive }: De
             <NavItem
               href="/dashboard"
               icon={<Home className="w-5 h-5" />}
+              label="Dashboard"
               isActive={isPathActive(pathname, "/dashboard") && !isMoreActive}
+              closeMorePage={closeMorePage}
+              showTooltip
             />
             <NavItem
               href="/marketplace"
               icon={<LayoutGrid className="w-5 h-5" />}
+              label="Marketplace"
               isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
+              closeMorePage={closeMorePage}
+              showTooltip
             />
             <NavItem
               href="/dashboard/store"
               icon={<Store className="w-5 h-5" />}
-              isActive={isPathActive(pathname, "/dashboard/store") && !isMoreActive}
+              label="Store"
+              isActive={
+                isPathActive(pathname, "/dashboard/store") && !isMoreActive
+              }
+              closeMorePage={closeMorePage}
+              showTooltip
             />
-
             <NavItem
               href="/dashboard/products"
               icon={<Package className="w-5 h-5" />}
-              isActive={isPathActive(pathname, "/dashboard/products") && !isMoreActive}
+              label="Products"
+              isActive={
+                isPathActive(pathname, "/dashboard/products") && !isMoreActive
+              }
+              closeMorePage={closeMorePage}
+              showTooltip
             />
           </div>
           <div className="mt-auto border-t p-3">
-            <NavItem
-              icon={<CircleEllipsis className="w-5 h-5" />}
+            <MoreButton
               isActive={isMoreActive}
               onClick={onMoreClick}
+              showTooltip
             />
           </div>
         </>
@@ -184,29 +286,45 @@ function DesktopNavigation({ pathname, userType, onMoreClick, isMoreActive }: De
             <NavItem
               href="/dashboard"
               icon={<Home className="w-5 h-5" />}
+              label="Dashboard"
               isActive={isPathActive(pathname, "/dashboard") && !isMoreActive}
+              closeMorePage={closeMorePage}
+              showTooltip
             />
             <NavItem
               href="/marketplace"
               icon={<LayoutGrid className="w-5 h-5" />}
+              label="Marketplace"
               isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
+              closeMorePage={closeMorePage}
+              showTooltip
             />
             <NavItem
               href="/dashboard/order"
               icon={<PackageOpen className="w-5 h-5" />}
-              isActive={isPathActive(pathname, "/dashboard/order") && !isMoreActive}
+              label="Orders"
+              isActive={
+                isPathActive(pathname, "/dashboard/order") && !isMoreActive
+              }
+              closeMorePage={closeMorePage}
+              showTooltip
             />
             <NavItem
               href="/dashboard/inventory"
               icon={<Boxes className="w-5 h-5" />}
-              isActive={isPathActive(pathname, "/dashboard/inventory") && !isMoreActive}
+              label="Inventory"
+              isActive={
+                isPathActive(pathname, "/dashboard/inventory") && !isMoreActive
+              }
+              closeMorePage={closeMorePage}
+              showTooltip
             />
           </div>
           <div className="mt-auto border-t p-3">
-            <NavItem
-              icon={<CircleEllipsis className="w-5 h-5" />}
+            <MoreButton
               isActive={isMoreActive}
               onClick={onMoreClick}
+              showTooltip
             />
           </div>
         </>
@@ -220,10 +338,17 @@ interface MobileNavigationProps {
   userType: "PLUG" | "SUPPLIER";
   onMoreClick: () => void;
   isMoreActive: boolean;
+  closeMorePage: () => void;
 }
 
 // Mobile bottom navigation
-function MobileNavigation({ pathname, userType, onMoreClick, isMoreActive }: MobileNavigationProps) {
+function MobileNavigation({
+  pathname,
+  userType,
+  onMoreClick,
+  isMoreActive,
+  closeMorePage,
+}: MobileNavigationProps) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -243,37 +368,37 @@ function MobileNavigation({ pathname, userType, onMoreClick, isMoreActive }: Mob
               label="Dashboard"
               isActive={isPathActive(pathname, "/dashboard") && !isMoreActive}
               compact
+              closeMorePage={closeMorePage}
             />
-
             <NavItem
               href="/marketplace"
               icon={<LayoutGrid className="w-5 h-5" />}
               label="Marketplace"
               isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
               compact
+              closeMorePage={closeMorePage}
             />
             <NavItem
               href="/dashboard/store"
               icon={<Store className="w-5 h-5" />}
               label="Store"
-              isActive={isPathActive(pathname, "/dashboard/store") && !isMoreActive}
+              isActive={
+                isPathActive(pathname, "/dashboard/store") && !isMoreActive
+              }
               compact
+              closeMorePage={closeMorePage}
             />
-
             <NavItem
               href="/dashboard/products"
               icon={<Package className="w-5 h-5" />}
               label="Products"
-              isActive={isPathActive(pathname, "/dashboard/products") && !isMoreActive}
+              isActive={
+                isPathActive(pathname, "/dashboard/products") && !isMoreActive
+              }
               compact
+              closeMorePage={closeMorePage}
             />
-            <NavItem
-              icon={<CircleEllipsis className="w-5 h-5" />}
-              label="More"
-              isActive={isMoreActive}
-              compact
-              onClick={onMoreClick}
-            />
+            <MoreButton isActive={isMoreActive} onClick={onMoreClick} compact />
           </>
         ) : (
           <>
@@ -283,6 +408,7 @@ function MobileNavigation({ pathname, userType, onMoreClick, isMoreActive }: Mob
               label="Dashboard"
               isActive={isPathActive(pathname, "/dashboard") && !isMoreActive}
               compact
+              closeMorePage={closeMorePage}
             />
             <NavItem
               href="/marketplace"
@@ -290,28 +416,29 @@ function MobileNavigation({ pathname, userType, onMoreClick, isMoreActive }: Mob
               label="Marketplace"
               isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
               compact
+              closeMorePage={closeMorePage}
             />
             <NavItem
               href="/dashboard/order"
               icon={<PackageOpen className="w-5 h-5" />}
-              label="Order"
-              isActive={isPathActive(pathname, "/dashboard/order") && !isMoreActive}
+              label="Orders"
+              isActive={
+                isPathActive(pathname, "/dashboard/order") && !isMoreActive
+              }
               compact
+              closeMorePage={closeMorePage}
             />
             <NavItem
               href="/dashboard/inventory"
               icon={<Boxes className="w-5 h-5" />}
               label="Inventory"
-              isActive={isPathActive(pathname, "/dashboard/inventory") && !isMoreActive}
+              isActive={
+                isPathActive(pathname, "/dashboard/inventory") && !isMoreActive
+              }
               compact
+              closeMorePage={closeMorePage}
             />
-            <NavItem
-              icon={<CircleEllipsis className="w-5 h-5" />}
-              label="More"
-              isActive={isMoreActive}
-              compact
-              onClick={onMoreClick}
-            />
+            <MoreButton isActive={isMoreActive} onClick={onMoreClick} compact />
           </>
         )}
       </nav>
@@ -333,18 +460,24 @@ export default function ClientLayout({
   const [showMorePage, setShowMorePage] = useState(false);
 
   const toggleMorePage = () => {
-    setShowMorePage(prev => !prev);
+    setShowMorePage((prev) => !prev);
   };
-  
+
+  // Function to explicitly close the more page
+  const closeMorePage = () => {
+    setShowMorePage(false);
+  };
+
   return (
     <ThemeWrapper>
       <div className="flex flex-col min-h-screen">
         {/* Desktop sidebar navigation */}
-        <DesktopNavigation 
-          pathname={pathname} 
-          userType={userType} 
+        <DesktopNavigation
+          pathname={pathname}
+          userType={userType}
           onMoreClick={toggleMorePage}
           isMoreActive={showMorePage}
+          closeMorePage={closeMorePage}
         />
 
         <div className="flex-1 flex flex-col md:ml-24">
@@ -357,7 +490,7 @@ export default function ClientLayout({
               }
             >
               {showMorePage ? (
-                <MorePageContent />
+                <MorePageContent onBack={closeMorePage} />
               ) : (
                 children
               )}
@@ -366,11 +499,12 @@ export default function ClientLayout({
         </div>
 
         {/* Mobile Navigation - only rendered on client-side */}
-        <MobileNavigation 
-          pathname={pathname} 
-          userType={userType} 
+        <MobileNavigation
+          pathname={pathname}
+          userType={userType}
           onMoreClick={toggleMorePage}
           isMoreActive={showMorePage}
+          closeMorePage={closeMorePage}
         />
       </div>
     </ThemeWrapper>

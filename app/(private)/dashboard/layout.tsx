@@ -3,6 +3,8 @@
 import { preload } from "swr";
 import { useEffect } from "react";
 import { SWRConfig } from "swr";
+import { useUser } from "@/app/_components/provider/UserContext";
+
 
 // Define a global fetcher function that can be reused
 const globalFetcher = async (url: string) => {
@@ -22,9 +24,16 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+
+     const { userData } = useUser();
+
   useEffect(() => {
-    // Prefetch multiple data sources using the same fetcher
-    preload("/api/products/supplier/", globalFetcher);
+    if(userData.userType === "SUPPLIER") {
+       preload("/api/products/supplier/", globalFetcher);
+    } else {
+      console.log("plug")
+    }
+   
     
   }, []);
 

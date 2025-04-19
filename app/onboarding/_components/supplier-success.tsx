@@ -125,12 +125,10 @@ export default function SupplierSuccess() {
 
         {/* Main heading - Responsive text sizing */}
         <div className="text-center mb-5 sm:mb-6 md:mb-8">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-gray-900 mb-2">
-            Supplier Registration Complete!
-          </h1>
-          <p className="text-[#FF7A29] font-medium text-sm sm:text-base md:text-lg mb-2">Your supplier account is now active</p>
+         
+          <p className="text-[#FF7A29] font-medium text-sm sm:text-base md:text-lg mb-2">Your account is now active</p>
           <p className="text-gray-600 text-xs sm:text-sm md:text-base">
-            Congratulations! Your supplier account has been successfully created. You can now access your dashboard to
+            Congratulations!, You can now access your dashboard to
             manage your products, receive orders, and grow your business.
           </p>
         </div>

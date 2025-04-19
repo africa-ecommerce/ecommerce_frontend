@@ -10,6 +10,7 @@ import {
   LogOut,
   ChevronRight,
   Shield,
+  ArrowLeft,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +23,7 @@ import { NotificationSection } from "./notification-section";
 import { AppSettingsSection } from "./app-settings-section";
 import { HelpSupportSection } from "./help-support-section";
 import { AccountActionsSection } from "./account-actions-section";
+import { Button } from "@/components/ui/button";
 
 type Section =
   | "profile"
@@ -32,30 +34,51 @@ type Section =
   | "help"
   | "account";
 
-export function MorePageContent() {
+interface MorePageContentProps {
+  onBack: () => void; // New prop to handle closing the more page
+}
+
+export function MorePageContent({ onBack }: MorePageContentProps) {
   const [activeSection, setActiveSection] = useState<Section | null>(null);
+
+  // Handler for back button in subsections
+  const handleBackFromSection = () => {
+    setActiveSection(null);
+  };
 
   const renderActiveSection = () => {
     switch (activeSection) {
       case "profile":
-        return <ProfileSection onBack={() => setActiveSection(null)} />;
+        return <ProfileSection onBack={handleBackFromSection} />;
       case "verification":
-        return <VerificationSection onBack={() => setActiveSection(null)} />;
+        return <VerificationSection onBack={handleBackFromSection} />;
       case "payment":
-        return <PaymentSection onBack={() => setActiveSection(null)} />;
+        return <PaymentSection onBack={handleBackFromSection} />;
       case "notifications":
-        return <NotificationSection onBack={() => setActiveSection(null)} />;
+        return <NotificationSection onBack={handleBackFromSection} />;
       case "settings":
-        return <AppSettingsSection onBack={() => setActiveSection(null)} />;
+        return <AppSettingsSection onBack={handleBackFromSection} />;
       case "help":
-        return <HelpSupportSection onBack={() => setActiveSection(null)} />;
+        return <HelpSupportSection onBack={handleBackFromSection} />;
       case "account":
-        return <AccountActionsSection onBack={() => setActiveSection(null)} />;
+        return <AccountActionsSection onBack={handleBackFromSection} />;
       default:
         return (
           <div className="animate-fade-in">
             <div className="flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-bold">More</h1>
+              <div className="flex items-center">
+                {/* Add back button to close More component */}
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={onBack} 
+                  className="mr-2" 
+                  aria-label="Back"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <h1 className="text-2xl font-bold">More</h1>
+              </div>
               <Avatar className="h-10 w-10">
                 <AvatarImage
                   src="/placeholder.svg?height=40&width=40"

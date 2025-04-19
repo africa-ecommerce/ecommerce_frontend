@@ -1,25 +1,338 @@
+// "use client";
+
+// import { useState } from "react";
+// import Link from "next/link";
+// import {
+//   ArrowUp,
+//   Clock,
+//   ExternalLink,
+//   HelpCircle,
+//   Instagram,
+//   MessageSquare,
+//   Package,
+//   PackageCheck,
+//   PackageOpen,
+//   Percent,
+//   PlusCircle,
+//   RefreshCw,
+//   Share2,
+//   ShoppingBag,
+//   TrendingUp,
+//   Truck,
+//   Twitter,
+//   Wallet,
+//   Youtube,
+// } from "lucide-react";
+
+// import { Button } from "@/components/ui/button";
+// import {
+//   Card,
+//   CardContent,
+//   CardDescription,
+//   CardFooter,
+//   CardHeader,
+//   CardTitle,
+// } from "@/components/ui/card";
+// import { Progress } from "@/components/ui/progress";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import {
+//   Tooltip,
+//   TooltipContent,
+//   TooltipProvider,
+//   TooltipTrigger,
+// } from "@/components/ui/tooltip";
+// import { Badge } from "@/components/ui/badge";
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+// export default function PlugDashboard() {
+  
+
+//   return (
+//     <TooltipProvider>
+//       <div className="flex flex-col min-h-screen bg-background p-3 sm:p-4 md:p-6 gap-4 sm:gap-6 animate-fade-in">
+//         {/* Header - Improved for mobile */}
+//         <div className="flex items-center justify-between gap-2">
+//           <div className="flex-1 min-w-0">
+           
+//             <p className="text-muted-foreground text-sm sm:text-base truncate">
+//               Welcome back, Ade! Here's your business at a glance.
+//             </p>
+//           </div>
+         
+//         </div>
+
+//         {/* Revenue Snapshot - Better mobile layout */}
+//         <section className="space-y-3 sm:space-y-4">
+//           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+//             <h2 className="text-base sm:text-lg font-semibold">Revenue Snapshot</h2>
+           
+//           </div>
+
+//           <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+//             <Card className="h-full">
+//               <CardHeader className="p-2 sm:p-3 pb-0">
+//                 <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+//                   Total Earnings
+//                   <Tooltip>
+//                     <TooltipTrigger asChild>
+//                       <HelpCircle className="h-3 w-3 text-muted-foreground" />
+//                     </TooltipTrigger>
+//                     <TooltipContent>
+//                       <p>Total revenue from all sales</p>
+//                     </TooltipContent>
+//                   </Tooltip>
+//                 </CardTitle>
+//               </CardHeader>
+//               <CardContent className="p-2 sm:p-3 pt-0">
+//                 <div className="text-xl sm:text-2xl font-bold">₦45,200</div>
+               
+//               </CardContent>
+//             </Card>
+
+//             <Card className="h-full">
+//               <CardHeader className="p-2 sm:p-3 pb-0">
+//                 <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+//                   Profit Margin
+//                   <Tooltip>
+//                     <TooltipTrigger asChild>
+//                       <HelpCircle className="h-3 w-3 text-muted-foreground" />
+//                     </TooltipTrigger>
+//                     <TooltipContent>
+//                       <p>Your earnings after platform fees</p>
+//                     </TooltipContent>
+//                   </Tooltip>
+//                 </CardTitle>
+//               </CardHeader>
+//               <CardContent className="p-2 sm:p-3 pt-0">
+//                 <div className="text-xl sm:text-2xl font-bold">₦18,080</div>
+                
+//               </CardContent>
+//             </Card>
+
+//             <Card className="h-full">
+//               <CardHeader className="p-2 sm:p-3 pb-0">
+//                 <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+//                   Pending Payments
+//                   <Tooltip>
+//                     <TooltipTrigger asChild>
+//                       <HelpCircle className="h-3 w-3 text-muted-foreground" />
+//                     </TooltipTrigger>
+//                     <TooltipContent>
+//                       <p>Money in escrow to be released</p>
+//                     </TooltipContent>
+//                   </Tooltip>
+//                 </CardTitle>
+//               </CardHeader>
+//               <CardContent className="p-2 sm:p-3 pt-0">
+//                 <div className="text-xl sm:text-2xl font-bold">₦12,500</div>
+//                 <div className="flex items-center text-[10px] xs:text-xs text-amber-600 mt-1">
+//                   <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
+//                   <span>Release in 2 days</span>
+//                 </div>
+//               </CardContent>
+//             </Card>
+
+//             <Card className="h-full">
+//               <CardHeader className="p-2 sm:p-3 pb-0">
+//                 <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+//                   Available Balance
+//                   <Tooltip>
+//                     <TooltipTrigger asChild>
+//                       <HelpCircle className="h-3 w-3 text-muted-foreground" />
+//                     </TooltipTrigger>
+//                     <TooltipContent>
+//                       <p>Money ready for withdrawal</p>
+//                     </TooltipContent>
+//                   </Tooltip>
+//                 </CardTitle>
+//               </CardHeader>
+//               <CardContent className="p-2 sm:p-3 pt-0">
+//                 <div className="text-xl sm:text-2xl font-bold">₦5,580</div>
+//                 <Button
+//                   variant="outline"
+//                   size="sm"
+//                   className="w-full mt-1 h-6 sm:h-7 text-[10px] xs:text-xs"
+//                 >
+//                   <Wallet className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" /> Withdraw
+//                 </Button>
+//               </CardContent>
+//             </Card>
+//           </div>
+//         </section>
+
+//         {/* Order Management Hub - Better mobile tabs */}
+//         <section className="space-y-3 sm:space-y-4">
+//           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+//             <h2 className="text-base sm:text-lg font-semibold">Order Management</h2>
+//             <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm">
+//               <Link href="#">View All Orders</Link>
+//             </Button>
+//           </div>
+
+//           <Tabs defaultValue="active">
+//             <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10 overflow-x-auto">
+//               <TabsTrigger value="active" className="text-xs sm:text-sm whitespace-nowrap">Active (5)</TabsTrigger>
+//               <TabsTrigger value="processing" className="text-xs sm:text-sm whitespace-nowrap">Processing (2)</TabsTrigger>
+//               <TabsTrigger value="delivered" className="text-xs sm:text-sm whitespace-nowrap">Delivered (8)</TabsTrigger>
+//               <TabsTrigger value="cancelled" className="text-xs sm:text-sm whitespace-nowrap">Cancelled (1)</TabsTrigger>
+//             </TabsList>
+//             <TabsContent value="active" className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
+//               {/* Order Card 1 - More compact on mobile */}
+//               <Card>
+//                 <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+//                   <div className="flex justify-between items-start gap-2">
+//                     <div className="min-w-0">
+//                       <CardTitle className="text-xs sm:text-sm font-medium truncate">
+//                         Order #PLG-2305
+//                       </CardTitle>
+//                       <CardDescription className="text-xs">Placed 2 hours ago</CardDescription>
+//                     </div>
+//                     <Badge className="text-xs">In Transit</Badge>
+//                   </div>
+//                 </CardHeader>
+//                 <CardContent className="p-3 sm:p-4 pt-0 pb-1 sm:pb-2">
+//                   <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+//                     <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
+//                       <AvatarImage
+//                         src="/placeholder.svg?height=32&width=32"
+//                         alt="Customer"
+//                       />
+//                       <AvatarFallback>CN</AvatarFallback>
+//                     </Avatar>
+//                     <div className="min-w-0">
+//                       <p className="text-xs sm:text-sm font-medium truncate">Chioma Nwosu</p>
+//                       <p className="text-[10px] xs:text-xs text-muted-foreground truncate">
+//                         Lagos, Nigeria
+//                       </p>
+//                     </div>
+//                   </div>
+//                   <div className="flex items-center gap-1 sm:gap-2 text-xs">
+//                     <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+//                     <span>2 items • ₦12,500</span>
+//                   </div>
+//                   <Progress value={60} className="h-1 mt-2 sm:mt-3" />
+//                   <div className="flex justify-between text-[10px] xs:text-xs mt-1">
+//                     <span>Processing</span>
+//                     <span>Shipped</span>
+//                     <span>Delivered</span>
+//                   </div>
+//                 </CardContent>
+//                 <CardFooter className="p-3 sm:p-4 pt-1 sm:pt-2 flex gap-1 sm:gap-2">
+//                   <Button variant="outline" size="sm" className="flex-1 h-8 text-xs">
+//                     <MessageSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" /> Message
+//                   </Button>
+//                   <Button size="sm" className="flex-1 h-8 text-xs">
+//                     <Truck className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" /> Track
+//                   </Button>
+//                 </CardFooter>
+//               </Card>
+
+//               {/* Order Card 2 */}
+//               <Card>
+//                 <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+//                   <div className="flex justify-between items-start gap-2">
+//                     <div className="min-w-0">
+//                       <CardTitle className="text-xs sm:text-sm font-medium truncate">
+//                         Order #PLG-2304
+//                       </CardTitle>
+//                       <CardDescription className="text-xs">Placed 5 hours ago</CardDescription>
+//                     </div>
+//                     <Badge variant="outline" className="text-xs">Processing</Badge>
+//                   </div>
+//                 </CardHeader>
+//                 <CardContent className="p-3 sm:p-4 pt-0 pb-1 sm:pb-2">
+//                   <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+//                     <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
+//                       <AvatarImage
+//                         src="/placeholder.svg?height=32&width=32"
+//                         alt="Customer"
+//                       />
+//                       <AvatarFallback>KO</AvatarFallback>
+//                     </Avatar>
+//                     <div className="min-w-0">
+//                       <p className="text-xs sm:text-sm font-medium truncate">Kwame Osei</p>
+//                       <p className="text-[10px] xs:text-xs text-muted-foreground truncate">
+//                         Accra, Ghana
+//                       </p>
+//                     </div>
+//                   </div>
+//                   <div className="flex items-center gap-1 sm:gap-2 text-xs">
+//                     <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+//                     <span>1 item • ₦8,200</span>
+//                   </div>
+//                   <Progress value={30} className="h-1 mt-2 sm:mt-3" />
+//                   <div className="flex justify-between text-[10px] xs:text-xs mt-1">
+//                     <span>Processing</span>
+//                     <span>Shipped</span>
+//                     <span>Delivered</span>
+//                   </div>
+//                 </CardContent>
+//                 <CardFooter className="p-3 sm:p-4 pt-1 sm:pt-2 flex gap-1 sm:gap-2">
+//                   <Button variant="outline" size="sm" className="flex-1 h-8 text-xs">
+//                     <MessageSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" /> Message
+//                   </Button>
+//                   <Button size="sm" className="flex-1 h-8 text-xs">
+//                     <PackageCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" /> Confirm
+//                   </Button>
+//                 </CardFooter>
+//               </Card>
+//             </TabsContent>
+//           </Tabs>
+//         </section>
+
+
+      
+
+//         {/* Educational Tip - Better mobile layout */}
+//         <Card className="bg-primary/10 border-primary/20 mt-2">
+//           <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+//             <div className="rounded-full bg-primary/20 p-1.5 sm:p-2 flex-shrink-0">
+//               <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+//             </div>
+//             <div className="flex-1 min-w-0">
+//               <h3 className="font-medium text-xs sm:text-sm">Business Tip</h3>
+//               <p className="text-[10px] xs:text-xs text-muted-foreground">
+//                 Sharing your products during peak hours (7-9 PM) can increase
+//                 your visibility by up to 40%.
+//               </p>
+//             </div>
+//             <Button variant="ghost" size="sm" className="ml-auto text-xs sm:text-sm h-7 sm:h-8">
+//               <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Learn More
+//             </Button>
+//           </CardContent>
+//         </Card>
+//       </div>
+//     </TooltipProvider>
+//   );
+// }
+
+
+
+
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
-  ArrowUp,
+  AlertCircle,
   Clock,
+  DollarSign,
   ExternalLink,
   HelpCircle,
   Instagram,
-  MessageSquare,
+  LineChart,
   Package,
   PackageCheck,
   PackageOpen,
-  Percent,
   PlusCircle,
   RefreshCw,
   Share2,
   ShoppingBag,
-  TrendingUp,
+  Store,
   Truck,
   Twitter,
+  Users,
   Wallet,
   Youtube,
 } from "lucide-react";
@@ -34,7 +347,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -42,573 +354,981 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUser } from "@/app/_components/provider/UserContext";
+import { Skeleton } from "@/components/ui/skeleton";
+import useSWR from "swr";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+// Utility functions
+const formatTimeAgo = (seconds: string) => {
+  const num = parseInt(seconds);
+  if (isNaN(num)) return "Just now";
+
+  const intervals = {
+    year: 31536000,
+    month: 2592000,
+    week: 604800,
+    day: 86400,
+    hour: 3600,
+    minute: 60,
+    second: 1,
+  };
+
+  for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+    const interval = Math.floor(num / secondsInUnit);
+    if (interval >= 1) {
+      return `${interval} ${unit}${interval === 1 ? "" : "s"} ago`;
+    }
+  }
+
+  return "Just now";
+};
+
+const formatQuantity = (quantity: number) => {
+  return quantity >= 100 ? "99+" : quantity.toString();
+};
+
+const formatPrice = (price: string) => {
+  if (price.includes("₦") || price.includes("$") || price.includes("€")) {
+    return price.replace(/\s+/g, "");
+  }
+  
+  const num = parseFloat(price.replace(/[^0-9.]/g, ""));
+  if (isNaN(num)) return price;
+  
+  return `₦${num.toLocaleString("en-NG")}`;
+};
+
+const truncateText = (text: string, maxLength: number = 20) => {
+  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
+};
+
+// Error State
+const ErrorState = ({ onRetry }: { onRetry?: () => void }) => (
+  <Card className="border rounded-lg">
+    <CardContent className="p-4 text-center">
+      <div className="flex flex-col items-center justify-center space-y-2">
+        <AlertCircle className="h-6 w-6 text-destructive" />
+        <h3 className="text-sm font-medium">Failed to load data</h3>
+        <p className="text-muted-foreground text-xs">
+          Something went wrong while loading the data
+        </p>
+        {onRetry && (
+          <Button variant="outline" size="sm" onClick={onRetry} className="mt-1">
+            <RefreshCw className="mr-1 h-3 w-3" />
+            Retry
+          </Button>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+);
+
+// Empty State with responsive adjustments
+const EmptyState = ({
+  message,
+  icon: Icon = Package,
+  actionText,
+  onAction,
+  className = "",
+}: {
+  message: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  actionText?: string;
+  onAction?: () => void;
+  className?: string;
+}) => (
+  <Card className={`border rounded-lg ${className}`}>
+    <CardContent className="p-4 text-center">
+      <div className="flex flex-col items-center justify-center space-y-2">
+        <Icon className="h-6 w-6 text-muted-foreground" />
+        <p className="text-muted-foreground text-xs">{message}</p>
+        {actionText && onAction && (
+          <Button variant="outline" size="sm" onClick={onAction} className="mt-1">
+            {actionText}
+          </Button>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+);
+
+// Loading Skeletons for different sections
+const RevenueLoadingSkeleton = () => (
+  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+    {[...Array(4)].map((_, i) => (
+      <Card key={i} className="h-full border rounded-lg">
+        <CardHeader className="p-2 sm:p-3 pb-0">
+          <Skeleton className="h-4 w-[100px]" />
+        </CardHeader>
+        <CardContent className="p-2 sm:p-3 pt-0">
+          <Skeleton className="h-5 w-12" />
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+);
+
+const StockLoadingSkeleton = () => (
+  <div className="space-y-3">
+    {[...Array(3)].map((_, i) => (
+      <Card key={i} className="border rounded-lg">
+        <CardContent className="p-3">
+          <div className="flex items-center gap-3">
+            <Skeleton className="w-10 h-10 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-[120px]" />
+              <Skeleton className="h-3 w-[80px]" />
+              <Skeleton className="h-1 w-full" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+);
+
+const OrderLoadingSkeleton = () => (
+  <div className="space-y-3">
+    {[...Array(2)].map((_, i) => (
+      <Card key={i} className="border rounded-lg">
+        <CardContent className="p-3">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[100px]" />
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-6 w-6 rounded-full" />
+              <div className="space-y-1 flex-1">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-2/3" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-3/4" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+);
+
+const ProductLoadingSkeleton = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+    {[...Array(2)].map((_, i) => (
+      <Card key={i}>
+        <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+          <Skeleton className="h-5 w-[150px]" />
+        </CardHeader>
+        <CardContent className="p-3 sm:p-4 pt-0">
+          <div className="space-y-3 sm:space-y-4">
+            {[...Array(3)].map((_, j) => (
+              <div key={j} className="flex items-center gap-2 sm:gap-3">
+                <Skeleton className="w-10 h-10 sm:w-12 sm:h-12 rounded-md" />
+                <div className="flex-1 min-w-0 space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-3 w-3/4" />
+                  <Skeleton className="h-1 w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+);
+
+const SocialLoadingSkeleton = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    {[...Array(4)].map((_, i) => (
+      <Card key={i}>
+        <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+          <Skeleton className="h-5 w-[120px]" />
+        </CardHeader>
+        <CardContent className="p-3 sm:p-4 pt-0">
+          <Skeleton className="h-6 w-[50px] mb-2" />
+          <Skeleton className="h-3 w-full mb-3" />
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-1 w-full" />
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-1 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+);
 
 export default function PlugDashboard() {
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const { userData } = useUser();
+  const { data, error: errorData, isLoading, mutate } = useSWR(
+    "/api/products/plug/"
+  );
+
+  const [productLoading, setProductLoading] = useState(true);
+  const [socialLoading, setSocialLoading] = useState(true);
+  const [productError, setProductError] = useState(false);
+  const [socialError, setSocialError] = useState(false);
+
+  const [orders, setOrders] = useState<any[]>([]);
+  const [topProducts, setTopProducts] = useState<any[]>([]);
+  const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
+  const [socialAnalytics, setSocialAnalytics] = useState<any[]>([]);
+  const products = Array.isArray(data?.data) ? data?.data : [];
+
+  const stockAlerts = useMemo(() => {
+    if (!products.length) return [];
+
+    const outOfStockItems = products
+      .filter((item) => item.stock === 0)
+      .map((item) => ({
+        id: item.id,
+        product: item.name,
+        status: "Out of Stock",
+        units: "0 units left",
+        salesRate: "Urgent attention needed",
+        progress: 0,
+      }));
+
+    const lowStockItems = products
+      .filter(
+        (item) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
+      )
+      .map((item) => ({
+        id: item.id,
+        product: item.name,
+        status: "Low Stock",
+        units: `Only ${formatQuantity(item.stock)} units left`,
+        salesRate: "Restock recommended",
+        progress: (item.stock / 5) * 100,
+      }));
+
+    return [...outOfStockItems, ...lowStockItems].slice(0, 3);
+  }, [products]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        setOrders([
+          {
+            id: "PLG-4582",
+            status: "active",
+            received: "3600",
+            customer: "Chioma Nwosu",
+            location: "Lagos, Nigeria",
+            items: [
+              { name: "Shea Butter (250g) x 10", price: "₦25,000" },
+              { name: "African Black Soap x 5", price: "₦7,500" },
+            ],
+            total: "₦32,500",
+          },
+          {
+            id: "PLG-4581",
+            status: "active",
+            received: "7200",
+            customer: "Kwame Osei",
+            location: "Accra, Ghana",
+            items: [
+              { name: "Ankara Dress x 1", price: "₦12,500" },
+            ],
+            total: "₦12,500",
+          },
+          {
+            id: "PLG-4583",
+            status: "processing",
+            received: "10800",
+            customer: "Amina Bello",
+            location: "Abuja, Nigeria",
+            items: [
+              { name: "Beaded Necklace x 2", price: "₦10,000" },
+              { name: "Leather Sandals x 1", price: "₦8,200" },
+            ],
+            total: "₦18,200",
+          },
+          {
+            id: "PLG-4584",
+            status: "delivered",
+            received: "14400",
+            customer: "John Doe",
+            location: "Nairobi, Kenya",
+            items: [
+              { name: "Kente Cloth x 3", price: "₦45,000" },
+            ],
+            total: "₦45,000",
+          },
+        ]);
+
+        setError(false);
+      } catch (err) {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Simulate loading products
+    const loadProducts = async () => {
+      try {
+        setProductLoading(true);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        setTopProducts([
+          {
+            id: 1,
+            name: "Ankara Print Dress",
+            price: "₦12,500",
+            sold: 24,
+            trend: "+15%",
+            progress: 80
+          },
+          {
+            id: 2,
+            name: "Handcrafted Sandals",
+            price: "₦8,200",
+            sold: 18,
+            trend: "+8%",
+            progress: 65
+          },
+          {
+            id: 3,
+            name: "Beaded Necklace",
+            price: "₦5,000",
+            sold: 15,
+            trend: "-2%",
+            progress: 45
+          }
+        ]);
+
+        setRecommendedProducts([
+          {
+            id: 4,
+            name: "African Print Headwrap",
+            supplier: "AfriThreads",
+            status: "High demand"
+          },
+          {
+            id: 5,
+            name: "Shea Butter Set",
+            supplier: "NaturalGlow",
+            status: "Trending now"
+          },
+          {
+            id: 6,
+            name: "Woven Basket Bag",
+            supplier: "EcoAfrica",
+            status: "Seasonal hit"
+          }
+        ]);
+
+        setProductError(false);
+      } catch (err) {
+        setProductError(true);
+      } finally {
+        setProductLoading(false);
+      }
+    };
+
+    // Simulate loading social analytics
+    const loadSocialAnalytics = async () => {
+      try {
+        setSocialLoading(true);
+        await new Promise(resolve => setTimeout(resolve, 1200));
+        
+        setSocialAnalytics([
+          {
+            platform: "Instagram",
+            percentage: "65%",
+            description: "Of your sales come from Instagram",
+            icon: Instagram,
+            color: "text-pink-600",
+            stats: [
+              { label: "Link clicks", value: "245", progress: 65 },
+              { label: "Conversions", value: "32 (13%)", progress: 13 }
+            ]
+          },
+          {
+            platform: "Twitter",
+            percentage: "25%",
+            description: "Of your sales come from Twitter",
+            icon: Twitter,
+            color: "text-blue-500",
+            stats: [
+              { label: "Link clicks", value: "120", progress: 35 },
+              { label: "Conversions", value: "18 (15%)", progress: 15 }
+            ]
+          },
+          {
+            platform: "YouTube",
+            percentage: "10%",
+            description: "Of your sales come from YouTube",
+            icon: Youtube,
+            color: "text-red-600",
+            stats: [
+              { label: "Link clicks", value: "85", progress: 25 },
+              { label: "Conversions", value: "8 (9%)", progress: 9 }
+            ]
+          },
+          {
+            platform: "Online Store",
+            percentage: "15%",
+            description: "Of your sales come from your store",
+            icon: Store,
+            color: "text-purple-600",
+            stats: [
+              { label: "Visits", value: "320", progress: 45 },
+              { label: "Conversions", value: "48 (15%)", progress: 15 }
+            ]
+          }
+        ]);
+
+        setSocialError(false);
+      } catch (err) {
+        setSocialError(true);
+      } finally {
+        setSocialLoading(false);
+      }
+    };
+
+    fetchData();
+    loadProducts();
+    loadSocialAnalytics();
+  }, []);
 
   const handleRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 1500);
   };
 
+  const activeOrders = orders.filter((order) => order.status === "active");
+
   return (
     <TooltipProvider>
-      <div className="flex flex-col min-h-screen bg-background p-3 sm:p-4 md:p-6 gap-4 sm:gap-6 animate-fade-in">
-        {/* Header - Improved for mobile */}
+      <div className="flex flex-col min-h-screen bg-background p-3 sm:p-4 gap-3 sm:gap-4">
+        {/* Header */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight truncate">
-              Plug Dashboard
+            <h1 className="text-muted-foreground font-semibold text-sm truncate">
+              Welcome back, {userData?.firstName || "Plug"}!
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-base truncate">
-              Welcome back, Ade! Here's your business at a glance.
-            </p>
+            <h1 className="text-muted-foreground text-xs sm:text-sm">
+              Here's your business at a glance.
+            </h1>
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0"
-          >
-            <RefreshCw
-              className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${refreshing ? "animate-spin" : ""}`}
-            />
-            <span className="sr-only">Refresh dashboard</span>
-          </Button>
+         
         </div>
 
-        {/* Revenue Snapshot - Better mobile layout */}
+        {/* Revenue Snapshot */}
         <section className="space-y-3 sm:space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-semibold">Revenue Snapshot</h2>
-            <Tabs defaultValue="day" className="w-full sm:w-[180px]">
-              <TabsList className="grid w-full grid-cols-3 h-8 sm:h-9">
-                <TabsTrigger value="day" className="text-xs sm:text-sm">Day</TabsTrigger>
-                <TabsTrigger value="week" className="text-xs sm:text-sm">Week</TabsTrigger>
-                <TabsTrigger value="month" className="text-xs sm:text-sm">Month</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-
-          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-            <Card className="h-full">
-              <CardHeader className="p-2 sm:p-3 pb-0">
-                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Total Earnings
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Total revenue from all sales</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 sm:p-3 pt-0">
-                <div className="text-xl sm:text-2xl font-bold">₦45,200</div>
-                <div className="flex items-center text-[10px] xs:text-xs text-green-600 mt-1">
-                  <ArrowUp className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
-                  <span>12% from last week</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="h-full">
-              <CardHeader className="p-2 sm:p-3 pb-0">
-                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Profit Margin
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Your earnings after platform fees</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 sm:p-3 pt-0">
-                <div className="text-xl sm:text-2xl font-bold">₦18,080</div>
-                <div className="flex items-center text-[10px] xs:text-xs text-green-600 mt-1">
-                  <Percent className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
-                  <span>40% of total sales</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="h-full">
-              <CardHeader className="p-2 sm:p-3 pb-0">
-                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Pending Payments
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Money in escrow to be released</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 sm:p-3 pt-0">
-                <div className="text-xl sm:text-2xl font-bold">₦12,500</div>
-                <div className="flex items-center text-[10px] xs:text-xs text-amber-600 mt-1">
-                  <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
-                  <span>Release in 2 days</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="h-full">
-              <CardHeader className="p-2 sm:p-3 pb-0">
-                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Available Balance
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Money ready for withdrawal</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 sm:p-3 pt-0">
-                <div className="text-xl sm:text-2xl font-bold">₦5,580</div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full mt-1 h-6 sm:h-7 text-[10px] xs:text-xs"
-                >
-                  <Wallet className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" /> Withdraw
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* Order Management Hub - Better mobile tabs */}
-        <section className="space-y-3 sm:space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-semibold">Order Management</h2>
-            <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm">
-              <Link href="#">View All Orders</Link>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+            <h2 className="text-sm sm:text-base font-semibold">
+              Revenue Snapshot
+            </h2>
+            <Button variant="outline" size="sm" asChild className="text-xs">
+              <Link href="/dashboard/finance">View Finances</Link>
             </Button>
           </div>
 
-          <Tabs defaultValue="active">
-            <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10 overflow-x-auto">
-              <TabsTrigger value="active" className="text-xs sm:text-sm whitespace-nowrap">Active (5)</TabsTrigger>
-              <TabsTrigger value="processing" className="text-xs sm:text-sm whitespace-nowrap">Processing (2)</TabsTrigger>
-              <TabsTrigger value="delivered" className="text-xs sm:text-sm whitespace-nowrap">Delivered (8)</TabsTrigger>
-              <TabsTrigger value="cancelled" className="text-xs sm:text-sm whitespace-nowrap">Cancelled (1)</TabsTrigger>
-            </TabsList>
-            <TabsContent value="active" className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-              {/* Order Card 1 - More compact on mobile */}
-              <Card>
-                <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
-                  <div className="flex justify-between items-start gap-2">
-                    <div className="min-w-0">
-                      <CardTitle className="text-xs sm:text-sm font-medium truncate">
-                        Order #PLG-2305
-                      </CardTitle>
-                      <CardDescription className="text-xs">Placed 2 hours ago</CardDescription>
-                    </div>
-                    <Badge className="text-xs">In Transit</Badge>
-                  </div>
+          {isLoading ? (
+            <RevenueLoadingSkeleton />
+          ) : errorData ? (
+            <ErrorState onRetry={() => mutate()} />
+          ) : (
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <Card className="h-full border rounded-lg">
+                <CardHeader className="p-2 sm:p-3 pb-0">
+                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                    Total Earnings
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">
+                        <p>Total amount earned from sales</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="p-3 sm:p-4 pt-0 pb-1 sm:pb-2">
-                  <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                    <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
-                      <AvatarImage
-                        src="/placeholder.svg?height=32&width=32"
-                        alt="Customer"
-                      />
-                      <AvatarFallback>CN</AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0">
-                      <p className="text-xs sm:text-sm font-medium truncate">Chioma Nwosu</p>
-                      <p className="text-[10px] xs:text-xs text-muted-foreground truncate">
-                        Lagos, Nigeria
-                      </p>
-                    </div>
+                <CardContent className="p-2 sm:p-3 pt-0">
+                  <div className="text-base sm:text-lg font-bold">
+                    ₦45,500
                   </div>
-                  <div className="flex items-center gap-1 sm:gap-2 text-xs">
-                    <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-                    <span>2 items • ₦12,500</span>
-                  </div>
-                  <Progress value={60} className="h-1 mt-2 sm:mt-3" />
-                  <div className="flex justify-between text-[10px] xs:text-xs mt-1">
-                    <span>Processing</span>
-                    <span>Shipped</span>
-                    <span>Delivered</span>
-                  </div>
+                  
                 </CardContent>
-                <CardFooter className="p-3 sm:p-4 pt-1 sm:pt-2 flex gap-1 sm:gap-2">
-                  <Button variant="outline" size="sm" className="flex-1 h-8 text-xs">
-                    <MessageSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" /> Message
-                  </Button>
-                  <Button size="sm" className="flex-1 h-8 text-xs">
-                    <Truck className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" /> Track
-                  </Button>
-                </CardFooter>
               </Card>
 
-              {/* Order Card 2 */}
-              <Card>
-                <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
-                  <div className="flex justify-between items-start gap-2">
-                    <div className="min-w-0">
-                      <CardTitle className="text-xs sm:text-sm font-medium truncate">
-                        Order #PLG-2304
-                      </CardTitle>
-                      <CardDescription className="text-xs">Placed 5 hours ago</CardDescription>
-                    </div>
-                    <Badge variant="outline" className="text-xs">Processing</Badge>
-                  </div>
+              <Card className="h-full border rounded-lg">
+                <CardHeader className="p-2 sm:p-3 pb-0">
+                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                    Profit Margin
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">
+                        <p>Your earnings after platform fees</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="p-3 sm:p-4 pt-0 pb-1 sm:pb-2">
-                  <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                    <Avatar className="h-7 w-7 sm:h-8 sm:w-8">
-                      <AvatarImage
-                        src="/placeholder.svg?height=32&width=32"
-                        alt="Customer"
-                      />
-                      <AvatarFallback>KO</AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0">
-                      <p className="text-xs sm:text-sm font-medium truncate">Kwame Osei</p>
-                      <p className="text-[10px] xs:text-xs text-muted-foreground truncate">
-                        Accra, Ghana
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 sm:gap-2 text-xs">
-                    <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-                    <span>1 item • ₦8,200</span>
-                  </div>
-                  <Progress value={30} className="h-1 mt-2 sm:mt-3" />
-                  <div className="flex justify-between text-[10px] xs:text-xs mt-1">
-                    <span>Processing</span>
-                    <span>Shipped</span>
-                    <span>Delivered</span>
+                <CardContent className="p-2 sm:p-3 pt-0">
+                  <div className="text-base sm:text-lg font-bold text-green-500">
+                    ₦18,080
                   </div>
                 </CardContent>
-                <CardFooter className="p-3 sm:p-4 pt-1 sm:pt-2 flex gap-1 sm:gap-2">
-                  <Button variant="outline" size="sm" className="flex-1 h-8 text-xs">
-                    <MessageSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" /> Message
-                  </Button>
-                  <Button size="sm" className="flex-1 h-8 text-xs">
-                    <PackageCheck className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" /> Confirm
-                  </Button>
-                </CardFooter>
               </Card>
-            </TabsContent>
-          </Tabs>
+
+              <Card className="h-full border rounded-lg">
+                <CardHeader className="p-2 sm:p-3 pb-0">
+                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                    Pending Payments
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">
+                        <p>Money in escrow to be released</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 sm:p-3 pt-0">
+                  <div className="text-base sm:text-lg font-bold">
+                    ₦12,500
+                  </div>
+                  <div className="flex items-center text-[10px] text-amber-600 mt-0.5">
+                    <Clock className="h-2.5 w-2.5 mr-1" />
+                    <span>Release in 2 days</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="h-full border rounded-lg">
+                <CardHeader className="p-2 sm:p-3 pb-0">
+                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                    Available Balance
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">
+                        <p>Money ready for withdrawal</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 sm:p-3 pt-0">
+                  <div className="text-base sm:text-lg font-bold">₦5,580</div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-1 h-6 text-xs"
+                  >
+                    <Wallet className="h-2.5 w-2.5 mr-1" /> Withdraw
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </section>
 
-        {/* Product Performance - Better mobile layout */}
+        {/* Stock Alerts Section */}
+        <section className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+            <h2 className="text-sm sm:text-base font-semibold">
+              Stock Alerts
+            </h2>
+            <Button variant="outline" size="sm" asChild className="text-xs">
+              <Link href="/dashboard/inventory">Manage Inventory</Link>
+            </Button>
+          </div>
+
+          {isLoading ? (
+            <StockLoadingSkeleton />
+          ) : errorData ? (
+            <ErrorState onRetry={() => mutate()} />
+          ) : stockAlerts.length === 0 ? (
+            <EmptyState
+              message="No stock alerts at this time"
+              icon={AlertCircle}
+            />
+          ) : (
+            <Card className="border rounded-lg">
+              <CardHeader className="p-3 sm:p-4 pb-1">
+                <CardTitle className="text-xs sm:text-sm font-medium">
+                  Stock Alerts
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 pt-0">
+                <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                  {stockAlerts.map((alert) => (
+                    <div
+                      key={alert.id}
+                      className="flex items-center gap-2 sm:gap-3"
+                    >
+                      <div
+                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          alert.status === "Out of Stock"
+                            ? "bg-red-100"
+                            : "bg-amber-100"
+                        }`}
+                      >
+                        <AlertCircle
+                          className={`h-4 w-4 sm:h-5 sm:w-5 ${
+                            alert.status === "Out of Stock"
+                              ? "text-red-600"
+                              : "text-amber-600"
+                          }`}
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center gap-1">
+                          <p className="text-xs sm:text-sm font-medium truncate">
+                            {truncateText(alert.product, 20)}
+                          </p>
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] sm:text-xs ${
+                              alert.status === "Out of Stock"
+                                ? "text-red-600 border-red-200 bg-red-50"
+                                : "text-amber-600 border-amber-200 bg-amber-50"
+                            }`}
+                          >
+                            {alert.status}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
+                          <p>{alert.units}</p>
+                        </div>
+                        <Progress
+                          value={alert.progress}
+                          className="h-1 sm:h-1.5 mt-1"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </section>
+
+        {/* Order Management Section */}
+        <section className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+            <h2 className="text-sm sm:text-base font-semibold">
+              Order Management
+            </h2>
+            <Button variant="outline" size="sm" asChild className="text-xs">
+              <Link href="/dashboard/orders">View All Orders</Link>
+            </Button>
+          </div>
+
+          {loading ? (
+            <OrderLoadingSkeleton />
+          ) : error ? (
+            <ErrorState onRetry={handleRefresh} />
+          ) : activeOrders.length === 0 ? (
+            <EmptyState
+              message="No active orders found"
+              icon={PackageCheck}
+              actionText="View All Orders"
+              onAction={() => console.log("View all orders clicked")}
+            />
+          ) : (
+            <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
+              {activeOrders.map((order) => (
+                <Card key={order.id} className="border rounded-lg">
+                  <CardHeader className="p-3 sm:p-4 pb-1">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="min-w-0">
+                        <CardTitle className="text-xs sm:text-sm font-medium truncate">
+                          {order.id}
+                        </CardTitle>
+                        <CardDescription className="text-[10px] sm:text-xs">
+                          {formatTimeAgo(order.received)}
+                        </CardDescription>
+                      </div>
+                      <Badge className="text-[10px] sm:text-xs capitalize">
+                        {order.status}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-3 sm:p-4 pt-0 pb-1">
+                    <div className="space-y-1 sm:space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-xs sm:text-sm">
+                          {order.customer} • {order.location}
+                        </span>
+                      </div>
+                      {order.items.map((item: any, i: number) => (
+                        <div
+                          key={i}
+                          className="flex justify-between text-xs sm:text-sm"
+                        >
+                          <span className="truncate max-w-[120px] sm:max-w-[180px]">
+                            {item.name}
+                          </span>
+                          <span className="whitespace-nowrap">
+                            {formatPrice(item.price)}
+                          </span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between text-xs sm:text-sm font-medium pt-1 sm:pt-2 border-t">
+                        <span>Total</span>
+                        <span>{formatPrice(order.total)}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="p-3 sm:p-4 pt-1 flex gap-1 sm:gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 h-7 sm:h-8 text-xs"
+                    >
+                      <Share2 className="h-3 w-3 mr-1" />
+                      Share Tracking
+                    </Button>
+                    <Button size="sm" className="flex-1 h-7 sm:h-8 text-xs">
+                      <Truck className="h-3 w-3 mr-1" />
+                      Track Order
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Product Performance */}
         <section className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-semibold">Product Performance</h2>
-            <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm">
+            <h2 className="text-base sm:text-lg font-semibold">
+              Product Performance
+            </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="text-xs sm:text-sm"
+            >
               <Link href="#">View All Products</Link>
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-            <Card>
-              <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
-                <CardTitle className="text-sm sm:text-base font-medium">
-                  Top Selling Products
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-4 pt-0">
-                <div className="space-y-3 sm:space-y-4">
-                  {/* Product 1 */}
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
-                      <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          {productLoading ? (
+            <ProductLoadingSkeleton />
+          ) : productError ? (
+            <ErrorState onRetry={() => {
+              setProductError(false);
+              setProductLoading(true);
+              setTimeout(() => setProductLoading(false), 1000);
+            }} />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+              {/* Top Selling Products with Scroll Area */}
+              <Card>
+                <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+                  <CardTitle className="text-sm sm:text-base font-medium">
+                    Top Selling Products
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <ScrollArea className="h-[250px]">
+                    <div className="space-y-3 sm:space-y-4 pr-3">
+                      {topProducts.length === 0 ? (
+                        <EmptyState
+                          message="No top selling products"
+                          icon={ShoppingBag}
+                        />
+                      ) : (
+                        topProducts.map((product) => (
+                          <div key={product.id} className="flex items-center gap-2 sm:gap-3">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
+                              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between gap-1">
+                                <p className="text-xs sm:text-sm font-medium truncate">
+                                  {product.name}
+                                </p>
+                                <p className="text-xs sm:text-sm font-medium whitespace-nowrap">
+                                  {product.price}
+                                </p>
+                              </div>
+                              <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
+                                <p>{product.sold} units sold</p>
+                                <p className={`whitespace-nowrap ${
+                                  product.trend.startsWith('+') 
+                                    ? 'text-green-600' 
+                                    : 'text-amber-600'
+                                }`}>
+                                  {product.trend} this week
+                                </p>
+                              </div>
+                              <Progress value={product.progress} className="h-1 mt-1" />
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between gap-1">
-                        <p className="text-xs sm:text-sm font-medium truncate">
-                          Ankara Print Dress
-                        </p>
-                        <p className="text-xs sm:text-sm font-medium whitespace-nowrap">₦12,500</p>
-                      </div>
-                      <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
-                        <p>24 units sold</p>
-                        <p className="text-green-600 whitespace-nowrap">+15% this week</p>
-                      </div>
-                      <Progress value={80} className="h-1 mt-1" />
-                    </div>
-                  </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
 
-                  {/* Product 2 */}
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
-                      <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              {/* Recommended Products with Scroll Area */}
+              <Card>
+                <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+                  <CardTitle className="text-sm sm:text-base font-medium">
+                    Recommended Products
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
+                    Trending among Plugs
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <ScrollArea className="h-[250px]">
+                    <div className="space-y-3 sm:space-y-4 pr-3">
+                      {recommendedProducts.length === 0 ? (
+                        <EmptyState
+                          message="No recommended products"
+                          icon={PackageOpen}
+                        />
+                      ) : (
+                        recommendedProducts.map((product) => (
+                          <div key={product.id} className="flex items-center gap-2 sm:gap-3">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
+                              <PackageOpen className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between items-center gap-1">
+                                <p className="text-xs sm:text-sm font-medium truncate">
+                                  {product.name}
+                                </p>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 px-2 text-xs"
+                                >
+                                  <PlusCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" /> Add
+                                </Button>
+                              </div>
+                              <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
+                                <p className="truncate">Supplier: {product.supplier}</p>
+                                <p className="text-green-600 whitespace-nowrap">
+                                  {product.status}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between gap-1">
-                        <p className="text-xs sm:text-sm font-medium truncate">
-                          Handcrafted Sandals
-                        </p>
-                        <p className="text-xs sm:text-sm font-medium whitespace-nowrap">₦8,200</p>
-                      </div>
-                      <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
-                        <p>18 units sold</p>
-                        <p className="text-green-600 whitespace-nowrap">+8% this week</p>
-                      </div>
-                      <Progress value={65} className="h-1 mt-1" />
-                    </div>
-                  </div>
-
-                  {/* Product 3 */}
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
-                      <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between gap-1">
-                        <p className="text-xs sm:text-sm font-medium truncate">
-                          Beaded Necklace
-                        </p>
-                        <p className="text-xs sm:text-sm font-medium whitespace-nowrap">₦5,000</p>
-                      </div>
-                      <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
-                        <p>15 units sold</p>
-                        <p className="text-amber-600 whitespace-nowrap">-2% this week</p>
-                      </div>
-                      <Progress value={45} className="h-1 mt-1" />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
-                <CardTitle className="text-sm sm:text-base font-medium">
-                  Recommended Products
-                </CardTitle>
-                <CardDescription className="text-xs sm:text-sm">Trending among similar Plugs</CardDescription>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-4 pt-0">
-                <div className="space-y-3 sm:space-y-4">
-                  {/* Recommended Product 1 */}
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
-                      <PackageOpen className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center gap-1">
-                        <p className="text-xs sm:text-sm font-medium truncate">
-                          African Print Headwrap
-                        </p>
-                        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
-                          <PlusCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" /> Add
-                        </Button>
-                      </div>
-                      <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
-                        <p className="truncate">Supplier: AfriThreads</p>
-                        <p className="text-green-600 whitespace-nowrap">High demand</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Recommended Product 2 */}
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
-                      <PackageOpen className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center gap-1">
-                        <p className="text-xs sm:text-sm font-medium truncate">
-                          Shea Butter Set
-                        </p>
-                        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
-                          <PlusCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" /> Add
-                        </Button>
-                      </div>
-                      <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
-                        <p className="truncate">Supplier: NaturalGlow</p>
-                        <p className="text-green-600 whitespace-nowrap">Trending now</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Recommended Product 3 */}
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
-                      <PackageOpen className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center gap-1">
-                        <p className="text-xs sm:text-sm font-medium truncate">
-                          Woven Basket Bag
-                        </p>
-                        <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
-                          <PlusCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" /> Add
-                        </Button>
-                      </div>
-                      <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
-                        <p className="truncate">Supplier: EcoAfrica</p>
-                        <p className="text-green-600 whitespace-nowrap">Seasonal hit</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </section>
 
-        {/* Social Analytics - Better mobile layout */}
+        {/* Social Analytics */}
         <section className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-semibold">Social Analytics</h2>
-            <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm">
+            <h2 className="text-base sm:text-lg font-semibold">
+              Social Analytics
+            </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="text-xs sm:text-sm"
+            >
               <Link href="#">Detailed Reports</Link>
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            <Card>
-              <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm sm:text-base font-medium">
-                    Platform Traffic
-                  </CardTitle>
-                  <Instagram className="h-4 w-4 text-pink-600" />
-                </div>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-4 pt-0">
-                <div className="text-xl sm:text-2xl font-bold">65%</div>
-                <p className="text-[10px] xs:text-xs text-muted-foreground">
-                  Of your sales come from Instagram
-                </p>
-                <div className="mt-3 space-y-2">
-                  <div className="flex justify-between text-[10px] xs:text-xs">
-                    <span>Link clicks</span>
-                    <span className="font-medium">245</span>
-                  </div>
-                  <Progress value={65} className="h-1" />
-                  <div className="flex justify-between text-[10px] xs:text-xs">
-                    <span>Conversions</span>
-                    <span className="font-medium">32 (13%)</span>
-                  </div>
-                  <Progress value={13} className="h-1" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm sm:text-base font-medium">
-                    Platform Traffic
-                  </CardTitle>
-                  <Twitter className="h-4 w-4 text-blue-500" />
-                </div>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-4 pt-0">
-                <div className="text-xl sm:text-2xl font-bold">25%</div>
-                <p className="text-[10px] xs:text-xs text-muted-foreground">
-                  Of your sales come from Twitter
-                </p>
-                <div className="mt-3 space-y-2">
-                  <div className="flex justify-between text-[10px] xs:text-xs">
-                    <span>Link clicks</span>
-                    <span className="font-medium">120</span>
-                  </div>
-                  <Progress value={35} className="h-1" />
-                  <div className="flex justify-between text-[10px] xs:text-xs">
-                    <span>Conversions</span>
-                    <span className="font-medium">18 (15%)</span>
-                  </div>
-                  <Progress value={15} className="h-1" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm sm:text-base font-medium">
-                    Platform Traffic
-                  </CardTitle>
-                  <Youtube className="h-4 w-4 text-red-600" />
-                </div>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-4 pt-0">
-                <div className="text-xl sm:text-2xl font-bold">10%</div>
-                <p className="text-[10px] xs:text-xs text-muted-foreground">
-                  Of your sales come from YouTube
-                </p>
-                <div className="mt-3 space-y-2">
-                  <div className="flex justify-between text-[10px] xs:text-xs">
-                    <span>Link clicks</span>
-                    <span className="font-medium">85</span>
-                  </div>
-                  <Progress value={25} className="h-1" />
-                  <div className="flex justify-between text-[10px] xs:text-xs">
-                    <span>Conversions</span>
-                    <span className="font-medium">8 (9%)</span>
-                  </div>
-                  <Progress value={9} className="h-1" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* Quick Actions - Better mobile buttons */}
-        <section className="space-y-3 sm:space-y-4">
-          <h2 className="text-base sm:text-lg font-semibold">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-            <Button variant="outline" className="h-auto flex-col py-4 sm:py-6 gap-1 sm:gap-2 text-xs sm:text-sm">
-              <PlusCircle className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              <span>Add Product</span>
-            </Button>
-            <Button variant="outline" className="h-auto flex-col py-4 sm:py-6 gap-1 sm:gap-2 text-xs sm:text-sm">
-              <Share2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              <span>Share Products</span>
-            </Button>
-            <Button variant="outline" className="h-auto flex-col py-4 sm:py-6 gap-1 sm:gap-2 text-xs sm:text-sm">
-              <Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              <span>Payment Status</span>
-            </Button>
-            <Button variant="outline" className="h-auto flex-col py-4 sm:py-6 gap-1 sm:gap-2 text-xs sm:text-sm">
-              <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              <span>Contact Supplier</span>
-            </Button>
-          </div>
-        </section>
-
-        {/* Educational Tip - Better mobile layout */}
-        <Card className="bg-primary/10 border-primary/20 mt-2">
-          <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
-            <div className="rounded-full bg-primary/20 p-1.5 sm:p-2 flex-shrink-0">
-              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-xs sm:text-sm">Business Tip</h3>
-              <p className="text-[10px] xs:text-xs text-muted-foreground">
-                Sharing your products during peak hours (7-9 PM) can increase
-                your visibility by up to 40%.
-              </p>
-            </div>
-            <Button variant="ghost" size="sm" className="ml-auto text-xs sm:text-sm h-7 sm:h-8">
-              <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Learn More
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </TooltipProvider>
-  );
+          {socialLoading ? (
+            <SocialLoadingSkeleton />
+          ) : socialError ? (
+            <ErrorState onRetry={() => {
+              setSocialError(false);
+              setSocialLoading(true);
+              setTimeout(() => setSocialLoading(false), 1000);
+            }} />
+          ) : socialAnalytics.length === 0 ? (
+            <EmptyState
+              message="No social analytics data"
+              icon={Users}
+              className="col-span-full"
+            />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              {socialAnalytics.map((platform) => {
+                const Icon = platform.icon;
+                return (
+                  <Card key={platform.platform}>
+                    <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm sm:text-base font-medium">
+                          Platform Traffic
+                        </CardTitle>
+                        <Icon className={`h-4 w-4 ${platform.color}`} />
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4 pt-0">
+                     <div className="2xl font-bold">{platform.percentage}</div>
+<p className="text-[10px] xs:text-xs text-muted-foreground">
+{platform.description}
+</p>
+<div className="mt-3 space-y-2">
+{platform.stats.map((stat: any, i: number) => (
+<div key={i}>
+<div className="flex justify-between text-[10px] xs:text-xs">
+<span>{stat.label}</span>
+<span className="font-medium">{stat.value}</span>
+</div>
+<Progress value={stat.progress} className="h-1" />
+</div>
+))}
+</div>
+</CardContent>
+</Card>
+);
+})}
+</div>
+)}
+</section>
+    {/* Educational Tip */}
+    <Card className="bg-primary/10 border-primary/20">
+      <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+        <div className="rounded-full bg-primary/20 p-1.5 flex-shrink-0">
+          <LineChart className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-medium text-xs sm:text-sm">Business Tip</h3>
+          <p className="text-[10px] sm:text-xs text-muted-foreground">
+            Sharing your products during peak hours (7-9 PM) can increase
+            your visibility by up to 40%.
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="ml-auto text-xs h-7 sm:h-8"
+        >
+          <ExternalLink className="h-3 w-3 mr-1" /> Learn
+        </Button>
+      </CardContent>
+    </Card>
+  </div>
+</TooltipProvider>
+);
 }

@@ -204,9 +204,9 @@ export default function PlugSuccess() {
                   <ShoppingCart className="h-4 w-4 text-[#FF7A29]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium text-sm">Add Your Products</h3>
+                  <h3 className="font-medium text-sm">Add  Products</h3>
                   <p className="text-xs text-gray-500">
-                    Expand your inventory with your first products
+                    Expand your store with your first products
                   </p>
                   <div className="mt-1.5">
                     <Progress value={0} className="h-1.5 bg-gray-100 w-full" />
@@ -262,18 +262,7 @@ export default function PlugSuccess() {
                 Quick Tips for Success
               </h3>
               <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-[#FF7A29] flex-shrink-0"></div>
-                  <span>
-                    Add high-quality product images to increase conversion rates
-                  </span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-[#FF7A29] flex-shrink-0"></div>
-                  <span>
-                    Write detailed product descriptions to improve SEO
-                  </span>
-                </li>
+                
                 <li className="flex items-center gap-2">
                   <div className="h-1.5 w-1.5 rounded-full bg-[#FF7A29] flex-shrink-0"></div>
                   <span>
