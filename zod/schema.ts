@@ -78,7 +78,29 @@ export const plugInfoSchema = z.object({
 
 
 
-// In your schema file
+// Use a custom refinement to handle both File objects and strings
+// const fileSchema = z.custom<File>()
+//   .refine(
+//     (file) => {
+//       // Skip validation if no file (optional)
+//       if (!file) return true;
+      
+//       // If it's already a File object, check size and type
+//       if (file instanceof File) {
+//         const validTypes = ["image/jpeg", "image/png", "image/svg+xml"];
+//         const maxSize = 5 * 1024 * 1024; // 5MB
+        
+//         return validTypes.includes(file.type) && file.size <= maxSize;
+//       }
+      
+//       return false;
+//     },
+//     {
+//       message: "Logo must be a JPEG, PNG, or SVG file less than 5MB",
+//     }
+//   )
+//   .optional();
+
 export const profileSchema = z.object({
   avatar: z.string().optional(),
   businessName: z.string().min(2, {
@@ -170,64 +192,35 @@ export const profileSchema = z.object({
     }
   ),
 });
-export const productSchema = z.object({
-  // Required fields
-  productName: z
-    .string()
-    .min(3, { message: "Product name must be at least 3 characters" })
-    .max(100, { message: "Product name cannot exceed 100 characters" }),
-  
-  description: z
-    .string()
-    .min(10, { message: "Description must be at least 10 characters" })
-    .max(1000, { message: "Description cannot exceed 1000 characters" }),
-  
-  price: z
-    .union([
-      z.string().refine(val => !isNaN(parseFloat(val)) && parseFloat(val) >= 0, {
-        message: "Price must be a positive number"
-      }),
-      z.number().min(0, { message: "Price must be a positive number" })
-    ])
-    .transform(val => typeof val === "string" ? parseFloat(val) : val),
-  
-  quantity: z
-    .union([
-      z.string().refine(val => !isNaN(parseInt(val)) && parseInt(val) >= 0, {
-        message: "Quantity must be a positive integer"
-      }),
-      z.number().int().min(0, { message: "Quantity must be a positive integer" })
-    ])
-    .transform(val => typeof val === "string" ? parseInt(val) : val),
-  
-  category: z
-    .string({ required_error: "Category is required" })
-    .min(1, { message: "Please select a category" }),
-  
-  shippingRegions: z
-    .string({ required_error: "Shipping region is required" })
-    .min(1, { message: "Please select a shipping region" }),
-  
-  // Optional fields with validation
-  images: z
-    .array(z.string().url({ message: "Invalid image URL" }))
-    .min(1, { message: "At least one product image is required" })
-    .optional(),
 
-  // For bulk upload (optional)
-  bulkFile: z.any().optional(),
-});
 
 export const supplierInfoSchema = z.object({
-  // Business type is required - must be one of the specified options
   businessType: z
     .enum(["Warehouse", "Wholesaler", "Importer", "Local Store"], {
-      required_error: "Please select a business type",
       invalid_type_error: "Business type must be a valid option",
-    })
+    }).optional()
     .describe("The type of business the supplier operates"),
-});
 
+  // Pickup location is required
+  pickupLocation: z
+    .string()
+    .min(1, "Pickup location is required")
+    .max(200, "Pickup location cannot exceed 200 characters")
+    .describe("The address where retailers can pick up products"),
+
+  // Business name is required
+  businessName: z
+    .string()
+    .min(1, "Business name is required")
+    .max(100, "Business name cannot exceed 100 characters")
+    .describe("The name of your business"),
+
+  // Avatar/logo is optional
+  avatar: z
+    .instanceof(File)
+    .optional()
+    .describe("The business logo image file"),
+});
 
 
 const variationSchema = z.object({

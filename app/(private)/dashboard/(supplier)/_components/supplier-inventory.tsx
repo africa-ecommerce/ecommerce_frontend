@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -323,6 +323,54 @@ export default function Inventory() {
     return value !== undefined && value !== null ? value : "-";
   };
 
+  const stats = useMemo(() => {
+  if (!products.length) return {
+    totalProducts: 0,
+    lowStockItems: 0,
+    outOfStock: 0,
+    inventoryValue: 0
+  };
+  
+  return {
+    totalProducts: products.length,
+    lowStockItems: products.filter(item => item.stock !== undefined && item.stock > 0 && item.stock <= 5).length,
+    outOfStock: products.filter(item => item.stock === 0).length,
+    inventoryValue: products.reduce((total, item) => total + (item.price * (item.stock || 0)), 0)
+  };
+}, [products]);
+
+// Generate stock alerts from product data
+const stockAlerts = useMemo(() => {
+  if (!products.length) return [];
+  
+  // Get out of stock items first
+  const outOfStockItems = products
+    .filter(item => item.stock === 0)
+    .map(item => ({
+      id: item.id,
+      product: item.name,
+      status: "Out of Stock",
+      units: "0 units left",
+      salesRate: "Urgent attention needed",
+      progress: 0
+    }));
+  
+  // Then get low stock items
+  const lowStockItems = products
+    .filter(item => item.stock !== undefined && item.stock > 0 && item.stock <= 5)
+    .map(item => ({
+      id: item.id,
+      product: item.name,
+      status: "Low Stock",
+      units: `Only ${item.stock} units left`,
+      salesRate: "Restock recommended",
+      progress: (item.stock / 5) * 100 // 5 is the threshold for low stock
+    }));
+  
+  // Combine and return only the first few items for the dashboard
+  return [...outOfStockItems, ...lowStockItems].slice(0, 3);
+}, [products]);
+
   return (
     <TooltipProvider>
       <div className="flex flex-col min-h-screen bg-background p-1.5 max-w-[360px]:p-1 sm:p-4 md:p-6 gap-2 max-w-[360px]:gap-1.5 sm:gap-4 pb-16 sm:pb-0">
@@ -357,7 +405,7 @@ export default function Inventory() {
           </div>
         </div>
         {/* Inventory Command Center */}
-        <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
+        {/* <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm max-w-[360px]:text-xs sm:text-base md:text-lg font-semibold">
               Inventory Command Center
@@ -469,7 +517,146 @@ export default function Inventory() {
               </CardContent>
             </Card>
           </div>
-        </section>
+        </section> */}
+
+        {/* Inventory Command Center */}
+<section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
+  <div className="flex items-center justify-between">
+    <h2 className="text-sm max-w-[360px]:text-xs sm:text-base md:text-lg font-semibold">
+      Inventory Command Center
+    </h2>
+    <Button
+      variant="outline"
+      size="sm"
+      asChild
+      className="text-xs h-7 hidden sm:inline-flex"
+    >
+      <Link href="#">View Reports</Link>
+    </Button>
+  </div>
+
+  {/* Tablet/Desktop Stats */}
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <Card className="p-2 md:p-3">
+      <CardHeader className="p-1 md:p-2 pb-0">
+        <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1">
+          Total Products
+          <Tooltip>
+            <TooltipTrigger>
+              <HelpCircle className="h-3 w-3 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Total number of products in your catalog</p>
+            </TooltipContent>
+          </Tooltip>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-1 md:p-2 pt-0">
+        {isLoading ? (
+          <Skeleton className="h-6 w-16" />
+        ) : (
+          <>
+            <div className="text-lg md:text-2xl font-bold">{stats.totalProducts}</div>
+            <div className="flex items-center text-xs text-green-600 mt-1">
+              <ArrowUpRight className="h-3 w-3 mr-1" />
+              <span>5 new this month</span>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+    <Card className="p-2 md:p-3">
+      <CardHeader className="p-1 md:p-2 pb-0">
+        <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1">
+          Low Stock Items
+          <Tooltip>
+            <TooltipTrigger>
+              <HelpCircle className="h-3 w-3 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Products that need restocking soon</p>
+            </TooltipContent>
+          </Tooltip>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-1 md:p-2 pt-0">
+        {isLoading ? (
+          <Skeleton className="h-6 w-16" />
+        ) : (
+          <>
+            <div className="text-lg md:text-2xl font-bold text-amber-500">
+              {stats.lowStockItems}
+            </div>
+            <div className="flex items-center text-xs text-amber-600 mt-1">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              <span>Restock needed</span>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+    <Card className="p-2 md:p-3">
+      <CardHeader className="p-1 md:p-2 pb-0">
+        <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1">
+          Out of Stock
+          <Tooltip>
+            <TooltipTrigger>
+              <HelpCircle className="h-3 w-3 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Products currently unavailable</p>
+            </TooltipContent>
+          </Tooltip>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-1 md:p-2 pt-0">
+        {isLoading ? (
+          <Skeleton className="h-6 w-16" />
+        ) : (
+          <>
+            <div className="text-lg md:text-2xl font-bold text-destructive">
+              {stats.outOfStock}
+            </div>
+            <div className="flex items-center text-xs text-destructive mt-1">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              <span>Urgent attention needed</span>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+    <Card className="p-2 md:p-3">
+      <CardHeader className="p-1 md:p-2 pb-0">
+        <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1">
+          Inventory Value
+          <Tooltip>
+            <TooltipTrigger>
+              <HelpCircle className="h-3 w-3 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Total value of current inventory</p>
+            </TooltipContent>
+          </Tooltip>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-1 md:p-2 pt-0">
+        {isLoading ? (
+          <Skeleton className="h-6 w-16" />
+        ) : (
+          <>
+            <div className="text-lg md:text-2xl font-bold">
+              ₦{(stats.inventoryValue / 1000).toFixed(1)}K
+            </div>
+            <div className="flex items-center text-xs text-green-600 mt-1">
+              <TrendingUp className="h-3 w-3 mr-1" />
+              <span>15% from last month</span>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  </div>
+</section>
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">

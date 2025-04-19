@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   ArrowRight,
   ArrowLeft,
@@ -23,29 +23,32 @@ import { useEffect } from "react";
 import { PRODUCT_CATEGORIES } from "@/app/constant";
 
 // Define a type for the product categories
-type ProductCategory = 'all' | 'electronics' | 'fashion' | 'beauty_skincare';
+type ProductCategory = "all" | "electronics" | "fashion" | "beauty_skincare";
 
 // Map icons and descriptions to each category
-const NICHE_CONFIG: Record<ProductCategory, {
-  icon: React.FC<any>;
-  description: string;
-}> = {
+const NICHE_CONFIG: Record<
+  ProductCategory,
+  {
+    icon: React.FC<any>;
+    description: string;
+  }
+> = {
   all: {
     icon: ShoppingCart,
-    description: "Wide range of products"
+    description: "Wide range of products",
   },
   electronics: {
     icon: Smartphone,
-    description: "Gadgets & devices"
+    description: "Gadgets & devices",
   },
   fashion: {
     icon: Shirt,
-    description: "Clothing & accessories"
+    description: "Clothing & accessories",
   },
   beauty_skincare: {
     icon: Sparkles,
-    description: "Cosmetics & wellness"
-  }
+    description: "Cosmetics & wellness",
+  },
 };
 
 interface PlugTypeProps {
@@ -74,14 +77,14 @@ export default function PlugInfo({
   }, plugInfoSchema);
 
   // Extract categories excluding the "all" option which will be handled by generalMerchant
-  const niches = PRODUCT_CATEGORIES
-    .filter(category => category.value !== "all")
-    .map(category => ({
-      id: category.value,
-      icon: NICHE_CONFIG[category.value as ProductCategory].icon,
-      label: category.label,
-      description: NICHE_CONFIG[category.value as ProductCategory].description,
-    }));
+  const niches = PRODUCT_CATEGORIES.filter(
+    (category) => category.value !== "all"
+  ).map((category) => ({
+    id: category.value,
+    icon: NICHE_CONFIG[category.value as ProductCategory].icon,
+    label: category.label,
+    description: NICHE_CONFIG[category.value as ProductCategory].description,
+  }));
 
   const currentNiches = watch("niches") || [];
   const generalMerchant = watch("generalMerchant");
@@ -153,7 +156,7 @@ export default function PlugInfo({
               Or select specific niches below (you can select multiple):
             </p>
 
-            {/* Niches Selection */}
+            {/* Niches Selection with fixed size cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {niches.map((niche) => {
                 const isSelected = currentNiches.includes(niche.id);
@@ -162,16 +165,18 @@ export default function PlugInfo({
                   <div
                     key={niche.id}
                     onClick={() => toggleNiche(niche.id)}
-                    className={`p-4 border-2 rounded-md hover:border-orange-500 cursor-pointer transition-all ${
+                    className={`p-4 border-2 rounded-md hover:border-orange-500 cursor-pointer transition-all h-32 w-full ${
                       isSelected ? "border-orange-500" : "border-gray-200"
                     }`}
                   >
-                    <div className="flex flex-col items-center text-center gap-2">
+                    <div className="flex flex-col items-center text-center gap-2 h-full justify-center">
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-50">
                         <niche.icon className="h-6 w-6 text-orange-500" />
                       </div>
                       <div>
-                        <span className="font-medium">{niche.label}</span>
+                        <span className="font-medium text-sm">
+                          {niche.label}
+                        </span>
                         <p className="text-xs text-gray-500">
                           {niche.description}
                         </p>
@@ -236,4 +241,4 @@ export default function PlugInfo({
       </div>
     </>
   );
-}
+} 

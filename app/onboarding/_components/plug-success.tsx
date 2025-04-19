@@ -150,7 +150,7 @@ export default function PlugSuccess() {
         <div className="w-full flex flex-col md:flex-row gap-3 mb-8">
           <Button
             asChild
-            className="w-full md:flex-1 bg-[#FF7A29] py-3 text-sm md:text-base group transition-all duration-200 hover:scale-[1.02]"
+            className="w-full md:w-[85%] md:flex-1 bg-[#FF7A29] py-3 text-sm md:text-base group transition-all duration-200 hover:scale-[1.02]"
           >
             <Link href="/dashboard">
               Go to Your Dashboard
@@ -160,7 +160,7 @@ export default function PlugSuccess() {
           <Button
             asChild
             variant="outline"
-            className="w-full md:flex-1 border-[#FF7A29] text-[#FF7A29] py-3 text-sm md:text-base group transition-all duration-200"
+            className="w-full md:w-[85%] md:flex-1 border-[#FF7A29] text-[#FF7A29] py-3 text-sm md:text-base group transition-all duration-200"
           >
             <Link href="/store/create">
               Create Your Store Now

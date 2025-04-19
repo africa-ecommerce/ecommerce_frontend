@@ -3,7 +3,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -43,8 +43,9 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
+import { useUser } from "@/app/_components/provider/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import useSWR from "swr";
 
 // ============== REUSABLE COMPONENTS ==============
 const LoadingSkeleton = () => (
@@ -124,97 +125,99 @@ export default function SupplierDashboard() {
   const [error, setError] = useState(false);
 
   // Mock data states
-  const [stats, setStats] = useState({
-    totalProducts: 48,
-    lowStockItems: 12,
-    outOfStock: 5,
-    inventoryValue: 1200000,
-  });
+  // const [stats, setStats] = useState({
+  //   totalProducts: 48,
+  //   lowStockItems: 12,
+  //   outOfStock: 5,
+  //   inventoryValue: 1200000,
+  // });
 
-  const [stockAlerts, setStockAlerts] = useState<any[]>([]);
+  // const [stockAlerts, setStockAlerts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
+  const { userData } = useUser();
+
 
   // Simulate data fetching
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       setLoading(true);
+  //       // Simulate API delay
+  //       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        // Mock data - replace with actual API calls
-        setStats({
-          totalProducts: 48,
-          lowStockItems: 12,
-          outOfStock: 5,
-          inventoryValue: 1200000,
-        });
+  //       // Mock data - replace with actual API calls
+  //       setStats({
+  //         totalProducts: 48,
+  //         lowStockItems: 12,
+  //         outOfStock: 5,
+  //         inventoryValue: 1200000,
+  //       });
 
-        setStockAlerts([
-          {
-            id: 1,
-            product: "Shea Butter (250g)",
-            status: "Low Stock",
-            units: "Only 8 units left",
-            salesRate: "Selling ~15 units/week",
-            progress: 20,
-          },
-          {
-            id: 2,
-            product: "African Black Soap",
-            status: "Out of Stock",
-            units: "0 units left",
-            salesRate: "12 pending orders",
-            progress: 0,
-          },
-          {
-            id: 3,
-            product: "African Black Soap",
-            status: "Out of Stock",
-            units: "0 units left",
-            salesRate: "12 pending orders",
-            progress: 0,
-          },
+  //       setStockAlerts([
+  //         {
+  //           id: 1,
+  //           product: "Shea Butter (250g)",
+  //           status: "Low Stock",
+  //           units: "Only 8 units left",
+  //           salesRate: "Selling ~15 units/week",
+  //           progress: 20,
+  //         },
+  //         {
+  //           id: 2,
+  //           product: "African Black Soap",
+  //           status: "Out of Stock",
+  //           units: "0 units left",
+  //           salesRate: "12 pending orders",
+  //           progress: 0,
+  //         },
+  //         {
+  //           id: 3,
+  //           product: "African Black Soap",
+  //           status: "Out of Stock",
+  //           units: "0 units left",
+  //           salesRate: "12 pending orders",
+  //           progress: 0,
+  //         },
          
-        ]);
+  //       ]);
 
-        setOrders([
-          {
-            id: "SUP-4582",
-            status: "pending",
-            received: "Received 2 hours ago",
-            customer: "Ade Johnson (Plug)",
-            location: "Lagos, Nigeria",
-            items: [
-              { name: "Shea Butter (250g) x 10", price: "₦25K" },
-              { name: "African Black Soap x 5", price: "₦7.5K" },
-            ],
-            total: "₦32.5K",
-          },
-          {
-            id: "SUP-4581",
-            status: "pending",
-            received: "Received 3 hours ago",
-            customer: "Fatima Osei (Plug)",
-            location: "Accra, Ghana",
-            items: [
-              { name: "Hair Growth Oil x 8", price: "₦16K" },
-              { name: "Body Butter x 5", price: "₦12.5K" },
-            ],
-            total: "₦28.5K",
-          },
-        ]);
+  //       setOrders([
+  //         {
+  //           id: "SUP-4582",
+  //           status: "pending",
+  //           received: "Received 2 hours ago",
+  //           customer: "Ade Johnson (Plug)",
+  //           location: "Lagos, Nigeria",
+  //           items: [
+  //             { name: "Shea Butter (250g) x 10", price: "₦25K" },
+  //             { name: "African Black Soap x 5", price: "₦7.5K" },
+  //           ],
+  //           total: "₦32.5K",
+  //         },
+  //         {
+  //           id: "SUP-4581",
+  //           status: "pending",
+  //           received: "Received 3 hours ago",
+  //           customer: "Fatima Osei (Plug)",
+  //           location: "Accra, Ghana",
+  //           items: [
+  //             { name: "Hair Growth Oil x 8", price: "₦16K" },
+  //             { name: "Body Butter x 5", price: "₦12.5K" },
+  //           ],
+  //           total: "₦28.5K",
+  //         },
+  //       ]);
 
-        setError(false);
-      } catch (err) {
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       setError(false);
+  //     } catch (err) {
+  //       setError(true);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchData();
-  }, [refreshing]);
+  //   fetchData();
+  // }, [refreshing]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -223,154 +226,145 @@ export default function SupplierDashboard() {
 
   const filteredOrders = orders.filter((order) => order.status === activeTab);
 
+     const { data, error: errorData, isLoading, mutate } = useSWR("/api/products/supplier/");
+  
+  // Extract products from the response
+  const products = Array.isArray(data?.data) ? data?.data : [];
+  
+  // Calculate inventory statistics based on actual product data
+  const stats = useMemo(() => {
+    if (!products.length) return {
+      totalProducts: 0,
+      lowStockItems: 0,
+      outOfStock: 0,
+      inventoryValue: 0
+    };
+    
+    return {
+      totalProducts: products.length,
+      lowStockItems: products.filter(item => item.stock !== undefined && item.stock > 0 && item.stock <= 5).length,
+      outOfStock: products.filter(item => item.stock === 0).length,
+      inventoryValue: products.reduce((total, item) => total + (item.price * (item.stock || 0)), 0)
+    };
+  }, [products]);
+  
+  // Generate stock alerts from product data
+  const stockAlerts = useMemo(() => {
+    if (!products.length) return [];
+    
+    // Get out of stock items first
+    const outOfStockItems = products
+      .filter(item => item.stock === 0)
+      .map(item => ({
+        id: item.id,
+        product: item.name,
+        status: "Out of Stock",
+        units: "0 units left",
+        salesRate: "Urgent attention needed",
+        progress: 0
+      }));
+    
+    // Then get low stock items
+    const lowStockItems = products
+      .filter(item => item.stock !== undefined && item.stock > 0 && item.stock <= 5)
+      .map(item => ({
+        id: item.id,
+        product: item.name,
+        status: "Low Stock",
+        units: `Only ${item.stock} units left`,
+        salesRate: "Restock recommended",
+        progress: (item.stock / 5) * 100 // 5 is the threshold for low stock
+      }));
+    
+    // Combine and return only the first few items for the dashboard
+    return [...outOfStockItems, ...lowStockItems].slice(0, 3);
+  }, [products]);
+  
+
   return (
     <TooltipProvider>
       <div className="flex flex-col min-h-screen bg-background p-3 sm:p-4 md:p-6 gap-4 sm:gap-6">
         {/* Header */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h1 className="text-muted-foreground text-bold text-sm sm:text-base truncate">
-              Welcome back, NaturalGlow! Here's your business at a glance.
+            <h1 className="text-muted-foreground font-semibold text-base truncate">
+              Welcome back, {userData?.brandName || "NaturalGlow"}!
+            </h1>
+            <h1 className="text-muted-foreground text-base">
+              Here's your business at a glance.
             </h1>
           </div>
-        
         </div>
 
         {/* Inventory Stats */}
-        <section className="space-y-3 sm:space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-semibold">
-              Inventory Intelligence
+        {/* Inventory Stats replaced with Financial Stats */}
+        <section className="space-y-3 md:space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+            <h2 className="text-base md:text-lg font-semibold">
+              Financial Overview
             </h2>
             <Button
               variant="outline"
               size="sm"
               asChild
-              className="text-xs sm:text-sm"
+              className="text-xs md:text-sm"
             >
-              <Link href="/dashboard/inventory">Manage Inventory</Link>
+              <Link href="/dashboard/finance">View Finances</Link>
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 xs:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
             <Card className="h-full">
               <CardHeader className="p-2 sm:p-3 pb-0">
-                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Total Products
+                <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1">
+                  Pending Payments
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-3 w-3 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Total number of products in your catalog</p>
+                      <p>Total amount of pending payments</p>
                     </TooltipContent>
                   </Tooltip>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-2 sm:p-3 pt-0">
-                {loading ? (
+              <CardContent className="p-2 min-h-dvh:p-3 pt-0">
+                {isLoading ? (
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-xl sm:text-2xl font-bold">
-                      {stats.totalProducts}
-                    </div>
-                    <div className="flex items-center text-[10px] xs:text-xs text-green-600 mt-1">
-                      <ArrowUp className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
-                      <span>5 new this month</span>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Other stat cards follow same pattern */}
-            {/* Low Stock Items Card */}
-            <Card className="h-full">
-              <CardHeader className="p-2 sm:p-3 pb-0">
-                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Low Stock Items
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Products that need restocking soon</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 sm:p-3 pt-0">
-                {loading ? (
-                  <Skeleton className="h-6 w-16" />
-                ) : (
-                  <>
-                    <div className="text-xl sm:text-2xl font-bold text-amber-500">
-                      {stats.lowStockItems}
-                    </div>
+                    <div className="text-xl md:text-2xl font-bold">₦45.5K</div>
                     <div className="flex items-center text-[10px] xs:text-xs text-amber-600 mt-1">
                       <AlertCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
-                      <span>Restock needed</span>
+                      <span>3 pending orders</span>
                     </div>
                   </>
                 )}
               </CardContent>
             </Card>
 
-            {/* Out of Stock Card */}
+            {/* Revenue This Month Card */}
             <Card className="h-full">
               <CardHeader className="p-2 sm:p-3 pb-0">
                 <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Out of Stock
+                  Revenue (This Month)
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-3 w-3 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Products currently unavailable</p>
+                      <p>Total revenue this month</p>
                     </TooltipContent>
                   </Tooltip>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2 sm:p-3 pt-0">
-                {loading ? (
+                {isLoading ? (
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-xl sm:text-2xl font-bold text-destructive">
-                      {stats.outOfStock}
-                    </div>
-                    <div className="flex items-center text-[10px] xs:text-xs text-destructive mt-1">
-                      <AlertCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
-                      <span>Urgent attention needed</span>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Inventory Value Card */}
-            <Card className="h-full">
-              <CardHeader className="p-2 sm:p-3 pb-0">
-                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Inventory Value
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Total value of current inventory</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 sm:p-3 pt-0">
-                {loading ? (
-                  <Skeleton className="h-6 w-16" />
-                ) : (
-                  <>
-                    <div className="text-xl sm:text-2xl font-bold">
-                      ₦{(stats.inventoryValue / 1000).toFixed(1)}K
+                    <div className="text-xl sm:text-2xl font-bold text-green-500">
+                      ₦127.8K
                     </div>
                     <div className="flex items-center text-[10px] xs:text-xs text-green-600 mt-1">
                       <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
@@ -380,86 +374,93 @@ export default function SupplierDashboard() {
                 )}
               </CardContent>
             </Card>
-          </div>
 
-          {/* Stock Alerts Section */}
-          <div className="space-y-3 sm:space-y-4">
-            {error ? (
-              <ErrorState onRetry={handleRefresh} />
-            ) : loading ? (
-              <LoadingSkeleton />
-            ) : stockAlerts.length === 0 ? (
-              <EmptyState
-                message="No stock alerts at this time"
-                icon={AlertCircle}
-                actionText="Add Products"
-                onAction={() => console.log("Add products clicked")}
-              />
-            ) : (
-              <Card>
-                <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
-                  <CardTitle className="text-sm sm:text-base font-medium">
-                    Stock Alerts
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
-                    {stockAlerts.map((alert) => (
-                      <div
-                        key={alert.id}
-                        className="flex items-center gap-2 sm:gap-3"
-                      >
-                        <div
-                          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                            alert.status === "Out of Stock"
-                              ? "bg-red-100"
-                              : "bg-amber-100"
-                          }`}
-                        >
-                          <AlertCircle
-                            className={`h-4 w-4 sm:h-5 sm:w-5 ${
-                              alert.status === "Out of Stock"
-                                ? "text-red-600"
-                                : "text-amber-600"
-                            }`}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-center gap-1">
-                            <p className="text-xs sm:text-sm font-medium truncate">
-                              {alert.product}
-                            </p>
-                            <Badge
-                              variant="outline"
-                              className={`text-xs ${
-                                alert.status === "Out of Stock"
-                                  ? "text-red-600 border-red-200 bg-red-50"
-                                  : "text-amber-600 border-amber-200 bg-amber-50"
-                              }`}
-                            >
-                              {alert.status}
-                            </Badge>
-                          </div>
-                          <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
-                            <p>{alert.units}</p>
-                            <p>{alert.salesRate}</p>
-                          </div>
-                          <Progress
-                            value={alert.progress}
-                            className="h-1 mt-1"
-                          />
-                        </div>
-                        <Button size="sm" className="text-xs h-7 sm:h-8">
-                          Restock
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* Total Paid Card */}
+            <Card className="h-full">
+              <CardHeader className="p-2 sm:p-3 pb-0">
+                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                  Total Paid
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Total amount paid to date</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 sm:p-3 pt-0">
+                {isLoading ? (
+                  <Skeleton className="h-6 w-16" />
+                ) : (
+                  <>
+                    <div className="text-xl sm:text-2xl font-bold">₦845.2K</div>
+                    <div className="flex items-center text-[10px] xs:text-xs text-muted-foreground mt-1">
+                      <Users className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
+                      <span>From 28 plugs</span>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Average Order Value Card */}
+            <Card className="h-full">
+              <CardHeader className="p-2 sm:p-3 pb-0">
+                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                  Average Order Value
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Average value per order</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 sm:p-3 pt-0">
+                {isLoading ? (
+                  <Skeleton className="h-6 w-16" />
+                ) : (
+                  <>
+                    <div className="text-xl sm:text-2xl font-bold">₦18.7K</div>
+                    <div className="flex items-center text-[10px] xs:text-xs text-green-600 mt-1">
+                      <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
+                      <span>8% from last month</span>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </section>
+
+        {/* Account Verification Tip */}
+        <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
+          <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+            <div className="rounded-full bg-amber-200 p-1.5 sm:p-2 flex-shrink-0">
+              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-medium text-xs sm:text-sm">
+                Action Required
+              </h3>
+              <p className="text-[10px] xs:text-xs text-muted-foreground">
+                You have received new orders. Please verify your account to
+                start accepting payments and processing orders.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto text-xs sm:text-sm h-7 sm:h-8"
+            >
+              <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Verify Now
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Order Fulfillment Section */}
         <section className="space-y-3 sm:space-y-4">
