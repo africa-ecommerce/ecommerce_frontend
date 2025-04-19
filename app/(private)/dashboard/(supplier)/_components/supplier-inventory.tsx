@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from "react";
@@ -6,28 +7,22 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import {
   AlertCircle,
-  ArrowUpRight,
   ChevronLeft,
   ChevronRight,
-  Download,
-  Filter,
+ 
   HelpCircle,
   MoreHorizontal,
   PackagePlus,
   Pencil,
   Plus,
-  RefreshCw,
   Search,
-  Settings,
-  Sliders,
   Tag,
   Trash2,
-  TrendingUp,
-  Users,
   X,
-  Menu,
   Package,
   FilterX,
+  Users,
+  Sliders,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -61,16 +56,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+
 import { AddProductModal } from "./add-product-modal";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import useSWR from "swr";
 import Image from "next/image";
 import { useDeleteResource } from "@/hooks/resourceManagement/useDeleteResources";
@@ -324,339 +311,216 @@ export default function Inventory() {
   };
 
   const stats = useMemo(() => {
-  if (!products.length) return {
-    totalProducts: 0,
-    lowStockItems: 0,
-    outOfStock: 0,
-    inventoryValue: 0
-  };
-  
-  return {
-    totalProducts: products.length,
-    lowStockItems: products.filter(item => item.stock !== undefined && item.stock > 0 && item.stock <= 5).length,
-    outOfStock: products.filter(item => item.stock === 0).length,
-    inventoryValue: products.reduce((total, item) => total + (item.price * (item.stock || 0)), 0)
-  };
-}, [products]);
+    if (!products.length)
+      return {
+        totalProducts: 0,
+        lowStockItems: 0,
+        outOfStock: 0,
+        inventoryValue: 0,
+      };
 
-// Generate stock alerts from product data
-const stockAlerts = useMemo(() => {
-  if (!products.length) return [];
-  
-  // Get out of stock items first
-  const outOfStockItems = products
-    .filter(item => item.stock === 0)
-    .map(item => ({
-      id: item.id,
-      product: item.name,
-      status: "Out of Stock",
-      units: "0 units left",
-      salesRate: "Urgent attention needed",
-      progress: 0
-    }));
-  
-  // Then get low stock items
-  const lowStockItems = products
-    .filter(item => item.stock !== undefined && item.stock > 0 && item.stock <= 5)
-    .map(item => ({
-      id: item.id,
-      product: item.name,
-      status: "Low Stock",
-      units: `Only ${item.stock} units left`,
-      salesRate: "Restock recommended",
-      progress: (item.stock / 5) * 100 // 5 is the threshold for low stock
-    }));
-  
-  // Combine and return only the first few items for the dashboard
-  return [...outOfStockItems, ...lowStockItems].slice(0, 3);
-}, [products]);
+    return {
+      totalProducts: products.length,
+      lowStockItems: products.filter(
+        (item) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
+      ).length,
+      outOfStock: products.filter((item) => item.stock === 0).length,
+      inventoryValue: products.reduce(
+        (total, item) => total + item.price * (item.stock || 0),
+        0
+      ),
+    };
+  }, [products]);
+
+  // Generate stock alerts from product data
+ 
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col min-h-screen bg-background p-1.5 max-w-[360px]:p-1 sm:p-4 md:p-6 gap-2 max-w-[360px]:gap-1.5 sm:gap-4 pb-16 sm:pb-0">
+      <div className="flex flex-col min-h-screen bg-background p-1.5 sm:p-4 md:p-6 gap-2 sm:gap-4 pb-16 sm:pb-0">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
           <div>
-            <h1 className="text-lg max-w-[360px]:text-base sm:text-xl md:text-2xl font-bold tracking-tight">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold">
               Inventory Management
             </h1>
-            <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-              Manage your products and monitor stock levels
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Manage products and monitor stock levels
             </p>
           </div>
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-7 max-w-[360px]:h-6 w-7 max-w-[360px]:w-6 sm:h-8 sm:w-8 md:h-9 md:w-9"
-            >
-              <Download className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-              <span className="sr-only">Export</span>
-            </Button>
-           
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-7 max-w-[360px]:h-6 w-7 max-w-[360px]:w-6 sm:h-8 sm:w-8 md:h-9 md:w-9 hidden md:flex"
-            >
-              <Settings className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4" />
-              <span className="sr-only">Settings</span>
-            </Button>
-          </div>
+         
         </div>
-        {/* Inventory Command Center */}
-        {/* <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm max-w-[360px]:text-xs sm:text-base md:text-lg font-semibold">
+
+        {/* Inventory Stats */}
+        <section className="space-y-3">
+          
+            <h2 className="text-sm sm:text-base font-semibold">
               Inventory Command Center
             </h2>
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="text-xs h-7 hidden sm:inline-flex"
-            >
-              <Link href="#">View Reports</Link>
-            </Button>
-          </div>
+           
+          
 
-          {/* Mobile Touch-Friendly Stats */}
-
-          {/* Tablet/Desktop Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Card className="p-2 md:p-3">
-              <CardHeader className="p-1 md:p-2 pb-0">
-                <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1">
+            {/* Total Products Card */}
+            <Card>
+              <CardHeader className="pb-0">
+                <CardTitle className="flex items-center gap-1 text-sm">
                   Total Products
                   <Tooltip>
-                    <TooltipTrigger>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help">
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </span>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Total number of products in your catalog</p>
+                      <p>Total products in inventory</p>
                     </TooltipContent>
                   </Tooltip>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-1 md:p-2 pt-0">
-                <div className="text-lg md:text-2xl font-bold">48</div>
-                <div className="flex items-center text-xs text-green-600 mt-1">
-                  <ArrowUpRight className="h-3 w-3 mr-1" />
-                  <span>5 new this month</span>
-                </div>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-6 w-16" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">
+                      {stats.totalProducts}
+                    </div>
+                    
+                  </>
+                )}
               </CardContent>
             </Card>
-            <Card className="p-2 md:p-3">
-              <CardHeader className="p-1 md:p-2 pb-0">
-                <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1">
+
+            {/* Low Stock Card */}
+            <Card>
+              <CardHeader className="pb-0">
+                <CardTitle className="flex items-center gap-1 text-sm">
                   Low Stock Items
                   <Tooltip>
-                    <TooltipTrigger>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help">
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </span>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Products that need restocking soon</p>
+                      <p>Products needing restock</p>
                     </TooltipContent>
                   </Tooltip>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-1 md:p-2 pt-0">
-                <div className="text-lg md:text-2xl font-bold text-amber-500">
-                  12
-                </div>
-                <div className="flex items-center text-xs text-amber-600 mt-1">
-                  <AlertCircle className="h-3 w-3 mr-1" />
-                  <span>Restock needed</span>
-                </div>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-6 w-16" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-amber-500">
+                      {stats.lowStockItems}
+                    </div>
+                    {stats.lowStockItems > 0 && (
+                      <div className="flex items-center text-amber-600 text-xs">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        Restock needed
+                      </div>
+                    )}
+                  </>
+                )}
               </CardContent>
             </Card>
-            <Card className="p-2 md:p-3">
-              <CardHeader className="p-1 md:p-2 pb-0">
-                <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1">
+
+            {/* Out of Stock Card */}
+            <Card>
+              <CardHeader className="pb-0">
+                <CardTitle className="flex items-center gap-1 text-sm">
                   Out of Stock
                   <Tooltip>
-                    <TooltipTrigger>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help">
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </span>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Products currently unavailable</p>
+                      <p>Unavailable products</p>
                     </TooltipContent>
                   </Tooltip>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-1 md:p-2 pt-0">
-                <div className="text-lg md:text-2xl font-bold text-destructive">
-                  5
-                </div>
-                <div className="flex items-center text-xs text-destructive mt-1">
-                  <AlertCircle className="h-3 w-3 mr-1" />
-                  <span>Urgent attention needed</span>
-                </div>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-6 w-16" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-destructive">
+                      {stats.outOfStock}
+                    </div>
+                    {stats.outOfStock > 0 && (
+                      <div className="flex items-center text-destructive text-xs">
+                        <AlertCircle className="h-3 w-3 mr-1" />
+                        Urgent attention needed
+                      </div>
+                    )}
+                  </>
+                )}
               </CardContent>
             </Card>
-            <Card className="p-2 md:p-3">
-              <CardHeader className="p-1 md:p-2 pb-0">
-                <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1">
+
+            {/* Inventory Value Card */}
+            <Card>
+              <CardHeader className="pb-0">
+                <CardTitle className="flex items-center gap-1 text-sm">
                   Inventory Value
                   <Tooltip>
-                    <TooltipTrigger>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                    <TooltipTrigger asChild>
+                      <span className="cursor-help">
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </span>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Total value of current inventory</p>
+                      <p>Total inventory value</p>
                     </TooltipContent>
                   </Tooltip>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-1 md:p-2 pt-0">
-                <div className="text-lg md:text-2xl font-bold">₦1.2M</div>
-                <div className="flex items-center text-xs text-green-600 mt-1">
-                  <TrendingUp className="h-3 w-3 mr-1" />
-                  <span>15% from last month</span>
-                </div>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-6 w-16" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">
+                      ₦{(stats.inventoryValue / 1000).toFixed(1)}K
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
-        </section> */}
+        </section>
 
-        {/* Inventory Command Center */}
-<section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
-  <div className="flex items-center justify-between">
-    <h2 className="text-sm max-w-[360px]:text-xs sm:text-base md:text-lg font-semibold">
-      Inventory Command Center
-    </h2>
-    <Button
-      variant="outline"
-      size="sm"
-      asChild
-      className="text-xs h-7 hidden sm:inline-flex"
-    >
-      <Link href="#">View Reports</Link>
-    </Button>
-  </div>
+         {/* Account Verification Tip */}
+                <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
+                  <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+                    <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
+                      <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-xs sm:text-sm">
+                        Action Required
+                      </h3>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">
+                         Please verify your account to
+                        start accepting payments and processing orders. Verified account are more likely to receive orders.
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="ml-auto text-xs h-7 sm:h-8"
+                    >
+                      <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Verify
+                    </Button>
+                  </CardContent>
+                </Card>
 
-  {/* Tablet/Desktop Stats */}
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-    <Card className="p-2 md:p-3">
-      <CardHeader className="p-1 md:p-2 pb-0">
-        <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1">
-          Total Products
-          <Tooltip>
-            <TooltipTrigger>
-              <HelpCircle className="h-3 w-3 text-muted-foreground" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Total number of products in your catalog</p>
-            </TooltipContent>
-          </Tooltip>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-1 md:p-2 pt-0">
-        {isLoading ? (
-          <Skeleton className="h-6 w-16" />
-        ) : (
-          <>
-            <div className="text-lg md:text-2xl font-bold">{stats.totalProducts}</div>
-            <div className="flex items-center text-xs text-green-600 mt-1">
-              <ArrowUpRight className="h-3 w-3 mr-1" />
-              <span>5 new this month</span>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
-    <Card className="p-2 md:p-3">
-      <CardHeader className="p-1 md:p-2 pb-0">
-        <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1">
-          Low Stock Items
-          <Tooltip>
-            <TooltipTrigger>
-              <HelpCircle className="h-3 w-3 text-muted-foreground" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Products that need restocking soon</p>
-            </TooltipContent>
-          </Tooltip>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-1 md:p-2 pt-0">
-        {isLoading ? (
-          <Skeleton className="h-6 w-16" />
-        ) : (
-          <>
-            <div className="text-lg md:text-2xl font-bold text-amber-500">
-              {stats.lowStockItems}
-            </div>
-            <div className="flex items-center text-xs text-amber-600 mt-1">
-              <AlertCircle className="h-3 w-3 mr-1" />
-              <span>Restock needed</span>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
-    <Card className="p-2 md:p-3">
-      <CardHeader className="p-1 md:p-2 pb-0">
-        <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1">
-          Out of Stock
-          <Tooltip>
-            <TooltipTrigger>
-              <HelpCircle className="h-3 w-3 text-muted-foreground" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Products currently unavailable</p>
-            </TooltipContent>
-          </Tooltip>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-1 md:p-2 pt-0">
-        {isLoading ? (
-          <Skeleton className="h-6 w-16" />
-        ) : (
-          <>
-            <div className="text-lg md:text-2xl font-bold text-destructive">
-              {stats.outOfStock}
-            </div>
-            <div className="flex items-center text-xs text-destructive mt-1">
-              <AlertCircle className="h-3 w-3 mr-1" />
-              <span>Urgent attention needed</span>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
-    <Card className="p-2 md:p-3">
-      <CardHeader className="p-1 md:p-2 pb-0">
-        <CardTitle className="text-xs md:text-sm font-medium flex items-center gap-1">
-          Inventory Value
-          <Tooltip>
-            <TooltipTrigger>
-              <HelpCircle className="h-3 w-3 text-muted-foreground" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Total value of current inventory</p>
-            </TooltipContent>
-          </Tooltip>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-1 md:p-2 pt-0">
-        {isLoading ? (
-          <Skeleton className="h-6 w-16" />
-        ) : (
-          <>
-            <div className="text-lg md:text-2xl font-bold">
-              ₦{(stats.inventoryValue / 1000).toFixed(1)}K
-            </div>
-            <div className="flex items-center text-xs text-green-600 mt-1">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              <span>15% from last month</span>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
-  </div>
-</section>
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -718,7 +582,6 @@ const stockAlerts = useMemo(() => {
               )}
             </div>
             <div className="flex items-center gap-2 max-w-[360px]:gap-1 overflow-x-auto pb-1 scrollbar-hide">
-             
               <div className="flex gap-1.5 max-w-[360px]:gap-1">
                 <Button
                   variant={selectedFilter === "all" ? "default" : "outline"}
@@ -771,27 +634,27 @@ const stockAlerts = useMemo(() => {
               </div>
               <div className="">
                 <Select
-  value={selectedCategory}
-  onValueChange={(value) => {
-    setSelectedCategory(value);
-    setCurrentPage(1);
-  }}
->
-  <SelectTrigger className="w-[120px] md:w-[150px] text-xs md:text-sm h-8 sm:h-9">
-    <SelectValue placeholder="Category" />
-  </SelectTrigger>
-  <SelectContent>
-    {PRODUCT_CATEGORIES.map((category) => (
-      <SelectItem 
-        key={category.value} 
-        value={category.value}
-        className="text-xs md:text-sm"
-      >
-        {category.label}
-      </SelectItem>
-    ))}
-  </SelectContent>
-</Select>
+                  value={selectedCategory}
+                  onValueChange={(value) => {
+                    setSelectedCategory(value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-[120px] md:w-[150px] text-xs md:text-sm h-8 sm:h-9">
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PRODUCT_CATEGORIES.map((category) => (
+                      <SelectItem
+                        key={category.value}
+                        value={category.value}
+                        className="text-xs md:text-sm"
+                      >
+                        {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
@@ -804,16 +667,7 @@ const stockAlerts = useMemo(() => {
                   <table className="w-full text-sm">
                     <thead className="text-xs uppercase bg-muted/50">
                       <tr>
-                        {/* <th className="p-2 sm:p-3 w-10 text-left">
-                          <Checkbox
-                            checked={
-                              selectedItems.length === currentItems?.length &&
-                              currentItems?.length > 0
-                            }
-                            onCheckedChange={selectAllItems}
-                            aria-label="Select all"
-                          />
-                        </th> */}
+                       
                         <th className="p-2 sm:p-3 text-left">Product</th>
                         <th className="p-2 sm:p-3 text-left">Price</th>
                         <th className="p-2 sm:p-3 text-left">Stock</th>
@@ -868,15 +722,7 @@ const stockAlerts = useMemo(() => {
                               key={item.id}
                               className="border-b hover:bg-muted/30"
                             >
-                              {/* <td className="p-2 sm:p-3">
-                                <Checkbox
-                                  checked={selectedItems.includes(item.id)}
-                                  onCheckedChange={() =>
-                                    toggleItemSelection(item.id)
-                                  }
-                                  aria-label={`Select ${item.name}`}
-                                />
-                              </td> */}
+                              
                               <td className="p-2 sm:p-3">
                                 <div className="flex items-center gap-2 sm:gap-3">
                                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
@@ -888,7 +734,7 @@ const stockAlerts = useMemo(() => {
                                       className="w-full h-full object-cover"
                                     />
                                   </div>
-                                  <span className="font-medium text-xs sm:text-sm truncate max-w-[150px]">
+                                  <span className="font-medium text-xs sm:text-sm truncate max-w-[150px] capitalize">
                                     {item.name || "-"}
                                   </span>
                                 </div>
