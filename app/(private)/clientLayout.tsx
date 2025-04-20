@@ -264,11 +264,11 @@ function DesktopNavigation({
               showTooltip
             />
             <NavItem
-              href="/dashboard/products"
+              href="/dashboard/product"
               icon={<Package className="w-5 h-5" />}
-              tip="Products"
+              tip="Product"
               isActive={
-                isPathActive(pathname, "/dashboard/products") && !isMoreActive
+                isPathActive(pathname, "/dashboard/product") && !isMoreActive
               }
               closeMorePage={closeMorePage}
               showTooltip
@@ -391,11 +391,11 @@ function MobileNavigation({
               closeMorePage={closeMorePage}
             />
             <NavItem
-              href="/dashboard/products"
+              href="/dashboard/product"
               icon={<Package className="w-5 h-5" />}
-              label="Products"
+              label="Product"
               isActive={
-                isPathActive(pathname, "/dashboard/products") && !isMoreActive
+                isPathActive(pathname, "/dashboard/product") && !isMoreActive
               }
               compact
               closeMorePage={closeMorePage}

@@ -223,12 +223,76 @@ export const supplierInfoSchema = z.object({
 });
 
 
+// const variationSchema = z.object({
+//   id: z.string(),
+//   size: z.string().optional(),
+//   color: z.string().optional(),
+//   stock: z.number().min(0, "Stock cannot be negative"),
+//   price: z.number().optional(),
+// });
+
+// // Define your dimension schema
+// const dimensionSchema = z
+//   .object({
+//     length: z.string().optional(),
+//     width: z.string().optional(),
+//     height: z.string().optional(),
+//   })
+  
+// // Main product schema
+// export const productFormSchema = z
+//   .object({
+//     name: z.string().min(1).max(100),
+//     category: z.string().min(1),
+//     description: z.string().max(1000).optional(),
+//     price: z
+//       .string()
+//       .min(1, "Price is required")
+//       .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
+//     weight: z.string().optional(),
+//     dimensions: dimensionSchema.optional(),
+//     hasVariations: z.boolean(),
+//     variations: z.array(variationSchema),
+//     images: z.array(z.instanceof(File)),
+//     imageUrls: z.array(z.string()),
+//     tags: z.array(z.string().max(20)),
+//   })
+//   .refine(
+//     (data) => {
+//       if (data.hasVariations) {
+//         return (
+//           data.variations.length > 0 &&
+//           data.variations.every(
+//             (v) =>
+//               v.size && v.color && typeof v.stock === "number" && v.stock >= 0
+//           )
+//         );
+//       }
+//       return true;
+//     },
+//     {
+//       message: "Please add at least one complete variation",
+//       path: ["variations"],
+//     }
+//   );
+
+// // Export the type that exactly matches the schema
+// export type ProductFormData = z.infer<typeof productFormSchema>;
+
+
 const variationSchema = z.object({
   id: z.string(),
   size: z.string().optional(),
   color: z.string().optional(),
-  stock: z.number().min(0, "Stock cannot be negative"),
-  price: z.number().optional(),
+  stock: z.number().min(1, "Stock cannot be negative"),
+  price: z.string().min(1, "Price is required")
+    .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
+  weight: z.string().optional(),
+  dimensions: z.object({
+    length: z.string().optional(),
+    width: z.string().optional(),
+    height: z.string().optional(), 
+  }).optional(),
 });
 
 // Define your dimension schema
@@ -238,24 +302,27 @@ const dimensionSchema = z
     width: z.string().optional(),
     height: z.string().optional(),
   })
-  
+  .optional();
+
 // Main product schema
 export const productFormSchema = z
   .object({
-    name: z.string().min(1).max(100),
-    category: z.string().min(1),
+    name: z.string().min(1, "Name is required").max(100),
+    category: z.string().min(1, "Category is required"),
     description: z.string().max(1000).optional(),
     price: z
       .string()
       .min(1, "Price is required")
       .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
+    stock: z.number().min(0, "Stock cannot be negative").optional(),
+    colour: z.string().optional(),
     weight: z.string().optional(),
-    dimensions: dimensionSchema.optional(),
+    dimensions: dimensionSchema,
     hasVariations: z.boolean(),
     variations: z.array(variationSchema),
     images: z.array(z.instanceof(File)),
     imageUrls: z.array(z.string()),
-    tags: z.array(z.string().max(20)),
+    
   })
   .refine(
     (data) => {
@@ -263,15 +330,16 @@ export const productFormSchema = z
         return (
           data.variations.length > 0 &&
           data.variations.every(
-            (v) =>
-              v.size && v.color && typeof v.stock === "number" && v.stock >= 0
+            (v) =>  v.price && typeof v.stock === "number" && v.stock >= 1
           )
         );
+      } else {
+        // For single product, stock is required
+        return typeof data.stock === "number" && data.stock >= 1;
       }
-      return true;
     },
     {
-      message: "Please add at least one complete variation",
+      message: "Please complete all required fields",
       path: ["variations"],
     }
   );
