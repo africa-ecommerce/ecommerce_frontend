@@ -298,9 +298,9 @@ const variationSchema = z.object({
 // Define your dimension schema
 const dimensionSchema = z
   .object({
-    length: z.string().optional(),
-    width: z.string().optional(),
-    height: z.string().optional(),
+    length: z.number().optional(),
+    width: z.number().optional(),
+    height: z.number().optional(),
   })
   .optional();
 
@@ -310,13 +310,14 @@ export const productFormSchema = z
     name: z.string().min(1, "Name is required").max(100),
     category: z.string().min(1, "Category is required"),
     description: z.string().max(1000).optional(),
+    size: z.string().optional(),
     price: z
       .string()
       .min(1, "Price is required")
       .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
-    stock: z.number().min(0, "Stock cannot be negative").optional(),
-    colour: z.string().optional(),
-    weight: z.string().optional(),
+    stock: z.number().min(0, "Stock cannot be negative"),
+    color: z.string().optional(),
+    weight: z.number().optional(),
     dimensions: dimensionSchema,
     hasVariations: z.boolean(),
     variations: z.array(variationSchema),
@@ -330,12 +331,12 @@ export const productFormSchema = z
         return (
           data.variations.length > 0 &&
           data.variations.every(
-            (v) =>  v.price && typeof v.stock === "number" && v.stock >= 1
+            (v) =>  v.price  && v.stock >= 1
           )
         );
       } else {
         // For single product, stock is required
-        return typeof data.stock === "number" && data.stock >= 1;
+        return  data.stock >= 1;
       }
     },
     {
