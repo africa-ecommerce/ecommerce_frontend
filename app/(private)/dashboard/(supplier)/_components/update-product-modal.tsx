@@ -89,39 +89,92 @@ import { z } from "zod";
 import { mutate } from "swr";
 import { PRODUCT_CATEGORIES } from "@/app/constant";
 
-export function AddProductModal({
+export function EditProductModal({
   open,
   onOpenChange,
+  productId,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  productId: string;
 }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
   const [newTag, setNewTag] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropAreaRef = useRef<HTMLDivElement>(null);
+  const [initialData, setInitialData] = useState<ProductFormData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  console.log(initialData)
 
-  // Define all hooks at the top level, not conditionally
-  const addProduct = async (data: ProductFormData) => {
+  // Fetch product data when modal opens
+  useEffect(() => {
+    if (open && productId) {
+      const fetchProduct = async () => {
+        setIsLoading(true);
+        try {
+          const response = await fetch(`/api/products/${productId}`);
+          const data = await response.json();
+          
+          if (response.ok) {
+            // Transform the data to match our form schema
+            const transformedData = {
+              ...data,
+              // Ensure all fields are present even if empty
+              name: data.name || "",
+              category: data.category || "",
+              description: data.description || "",
+              size: data.size || "",
+              price: data.price ? String(data.price) : "",
+              stock: data.stock || 0,
+              color: data.color || "",
+              weight: data.weight || undefined,
+              dimensions: data.dimensions || {
+                length: undefined,
+                width: undefined,
+                height: undefined,
+              },
+              hasVariations: data.hasVariations || false,
+              variations: data.variations || [],
+              images: [],
+              imageUrls: data.images || [],
+            };
+            
+            setInitialData(transformedData);
+          } else {
+            errorToast(data.error || "Failed to fetch product");
+            onOpenChange(false);
+          }
+        } catch (error) {
+          errorToast("Failed to fetch product");
+          onOpenChange(false);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchProduct();
+    }
+  }, [open, productId, onOpenChange]);
+
+  const updateProduct = async (data: ProductFormData) => {
     try {
-      console.log("posted data", data);
+      console.log("updated data", data);
 
       const formData = new FormData();
 
-      // 2. Append the images
+      // Append the images
       data.images.forEach((file: File) => {
         formData.append("images", file);
       });
 
-      // 3. Append all other form data as JSON
+      // Append all other form data as JSON
       const { images, imageUrls, ...jsonData } = data;
       formData.append("productData", JSON.stringify(jsonData));
-      console.log("formData", formData);
 
-      // 4. Send with FormData
-      const response = await fetch("/api/products", {
-        method: "POST",
+      // Send with FormData
+      const response = await fetch(`/api/products/${productId}`, {
+        method: "PUT",
         body: formData,
       });
 
@@ -132,7 +185,7 @@ export function AddProductModal({
         return null;
       }
 
-      successToast(result.message);
+      successToast("Product updated successfully");
       return result;
     } catch (error) {
       console.error(error);
@@ -142,20 +195,27 @@ export function AddProductModal({
   };
 
   const {
-    form: { register, submit, errors, setValue, isSubmitting, watch },
+    form: { register, submit, errors, setValue, isSubmitting, watch, reset },
   } = useFormResolver<ProductFormData>(
-    addProduct,
+    updateProduct,
     productFormSchema,
     () => {
       onOpenChange(false);
       setCurrentStep(0);
       mutate("/api/products/supplier/");
     },
-    {
+    initialData || {
       hasVariations: false,
       variations: [],
     }
   );
+
+  // Reset form with initial data when it's loaded
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData);
+    }
+  }, [initialData, reset]);
 
   const formData = watch();
 
@@ -195,7 +255,7 @@ export function AddProductModal({
       dropArea.removeEventListener("dragleave", handleDragLeave);
       dropArea.removeEventListener("drop", handleDrop);
     };
-  }, [open]); // Added open as a dependency
+  }, [open, formData.images, formData.imageUrls]);
 
   const handleFiles = (files: FileList) => {
     const currentImages = formData.images || [];
@@ -235,12 +295,20 @@ export function AddProductModal({
     const newImages = [...(formData.images || [])];
     const newImageUrls = [...(formData.imageUrls || [])];
 
-    URL.revokeObjectURL(newImageUrls[index]);
-    newImages.splice(index, 1);
-    newImageUrls.splice(index, 1);
-
-    setValue("images", newImages);
-    setValue("imageUrls", newImageUrls);
+    // Check if the image is from initial data (URL) or newly uploaded (File)
+    if (index < newImageUrls.length - newImages.length) {
+      // This is an initial image (URL only)
+      newImageUrls.splice(index, 1);
+      setValue("imageUrls", newImageUrls);
+    } else {
+      // This is a newly uploaded image (File)
+      const adjustedIndex = index - (newImageUrls.length - newImages.length);
+      URL.revokeObjectURL(newImageUrls[index]);
+      newImages.splice(adjustedIndex, 1);
+      newImageUrls.splice(index, 1);
+      setValue("images", newImages);
+      setValue("imageUrls", newImageUrls);
+    }
   };
 
   const addVariation = () => {
@@ -250,11 +318,11 @@ export function AddProductModal({
       color: "",
       stock: formData.stock || 0,
       price: formData.price || "",
-      weight: formData.weight || "",
+      weight: formData.weight || undefined,
       dimensions: {
-        length: formData.dimensions?.length || "",
-        width: formData.dimensions?.width || "",
-        height: formData.dimensions?.height || "",
+        length: formData.dimensions?.length || undefined,
+        width: formData.dimensions?.width || undefined,
+        height: formData.dimensions?.height || undefined,
       },
     };
 
@@ -295,23 +363,10 @@ export function AddProductModal({
     setValue("variations", updatedVariations);
   };
 
-  // // Function to get the appropriate step after variations
-  // const getNextStepAfterVariations = () => {
-  //   if (formData.hasVariations) {
-  //     // Skip to media step (index 3)
-  //     return 3;
-  //   } else {
-  //     // Go to details step (index 2)
-  //     return 2;
-  //   }
-  // };
-
   const goToNextStep = () => {
     if (currentStep < steps.length - 1) {
       setDirection(1);
 
-      // If we're on variations step and variations are enabled,
-      // skip the single product details step
       if (currentStep === 1 && formData.hasVariations) {
         setCurrentStep(3); // Skip to media step
       } else {
@@ -324,8 +379,6 @@ export function AddProductModal({
     if (currentStep > 0) {
       setDirection(-1);
 
-      // If we're on media step and variations are enabled,
-      // go back to variations step
       if (currentStep === 3 && formData.hasVariations) {
         setCurrentStep(1);
       } else {
@@ -357,7 +410,6 @@ export function AddProductModal({
     { id: "review", title: "Review" },
   ];
 
-  // Function to truncate product name
   const truncateName = (name: string, maxLength = 15) => {
     if (!name) return "";
     return name.length > maxLength
@@ -365,7 +417,6 @@ export function AddProductModal({
       : name;
   };
 
-  // Custom validation function for steps
   const isStepValid = () => {
     switch (currentStep) {
       case 0:
@@ -376,18 +427,15 @@ export function AddProductModal({
           !errors.name
         );
       case 1:
-        // For variations step
         if (formData.hasVariations) {
-          // Check if at least one variation exists and has required fields
           return (
             formData.variations &&
             formData.variations.length > 0 &&
             formData.variations.every((v) => !!v.price && v.stock >= 1)
           );
         }
-        return true; // If no variations, this step is valid
+        return true;
       case 2:
-        // For single product details
         return (
           !!formData.name &&
           !!formData.price &&
@@ -397,13 +445,11 @@ export function AddProductModal({
           !errors.price
         );
       case 3:
-        // For media step
         return (
           (formData.images?.length > 0 || formData.imageUrls?.length > 0) &&
           !errors.images
         );
       case 4:
-        // For review step
         const baseValidation =
           !!formData.category &&
           !!formData.name &&
@@ -412,7 +458,6 @@ export function AddProductModal({
           ((formData.images && formData.images.length > 0) ||
             (formData.imageUrls && formData.imageUrls.length > 0));
 
-        // Validation depends on whether we have variations
         if (formData.hasVariations) {
           return (
             baseValidation &&
@@ -428,21 +473,28 @@ export function AddProductModal({
     }
   };
 
-  // Update the handleSubmit function
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // If hasVariations is false, make sure variations is an empty array
     if (!formData.hasVariations) {
       setValue("variations", []);
     }
 
-    // Now we can submit the form
     await submit(e);
   };
 
-  // If modal is not open, render nothing but ensure hooks are called
   if (!open) return null;
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="flex flex-col items-center gap-4 rounded-lg bg-background p-8">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p>Loading product data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-sm md:items-center">
@@ -472,7 +524,7 @@ export function AddProductModal({
                   <span className="sr-only">Back</span>
                 </Button>
               )}
-              <h2 className="text-lg font-semibold">Add Product</h2>
+              <h2 className="text-lg font-semibold">Edit Product</h2>
             </div>
             <Button
               variant="ghost"
@@ -486,7 +538,7 @@ export function AddProductModal({
           </div>
         </div>
 
-        {/* Progress indicator - simplified for mobile */}
+        {/* Progress indicator */}
         <div className="sticky top-[60px] z-10 border-b bg-background px-4 py-2 md:px-6">
           <div className="relative flex items-center justify-between">
             <div className="absolute left-0 right-0 top-1/2 h-[2px] bg-muted">
@@ -500,7 +552,6 @@ export function AddProductModal({
             {steps.map((step, index) => (
               <div
                 key={step.id}
-                // onClick={() => setCurrentStep(index)}
                 className={cn(
                   "relative z-10 flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium transition-colors",
                   index < currentStep
@@ -524,7 +575,7 @@ export function AddProductModal({
           </p>
         </div>
 
-        {/* Form content with swipe gestures */}
+        {/* Form content */}
         <ScrollArea className="flex-1">
           <form onSubmit={submit}>
             <AnimatePresence initial={false} custom={direction} mode="wait">
@@ -538,7 +589,7 @@ export function AddProductModal({
                 transition={{ type: "tween", duration: 0.3 }}
                 className="h-full p-4 md:p-6"
               >
-                {/* Step 1: Category - Improved mobile layout */}
+                {/* Step 1: Category */}
                 {currentStep === 0 && (
                   <div className="space-y-6">
                     <div className="space-y-3">
@@ -613,7 +664,6 @@ export function AddProductModal({
                           className="min-h-[120px] text-base"
                           maxLength={1000}
                         />
-                        {/* Character counter */}
                         <div className="absolute bottom-2 right-2 text-sm text-muted-foreground">
                           {formData.description?.length || 0}/1000
                         </div>
@@ -627,7 +677,7 @@ export function AddProductModal({
                   </div>
                 )}
 
-                {/* Step 2: Variations (moved from step 3) */}
+                {/* Step 2: Variations */}
                 {currentStep === 1 && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between rounded-lg bg-muted/30 p-4">
@@ -866,7 +916,8 @@ export function AddProductModal({
                       )}
                   </div>
                 )}
-                {/* Step 3: Single Product Details (moved from step 2) */}
+
+                {/* Step 3: Single Product Details */}
                 {currentStep === 2 && (
                   <div className="space-y-6">
                     <div className="rounded-lg bg-muted/30 p-4">
@@ -1053,12 +1104,12 @@ export function AddProductModal({
                   </div>
                 )}
 
-                {/* Step 5: Review - Summary cards */}
+                {/* Step 5: Review */}
                 {currentStep === 4 && (
                   <div className="space-y-6">
                     <div className="space-y-3">
                       <h3 className="text-lg font-medium">
-                        Review Your Product
+                        Review Your Changes
                       </h3>
                       <p className="text-muted-foreground">
                         Check all details before submitting. You can go back to
@@ -1090,7 +1141,7 @@ export function AddProductModal({
                           </div>
                           <div className="col-span-2 w-full">
                             <div className="rounded-xl border bg-muted/30 w-full p-5">
-                              <h4 className="mb-3 text-sm font-medium">
+                                                           <h4 className="mb-3 text-sm font-medium">
                                 Description
                               </h4>
                               <ScrollArea className="h-[150px] w-full rounded-md border p-2">
@@ -1284,7 +1335,7 @@ export function AddProductModal({
           </form>
         </ScrollArea>
 
-        {/* Footer with floating action on mobile */}
+        {/* Footer with action buttons */}
         <div className="sticky bottom-0 border-t bg-background/95 p-4 backdrop-blur-sm md:p-6">
           <div className="flex items-center justify-between gap-3">
             <Button
@@ -1315,10 +1366,10 @@ export function AddProductModal({
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
+                      Updating...
                     </>
                   ) : (
-                    "Add Product"
+                    "Update Product"
                   )}
                 </Button>
               )}

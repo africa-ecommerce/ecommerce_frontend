@@ -65,6 +65,7 @@ import DeleteDialog from "./delete-dialog";
 import { PRODUCT_CATEGORIES } from "@/app/constant";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import EmptyState from "@/app/_components/empty-state";
+import { EditProductModal } from "./update-product-modal";
 
 const LoadingSkeleton = () => (
   <Card>
@@ -172,6 +173,15 @@ export default function Inventory() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   // Add state for delete confirmation
   const [productToDelete, setProductToDelete] = useState<string>("");
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState<string >(
+   ""
+  );
+
+  const handleEdit = (productId: string) => {
+    setSelectedProductId(productId);
+    setEditModalOpen(true);
+  };
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -348,17 +358,13 @@ export default function Inventory() {
               Manage products and monitor stock levels
             </p>
           </div>
-         
         </div>
 
         {/* Inventory Stats */}
         <section className="space-y-3">
-          
-            <h2 className="text-sm sm:text-base font-semibold">
-              Inventory Command Center
-            </h2>
-           
-          
+          <h2 className="text-sm sm:text-base font-semibold">
+            Inventory Command Center
+          </h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {/* Total Products Card */}
@@ -386,7 +392,6 @@ export default function Inventory() {
                     <div className="text-2xl font-bold">
                       {stats.totalProducts}
                     </div>
-                    
                   </>
                 )}
               </CardContent>
@@ -496,30 +501,31 @@ export default function Inventory() {
           </div>
         </section>
 
-         {/* Account Verification Tip */}
-                <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
-                  <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
-                    <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
-                      <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-xs sm:text-sm">
-                        Action Required
-                      </h3>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground">
-                         Please verify your account to
-                        start accepting payments and processing orders. Verified account are more likely to receive orders.
-                      </p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="ml-auto text-xs h-7 sm:h-8"
-                    >
-                      <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Verify
-                    </Button>
-                  </CardContent>
-                </Card>
+        {/* Account Verification Tip */}
+        <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
+          <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+            <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
+              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-medium text-xs sm:text-sm">
+                Action Required
+              </h3>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">
+                Please verify your account to start accepting payments and
+                processing orders. Verified account are more likely to receive
+                orders.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto text-xs h-7 sm:h-8"
+            >
+              <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Verify
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
@@ -667,7 +673,6 @@ export default function Inventory() {
                   <table className="w-full text-sm">
                     <thead className="text-xs uppercase bg-muted/50">
                       <tr>
-                       
                         <th className="p-2 sm:p-3 text-left">Product</th>
                         <th className="p-2 sm:p-3 text-left">Price</th>
                         <th className="p-2 sm:p-3 text-left">Stock</th>
@@ -722,7 +727,6 @@ export default function Inventory() {
                               key={item.id}
                               className="border-b hover:bg-muted/30"
                             >
-                              
                               <td className="p-2 sm:p-3">
                                 <div className="flex items-center gap-2 sm:gap-3">
                                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
@@ -781,7 +785,11 @@ export default function Inventory() {
                                     <DropdownMenuLabel className="text-xs sm:text-sm">
                                       Actions
                                     </DropdownMenuLabel>
-                                    <DropdownMenuItem className="text-xs sm:text-sm">
+                                    <DropdownMenuItem className="text-xs sm:text-sm"
+                                    onClick={() => {
+                                      handleEdit(item.id);
+                                    }}
+                                    >
                                       <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
                                       Edit
                                     </DropdownMenuItem>
@@ -850,6 +858,13 @@ export default function Inventory() {
           open={showEnhancedAddProduct}
           onOpenChange={setShowEnhancedAddProduct}
         />
+
+        <EditProductModal
+          open={editModalOpen}
+          onOpenChange={setEditModalOpen}
+          productId={selectedProductId}
+        />
+
         {/* Delete Confirmation Dialog */}
         <DeleteDialog
           productToDelete={productToDelete}
