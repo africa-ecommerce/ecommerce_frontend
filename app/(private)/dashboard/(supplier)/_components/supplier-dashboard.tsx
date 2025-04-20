@@ -407,13 +407,11 @@ export default function SupplierDashboard() {
 
         {/* Inventory Stats */}
         <section className="space-y-3 sm:space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+          <div className="">
             <h2 className="text-sm sm:text-base font-semibold">
               Financial Overview
             </h2>
-            <Button variant="outline" size="sm" asChild className="text-xs">
-              <Link href="/dashboard/finance">View Finances</Link>
-            </Button>
+            
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:gap-3">

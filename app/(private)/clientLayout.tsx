@@ -43,7 +43,8 @@ const isPathActive = (pathname: string, pattern: string) => {
 interface NavItemProps {
   href: string;
   icon: React.ReactNode;
-  label: string;
+  label?: string;
+  tip?: string;
   isActive: boolean;
   badge?: string;
   compact?: boolean;
@@ -55,6 +56,7 @@ function NavItem({
   href,
   icon,
   label,
+  tip,
   isActive,
   badge,
   compact,
@@ -119,7 +121,7 @@ function NavItem({
               {content}
             </Link>
           </TooltipTrigger>
-          <TooltipContent side="right">{label}</TooltipContent>
+          <TooltipContent side="right">{tip}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     );
@@ -238,7 +240,7 @@ function DesktopNavigation({
             <NavItem
               href="/dashboard"
               icon={<Home className="w-5 h-5" />}
-              label="Dashboard"
+              tip="Dashboard"
               isActive={isPathActive(pathname, "/dashboard") && !isMoreActive}
               closeMorePage={closeMorePage}
               showTooltip
@@ -246,7 +248,7 @@ function DesktopNavigation({
             <NavItem
               href="/marketplace"
               icon={<LayoutGrid className="w-5 h-5" />}
-              label="Marketplace"
+              tip="Marketplace"
               isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
               closeMorePage={closeMorePage}
               showTooltip
@@ -254,7 +256,7 @@ function DesktopNavigation({
             <NavItem
               href="/dashboard/store"
               icon={<Store className="w-5 h-5" />}
-              label="Store"
+              tip="Store"
               isActive={
                 isPathActive(pathname, "/dashboard/store") && !isMoreActive
               }
@@ -264,7 +266,7 @@ function DesktopNavigation({
             <NavItem
               href="/dashboard/products"
               icon={<Package className="w-5 h-5" />}
-              label="Products"
+              tip="Products"
               isActive={
                 isPathActive(pathname, "/dashboard/products") && !isMoreActive
               }
@@ -286,7 +288,7 @@ function DesktopNavigation({
             <NavItem
               href="/dashboard"
               icon={<Home className="w-5 h-5" />}
-              label="Dashboard"
+              tip="Dashboard"
               isActive={isPathActive(pathname, "/dashboard") && !isMoreActive}
               closeMorePage={closeMorePage}
               showTooltip
@@ -294,7 +296,7 @@ function DesktopNavigation({
             <NavItem
               href="/marketplace"
               icon={<LayoutGrid className="w-5 h-5" />}
-              label="Marketplace"
+              tip="Marketplace"
               isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
               closeMorePage={closeMorePage}
               showTooltip
@@ -302,7 +304,7 @@ function DesktopNavigation({
             <NavItem
               href="/dashboard/order"
               icon={<PackageOpen className="w-5 h-5" />}
-              label="Orders"
+              tip="Orders"
               isActive={
                 isPathActive(pathname, "/dashboard/order") && !isMoreActive
               }
@@ -312,7 +314,7 @@ function DesktopNavigation({
             <NavItem
               href="/dashboard/inventory"
               icon={<Boxes className="w-5 h-5" />}
-              label="Inventory"
+              tip="Inventory"
               isActive={
                 isPathActive(pathname, "/dashboard/inventory") && !isMoreActive
               }
