@@ -6,27 +6,11 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  Download,
-  Filter,
   HelpCircle,
   ImageIcon,
-  LineChart,
   Loader2,
-  MoreHorizontal,
-  PackageCheck,
-  PackagePlus,
-  Pencil,
   Plus,
-  QrCode,
-  RefreshCw,
-  Search,
-  Settings,
-  Sliders,
-  Tag,
   Trash2,
-  TrendingDown,
-  TrendingUp,
   Upload,
   Users,
   X,
@@ -34,33 +18,9 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import {
   Select,
   SelectContent,
@@ -68,26 +28,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { productFormSchema, ProductFormData } from "@/zod/schema";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
-import { z } from "zod";
 import { mutate } from "swr";
 import { PRODUCT_CATEGORIES } from "@/app/constant";
+
+
+interface Dimensions {
+  length?: number;
+  width?: number;
+  height?: number;
+}
+
+interface Variation {
+  id: string;
+  price: number;
+  stock: number;
+  size?: string;
+  color?: string;
+  weight?: number;
+  dimensions?: Dimensions;
+  [key: string]: any; // This adds an index signature
+}
+
+
+
 
 export function AddProductModal({
   open,
@@ -98,44 +70,43 @@ export function AddProductModal({
 }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
-  const [newTag, setNewTag] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropAreaRef = useRef<HTMLDivElement>(null);
 
-  // Define all hooks at the top level, not conditionally
+  
+
   const addProduct = async (data: ProductFormData) => {
     try {
-      console.log("posted data", data);
+      console.log("Submitting data:", JSON.stringify(data, null, 2));
+      console.log("Images count:", data.images.length);
 
       const formData = new FormData();
-
-      // 2. Append the images
       data.images.forEach((file: File) => {
         formData.append("images", file);
       });
 
-      // 3. Append all other form data as JSON
       const { images, imageUrls, ...jsonData } = data;
+      console.log("JSON data:", jsonData);
       formData.append("productData", JSON.stringify(jsonData));
-      console.log("formData", formData);
 
-      // 4. Send with FormData
       const response = await fetch("/api/products", {
         method: "POST",
         body: formData,
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        errorToast(result.error);
+        const errorResult = await response.json();
+        console.error("Server error:", errorResult);
+        errorToast(errorResult.error || "Server error");
         return null;
       }
 
+      const result = await response.json();
+      console.log("Success:", result);
       successToast(result.message);
       return result;
     } catch (error) {
-      console.error(error);
+      console.error("Submission error:", error);
       errorToast("Something went wrong");
       return null;
     }
@@ -147,9 +118,10 @@ export function AddProductModal({
     addProduct,
     productFormSchema,
     () => {
-      onOpenChange(false);
-      setCurrentStep(0);
-      mutate("/api/products/supplier/");
+     onOpenChange(false);
+    setCurrentStep(0);
+    
+    mutate("/api/products/supplier/");
     },
     {
       hasVariations: false,
@@ -249,12 +221,12 @@ export function AddProductModal({
       size: "",
       color: "",
       stock: formData.stock || 0,
-      price: formData.price || "",
-      weight: formData.weight || "",
+      price: formData.price || 0,
+      weight: formData.weight || 0,
       dimensions: {
-        length: formData.dimensions?.length || "",
-        width: formData.dimensions?.width || "",
-        height: formData.dimensions?.height || "",
+        length: formData.dimensions?.length || 0,
+        width: formData.dimensions?.width || 0,
+        height: formData.dimensions?.height || 0,
       },
     };
 
@@ -262,31 +234,33 @@ export function AddProductModal({
   };
 
   const updateVariation = (
-    index: number,
-    field: string,
-    value: string | number
-  ) => {
-    const updatedVariations = [...(formData.variations || [])];
+  index: number,
+  field: string,
+  value: string | number
+) => {
+  const updatedVariations = [...(formData.variations || [])] as Variation[];
 
-    // Handle nested dimensions fields
-    if (field.includes(".")) {
-      const [parent, child] = field.split(".");
+  // Handle nested dimensions fields
+  if (field.includes(".")) {
+    const [parent, child] = field.split(".");
+    if (parent === "dimensions") {
       updatedVariations[index] = {
         ...updatedVariations[index],
-        [parent]: {
-          ...(updatedVariations[index][parent] || {}),
+        dimensions: {
+          ...(updatedVariations[index].dimensions || {}),
           [child]: value,
         },
       };
-    } else {
-      updatedVariations[index] = {
-        ...updatedVariations[index],
-        [field]: value,
-      };
     }
+  } else {
+    updatedVariations[index] = {
+      ...updatedVariations[index],
+      [field]: value,
+    };
+  }
 
-    setValue("variations", updatedVariations);
-  };
+  setValue("variations", updatedVariations);
+};
 
   const removeVariation = (index: number) => {
     const updatedVariations = [...(formData.variations || [])];
@@ -386,16 +360,15 @@ export function AddProductModal({
           );
         }
         return true; // If no variations, this step is valid
-      case 2:
-        // For single product details
-        return (
-          !!formData.name &&
-          !!formData.price &&
-          !!formData.stock &&
-          !errors.stock &&
-          !errors.name &&
-          !errors.price
-        );
+     case 2: // For single product details
+  return (
+    !!formData.name &&
+    !!formData.price && 
+    (formData.stock !== undefined && formData.stock >= 1) && // Improved check
+    !errors.stock &&
+    !errors.name &&
+    !errors.price
+  );
       case 3:
         // For media step
         return (
@@ -429,17 +402,44 @@ export function AddProductModal({
   };
 
   // Update the handleSubmit function
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
 
-    // If hasVariations is false, make sure variations is an empty array
-    if (!formData.hasVariations) {
-      setValue("variations", []);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  console.log("Submit triggered", formData);
+
+  // Clean up NaN values before submission
+  if (isNaN(formData.weight!)) {
+    setValue("weight", undefined);
+  }
+  
+  // Clean up dimension NaN values
+  if (formData.dimensions) {
+    if (isNaN(formData.dimensions.length!)) {
+      setValue("dimensions.length", undefined);
     }
+    if (isNaN(formData.dimensions.width!)) {
+      setValue("dimensions.width", undefined);
+    }
+    if (isNaN(formData.dimensions.height!)) {
+      setValue("dimensions.height", undefined);
+    }
+  }
 
-    // Now we can submit the form
+  // If hasVariations is false, make sure variations is an empty array
+  if (!formData.hasVariations) {
+    setValue("variations", []);
+  }
+
+  // Ensure we have valid data before submitting
+  try {
+    // Force validation using the submit function from your form hook
     await submit(e);
-  };
+  } catch (error) {
+    console.error("Form submission error:", error);
+    errorToast("Please check all required fields");
+  }
+};
 
   // If modal is not open, render nothing but ensure hooks are called
   if (!open) return null;
@@ -526,7 +526,7 @@ export function AddProductModal({
 
         {/* Form content with swipe gestures */}
         <ScrollArea className="flex-1">
-          <form onSubmit={submit}>
+          <form onSubmit={handleSubmit}>
             <AnimatePresence initial={false} custom={direction} mode="wait">
               <motion.div
                 key={currentStep}
@@ -772,7 +772,7 @@ export function AddProductModal({
                                     updateVariation(
                                       index,
                                       "stock",
-                                      e.target.value
+                                      Number(e.target.value)
                                     )
                                   }
                                   className="h-12 text-base"
@@ -794,7 +794,7 @@ export function AddProductModal({
                                     updateVariation(
                                       index,
                                       "weight",
-                                      e.target.value
+                                      Number(e.target.value)
                                     )
                                   }
                                   className="h-12 text-base"
@@ -813,7 +813,7 @@ export function AddProductModal({
                                     updateVariation(
                                       index,
                                       "dimensions.length",
-                                      e.target.value
+                                      Number(e.target.value)
                                     )
                                   }
                                   className="h-12 text-base"
@@ -826,7 +826,7 @@ export function AddProductModal({
                                     updateVariation(
                                       index,
                                       "dimensions.width",
-                                      e.target.value
+                                      Number(e.target.value)
                                     )
                                   }
                                   className="h-12 text-base"
@@ -839,7 +839,7 @@ export function AddProductModal({
                                     updateVariation(
                                       index,
                                       "dimensions.height",
-                                      e.target.value
+                                      Number(e.target.value)
                                     )
                                   }
                                   className="h-12 text-base"
@@ -887,7 +887,9 @@ export function AddProductModal({
                           type="number"
                           min="0"
                           step="0.01"
-                          {...register("price")}
+                          {...register("price", {
+                            valueAsNumber: true, // Convert to number automatically
+                          })}
                           placeholder="0.00"
                           className="h-12 text-base"
                         />
@@ -898,13 +900,17 @@ export function AddProductModal({
                         )}
                       </div>
 
+                     
+
                       <div className="space-y-3">
                         <Label htmlFor="stock">Stock</Label>
                         <Input
                           id="stock"
                           type="number"
                           min="0"
-                          {...register("stock")}
+                          {...register("stock", {
+                            valueAsNumber: true, // Convert to number automatically
+                          })}
                           placeholder="0"
                           className="h-12 text-base"
                         />
@@ -937,7 +943,9 @@ export function AddProductModal({
                           id="weight"
                           type="number"
                           min="0"
-                          {...register("weight")}
+                          {...register("weight",  {
+                            valueAsNumber: true, // Convert to number automatically
+                          })}
                           placeholder="e.g. 250"
                           className="h-12 text-base"
                         />
@@ -960,17 +968,26 @@ export function AddProductModal({
                       <div className="grid grid-cols-3 gap-3">
                         <Input
                           placeholder="Length"
-                          {...register("dimensions.length")}
+                          type="number"
+                          {...register("dimensions.length",  {
+                            valueAsNumber: true, // Convert to number automatically
+                          })}
                           className="h-12 text-base"
                         />
                         <Input
                           placeholder="Width"
-                          {...register("dimensions.width")}
+                          type="number"
+                          {...register("dimensions.width",  {
+                            valueAsNumber: true, // Convert to number automatically
+                          })}
                           className="h-12 text-base"
                         />
                         <Input
                           placeholder="Height"
-                          {...register("dimensions.height")}
+                          type="number"
+                          {...register("dimensions.height",  {
+                            valueAsNumber: true, // Convert to number automatically
+                          })}
                           className="h-12 text-base"
                         />
                       </div>
@@ -1307,10 +1324,10 @@ export function AddProductModal({
                 </Button>
               ) : (
                 <Button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
+                  onClick={(e) => handleSubmit(e)} // Ensure event is passed
+                  disabled={isSubmitting || !isStepValid()}
                   className="flex-1 md:flex-none"
-                  type="button"
+                  type="button" // Change to "button" to avoid double submission
                 >
                   {isSubmitting ? (
                     <>

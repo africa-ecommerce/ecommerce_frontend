@@ -31,7 +31,7 @@ export default function DashboardLayout({
     if(userData.userType === "SUPPLIER") {
        preload("/api/products/supplier/", globalFetcher);
     } else {
-      console.log("plug")
+      preload("/api/plug/products/", globalFetcher);
     }
    
     

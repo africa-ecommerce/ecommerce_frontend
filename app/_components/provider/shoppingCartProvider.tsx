@@ -7,7 +7,16 @@ import {
   type ReactNode,
   useEffect,
 } from "react";
-import { ShoppingCart, X, Plus, Minus, Trash2, Package, Check, Pencil } from "lucide-react";
+import {
+  ShoppingCart,
+  X,
+  Plus,
+  Minus,
+  Trash2,
+  Package,
+  Check,
+  Pencil,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -20,6 +29,9 @@ import {
   SheetFooter,
   SheetClose,
 } from "@/components/ui/sheet";
+import { useFormResolver } from "@/hooks/useFormResolver";
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
+import { mutate } from "swr";
 
 interface CartItem {
   id: string;
@@ -31,17 +43,18 @@ interface CartItem {
 interface ShoppingCartContextType {
   items: CartItem[];
   itemCount: number;
-  
+
   addItem: (item: CartItem, openCart?: boolean) => void;
   removeItem: (itemId: string) => void;
- 
+
   clearCart: () => void;
   openCart: () => void;
 }
 
 interface ShoppingCartProviderProps {
   children: ReactNode;
-  excludePaths?: string[]; // Array of paths to exclude
+  excludePaths?: string[]; 
+  exclude?: boolean
 }
 
 const ShoppingCartContext = createContext<ShoppingCartContextType | undefined>(
@@ -51,6 +64,7 @@ const ShoppingCartContext = createContext<ShoppingCartContextType | undefined>(
 export function ShoppingCartProvider({
   children,
   excludePaths = [],
+  exclude
 }: ShoppingCartProviderProps) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -69,11 +83,6 @@ export function ShoppingCartProvider({
 
   const itemCount = items.length;
 
-  // const totalPrice = items.reduce(
-  //   (total, item) => total + item.price * item.quantity,
-  //   0
-  // );
-
   // Function to explicitly open the cart
   const openCart = () => {
     setIsOpen(true);
@@ -84,8 +93,7 @@ export function ShoppingCartProvider({
     setItems((prevItems) => {
       // Check if item already exists in cart
       const existingItemIndex = prevItems.findIndex(
-        (item) =>
-          item.id === newItem.id 
+        (item) => item.id === newItem.id
       );
 
       if (existingItemIndex >= 0) {
@@ -109,14 +117,6 @@ export function ShoppingCartProvider({
     setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
   };
 
-  // const updateQuantity = (itemId: string) => {
-  //   setItems((prevItems) =>
-  //     prevItems
-  //       .map((item) => (item.id === itemId ? { ...item, quantity } : item))
-  //       .filter((item) => item.quantity > 0)
-  //   );
-  // };
-
   const clearCart = () => {
     setItems([]);
   };
@@ -128,19 +128,38 @@ export function ShoppingCartProvider({
       minimumFractionDigits: 0,
     }).format(price);
   };
-  
-  const handleConfirm = () => {
-    // Logic for confirming selections
-    // Usually would send to checkout or finalize the store additions
-    // For now, we'll simply route to a success page or close the panel
-    setIsConfirmMode(false);
-    setIsOpen(false);
-    
-    // You could redirect here if needed
-    // router.push('/marketplace/success');
-    
-    // Or show a success notification
-    // toast.success("Products successfully added to your store!");
+
+  // const handleConfirm = () => {
+
+  //
+
+  // };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("/api/plug/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(items),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        errorToast(result.error);
+        return null;
+      }
+
+      successToast(result.message);
+      setIsConfirmMode(false);
+      setIsOpen(false);
+      mutate("/api/plug/products/")
+      return result;
+    } catch (error) {
+      console.error(error);
+      errorToast("Something went wrong");
+      return null;
+    }
   };
 
   // Use effect to persist cart items in localStorage
@@ -176,7 +195,7 @@ export function ShoppingCartProvider({
     >
       {children}
 
-      {shouldShowCart && (
+      {shouldShowCart && !exclude && (
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button
@@ -200,7 +219,9 @@ export function ShoppingCartProvider({
             {items.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
                 <Package className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-medium text-lg mb-1">No products selected</h3>
+                <h3 className="font-medium text-lg mb-1">
+                  No products selected
+                </h3>
                 <p className="text-muted-foreground mb-4">
                   Browse the marketplace to add products to your store
                 </p>
@@ -241,31 +262,16 @@ export function ShoppingCartProvider({
                           <p className="text-sm text-muted-foreground">
                             {formatPrice(item.price)}
                           </p>
-                          <div className="flex items-center justify-between mt-2">
-                            <div className="flex items-center space-x-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 px-2"
-                                onClick={() => {
-                                  // Handle edit logic
-                                  console.log("Edit item", item.id);
-                                }}
-                              >
-                                <Pencil className="h-3 w-3 mr-1" />
-                                Edit
-                              </Button>
-                              
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 px-2"
-                                onClick={() => removeItem(item.id)}
-                              >
-                                <Trash2 className="h-3 w-3 mr-1" />
-                                Remove
-                              </Button>
-                            </div>
+                          <div className="">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 px-2"
+                              onClick={() => removeItem(item.id)}
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              Remove
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -278,10 +284,10 @@ export function ShoppingCartProvider({
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Total Items</span>
                       <span className="font-medium">
-                        {itemCount} item{itemCount !== 1 ? 's' : ''}
+                        {itemCount} item{itemCount !== 1 ? "s" : ""}
                       </span>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-2">
                       <Button
                         variant="outline"
@@ -291,10 +297,7 @@ export function ShoppingCartProvider({
                         <Trash2 className="h-4 w-4" />
                         Clear All
                       </Button>
-                      <Button 
-                        className="w-full gap-1"
-                        onClick={handleConfirm}
-                      >
+                      <Button className="w-full gap-1" onClick={handleSubmit}>
                         <Check className="h-4 w-4" />
                         Confirm
                       </Button>

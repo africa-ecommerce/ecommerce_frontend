@@ -102,7 +102,7 @@ export const plugInfoSchema = z.object({
 //   .optional();
 
 export const profileSchema = z.object({
-  avatar: z.string().optional(),
+ 
   businessName: z.string().min(2, {
     message: "Please provide your business name",
   }),
@@ -285,13 +285,12 @@ const variationSchema = z.object({
   size: z.string().optional(),
   color: z.string().optional(),
   stock: z.number().min(1, "Stock cannot be negative"),
-  price: z.string().min(1, "Price is required")
-    .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
-  weight: z.string().optional(),
+  price: z.number().min(1, "Price is required"),
+  weight: z.number().optional(),
   dimensions: z.object({
-    length: z.string().optional(),
-    width: z.string().optional(),
-    height: z.string().optional(), 
+    length: z.number().optional(),
+    width: z.number().optional(),
+    height: z.number().optional(), 
   }).optional(),
 });
 
@@ -312,10 +311,9 @@ export const productFormSchema = z
     description: z.string().max(1000).optional(),
     size: z.string().optional(),
     price: z
-      .string()
-      .min(1, "Price is required")
-      .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
-    stock: z.number().min(0, "Stock cannot be negative"),
+      .number()
+      .min(1, "Price is required"),
+    stock: z.number().min(1, "Stock cannot be negative"),
     color: z.string().optional(),
     weight: z.number().optional(),
     dimensions: dimensionSchema,
@@ -345,5 +343,58 @@ export const productFormSchema = z
     }
   );
 
-// Export the type that exactly matches the schema
+// const variationSchema = z.object({
+//   id: z.string(),
+//   size: z.string().optional(),
+//   color: z.string().optional(),
+//   stock: z.number().min(1, "Stock must be at least 1"),
+//   price: z.string().min(1, "Price is required")
+//     .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
+//   weight: z.union([z.string(), z.number()]).optional().transform(val => typeof val === 'number' ? val.toString() : val),
+//   dimensions: z.object({
+//     length: z.union([z.string(), z.number()]).optional(),
+//     width: z.union([z.string(), z.number()]).optional(),
+//     height: z.union([z.string(), z.number()]).optional(),
+//   }).optional(),
+// });
+
+// export const productFormSchema = z.object({
+//   name: z.string().min(1, "Name is required").max(100),
+//   category: z.string().min(1, "Category is required"),
+//   description: z.string().max(1000).optional(),
+//   size: z.string().optional(),
+//   price: z.union([
+//     z.string().min(1, "Price is required").regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
+//     z.number().min(0, "Price must be positive")
+//   ]).transform(val => typeof val === 'number' ? val.toString() : val),
+//   stock: z.number().min(1, "Stock must be at least 1"),
+//   color: z.string().optional(),
+//   weight: z.union([z.string(), z.number()]).optional(),
+//   dimensions: z.object({
+//     length: z.union([z.string(), z.number()]).optional(),
+//     width: z.union([z.string(), z.number()]).optional(),
+//     height: z.union([z.string(), z.number()]).optional(),
+//   }).optional(),
+//   hasVariations: z.boolean(),
+//   variations: z.array(variationSchema),
+//   images: z.array(z.instanceof(File)).min(1, "At least one image is required"),
+//   imageUrls: z.array(z.string()),
+// }).superRefine((data, ctx) => {
+//   if (data.hasVariations && data.variations.length === 0) {
+//     ctx.addIssue({
+//       code: z.ZodIssueCode.custom,
+//       message: "At least one variation is required",
+//       path: ["variations"]
+//     });
+//   }
+//   if (!data.hasVariations && data.stock < 1) {
+//     ctx.addIssue({
+//       code: z.ZodIssueCode.custom,
+//       message: "Stock must be at least 1",
+//       path: ["stock"]
+//     });
+//   }
+// });
+
+// // Export the type that exactly matches the schema
 export type ProductFormData = z.infer<typeof productFormSchema>;

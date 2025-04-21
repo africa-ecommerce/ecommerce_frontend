@@ -33,6 +33,7 @@ import {
   Zap,
 } from "lucide-react";
 
+import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -89,6 +90,24 @@ import { z } from "zod";
 import { mutate } from "swr";
 import { PRODUCT_CATEGORIES } from "@/app/constant";
 
+
+interface Dimensions {
+  length?: number;
+  width?: number;
+  height?: number;
+}
+
+interface Variation {
+  id: string;
+  price: number;
+  stock: number;
+  size?: string;
+  color?: string;
+  weight?: number;
+  dimensions?: Dimensions;
+  [key: string]: any; // This adds an index signature
+}
+
 export function EditProductModal({
   open,
   onOpenChange,
@@ -100,67 +119,37 @@ export function EditProductModal({
 }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
-  const [newTag, setNewTag] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropAreaRef = useRef<HTMLDivElement>(null);
-  const [initialData, setInitialData] = useState<ProductFormData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  console.log(initialData)
+  const [selectedCategoryLabel, setSelectedCategoryLabel] = useState("");
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Fetch product data when modal opens
-  useEffect(() => {
-    if (open && productId) {
-      const fetchProduct = async () => {
-        setIsLoading(true);
-        try {
-          const response = await fetch(`/api/products/${productId}`);
-          const data = await response.json();
-          
-          if (response.ok) {
-            // Transform the data to match our form schema
-            const transformedData = {
-              ...data,
-              // Ensure all fields are present even if empty
-              name: data.name || "",
-              category: data.category || "",
-              description: data.description || "",
-              size: data.size || "",
-              price: data.price ? String(data.price) : "",
-              stock: data.stock || 0,
-              color: data.color || "",
-              weight: data.weight || undefined,
-              dimensions: data.dimensions || {
-                length: undefined,
-                width: undefined,
-                height: undefined,
-              },
-              hasVariations: data.hasVariations || false,
-              variations: data.variations || [],
-              images: [],
-              imageUrls: data.images || [],
-            };
-            
-            setInitialData(transformedData);
-          } else {
-            errorToast(data.error || "Failed to fetch product");
-            onOpenChange(false);
-          }
-        } catch (error) {
-          errorToast("Failed to fetch product");
-          onOpenChange(false);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      fetchProduct();
+  const fetcher = async (url: string) => {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || "Failed to fetch product");
     }
-  }, [open, productId, onOpenChange]);
+    return res.json();
+  };
+
+  const {
+    data: initialData,
+    error,
+    isLoading,
+  } = useSWR(open && productId ? `/api/products/${productId}` : null, fetcher);
+
+  // Handle error
+  useEffect(() => {
+    if (error) {
+      errorToast(error.message || "Failed to fetch product");
+      onOpenChange(false);
+    }
+  }, [error, onOpenChange]);
 
   const updateProduct = async (data: ProductFormData) => {
     try {
-      console.log("updated data", data);
-
       const formData = new FormData();
 
       // Append the images
@@ -186,7 +175,9 @@ export function EditProductModal({
       }
 
       successToast("Product updated successfully");
-      return result;
+      // Trigger revalidation of the product list
+      mutate("/api/products/supplier/");
+      return result.data;
     } catch (error) {
       console.error(error);
       errorToast("Something went wrong");
@@ -204,18 +195,54 @@ export function EditProductModal({
       setCurrentStep(0);
       mutate("/api/products/supplier/");
     },
-    initialData || {
+    initialData?.data || {
       hasVariations: false,
       variations: [],
+      images: [],
+      imageUrls: [],
     }
   );
-
-  // Reset form with initial data when it's loaded
   useEffect(() => {
-    if (initialData) {
-      reset(initialData);
+    if (initialData?.data && !isInitialized) {
+      const formattedData = {
+        ...initialData.data,
+        imageUrls:
+          initialData.data.imageUrls ||
+          (initialData.data.images && Array.isArray(initialData.data.images)
+            ? initialData.data.images
+            : []),
+        images: [],
+      };
+
+      // Reset the form with the formatted data
+      reset(formattedData);
+
+      // Handle category initialization
+      if (initialData.data.category) {
+        // Force set the category value
+        setValue("category", initialData.data.category);
+
+        // Find and set the display label
+        const categoryOption = PRODUCT_CATEGORIES.find(
+          (c) => c.value === initialData.data.category
+        );
+
+        if (categoryOption) {
+          setSelectedCategoryLabel(categoryOption.label);
+        } else {
+          setSelectedCategoryLabel(initialData.data.category);
+        }
+      }
+
+      setIsInitialized(true);
     }
-  }, [initialData, reset]);
+  }, [initialData, reset, setValue, isInitialized]);
+
+  useEffect(() => {
+    if (!open) {
+      setIsInitialized(false);
+    }
+  }, [open]);
 
   const formData = watch();
 
@@ -259,6 +286,8 @@ export function EditProductModal({
 
   const handleFiles = (files: FileList) => {
     const currentImages = formData.images || [];
+    const currentImageUrls = formData.imageUrls || [];
+
     const newFiles = Array.from(files).filter(
       (file) =>
         (file.type === "image/jpeg" || file.type === "image/png") &&
@@ -270,19 +299,28 @@ export function EditProductModal({
       return;
     }
 
-    if (currentImages.length + newFiles.length > 5) {
+    // Calculate how many more images we can add
+    const remainingSlots = 5 - currentImageUrls.length;
+
+    if (remainingSlots <= 0) {
       errorToast("Maximum 5 images allowed");
-      newFiles.splice(5 - currentImages.length);
+      return;
     }
 
-    const newImages = [...currentImages, ...newFiles];
-    const newImageUrls = [
-      ...(formData.imageUrls || []),
-      ...newFiles.map((file) => URL.createObjectURL(file)),
-    ];
+    // Trim to remaining slots if needed
+    const trimmedNewFiles =
+      remainingSlots < newFiles.length
+        ? newFiles.slice(0, remainingSlots)
+        : newFiles;
 
-    setValue("images", newImages);
-    setValue("imageUrls", newImageUrls);
+    // Generate object URLs for the new files
+    const newImageUrls = trimmedNewFiles.map((file) =>
+      URL.createObjectURL(file)
+    );
+
+    // Update the form values
+    setValue("images", [...currentImages, ...trimmedNewFiles]);
+    setValue("imageUrls", [...currentImageUrls, ...newImageUrls]);
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -295,15 +333,20 @@ export function EditProductModal({
     const newImages = [...(formData.images || [])];
     const newImageUrls = [...(formData.imageUrls || [])];
 
-    // Check if the image is from initial data (URL) or newly uploaded (File)
-    if (index < newImageUrls.length - newImages.length) {
-      // This is an initial image (URL only)
+    // If we're removing a URL that was initially loaded (not a new upload)
+    const isInitialImage = index < newImageUrls.length - newImages.length;
+
+    if (isInitialImage) {
+      // Remove the image URL but keep track that we deleted it
+      // You might want to add a tracking array for deleted images here
       newImageUrls.splice(index, 1);
       setValue("imageUrls", newImageUrls);
     } else {
-      // This is a newly uploaded image (File)
+      // This is a newly uploaded image
       const adjustedIndex = index - (newImageUrls.length - newImages.length);
+      // Revoke the object URL to prevent memory leaks
       URL.revokeObjectURL(newImageUrls[index]);
+      // Remove from both arrays
       newImages.splice(adjustedIndex, 1);
       newImageUrls.splice(index, 1);
       setValue("images", newImages);
@@ -317,7 +360,7 @@ export function EditProductModal({
       size: "",
       color: "",
       stock: formData.stock || 0,
-      price: formData.price || "",
+      price: formData.price || 0,
       weight: formData.weight || undefined,
       dimensions: {
         length: formData.dimensions?.length || undefined,
@@ -334,18 +377,20 @@ export function EditProductModal({
     field: string,
     value: string | number
   ) => {
-    const updatedVariations = [...(formData.variations || [])];
+    const updatedVariations = [...(formData.variations || [])] as Variation[];
 
     // Handle nested dimensions fields
     if (field.includes(".")) {
       const [parent, child] = field.split(".");
-      updatedVariations[index] = {
-        ...updatedVariations[index],
-        [parent]: {
-          ...(updatedVariations[index][parent] || {}),
-          [child]: value,
-        },
-      };
+      if (parent === "dimensions") {
+        updatedVariations[index] = {
+          ...updatedVariations[index],
+          dimensions: {
+            ...(updatedVariations[index].dimensions || {}),
+            [child]: value,
+          },
+        };
+      }
     } else {
       updatedVariations[index] = {
         ...updatedVariations[index],
@@ -421,37 +466,55 @@ export function EditProductModal({
     switch (currentStep) {
       case 0:
         return (
-          !!formData.category &&
-          !errors.category &&
+          
           !!formData.name &&
           !errors.name
         );
       case 1:
+        // For variations step
         if (formData.hasVariations) {
+          // Check if at least one variation exists and has required fields
           return (
             formData.variations &&
             formData.variations.length > 0 &&
             formData.variations.every((v) => !!v.price && v.stock >= 1)
           );
         }
-        return true;
-      case 2:
+        return true; // If no variations, this step is valid
+      case 2: // For single product details
         return (
           !!formData.name &&
           !!formData.price &&
-          !!formData.stock &&
+          formData.stock !== undefined &&
+          formData.stock >= 1 && // Improved check
           !errors.stock &&
           !errors.name &&
           !errors.price
         );
       case 3:
+        // For media step
         return (
           (formData.images?.length > 0 || formData.imageUrls?.length > 0) &&
           !errors.images
         );
       case 4:
+        // For the review step specifically, double-check category
+        let categoryValue = formData.category;
+
+        // If it's not properly in form state, try to get it from the rendered label
+        if (!categoryValue && selectedCategoryLabel) {
+          const foundCategory = PRODUCT_CATEGORIES.find(
+            (c) => c.label === selectedCategoryLabel
+          );
+          if (foundCategory) {
+            categoryValue = foundCategory.value;
+          } else {
+            categoryValue = selectedCategoryLabel; // Use label as fallback
+          }
+        }
+
         const baseValidation =
-          !!formData.category &&
+          !!categoryValue && // Use our enhanced category checking
           !!formData.name &&
           !!formData.price &&
           !errors.price &&
@@ -468,6 +531,7 @@ export function EditProductModal({
         }
 
         return baseValidation;
+
       default:
         return false;
     }
@@ -480,9 +544,40 @@ export function EditProductModal({
       setValue("variations", []);
     }
 
-    await submit(e);
-  };
+    if (isNaN(formData.weight!)) {
+      setValue("weight", undefined);
+    }
 
+    // Make sure the category is set
+    if (!formData.category) {
+      errorToast("Please select a category");
+      return;
+    }
+
+    // Clean up dimension NaN values
+    if (formData.dimensions) {
+      if (isNaN(formData.dimensions.length!)) {
+        setValue("dimensions.length", undefined);
+      }
+      if (isNaN(formData.dimensions.width!)) {
+        setValue("dimensions.width", undefined);
+      }
+      if (isNaN(formData.dimensions.height!)) {
+        setValue("dimensions.height", undefined);
+      }
+
+      // Make sure the form data is correctly structured before submission
+      // If there are no new images, but there are imageUrls, use those
+      if (
+        (formData.images?.length || 0) === 0 &&
+        (formData.imageUrls?.length || 0) > 0
+      ) {
+        setValue("images", formData.images);
+      }
+
+      await submit(e);
+    }
+  };
   if (!open) return null;
 
   if (isLoading) {
@@ -594,13 +689,26 @@ export function EditProductModal({
                   <div className="space-y-6">
                     <div className="space-y-3">
                       <Label htmlFor="category">Product Category</Label>
+
                       <Select
-                        {...register("category")}
-                        onValueChange={(value) => setValue("category", value)}
-                        defaultValue={formData.category}
+                        value={formData.category || ""}
+                        onValueChange={(value) => {
+                          setValue("category", value);
+
+                          const categoryOption = PRODUCT_CATEGORIES.find(
+                            (c) => c.value === value
+                          );
+                          if (categoryOption) {
+                            setSelectedCategoryLabel(categoryOption.label);
+                          }
+                        }}
                       >
                         <SelectTrigger id="category" className="h-12 text-base">
-                          <SelectValue placeholder="Select a category" />
+                          {selectedCategoryLabel ? (
+                            <span>{selectedCategoryLabel}</span>
+                          ) : (
+                            <SelectValue placeholder="Select a category" />
+                          )}
                         </SelectTrigger>
                         <SelectContent className="z-[200]">
                           {PRODUCT_CATEGORIES.map((category) => (
@@ -800,7 +908,7 @@ export function EditProductModal({
                                     updateVariation(
                                       index,
                                       "price",
-                                      e.target.value
+                                      Number(e.target.value)
                                     )
                                   }
                                   className="h-12 text-base"
@@ -822,7 +930,7 @@ export function EditProductModal({
                                     updateVariation(
                                       index,
                                       "stock",
-                                      e.target.value
+                                      Number(e.target.value)
                                     )
                                   }
                                   className="h-12 text-base"
@@ -844,7 +952,7 @@ export function EditProductModal({
                                     updateVariation(
                                       index,
                                       "weight",
-                                      e.target.value
+                                      Number(e.target.value)
                                     )
                                   }
                                   className="h-12 text-base"
@@ -863,7 +971,7 @@ export function EditProductModal({
                                     updateVariation(
                                       index,
                                       "dimensions.length",
-                                      e.target.value
+                                      Number(e.target.value)
                                     )
                                   }
                                   className="h-12 text-base"
@@ -876,7 +984,7 @@ export function EditProductModal({
                                     updateVariation(
                                       index,
                                       "dimensions.width",
-                                      e.target.value
+                                      Number(e.target.value)
                                     )
                                   }
                                   className="h-12 text-base"
@@ -889,7 +997,7 @@ export function EditProductModal({
                                     updateVariation(
                                       index,
                                       "dimensions.height",
-                                      e.target.value
+                                      Number(e.target.value)
                                     )
                                   }
                                   className="h-12 text-base"
@@ -938,7 +1046,9 @@ export function EditProductModal({
                           type="number"
                           min="0"
                           step="0.01"
-                          {...register("price")}
+                          {...register("price", {
+                            valueAsNumber: true, // Convert to number automatically
+                          })}
                           placeholder="0.00"
                           className="h-12 text-base"
                         />
@@ -955,7 +1065,9 @@ export function EditProductModal({
                           id="stock"
                           type="number"
                           min="0"
-                          {...register("stock")}
+                          {...register("stock", {
+                            valueAsNumber: true, // Convert to number automatically
+                          })}
                           placeholder="0"
                           className="h-12 text-base"
                         />
@@ -988,7 +1100,9 @@ export function EditProductModal({
                           id="weight"
                           type="number"
                           min="0"
-                          {...register("weight")}
+                          {...register("weight", {
+                            valueAsNumber: true, // Convert to number automatically
+                          })}
                           placeholder="e.g. 250"
                           className="h-12 text-base"
                         />
@@ -1011,17 +1125,26 @@ export function EditProductModal({
                       <div className="grid grid-cols-3 gap-3">
                         <Input
                           placeholder="Length"
-                          {...register("dimensions.length")}
+                          type="number"
+                          {...register("dimensions.length", {
+                            valueAsNumber: true, // Convert to number automatically
+                          })}
                           className="h-12 text-base"
                         />
                         <Input
                           placeholder="Width"
-                          {...register("dimensions.width")}
+                          type="number"
+                          {...register("dimensions.width", {
+                            valueAsNumber: true, // Convert to number automatically
+                          })}
                           className="h-12 text-base"
                         />
                         <Input
                           placeholder="Height"
-                          {...register("dimensions.height")}
+                          type="number"
+                          {...register("dimensions.height", {
+                            valueAsNumber: true, // Convert to number automatically
+                          })}
                           className="h-12 text-base"
                         />
                       </div>
@@ -1136,12 +1259,14 @@ export function EditProductModal({
                               Category
                             </p>
                             <p className="font-medium capitalize">
-                              {formData.category || "-"}
+                              {selectedCategoryLabel ||
+                                formData.category ||
+                                "-"}
                             </p>
                           </div>
                           <div className="col-span-2 w-full">
                             <div className="rounded-xl border bg-muted/30 w-full p-5">
-                                                           <h4 className="mb-3 text-sm font-medium">
+                              <h4 className="mb-3 text-sm font-medium">
                                 Description
                               </h4>
                               <ScrollArea className="h-[150px] w-full rounded-md border p-2">
@@ -1358,10 +1483,10 @@ export function EditProductModal({
                 </Button>
               ) : (
                 <Button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
+                  onClick={(e) => handleSubmit(e)} // Ensure event is passed
+                  disabled={isSubmitting || !isStepValid()}
                   className="flex-1 md:flex-none"
-                  type="button"
+                  type="button" // Change to "button" to avoid double submission
                 >
                   {isSubmitting ? (
                     <>

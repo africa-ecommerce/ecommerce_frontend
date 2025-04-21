@@ -32,6 +32,8 @@ import { VideoPlayer } from "./video-player";
 import { CustomerReviews } from "./customer-reviews";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
+import { useUser } from "@/app/_components/provider/UserContext";
+
 
 // Define fetcher function for useSWR
 const fetcher = async (url: string) => {
@@ -45,6 +47,9 @@ const fetcher = async (url: string) => {
 
 // Product Skeleton Loading Component
 const ProductSkeleton = () => {
+
+   
+
   return (
     <div className="flex flex-col min-h-screen bg-background animate-fade-in pb-20">
       {/* Header Skeleton */}
@@ -129,10 +134,10 @@ export default function ProductDetail() {
   });
 
   const [isAdding, setIsAdding] = useState(false);
-  const [isAdded, setIsAdded] = useState(false);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [currentVideoUrl, setCurrentVideoUrl] = useState("");
     const { items, addItem } = useShoppingCart()
+     const { userData } = useUser();
 
       const isInCart = items.some(item => item.id === product?.id)
 
@@ -218,7 +223,9 @@ export default function ProductDetail() {
             </h1>
           </div>
           <div>
-            <Button
+
+            {userData.userType === "PLUG" && (
+               <Button
               className={`${
                 isInCart ? "bg-green-100 text-green-800 hover:bg-green-100" : ""
               }`}
@@ -240,23 +247,9 @@ export default function ProductDetail() {
                 </>
               )}
             </Button>
-            {/* <Button
-              onClick={handleAddToStore}
-              disabled={isAdding || isAdded}
-              className="whitespace-nowrap"
-            >
-              {isAdding ? (
-                <span className="animate-pulse">Adding...</span>
-              ) : isAdded ? (
-                <>
-                  <PackageCheck className="mr-2 h-4 w-4" /> Added to Store
-                </>
-              ) : (
-                <>
-                  <Plus className="mr-2 h-4 w-4" /> Add to Store
-                </>
-              )}
-            </Button> */}
+            )}
+           
+            
           </div>
         </header>
 

@@ -237,14 +237,14 @@ export default function Inventory() {
   const totalPages = Math.ceil((filteredItems?.length || 0) / itemsPerPage);
 
   // Helper functions
-  const getStockStatus = (item) => {
+  const getStockStatus = (item: any) => {
     if (!item.stock && item.stock !== 0) return "unknown";
     if (item.stock === 0) return "out-of-stock";
     if (item.stock <= 5) return "low-stock";
     return "optimal";
   };
 
-  const getStockStatusColor = (status) => {
+  const getStockStatusColor = (status: any) => {
     switch (status) {
       case "out-of-stock":
         return "text-destructive";
@@ -257,7 +257,7 @@ export default function Inventory() {
     }
   };
 
-  const getStockStatusBadge = (status) => {
+  const getStockStatusBadge = (status: any) => {
     switch (status) {
       case "out-of-stock":
         return (
@@ -316,7 +316,7 @@ export default function Inventory() {
   };
 
   // Display value helper
-  const displayValue = (value) => {
+  const displayValue = (value: any) => {
     return value !== undefined && value !== null ? value : "-";
   };
 
@@ -332,11 +332,11 @@ export default function Inventory() {
     return {
       totalProducts: products.length,
       lowStockItems: products.filter(
-        (item) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
+        (item: any) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
       ).length,
-      outOfStock: products.filter((item) => item.stock === 0).length,
+      outOfStock: products.filter((item: any) => item.stock === 0).length,
       inventoryValue: products.reduce(
-        (total, item) => total + item.price * (item.stock || 0),
+        (total:any, item: any) => total + item.price * (item.stock || 0),
         0
       ),
     };
@@ -720,7 +720,7 @@ export default function Inventory() {
                           </td>
                         </tr>
                       ) : (
-                        currentItems.map((item) => {
+                        currentItems.map((item: any) => {
                           const stockStatus = getStockStatus(item);
                           return (
                             <tr
