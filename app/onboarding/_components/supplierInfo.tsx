@@ -96,7 +96,8 @@ export default function SupplierInfo({
       control,
       setValue,
       handleSubmit,
-      formState: { isSubmitting },
+      register,
+      formState: { isSubmitting, errors },
     },
   } = useFormResolver(
     async (data) => {
@@ -206,7 +207,8 @@ export default function SupplierInfo({
     logoInputRef.current?.click();
   };
 
-  const removeLogo = () => {
+  const removeLogo = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (logoUrl) {
       URL.revokeObjectURL(logoUrl);
     }
@@ -226,19 +228,18 @@ export default function SupplierInfo({
       ...formData,
       supplierInfo: data,
     } as FormData)
-       .then((result) => {
-      // Only set success if result is not null
-      if (result !== null) {
-        setIsSuccess(true);
-      }
-      return result;
-    })
-    .catch((error) => {
-      console.error("Form submission error:", error);
-      throw error;
-    });
-});
-
+      .then((result) => {
+        // Only set success if result is not null
+        if (result !== null) {
+          setIsSuccess(true);
+        }
+        return result;
+      })
+      .catch((error) => {
+        console.error("Form submission error:", error);
+        throw error;
+      });
+  });
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -252,10 +253,7 @@ export default function SupplierInfo({
 
       <Card className="p-6">
         <Form {...form}>
-          <form
-            onSubmit={onFormSubmit}
-            className="space-y-6"
-          >
+          <form onSubmit={onFormSubmit} className="space-y-6">
             {/* Logo Upload */}
             <FormField
               control={control}
@@ -295,10 +293,7 @@ export default function SupplierInfo({
                           </div>
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeLogo();
-                            }}
+                            onClick={removeLogo}
                             className="mt-4 flex items-center gap-1 rounded-lg bg-destructive px-3 py-1 text-sm font-medium text-destructive-foreground"
                           >
                             Remove Logo
@@ -356,13 +351,34 @@ export default function SupplierInfo({
               )}
             />
 
+            {/* Phone Field - Fixed from businessType to phone */}
+            <FormField
+              control={control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">Phone number</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter your phone number"
+                      {...field}
+                      value={field.value || ""} // Ensure the value is never undefined
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Business Type */}
             <FormField
               control={control}
               name="businessType"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-gray-700">
-                    Business Type <span className="text-gray-500">(Optional)</span>
+                    Business Type{" "}
+                    <span className="text-gray-500">(Optional)</span>
                   </FormLabel>
                   <FormControl>
                     <Select
@@ -371,7 +387,6 @@ export default function SupplierInfo({
                         setCurrentBusinessType(value as BusinessType);
                       }}
                       value={field.value || ""}
-                      defaultValue={field.value}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select your business type" />
@@ -399,6 +414,7 @@ export default function SupplierInfo({
               )}
             />
 
+            {/* Pickup Location */}
             <FormField
               control={control}
               name="pickupLocation"
@@ -412,16 +428,14 @@ export default function SupplierInfo({
                       <Input
                         placeholder="Enter your pickup address"
                         className="pl-10"
+                        {...field}
                         value={field.value || ""}
-                        onChange={field.onChange}
-                        onBlur={field.onBlur}
-                        name={field.name}
                       />
                       <MapPin className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                     </div>
                   </FormControl>
                   <p className="text-xs text-gray-500 mt-1">
-                    This is where your products would be picked up 
+                    This is where your products would be picked up
                   </p>
                   <FormMessage />
                 </FormItem>

@@ -78,28 +78,7 @@ export const plugInfoSchema = z.object({
 
 
 
-// Use a custom refinement to handle both File objects and strings
-// const fileSchema = z.custom<File>()
-//   .refine(
-//     (file) => {
-//       // Skip validation if no file (optional)
-//       if (!file) return true;
-      
-//       // If it's already a File object, check size and type
-//       if (file instanceof File) {
-//         const validTypes = ["image/jpeg", "image/png", "image/svg+xml"];
-//         const maxSize = 5 * 1024 * 1024; // 5MB
-        
-//         return validTypes.includes(file.type) && file.size <= maxSize;
-//       }
-      
-//       return false;
-//     },
-//     {
-//       message: "Logo must be a JPEG, PNG, or SVG file less than 5MB",
-//     }
-//   )
-//   .optional();
+
 
 export const profileSchema = z.object({
  
@@ -215,6 +194,45 @@ export const supplierInfoSchema = z.object({
     .max(100, "Business name cannot exceed 100 characters")
     .describe("The name of your business"),
 
+    phone: z
+    .string().min(11, "Phone number is required")
+    .refine(
+      (val) => {
+        
+        
+
+        // Otherwise validate as Nigerian phone number
+        return /^(\+?234|0)[\d]{10}$/.test(val);
+      },
+      {
+        message: "Please enter a valid Nigerian phone number",
+      }
+    )
+    .refine(
+      (val) => {
+       
+
+        // Check length requirements when value exists
+        return val.length >= 11 && val.length <= 15;
+      },
+      {
+        message: "Phone number must be between 11 and 15 digits",
+      }
+    )
+    .transform((val) => {
+      
+    
+
+      // Normalize phone number to standard format
+      if (val.startsWith("0")) {
+        return `+234${val.slice(1)}`;
+      }
+      if (val.startsWith("234")) {
+        return `+${val}`;
+      }
+      return val;
+    }),
+
   // Avatar/logo is optional
   avatar: z
     .instanceof(File)
@@ -223,61 +241,7 @@ export const supplierInfoSchema = z.object({
 });
 
 
-// const variationSchema = z.object({
-//   id: z.string(),
-//   size: z.string().optional(),
-//   color: z.string().optional(),
-//   stock: z.number().min(0, "Stock cannot be negative"),
-//   price: z.number().optional(),
-// });
 
-// // Define your dimension schema
-// const dimensionSchema = z
-//   .object({
-//     length: z.string().optional(),
-//     width: z.string().optional(),
-//     height: z.string().optional(),
-//   })
-  
-// // Main product schema
-// export const productFormSchema = z
-//   .object({
-//     name: z.string().min(1).max(100),
-//     category: z.string().min(1),
-//     description: z.string().max(1000).optional(),
-//     price: z
-//       .string()
-//       .min(1, "Price is required")
-//       .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
-//     weight: z.string().optional(),
-//     dimensions: dimensionSchema.optional(),
-//     hasVariations: z.boolean(),
-//     variations: z.array(variationSchema),
-//     images: z.array(z.instanceof(File)),
-//     imageUrls: z.array(z.string()),
-//     tags: z.array(z.string().max(20)),
-//   })
-//   .refine(
-//     (data) => {
-//       if (data.hasVariations) {
-//         return (
-//           data.variations.length > 0 &&
-//           data.variations.every(
-//             (v) =>
-//               v.size && v.color && typeof v.stock === "number" && v.stock >= 0
-//           )
-//         );
-//       }
-//       return true;
-//     },
-//     {
-//       message: "Please add at least one complete variation",
-//       path: ["variations"],
-//     }
-//   );
-
-// // Export the type that exactly matches the schema
-// export type ProductFormData = z.infer<typeof productFormSchema>;
 
 
 const variationSchema = z.object({
@@ -343,58 +307,7 @@ export const productFormSchema = z
     }
   );
 
-// const variationSchema = z.object({
-//   id: z.string(),
-//   size: z.string().optional(),
-//   color: z.string().optional(),
-//   stock: z.number().min(1, "Stock must be at least 1"),
-//   price: z.string().min(1, "Price is required")
-//     .regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
-//   weight: z.union([z.string(), z.number()]).optional().transform(val => typeof val === 'number' ? val.toString() : val),
-//   dimensions: z.object({
-//     length: z.union([z.string(), z.number()]).optional(),
-//     width: z.union([z.string(), z.number()]).optional(),
-//     height: z.union([z.string(), z.number()]).optional(),
-//   }).optional(),
-// });
 
-// export const productFormSchema = z.object({
-//   name: z.string().min(1, "Name is required").max(100),
-//   category: z.string().min(1, "Category is required"),
-//   description: z.string().max(1000).optional(),
-//   size: z.string().optional(),
-//   price: z.union([
-//     z.string().min(1, "Price is required").regex(/^\d+(\.\d{1,2})?$/, "Invalid price format"),
-//     z.number().min(0, "Price must be positive")
-//   ]).transform(val => typeof val === 'number' ? val.toString() : val),
-//   stock: z.number().min(1, "Stock must be at least 1"),
-//   color: z.string().optional(),
-//   weight: z.union([z.string(), z.number()]).optional(),
-//   dimensions: z.object({
-//     length: z.union([z.string(), z.number()]).optional(),
-//     width: z.union([z.string(), z.number()]).optional(),
-//     height: z.union([z.string(), z.number()]).optional(),
-//   }).optional(),
-//   hasVariations: z.boolean(),
-//   variations: z.array(variationSchema),
-//   images: z.array(z.instanceof(File)).min(1, "At least one image is required"),
-//   imageUrls: z.array(z.string()),
-// }).superRefine((data, ctx) => {
-//   if (data.hasVariations && data.variations.length === 0) {
-//     ctx.addIssue({
-//       code: z.ZodIssueCode.custom,
-//       message: "At least one variation is required",
-//       path: ["variations"]
-//     });
-//   }
-//   if (!data.hasVariations && data.stock < 1) {
-//     ctx.addIssue({
-//       code: z.ZodIssueCode.custom,
-//       message: "Stock must be at least 1",
-//       path: ["stock"]
-//     });
-//   }
-// });
 
 // // Export the type that exactly matches the schema
 export type ProductFormData = z.infer<typeof productFormSchema>;

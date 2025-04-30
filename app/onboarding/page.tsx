@@ -15,9 +15,7 @@ import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 // Extract the actual type from the schema
 type UserTypeValue = z.infer<typeof userTypeSchema>["userType"];
 
-type UserTypeData = {
-  userType?: UserTypeValue;
-};
+
 
 export type PlugData = {
   userType?: UserTypeValue;
@@ -28,7 +26,6 @@ export type PlugData = {
 export type SupplierData = {
   userType?: UserTypeValue;
   supplierInfo?: z.infer<typeof supplierInfoSchema>;
-  // productStep?: z.infer<typeof productSchema>;
 };
 
 export type FormData = PlugData | SupplierData;
@@ -61,45 +58,218 @@ const Page = () => {
     setStep((prev) => Math.min(prev + 1, totalSteps));
   };
 
- const handleSubmitSupplier = async (data: FormData): Promise<any> => {
-   // Check if data is SupplierData type before accessing supplierInfo
-   if ("supplierInfo" in data) {
-     console.log("submitted supplier data", data);
-     try {
-       const response = await fetch("/api/onboarding", {
-         method: "POST",
-         headers: { "Content-Type": "application/json" },
-         body: JSON.stringify({
-           userType: data.userType,
-           supplierInfo: data.supplierInfo,
-          //  ...(data.productStep && { productStep: data.productStep }),
-         }),
-       });
+// const handleSubmitSupplier = async (data: FormData): Promise<any> => {
+//    // Check if data is SupplierData type before accessing supplierInfo
+//    if ("supplierInfo" in data) {
+//      console.log("submitted supplier data", data);
+//      try {
+//        const response = await fetch("/api/onboarding", {
+//          method: "POST",
+//          headers: { "Content-Type": "application/json" },
+//          body: JSON.stringify({
+//            userType: data.userType,
+//            supplierInfo: data.supplierInfo,
+//          }),
+//        });
 
-       const result = await response.json();
-       if (!response.ok) {
-         errorToast(result.error);
-         return null; // Return null to indicate failure
-       }
+//        const result = await response.json();
+//        if (!response.ok) {
+//          errorToast(result.error);
+//          return null; // Return null to indicate failure
+//        }
 
-       successToast(result.message);
-       return result; // Return the result to be passed to onSuccess
-     } catch (error) {
-       console.error(error);
-       errorToast("Something went wrong");
-       return null; // Return null to indicate failure
-     }
-   } else {
-     errorToast("Invalid supplier data");
-     return null;
-   }
- };
+//        successToast(result.message);
+//        return result; // Return the result to be passed to onSuccess
+//      } catch (error) {
+//        console.error(error);
+//        errorToast("Something went wrong");
+//        return null; // Return null to indicate failure
+//      }
+//    } else {
+//      errorToast("Invalid supplier data");
+//      return null;
+//    }
+//  };
+
+
+
+
+
+//  const handleSubmitSupplier = async (data: FormData): Promise<any> => {
+//   // Check if data is SupplierData type before accessing supplierInfo
+//   if ("supplierInfo" in data) {
+//     console.log("submitted supplier data", data);
+//     try {
+//       // Create a FormData object to properly handle file uploads
+//       const formData = new FormData();
+
+//       // Handle the avatar file if it exists
+//       if (data.supplierInfo?.avatar instanceof File) {
+//         formData.append("avatar", data.supplierInfo.avatar);
+//       }
+
+//       // Extract the avatar from supplierInfo to avoid stringification issues
+//       const { avatar, ...supplierInfoWithoutAvatar } = data.supplierInfo || {};
+
+//       console.log(data.userType)
+
+//       // Create a clean data object without the File object
+//       const jsonData = {
+//         userType: data.userType,
+//         supplierInfo: supplierInfoWithoutAvatar,
+//       };
+
+//       // Append the JSON data as a string
+//       formData.append("userData", JSON.stringify(jsonData));
+
+//       // Send the FormData to the server
+//       const response = await fetch("/api/onboarding", {
+//         method: "POST",
+//         // Don't set Content-Type header, browser will set it with boundary for FormData
+//         body: formData,
+//       });
+
+//       const result = await response.json();
+//       if (!response.ok) {
+//         errorToast(result.error);
+//         return null; // Return null to indicate failure
+//       }
+
+//       successToast(result.message);
+//       return result; // Return the result to be passed to onSuccess
+//     } catch (error) {
+//       console.error(error);
+//       errorToast("Something went wrong");
+//       return null; // Return null to indicate failure
+//     }
+//   } else {
+//     errorToast("Invalid supplier data");
+//     return null;
+//   }
+// };
+
+
+const handleSubmitSupplier = async (data: FormData): Promise<any> => {
+  // Check if data is SupplierData type before accessing supplierInfo
+  if ("supplierInfo" in data) {
+    console.log("submitted supplier data", data);
+    try {
+      // Create a FormData object to properly handle file uploads
+      const formData = new FormData();
+
+      // Handle the avatar file if it exists
+      if (data.supplierInfo?.avatar instanceof File) {
+        formData.append("avatar", data.supplierInfo.avatar);
+      }
+
+      // Extract the avatar from supplierInfo to avoid stringification issues
+      const { avatar, ...supplierInfoWithoutAvatar } = data.supplierInfo || {};
+
+      // Create a clean data object with userType at the top level,
+      // just like in handleSubmitPlug
+      const processedData = {
+        userType: data.userType,
+        supplierInfo: supplierInfoWithoutAvatar,
+      };
+
+      // Append the JSON data as a string
+      formData.append("userData", JSON.stringify(processedData));
+
+      // Send the FormData to the server
+      const response = await fetch("/api/onboarding", {
+        method: "POST",
+        // Don't set Content-Type header, browser will set it with boundary for FormData
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        errorToast(result.error);
+        return null; // Return null to indicate failure
+      }
+
+      successToast(result.message);
+      return result; // Return the result to be passed to onSuccess
+    } catch (error) {
+      console.error(error);
+      errorToast("Something went wrong");
+      return null; // Return null to indicate failure
+    }
+  } else {
+    errorToast("Invalid supplier data");
+    return null;
+  }
+};
+// const handleSubmitPlug = async (data: FormData): Promise<any> => {
+//   // Check if data is PlugData type before accessing plugInfo
+//   if ("plugInfo" in data) {
+//     const plugData = data.plugInfo || {};
+
+//     // Pre-process data before sending to backend
+//     let processedNiches: string[] = [];
+
+//     // If generalMerchant is chosen, niches should be empty
+//     if (plugData.generalMerchant) {
+//       processedNiches = [];
+//     }
+//     // If not generalMerchant, handle niches and otherNiche
+//     else {
+//       // Start with selected niches but filter out "other"
+//       // Use type assertion to make TypeScript understand niches is a string array
+//       processedNiches = ((plugData.niches || []) as string[]).filter(
+//         (niche) => niche !== "other"
+//       );
+
+//       // If otherNiche is provided and not empty, add its value to niches array
+//       if (plugData.otherNiche?.trim()) {
+//         processedNiches.push(plugData.otherNiche.trim());
+//       }
+//     }
+
+//     const processedData = {
+//       userType: data.userType,
+//       niches: processedNiches,
+//       generalMerchant: Boolean(plugData.generalMerchant),
+//       // Include profile data if available
+//       ...(data.profile && { profile: data.profile }),
+//     };
+
+//     // Send optimized data to backend
+//     console.log("data", processedData);
+//     try {
+//       const response = await fetch("/api/onboarding", {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify(processedData),
+//       });
+
+//       const result = await response.json();
+//       if (!response.ok) {
+//         errorToast(result.error);
+//         return null; // Return null to indicate failure
+//       }
+
+//       successToast(result.message);
+//       return result; // Return the result to be passed to onSuccess
+//     } catch (error) {
+//       console.error(error);
+//       errorToast("Something went wrong");
+//       return null; // Return null to indicate failure
+//     }
+//   } else {
+//     errorToast("Invalid form data");
+//     return null;
+//   }
+// };
 
 
 const handleSubmitPlug = async (data: FormData): Promise<any> => {
   // Check if data is PlugData type before accessing plugInfo
-  if ("plugInfo" in data) {
+  if ("plugInfo" in data && "profile" in data) {
     const plugData = data.plugInfo || {};
+    const profileData = data.profile;
 
     // Pre-process data before sending to backend
     let processedNiches: string[] = [];
@@ -121,13 +291,19 @@ const handleSubmitPlug = async (data: FormData): Promise<any> => {
         processedNiches.push(plugData.otherNiche.trim());
       }
     }
-
+     
+    if(!profileData) return
     const processedData = {
       userType: data.userType,
       niches: processedNiches,
       generalMerchant: Boolean(plugData.generalMerchant),
-      // Include profile data if available
-      ...(data.profile && { profile: data.profile }),
+      // Include profile data explicitly
+      profile: {
+        businessName: profileData.businessName,
+        phone: profileData.phone,
+        state: profileData.state,
+        aboutBusiness: profileData.aboutBusiness,
+      },
     };
 
     // Send optimized data to backend

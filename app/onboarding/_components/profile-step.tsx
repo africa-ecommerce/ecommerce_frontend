@@ -67,7 +67,7 @@ export default function ProfileStep({
       </p>
 
       <Card className="p-6 mb-8">
-        <form onSubmit={submit}>
+        <form onSubmit={submit} method={"POST"}>
           <div className="space-y-6">
             {/* Business Name */}
             <div className="space-y-2">
