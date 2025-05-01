@@ -90,13 +90,6 @@ import { z } from "zod";
 import { mutate } from "swr";
 import { PRODUCT_CATEGORIES } from "@/app/constant";
 
-
-interface Dimensions {
-  length?: number;
-  width?: number;
-  height?: number;
-}
-
 interface Variation {
   id: string;
   price: number;
@@ -104,7 +97,6 @@ interface Variation {
   size?: string;
   color?: string;
   weight?: number;
-  dimensions?: Dimensions;
   [key: string]: any; // This adds an index signature
 }
 
@@ -362,11 +354,6 @@ export function EditProductModal({
       stock: formData.stock || 0,
       price: formData.price || 0,
       weight: formData.weight || undefined,
-      dimensions: {
-        length: formData.dimensions?.length || undefined,
-        width: formData.dimensions?.width || undefined,
-        height: formData.dimensions?.height || undefined,
-      },
     };
 
     setValue("variations", [...(formData.variations || []), newVariation]);
@@ -465,11 +452,7 @@ export function EditProductModal({
   const isStepValid = () => {
     switch (currentStep) {
       case 0:
-        return (
-          
-          !!formData.name &&
-          !errors.name
-        );
+        return !!formData.name && !errors.name;
       case 1:
         // For variations step
         if (formData.hasVariations) {
@@ -555,28 +538,17 @@ export function EditProductModal({
     }
 
     // Clean up dimension NaN values
-    if (formData.dimensions) {
-      if (isNaN(formData.dimensions.length!)) {
-        setValue("dimensions.length", undefined);
-      }
-      if (isNaN(formData.dimensions.width!)) {
-        setValue("dimensions.width", undefined);
-      }
-      if (isNaN(formData.dimensions.height!)) {
-        setValue("dimensions.height", undefined);
-      }
 
-      // Make sure the form data is correctly structured before submission
-      // If there are no new images, but there are imageUrls, use those
-      if (
-        (formData.images?.length || 0) === 0 &&
-        (formData.imageUrls?.length || 0) > 0
-      ) {
-        setValue("images", formData.images);
-      }
-
-      await submit(e);
+    // Make sure the form data is correctly structured before submission
+    // If there are no new images, but there are imageUrls, use those
+    if (
+      (formData.images?.length || 0) === 0 &&
+      (formData.imageUrls?.length || 0) > 0
+    ) {
+      setValue("images", formData.images);
     }
+
+    await submit(e);
   };
   if (!open) return null;
 
@@ -785,7 +757,7 @@ export function EditProductModal({
                   </div>
                 )}
 
-                {/* Step 2: Variations */}
+                {/* Step 2: Variations (moved from step 3) */}
                 {currentStep === 1 && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between rounded-lg bg-muted/30 p-4">
@@ -857,42 +829,20 @@ export function EditProductModal({
                                 <Trash2 className="h-5 w-5" />
                               </Button>
                             </div>
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                              <div className="space-y-3">
-                                <Label htmlFor={`size-${index}`}>Size *</Label>
-                                <Input
-                                  id={`size-${index}`}
-                                  placeholder="e.g. Small, 250ml"
-                                  value={variation.size || ""}
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "size",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                />
-                              </div>
-                              <div className="space-y-3">
-                                <Label htmlFor={`color-${index}`}>
-                                  Color *
-                                </Label>
-                                <Input
-                                  id={`color-${index}`}
-                                  placeholder="e.g. Red"
-                                  value={variation.color || ""}
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "color",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                />
-                              </div>
 
+                            <div className="space-y-3 pb-6">
+                              <Label htmlFor={`size-${index}`}>Size *</Label>
+                              <Input
+                                id={`size-${index}`}
+                                placeholder="e.g. XL, 250ml, 32 inches"
+                                value={variation.size || ""}
+                                onChange={(e) =>
+                                  updateVariation(index, "size", e.target.value)
+                                }
+                                className="h-12 text-base"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
                               <div className="space-y-3">
                                 <Label htmlFor={`price-${index}`}>
                                   Price (₦) *
@@ -908,7 +858,7 @@ export function EditProductModal({
                                     updateVariation(
                                       index,
                                       "price",
-                                      Number(e.target.value)
+                                      e.target.value
                                     )
                                   }
                                   className="h-12 text-base"
@@ -937,7 +887,9 @@ export function EditProductModal({
                                   required
                                 />
                               </div>
+                            </div>
 
+                            <div className="grid grid-cols-2 gap-4 mt-4">
                               <div className="space-y-3">
                                 <Label htmlFor={`weight-${index}`}>
                                   Weight (g)
@@ -958,46 +910,20 @@ export function EditProductModal({
                                   className="h-12 text-base"
                                 />
                               </div>
-                            </div>
 
-                            <div className="mt-4 space-y-3">
-                              <Label>Dimensions (inch)</Label>
-                              <div className="grid grid-cols-3 gap-3">
+                              <div className="space-y-3">
+                                <Label htmlFor={`color-${index}`}>
+                                  Color *
+                                </Label>
                                 <Input
-                                  placeholder="Length"
-                                  value={variation.dimensions?.length || ""}
-                                  type="number"
+                                  id={`color-${index}`}
+                                  placeholder="e.g. Red"
+                                  value={variation.color || ""}
                                   onChange={(e) =>
                                     updateVariation(
                                       index,
-                                      "dimensions.length",
-                                      Number(e.target.value)
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                />
-                                <Input
-                                  placeholder="Width"
-                                  value={variation.dimensions?.width || ""}
-                                  type="number"
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "dimensions.width",
-                                      Number(e.target.value)
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                />
-                                <Input
-                                  placeholder="Height"
-                                  value={variation.dimensions?.height || ""}
-                                  type="number"
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "dimensions.height",
-                                      Number(e.target.value)
+                                      "color",
+                                      e.target.value
                                     )
                                   }
                                   className="h-12 text-base"
@@ -1024,8 +950,7 @@ export function EditProductModal({
                       )}
                   </div>
                 )}
-
-                {/* Step 3: Single Product Details */}
+                {/* Step 3: Single Product Details (moved from step 2) */}
                 {currentStep === 2 && (
                   <div className="space-y-6">
                     <div className="rounded-lg bg-muted/30 p-4">
@@ -1038,7 +963,22 @@ export function EditProductModal({
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-3">
+                      <Label htmlFor="size">Size</Label>
+                      <Input
+                        id="size"
+                        {...register("size")}
+                        placeholder="e.g. XL, 250ml, 32 inches"
+                        className="h-12 text-base"
+                      />
+                      {errors.size && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.size.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-3">
                         <Label htmlFor="price">Price (₦)</Label>
                         <Input
@@ -1077,20 +1017,6 @@ export function EditProductModal({
                           </p>
                         )}
                       </div>
-                      <div className="space-y-3">
-                        <Label htmlFor="size">Size</Label>
-                        <Input
-                          id="size"
-                          {...register("size")}
-                          placeholder="e.g. Small, 250ml"
-                          className="h-12 text-base"
-                        />
-                        {errors.size && (
-                          <p className="text-xs text-red-500 mt-1">
-                            {errors.size.message}
-                          </p>
-                        )}
-                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -1115,36 +1041,6 @@ export function EditProductModal({
                           type="text"
                           {...register("color")}
                           placeholder="e.g. Red"
-                          className="h-12 text-base"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <Label>Dimensions (inch)</Label>
-                      <div className="grid grid-cols-3 gap-3">
-                        <Input
-                          placeholder="Length"
-                          type="number"
-                          {...register("dimensions.length", {
-                            valueAsNumber: true, // Convert to number automatically
-                          })}
-                          className="h-12 text-base"
-                        />
-                        <Input
-                          placeholder="Width"
-                          type="number"
-                          {...register("dimensions.width", {
-                            valueAsNumber: true, // Convert to number automatically
-                          })}
-                          className="h-12 text-base"
-                        />
-                        <Input
-                          placeholder="Height"
-                          type="number"
-                          {...register("dimensions.height", {
-                            valueAsNumber: true, // Convert to number automatically
-                          })}
                           className="h-12 text-base"
                         />
                       </div>
@@ -1227,12 +1123,12 @@ export function EditProductModal({
                   </div>
                 )}
 
-                {/* Step 5: Review */}
+                {/* Step 5: Review - Summary cards */}
                 {currentStep === 4 && (
                   <div className="space-y-6">
                     <div className="space-y-3">
                       <h3 className="text-lg font-medium">
-                        Review Your Changes
+                        Review Your Product
                       </h3>
                       <p className="text-muted-foreground">
                         Check all details before submitting. You can go back to
@@ -1259,9 +1155,7 @@ export function EditProductModal({
                               Category
                             </p>
                             <p className="font-medium capitalize">
-                              {selectedCategoryLabel ||
-                                formData.category ||
-                                "-"}
+                              {formData.category || "-"}
                             </p>
                           </div>
                           <div className="col-span-2 w-full">
@@ -1313,29 +1207,19 @@ export function EditProductModal({
                               </div>
                               <div>
                                 <p className="text-sm text-muted-foreground">
+                                  Size
+                                </p>
+                                <p className="font-medium capitalize ">
+                                  {formData.size || "-"}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">
                                   Weight
                                 </p>
                                 <p className="font-medium">
                                   {formData.weight
                                     ? `${formData.weight}g`
-                                    : "-"}
-                                </p>
-                              </div>
-                              <div className="col-span-2">
-                                <p className="text-sm text-muted-foreground">
-                                  Dimensions
-                                </p>
-                                <p className="font-medium">
-                                  {formData.dimensions?.length ||
-                                  formData.dimensions?.width ||
-                                  formData.dimensions?.height
-                                    ? `${
-                                        formData.dimensions?.length || "-"
-                                      } × ${
-                                        formData.dimensions?.width || "-"
-                                      } × ${
-                                        formData.dimensions?.height || "-"
-                                      } (inch)`
                                     : "-"}
                                 </p>
                               </div>
@@ -1396,31 +1280,19 @@ export function EditProductModal({
                                     </div>
                                     <div>
                                       <p className="text-sm text-muted-foreground">
+                                        Size
+                                      </p>
+                                      <p className="font-medium capitalize ">
+                                        {variation.size || "-"}
+                                      </p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-muted-foreground">
                                         Weight
                                       </p>
                                       <p className="font-medium">
                                         {variation.weight
                                           ? `${variation.weight}g`
-                                          : "-"}
-                                      </p>
-                                    </div>
-                                    <div className="col-span-2">
-                                      <p className="text-sm text-muted-foreground">
-                                        Dimensions
-                                      </p>
-                                      <p className="font-medium">
-                                        {variation.dimensions?.length ||
-                                        variation.dimensions?.width ||
-                                        variation.dimensions?.height
-                                          ? `${
-                                              variation.dimensions?.length ||
-                                              "-"
-                                            } × ${
-                                              variation.dimensions?.width || "-"
-                                            } × ${
-                                              variation.dimensions?.height ||
-                                              "-"
-                                            } (inch)`
                                           : "-"}
                                       </p>
                                     </div>
@@ -1460,7 +1332,7 @@ export function EditProductModal({
           </form>
         </ScrollArea>
 
-        {/* Footer with action buttons */}
+        {/* Footer with floating action on mobile */}
         <div className="sticky bottom-0 border-t bg-background/95 p-4 backdrop-blur-sm md:p-6">
           <div className="flex items-center justify-between gap-3">
             <Button
@@ -1491,10 +1363,10 @@ export function EditProductModal({
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Updating...
+                      Saving...
                     </>
                   ) : (
-                    "Update Product"
+                    "Add Product"
                   )}
                 </Button>
               )}

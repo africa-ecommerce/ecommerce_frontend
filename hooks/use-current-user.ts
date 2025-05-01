@@ -1,13 +1,25 @@
-// hooks/use-current-user.ts
+
+
+
 "use client";
 import useSWR from "swr";
 
 const currentUserFetcher = async () => {
-  const response = await fetch("/api/auth/current-user");
-  if (!response.ok) {
-    throw new Error("Failed to fetch current user");
+  try {
+    const response = await fetch("/api/auth/current-user");
+
+    if (!response.ok) {
+      console.error("User fetch error:", response.status, response.statusText);
+      throw new Error("Failed to fetch current user");
+    }
+
+    const data = await response.json();
+    console.log("API returned user data:", data); // Debug log
+    return data;
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    throw error;
   }
-  return response.json();
 };
 
 export function useSwrUser(initialData?: any) {
@@ -16,18 +28,20 @@ export function useSwrUser(initialData?: any) {
     currentUserFetcher,
     {
       fallbackData: initialData,
-      revalidateOnFocus: false, // Changed to false to prevent reloading on focus
+      revalidateOnFocus: false,
       revalidateOnReconnect: true,
-      dedupingInterval: 10000, // Increased to reduce refetching
-      keepPreviousData: true, // Keep showing previous data while revalidating
-      // Don't revalidate if we have initial data
-      revalidateIfStale: initialData ? false : true,
+      dedupingInterval: 5000,
+      keepPreviousData: true,
+      // Always revalidate on mount to get fresh data
+      revalidateOnMount: true,
+      // Always revalidate if stale, regardless of initialData
+      revalidateIfStale: true,
     }
   );
 
   return {
     user: data,
-    isLoading: isLoading && !data, // Only consider loading if we have no data
+    isLoading: isLoading && !data,
     isError: error,
     mutate,
   };

@@ -1,8 +1,5 @@
 
 
-
-
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -10,7 +7,6 @@ import Link from "next/link";
 import {
   AlertCircle,
   Clock,
-  DollarSign,
   ExternalLink,
   HelpCircle,
   Instagram,
@@ -509,7 +505,7 @@ export default function PlugDashboard() {
         <div className="flex items-center justify-between gap-2">
           <div className="flex-1 min-w-0">
             <h1 className="text-muted-foreground font-semibold text-sm truncate">
-              Welcome back, {userData?.firstName || "Plug"}!
+              Welcome back, {userData?.businessName || "Plug"}!
             </h1>
             <h1 className="text-muted-foreground text-xs sm:text-sm">
               Here's your business at a glance.

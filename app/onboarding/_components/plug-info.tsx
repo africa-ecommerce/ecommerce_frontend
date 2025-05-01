@@ -5,9 +5,7 @@ import {
   Shirt,
   Smartphone,
   Sparkles,
-  Home,
-  Palette,
-  FileCode,
+ 
   ShoppingCart,
 } from "lucide-react";
 import { useFormResolver } from "@/hooks/useFormResolver";

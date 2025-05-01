@@ -195,7 +195,7 @@ export const supplierInfoSchema = z.object({
     .describe("The name of your business"),
 
     phone: z
-    .string().min(11, "Phone number is required")
+    .string().min(1, "Phone number is required")
     .refine(
       (val) => {
         
@@ -251,21 +251,10 @@ const variationSchema = z.object({
   stock: z.number().min(1, "Stock cannot be negative"),
   price: z.number().min(1, "Price is required"),
   weight: z.number().optional(),
-  dimensions: z.object({
-    length: z.number().optional(),
-    width: z.number().optional(),
-    height: z.number().optional(), 
-  }).optional(),
+ 
 });
 
-// Define your dimension schema
-const dimensionSchema = z
-  .object({
-    length: z.number().optional(),
-    width: z.number().optional(),
-    height: z.number().optional(),
-  })
-  .optional();
+
 
 // Main product schema
 export const productFormSchema = z
@@ -280,7 +269,6 @@ export const productFormSchema = z
     stock: z.number().min(1, "Stock cannot be negative"),
     color: z.string().optional(),
     weight: z.number().optional(),
-    dimensions: dimensionSchema,
     hasVariations: z.boolean(),
     variations: z.array(variationSchema),
     images: z.array(z.instanceof(File)),

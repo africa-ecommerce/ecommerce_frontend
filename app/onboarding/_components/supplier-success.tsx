@@ -236,20 +236,7 @@ export default function SupplierSuccess() {
               </div>
             </div>
 
-            {/* <div className="group sm:col-span-2 md:col-span-1">
-              <div className="flex items-start gap-2 sm:gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-orange-100 flex items-center justify-center mt-0.5 group-hover:scale-110 transition-transform flex-shrink-0">
-                  <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#FF7A29]" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-xs sm:text-sm">Set Shipping Options</h3>
-                  <p className="text-xs text-gray-500">Configure your shipping methods and delivery areas</p>
-                  <div className="mt-1.5">
-                    <Progress value={0} className="h-1.5 bg-gray-100 w-full" />
-                  </div>
-                </div>
-              </div>
-            </div> */}
+           
           </div>
         </Card>
 

@@ -226,6 +226,20 @@ const DelayOrderModal = ({
   );
 };
 
+const TipSkeleton = () => (
+  <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
+    <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+      <Skeleton className="rounded-full h-8 w-8 flex-shrink-0" />
+      <div className="flex-1 min-w-0 space-y-2">
+        <Skeleton className="h-3 w-[120px]" />
+        <Skeleton className="h-2 w-full" />
+        <Skeleton className="h-2 w-3/4" />
+      </div>
+      <Skeleton className="h-7 w-[80px]" />
+    </CardContent>
+  </Card>
+);
+
 const SupplierOrder = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("pending");
@@ -234,7 +248,7 @@ const SupplierOrder = () => {
   const [delayModalOpen, setDelayModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  const { userData } = useUser();
+  const { userData: {user} } = useUser();
   const {
     data,
     error: errorData,
@@ -412,262 +426,273 @@ const SupplierOrder = () => {
       {/* Intelligence Section at the top */}
       <IntelligenceSection />
 
-      {/* Account Verification Tip */}
-      <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
-        <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
-          <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
-            <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-xs sm:text-sm">Action Required</h3>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">
-              Please verify your account to start accepting payments and
-              processing orders. Verified account are more likely to receive
-              orders.
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-auto text-xs h-7 sm:h-8"
-          >
-            <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Verify
-          </Button>
-        </CardContent>
-      </Card>
-
-      <section className="space-y-3 sm:space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-          <h2 className="text-sm sm:text-base font-semibold">
-            Order Fulfillment
-          </h2>
-        </div>
-
-        {error ? (
-          <ErrorState onRetry={handleRefresh} />
-        ) : loading ? (
-          <LoadingSkeleton />
+      {!user?.supplier.verified ? (
+        <>
+        {isLoading ? (
+          <TipSkeleton/>
         ) : (
-          <Tabs
-            defaultValue="pending"
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-3 overflow-x-auto">
-              <TabsTrigger
-                value="pending"
-                className="text-xs sm:text-sm whitespace-nowrap"
+          <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
+            <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+              <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
+                <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-xs sm:text-sm">
+                  Action Required
+                </h3>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
+                  Please verify your account to start accepting payments and
+                  processing orders. Verified account are more likely to receive
+                  orders.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto text-xs h-7 sm:h-8"
               >
-                Pending ({orders.filter((o) => o.status === "pending").length})
-              </TabsTrigger>
-              <TabsTrigger
-                value="processing"
-                className="text-xs sm:text-sm whitespace-nowrap"
-              >
-                Processing (
-                {orders.filter((o) => o.status === "processing").length})
-              </TabsTrigger>
-              <TabsTrigger
-                value="delivered"
-                className="text-xs sm:text-sm whitespace-nowrap"
-              >
-                Delivered (
-                {orders.filter((o) => o.status === "delivered").length})
-              </TabsTrigger>
-            </TabsList>
+                <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Verify
+              </Button>
+            </CardContent>
+          </Card>
+        )
+}
 
-            <TabsContent value={activeTab} className="mt-3 sm:mt-4">
-              {filteredOrders.length === 0 ? (
-                <EmptyState
-                  message={`No ${activeTab} orders found`}
-                  icon={PackageCheck}
-                />
-              ) : (
-                <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
-                  {filteredOrders.map((order) => (
-                    <Card key={order.id} className="border rounded-lg">
-                      <CardHeader className="p-3 sm:p-4 pb-1">
-                        <div className="flex justify-between items-start gap-2">
-                          <div className="min-w-0">
-                            <CardTitle className="text-xs sm:text-sm font-medium truncate">
-                              {order.id}
-                            </CardTitle>
-                            <CardDescription className="text-[10px] sm:text-xs">
-                              {formatTimeAgo(order.received)}
-                            </CardDescription>
-                          </div>
-                          <Badge className="text-[10px] sm:text-xs capitalize">
-                            {order.status}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-3 sm:p-4 pt-0 pb-1">
-                        <div className="space-y-1 sm:space-y-2">
-                          {order.items.map((item: any, i: number) => (
-                            <div
-                              key={i}
-                              className="flex justify-between text-xs sm:text-sm"
-                            >
-                              <span className="truncate max-w-[120px] sm:max-w-[180px]">
-                                {item.name}
-                              </span>
-                              <span className="whitespace-nowrap">
-                                {formatPrice(item.price)}
-                              </span>
+          <section className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <h2 className="text-sm sm:text-base font-semibold">
+                Order Fulfillment
+              </h2>
+            </div>
+
+            {error ? (
+              <ErrorState onRetry={handleRefresh} />
+            ) : loading ? (
+              <LoadingSkeleton />
+            ) : (
+              <>
+                {filteredOrders.length === 0 ? (
+                  <EmptyState message={"No orders found"} icon={PackageCheck} />
+                ) : (
+                  <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
+                    {filteredOrders.map((order) => (
+                      <Card key={order.id} className="border rounded-lg">
+                        <CardHeader className="p-3 sm:p-4 pb-1">
+                          <div className="flex justify-between items-start gap-2">
+                            <div className="min-w-0">
+                              <CardTitle className="text-xs sm:text-sm font-medium truncate">
+                                {order.id}
+                              </CardTitle>
+                              <CardDescription className="text-[10px] sm:text-xs">
+                                {formatTimeAgo(order.received)}
+                              </CardDescription>
                             </div>
-                          ))}
-                          <div className="flex justify-between text-xs sm:text-sm font-medium pt-1 sm:pt-2 border-t">
-                            <span>Total</span>
-                            <span>{formatPrice(order.total)}</span>
                           </div>
-                        </div>
-                      </CardContent>
-                      <CardFooter className="p-3 sm:p-4 pt-1 flex gap-1 sm:gap-2">
-                        {order.status === "pending" && (
-                          <>
-                            <Dialog
-                              open={
-                                delayModalOpen && selectedOrderId === order.id
-                              }
-                              onOpenChange={(open) => {
-                                if (!open) {
-                                  setDelayModalOpen(false);
-                                  setSelectedOrderId(null);
-                                } else {
-                                  setDelayModalOpen(true);
-                                  setSelectedOrderId(order.id);
-                                }
-                              }}
-                            >
-                              <DialogTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="flex-1 h-7 sm:h-8 text-xs"
-                                  onClick={() => handleDelayClick(order.id)}
-                                >
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  Delay
-                                </Button>
-                              </DialogTrigger>
-                              <DelayOrderModal
+                        </CardHeader>
+                        <CardContent className="p-3 sm:p-4 pt-0 pb-1">
+                          <div className="space-y-1 sm:space-y-2">
+                            {order.items.map((item: any, i: number) => (
+                              <div
+                                key={i}
+                                className="flex justify-between text-xs sm:text-sm"
+                              >
+                                <span className="truncate max-w-[120px] capitalize sm:max-w-[180px]">
+                                  {item.name}
+                                </span>
+                                <span className="whitespace-nowrap">
+                                  {formatPrice(item.price)}
+                                </span>
+                              </div>
+                            ))}
+                            <div className="flex justify-between text-xs sm:text-sm font-medium pt-1 sm:pt-2 border-t">
+                              <span>Total</span>
+                              <span>{formatPrice(order.total)}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </section>
+        </>
+      ) : (
+        <section className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+            <h2 className="text-sm sm:text-base font-semibold">
+              Order Fulfillment
+            </h2>
+          </div>
+
+          {error ? (
+            <ErrorState onRetry={handleRefresh} />
+          ) : loading ? (
+            <LoadingSkeleton />
+          ) : (
+            <Tabs
+              defaultValue="pending"
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-3 overflow-x-auto">
+                <TabsTrigger
+                  value="pending"
+                  className="text-xs sm:text-sm whitespace-nowrap"
+                >
+                  Pending ({orders.filter((o) => o.status === "pending").length}
+                  )
+                </TabsTrigger>
+                <TabsTrigger
+                  value="processing"
+                  className="text-xs sm:text-sm whitespace-nowrap"
+                >
+                  Processing (
+                  {orders.filter((o) => o.status === "processing").length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="delivered"
+                  className="text-xs sm:text-sm whitespace-nowrap"
+                >
+                  Delivered (
+                  {orders.filter((o) => o.status === "delivered").length})
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value={activeTab} className="mt-3 sm:mt-4">
+                {filteredOrders.length === 0 ? (
+                  <EmptyState
+                    message={`No ${activeTab} orders found`}
+                    icon={PackageCheck}
+                  />
+                ) : (
+                  <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
+                    {filteredOrders.map((order) => (
+                      <Card key={order.id} className="border rounded-lg">
+                        <CardHeader className="p-3 sm:p-4 pb-1">
+                          <div className="flex justify-between items-start gap-2">
+                            <div className="min-w-0">
+                              <CardTitle className="text-xs sm:text-sm font-medium truncate">
+                                {order.id}
+                              </CardTitle>
+                              <CardDescription className="text-[10px] sm:text-xs">
+                                {formatTimeAgo(order.received)}
+                              </CardDescription>
+                            </div>
+                            <Badge className="text-[10px] sm:text-xs capitalize">
+                              {order.status}
+                            </Badge>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="p-3 sm:p-4 pt-0 pb-1">
+                          <div className="space-y-1 sm:space-y-2">
+                            {order.items.map((item: any, i: number) => (
+                              <div
+                                key={i}
+                                className="flex justify-between text-xs sm:text-sm"
+                              >
+                                <span className="truncate max-w-[120px] sm:max-w-[180px]">
+                                  {item.name}
+                                </span>
+                                <span className="whitespace-nowrap">
+                                  {formatPrice(item.price)}
+                                </span>
+                              </div>
+                            ))}
+                            <div className="flex justify-between text-xs sm:text-sm font-medium pt-1 sm:pt-2 border-t">
+                              <span>Total</span>
+                              <span>{formatPrice(order.total)}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                        <CardFooter className="p-3 sm:p-4 pt-1 flex gap-1 sm:gap-2">
+                          {order.status === "pending" && (
+                            <>
+                              <Dialog
                                 open={
                                   delayModalOpen && selectedOrderId === order.id
                                 }
                                 onOpenChange={(open) => {
-                                  setDelayModalOpen(open);
-                                  if (!open) setSelectedOrderId(null);
+                                  if (!open) {
+                                    setDelayModalOpen(false);
+                                    setSelectedOrderId(null);
+                                  } else {
+                                    setDelayModalOpen(true);
+                                    setSelectedOrderId(order.id);
+                                  }
                                 }}
-                                onDelaySelect={handleDelaySelect}
-                              />
-                            </Dialog>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              className="flex-1 h-7 sm:h-8 text-xs"
-                            >
-                              <X className="h-3 w-3 mr-1" />
-                              Decline
-                            </Button>
+                              >
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex-1 h-7 sm:h-8 text-xs"
+                                    onClick={() => handleDelayClick(order.id)}
+                                  >
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    Delay
+                                  </Button>
+                                </DialogTrigger>
+                                <DelayOrderModal
+                                  open={
+                                    delayModalOpen &&
+                                    selectedOrderId === order.id
+                                  }
+                                  onOpenChange={(open) => {
+                                    setDelayModalOpen(open);
+                                    if (!open) setSelectedOrderId(null);
+                                  }}
+                                  onDelaySelect={handleDelaySelect}
+                                />
+                              </Dialog>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="flex-1 h-7 sm:h-8 text-xs"
+                              >
+                                <X className="h-3 w-3 mr-1" />
+                                Decline
+                              </Button>
+                              <Button
+                                size="sm"
+                                className="flex-1 h-7 sm:h-8 text-xs"
+                              >
+                                <PackageCheck className="h-3 w-3 mr-1" />
+                                Confirm
+                              </Button>
+                            </>
+                          )}
+                          {order.status === "processing" && (
                             <Button
                               size="sm"
                               className="flex-1 h-7 sm:h-8 text-xs"
                             >
                               <PackageCheck className="h-3 w-3 mr-1" />
-                              Confirm
+                              Track
                             </Button>
-                          </>
-                        )}
-                        {order.status === "processing" && (
-                          <Button
-                            size="sm"
-                            className="flex-1 h-7 sm:h-8 text-xs"
-                          >
-                            <PackageCheck className="h-3 w-3 mr-1" />
-                            Track
-                          </Button>
-                        )}
-                        {order.status === "delivered" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1 h-7 sm:h-8 text-xs"
-                          >
-                            <DollarSign className="h-3 w-3 mr-1" />
-                            Request
-                          </Button>
-                        )}
-                      </CardFooter>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        )}
-      </section>
-
-      {/* Order Fulfillment Section */}
-      <section className="space-y-3 sm:space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-          <h2 className="text-sm sm:text-base font-semibold">
-            Order Fulfillment
-          </h2>
-        </div>
-
-        {error ? (
-          <ErrorState onRetry={handleRefresh} />
-        ) : loading ? (
-          <LoadingSkeleton />
-        ) : (
-          <>
-            {filteredOrders.length === 0 ? (
-              <EmptyState message={"No orders found"} icon={PackageCheck} />
-            ) : (
-              <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
-                {filteredOrders.map((order) => (
-                  <Card key={order.id} className="border rounded-lg">
-                    <CardHeader className="p-3 sm:p-4 pb-1">
-                      <div className="flex justify-between items-start gap-2">
-                        <div className="min-w-0">
-                          <CardTitle className="text-xs sm:text-sm font-medium truncate">
-                            {order.id}
-                          </CardTitle>
-                          <CardDescription className="text-[10px] sm:text-xs">
-                            {formatTimeAgo(order.received)}
-                          </CardDescription>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-3 sm:p-4 pt-0 pb-1">
-                      <div className="space-y-1 sm:space-y-2">
-                        {order.items.map((item: any, i: number) => (
-                          <div
-                            key={i}
-                            className="flex justify-between text-xs sm:text-sm"
-                          >
-                            <span className="truncate max-w-[120px] capitalize sm:max-w-[180px]">
-                              {item.name}
-                            </span>
-                            <span className="whitespace-nowrap">
-                              {formatPrice(item.price)}
-                            </span>
-                          </div>
-                        ))}
-                        <div className="flex justify-between text-xs sm:text-sm font-medium pt-1 sm:pt-2 border-t">
-                          <span>Total</span>
-                          <span>{formatPrice(order.total)}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </section>
+                          )}
+                          {order.status === "delivered" && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-7 sm:h-8 text-xs"
+                            >
+                              <DollarSign className="h-3 w-3 mr-1" />
+                              Request
+                            </Button>
+                          )}
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          )}
+        </section>
+      )}
     </div>
   );
 };

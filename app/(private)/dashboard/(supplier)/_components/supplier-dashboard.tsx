@@ -77,10 +77,10 @@ const formatPrice = (price: string) => {
   if (price.includes("₦") || price.includes("$") || price.includes("€")) {
     return price.replace(/\s+/g, "");
   }
-  
+
   const num = parseFloat(price.replace(/[^0-9.]/g, ""));
   if (isNaN(num)) return price;
-  
+
   return `₦${num.toLocaleString("en-NG")}`;
 };
 
@@ -125,7 +125,12 @@ const ErrorState = ({ onRetry }: { onRetry?: () => void }) => (
           Something went wrong while loading the data
         </p>
         {onRetry && (
-          <Button variant="outline" size="sm" onClick={onRetry} className="mt-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRetry}
+            className="mt-1"
+          >
             <RefreshCw className="mr-1 h-3 w-3" />
             Retry
           </Button>
@@ -153,7 +158,12 @@ const EmptyState = ({
         <Icon className="h-6 w-6 text-muted-foreground" />
         <p className="text-muted-foreground text-xs">{message}</p>
         {actionText && onAction && (
-          <Button variant="outline" size="sm" onClick={onAction} className="mt-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onAction}
+            className="mt-1"
+          >
             {actionText}
           </Button>
         )}
@@ -178,7 +188,9 @@ const DelayOrderModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[90vw] max-w-[400px] rounded-lg">
         <DialogHeader>
-          <DialogTitle className="text-center text-base">Delay Order</DialogTitle>
+          <DialogTitle className="text-center text-base">
+            Delay Order
+          </DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-2 py-3">
           {delayOptions.map((time) => (
@@ -211,6 +223,41 @@ const DelayOrderModal = ({
   );
 };
 
+const WelcomeSkeleton = () => (
+  <div className="flex-1 min-w-0">
+    <Skeleton className="h-4 w-[180px] mb-1" />
+    <Skeleton className="h-3 w-[200px]" />
+  </div>
+);
+
+const TipSkeleton = () => (
+  <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
+    <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+      <Skeleton className="rounded-full h-8 w-8 flex-shrink-0" />
+      <div className="flex-1 min-w-0 space-y-2">
+        <Skeleton className="h-3 w-[120px]" />
+        <Skeleton className="h-2 w-full" />
+        <Skeleton className="h-2 w-3/4" />
+      </div>
+      <Skeleton className="h-7 w-[80px]" />
+    </CardContent>
+  </Card>
+);
+
+const EducationalTipSkeleton = () => (
+  <Card className="bg-primary/10 border-primary/20">
+    <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+      <Skeleton className="rounded-full h-8 w-8 flex-shrink-0" />
+      <div className="flex-1 min-w-0 space-y-2">
+        <Skeleton className="h-3 w-[120px]" />
+        <Skeleton className="h-2 w-full" />
+        <Skeleton className="h-2 w-3/4" />
+      </div>
+      <Skeleton className="h-7 w-[80px]" />
+    </CardContent>
+  </Card>
+);
+
 export default function SupplierDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("pending");
@@ -219,15 +266,20 @@ export default function SupplierDashboard() {
   const [delayModalOpen, setDelayModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  const { userData } = useUser();
-  const { data, error: errorData, isLoading, mutate } = useSWR(
-    "/api/products/supplier/"
-  );
+  const {
+    userData: { user },
+  } = useUser();
+
+  const {
+    data,
+    error: errorData,
+    isLoading,
+    mutate,
+  } = useSWR("/api/products/supplier/");
 
   const [orders, setOrders] = useState<any[]>([]);
   const products = Array.isArray(data?.data) ? data?.data : [];
 
- 
   const stockAlerts = useMemo(() => {
     if (!products.length) return [];
 
@@ -395,14 +447,18 @@ export default function SupplierDashboard() {
       <div className="flex flex-col min-h-screen bg-background p-3 sm:p-4 gap-3 sm:gap-4">
         {/* Header */}
         <div className="flex items-center justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-muted-foreground font-semibold text-sm truncate">
-              Welcome back, {userData?.brandName || "NaturalGlow"}!
-            </h1>
-            <h1 className="text-muted-foreground text-xs sm:text-sm">
-              Here's your business at a glance.
-            </h1>
-          </div>
+          {isLoading ? (
+            <WelcomeSkeleton />
+          ) : (
+            <div className="flex-1 min-w-0">
+              <h1 className="text-muted-foreground font-semibold text-sm truncate capitalize">
+                Welcome back, {user?.supplier.businessName}!
+              </h1>
+              <h1 className="text-muted-foreground text-xs sm:text-sm">
+                Here's your business at a glance.
+              </h1>
+            </div>
+          )}
         </div>
 
         {/* Inventory Stats */}
@@ -411,7 +467,6 @@ export default function SupplierDashboard() {
             <h2 className="text-sm sm:text-base font-semibold">
               Financial Overview
             </h2>
-            
           </div>
 
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
@@ -600,51 +655,121 @@ export default function SupplierDashboard() {
           </div>
         </section>
 
-        {/* Account Verification Tip */}
-        <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
-          <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
-            <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
-              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+        {!user?.supplier.verified ? (
+          <>
+            {isLoading ? (
+              <TipSkeleton />
+            ) : (
+              <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
+                <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+                  <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
+                    <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-xs sm:text-sm">
+                      Action Required
+                    </h3>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">
+                      Please verify your account to start accepting payments and
+                      processing orders. Verified account are more likely to
+                      receive orders.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto text-xs h-7 sm:h-8"
+                  >
+                    <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Verify
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            <section className="space-y-3 sm:space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                <h2 className="text-sm sm:text-base font-semibold">
+                  Order Fulfillment
+                </h2>
+                <Button variant="outline" size="sm" asChild className="text-xs">
+                  <Link href="/dashboard/order">View All Orders</Link>
+                </Button>
+              </div>
+
+              {error ? (
+                <ErrorState onRetry={handleRefresh} />
+              ) : loading ? (
+                <LoadingSkeleton />
+              ) : (
+                <>
+                  {filteredOrders.length === 0 ? (
+                    <EmptyState
+                      message={"No orders found"}
+                      icon={PackageCheck}
+                      actionText="View All Orders"
+                      onAction={() => console.log("View all orders clicked")}
+                    />
+                  ) : (
+                    <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
+                      {filteredOrders.map((order) => (
+                        <Card key={order.id} className="border rounded-lg">
+                          <CardHeader className="p-3 sm:p-4 pb-1">
+                            <div className="flex justify-between items-start gap-2">
+                              <div className="min-w-0">
+                                <CardTitle className="text-xs sm:text-sm font-medium truncate">
+                                  {order.id}
+                                </CardTitle>
+                                <CardDescription className="text-[10px] sm:text-xs">
+                                  {formatTimeAgo(order.received)}
+                                </CardDescription>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="p-3 sm:p-4 pt-0 pb-1">
+                            <div className="space-y-1 sm:space-y-2">
+                              {order.items.map((item: any, i: number) => (
+                                <div
+                                  key={i}
+                                  className="flex justify-between text-xs sm:text-sm"
+                                >
+                                  <span className="truncate max-w-[120px] capitalize sm:max-w-[180px]">
+                                    {item.name}
+                                  </span>
+                                  <span className="whitespace-nowrap">
+                                    {formatPrice(item.price)}
+                                  </span>
+                                </div>
+                              ))}
+                              <div className="flex justify-between text-xs sm:text-sm font-medium pt-1 sm:pt-2 border-t">
+                                <span>Total</span>
+                                <span>{formatPrice(order.total)}</span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
+          </>
+        ) : (
+          <section className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <h2 className="text-sm sm:text-base font-semibold">
+                Order Fulfillment
+              </h2>
+              <Button variant="outline" size="sm" asChild className="text-xs">
+                <Link href="/dashboard/order">View All Orders</Link>
+              </Button>
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-xs sm:text-sm">
-                Action Required
-              </h3>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">
-                Please verify your account to start accepting payments and
-                processing orders. Verified account are more likely to receive
-                orders.
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="ml-auto text-xs h-7 sm:h-8"
-            >
-              <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Verify
-            </Button>
-          </CardContent>
-        </Card>
 
-        {/* Order Fulfillment Section */}
-        <section className="space-y-3 sm:space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-            <h2 className="text-sm sm:text-base font-semibold">
-              Order Fulfillment
-            </h2>
-            <Button variant="outline" size="sm" asChild className="text-xs">
-              <Link href="/dashboard/orders">View All Orders</Link>
-            </Button>
-          </div>
-
-          {error ? (
-            <ErrorState onRetry={handleRefresh} />
-          ) : loading ? (
-            <LoadingSkeleton />
-          ) : (
-           
-             
-
+            {error ? (
+              <ErrorState onRetry={handleRefresh} />
+            ) : loading ? (
+              <LoadingSkeleton />
+            ) : (
               <>
                 {filteredOrders.length === 0 ? (
                   <EmptyState
@@ -694,172 +819,97 @@ export default function SupplierDashboard() {
                           </div>
                         </CardContent>
                         <CardFooter className="p-3 sm:p-4 pt-1 flex gap-1 sm:gap-2">
-                        
-                            <>
-                              <Dialog
+                          <>
+                            <Dialog
+                              open={
+                                delayModalOpen && selectedOrderId === order.id
+                              }
+                              onOpenChange={(open) => {
+                                if (!open) {
+                                  setDelayModalOpen(false);
+                                  setSelectedOrderId(null);
+                                } else {
+                                  setDelayModalOpen(true);
+                                  setSelectedOrderId(order.id);
+                                }
+                              }}
+                            >
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1 h-7 sm:h-8 text-xs"
+                                  onClick={() => handleDelayClick(order.id)}
+                                >
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  Delay
+                                </Button>
+                              </DialogTrigger>
+                              <DelayOrderModal
                                 open={
                                   delayModalOpen && selectedOrderId === order.id
                                 }
                                 onOpenChange={(open) => {
-                                  if (!open) {
-                                    setDelayModalOpen(false);
-                                    setSelectedOrderId(null);
-                                  } else {
-                                    setDelayModalOpen(true);
-                                    setSelectedOrderId(order.id);
-                                  }
+                                  setDelayModalOpen(open);
+                                  if (!open) setSelectedOrderId(null);
                                 }}
-                              >
-                                <DialogTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="flex-1 h-7 sm:h-8 text-xs"
-                                    onClick={() => handleDelayClick(order.id)}
-                                  >
-                                    <Clock className="h-3 w-3 mr-1" />
-                                    Delay
-                                  </Button>
-                                </DialogTrigger>
-                                <DelayOrderModal
-                                  open={
-                                    delayModalOpen &&
-                                    selectedOrderId === order.id
-                                  }
-                                  onOpenChange={(open) => {
-                                    setDelayModalOpen(open);
-                                    if (!open) setSelectedOrderId(null);
-                                  }}
-                                  onDelaySelect={handleDelaySelect}
-                                />
-                              </Dialog>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                className="flex-1 h-7 sm:h-8 text-xs"
-                              >
-                                <X className="h-3 w-3 mr-1" />
-                                Decline
-                              </Button>
-                              <Button
-                                size="sm"
-                                className="flex-1 h-7 sm:h-8 text-xs"
-                              >
-                                <PackageCheck className="h-3 w-3 mr-1" />
-                                Confirm
-                              </Button>
-                            </>
-                         
-                          
+                                onDelaySelect={handleDelaySelect}
+                              />
+                            </Dialog>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="flex-1 h-7 sm:h-8 text-xs"
+                            >
+                              <X className="h-3 w-3 mr-1" />
+                              Decline
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="flex-1 h-7 sm:h-8 text-xs"
+                            >
+                              <PackageCheck className="h-3 w-3 mr-1" />
+                              Confirm
+                            </Button>
+                          </>
                         </CardFooter>
                       </Card>
                     ))}
                   </div>
                 )}
               </>
-            
-          )}
-        </section>
-
-        {/* Order Fulfillment Section */}
-        <section className="space-y-3 sm:space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-            <h2 className="text-sm sm:text-base font-semibold">
-              Order Fulfillment
-            </h2>
-            <Button variant="outline" size="sm" asChild className="text-xs">
-              <Link href="/dashboard/orders">View All Orders</Link>
-            </Button>
-          </div>
-
-          {error ? (
-            <ErrorState onRetry={handleRefresh} />
-          ) : loading ? (
-            <LoadingSkeleton />
-          ) : (
-           
-              
-
-              <>
-                {filteredOrders.length === 0 ? (
-                  <EmptyState
-                    message={"No orders found"}
-                    icon={PackageCheck}
-                    actionText="View All Orders"
-                    onAction={() => console.log("View all orders clicked")}
-                  />
-                ) : (
-                  <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
-                    {filteredOrders.map((order) => (
-                      <Card key={order.id} className="border rounded-lg">
-                        <CardHeader className="p-3 sm:p-4 pb-1">
-                          <div className="flex justify-between items-start gap-2">
-                            <div className="min-w-0">
-                              <CardTitle className="text-xs sm:text-sm font-medium truncate">
-                                {order.id}
-                              </CardTitle>
-                              <CardDescription className="text-[10px] sm:text-xs">
-                                {formatTimeAgo(order.received)}
-                              </CardDescription>
-                            </div>
-                           
-                          </div>
-                        </CardHeader>
-                        <CardContent className="p-3 sm:p-4 pt-0 pb-1">
-                          <div className="space-y-1 sm:space-y-2">
-                            {order.items.map((item: any, i: number) => (
-                              <div
-                                key={i}
-                                className="flex justify-between text-xs sm:text-sm"
-                              >
-                                <span className="truncate max-w-[120px] capitalize sm:max-w-[180px]">
-                                  {item.name}
-                                </span>
-                                <span className="whitespace-nowrap">
-                                  {formatPrice(item.price)}
-                                </span>
-                              </div>
-                            ))}
-                            <div className="flex justify-between text-xs sm:text-sm font-medium pt-1 sm:pt-2 border-t">
-                              <span>Total</span>
-                              <span>{formatPrice(order.total)}</span>
-                            </div>
-                          </div>
-                        </CardContent>
-                       
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </>
-           
-          )}
-        </section>
+            )}
+          </section>
+        )}
 
         {/* Educational Tip */}
-        <Card className="bg-primary/10 border-primary/20">
-          <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
-            <div className="rounded-full bg-primary/20 p-1.5 flex-shrink-0">
-              <LineChart className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-xs sm:text-sm">
-                Recession-Era Tip
-              </h3>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">
-                Consider offering smaller package sizes at lower price to
-                maintain sales volume during economic downturns.
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto text-xs h-7 sm:h-8"
-            >
-              <ExternalLink className="h-3 w-3 mr-1" /> Learn
-            </Button>
-          </CardContent>
-        </Card>
+        {isLoading ? (
+          <EducationalTipSkeleton />
+        ) : (
+          <Card className="bg-primary/10 border-primary/20">
+            <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+              <div className="rounded-full bg-primary/20 p-1.5 flex-shrink-0">
+                <LineChart className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-xs sm:text-sm">
+                  Recession-Era Tip
+                </h3>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
+                  Consider offering smaller package sizes at lower price to
+                  maintain sales volume during economic downturns.
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto text-xs h-7 sm:h-8"
+              >
+                <ExternalLink className="h-3 w-3 mr-1" /> Learn
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </TooltipProvider>
   );

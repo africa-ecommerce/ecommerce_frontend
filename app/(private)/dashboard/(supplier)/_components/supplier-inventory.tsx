@@ -66,6 +66,7 @@ import { PRODUCT_CATEGORIES } from "@/app/constant";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import EmptyState from "@/app/_components/empty-state";
 import { EditProductModal } from "./update-product-modal";
+import { useUser } from "@/app/_components/provider/UserContext";
 
 const LoadingSkeleton = () => (
   <Card>
@@ -104,6 +105,20 @@ const LoadingSkeleton = () => (
           </tbody>
         </table>
       </div>
+    </CardContent>
+  </Card>
+);
+
+const TipSkeleton = () => (
+  <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
+    <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+      <Skeleton className="rounded-full h-8 w-8 flex-shrink-0" />
+      <div className="flex-1 min-w-0 space-y-2">
+        <Skeleton className="h-3 w-[120px]" />
+        <Skeleton className="h-2 w-full" />
+        <Skeleton className="h-2 w-3/4" />
+      </div>
+      <Skeleton className="h-7 w-[80px]" />
     </CardContent>
   </Card>
 );
@@ -196,6 +211,9 @@ export default function Inventory() {
     },
     deleteProductFn
   );
+
+    const { userData: {user} } = useUser();
+
 
   // Fetch data
   const { data, error, isLoading, mutate } = useSWR("/api/products/supplier/");
@@ -501,7 +519,10 @@ export default function Inventory() {
           </div>
         </section>
 
-        {/* Account Verification Tip */}
+        {isLoading && <TipSkeleton/>}
+       
+       {!user?.supplier.verified && !isLoading ? (
+        
         <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
           <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
             <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
@@ -526,6 +547,7 @@ export default function Inventory() {
             </Button>
           </CardContent>
         </Card>
+       ) : ("")}
 
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
@@ -540,7 +562,7 @@ export default function Inventory() {
                 disabled={selectedItems.length === 0}
               >
                 <Sliders className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1" />{" "}
-                Bulk Update
+                Bulk Upload
               </Button>
               <Button
                 variant="outline"
@@ -738,9 +760,11 @@ export default function Inventory() {
                                       className="w-full h-full object-cover"
                                     />
                                   </div>
-                                  <span className="font-medium text-xs sm:text-sm truncate max-w-[150px] capitalize">
+                                  <Link href={`/marketplace/product/${item.id}`}>
+                                  <span className="font-medium text-xs sm:text-sm truncate max-w-[150px] capitalize underline">
                                     {item.name || "-"}
                                   </span>
+                                  </Link>
                                 </div>
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
@@ -791,12 +815,12 @@ export default function Inventory() {
                                     }}
                                     >
                                       <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
-                                      Edit
+                                      Manage
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem className="text-xs sm:text-sm">
+                                    {/* <DropdownMenuItem className="text-xs sm:text-sm">
                                       <PackagePlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
                                       Restock
-                                    </DropdownMenuItem>
+                                    </DropdownMenuItem> */}
                                     <DropdownMenuItem className="text-xs sm:text-sm">
                                       <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
                                       Promote

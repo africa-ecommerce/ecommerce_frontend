@@ -28,6 +28,7 @@ export default function DashboardLayout({
      const { userData } = useUser();
 
   useEffect(() => {
+    preload("/api/auth/current-user", globalFetcher);
     if(userData.userType === "SUPPLIER") {
        preload("/api/products/supplier/", globalFetcher);
     } else {

@@ -41,11 +41,6 @@ import { mutate } from "swr";
 import { PRODUCT_CATEGORIES } from "@/app/constant";
 
 
-interface Dimensions {
-  length?: number;
-  width?: number;
-  height?: number;
-}
 
 interface Variation {
   id: string;
@@ -54,12 +49,9 @@ interface Variation {
   size?: string;
   color?: string;
   weight?: number;
-  dimensions?: Dimensions;
+  // dimensions?: Dimensions;
   [key: string]: any; // This adds an index signature
 }
-
-
-
 
 export function AddProductModal({
   open,
@@ -72,8 +64,6 @@ export function AddProductModal({
   const [direction, setDirection] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropAreaRef = useRef<HTMLDivElement>(null);
-
-  
 
   const addProduct = async (data: ProductFormData) => {
     try {
@@ -118,10 +108,10 @@ export function AddProductModal({
     addProduct,
     productFormSchema,
     () => {
-     onOpenChange(false);
-    setCurrentStep(0);
-    
-    mutate("/api/products/supplier/");
+      onOpenChange(false);
+      setCurrentStep(0);
+
+      mutate("/api/products/supplier/");
     },
     {
       hasVariations: false,
@@ -223,44 +213,40 @@ export function AddProductModal({
       stock: formData.stock || 0,
       price: formData.price || 0,
       weight: formData.weight || 0,
-      dimensions: {
-        length: formData.dimensions?.length || 0,
-        width: formData.dimensions?.width || 0,
-        height: formData.dimensions?.height || 0,
-      },
+     
     };
 
     setValue("variations", [...(formData.variations || []), newVariation]);
   };
 
   const updateVariation = (
-  index: number,
-  field: string,
-  value: string | number
-) => {
-  const updatedVariations = [...(formData.variations || [])] as Variation[];
+    index: number,
+    field: string,
+    value: string | number
+  ) => {
+    const updatedVariations = [...(formData.variations || [])] as Variation[];
 
-  // Handle nested dimensions fields
-  if (field.includes(".")) {
-    const [parent, child] = field.split(".");
-    if (parent === "dimensions") {
+    // Handle nested dimensions fields
+    if (field.includes(".")) {
+      const [parent, child] = field.split(".");
+      if (parent === "dimensions") {
+        updatedVariations[index] = {
+          ...updatedVariations[index],
+          dimensions: {
+            ...(updatedVariations[index].dimensions || {}),
+            [child]: value,
+          },
+        };
+      }
+    } else {
       updatedVariations[index] = {
         ...updatedVariations[index],
-        dimensions: {
-          ...(updatedVariations[index].dimensions || {}),
-          [child]: value,
-        },
+        [field]: value,
       };
     }
-  } else {
-    updatedVariations[index] = {
-      ...updatedVariations[index],
-      [field]: value,
-    };
-  }
 
-  setValue("variations", updatedVariations);
-};
+    setValue("variations", updatedVariations);
+  };
 
   const removeVariation = (index: number) => {
     const updatedVariations = [...(formData.variations || [])];
@@ -269,17 +255,7 @@ export function AddProductModal({
     setValue("variations", updatedVariations);
   };
 
-  // // Function to get the appropriate step after variations
-  // const getNextStepAfterVariations = () => {
-  //   if (formData.hasVariations) {
-  //     // Skip to media step (index 3)
-  //     return 3;
-  //   } else {
-  //     // Go to details step (index 2)
-  //     return 2;
-  //   }
-  // };
-
+  
   const goToNextStep = () => {
     if (currentStep < steps.length - 1) {
       setDirection(1);
@@ -330,6 +306,7 @@ export function AddProductModal({
     { id: "media", title: "Media" },
     { id: "review", title: "Review" },
   ];
+  
 
   // Function to truncate product name
   const truncateName = (name: string, maxLength = 15) => {
@@ -360,15 +337,15 @@ export function AddProductModal({
           );
         }
         return true; // If no variations, this step is valid
-     case 2: // For single product details
-  return (
-    !!formData.name &&
-    !!formData.price && 
-    (formData.stock !== undefined && formData.stock >= 1) && // Improved check
-    !errors.stock &&
-    !errors.name &&
-    !errors.price
-  );
+      case 2: // For single product details
+        return (
+          
+          !!formData.price &&
+          formData.stock !== undefined &&
+          formData.stock >= 1 && // Improved check
+          !errors.stock &&
+          !errors.price
+        );
       case 3:
         // For media step
         return (
@@ -382,6 +359,7 @@ export function AddProductModal({
           !!formData.name &&
           !!formData.price &&
           !errors.price &&
+          formData.stock > 0 &&
           ((formData.images && formData.images.length > 0) ||
             (formData.imageUrls && formData.imageUrls.length > 0));
 
@@ -403,43 +381,30 @@ export function AddProductModal({
 
   // Update the handleSubmit function
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  console.log("Submit triggered", formData);
+    console.log("Submit triggered", formData);
 
-  // Clean up NaN values before submission
-  if (isNaN(formData.weight!)) {
-    setValue("weight", undefined);
-  }
-  
-  // Clean up dimension NaN values
-  if (formData.dimensions) {
-    if (isNaN(formData.dimensions.length!)) {
-      setValue("dimensions.length", undefined);
+    // Clean up NaN values before submission
+    if (isNaN(formData.weight!)) {
+      setValue("weight", undefined);
     }
-    if (isNaN(formData.dimensions.width!)) {
-      setValue("dimensions.width", undefined);
-    }
-    if (isNaN(formData.dimensions.height!)) {
-      setValue("dimensions.height", undefined);
-    }
-  }
 
-  // If hasVariations is false, make sure variations is an empty array
-  if (!formData.hasVariations) {
-    setValue("variations", []);
-  }
+    // If hasVariations is false, make sure variations is an empty array
+    if (!formData.hasVariations) {
+      setValue("variations", []);
+    }
 
-  // Ensure we have valid data before submitting
-  try {
-    // Force validation using the submit function from your form hook
-    await submit(e);
-  } catch (error) {
-    console.error("Form submission error:", error);
-    errorToast("Please check all required fields");
-  }
-};
+    // Ensure we have valid data before submitting
+    try {
+      // Force validation using the submit function from your form hook
+      await submit(e);
+    } catch (error) {
+      console.error("Form submission error:", error);
+      errorToast("Please check all required fields");
+    }
+  };
 
   // If modal is not open, render nothing but ensure hooks are called
   if (!open) return null;
@@ -699,42 +664,20 @@ const handleSubmit = async (e: React.FormEvent) => {
                                 <Trash2 className="h-5 w-5" />
                               </Button>
                             </div>
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                              <div className="space-y-3">
-                                <Label htmlFor={`size-${index}`}>Size *</Label>
-                                <Input
-                                  id={`size-${index}`}
-                                  placeholder="e.g. Small, 250ml"
-                                  value={variation.size || ""}
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "size",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                />
-                              </div>
-                              <div className="space-y-3">
-                                <Label htmlFor={`color-${index}`}>
-                                  Color *
-                                </Label>
-                                <Input
-                                  id={`color-${index}`}
-                                  placeholder="e.g. Red"
-                                  value={variation.color || ""}
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "color",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                />
-                              </div>
 
+                            <div className="space-y-3 pb-6">
+                              <Label htmlFor={`size-${index}`}>Size *</Label>
+                              <Input
+                                id={`size-${index}`}
+                                placeholder="e.g. XL, 250ml, 32 inches"
+                                value={variation.size || ""}
+                                onChange={(e) =>
+                                  updateVariation(index, "size", e.target.value)
+                                }
+                                className="h-12 text-base"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
                               <div className="space-y-3">
                                 <Label htmlFor={`price-${index}`}>
                                   Price (₦) *
@@ -745,7 +688,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                                   min="0"
                                   step="0.01"
                                   placeholder="0.00"
-                                  value={variation.price || ""}
+                                  value={variation.price || undefined}
                                   onChange={(e) =>
                                     updateVariation(
                                       index,
@@ -767,7 +710,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                                   type="number"
                                   min="0"
                                   placeholder="0"
-                                  value={variation.stock || ""}
+                                  value={variation.stock || undefined}
                                   onChange={(e) =>
                                     updateVariation(
                                       index,
@@ -779,7 +722,9 @@ const handleSubmit = async (e: React.FormEvent) => {
                                   required
                                 />
                               </div>
+                            </div>
 
+                            <div className="grid grid-cols-2 gap-4 mt-4">
                               <div className="space-y-3">
                                 <Label htmlFor={`weight-${index}`}>
                                   Weight (g)
@@ -789,7 +734,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                                   type="number"
                                   min="1"
                                   placeholder="e.g. 250"
-                                  value={variation.weight || ""}
+                                  value={variation.weight || undefined}
                                   onChange={(e) =>
                                     updateVariation(
                                       index,
@@ -800,52 +745,28 @@ const handleSubmit = async (e: React.FormEvent) => {
                                   className="h-12 text-base"
                                 />
                               </div>
-                            </div>
 
-                            <div className="mt-4 space-y-3">
-                              <Label>Dimensions (inch)</Label>
-                              <div className="grid grid-cols-3 gap-3">
+                              <div className="space-y-3">
+                                <Label htmlFor={`color-${index}`}>
+                                  Color *
+                                </Label>
                                 <Input
-                                  placeholder="Length"
-                                  value={variation.dimensions?.length || ""}
-                                  type="number"
+                                  id={`color-${index}`}
+                                  placeholder="e.g. Red"
+                                  value={variation.color || ""}
                                   onChange={(e) =>
                                     updateVariation(
                                       index,
-                                      "dimensions.length",
-                                      Number(e.target.value)
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                />
-                                <Input
-                                  placeholder="Width"
-                                  value={variation.dimensions?.width || ""}
-                                  type="number"
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "dimensions.width",
-                                      Number(e.target.value)
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                />
-                                <Input
-                                  placeholder="Height"
-                                  value={variation.dimensions?.height || ""}
-                                  type="number"
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "dimensions.height",
-                                      Number(e.target.value)
+                                      "color",
+                                      e.target.value
                                     )
                                   }
                                   className="h-12 text-base"
                                 />
                               </div>
                             </div>
+
+                           
                           </div>
                         ))}
                       </div>
@@ -879,7 +800,22 @@ const handleSubmit = async (e: React.FormEvent) => {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-3">
+                      <Label htmlFor="size">Size</Label>
+                      <Input
+                        id="size"
+                        {...register("size")}
+                        placeholder="e.g. XL, 250ml, 32 inches"
+                        className="h-12 text-base"
+                      />
+                      {errors.size && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.size.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-3">
                         <Label htmlFor="price">Price (₦)</Label>
                         <Input
@@ -900,8 +836,6 @@ const handleSubmit = async (e: React.FormEvent) => {
                         )}
                       </div>
 
-                     
-
                       <div className="space-y-3">
                         <Label htmlFor="stock">Stock</Label>
                         <Input
@@ -920,20 +854,6 @@ const handleSubmit = async (e: React.FormEvent) => {
                           </p>
                         )}
                       </div>
-                      <div className="space-y-3">
-                        <Label htmlFor="size">Size</Label>
-                        <Input
-                          id="size"
-                          {...register("size")}
-                          placeholder="e.g. Small, 250ml"
-                          className="h-12 text-base"
-                        />
-                        {errors.size && (
-                          <p className="text-xs text-red-500 mt-1">
-                            {errors.size.message}
-                          </p>
-                        )}
-                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -943,7 +863,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                           id="weight"
                           type="number"
                           min="0"
-                          {...register("weight",  {
+                          {...register("weight", {
                             valueAsNumber: true, // Convert to number automatically
                           })}
                           placeholder="e.g. 250"
@@ -963,35 +883,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <Label>Dimensions (inch)</Label>
-                      <div className="grid grid-cols-3 gap-3">
-                        <Input
-                          placeholder="Length"
-                          type="number"
-                          {...register("dimensions.length",  {
-                            valueAsNumber: true, // Convert to number automatically
-                          })}
-                          className="h-12 text-base"
-                        />
-                        <Input
-                          placeholder="Width"
-                          type="number"
-                          {...register("dimensions.width",  {
-                            valueAsNumber: true, // Convert to number automatically
-                          })}
-                          className="h-12 text-base"
-                        />
-                        <Input
-                          placeholder="Height"
-                          type="number"
-                          {...register("dimensions.height",  {
-                            valueAsNumber: true, // Convert to number automatically
-                          })}
-                          className="h-12 text-base"
-                        />
-                      </div>
-                    </div>
+                   
                   </div>
                 )}
 
@@ -1152,6 +1044,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                                   {formData.color || "-"}
                                 </p>
                               </div>
+                               <div>
+                                <p className="text-sm text-muted-foreground">
+                                  Size
+                                </p>
+                                <p className="font-medium capitalize ">
+                                  {formData.size || "-"}
+                                </p>
+                              </div>
                               <div>
                                 <p className="text-sm text-muted-foreground">
                                   Weight
@@ -1162,24 +1062,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                                     : "-"}
                                 </p>
                               </div>
-                              <div className="col-span-2">
-                                <p className="text-sm text-muted-foreground">
-                                  Dimensions
-                                </p>
-                                <p className="font-medium">
-                                  {formData.dimensions?.length ||
-                                  formData.dimensions?.width ||
-                                  formData.dimensions?.height
-                                    ? `${
-                                        formData.dimensions?.length || "-"
-                                      } × ${
-                                        formData.dimensions?.width || "-"
-                                      } × ${
-                                        formData.dimensions?.height || "-"
-                                      } (inch)`
-                                    : "-"}
-                                </p>
-                              </div>
+                             
                             </>
                           )}
                           {formData.hasVariations && (
@@ -1236,6 +1119,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                                       </p>
                                     </div>
                                     <div>
+                                <p className="text-sm text-muted-foreground">
+                                  Size
+                                </p>
+                                <p className="font-medium capitalize ">
+                                  {variation.size || "-"}
+                                </p>
+                              </div>
+                                    <div>
                                       <p className="text-sm text-muted-foreground">
                                         Weight
                                       </p>
@@ -1245,26 +1136,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                                           : "-"}
                                       </p>
                                     </div>
-                                    <div className="col-span-2">
-                                      <p className="text-sm text-muted-foreground">
-                                        Dimensions
-                                      </p>
-                                      <p className="font-medium">
-                                        {variation.dimensions?.length ||
-                                        variation.dimensions?.width ||
-                                        variation.dimensions?.height
-                                          ? `${
-                                              variation.dimensions?.length ||
-                                              "-"
-                                            } × ${
-                                              variation.dimensions?.width || "-"
-                                            } × ${
-                                              variation.dimensions?.height ||
-                                              "-"
-                                            } (inch)`
-                                          : "-"}
-                                      </p>
-                                    </div>
+                                   
                                   </div>
                                 </div>
                               ))}

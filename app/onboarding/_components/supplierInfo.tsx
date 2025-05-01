@@ -96,8 +96,7 @@ export default function SupplierInfo({
       control,
       setValue,
       handleSubmit,
-      register,
-      formState: { isSubmitting, errors },
+      formState: { isSubmitting },
     },
   } = useFormResolver(
     async (data) => {

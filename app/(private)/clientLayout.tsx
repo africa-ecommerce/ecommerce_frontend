@@ -304,7 +304,7 @@ function DesktopNavigation({
             <NavItem
               href="/dashboard/order"
               icon={<PackageOpen className="w-5 h-5" />}
-              tip="Orders"
+              tip="Order"
               isActive={
                 isPathActive(pathname, "/dashboard/order") && !isMoreActive
               }
