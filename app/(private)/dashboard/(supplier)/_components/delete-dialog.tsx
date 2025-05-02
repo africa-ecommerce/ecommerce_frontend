@@ -65,10 +65,7 @@ const DeleteDialog = ({
                   const result = await deleteResource(productToDelete);
                   if (result.success) {
                     setProductToDelete(""); // Clear delete state
-                    // Reset pagination if needed
-                    // if (currentItems?.length === 1 && currentPage > 1) {
-                    //   setCurrentPage(currentPage - 1);
-                    // }
+                    
                   }
                 } catch (error) {
                   console.error("Delete failed:", error);

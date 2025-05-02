@@ -250,13 +250,20 @@ const SocialLoadingSkeleton = () => (
   </div>
 );
 
+const WelcomeSkeleton = () => (
+  <div className="flex-1 min-w-0">
+    <Skeleton className="h-4 w-[180px] mb-1" />
+    <Skeleton className="h-3 w-[200px]" />
+  </div>
+);
+
 export default function PlugDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const { userData } = useUser();
+  const { userData: {user} } = useUser();
   const { data, error: errorData, isLoading, mutate } = useSWR(
-    "/api/products/plug/"
+    "/api/plug/products/"
   );
 
   const [productLoading, setProductLoading] = useState(true);
@@ -270,12 +277,13 @@ export default function PlugDashboard() {
   const [socialAnalytics, setSocialAnalytics] = useState<any[]>([]);
   const products = Array.isArray(data?.data) ? data?.data : [];
 
+
   const stockAlerts = useMemo(() => {
     if (!products.length) return [];
 
     const outOfStockItems = products
-      .filter((item) => item.stock === 0)
-      .map((item) => ({
+      .filter((item: any) => item.stock === 0)
+      .map((item: any) => ({
         id: item.id,
         product: item.name,
         status: "Out of Stock",
@@ -286,9 +294,9 @@ export default function PlugDashboard() {
 
     const lowStockItems = products
       .filter(
-        (item) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
+        (item: any) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
       )
-      .map((item) => ({
+      .map((item: any) => ({
         id: item.id,
         product: item.name,
         status: "Low Stock",
@@ -502,10 +510,14 @@ export default function PlugDashboard() {
     <TooltipProvider>
       <div className="flex flex-col min-h-screen bg-background p-3 sm:p-4 gap-3 sm:gap-4">
         {/* Header */}
-        <div className="flex items-center justify-between gap-2">
+
+        {isLoading && !user?.plug.businessName ? (
+          <WelcomeSkeleton/>
+        ) : (
+     <div className="flex items-center justify-between gap-2">
           <div className="flex-1 min-w-0">
             <h1 className="text-muted-foreground font-semibold text-sm truncate">
-              Welcome back, {userData?.businessName || "Plug"}!
+              Welcome back, {user?.plug.businessName}!
             </h1>
             <h1 className="text-muted-foreground text-xs sm:text-sm">
               Here's your business at a glance.
@@ -513,6 +525,8 @@ export default function PlugDashboard() {
           </div>
          
         </div>
+        )}
+        
 
         {/* Revenue Snapshot */}
         <section className="space-y-3 sm:space-y-4">
@@ -634,9 +648,7 @@ export default function PlugDashboard() {
             <h2 className="text-sm sm:text-base font-semibold">
               Stock Alerts
             </h2>
-            <Button variant="outline" size="sm" asChild className="text-xs">
-              <Link href="/dashboard/inventory">Manage Inventory</Link>
-            </Button>
+            
           </div>
 
           {isLoading ? (
@@ -716,7 +728,7 @@ export default function PlugDashboard() {
               Order Management
             </h2>
             <Button variant="outline" size="sm" asChild className="text-xs">
-              <Link href="/dashboard/orders">View All Orders</Link>
+              <Link href="/dashboard/order">View All Orders</Link>
             </Button>
           </div>
 
@@ -800,7 +812,7 @@ export default function PlugDashboard() {
         {/* Product Performance */}
         <section className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-semibold">
+            <h2 className="text-base font-semibold">
               Product Performance
             </h2>
             <Button
@@ -809,7 +821,7 @@ export default function PlugDashboard() {
               asChild
               className="text-xs sm:text-sm"
             >
-              <Link href="#">View All Products</Link>
+              <Link href="/dashboard/product">View All Products</Link>
             </Button>
           </div>
 
@@ -855,13 +867,7 @@ export default function PlugDashboard() {
                               </div>
                               <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
                                 <p>{product.sold} units sold</p>
-                                <p className={`whitespace-nowrap ${
-                                  product.trend.startsWith('+') 
-                                    ? 'text-green-600' 
-                                    : 'text-amber-600'
-                                }`}>
-                                  {product.trend} this week
-                                </p>
+                               
                               </div>
                               <Progress value={product.progress} className="h-1 mt-1" />
                             </div>

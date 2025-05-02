@@ -9,7 +9,14 @@ export default function ThemeWrapper({
   children: React.ReactNode;
 }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="light">
+    <ThemeProvider
+     
+     
+       attribute="class"
+defaultTheme="light"
+      enableSystem
+      disableTransitionOnChange
+    >
       {children}
       <ToasterAdvanced />
     </ThemeProvider>

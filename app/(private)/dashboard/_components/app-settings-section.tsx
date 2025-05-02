@@ -9,13 +9,14 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useTheme } from "next-themes";
 
 interface AppSettingsSectionProps {
   onBack: () => void
 }
 
 export function AppSettingsSection({ onBack }: AppSettingsSectionProps) {
-  const [theme, setTheme] = useState("light")
+ const { setTheme } = useTheme();
 
   return (
     <div className="animate-fade-in">
@@ -42,9 +43,9 @@ export function AppSettingsSection({ onBack }: AppSettingsSectionProps) {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div
-                  className={`border rounded-lg p-4 cursor-pointer flex flex-col items-center gap-2 ${
-                    theme === "light" ? "border-primary bg-primary/5" : ""
-                  }`}
+                  className={`border rounded-lg p-4 cursor-pointer flex flex-col items-center gap-2 
+                   
+                  `}
                   onClick={() => setTheme("light")}
                 >
                   <div className="h-20 w-full bg-white border rounded-md flex items-center justify-center">
@@ -54,9 +55,9 @@ export function AppSettingsSection({ onBack }: AppSettingsSectionProps) {
                 </div>
 
                 <div
-                  className={`border rounded-lg p-4 cursor-pointer flex flex-col items-center gap-2 ${
-                    theme === "dark" ? "border-primary bg-primary/5" : ""
-                  }`}
+                  className={`border rounded-lg p-4 cursor-pointer flex flex-col items-center gap-2 
+                   
+                `}
                   onClick={() => setTheme("dark")}
                 >
                   <div className="h-20 w-full bg-gray-900 border rounded-md flex items-center justify-center">

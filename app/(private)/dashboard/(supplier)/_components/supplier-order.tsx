@@ -1,14 +1,11 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
 import {
   AlertCircle,
   Clock,
   DollarSign,
   ExternalLink,
-  HelpCircle,
-  LineChart,
   Package,
   PackageCheck,
   RefreshCw,
@@ -46,50 +43,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { IntelligenceSection } from "./order-intelligence";
+import { formatPrice, formatQuantity, formatTimeAgo } from "@/lib/utils";
 
 // Utility functions remain the same
-const formatTimeAgo = (seconds: string) => {
-  const num = parseInt(seconds);
-  if (isNaN(num)) return "Just now";
-
-  const intervals = {
-    year: 31536000,
-    month: 2592000,
-    week: 604800,
-    day: 86400,
-    hour: 3600,
-    minute: 60,
-    second: 1,
-  };
-
-  for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-    const interval = Math.floor(num / secondsInUnit);
-    if (interval >= 1) {
-      return `${interval} ${unit}${interval === 1 ? "" : "s"} ago`;
-    }
-  }
-
-  return "Just now";
-};
-
-const formatQuantity = (quantity: number) => {
-  return quantity >= 100 ? "99+" : quantity.toString();
-};
-
-const formatPrice = (price: string) => {
-  if (price.includes("₦") || price.includes("$") || price.includes("€")) {
-    return price.replace(/\s+/g, "");
-  }
-
-  const num = parseFloat(price.replace(/[^0-9.]/g, ""));
-  if (isNaN(num)) return price;
-
-  return `₦${num.toLocaleString("en-NG")}`;
-};
-
-const truncateText = (text: string, maxLength: number = 20) => {
-  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
-};
 
 // Responsive Loading Skeleton
 const LoadingSkeleton = () => (
@@ -263,8 +219,8 @@ const SupplierOrder = () => {
     if (!products.length) return [];
 
     const outOfStockItems = products
-      .filter((item) => item.stock === 0)
-      .map((item) => ({
+      .filter((item: any) => item.stock === 0)
+      .map((item: any) => ({
         id: item.id,
         product: item.name,
         status: "Out of Stock",
@@ -275,9 +231,9 @@ const SupplierOrder = () => {
 
     const lowStockItems = products
       .filter(
-        (item) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
+        (item: any) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
       )
-      .map((item) => ({
+      .map((item: any) => ({
         id: item.id,
         product: item.name,
         status: "Low Stock",

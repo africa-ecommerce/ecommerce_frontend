@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -9,10 +8,8 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
- 
   HelpCircle,
   MoreHorizontal,
-  PackagePlus,
   Pencil,
   Plus,
   Search,
@@ -67,6 +64,7 @@ import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import EmptyState from "@/app/_components/empty-state";
 import { EditProductModal } from "./update-product-modal";
 import { useUser } from "@/app/_components/provider/UserContext";
+import { truncateText } from "@/lib/utils";
 
 const LoadingSkeleton = () => (
   <Card>
@@ -184,14 +182,11 @@ export default function Inventory() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [showEnhancedAddProduct, setShowEnhancedAddProduct] = useState(false);
   const [showBulkUpdate, setShowBulkUpdate] = useState(false);
-  const [showPromotion, setShowPromotion] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   // Add state for delete confirmation
   const [productToDelete, setProductToDelete] = useState<string>("");
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState<string >(
-   ""
-  );
+  const [selectedProductId, setSelectedProductId] = useState<string>("");
 
   const handleEdit = (productId: string) => {
     setSelectedProductId(productId);
@@ -212,8 +207,9 @@ export default function Inventory() {
     deleteProductFn
   );
 
-    const { userData: {user} } = useUser();
-
+  const {
+    userData: { user },
+  } = useUser();
 
   // Fetch data
   const { data, error, isLoading, mutate } = useSWR("/api/products/supplier/");
@@ -350,18 +346,18 @@ export default function Inventory() {
     return {
       totalProducts: products.length,
       lowStockItems: products.filter(
-        (item: any) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
+        (item: any) =>
+          item.stock !== undefined && item.stock > 0 && item.stock <= 5
       ).length,
       outOfStock: products.filter((item: any) => item.stock === 0).length,
       inventoryValue: products.reduce(
-        (total:any, item: any) => total + item.price * (item.stock || 0),
+        (total: any, item: any) => total + item.price * (item.stock || 0),
         0
       ),
     };
   }, [products]);
 
   // Generate stock alerts from product data
- 
 
   return (
     <TooltipProvider>
@@ -519,42 +515,43 @@ export default function Inventory() {
           </div>
         </section>
 
-        {isLoading && <TipSkeleton/>}
-       
-       {!user?.supplier.verified && !isLoading ? (
-        
-        <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
-          <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
-            <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
-              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-xs sm:text-sm">
-                Action Required
-              </h3>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">
-                Please verify your account to start accepting payments and
-                processing orders. Verified account are more likely to receive
-                orders.
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="ml-auto text-xs h-7 sm:h-8"
-            >
-              <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Verify
-            </Button>
-          </CardContent>
-        </Card>
-       ) : ("")}
+        {isLoading && <TipSkeleton />}
+
+        {!user?.supplier.verified && !isLoading ? (
+          <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
+            <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+              <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
+                <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-xs sm:text-sm">
+                  Action Required
+                </h3>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
+                  Please verify your account to start accepting payments and
+                  processing orders. Verified account are more likely to receive
+                  orders.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto text-xs h-7 sm:h-8"
+              >
+                <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Verify
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          ""
+        )}
 
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex items-center justify-between"></div>
-            <div className="flex items-center gap-2">
-              <Button
+          <div className="flex justify-end gap-2">
+            
+            <div className="flex justify-end gap-2">
+              {/* <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowBulkUpdate(true)}
@@ -563,17 +560,8 @@ export default function Inventory() {
               >
                 <Sliders className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1" />{" "}
                 Bulk Upload
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowPromotion(true)}
-                className="text-xs md:text-sm h-7 sm:h-8"
-                disabled={selectedItems.length === 0}
-              >
-                <Tag className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1" />{" "}
-                Promote
-              </Button>
+              </Button> */}
+
               <Button
                 size="sm"
                 onClick={() => setShowEnhancedAddProduct(true)}
@@ -760,10 +748,12 @@ export default function Inventory() {
                                       className="w-full h-full object-cover"
                                     />
                                   </div>
-                                  <Link href={`/marketplace/product/${item.id}`}>
-                                  <span className="font-medium text-xs sm:text-sm truncate max-w-[150px] capitalize underline">
-                                    {item.name || "-"}
-                                  </span>
+                                  <Link
+                                    href={`/marketplace/product/${item.id}`}
+                                  >
+                                    <span className="font-medium text-xs sm:text-sm whitespace-nowrap max-w-[250px] capitalize underline text-blue-700">
+                                      {truncateText(item.name, 10) || "-"}
+                                    </span>
                                   </Link>
                                 </div>
                               </td>
@@ -809,18 +799,16 @@ export default function Inventory() {
                                     <DropdownMenuLabel className="text-xs sm:text-sm">
                                       Actions
                                     </DropdownMenuLabel>
-                                    <DropdownMenuItem className="text-xs sm:text-sm"
-                                    onClick={() => {
-                                      handleEdit(item.id);
-                                    }}
+                                    <DropdownMenuItem
+                                      className="text-xs sm:text-sm"
+                                      onClick={() => {
+                                        handleEdit(item.id);
+                                      }}
                                     >
                                       <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
                                       Manage
                                     </DropdownMenuItem>
-                                    {/* <DropdownMenuItem className="text-xs sm:text-sm">
-                                      <PackagePlus className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
-                                      Restock
-                                    </DropdownMenuItem> */}
+
                                     <DropdownMenuItem className="text-xs sm:text-sm">
                                       <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
                                       Promote

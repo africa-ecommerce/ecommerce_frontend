@@ -32,7 +32,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { cn, truncateText } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { productFormSchema, ProductFormData } from "@/zod/schema";
@@ -307,14 +307,6 @@ export function AddProductModal({
     { id: "review", title: "Review" },
   ];
   
-
-  // Function to truncate product name
-  const truncateName = (name: string, maxLength = 15) => {
-    if (!name) return "";
-    return name.length > maxLength
-      ? name.substring(0, maxLength) + "..."
-      : name;
-  };
 
   // Custom validation function for steps
   const isStepValid = () => {
@@ -765,8 +757,6 @@ export function AddProductModal({
                                 />
                               </div>
                             </div>
-
-                           
                           </div>
                         ))}
                       </div>
@@ -882,8 +872,6 @@ export function AddProductModal({
                         />
                       </div>
                     </div>
-
-                   
                   </div>
                 )}
 
@@ -893,7 +881,7 @@ export function AddProductModal({
                     <div className="space-y-3">
                       <Label>Product Images</Label>
                       <p className="text-sm text-muted-foreground">
-                        Max 5 images (5MB each) - JPG, PNG only
+                        Max 5 images (5MB each) - JPG, PNG and SVG only
                       </p>
                       <div
                         ref={dropAreaRef}
@@ -903,7 +891,7 @@ export function AddProductModal({
                         <input
                           ref={fileInputRef}
                           type="file"
-                          accept="image/jpeg, image/png"
+                          accept="image/jpeg, image/png, image/svg+xml"
                           multiple
                           className="hidden"
                           onChange={handleFileInputChange}
@@ -986,7 +974,7 @@ export function AddProductModal({
                               Name
                             </p>
                             <p className="font-medium truncate capitalize">
-                              {truncateName(formData.name) || "-"}
+                              {truncateText(formData.name) || "-"}
                             </p>
                           </div>
                           <div>
@@ -1044,7 +1032,7 @@ export function AddProductModal({
                                   {formData.color || "-"}
                                 </p>
                               </div>
-                               <div>
+                              <div>
                                 <p className="text-sm text-muted-foreground">
                                   Size
                                 </p>
@@ -1062,7 +1050,6 @@ export function AddProductModal({
                                     : "-"}
                                 </p>
                               </div>
-                             
                             </>
                           )}
                           {formData.hasVariations && (
@@ -1119,13 +1106,13 @@ export function AddProductModal({
                                       </p>
                                     </div>
                                     <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Size
-                                </p>
-                                <p className="font-medium capitalize ">
-                                  {variation.size || "-"}
-                                </p>
-                              </div>
+                                      <p className="text-sm text-muted-foreground">
+                                        Size
+                                      </p>
+                                      <p className="font-medium capitalize ">
+                                        {variation.size || "-"}
+                                      </p>
+                                    </div>
                                     <div>
                                       <p className="text-sm text-muted-foreground">
                                         Weight
@@ -1136,7 +1123,6 @@ export function AddProductModal({
                                           : "-"}
                                       </p>
                                     </div>
-                                   
                                   </div>
                                 </div>
                               ))}

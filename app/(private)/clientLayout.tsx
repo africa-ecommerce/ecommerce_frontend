@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlobalLoadingIndicatorAdvanced } from "@/components/ui/loading-indicator-advanced";
-import ThemeWrapper from "../themeWrapper";
 import { MorePageContent } from "./dashboard/_components/more-page-content";
 import {
   Tooltip,
@@ -471,7 +470,7 @@ export default function ClientLayout({
   };
 
   return (
-    <ThemeWrapper>
+   
       <div className="flex flex-col min-h-screen">
         {/* Desktop sidebar navigation */}
         <DesktopNavigation
@@ -509,6 +508,6 @@ export default function ClientLayout({
           closeMorePage={closeMorePage}
         />
       </div>
-    </ThemeWrapper>
+   
   );
 }

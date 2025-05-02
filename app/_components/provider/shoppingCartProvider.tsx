@@ -53,8 +53,8 @@ interface ShoppingCartContextType {
 
 interface ShoppingCartProviderProps {
   children: ReactNode;
-  excludePaths?: string[]; 
-  exclude?: boolean
+  excludePaths?: string[];
+  exclude?: boolean;
 }
 
 const ShoppingCartContext = createContext<ShoppingCartContextType | undefined>(
@@ -64,7 +64,7 @@ const ShoppingCartContext = createContext<ShoppingCartContextType | undefined>(
 export function ShoppingCartProvider({
   children,
   excludePaths = [],
-  exclude
+  exclude,
 }: ShoppingCartProviderProps) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -153,7 +153,7 @@ export function ShoppingCartProvider({
       successToast(result.message);
       setIsConfirmMode(false);
       setIsOpen(false);
-      mutate("/api/plug/products/")
+      mutate("/api/plug/products/");
       return result;
     } catch (error) {
       console.error(error);

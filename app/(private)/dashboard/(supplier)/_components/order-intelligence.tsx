@@ -165,8 +165,8 @@ export function IntelligenceSection() {
       // Calculate average delivery time (in hours)
       const deliveryTimes = deliveredOrders.map((order) => {
         const createdTime = order.createdAt.getTime();
-        const deliveredTime = order.deliveredAt.getTime();
-        return (deliveredTime - createdTime) / (1000 * 60 * 60); // Convert to hours
+        const deliveredTime = order.deliveredAt?.getTime();
+        return (deliveredTime! - createdTime) / (1000 * 60 * 60); // Convert to hours
       });
 
       const avgDeliveryTime =

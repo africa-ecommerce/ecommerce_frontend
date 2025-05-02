@@ -97,7 +97,6 @@ const LoadingOrdersSkeleton = () => (
   </div>
 );
 
-
 const LoadingSkeleton = () => (
   <Card>
     <CardContent className="p-0">
@@ -143,13 +142,13 @@ const LoadingSkeleton = () => (
 const OrderCard = ({ order }: { order: Order }) => {
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'active':
+      case "active":
         return <Badge variant="default">Active</Badge>;
-      case 'processing':
+      case "processing":
         return <Badge variant="secondary">Processing</Badge>;
-      case 'delivered':
+      case "delivered":
         return <Badge variant="outline">Delivered</Badge>;
-      case 'cancelled':
+      case "cancelled":
         return <Badge variant="destructive">Cancelled</Badge>;
       default:
         return <Badge variant="outline">Unknown</Badge>;
@@ -175,10 +174,11 @@ const OrderCard = ({ order }: { order: Order }) => {
         <div className="flex items-center gap-1 sm:gap-2 text-xs">
           <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           <span>
-            {order.items} item{order.items !== 1 ? 's' : ''} • ₦{order.amount.toLocaleString()}
+            {order.items} item{order.items !== 1 ? "s" : ""} • ₦
+            {order.amount.toLocaleString()}
           </span>
         </div>
-        {order.status !== 'cancelled' && (
+        {order.status !== "cancelled" && (
           <>
             <Progress value={order.progress} className="h-1 mt-2 sm:mt-3" />
             <div className="flex justify-between text-[10px] xs:text-xs mt-1">
@@ -235,11 +235,10 @@ const EmptyProductsState = () => (
   <EmptyState
     icon={<Package className="h-12 w-12 text-muted-foreground" />}
     title="No products yet"
-    description="You don't have any products that people have plugged into yet."
+    description="You have not plugged into any product yet."
     showBorder={false}
   />
 );
-
 
 const EmptyOrdersState = ({ status }: { status: string }) => {
   const statusConfig = {
@@ -265,7 +264,8 @@ const EmptyOrdersState = ({ status }: { status: string }) => {
     },
   };
 
-  const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.active;
+  const config =
+    statusConfig[status as keyof typeof statusConfig] || statusConfig.active;
 
   return (
     <EmptyState
@@ -287,21 +287,20 @@ const ErrorOrdersState = ({ onRetry }: { onRetry?: () => void }) => (
   />
 );
 // Scrollable container with max height
-  const scrollableClasses = "max-h-[calc(100vh-400px)] overflow-y-auto pr-2";
+const scrollableClasses = "max-h-[calc(100vh-400px)] overflow-y-auto pr-2";
 
- // Categorize orders and get counts
- 
+// Categorize orders and get counts
 
 // Add this interface near your other types
 interface Order {
   id: string;
   orderNumber: string;
   date: string;
-  status: 'active' | 'processing' | 'delivered' | 'cancelled';
+  status: "active" | "processing" | "delivered" | "cancelled";
   items: number;
   amount: number;
   progress: number;
-  progressStage: 'Processing' | 'Shipped' | 'Delivered';
+  progressStage: "Processing" | "Shipped" | "Delivered";
 }
 
 const deleteProductFn = async (id: string) => {
@@ -331,18 +330,28 @@ export default function Products() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
 
-  {/* Fetch orders data */}
-  const { data: ordersData, error: ordersError, isLoading: ordersLoading, mutate: ordersMutate } = useSWR('/api/orders');
-  
+  {
+    /* Fetch orders data */
+  }
+  const {
+    data: ordersData,
+    error: ordersError,
+    isLoading: ordersLoading,
+    mutate: ordersMutate,
+  } = useSWR("/api/orders");
+
   // Process orders data
   const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];
 
-   const orderCounts = useMemo(() => {
+  const orderCounts = useMemo(() => {
     return {
-      active: orders.filter((order: Order) => order.status === 'active').length,
-      processing: orders.filter((order: Order) => order.status === 'processing').length,
-      delivered: orders.filter((order: Order) => order.status === 'delivered').length,
-      cancelled: orders.filter((order: Order) => order.status === 'cancelled').length,
+      active: orders.filter((order: Order) => order.status === "active").length,
+      processing: orders.filter((order: Order) => order.status === "processing")
+        .length,
+      delivered: orders.filter((order: Order) => order.status === "delivered")
+        .length,
+      cancelled: orders.filter((order: Order) => order.status === "cancelled")
+        .length,
     };
   }, [orders]);
 
@@ -357,7 +366,7 @@ export default function Products() {
   );
 
   // Fetch data
-  const { data, error, isLoading, mutate } = useSWR("/api/products/plugged/");
+  const { data, error, isLoading, mutate } = useSWR("/api/plug/products/");
   const products = Array.isArray(data?.data) ? data?.data : [];
 
   // Filter items based on selected category, filter, and search query
@@ -394,14 +403,14 @@ export default function Products() {
   const totalPages = Math.ceil((filteredItems?.length || 0) / itemsPerPage);
 
   // Helper functions
-  const getStockStatus = (item) => {
+  const getStockStatus = (item: any) => {
     if (!item.stock && item.stock !== 0) return "unknown";
     if (item.stock === 0) return "out-of-stock";
     if (item.stock <= 5) return "low-stock";
     return "optimal";
   };
 
-  const getStockStatusColor = (status) => {
+  const getStockStatusColor = (status: any) => {
     switch (status) {
       case "out-of-stock":
         return "text-destructive";
@@ -414,7 +423,7 @@ export default function Products() {
     }
   };
 
-  const getStockStatusBadge = (status) => {
+  const getStockStatusBadge = (status: any) => {
     switch (status) {
       case "out-of-stock":
         return (
@@ -473,7 +482,7 @@ export default function Products() {
   };
 
   // Display value helper
-  const displayValue = (value) => {
+  const displayValue = (value: any) => {
     return value !== undefined && value !== null ? value : "-";
   };
 
@@ -489,11 +498,12 @@ export default function Products() {
     return {
       totalProducts: products.length,
       lowStockItems: products.filter(
-        (item) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
+        (item: any) =>
+          item.stock !== undefined && item.stock > 0 && item.stock <= 5
       ).length,
-      outOfStock: products.filter((item) => item.stock === 0).length,
+      outOfStock: products.filter((item: any) => item.stock === 0).length,
       totalProfit: products.reduce(
-        (total, item) => total + (item.profit || 0),
+        (total: any, item: any) => total + (item.profit || 0),
         0
       ),
     };
@@ -811,7 +821,7 @@ export default function Products() {
                           </td>
                         </tr>
                       ) : (
-                        currentItems.map((item) => {
+                        currentItems.map((item: any) => {
                           const stockStatus = getStockStatus(item);
                           return (
                             <tr
@@ -935,113 +945,115 @@ export default function Products() {
           </div>
         </section>
 
+        {/* Order Management Hub - Better mobile tabs */}
+        <section className="space-y-3 sm:space-y-4">
+          <div>
+            <h2 className="text-base sm:text-lg font-semibold">
+              Order Management
+            </h2>
+          </div>
 
-     
-      {/* Order Management Hub - Better mobile tabs */}
-       <section className="space-y-3 sm:space-y-4">
-  <div>
-    <h2 className="text-base sm:text-lg font-semibold">Order Management</h2>
-  </div>
+          <Tabs defaultValue="active">
+            <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10 overflow-x-auto">
+              <TabsTrigger
+                value="active"
+                className="text-xs sm:text-sm whitespace-nowrap"
+              >
+                Pending ({orderCounts.active})
+              </TabsTrigger>
+              <TabsTrigger
+                value="processing"
+                className="text-xs sm:text-sm whitespace-nowrap"
+              >
+                Processing ({orderCounts.processing})
+              </TabsTrigger>
+              <TabsTrigger
+                value="delivered"
+                className="text-xs sm:text-sm whitespace-nowrap"
+              >
+                Delivered ({orderCounts.delivered})
+              </TabsTrigger>
+              <TabsTrigger
+                value="cancelled"
+                className="text-xs sm:text-sm whitespace-nowrap"
+              >
+                Cancelled ({orderCounts.cancelled})
+              </TabsTrigger>
+            </TabsList>
 
-  
-  
- 
+            <TabsContent value="active" className="mt-3 sm:mt-4">
+              {ordersLoading ? (
+                <LoadingOrdersSkeleton />
+              ) : ordersError ? (
+                <ErrorOrdersState onRetry={() => ordersMutate()} />
+              ) : orderCounts.active === 0 ? (
+                <EmptyOrdersState status="active" />
+              ) : (
+                <div className={scrollableClasses}>
+                  {orders
+                    .filter((order: Order) => order.status === "active")
+                    .map((order: Order) => (
+                      <OrderCard key={order.id} order={order} />
+                    ))}
+                </div>
+              )}
+            </TabsContent>
 
-  
+            <TabsContent value="processing" className="mt-3 sm:mt-4">
+              {ordersLoading ? (
+                <LoadingOrdersSkeleton />
+              ) : ordersError ? (
+                <ErrorOrdersState onRetry={() => ordersMutate()} />
+              ) : orderCounts.processing === 0 ? (
+                <EmptyOrdersState status="processing" />
+              ) : (
+                <div className={scrollableClasses}>
+                  {orders
+                    .filter((order: Order) => order.status === "processing")
+                    .map((order: Order) => (
+                      <OrderCard key={order.id} order={order} />
+                    ))}
+                </div>
+              )}
+            </TabsContent>
 
-  <Tabs defaultValue="active">
-    <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10 overflow-x-auto">
-      <TabsTrigger value="active" className="text-xs sm:text-sm whitespace-nowrap">
-        Pending ({orderCounts.active})
-      </TabsTrigger>
-      <TabsTrigger value="processing" className="text-xs sm:text-sm whitespace-nowrap">
-        Processing ({orderCounts.processing})
-      </TabsTrigger>
-      <TabsTrigger value="delivered" className="text-xs sm:text-sm whitespace-nowrap">
-        Delivered ({orderCounts.delivered})
-      </TabsTrigger>
-      <TabsTrigger value="cancelled" className="text-xs sm:text-sm whitespace-nowrap">
-        Cancelled ({orderCounts.cancelled})
-      </TabsTrigger>
-    </TabsList>
+            <TabsContent value="delivered" className="mt-3 sm:mt-4">
+              {ordersLoading ? (
+                <LoadingOrdersSkeleton />
+              ) : ordersError ? (
+                <ErrorOrdersState onRetry={() => ordersMutate()} />
+              ) : orderCounts.delivered === 0 ? (
+                <EmptyOrdersState status="delivered" />
+              ) : (
+                <div className={scrollableClasses}>
+                  {orders
+                    .filter((order: Order) => order.status === "delivered")
+                    .map((order: Order) => (
+                      <OrderCard key={order.id} order={order} />
+                    ))}
+                </div>
+              )}
+            </TabsContent>
 
-    <TabsContent value="active" className="mt-3 sm:mt-4">
-      {ordersLoading ? (
-        <LoadingOrdersSkeleton />
-      ) : ordersError ? (
-        <ErrorOrdersState onRetry={() => ordersMutate()} />
-      ) : orderCounts.active === 0 ? (
-        <EmptyOrdersState status="active" />
-      ) : (
-        <div className={scrollableClasses}>
-          {orders
-            .filter((order: Order) => order.status === 'active')
-            .map((order: Order) => (
-              <OrderCard key={order.id} order={order} />
-            ))}
-        </div>
-      )}
-    </TabsContent>
-
-    <TabsContent value="processing" className="mt-3 sm:mt-4">
-      {ordersLoading ? (
-        <LoadingOrdersSkeleton />
-      ) : ordersError ? (
-        <ErrorOrdersState onRetry={() => ordersMutate()} />
-      ) : orderCounts.processing === 0 ? (
-        <EmptyOrdersState status="processing" />
-      ) : (
-        <div className={scrollableClasses}>
-          {orders
-            .filter((order: Order) => order.status === 'processing')
-            .map((order: Order) => (
-              <OrderCard key={order.id} order={order} />
-            ))}
-        </div>
-      )}
-    </TabsContent>
-
-    <TabsContent value="delivered" className="mt-3 sm:mt-4">
-      {ordersLoading ? (
-        <LoadingOrdersSkeleton />
-      ) : ordersError ? (
-        <ErrorOrdersState onRetry={() => ordersMutate()} />
-      ) : orderCounts.delivered === 0 ? (
-        <EmptyOrdersState status="delivered" />
-      ) : (
-        <div className={scrollableClasses}>
-          {orders
-            .filter((order: Order) => order.status === 'delivered')
-            .map((order: Order) => (
-              <OrderCard key={order.id} order={order} />
-            ))}
-        </div>
-      )}
-    </TabsContent>
-
-    <TabsContent value="cancelled" className="mt-3 sm:mt-4">
-      {ordersLoading ? (
-        <LoadingOrdersSkeleton />
-      ) : ordersError ? (
-        <ErrorOrdersState onRetry={() => ordersMutate()} />
-      ) : orderCounts.cancelled === 0 ? (
-        <EmptyOrdersState status="cancelled" />
-      ) : (
-        <div className={scrollableClasses}>
-          {orders
-            .filter((order: Order) => order.status === 'cancelled')
-            .map((order: Order) => (
-              <OrderCard key={order.id} order={order} />
-            ))}
-        </div>
-      )}
-    </TabsContent>
-  </Tabs>
-</section>
-
-
-
-
+            <TabsContent value="cancelled" className="mt-3 sm:mt-4">
+              {ordersLoading ? (
+                <LoadingOrdersSkeleton />
+              ) : ordersError ? (
+                <ErrorOrdersState onRetry={() => ordersMutate()} />
+              ) : orderCounts.cancelled === 0 ? (
+                <EmptyOrdersState status="cancelled" />
+              ) : (
+                <div className={scrollableClasses}>
+                  {orders
+                    .filter((order: Order) => order.status === "cancelled")
+                    .map((order: Order) => (
+                      <OrderCard key={order.id} order={order} />
+                    ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </section>
 
         {/* Delete Confirmation Dialog */}
         <DeleteDialog

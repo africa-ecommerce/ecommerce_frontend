@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   AlertCircle,
   Clock,
-  DollarSign,
   ExternalLink,
   HelpCircle,
   LineChart,
@@ -43,50 +42,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { formatPrice, formatQuantity, formatTimeAgo, truncateText } from "@/lib/utils";
 
-// Utility functions remain the same
-const formatTimeAgo = (seconds: string) => {
-  const num = parseInt(seconds);
-  if (isNaN(num)) return "Just now";
 
-  const intervals = {
-    year: 31536000,
-    month: 2592000,
-    week: 604800,
-    day: 86400,
-    hour: 3600,
-    minute: 60,
-    second: 1,
-  };
-
-  for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-    const interval = Math.floor(num / secondsInUnit);
-    if (interval >= 1) {
-      return `${interval} ${unit}${interval === 1 ? "" : "s"} ago`;
-    }
-  }
-
-  return "Just now";
-};
-
-const formatQuantity = (quantity: number) => {
-  return quantity >= 100 ? "99+" : quantity.toString();
-};
-
-const formatPrice = (price: string) => {
-  if (price.includes("₦") || price.includes("$") || price.includes("€")) {
-    return price.replace(/\s+/g, "");
-  }
-
-  const num = parseFloat(price.replace(/[^0-9.]/g, ""));
-  if (isNaN(num)) return price;
-
-  return `₦${num.toLocaleString("en-NG")}`;
-};
-
-const truncateText = (text: string, maxLength: number = 20) => {
-  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
-};
 
 // Responsive Loading Skeleton
 const LoadingSkeleton = () => (
@@ -284,8 +242,8 @@ export default function SupplierDashboard() {
     if (!products.length) return [];
 
     const outOfStockItems = products
-      .filter((item) => item.stock === 0)
-      .map((item) => ({
+      .filter((item: any) => item.stock === 0)
+      .map((item: any) => ({
         id: item.id,
         product: item.name,
         status: "Out of Stock",
@@ -296,9 +254,9 @@ export default function SupplierDashboard() {
 
     const lowStockItems = products
       .filter(
-        (item) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
+        (item: any) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
       )
-      .map((item) => ({
+      .map((item: any) => ({
         id: item.id,
         product: item.name,
         status: "Low Stock",
@@ -447,10 +405,11 @@ export default function SupplierDashboard() {
       <div className="flex flex-col min-h-screen bg-background p-3 sm:p-4 gap-3 sm:gap-4">
         {/* Header */}
         <div className="flex items-center justify-between gap-2">
-          {isLoading ? (
+          {isLoading && !user?.supplier.businessName ? (
             <WelcomeSkeleton />
           ) : (
-            <div className="flex-1 min-w-0">
+           
+                <div className="flex-1 min-w-0">
               <h1 className="text-muted-foreground font-semibold text-sm truncate capitalize">
                 Welcome back, {user?.supplier.businessName}!
               </h1>
@@ -458,6 +417,8 @@ export default function SupplierDashboard() {
                 Here's your business at a glance.
               </h1>
             </div>
+           
+            
           )}
         </div>
 
