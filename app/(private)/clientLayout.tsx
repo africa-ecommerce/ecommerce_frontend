@@ -16,6 +16,7 @@ import {
   Package,
   CircleEllipsis,
   Boxes,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlobalLoadingIndicatorAdvanced } from "@/components/ui/loading-indicator-advanced";
@@ -244,17 +245,10 @@ function DesktopNavigation({
               closeMorePage={closeMorePage}
               showTooltip
             />
-            <NavItem
-              href="/marketplace"
-              icon={<LayoutGrid className="w-5 h-5" />}
-              tip="Marketplace"
-              isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
-              closeMorePage={closeMorePage}
-              showTooltip
-            />
+
             <NavItem
               href="/dashboard/store"
-              icon={<Store className="w-5 h-5" />}
+              icon={<Globe className="w-5 h-5" />}
               tip="Store"
               isActive={
                 isPathActive(pathname, "/dashboard/store") && !isMoreActive
@@ -262,6 +256,16 @@ function DesktopNavigation({
               closeMorePage={closeMorePage}
               showTooltip
             />
+
+            <NavItem
+              href="/marketplace"
+              icon={<Store className="w-5 h-5" />}
+              tip="Marketplace"
+              isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
+              closeMorePage={closeMorePage}
+              showTooltip
+            />
+
             <NavItem
               href="/dashboard/product"
               icon={<Package className="w-5 h-5" />}
@@ -292,14 +296,7 @@ function DesktopNavigation({
               closeMorePage={closeMorePage}
               showTooltip
             />
-            <NavItem
-              href="/marketplace"
-              icon={<LayoutGrid className="w-5 h-5" />}
-              tip="Marketplace"
-              isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
-              closeMorePage={closeMorePage}
-              showTooltip
-            />
+
             <NavItem
               href="/dashboard/order"
               icon={<PackageOpen className="w-5 h-5" />}
@@ -310,6 +307,16 @@ function DesktopNavigation({
               closeMorePage={closeMorePage}
               showTooltip
             />
+
+            <NavItem
+              href="/marketplace"
+              icon={<Store className="w-5 h-5" />}
+              tip="Marketplace"
+              isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
+              closeMorePage={closeMorePage}
+              showTooltip
+            />
+
             <NavItem
               href="/dashboard/inventory"
               icon={<Boxes className="w-5 h-5" />}
@@ -371,21 +378,23 @@ function MobileNavigation({
               compact
               closeMorePage={closeMorePage}
             />
-            <NavItem
-              href="/marketplace"
-              icon={<LayoutGrid className="w-5 h-5" />}
-              label="Marketplace"
-              isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
-              compact
-              closeMorePage={closeMorePage}
-            />
+
             <NavItem
               href="/dashboard/store"
-              icon={<Store className="w-5 h-5" />}
+              icon={<Globe className="w-5 h-5" />}
               label="Store"
               isActive={
                 isPathActive(pathname, "/dashboard/store") && !isMoreActive
               }
+              compact
+              closeMorePage={closeMorePage}
+            />
+
+            <NavItem
+              href="/marketplace"
+              icon={<Store className="w-5 h-5" />}
+              label="Marketplace"
+              isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
               compact
               closeMorePage={closeMorePage}
             />
@@ -411,14 +420,7 @@ function MobileNavigation({
               compact
               closeMorePage={closeMorePage}
             />
-            <NavItem
-              href="/marketplace"
-              icon={<LayoutGrid className="w-5 h-5" />}
-              label="Marketplace"
-              isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
-              compact
-              closeMorePage={closeMorePage}
-            />
+           
             <NavItem
               href="/dashboard/order"
               icon={<PackageOpen className="w-5 h-5" />}
@@ -429,6 +431,15 @@ function MobileNavigation({
               compact
               closeMorePage={closeMorePage}
             />
+             <NavItem
+              href="/marketplace"
+              icon={<Store className="w-5 h-5" />}
+              label="Marketplace"
+              isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
+              compact
+              closeMorePage={closeMorePage}
+            />
+
             <NavItem
               href="/dashboard/inventory"
               icon={<Boxes className="w-5 h-5" />}
@@ -491,7 +502,7 @@ export default function ClientLayout({
               }
             >
               {showMorePage ? (
-                <MorePageContent onBack={closeMorePage} />
+                <MorePageContent onBack={closeMorePage} userType={userType} />
               ) : (
                 children
               )}

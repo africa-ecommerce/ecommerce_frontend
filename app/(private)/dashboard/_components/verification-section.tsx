@@ -49,14 +49,12 @@ export function VerificationSection({ onBack }: VerificationSectionProps) {
         <TabsContent value="personal" className="space-y-4">
           <Card>
             <CardHeader className="pb-2">
-              <div className="flex justify-between items-center">
+              <div className="flex items-center">
                 <div>
-                  <CardTitle>Verification Status</CardTitle>
-                  <CardDescription>Complete your identity verification</CardDescription>
+                  <CardTitle className="text-base">Status</CardTitle>
+                  <CardDescription className="text-sm">Complete your identity verification</CardDescription>
                 </div>
-                <div className="px-2 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-medium">
-                  In Progress
-                </div>
+               
               </div>
             </CardHeader>
             <CardContent>

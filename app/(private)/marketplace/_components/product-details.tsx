@@ -137,7 +137,7 @@ export default function ProductDetail() {
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [currentVideoUrl, setCurrentVideoUrl] = useState("");
     const { items, addItem } = useShoppingCart()
-     const { userData } = useUser();
+     const { userData: {user} } = useUser();
 
       const isInCart = items.some(item => item.id === product?.id)
 
@@ -223,33 +223,32 @@ export default function ProductDetail() {
             </h1>
           </div>
           <div>
-
-            {userData.userType === "PLUG" && (
-               <Button
-              className={`${
-                isInCart ? "bg-green-100 text-green-800 hover:bg-green-100" : ""
-              }`}
-              onClick={handleAddToStore}
-              disabled={isAdding || isInCart}
-              aria-live="polite"
-            >
-              {isAdding ? (
-                <span className="animate-pulse">Adding...</span>
-              ) : isInCart ? (
-                <>
-                  <Package className="mr-1 h-3 w-3 md:h-4 md:w-4" />
-                  <span className="text-xs sm:text-sm">Added</span>
-                </>
-              ) : (
-                <>
-                  <Plus className="mr-1 h-3 w-3 md:h-4 md:w-4" />
-                  <span className="text-xs sm:text-sm">Add to Store</span>
-                </>
-              )}
-            </Button>
+            {user.userType === "PLUG" && (
+              <Button
+                className={`${
+                  isInCart
+                    ? "bg-green-100 text-green-800 hover:bg-green-100"
+                    : ""
+                }`}
+                onClick={handleAddToStore}
+                disabled={isAdding || isInCart}
+                aria-live="polite"
+              >
+                {isAdding ? (
+                  <span className="animate-pulse">Adding...</span>
+                ) : isInCart ? (
+                  <>
+                    <Package className="mr-1 h-3 w-3 md:h-4 md:w-4" />
+                    <span className="text-xs sm:text-sm">Added</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="mr-1 h-3 w-3 md:h-4 md:w-4" />
+                    <span className="text-xs sm:text-sm">Add to Store</span>
+                  </>
+                )}
+              </Button>
             )}
-           
-            
           </div>
         </header>
 

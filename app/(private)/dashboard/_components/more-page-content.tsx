@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Shield,
   ArrowLeft,
+  LineChart,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,7 +23,6 @@ import { PaymentSection } from "./payment-section";
 import { NotificationSection } from "./notification-section";
 import { AppSettingsSection } from "./app-settings-section";
 import { HelpSupportSection } from "./help-support-section";
-import { AccountActionsSection } from "./account-actions-section";
 import { Button } from "@/components/ui/button";
 
 type Section =
@@ -36,9 +36,10 @@ type Section =
 
 interface MorePageContentProps {
   onBack: () => void; // New prop to handle closing the more page
+  userType: "PLUG" | "SUPPLIER";
 }
 
-export function MorePageContent({ onBack }: MorePageContentProps) {
+export function MorePageContent({ onBack, userType }: MorePageContentProps) {
   const [activeSection, setActiveSection] = useState<Section | null>(null);
 
   // Handler for back button in subsections
@@ -49,7 +50,7 @@ export function MorePageContent({ onBack }: MorePageContentProps) {
   const renderActiveSection = () => {
     switch (activeSection) {
       case "profile":
-        return <ProfileSection onBack={handleBackFromSection} />;
+        return <ProfileSection onBack={handleBackFromSection} userType={userType} />;
       case "verification":
         return <VerificationSection onBack={handleBackFromSection} />;
       case "payment":
@@ -60,32 +61,33 @@ export function MorePageContent({ onBack }: MorePageContentProps) {
         return <AppSettingsSection onBack={handleBackFromSection} />;
       case "help":
         return <HelpSupportSection onBack={handleBackFromSection} />;
-      case "account":
-        return <AccountActionsSection onBack={handleBackFromSection} />;
+     
       default:
         return (
           <div className="animate-fade-in">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center">
                 {/* Add back button to close More component */}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={onBack} 
-                  className="mr-2" 
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onBack}
+                  className="mr-2"
                   aria-label="Back"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <h1 className="text-2xl font-bold">More</h1>
+                <h1 className="text-xl md:text-2xl font-bold">More</h1>
               </div>
-              <Avatar className="h-10 w-10">
-                <AvatarImage
-                  src="/placeholder.svg?height=40&width=40"
-                  alt="User"
-                />
-                <AvatarFallback>JD</AvatarFallback>
-              </Avatar>
+              {userType === "SUPPLIER" && (
+                <Avatar className="h-10 w-10">
+                  <AvatarImage
+                    src="/placeholder.svg?height=40&width=40"
+                    alt="User"
+                  />
+                  <AvatarFallback>JD</AvatarFallback>
+                </Avatar>
+              )}
             </div>
 
             <div className="grid gap-4">
@@ -105,31 +107,33 @@ export function MorePageContent({ onBack }: MorePageContentProps) {
                   </button>
 
                   <Separator />
-
-                  <button
-                    onClick={() => setActiveSection("verification")}
-                    className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
-                        <Shield className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex flex-col items-start">
-                        <span>Identity Verification</span>
-                        <span className="text-xs text-muted-foreground">
-                          Verify your identity
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800">
-                        Pending
-                      </span>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </button>
-
-                  <Separator />
+                  {userType === "SUPPLIER" && (
+                    <>
+                      <button
+                        onClick={() => setActiveSection("verification")}
+                        className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
+                            <Shield className="h-4 w-4 text-primary" />
+                          </div>
+                          <div className="flex flex-col items-start">
+                            <span>Identity Verification</span>
+                            <span className="text-xs text-muted-foreground">
+                              Verify your identity
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800">
+                            Pending
+                          </span>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </button>
+                      <Separator />
+                    </>
+                  )}
 
                   <button
                     onClick={() => setActiveSection("payment")}
@@ -169,9 +173,9 @@ export function MorePageContent({ onBack }: MorePageContentProps) {
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
-                        <Settings className="h-4 w-4 text-primary" />
+                        <LineChart className="h-4 w-4 text-primary" />
                       </div>
-                      <span>Application Settings</span>
+                      <span>Analytics</span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </button>
@@ -196,16 +200,16 @@ export function MorePageContent({ onBack }: MorePageContentProps) {
                   <Separator />
 
                   <button
-                    onClick={() => setActiveSection("account")}
+                    onClick={() => {}}
                     className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-destructive/10">
                         <LogOut className="h-4 w-4 text-destructive" />
                       </div>
-                      <span>Account Actions</span>
+                      <span>Sign Out</span>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    
                   </button>
                 </CardContent>
               </Card>

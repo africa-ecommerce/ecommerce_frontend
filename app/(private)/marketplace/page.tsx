@@ -28,81 +28,11 @@ import { ProductCardSkeleton } from "./_components/product-card-skeleton";
 import { NoResults } from "./_components/no-results";
 import { ActiveFilters } from "./_components/active-filters";
 import { FilterSheet } from "./_components/filter-sheet";
+import useSWR from "swr";
 
 
 
-const sampleProducts = [
-  {
-    id: "1",
-    name: "Premium Wireless Headphones",
-    images: ["/placeholder.svg?height=600&width=600"],
-    category: "Electronics",
-    price: 25000,
-    originalPrice: 30000,
-    rating: 4.8,
-    plugsCount: 120,
-    trending: true,
-    supplier: {
-      name: "TechGadgets",
-      image: "/placeholder.svg?height=50&width=50",
-    },
-  },
-  {
-    id: "2",
-    name: "Organic Cotton T-Shirt",
-    images: ["/placeholder.svg?height=600&width=600"],
-    category: "Fashion",
-    price: 5000,
-    rating: 4.5,
-    plugsCount: 85,
-    supplier: {
-      name: "EcoWear",
-      image: "/placeholder.svg?height=50&width=50",
-    },
-  },
-  {
-    id: "3",
-    name: "Smart Home Security Camera",
-    images: ["/placeholder.svg?height=600&width=600"],
-    category: "Home & Security",
-    price: 15000,
-    originalPrice: 18000,
-    rating: 4.7,
-    plugsCount: 65,
-    trending: true,
-    supplier: {
-      name: "SafeHouse",
-      image: "/placeholder.svg?height=50&width=50",
-    },
-  },
-  {
-    id: "4",
-    name: "Handcrafted Leather Wallet",
-    images: ["/placeholder.svg?height=600&width=600"],
-    category: "Accessories",
-    price: 8000,
-    rating: 4.9,
-    plugsCount: 42,
-    supplier: {
-      name: "ArtisanCrafts",
-      image: "/placeholder.svg?height=50&width=50",
-    },
-  },
-  {
-    id: "5",
-    name: "Fitness Tracker Watch",
-    images: ["/placeholder.svg?height=600&width=600"],
-    category: "Fitness",
-    price: 12000,
-    originalPrice: 15000,
-    rating: 4.6,
-    plugsCount: 110,
-    supplier: {
-      name: "FitTech",
-      image: "/placeholder.svg?height=50&width=50",
-    },
-  },
-]
+
 
 export default function MarketplacePage() {
   const router = useRouter();
@@ -118,6 +48,10 @@ export default function MarketplacePage() {
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  
+
+  
   
   // IntersectionObserver for infinite scroll
   const { ref: loadingRef, inView } = useInView({
@@ -295,7 +229,7 @@ export default function MarketplacePage() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               ref={searchInputRef}
-              placeholder="Search products, suppliers, categories..."
+              placeholder="Search products..."
               className="pl-9 pr-12 text-sm sm:text-base sm:pl-10 sm:pr-14"
               value={searchQuery}
               onChange={handleSearchChange}
@@ -449,7 +383,7 @@ export default function MarketplacePage() {
         <DiscoveryModeDialog
           open={showDiscoveryMode}
           onOpenChange={setShowDiscoveryMode}
-          products={sampleProducts}
+          products={products}
         />
       </div>
     </TooltipProvider>

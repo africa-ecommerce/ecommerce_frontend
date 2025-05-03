@@ -16,7 +16,6 @@
 //   TooltipTrigger,
 // } from "@/components/ui/tooltip";
 // import { cn } from "@/lib/utils";
-// import { Product } from "@/types/product";
 // import Image from "next/image";
 
 
@@ -646,11 +645,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn, truncateText } from "@/lib/utils"
 import Image from "next/image"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { Product } from "@/types/product";
+
 
 interface DiscoveryModeDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  products: any[]
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  products: Product[];
 }
 
 export function DiscoveryModeDialog({ open, onOpenChange, products }: DiscoveryModeDialogProps) {

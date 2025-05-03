@@ -55,16 +55,13 @@ export const formatQuantity = (quantity: number) => {
 };
 
 export const formatPrice = (price: string) => {
-  if (price.includes("₦") || price.includes("$") || price.includes("€")) {
-    return price.replace(/\s+/g, "");
-  }
+ 
 
-  const num = parseFloat(price.replace(/[^0-9.]/g, ""));
-  if (isNaN(num)) return price;
 
-  return `₦${num.toLocaleString("en-NG")}`;
+
+  return `₦${price.toLocaleString()}`;
 };
 
 export const truncateText = (text: string, maxLength: number = 20) => {
-  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
+  return text?.length > maxLength ? `${text?.substring(0, maxLength)}...` : text;
 };

@@ -8,6 +8,7 @@ import {
   AlertCircle,
   Clock,
   ExternalLink,
+  Globe,
   HelpCircle,
   Instagram,
   LineChart,
@@ -47,50 +48,37 @@ import { useUser } from "@/app/_components/provider/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import useSWR from "swr";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatPrice, formatQuantity, formatTimeAgo, truncateText } from "@/lib/utils";
 
-// Utility functions
-const formatTimeAgo = (seconds: string) => {
-  const num = parseInt(seconds);
-  if (isNaN(num)) return "Just now";
+function getTopAndBottomSales(productsArray: any, count = 5) {
+  // Create a copy of the array to avoid modifying the original
+  const productsCopy = [...productsArray];
 
-  const intervals = {
-    year: 31536000,
-    month: 2592000,
-    week: 604800,
-    day: 86400,
-    hour: 3600,
-    minute: 60,
-    second: 1,
+  // Filter out products with zero sales and sort by sales in descending order
+  const productsWithSales = productsCopy.filter(product => product.sales > 0)
+    .sort((a, b) => b.sales - a.sales);
+
+  // Get top products (limited to count)
+  const topProducts = productsWithSales.slice(0, count);
+
+  // Find the minimum sales value from top products
+  const minTopSales = topProducts.length > 0 ? 
+    topProducts[topProducts.length - 1].sales : Infinity;
+
+  // Get bottom products: those with sales > 0 but less than the minimum top sales
+  const bottomCandidates = productsCopy.filter(product => 
+    product.sales > 0 && product.sales < minTopSales
+  ).sort((a, b) => a.sales - b.sales);
+
+  // Take only up to 'count' bottom products
+  const bottomProducts = bottomCandidates.slice(0, count);
+
+  return {
+    topProducts,
+    bottomProducts,
   };
+}
 
-  for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-    const interval = Math.floor(num / secondsInUnit);
-    if (interval >= 1) {
-      return `${interval} ${unit}${interval === 1 ? "" : "s"} ago`;
-    }
-  }
-
-  return "Just now";
-};
-
-const formatQuantity = (quantity: number) => {
-  return quantity >= 100 ? "99+" : quantity.toString();
-};
-
-const formatPrice = (price: string) => {
-  if (price.includes("₦") || price.includes("$") || price.includes("€")) {
-    return price.replace(/\s+/g, "");
-  }
-  
-  const num = parseFloat(price.replace(/[^0-9.]/g, ""));
-  if (isNaN(num)) return price;
-  
-  return `₦${num.toLocaleString("en-NG")}`;
-};
-
-const truncateText = (text: string, maxLength: number = 20) => {
-  return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
-};
 
 // Error State
 const ErrorState = ({ onRetry }: { onRetry?: () => void }) => (
@@ -250,6 +238,20 @@ const SocialLoadingSkeleton = () => (
   </div>
 );
 
+const EducationalTipSkeleton = () => (
+  <Card className="bg-primary/10 border-primary/20">
+    <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+      <Skeleton className="rounded-full h-8 w-8 flex-shrink-0" />
+      <div className="flex-1 min-w-0 space-y-2">
+        <Skeleton className="h-3 w-[120px]" />
+        <Skeleton className="h-2 w-full" />
+        <Skeleton className="h-2 w-3/4" />
+      </div>
+      <Skeleton className="h-7 w-[80px]" />
+    </CardContent>
+  </Card>
+);
+
 const WelcomeSkeleton = () => (
   <div className="flex-1 min-w-0">
     <Skeleton className="h-4 w-[180px] mb-1" />
@@ -272,11 +274,12 @@ export default function PlugDashboard() {
   const [socialError, setSocialError] = useState(false);
 
   const [orders, setOrders] = useState<any[]>([]);
-  const [topProducts, setTopProducts] = useState<any[]>([]);
   const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
   const [socialAnalytics, setSocialAnalytics] = useState<any[]>([]);
   const products = Array.isArray(data?.data) ? data?.data : [];
 
+const { topProducts, bottomProducts } = getTopAndBottomSales(products);
+  
 
   const stockAlerts = useMemo(() => {
     if (!products.length) return [];
@@ -371,67 +374,7 @@ export default function PlugDashboard() {
       }
     };
 
-    // Simulate loading products
-    const loadProducts = async () => {
-      try {
-        setProductLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        setTopProducts([
-          {
-            id: 1,
-            name: "Ankara Print Dress",
-            price: "₦12,500",
-            sold: 24,
-            trend: "+15%",
-            progress: 80
-          },
-          {
-            id: 2,
-            name: "Handcrafted Sandals",
-            price: "₦8,200",
-            sold: 18,
-            trend: "+8%",
-            progress: 65
-          },
-          {
-            id: 3,
-            name: "Beaded Necklace",
-            price: "₦5,000",
-            sold: 15,
-            trend: "-2%",
-            progress: 45
-          }
-        ]);
-
-        setRecommendedProducts([
-          {
-            id: 4,
-            name: "African Print Headwrap",
-            supplier: "AfriThreads",
-            status: "High demand"
-          },
-          {
-            id: 5,
-            name: "Shea Butter Set",
-            supplier: "NaturalGlow",
-            status: "Trending now"
-          },
-          {
-            id: 6,
-            name: "Woven Basket Bag",
-            supplier: "EcoAfrica",
-            status: "Seasonal hit"
-          }
-        ]);
-
-        setProductError(false);
-      } catch (err) {
-        setProductError(true);
-      } finally {
-        setProductLoading(false);
-      }
-    };
+   
 
     // Simulate loading social analytics
     const loadSocialAnalytics = async () => {
@@ -477,7 +420,7 @@ export default function PlugDashboard() {
             platform: "Online Store",
             percentage: "15%",
             description: "Of your sales come from your store",
-            icon: Store,
+            icon: Globe,
             color: "text-purple-600",
             stats: [
               { label: "Visits", value: "320", progress: 45 },
@@ -495,7 +438,6 @@ export default function PlugDashboard() {
     };
 
     fetchData();
-    loadProducts();
     loadSocialAnalytics();
   }, []);
 
@@ -512,21 +454,19 @@ export default function PlugDashboard() {
         {/* Header */}
 
         {isLoading && !user?.plug.businessName ? (
-          <WelcomeSkeleton/>
+          <WelcomeSkeleton />
         ) : (
-     <div className="flex items-center justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-muted-foreground font-semibold text-sm truncate">
-              Welcome back, {user?.plug.businessName}!
-            </h1>
-            <h1 className="text-muted-foreground text-xs sm:text-sm">
-              Here's your business at a glance.
-            </h1>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-muted-foreground font-semibold text-sm truncate">
+                Welcome back, {user?.plug.businessName}!
+              </h1>
+              <h1 className="text-muted-foreground text-xs sm:text-sm">
+                Here's your business at a glance.
+              </h1>
+            </div>
           </div>
-         
-        </div>
         )}
-        
 
         {/* Revenue Snapshot */}
         <section className="space-y-3 sm:space-y-4">
@@ -560,10 +500,7 @@ export default function PlugDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-2 sm:p-3 pt-0">
-                  <div className="text-base sm:text-lg font-bold">
-                    ₦45,500
-                  </div>
-                  
+                  <div className="text-base sm:text-lg font-bold">₦45,500</div>
                 </CardContent>
               </Card>
 
@@ -603,9 +540,7 @@ export default function PlugDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-2 sm:p-3 pt-0">
-                  <div className="text-base sm:text-lg font-bold">
-                    ₦12,500
-                  </div>
+                  <div className="text-base sm:text-lg font-bold">₦12,500</div>
                   <div className="flex items-center text-[10px] text-amber-600 mt-0.5">
                     <Clock className="h-2.5 w-2.5 mr-1" />
                     <span>Release in 2 days</span>
@@ -645,10 +580,7 @@ export default function PlugDashboard() {
         {/* Stock Alerts Section */}
         <section className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-            <h2 className="text-sm sm:text-base font-semibold">
-              Stock Alerts
-            </h2>
-            
+            <h2 className="text-sm sm:text-base font-semibold">Stock Alerts</h2>
           </div>
 
           {isLoading ? (
@@ -812,64 +744,65 @@ export default function PlugDashboard() {
         {/* Product Performance */}
         <section className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h2 className="text-base font-semibold">
-              Product Performance
-            </h2>
+            <h2 className="text-sm sm:text-base font-semibold">Product Performance</h2>
             <Button
               variant="outline"
               size="sm"
               asChild
-              className="text-xs sm:text-sm"
+              className="text-xs"
             >
               <Link href="/dashboard/product">View All Products</Link>
             </Button>
           </div>
 
-          {productLoading ? (
+          {isLoading ? (
             <ProductLoadingSkeleton />
           ) : productError ? (
-            <ErrorState onRetry={() => {
-              setProductError(false);
-              setProductLoading(true);
-              setTimeout(() => setProductLoading(false), 1000);
-            }} />
+            <ErrorState
+              onRetry={() => {
+                setProductError(false);
+                setProductLoading(true);
+                setTimeout(() => setProductLoading(false), 1000);
+              }}
+            />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               {/* Top Selling Products with Scroll Area */}
               <Card>
                 <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
                   <CardTitle className="text-sm sm:text-base font-medium">
-                    Top Selling Products
+                    Top Perfoming Products
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <ScrollArea className="h-[250px]">
+                  <ScrollArea className="max-h-[250px]">
                     <div className="space-y-3 sm:space-y-4 pr-3">
                       {topProducts.length === 0 ? (
                         <EmptyState
-                          message="No top selling products"
+                          message="No top performing products"
                           icon={ShoppingBag}
                         />
                       ) : (
                         topProducts.map((product) => (
-                          <div key={product.id} className="flex items-center gap-2 sm:gap-3">
+                          <div
+                            key={product.id}
+                            className="flex items-center gap-2 sm:gap-3"
+                          >
                             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
                               <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex justify-between gap-1">
-                                <p className="text-xs sm:text-sm font-medium truncate">
-                                  {product.name}
+                                <p className="text-xs sm:text-sm font-medium capitalize">
+                                  {truncateText(product.name, 30)}
                                 </p>
                                 <p className="text-xs sm:text-sm font-medium whitespace-nowrap">
-                                  {product.price}
+                                  {formatPrice(product.price)}
                                 </p>
                               </div>
                               <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
-                                <p>{product.sold} units sold</p>
-                               
+                                <p>{product.sales || 0} units sold</p>
                               </div>
-                              <Progress value={product.progress} className="h-1 mt-1" />
                             </div>
                           </div>
                         ))
@@ -883,44 +816,37 @@ export default function PlugDashboard() {
               <Card>
                 <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
                   <CardTitle className="text-sm sm:text-base font-medium">
-                    Recommended Products
+                    Low Performing Products
                   </CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">
-                    Trending among Plugs
-                  </CardDescription>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <ScrollArea className="h-[250px]">
+                  <ScrollArea className="max-h-[250px]">
                     <div className="space-y-3 sm:space-y-4 pr-3">
-                      {recommendedProducts.length === 0 ? (
+                      {bottomProducts.length === 0 ? (
                         <EmptyState
-                          message="No recommended products"
-                          icon={PackageOpen}
+                          message="No low performing products"
+                          icon={ShoppingBag}
                         />
                       ) : (
-                        recommendedProducts.map((product) => (
-                          <div key={product.id} className="flex items-center gap-2 sm:gap-3">
+                        bottomProducts.map((product) => (
+                          <div
+                            key={product.id}
+                            className="flex items-center gap-2 sm:gap-3"
+                          >
                             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
-                              <PackageOpen className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex justify-between items-center gap-1">
-                                <p className="text-xs sm:text-sm font-medium truncate">
-                                  {product.name}
+                              <div className="flex justify-between gap-1">
+                                <p className="text-xs sm:text-sm font-medium ">
+                                  {truncateText(product.name, 30)}
                                 </p>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 px-2 text-xs"
-                                >
-                                  <PlusCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1" /> Add
-                                </Button>
+                                <p className="text-xs sm:text-sm font-medium whitespace-nowrap">
+                                  {formatPrice(product.price)}
+                                </p>
                               </div>
                               <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
-                                <p className="truncate">Supplier: {product.supplier}</p>
-                                <p className="text-green-600 whitespace-nowrap">
-                                  {product.status}
-                                </p>
+                                <p>{product.sales || 0} units sold</p>
                               </div>
                             </div>
                           </div>
@@ -937,14 +863,14 @@ export default function PlugDashboard() {
         {/* Social Analytics */}
         <section className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h2 className="text-base sm:text-lg font-semibold">
+            <h2 className="text-sm sm:text-base font-semibold">
               Social Analytics
             </h2>
             <Button
               variant="outline"
               size="sm"
               asChild
-              className="text-xs sm:text-sm"
+              className="text-xs"
             >
               <Link href="#">Detailed Reports</Link>
             </Button>
@@ -953,11 +879,13 @@ export default function PlugDashboard() {
           {socialLoading ? (
             <SocialLoadingSkeleton />
           ) : socialError ? (
-            <ErrorState onRetry={() => {
-              setSocialError(false);
-              setSocialLoading(true);
-              setTimeout(() => setSocialLoading(false), 1000);
-            }} />
+            <ErrorState
+              onRetry={() => {
+                setSocialError(false);
+                setSocialLoading(true);
+                setTimeout(() => setSocialLoading(false), 1000);
+              }}
+            />
           ) : socialAnalytics.length === 0 ? (
             <EmptyState
               message="No social analytics data"
@@ -979,51 +907,58 @@ export default function PlugDashboard() {
                       </div>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4 pt-0">
-                     <div className="2xl font-bold">{platform.percentage}</div>
-<p className="text-[10px] xs:text-xs text-muted-foreground">
-{platform.description}
-</p>
-<div className="mt-3 space-y-2">
-{platform.stats.map((stat: any, i: number) => (
-<div key={i}>
-<div className="flex justify-between text-[10px] xs:text-xs">
-<span>{stat.label}</span>
-<span className="font-medium">{stat.value}</span>
-</div>
-<Progress value={stat.progress} className="h-1" />
-</div>
-))}
-</div>
-</CardContent>
-</Card>
-);
-})}
-</div>
-)}
-</section>
-    {/* Educational Tip */}
-    <Card className="bg-primary/10 border-primary/20">
-      <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
-        <div className="rounded-full bg-primary/20 p-1.5 flex-shrink-0">
-          <LineChart className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-xs sm:text-sm">Business Tip</h3>
-          <p className="text-[10px] sm:text-xs text-muted-foreground">
-            Sharing your products during peak hours (7-9 PM) can increase
-            your visibility by up to 40%.
-          </p>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="ml-auto text-xs h-7 sm:h-8"
-        >
-          <ExternalLink className="h-3 w-3 mr-1" /> Learn
-        </Button>
-      </CardContent>
-    </Card>
-  </div>
-</TooltipProvider>
-);
+                      <div className="2xl font-bold">{platform.percentage}</div>
+                      <p className="text-[10px] xs:text-xs text-muted-foreground">
+                        {platform.description}
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {platform.stats.map((stat: any, i: number) => (
+                          <div key={i}>
+                            <div className="flex justify-between text-[10px] xs:text-xs">
+                              <span>{stat.label}</span>
+                              <span className="font-medium">{stat.value}</span>
+                            </div>
+                            <Progress value={stat.progress} className="h-1" />
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </section>
+        {/* Educational Tip */}
+        {isLoading ? 
+       (<EducationalTipSkeleton/>)
+       :  
+       (
+        <Card className="bg-primary/10 border-primary/20">
+          <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+            <div className="rounded-full bg-primary/20 p-1.5 flex-shrink-0">
+              <LineChart className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-medium text-xs sm:text-sm">Business Tip</h3>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">
+                Sharing your products during peak hours (7-9 PM) can increase
+                your visibility by up to 40%.
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto text-xs h-7 sm:h-8"
+            >
+              <ExternalLink className="h-3 w-3 mr-1" /> Learn
+            </Button>
+          </CardContent>
+        </Card>
+       )
+      }
+        
+      </div>
+    </TooltipProvider>
+  );
 }

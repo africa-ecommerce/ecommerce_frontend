@@ -18,6 +18,7 @@ import {
   Users,
   MessageSquare,
   Truck,
+  Pencil,
   PackageCheck,
   Share2,
 } from "lucide-react";
@@ -63,8 +64,8 @@ import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import EmptyState from "@/app/_components/empty-state";
 import DeleteDialog from "../../(supplier)/_components/delete-dialog";
 import { Tabs, TabsContent, TabsTrigger, TabsList } from "@/components/ui/tabs";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { formatPrice, truncateText } from "@/lib/utils";
 
 const LoadingOrdersSkeleton = () => (
   <div className="space-y-3 sm:space-y-4">
@@ -303,8 +304,8 @@ interface Order {
   progressStage: "Processing" | "Shipped" | "Delivered";
 }
 
-const deleteProductFn = async (id: string) => {
-  const response = await fetch(`/api/products/${id}`, {
+const deleteProductFn = async (productId: string) => {
+  const response = await fetch(`/api/plug/products/${productId}`, {
     method: "DELETE",
   });
   const result = await response.json();
@@ -356,9 +357,9 @@ export default function Products() {
   }, [orders]);
 
   const { deleteResource } = useDeleteResource(
-    "/api/products/plugged/",
+    "/api/plug/products/",
     async () => {
-      const res = await fetch("/api/products/plugged/");
+      const res = await fetch("/api/plug/products/");
       if (!res.ok) throw new Error("Failed to fetch products");
       return res.json();
     },
@@ -368,6 +369,7 @@ export default function Products() {
   // Fetch data
   const { data, error, isLoading, mutate } = useSWR("/api/plug/products/");
   const products = Array.isArray(data?.data) ? data?.data : [];
+  console.log("products", products)
 
   // Filter items based on selected category, filter, and search query
   const filteredItems = products?.filter((item: any) => {
@@ -486,28 +488,28 @@ export default function Products() {
     return value !== undefined && value !== null ? value : "-";
   };
 
-  const stats = useMemo(() => {
-    if (!products.length)
-      return {
-        totalProducts: 0,
-        lowStockItems: 0,
-        outOfStock: 0,
-        totalProfit: 0,
-      };
-
+ const stats = useMemo(() => {
+  if (!products.length)
     return {
-      totalProducts: products.length,
-      lowStockItems: products.filter(
-        (item: any) =>
-          item.stock !== undefined && item.stock > 0 && item.stock <= 5
-      ).length,
-      outOfStock: products.filter((item: any) => item.stock === 0).length,
-      totalProfit: products.reduce(
-        (total: any, item: any) => total + (item.profit || 0),
-        0
-      ),
+      totalProducts: 0,
+      lowStockItems: 0,
+      outOfStock: 0,
+      totalProfit: 0,
     };
-  }, [products]);
+
+  return {
+    totalProducts: products.length,
+    lowStockItems: products.filter(
+      (item: any) =>
+        item.stock !== undefined && item.stock > 0 && item.stock <= 5
+    ).length,
+    outOfStock: products.filter((item: any) => item.stock === 0).length,
+    totalProfit: products.reduce(
+      (total: any, item: any) => total + ((item.price || 0) - (item.originalPrice || 0)),
+      0
+    ),
+  };
+}, [products]);
 
   return (
     <TooltipProvider>
@@ -552,7 +554,7 @@ export default function Products() {
                 {isLoading ? (
                   <Skeleton className="h-6 w-16" />
                 ) : (
-                  <div className="text-2xl font-bold">
+                  <div className="text-xl font-bold">
                     {stats.totalProducts}
                   </div>
                 )}
@@ -581,7 +583,7 @@ export default function Products() {
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-2xl font-bold text-amber-500">
+                    <div className="text-xl font-bold text-amber-500">
                       {stats.lowStockItems}
                     </div>
                     {stats.lowStockItems > 0 && (
@@ -617,7 +619,7 @@ export default function Products() {
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-2xl font-bold text-destructive">
+                    <div className="text-xl font-bold text-destructive">
                       {stats.outOfStock}
                     </div>
                     {stats.outOfStock > 0 && (
@@ -652,8 +654,8 @@ export default function Products() {
                 {isLoading ? (
                   <Skeleton className="h-6 w-16" />
                 ) : (
-                  <div className="text-2xl font-bold">
-                    ₦{(stats.totalProfit / 1000).toFixed(1)}K
+                  <div className="text-xl font-bold">
+                    {`₦${stats.totalProfit.toLocaleString()}`}
                   </div>
                 )}
               </CardContent>
@@ -663,9 +665,7 @@ export default function Products() {
 
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex items-center justify-between"></div>
-          </div>
+         
           {/* Filters and Search */}
           <div className="flex flex-col gap-2 max-w-[360px]:gap-1.5 sm:gap-3">
             <div className="relative flex items-center">
@@ -774,19 +774,19 @@ export default function Products() {
             <Card>
               <CardContent className="p-0">
                 <div className="relative overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full">
                     <thead className="text-xs uppercase bg-muted/50">
                       <tr>
-                        <th className="p-2 sm:p-3 text-left">Product</th>
-                        <th className="p-2 sm:p-3 text-left">Price</th>
-                        <th className="p-2 sm:p-3 text-left">Profit</th>
-                        <th className="p-2 sm:p-3 text-left">Stock</th>
-                        <th className="p-2 sm:p-3 w-[70px] text-left">
+                        <th className="p-2 sm:p-3  text-left">Product</th>
+                        <th className="p-2 sm:p-3  text-left">Selling Price</th>
+                        <th className="p-2 sm:p-3  text-left">Cost Price</th>
+                        <th className="p-2 sm:p-3  text-left">Stock</th>
+                        <th className="p-2 sm:p-3  w-[70px] text-left">
                           Status
                         </th>
-                        <th className="p-2 sm:p-3 text-left">Plugs</th>
-                        <th className="p-2 sm:p-3 text-left">Sales</th>
-                        <th className="p-2 sm:p-3 w-[70px] text-left">
+                        <th className="p-2 sm:p-3  text-left">Plugs</th>
+                        <th className="p-2 sm:p-3  text-left">Sales</th>
+                        <th className="p-2 sm:p-3  w-[70px] text-left">
                           Actions
                         </th>
                       </tr>
@@ -840,8 +840,8 @@ export default function Products() {
                                     />
                                   </div>
                                   <Link href={`/products/${item.id}`}>
-                                    <span className="font-medium text-xs sm:text-sm truncate max-w-[150px] capitalize text-blue-500 underline">
-                                      {item.name || "-"}
+                                    <span className="font-medium text-xs sm:text-sm whitespace-nowrap max-w-[250px] capitalize underline text-blue-700">
+                                      {truncateText(item.name, 10) || "-"}
                                     </span>
                                   </Link>
                                 </div>
@@ -852,8 +852,8 @@ export default function Products() {
                                   : "-"}
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                {item.profit
-                                  ? `₦${item.profit.toLocaleString()}`
+                                {item.originalPrice
+                                  ? `₦${item.originalPrice.toLocaleString()}`
                                   : "-"}
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm">
@@ -871,7 +871,7 @@ export default function Products() {
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
                                 <div className="flex items-center gap-1">
                                   <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground" />
-                                  <span>{displayValue(item.plugs)}</span>
+                                  <span>{displayValue(item.plugsCount)}</span>
                                 </div>
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
@@ -893,6 +893,16 @@ export default function Products() {
                                     <DropdownMenuLabel className="text-xs sm:text-sm">
                                       Actions
                                     </DropdownMenuLabel>
+                                    <DropdownMenuItem
+                                      className="text-xs sm:text-sm"
+                                      onClick={() => {
+                                        // handleEdit(item.id);
+                                      }}
+                                    >
+                                      <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Manage
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                       className="text-destructive text-xs sm:text-sm"
                                       onClick={() =>

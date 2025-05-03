@@ -23,7 +23,7 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn, truncateText } from "@/lib/utils";
 import Image from "next/image";
 import { Product } from "@/types/product";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
@@ -39,7 +39,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { items, addItem } = useShoppingCart();
 
-  const { userData } = useUser();
+  const { userData: {user} } = useUser();
 
   // Check if product is already in cart
   const isInCart = items.some((item) => item.id === product.id);
@@ -145,7 +145,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
             {/* Price and Competition */}
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <div className="text-[10px] font-semibold md:text-base">
+                <div className="text-sm font-semibold md:text-base">
                   ₦{product?.price?.toLocaleString()}
                 </div>
               </div>
@@ -173,23 +173,15 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
             {/* Supplier Info */}
             <div className="flex items-center gap-1 pt-1">
-              <Avatar className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0">
-                <AvatarImage
-                  src={product?.supplier?.image || "/placeholder.svg"}
-                  alt={product?.supplier?.name}
-                />
-                <AvatarFallback>
-                  {product?.supplier?.name?.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-xs sm:text-sm truncate max-w-[calc(100%-24px)]">
-                {product?.supplier?.name}
+             
+              <span className="text-xs sm:text-sm">
+                {truncateText(product?.supplier?.name)}
               </span>
             </div>
 
             {/* Action Buttons - Push to bottom with flex spacer */}
 
-            {userData.userType === "PLUG" && (
+            {user.userType === "PLUG" && (
               <div className="mt-auto pt-2">
                 <Button
                   className={`w-full h-8 sm:h-9 ${
