@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Expand, Play, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -9,71 +9,60 @@ import Image from "next/image";
 
 interface ProductImageGalleryProps {
   images: string[];
-  videos?: string[];
-  onVideoPlayClick?: (videoUrl: string) => void;
   className?: string;
 }
 
 export function ProductImageGallery({
   images,
-  videos = [],
-  onVideoPlayClick,
   className,
 }: ProductImageGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [viewportHeight, setViewportHeight] = useState(0);
-  const [viewportWidth, setViewportWidth] = useState(0);
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
+  // Handle device type detection
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
     };
-    
-    const updateViewportDimensions = () => {
-      setViewportHeight(window.innerHeight);
-      setViewportWidth(window.innerWidth);
-    };
 
     checkMobile();
-    updateViewportDimensions();
 
-    window.addEventListener("resize", () => {
-      checkMobile();
-      updateViewportDimensions();
-    });
+    // Throttled resize handler to improve performance
+    let resizeTimer: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        checkMobile();
+      }, 100);
+    };
 
+    window.addEventListener("resize", handleResize);
     return () => {
-      window.removeEventListener("resize", checkMobile);
-      window.removeEventListener("resize", updateViewportDimensions);
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(resizeTimer);
     };
   }, []);
 
   const allMedia = [
     ...(images || []).map((img) => ({ type: "image" as const, url: img })),
-    ...(videos || []).map((video) => ({ type: "video" as const, url: video })),
   ];
 
   const handlePrevious = () => {
     setCurrentIndex((prev) => (prev === 0 ? allMedia.length - 1 : prev - 1));
-   
   };
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === allMedia.length - 1 ? 0 : prev + 1));
-   
   };
 
   const handleThumbnailClick = (index: number) => {
     setCurrentIndex(index);
-   
   };
 
-  
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX);
   };
@@ -92,39 +81,17 @@ export function ProductImageGallery({
     }
   };
 
- 
- 
-
-  const handleVideoPlayClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (allMedia[currentIndex]?.type === "video") {
-      onVideoPlayClick?.(allMedia[currentIndex].url);
-    }
-  };
-
-  // Calculate dimensions for main gallery
-  const mainImageHeight = isMobile 
-    ? Math.floor(viewportHeight * (2/4)) 
-    : 500; // Fixed height on desktop
-
-  const mainImageWidth = isMobile
-    ? "100%" 
-    : 1000; // Fixed width on desktop
-
   return (
-    <div className={cn("relative", className)}>
-      {/* Main media display */}
+    <div className={cn("relative w-full", className)}>
+      {/* Main media display with consistent dimensions */}
       <div
         ref={imageContainerRef}
-        style={{
-          height: isMobile ? `${mainImageHeight}px` : `${mainImageHeight}px`,
-          width: isMobile ? "100%" : `${mainImageWidth}px`,
-          maxHeight: isMobile ? `${mainImageHeight}px` : `${mainImageHeight}px`,
-        }}
         className={cn(
-          "relative overflow-hidden bg-muted rounded-lg touch-pan-y mx-auto"
+          "relative overflow-hidden bg-muted rounded-lg touch-pan-y mx-auto",
+          isMobile
+            ? "h-64 w-full" // Fixed height for mobile (16rem)
+            : "h-96 w-full max-w-4xl" // Fixed height for desktop (24rem)
         )}
-        // onMouseMove={handleMouseMove}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -144,42 +111,11 @@ export function ProductImageGallery({
                   src={allMedia[currentIndex].url || "/placeholder.svg"}
                   alt={`Product image ${currentIndex + 1}`}
                   fill
-                  sizes="(max-width: 768px) 100vw, 600px"
+                  sizes="(max-width: 768px) 100vw, 800px"
                   priority={currentIndex === 0}
-                  className=
-                    "object-contain transition-transform duration-300 scale-100"                 
+                  className="object-contain w-full h-full"
                   draggable="false"
                 />
-              </div>
-            )}
-
-            {allMedia[currentIndex]?.type === "video" && (
-              <div className="relative h-full w-full flex items-center justify-center bg-black">
-                <div className="absolute inset-0 opacity-50 bg-gradient-to-b from-transparent to-black" />
-                <Image
-                  src="/placeholder.svg"
-                  alt={`Video thumbnail ${currentIndex + 1}`}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 600px"
-                  className="object-cover opacity-70"
-                  draggable="false"
-                />
-                <Button
-                  variant="secondary"
-                  size={isMobile ? "sm" : "default"}
-                  className={cn(
-                    "absolute rounded-full bg-white/30 backdrop-blur-md hover:bg-white/50",
-                    isMobile ? "h-12 w-12" : "h-16 w-16"
-                  )}
-                  onClick={handleVideoPlayClick}
-                >
-                  <Play
-                    className={cn(
-                      "text-white fill-white",
-                      isMobile ? "h-6 w-6" : "h-8 w-8"
-                    )}
-                  />
-                </Button>
               </div>
             )}
           </motion.div>
@@ -220,26 +156,13 @@ export function ProductImageGallery({
             </Button>
           </>
         )}
-
-      
-       
-
-        
       </div>
 
       {/* Gallery view under main image */}
       {allMedia.length > 1 && (
-        <div className="mt-4" style={{ 
-          width: isMobile ? "100%" : `${mainImageWidth}px`,
-          margin: "1rem auto 0" 
-        }}>
+        <div className={cn("mt-4 w-full", isMobile ? "" : "max-w-4xl mx-auto")}>
           <h3 className="text-sm font-medium mb-2">Gallery</h3>
-          <div
-            className={cn(
-              "grid gap-2",
-              isMobile ? "grid-cols-4" : "grid-cols-4"
-            )}
-          >
+          <div className="grid grid-cols-4 gap-2">
             {allMedia.map((media, index) => (
               <button
                 key={index}
@@ -257,27 +180,13 @@ export function ProductImageGallery({
                       src={media.url || "/placeholder.svg"}
                       alt={`Gallery image ${index + 1}`}
                       fill
-                      sizes="(max-width: 768px) 33vw, 20vw"
+                      sizes="(max-width: 768px) 25vw, 120px"
                       className="object-cover"
                       loading="lazy"
                     />
                   </div>
                 )}
-                {media.type === "video" && (
-                  <div className="relative h-full w-full">
-                    <Image
-                      src="/placeholder.svg"
-                      alt={`Video thumbnail ${index + 1}`}
-                      fill
-                      sizes="(max-width: 768px) 33vw, 20vw"
-                      className="object-cover"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                      <Play className="h-5 w-5 text-white" />
-                    </div>
-                  </div>
-                )}
+
                 {currentIndex === index && (
                   <div className="absolute bottom-1 right-1 h-2 w-2 rounded-full bg-primary" />
                 )}
@@ -286,8 +195,6 @@ export function ProductImageGallery({
           </div>
         </div>
       )}
-
-      
     </div>
   );
 }

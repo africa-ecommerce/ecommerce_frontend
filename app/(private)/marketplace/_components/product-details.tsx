@@ -5,15 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import {
   ArrowLeft,
-  Bookmark,
-  ChevronDown,
-  ChevronRight,
-  Heart,
-  Info,
+  
   Package,
-  PackageCheck,
   Plus,
-  Share2,
+ 
   ShoppingBag,
   Star,
   Truck,
@@ -28,11 +23,11 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProductImageGallery } from "./product-image-gallery";
 import { ProductSpecifications } from "./product-specifications";
-import { VideoPlayer } from "./video-player";
 import { CustomerReviews } from "./customer-reviews";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
 import { useUser } from "@/app/_components/provider/UserContext";
+import { formatPrice, truncateText } from "@/lib/utils";
 
 
 // Define fetcher function for useSWR
@@ -47,9 +42,6 @@ const fetcher = async (url: string) => {
 
 // Product Skeleton Loading Component
 const ProductSkeleton = () => {
-
-   
-
   return (
     <div className="flex flex-col min-h-screen bg-background animate-fade-in pb-20">
       {/* Header Skeleton */}
@@ -62,61 +54,69 @@ const ProductSkeleton = () => {
       </header>
 
       <main className="flex-1">
-        {/* Gallery Skeleton */}
-        <section className="p-4">
-          <div className="aspect-square w-full overflow-hidden rounded-lg mb-4">
-            <Skeleton className="h-full w-full" />
-          </div>
-          <div className="grid grid-cols-4 gap-2">
-            {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="aspect-square rounded-md" />
-            ))}
-          </div>
-        </section>
-
-        {/* Product Info Skeletons */}
-        <section className="px-4 space-y-6">
-          <div>
-            <Skeleton className="h-7 w-3/4 mb-2" />
-            <div className="flex items-center gap-2 mt-1">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-4 w-4 rounded-full" />
-              <Skeleton className="h-4 w-24" />
-            </div>
-          </div>
-
-          {/* Supplier Skeleton */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                  <div>
-                    <Skeleton className="h-5 w-32 mb-1" />
-                    <Skeleton className="h-4 w-20" />
-                  </div>
+        {/* Gallery Skeleton - Modified for better responsiveness */}
+        <div className="container mx-auto px-4">
+          <div className="">
+            {/* Gallery section */}
+            <section className="p-4">
+              {/* Main image with controlled height on larger screens */}
+              <div className="relative overflow-hidden rounded-lg mb-4 md:max-h-96 lg:max-h-[28rem]">
+                <div className="aspect-square md:aspect-auto md:h-96 lg:h-[28rem] w-full">
+                  <Skeleton className="h-full w-full" />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              {/* Thumbnail grid */}
+              <div className="grid grid-cols-4 gap-2">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="aspect-square rounded-md" />
+                ))}
+              </div>
+            </section>
 
-          {/* Delivery & Stock Skeleton */}
-          <div className="grid grid-cols-2 gap-4">
-            <Skeleton className="h-20 rounded-lg" />
-            <Skeleton className="h-20 rounded-lg" />
-          </div>
+            {/* Product Info Skeletons */}
+            <section className="px-4 space-y-6 md:pt-4">
+              <div>
+                <Skeleton className="h-7 w-3/4 mb-2" />
+                <div className="flex items-center gap-2 mt-1">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-4 rounded-full" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              </div>
 
-          {/* Tabs Skeleton */}
-          <div className="mt-6">
-            <Skeleton className="h-10 w-full mb-4" />
-            <Skeleton className="h-32 w-full" />
+              {/* Supplier Skeleton */}
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <div>
+                        <Skeleton className="h-5 w-32 mb-1" />
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Delivery & Stock Skeleton */}
+              <div className="grid grid-cols-2 gap-4">
+                <Skeleton className="h-20 rounded-lg" />
+                <Skeleton className="h-20 rounded-lg" />
+              </div>
+
+              {/* Tabs Skeleton */}
+              <div className="mt-6">
+                <Skeleton className="h-10 w-full mb-4" />
+                <Skeleton className="h-32 w-full" />
+              </div>
+            </section>
           </div>
-        </section>
+        </div>
       </main>
     </div>
   );
 };
-
 export default function ProductDetail() {
   const router = useRouter();
   const params = useParams();
@@ -134,10 +134,10 @@ export default function ProductDetail() {
   });
 
   const [isAdding, setIsAdding] = useState(false);
-  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
-  const [currentVideoUrl, setCurrentVideoUrl] = useState("");
     const { items, addItem } = useShoppingCart()
      const { userData: {user} } = useUser();
+
+     console.log("product",product)
 
       const isInCart = items.some(item => item.id === product?.id)
 
@@ -166,10 +166,7 @@ export default function ProductDetail() {
     }, 800)
   }
 
-  const handleVideoPlayClick = (videoUrl: string) => {
-    setCurrentVideoUrl(videoUrl);
-    setShowVideoPlayer(true);
-  };
+ 
 
   // Handle loading state with skeleton
   if (isLoading) {
@@ -223,7 +220,7 @@ export default function ProductDetail() {
             </h1>
           </div>
           <div>
-            {user.userType === "PLUG" && (
+            {user?.userType === "PLUG" && (
               <Button
                 className={`${
                   isInCart
@@ -231,12 +228,12 @@ export default function ProductDetail() {
                     : ""
                 }`}
                 onClick={handleAddToStore}
-                disabled={isAdding || isInCart}
+                disabled={isAdding || isInCart || product.isPlugged}
                 aria-live="polite"
               >
                 {isAdding ? (
                   <span className="animate-pulse">Adding...</span>
-                ) : isInCart ? (
+                ) : isInCart || product.isPlugged ? (
                   <>
                     <Package className="mr-1 h-3 w-3 md:h-4 md:w-4" />
                     <span className="text-xs sm:text-sm">Added</span>
@@ -257,8 +254,7 @@ export default function ProductDetail() {
           <section className="p-4">
             <ProductImageGallery
               images={product?.images}
-              videos={product?.videos}
-              onVideoPlayClick={handleVideoPlayClick}
+             
             />
 
             {product?.trending && (
@@ -274,10 +270,13 @@ export default function ProductDetail() {
           {/* Product Info */}
           <section className="px-4 space-y-6">
             <div>
-              <div className="flex items-start">
-                <h2 className="text-lg md:text-xl font-bold capitalize">
-                  {product?.name}
+              <div className="flex items-start justify-between">
+                <h2 className="text-base md:text-lg font-bold capitalize">
+                  {truncateText(product?.name)}
                 </h2>
+                <div className="font-semibold">
+                  {formatPrice(product?.price)}
+                  </div>
               </div>
               <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
                 <div className="flex items-center">
@@ -306,20 +305,20 @@ export default function ProductDetail() {
                   <div className="flex items-center gap-3">
                     <Avatar>
                       <AvatarImage
-                        src={product?.supplier?.image || "/placeholder.svg"}
-                        alt={product?.supplier?.name}
+                        src={product?.supplier?.image}
+                        alt={product?.supplier?.businessName}
                       />
-                      <AvatarFallback>
-                        {product?.supplier?.name?.charAt(0) || "S"}
+                      <AvatarFallback className="capitalize">
+                        {product?.supplier?.businessName?.charAt(0) || "S"}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="font-semibold">
-                        {product?.supplier?.name}
+                      <div className="font-semibold capitalize">
+                        {truncateText(product?.supplier?.businessName)}
                       </div>
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Star className="mr-1 h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        {product?.supplier?.rating}
+                      <div className="flex items-center text-sm text-muted-foreground capitalize">
+                        
+                        {product?.supplier?.pickupLocation}
                       </div>
                     </div>
                   </div>
@@ -370,7 +369,7 @@ export default function ProductDetail() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">About this product</h3>
                   <div className="text-sm prose prose-sm max-w-full">
-                    <p className="whitespace-pre-wrap break-words overflow-wrap-anywhere">
+                    <p className="whitespace-pre-wrap break-words overflow-wrap-anywhere capitalize">
                       {formattedDescription || "No description available."}
                     </p>
                   </div>
@@ -379,7 +378,7 @@ export default function ProductDetail() {
 
               <TabsContent value="specifications" className="mt-4">
                 <ProductSpecifications
-                  specifications={product?.specifications}
+                  product={product}
                 />
               </TabsContent>
 
@@ -395,16 +394,8 @@ export default function ProductDetail() {
           </section>
         </main>
 
-        {/* Modal components */}
-        {showVideoPlayer && (
-          <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
-            <VideoPlayer
-              videoUrl={currentVideoUrl}
-              onClose={() => setShowVideoPlayer(false)}
-              className="max-w-3xl w-full"
-            />
-          </div>
-        )}
+      
+        
       </div>
     </TooltipProvider>
   );

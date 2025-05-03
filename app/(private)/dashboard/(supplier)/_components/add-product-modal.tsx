@@ -163,12 +163,12 @@ export function AddProductModal({
     const currentImages = formData.images || [];
     const newFiles = Array.from(files).filter(
       (file) =>
-        (file.type === "image/jpeg" || file.type === "image/png") &&
+        (file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/webp" || file.type === "image/svg+xml") &&
         file.size <= 5 * 1024 * 1024 // 5MB
     );
 
     if (newFiles.length === 0) {
-      errorToast("Only JPG/PNG images under 5MB allowed");
+      errorToast("Only images under 5MB allowed");
       return;
     }
 
@@ -891,7 +891,7 @@ export function AddProductModal({
                         <input
                           ref={fileInputRef}
                           type="file"
-                          accept="image/jpeg, image/png, image/svg+xml"
+                          accept="image/jpeg, image/png, image/svg+xml, image/webp"
                           multiple
                           className="hidden"
                           onChange={handleFileInputChange}

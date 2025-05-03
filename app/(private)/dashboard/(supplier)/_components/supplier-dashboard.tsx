@@ -576,7 +576,7 @@ export default function SupplierDashboard() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-center gap-1">
-                            <p className="text-xs sm:text-sm font-medium truncate">
+                            <p className="text-xs sm:text-sm font-medium truncate capitalize">
                               {truncateText(alert.product, 20)}
                             </p>
                             <Badge
@@ -593,20 +593,9 @@ export default function SupplierDashboard() {
                           <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
                             <p>{alert.units}</p>
                           </div>
-                          <Progress
-                            value={alert.progress}
-                            className="h-1 sm:h-1.5 mt-1"
-                          />
+                          
                         </div>
-                        <Button
-                          size="sm"
-                          className="text-xs h-7 sm:h-8"
-                          onClick={() => {
-                            console.log(`Restock product: ${alert.id}`);
-                          }}
-                        >
-                          Restock
-                        </Button>
+                       
                       </div>
                     ))}
                   </div>

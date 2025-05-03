@@ -67,6 +67,20 @@ import { Tabs, TabsContent, TabsTrigger, TabsList } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { formatPrice, truncateText } from "@/lib/utils";
 
+const TipSkeleton = () => (
+  <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
+    <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+      <Skeleton className="rounded-full h-8 w-8 flex-shrink-0" />
+      <div className="flex-1 min-w-0 space-y-2">
+        <Skeleton className="h-3 w-[120px]" />
+        <Skeleton className="h-2 w-full" />
+        <Skeleton className="h-2 w-3/4" />
+      </div>
+      <Skeleton className="h-7 w-[80px]" />
+    </CardContent>
+  </Card>
+);
+
 const LoadingOrdersSkeleton = () => (
   <div className="space-y-3 sm:space-y-4">
     {[...Array(3)].map((_, i) => (
@@ -369,7 +383,7 @@ export default function Products() {
   // Fetch data
   const { data, error, isLoading, mutate } = useSWR("/api/plug/products/");
   const products = Array.isArray(data?.data) ? data?.data : [];
-  console.log("products", products)
+  console.log("products", products);
 
   // Filter items based on selected category, filter, and search query
   const filteredItems = products?.filter((item: any) => {
@@ -377,17 +391,17 @@ export default function Products() {
       return false;
     if (
       selectedFilter === "out-of-stock" &&
-      (item.stock > 0 || item.stock === undefined)
+      (item.stocks > 0 || item.stocks === undefined)
     )
       return false;
     if (
       selectedFilter === "low-stock" &&
-      (item.stock === 0 || item.stock === undefined || item.stock > 5)
+      (item.stocks === 0 || item.stocks === undefined || item.stocks > 5)
     )
       return false;
     if (
       selectedFilter === "optimal" &&
-      (item.stock === 0 || item.stock === undefined || item.stock <= 10)
+      (item.stocks === 0 || item.stocks === undefined || item.stocks <= 10)
     )
       return false;
     if (
@@ -406,9 +420,9 @@ export default function Products() {
 
   // Helper functions
   const getStockStatus = (item: any) => {
-    if (!item.stock && item.stock !== 0) return "unknown";
-    if (item.stock === 0) return "out-of-stock";
-    if (item.stock <= 5) return "low-stock";
+    if (!item.stocks && item.stocks !== 0) return "unknown";
+    if (item.stocks === 0) return "out-of-stock";
+    if (item.stocks <= 5) return "low-stock";
     return "optimal";
   };
 
@@ -488,28 +502,29 @@ export default function Products() {
     return value !== undefined && value !== null ? value : "-";
   };
 
- const stats = useMemo(() => {
-  if (!products.length)
-    return {
-      totalProducts: 0,
-      lowStockItems: 0,
-      outOfStock: 0,
-      totalProfit: 0,
-    };
+  const stats = useMemo(() => {
+    if (!products.length)
+      return {
+        totalProducts: 0,
+        lowStockItems: 0,
+        outOfStock: 0,
+        totalProfit: 0,
+      };
 
-  return {
-    totalProducts: products.length,
-    lowStockItems: products.filter(
-      (item: any) =>
-        item.stock !== undefined && item.stock > 0 && item.stock <= 5
-    ).length,
-    outOfStock: products.filter((item: any) => item.stock === 0).length,
-    totalProfit: products.reduce(
-      (total: any, item: any) => total + ((item.price || 0) - (item.originalPrice || 0)),
-      0
-    ),
-  };
-}, [products]);
+    return {
+      totalProducts: products.length,
+      lowStockItems: products.filter(
+        (item: any) =>
+          item.stocks !== undefined && item.stocks > 0 && item.stocks <= 5
+      ).length,
+      outOfStock: products.filter((item: any) => item.stocks === 0).length,
+      totalProfit: products.reduce(
+        (total: any, item: any) =>
+          total + ((item.price || 0) - (item.originalPrice || 0)),
+        0
+      ),
+    };
+  }, [products]);
 
   return (
     <TooltipProvider>
@@ -554,9 +569,7 @@ export default function Products() {
                 {isLoading ? (
                   <Skeleton className="h-6 w-16" />
                 ) : (
-                  <div className="text-xl font-bold">
-                    {stats.totalProducts}
-                  </div>
+                  <div className="text-xl font-bold">{stats.totalProducts}</div>
                 )}
               </CardContent>
             </Card>
@@ -586,12 +599,6 @@ export default function Products() {
                     <div className="text-xl font-bold text-amber-500">
                       {stats.lowStockItems}
                     </div>
-                    {stats.lowStockItems > 0 && (
-                      <div className="flex items-center text-amber-600 text-xs">
-                        <AlertCircle className="h-3 w-3 mr-1" />
-                        Restock needed
-                      </div>
-                    )}
                   </>
                 )}
               </CardContent>
@@ -622,12 +629,6 @@ export default function Products() {
                     <div className="text-xl font-bold text-destructive">
                       {stats.outOfStock}
                     </div>
-                    {stats.outOfStock > 0 && (
-                      <div className="flex items-center text-destructive text-xs">
-                        <AlertCircle className="h-3 w-3 mr-1" />
-                        Urgent attention needed
-                      </div>
-                    )}
                   </>
                 )}
               </CardContent>
@@ -663,9 +664,29 @@ export default function Products() {
           </div>
         </section>
 
+        {isLoading ? (
+          <TipSkeleton />
+        ) : (
+          <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
+            <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+              <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
+                <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-xs sm:text-sm">
+                  Important Notice
+                </h3>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
+                  Unable to find a product, Note suppliers can sometimes
+                  discontinue a product
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
-         
           {/* Filters and Search */}
           <div className="flex flex-col gap-2 max-w-[360px]:gap-1.5 sm:gap-3">
             <div className="relative flex items-center">
@@ -839,9 +860,9 @@ export default function Products() {
                                       className="w-full h-full object-cover"
                                     />
                                   </div>
-                                  <Link href={`/products/${item.id}`}>
+                                  <Link href={`/marketplace/product${item.id}`}>
                                     <span className="font-medium text-xs sm:text-sm whitespace-nowrap max-w-[250px] capitalize underline text-blue-700">
-                                      {truncateText(item.name, 10) || "-"}
+                                      {truncateText(item.name, 15) || "-"}
                                     </span>
                                   </Link>
                                 </div>
@@ -861,7 +882,7 @@ export default function Products() {
                                   <span
                                     className={getStockStatusColor(stockStatus)}
                                   >
-                                    {displayValue(item.stock)}
+                                    {displayValue(item.stocks)}
                                   </span>
                                 </div>
                               </td>

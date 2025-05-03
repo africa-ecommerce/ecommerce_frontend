@@ -29,14 +29,12 @@ export default function DashboardLayout({
 
   useEffect(() => {
     preload("/api/auth/current-user", globalFetcher);
-    if(userData.userType === "SUPPLIER") {
+    if(userData?.userType === "SUPPLIER") {
        preload("/api/products/supplier/", globalFetcher);
-    } else {
+    } else if(userData?.userType === "PLUG") {
       preload("/api/plug/products/", globalFetcher);
     }
-   
-    
-  }, []);
+    }, []);
 
   return (
     <SWRConfig

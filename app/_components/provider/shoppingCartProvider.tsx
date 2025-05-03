@@ -16,6 +16,7 @@ import {
   Package,
   Check,
   Pencil,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -43,10 +44,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 import { cn } from "@/lib/utils"
 import { truncateText } from "@/lib/utils";
 import { useCreateResource } from "@/hooks/resourceManagement/useCreateResources";
 import { z } from "zod";
+
+// Maximum allowed products in cart
+const MAX_CART_ITEMS = 20;
 
 interface CartItem {
   id: string;
@@ -61,8 +70,9 @@ interface ShoppingCartContextType {
   items: CartItem[];
   itemCount: number;
   totalProfit: number;
+  isCartFull: boolean;
 
-  addItem: (item: CartItem, openCart?: boolean) => void;
+  addItem: (item: CartItem, openCart?: boolean) => boolean;
   removeItem: (itemId: string) => void;
   updateItemPrice: (itemId: string, sellingPrice: number) => void;
 
@@ -96,6 +106,7 @@ export function ShoppingCartProvider({
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showLimitAlert, setShowLimitAlert] = useState(false);
   const pathname = usePathname();
   const [openAddPrice, setOpenAddPrice] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string>("");
@@ -111,6 +122,7 @@ export function ShoppingCartProvider({
   });
 
   const itemCount = items.length;
+  const isCartFull = itemCount >= MAX_CART_ITEMS;
   
   // Calculate total profit across all items
   const totalProfit = items.reduce((sum, item) => sum + (item.profit || 0), 0);
@@ -122,6 +134,18 @@ export function ShoppingCartProvider({
 
   // Modified addItem to accept an openCart parameter that defaults to false
   const addItem = (newItem: CartItem, openCart = false) => {
+    // Check if cart is already full
+    if (isCartFull) {
+      // Show limit reached alert and open cart to show the message
+      setShowLimitAlert(true);
+      setIsOpen(true);
+      
+      // Auto-hide the alert after 5 seconds
+      setTimeout(() => setShowLimitAlert(false), 5000);
+      
+      return false;
+    }
+
     setItems((prevItems) => {
       // Check if item already exists in cart
       const existingItemIndex = prevItems.findIndex(
@@ -143,10 +167,16 @@ export function ShoppingCartProvider({
     if (openCart) {
       setIsOpen(true);
     }
+    
+    return true;
   };
 
   const removeItem = (itemId: string) => {
     setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
+    // Reset limit alert if it was showing and we're now under the limit
+    if (showLimitAlert && itemCount <= MAX_CART_ITEMS) {
+      setShowLimitAlert(false);
+    }
   };
 
   const updateItemPrice = (itemId: string, sellingPrice: number) => {
@@ -161,10 +191,7 @@ export function ShoppingCartProvider({
     );
   };
 
-
-
-
-   const handleSubmit = async () => {
+  const handleSubmit = async () => {
     setIsLoading(true)
     try {
       // Transform items to include user's price and product ID
@@ -190,7 +217,7 @@ export function ShoppingCartProvider({
       }
 
       successToast(result.message);
-     localStorage.removeItem("cartItems")
+      localStorage.removeItem("cartItems")
       setItems([]);
       setIsOpen(false);
       mutate("/api/plug/products/");
@@ -205,11 +232,10 @@ export function ShoppingCartProvider({
     }
   };
 
-  
-
   const clearCart = () => {
     localStorage.removeItem("cartItems")
     setItems([]);
+    setShowLimitAlert(false);
   };
 
   const formatPrice = (price: number) => {
@@ -219,8 +245,6 @@ export function ShoppingCartProvider({
       minimumFractionDigits: 0,
     }).format(price);
   };
-
- 
 
   const handlePriceModalOpen = (itemId: string) => {
     setSelectedItemId(itemId);
@@ -255,6 +279,7 @@ export function ShoppingCartProvider({
         items,
         itemCount,
         totalProfit,
+        isCartFull,
         addItem,
         removeItem,
         updateItemPrice,
@@ -282,8 +307,19 @@ export function ShoppingCartProvider({
           </SheetTrigger>
           <SheetContent className="w-full sm:max-w-md flex flex-col">
             <SheetHeader>
-              <SheetTitle>Selected Products ({itemCount})</SheetTitle>
+              <SheetTitle>Selected Products ({itemCount}/{MAX_CART_ITEMS})</SheetTitle>
             </SheetHeader>
+
+            {/* Limit reached alert message */}
+            {showLimitAlert && (
+              <Alert variant="destructive" className="my-2">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Product Limit Reached</AlertTitle>
+                <AlertDescription>
+                  You can only add up to {MAX_CART_ITEMS} products at a time. Please confirm or remove some products before adding more.
+                </AlertDescription>
+              </Alert>
+            )}
 
             {items.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
@@ -380,7 +416,7 @@ export function ShoppingCartProvider({
                           Total Items
                         </span>
                         <span className="font-medium">
-                          {itemCount} item{itemCount !== 1 ? "s" : ""}
+                          {itemCount} / {MAX_CART_ITEMS} item{itemCount !== 1 ? "s" : ""}
                         </span>
                       </div>
 

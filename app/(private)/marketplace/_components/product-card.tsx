@@ -30,7 +30,7 @@ import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider
 import { useUser } from "@/app/_components/provider/UserContext";
 
 interface ProductCardProps {
-  product: Product;
+  product: any;
   className?: string;
 }
 
@@ -40,6 +40,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const { items, addItem } = useShoppingCart();
 
   const { userData: {user} } = useUser();
+  console.log("p", user)
+
 
   // Check if product is already in cart
   const isInCart = items.some((item) => item.id === product.id);
@@ -172,16 +174,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
             </div>
 
             {/* Supplier Info */}
-            <div className="flex items-center gap-1 pt-1">
-             
-              <span className="text-xs sm:text-sm">
-                {truncateText(product?.supplier?.name)}
-              </span>
-            </div>
+            
 
             {/* Action Buttons - Push to bottom with flex spacer */}
 
-            {user.userType === "PLUG" && (
+            {user?.userType === "PLUG" && (
               <div className="mt-auto pt-2">
                 <Button
                   className={`w-full h-8 sm:h-9 ${
@@ -190,12 +187,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
                       : ""
                   }`}
                   onClick={handleAddToStore}
-                  disabled={isAdding || isInCart}
+                  disabled={isAdding || isInCart || product?.isPlugged}
                   aria-live="polite"
                 >
                   {isAdding ? (
                     <span className="animate-pulse">Adding...</span>
-                  ) : isInCart ? (
+                  ) : isInCart || product?.isPlugged ? (
                     <>
                       <Package className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
                       <span className="text-xs sm:text-sm">Added</span>

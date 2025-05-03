@@ -285,7 +285,7 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
     if (!products.length) return [];
 
     const outOfStockItems = products
-      .filter((item: any) => item.stock === 0)
+      .filter((item: any) => item.stocks === 0)
       .map((item: any) => ({
         id: item.id,
         product: item.name,
@@ -297,15 +297,15 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
 
     const lowStockItems = products
       .filter(
-        (item: any) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
+        (item: any) => item.stocks !== undefined && item.stocks > 0 && item.stocks <= 5
       )
       .map((item: any) => ({
         id: item.id,
         product: item.name,
         status: "Low Stock",
-        units: `Only ${formatQuantity(item.stock)} units left`,
+        units: `Only ${formatQuantity(item.stocks)} units left`,
         salesRate: "Restock recommended",
-        progress: (item.stock / 5) * 100,
+        progress: (item.stocks / 5) * 100,
       }));
 
     return [...outOfStockItems, ...lowStockItems].slice(0, 3);
@@ -458,7 +458,7 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
         ) : (
           <div className="flex items-center justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <h1 className="text-muted-foreground font-semibold text-sm truncate">
+              <h1 className="text-muted-foreground font-semibold text-sm truncate capitalize">
                 Welcome back, {user?.plug.businessName}!
               </h1>
               <h1 className="text-muted-foreground text-xs sm:text-sm">
@@ -623,7 +623,7 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-center gap-1">
-                          <p className="text-xs sm:text-sm font-medium truncate">
+                          <p className="text-xs sm:text-sm font-medium truncate capitalize">
                             {truncateText(alert.product, 20)}
                           </p>
                           <Badge
@@ -640,10 +640,7 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
                         <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
                           <p>{alert.units}</p>
                         </div>
-                        <Progress
-                          value={alert.progress}
-                          className="h-1 sm:h-1.5 mt-1"
-                        />
+                        
                       </div>
                     </div>
                   ))}

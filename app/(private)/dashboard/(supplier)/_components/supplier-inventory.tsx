@@ -64,7 +64,7 @@ import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import EmptyState from "@/app/_components/empty-state";
 import { EditProductModal } from "./update-product-modal";
 import { useUser } from "@/app/_components/provider/UserContext";
-import { truncateText } from "@/lib/utils";
+import { formatPrice, truncateText } from "@/lib/utils";
 
 const LoadingSkeleton = () => (
   <Card>
@@ -403,7 +403,7 @@ export default function Inventory() {
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-2xl font-bold">
+                    <div className="text-xl font-bold">
                       {stats.totalProducts}
                     </div>
                   </>
@@ -433,7 +433,7 @@ export default function Inventory() {
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-2xl font-bold text-amber-500">
+                    <div className="text-xl font-bold text-amber-500">
                       {stats.lowStockItems}
                     </div>
                     {stats.lowStockItems > 0 && (
@@ -469,7 +469,7 @@ export default function Inventory() {
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-2xl font-bold text-destructive">
+                    <div className="text-xl font-bold text-destructive">
                       {stats.outOfStock}
                     </div>
                     {stats.outOfStock > 0 && (
@@ -505,8 +505,8 @@ export default function Inventory() {
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-2xl font-bold">
-                      ₦{(stats.inventoryValue / 1000).toFixed(1)}K
+                    <div className="text-xl font-bold">
+                      {formatPrice(stats.inventoryValue)}
                     </div>
                   </>
                 )}
@@ -752,7 +752,7 @@ export default function Inventory() {
                                     href={`/marketplace/product/${item.id}`}
                                   >
                                     <span className="font-medium text-xs sm:text-sm whitespace-nowrap max-w-[250px] capitalize underline text-blue-700">
-                                      {truncateText(item.name, 10) || "-"}
+                                      {truncateText(item.name, 15) || "-"}
                                     </span>
                                   </Link>
                                 </div>
@@ -777,7 +777,7 @@ export default function Inventory() {
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
                                 <div className="flex items-center gap-1">
                                   <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground" />
-                                  <span>{displayValue(item.plugs)}</span>
+                                  <span>{displayValue(item.plugsCount)}</span>
                                 </div>
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
