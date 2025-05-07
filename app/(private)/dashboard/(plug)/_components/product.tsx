@@ -918,7 +918,7 @@ export default function Products() {
                                       className="w-full h-full object-cover"
                                     />
                                   </div>
-                                  <Link href={`/marketplace/product${item.id}`}>
+                                  <Link href={`/marketplace/product/${item.id}`}>
                                     <span className="font-medium text-xs sm:text-sm whitespace-nowrap max-w-[250px] capitalize underline text-blue-700">
                                       {truncateText(item.name, 15) || "-"}
                                     </span>
