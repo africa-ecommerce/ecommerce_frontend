@@ -5,7 +5,6 @@ import {
   User,
   CreditCard,
   Bell,
-  Settings,
   HelpCircle,
   LogOut,
   ChevronRight,
@@ -24,6 +23,18 @@ import { NotificationSection } from "./notification-section";
 import { AppSettingsSection } from "./app-settings-section";
 import { HelpSupportSection } from "./help-support-section";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Section =
   | "profile"
@@ -41,10 +52,45 @@ interface MorePageContentProps {
 
 export function MorePageContent({ onBack, userType }: MorePageContentProps) {
   const [activeSection, setActiveSection] = useState<Section | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false); // State for the confirmation modal
+  const router = useRouter();
 
   // Handler for back button in subsections
   const handleBackFromSection = () => {
     setActiveSection(null);
+  };
+
+  // Open the sign out confirmation modal
+  const openSignOutModal = () => {
+    setShowSignOutModal(true);
+  };
+
+  // Handle sign out process
+  const handleSignOut = async () => {
+    try {
+      setIsLoggingOut(true);
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json()
+
+      if (response.ok) {
+        // Successfully logged out, redirect to login page
+        router.push("/auth/login");
+        successToast(result.message)
+      } else {
+       errorToast(result.error)
+      }
+    } catch (error) {
+      errorToast("An error occurred while logging out. Please try again.");
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   const renderActiveSection = () => {
@@ -79,15 +125,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                 </Button>
                 <h1 className="text-xl md:text-2xl font-bold">More</h1>
               </div>
-              {userType === "SUPPLIER" && (
-                <Avatar className="h-10 w-10">
-                  <AvatarImage
-                    src="/placeholder.svg?height=40&width=40"
-                    alt="User"
-                  />
-                  <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
-              )}
+              
             </div>
 
             <div className="grid gap-4">
@@ -200,16 +238,16 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                   <Separator />
 
                   <button
-                    onClick={() => {}}
+                    onClick={openSignOutModal}
                     className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors"
+                    disabled={isLoggingOut}
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-destructive/10">
                         <LogOut className="h-4 w-4 text-destructive" />
                       </div>
-                      <span>Sign Out</span>
+                      <span>{isLoggingOut ? "Signing Out..." : "Sign Out"}</span>
                     </div>
-                    
                   </button>
                 </CardContent>
               </Card>
@@ -228,6 +266,28 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
       <ScrollArea className="h-[calc(100vh-100px)]">
         {renderActiveSection()}
       </ScrollArea>
+
+      {/* Sign Out Confirmation Modal */}
+      <AlertDialog open={showSignOutModal} onOpenChange={setShowSignOutModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sign Out</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to sign out of your account?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleSignOut}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isLoggingOut}
+            >
+              {isLoggingOut ? "Signing Out..." : "Sign Out"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

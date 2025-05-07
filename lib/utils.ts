@@ -51,17 +51,43 @@ export const formatTimeAgo = (seconds: string) => {
 };
 
 export const formatQuantity = (quantity: number) => {
-  return quantity >= 100 ? "99+" : quantity.toString();
+  if (quantity === 0) return "0";
+    if (quantity > 99) return "99+";
+    return quantity?.toLocaleString();
 };
+
+
 
 export const formatPrice = (price: string) => {
  
-
-
-
   return `₦${price.toLocaleString()}`;
 };
 
 export const truncateText = (text: string, maxLength: number = 20) => {
   return text?.length > maxLength ? `${text?.substring(0, maxLength)}...` : text;
 };
+
+
+
+export const getTotalStock = (item: any) => {
+    if (item.variations && item.variations.length > 0) {
+      return item.variations.reduce(
+        (sum: number, variation: any) => sum + (variation.stock || 0),
+        0
+      );
+    }
+    return item.stock;
+  };
+
+
+
+  export const getTotalStocks = (item: any) => {
+    console.log(item)
+    if (item.variations && item.variations.length > 0) {
+      return item.variations.reduce(
+        (sum: number, variation: any) => sum + (variation.stocks || 0),
+        0
+      );
+    }
+    return item.stocks
+  };

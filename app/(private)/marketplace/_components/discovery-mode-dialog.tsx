@@ -4,7 +4,7 @@ import type React from "react";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, type PanInfo } from "framer-motion";
-import { BookmarkPlus, Info, Plus, Star, Users, X } from "lucide-react";
+import { Info, Plus, Users, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -15,39 +15,80 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn, truncateText } from "@/lib/utils";
+import { cn, formatQuantity, truncateText } from "@/lib/utils";
 import Image from "next/image";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Product } from "@/types/product";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
 import { useUser } from "@/app/_components/provider/UserContext";
 import Link from "next/link";
+import { useInView } from "react-intersection-observer";
 
 interface DiscoveryModeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  products: Product[];
+  products: any[];
+  isLoading?: boolean;
+  isLoadingMore?: boolean;
+  hasNextPage?: boolean;
+  loadMore: () => void;
 }
 
 export function DiscoveryModeDialog({
   open,
   onOpenChange,
   products,
+  isLoading = false,
+  isLoadingMore = false,
+  hasNextPage = false,
+  loadMore,
 }: DiscoveryModeDialogProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState<"left" | "right" | null>(null);
-  const [likedProducts, setLikedProducts] = useState<string[]>([]);
-  const [savedProducts, setSavedProducts] = useState<string[]>([]);
   const [exitX, setExitX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const { items, addItem } = useShoppingCart();
   const [isAdding, setIsAdding] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const { userData } = useUser();
 
-  console.log("d", userData);
-
   const currentProduct = products[currentIndex];
+
+  const { ref: loadingRef, inView } = useInView({
+    threshold: 0.5,
+    triggerOnce: false,
+  });
+
+  useEffect(() => {
+    if (
+      inView &&
+      hasNextPage &&
+      !isLoadingMore &&
+      currentIndex >= products.length - 3
+    ) {
+      loadMore();
+    }
+  }, [
+    inView,
+    hasNextPage,
+    isLoadingMore,
+    loadMore,
+    currentIndex,
+    products.length,
+  ]);
+
+  useEffect(() => {
+    // Only set up the carousel if there are multiple images
+    if (!currentProduct?.images || currentProduct.images.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === currentProduct.images.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 5000); // Change image every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [currentProduct?.images]);
 
   // Check if product is already in cart
   const isInCart = items.some((item) => item.id === currentProduct?.id);
@@ -84,8 +125,7 @@ export function DiscoveryModeDialog({
   useEffect(() => {
     if (open) {
       setCurrentIndex(0);
-      setLikedProducts([]);
-      setSavedProducts([]);
+     
     }
   }, [open]);
 
@@ -133,13 +173,25 @@ export function DiscoveryModeDialog({
 
     setDirection("left");
     setExitX(-500);
-    const currentProductId = products[currentIndex].id;
-    setLikedProducts((prev) => [...prev, currentProductId]);
+    const currentProductId = products[currentIndex]?.id;
+    
 
     // Move to next product after animation
     setTimeout(() => {
       if (currentIndex < products.length - 1) {
         setCurrentIndex(currentIndex + 1);
+
+        // If we're approaching the end of loaded products, trigger loading more
+        if (
+          currentIndex >= products.length - 3 &&
+          hasNextPage &&
+          !isLoadingMore
+        ) {
+          loadMore();
+        }
+      } else if (hasNextPage) {
+        // If we're at the end but more products can be loaded, show loading state
+        loadMore();
       } else {
         onOpenChange(false);
       }
@@ -190,8 +242,20 @@ export function DiscoveryModeDialog({
             {/* Card Stack */}
             <div className="flex-1 flex items-center justify-center overflow-hidden touch-none">
               <AnimatePresence initial={false} custom={direction} mode="wait">
+                {products.length === 0 && !isLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center text-white">
+                    <div className="text-center p-6 bg-black/70 rounded-lg backdrop-blur-sm">
+                      <h3 className="text-xl font-bold mb-2">
+                        No products found
+                      </h3>
+                      <p className="text-white/70">
+                        Try adjusting your filters or check back later.
+                      </p>
+                    </div>
+                  </div>
+                )}
                 <motion.div
-                  key={currentProduct?.id}
+                  key={currentProduct?.id || `empty-product-${currentIndex}`}
                   className="absolute w-full h-full"
                   custom={direction}
                   initial={{
@@ -228,16 +292,31 @@ export function DiscoveryModeDialog({
                 >
                   <div className="relative h-full flex flex-col">
                     {/* Product Image */}
-                    <div className="relative flex-1 bg-muted overflow-hidden">
-                      <Image
-                        src={currentProduct?.images?.[0] || "/placeholder.svg"}
-                        alt={currentProduct?.name || "Product image"}
-                        className="h-full w-full object-cover"
-                        loading="eager"
-                        width={600}
-                        height={600}
-                      />
-                    </div>
+                    {/* Product Image - FIXED */}
+                    {currentProduct?.images &&
+                      currentProduct.images.length > 0 && (
+                        <div className="relative flex-1 bg-muted overflow-hidden">
+                          {currentProduct.images.map((image, index) => (
+                            <div
+                              key={index}
+                              className={`absolute inset-0 transition-opacity duration-1000 ${
+                                index === currentImageIndex
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              }`}
+                            >
+                              <Image
+                                src={image || "/placeholder.svg"}
+                                alt={currentProduct?.name || "Product image"}
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                                width={600}
+                                height={600}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
                     {/* Product Info with improved styling */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-4 text-white">
@@ -252,7 +331,10 @@ export function DiscoveryModeDialog({
                         <div className="flex items-center">
                           <Users className="mr-1 h-3.5 w-3.5" />
                           <span className="font-medium">
-                            {currentProduct?.plugsCount} plugs
+                            {formatQuantity(currentProduct?.plugsCount)}{" "}
+                            {currentProduct?.plugsCount === 1
+                              ? "plug"
+                              : "plugs"}
                           </span>
                         </div>
                       </div>
@@ -266,7 +348,7 @@ export function DiscoveryModeDialog({
 
                         <div className="flex items-center gap-1">
                           <span className="text-sm capitalize">
-                            {currentProduct?.sales || 0} sold
+                            {formatQuantity(currentProduct?.sales) || 0} sold
                           </span>
                         </div>
                       </div>
@@ -275,6 +357,20 @@ export function DiscoveryModeDialog({
                 </motion.div>
               </AnimatePresence>
             </div>
+
+            {/* Skeleton loading state */}
+            {(!currentProduct || isLoading) && (
+              <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center">
+                <div className="w-full h-full flex flex-col">
+                  <div className="flex-1 bg-gray-800 animate-pulse"></div>
+                  <div className="h-32 p-4 bg-gray-900">
+                    <div className="h-6 w-3/4 bg-gray-800 rounded animate-pulse mb-2"></div>
+                    <div className="h-4 w-1/2 bg-gray-800 rounded animate-pulse mb-4"></div>
+                    <div className="h-6 w-1/3 bg-gray-800 rounded animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Action Buttons with improved styling */}
             <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-3 sm:gap-4 px-4">
@@ -308,7 +404,9 @@ export function DiscoveryModeDialog({
                         " hover:bg-white/95 hover:text-green-500 hover:scale-105 transition-transform"
                       )}
                       onClick={handleAddToStore}
-                      disabled={isAdding || isInCart}
+                      disabled={
+                        isAdding || isInCart || currentProduct?.isPlugged
+                      }
                       aria-label="Add product to store"
                     >
                       <Plus className="h-5 w-5 md:h-6 md:w-6" />
@@ -431,6 +529,21 @@ export function DiscoveryModeDialog({
                 <div className="bg-black/50 text-white px-4 py-2 rounded-lg text-sm backdrop-blur-sm">
                   Use ← → arrow keys to navigate
                 </div>
+              </div>
+            )}
+
+            {/* Infinite scroll loading indicator */}
+            {hasNextPage && (
+              <div
+                ref={loadingRef}
+                className="absolute bottom-20 left-0 right-0 flex justify-center pointer-events-none"
+              >
+                {isLoadingMore && (
+                  <div className="bg-black/70 text-white px-4 py-2 rounded-full backdrop-blur-sm flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span className="text-sm">Loading more...</span>
+                  </div>
+                )}
               </div>
             )}
           </div>

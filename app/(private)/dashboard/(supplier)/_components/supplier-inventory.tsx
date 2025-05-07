@@ -64,7 +64,7 @@ import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import EmptyState from "@/app/_components/empty-state";
 import { EditProductModal } from "./update-product-modal";
 import { useUser } from "@/app/_components/provider/UserContext";
-import { formatPrice, truncateText } from "@/lib/utils";
+import { formatPrice, getTotalStock, truncateText } from "@/lib/utils";
 
 const LoadingSkeleton = () => (
   <Card>
@@ -179,9 +179,7 @@ export default function Inventory() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedItems, setSelectedItems] = useState([]);
   const [showEnhancedAddProduct, setShowEnhancedAddProduct] = useState(false);
-  const [showBulkUpdate, setShowBulkUpdate] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   // Add state for delete confirmation
   const [productToDelete, setProductToDelete] = useState<string>("");
@@ -219,30 +217,41 @@ export default function Inventory() {
 
   // Filter items based on selected category, filter, and search query
   const filteredItems = products?.filter((item: any) => {
-    if (selectedCategory !== "all" && item.category !== selectedCategory)
-      return false;
-    if (
-      selectedFilter === "out-of-stock" &&
-      (item.stock > 0 || item.stock === undefined)
-    )
-      return false;
-    if (
-      selectedFilter === "low-stock" &&
-      (item.stock === 0 || item.stock === undefined || item.stock > 5)
-    )
-      return false;
-    if (
-      selectedFilter === "optimal" &&
-      (item.stock === 0 || item.stock === undefined || item.stock <= 10)
-    )
-      return false;
-    if (
-      searchQuery &&
-      !item.name?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-      return false;
-    return true;
-  });
+    
+    
+const totalStock = getTotalStock(item);
+  const hasStock = totalStock !== undefined && totalStock !== null;
+  
+  // Category filter
+  if (selectedCategory !== "all" && item.category !== selectedCategory)
+    return false;
+  
+  // Stock-based filters
+  if (
+    selectedFilter === "out-of-stock" &&
+    (hasStock && totalStock > 0)
+  )
+    return false;
+  if (
+    selectedFilter === "low-stock" &&
+    (!hasStock || totalStock === 0 || totalStock > 5)
+  )
+    return false;
+  if (
+    selectedFilter === "optimal" &&
+    (!hasStock || totalStock === 0 || totalStock <= 10)
+  )
+    return false;
+  
+  // Search filter
+  if (
+    searchQuery &&
+    !item.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+    return false;
+  
+  return true;
+});
 
   // Get current items for pagination
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -252,11 +261,25 @@ export default function Inventory() {
 
   // Helper functions
   const getStockStatus = (item: any) => {
-    if (!item.stock && item.stock !== 0) return "unknown";
-    if (item.stock === 0) return "out-of-stock";
-    if (item.stock <= 5) return "low-stock";
+  // If item has variations, calculate total stock across all variations
+  if (item.variations && item.variations.length > 0) {
+    const totalStock = item.variations.reduce(
+      (sum: number, variation: any) => sum + (variation.stock || 0), 
+      0
+    );
+    
+    // Check total stock across all variations
+    if (totalStock === 0) return "out-of-stock";
+    if (totalStock <= 5) return "low-stock";
     return "optimal";
-  };
+  }
+  
+  // If no variations, use item stock directly
+  if (item.stock === undefined || item.stock === null) return "unknown";
+  if (item.stock === 0) return "out-of-stock";
+  if (item.stock <= 5) return "low-stock";
+  return "optimal";
+};
 
   const getStockStatusColor = (status: any) => {
     switch (status) {
@@ -345,15 +368,39 @@ export default function Inventory() {
 
     return {
       totalProducts: products.length,
-      lowStockItems: products.filter(
-        (item: any) =>
-          item.stock !== undefined && item.stock > 0 && item.stock <= 5
-      ).length,
-      outOfStock: products.filter((item: any) => item.stock === 0).length,
-      inventoryValue: products.reduce(
-        (total: any, item: any) => total + item.price * (item.stock || 0),
-        0
-      ),
+      lowStockItems: products.filter((item: any) => {
+      if (item.variations && item.variations.length > 0) {
+        // Get total stock across all variations
+        const totalStock = item.variations.reduce((sum: number, variation: any) => 
+          sum + (variation.stock || 0), 0);
+        return totalStock > 0 && totalStock <= 5;
+      }
+      // If no variations, use item stock directly
+      return item.stock !== undefined && item.stock > 0 && item.stock <= 5;
+    }).length,
+    outOfStock: products.filter((item: any) => {
+      if (item.variations && item.variations.length > 0) {
+        // Check if all variations have zero stock
+        const totalStock = item.variations.reduce((sum: number, variation: any) => 
+          sum + (variation.stock || 0), 0);
+        return totalStock === 0;
+      }
+      // If no variations, check item stock directly
+      return item.stock === 0;
+    }).length,
+      inventoryValue: products.reduce((total: number, item: any) => {
+        if (item.variations && item.variations.length > 0) {
+          // Calculate value across all variations
+          const variationValue = item.variations.reduce(
+            (sum: number, variation: any) =>
+              sum + item.price * (variation.stock || 0),
+            0
+          );
+          return total + variationValue;
+        }
+        // If no variations, calculate value using item stock directly
+        return total + item.price * (item.stock || 0);
+      }, 0),
     };
   }, [products]);
 
@@ -551,16 +598,7 @@ export default function Inventory() {
           <div className="flex justify-end gap-2">
             
             <div className="flex justify-end gap-2">
-              {/* <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowBulkUpdate(true)}
-                className="text-xs md:text-sm h-7 sm:h-8"
-                disabled={selectedItems.length === 0}
-              >
-                <Sliders className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1" />{" "}
-                Bulk Upload
-              </Button> */}
+              
 
               <Button
                 size="sm"
@@ -767,7 +805,7 @@ export default function Inventory() {
                                   <span
                                     className={getStockStatusColor(stockStatus)}
                                   >
-                                    {displayValue(item.stock)}
+                                    {getTotalStock(item)}
                                   </span>
                                 </div>
                               </td>

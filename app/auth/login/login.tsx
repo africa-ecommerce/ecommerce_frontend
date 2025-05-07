@@ -165,7 +165,8 @@ export default function Login() {
                   className="w-full"
                   disabled={isSubmitting}
                 >
-                  Sign in
+                  {isSubmitting ? "Signing in..." : " Sign in"}
+                 
                 </Button>
               </div>
             </form>

@@ -28,7 +28,6 @@ export default function DashboardLayout({
      const { userData } = useUser();
 
   useEffect(() => {
-    preload("/api/auth/current-user", globalFetcher);
     if(userData?.userType === "SUPPLIER") {
        preload("/api/products/supplier/", globalFetcher);
     } else if(userData?.userType === "PLUG") {
@@ -40,7 +39,7 @@ export default function DashboardLayout({
     <SWRConfig
       value={{
         fetcher: globalFetcher,
-        revalidateOnFocus: false,
+        revalidateOnFocus: true,
         dedupingInterval: 5000,
       }}
     >

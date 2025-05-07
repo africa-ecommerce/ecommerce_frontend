@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import {
@@ -8,10 +10,7 @@ import {
   useEffect,
 } from "react";
 import {
-  ShoppingCart,
   X,
-  Plus,
-  Minus,
   Trash2,
   Package,
   Check,
@@ -33,9 +32,8 @@ import {
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import { mutate } from "swr";
-import type React from "react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -43,19 +41,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert";
-import { cn } from "@/lib/utils"
+} from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
 import { truncateText } from "@/lib/utils";
-import { useCreateResource } from "@/hooks/resourceManagement/useCreateResources";
-import { z } from "zod";
 
 // Maximum allowed products in cart
 const MAX_CART_ITEMS = 20;
+
 
 interface CartItem {
   id: string;
@@ -71,13 +64,14 @@ interface ShoppingCartContextType {
   itemCount: number;
   totalProfit: number;
   isCartFull: boolean;
-
+ 
   addItem: (item: CartItem, openCart?: boolean) => boolean;
   removeItem: (itemId: string) => void;
   updateItemPrice: (itemId: string, sellingPrice: number) => void;
-
+  setIsMutate: (mutate: boolean) => void;
   clearCart: () => void;
   openCart: () => void;
+  isMutate: boolean;
 }
 
 interface PriceModalProps {
@@ -110,6 +104,26 @@ export function ShoppingCartProvider({
   const pathname = usePathname();
   const [openAddPrice, setOpenAddPrice] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string>("");
+  const [isMutate, setIsMutate] = useState(false)
+
+  useEffect(() => {
+    // Listen for the reset-is-mutate event
+    const handleResetMutate = () => {
+      setIsMutate(false);
+      console.log("isMutate reset to false");
+    };
+
+    window.addEventListener("reset-is-mutate", handleResetMutate);
+
+    // Clean up the event listener on unmount
+    return () => {
+      window.removeEventListener("reset-is-mutate", handleResetMutate);
+    };
+  }, []);
+
+
+
+
 
   // Check if current path should be excluded
   const shouldShowCart = !excludePaths.some((path) => {
@@ -123,7 +137,7 @@ export function ShoppingCartProvider({
 
   const itemCount = items.length;
   const isCartFull = itemCount >= MAX_CART_ITEMS;
-  
+
   // Calculate total profit across all items
   const totalProfit = items.reduce((sum, item) => sum + (item.profit || 0), 0);
 
@@ -132,17 +146,23 @@ export function ShoppingCartProvider({
     setIsOpen(true);
   };
 
+  // Helper function to check if a product has been submitted
+  
+
   // Modified addItem to accept an openCart parameter that defaults to false
   const addItem = (newItem: CartItem, openCart = false) => {
+    // Check if item has already been submitted
+ 
+
     // Check if cart is already full
     if (isCartFull) {
       // Show limit reached alert and open cart to show the message
       setShowLimitAlert(true);
       setIsOpen(true);
-      
+
       // Auto-hide the alert after 5 seconds
-      setTimeout(() => setShowLimitAlert(false), 5000);
-      
+      setTimeout(() => setShowLimitAlert(false), 10000);
+
       return false;
     }
 
@@ -167,7 +187,7 @@ export function ShoppingCartProvider({
     if (openCart) {
       setIsOpen(true);
     }
-    
+
     return true;
   };
 
@@ -180,7 +200,7 @@ export function ShoppingCartProvider({
   };
 
   const updateItemPrice = (itemId: string, sellingPrice: number) => {
-    setItems((prevItems) => 
+    setItems((prevItems) =>
       prevItems.map((item) => {
         if (item.id === itemId) {
           const profit = sellingPrice - item.price;
@@ -191,49 +211,57 @@ export function ShoppingCartProvider({
     );
   };
 
+  
   const handleSubmit = async () => {
-    setIsLoading(true)
-    try {
-      // Transform items to include user's price and product ID
-      const products = items.map(item => ({
-        id: item.id,
-        price: item.sellingPrice || item.price,
-      }));
+  setIsLoading(true);
+  try {
+    // Transform items to include user's price and product ID
+    const products = items.map((item) => ({
+      id: item.id,
+      price: item.sellingPrice || item.price,
+    }));
 
-      console.log("items",JSON.stringify(products))
+    console.log("items", JSON.stringify(products));
 
-       
-      const response = await fetch("/api/plug/products/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(products),
-      });
+    const response = await fetch("/api/plug/products/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(products),
+    });
 
-      const result = await response.json();
+    const result = await response.json();
 
-      if (!response.ok) {
-        errorToast(result.error);
-        return null;
-      }
-
-      successToast(result.message);
-      localStorage.removeItem("cartItems")
-      setItems([]);
-      setIsOpen(false);
-      mutate("/api/plug/products/");
-      return result;
-    } catch (error) {
-      console.error(error);
-      errorToast("Something went wrong");
+    if (!response.ok) {
+      errorToast(result.error);
       return null;
     }
-    finally{
-      setIsLoading(false)
-    }
-  };
+
+    
+
+    // Clear cart items from localStorage but keep track of submitted products
+    localStorage.removeItem("cartItems");
+    setItems([]);
+    setIsOpen(false);
+
+    // Mutate the SWR cache to refresh marketplace data
+    mutate("/api/plug/products/");
+
+    setIsMutate(true);
+    
+
+    successToast(result.message);
+    return result;
+  } catch (error) {
+    console.error(error);
+    errorToast("Something went wrong");
+    return null;
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const clearCart = () => {
-    localStorage.removeItem("cartItems")
+    localStorage.removeItem("cartItems");
     setItems([]);
     setShowLimitAlert(false);
   };
@@ -255,7 +283,7 @@ export function ShoppingCartProvider({
     updateItemPrice(selectedItemId, price);
   };
 
-  // Use effect to persist cart items in localStorage
+  // Use effect to load data from localStorage on mount
   useEffect(() => {
     // Load cart items from localStorage on initial render
     const storedItems = localStorage.getItem("cartItems");
@@ -266,6 +294,9 @@ export function ShoppingCartProvider({
         console.error("Failed to parse stored cart items:", error);
       }
     }
+
+    // Load submitted product IDs from localStorage
+
   }, []);
 
   // Save cart items to localStorage whenever they change
@@ -280,17 +311,20 @@ export function ShoppingCartProvider({
         itemCount,
         totalProfit,
         isCartFull,
+        setIsMutate,
         addItem,
         removeItem,
         updateItemPrice,
         clearCart,
         openCart,
+        isMutate,
+        
       }}
     >
       {children}
 
       {shouldShowCart && !exclude && (
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <Sheet open={isOpen} onOpenChange={setIsOpen} >
           <SheetTrigger asChild>
             <Button
               variant="outline"
@@ -305,9 +339,11 @@ export function ShoppingCartProvider({
               )}
             </Button>
           </SheetTrigger>
-          <SheetContent className="w-full sm:max-w-md flex flex-col">
+          <SheetContent className="w-full sm:max-w-md flex flex-col duration-1000">
             <SheetHeader>
-              <SheetTitle>Selected Products ({itemCount}/{MAX_CART_ITEMS})</SheetTitle>
+              <SheetTitle>
+                Selected Products ({itemCount}/{MAX_CART_ITEMS})
+              </SheetTitle>
             </SheetHeader>
 
             {/* Limit reached alert message */}
@@ -316,7 +352,8 @@ export function ShoppingCartProvider({
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Product Limit Reached</AlertTitle>
                 <AlertDescription>
-                  You can only add up to {MAX_CART_ITEMS} products at a time. Please confirm or remove some products before adding more.
+                  You can only add up to {MAX_CART_ITEMS} products at a time.
+                  Please confirm or remove some products before adding more.
                 </AlertDescription>
               </Alert>
             )}
@@ -416,7 +453,8 @@ export function ShoppingCartProvider({
                           Total Items
                         </span>
                         <span className="font-medium">
-                          {itemCount} / {MAX_CART_ITEMS} item{itemCount !== 1 ? "s" : ""}
+                          {itemCount} / {MAX_CART_ITEMS} item
+                          {itemCount !== 1 ? "s" : ""}
                         </span>
                       </div>
 
@@ -445,7 +483,7 @@ export function ShoppingCartProvider({
                         onClick={handleSubmit}
                       >
                         <Check className="h-4 w-4" />
-                        {isLoading ? "Submitting.." : "Confirm"}
+                        {isLoading ? "Submitting..." : "Confirm"}
                       </Button>
                     </div>
                   </div>
@@ -477,7 +515,6 @@ export function useShoppingCart() {
   }
   return context;
 }
-
 
 function PriceModal({
   open,
@@ -565,7 +602,6 @@ function PriceModal({
             Set a price for your product. Minimum price is ₦
             {minPrice.toLocaleString()}.
           </DialogDescription>
-         
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>

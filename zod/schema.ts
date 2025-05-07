@@ -64,6 +64,19 @@ export const ResetPasswordSchema = z
   userType: z.enum(["SUPPLIER", "PLUG"]),
 });
 
+export const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters" }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
 export const plugInfoSchema = z.object({
   niches: z.array(z.string()).optional(), // Make it optional
   generalMerchant: z.boolean().optional(),
@@ -242,60 +255,46 @@ export const supplierInfoSchema = z.object({
 
 
 
-
-
 const variationSchema = z.object({
   id: z.string(),
   size: z.string().optional(),
   color: z.string().optional(),
-  stock: z.number().min(1, "Stock cannot be negative"),
-  price: z.number().min(1, "Price is required"),
-  weight: z.number().optional(),
- 
-});
+  stock: z.number().or(z.string()).optional(),
+})
 
-
-
-// Main product schema
+// Main product schema with improved validation
 export const productFormSchema = z
   .object({
     name: z.string().min(1, "Name is required").max(100),
     category: z.string().min(1, "Category is required"),
     description: z.string().max(1000).optional(),
     size: z.string().optional(),
-    price: z
-      .number()
-      .min(1, "Price is required"),
-    stock: z.number().min(1, "Stock cannot be negative"),
+    price: z.number().min(1, "Price is required"),
+    stock: z.number().optional(),
     color: z.string().optional(),
-    weight: z.number().optional(),
     hasVariations: z.boolean(),
     variations: z.array(variationSchema),
     images: z.array(z.instanceof(File)),
     imageUrls: z.array(z.string()),
-    
   })
-  .refine(
-    (data) => {
-      if (data.hasVariations) {
-        return (
-          data.variations.length > 0 &&
-          data.variations.every(
-            (v) =>  v.price  && v.stock >= 1
-          )
-        );
-      } else {
-        // For single product, stock is required
-        return  data.stock >= 1;
-      }
-    },
-    {
-      message: "Please complete all required fields",
-      path: ["variations"],
-    }
-  );
 
+  export const updateProductFormSchema = z
+  .object({
+    name: z.string().min(1, "Name is required").max(100),
+    category: z.string().min(1, "Category is required"),
+    description: z.string().max(1000).optional(),
+    size: z.string().optional(),
+    price: z.number().min(1, "Price is required"),
+    stock: z.number().optional(),
+    color: z.string().optional(),
+    hasVariations: z.boolean(),
+    variations: z.array(variationSchema),
+    images: z.array(z.instanceof(File)).optional(),
+    imageUrls: z.array(z.string()).optional(),
+  })
 
+  export type UpdateFormData = z.infer<typeof updateProductFormSchema>
+ 
 
-// // Export the type that exactly matches the schema
-export type ProductFormData = z.infer<typeof productFormSchema>;
+// Export the type that exactly matches the schema
+export type ProductFormData = z.infer<typeof productFormSchema>

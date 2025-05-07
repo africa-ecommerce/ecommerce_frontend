@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -14,12 +12,9 @@ import {
   LineChart,
   Package,
   PackageCheck,
-  PackageOpen,
-  PlusCircle,
   RefreshCw,
   Share2,
   ShoppingBag,
-  Store,
   Truck,
   Twitter,
   Users,
@@ -48,27 +43,36 @@ import { useUser } from "@/app/_components/provider/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import useSWR from "swr";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { formatPrice, formatQuantity, formatTimeAgo, truncateText } from "@/lib/utils";
+import {
+  formatPrice,
+  formatQuantity,
+  formatTimeAgo,
+  getTotalStocks,
+  truncateText,
+} from "@/lib/utils";
 
 function getTopAndBottomSales(productsArray: any, count = 5) {
   // Create a copy of the array to avoid modifying the original
   const productsCopy = [...productsArray];
 
   // Filter out products with zero sales and sort by sales in descending order
-  const productsWithSales = productsCopy.filter(product => product.sales > 0)
+  const productsWithSales = productsCopy
+    .filter((product) => product.sales > 0)
     .sort((a, b) => b.sales - a.sales);
 
   // Get top products (limited to count)
   const topProducts = productsWithSales.slice(0, count);
 
   // Find the minimum sales value from top products
-  const minTopSales = topProducts.length > 0 ? 
-    topProducts[topProducts.length - 1].sales : Infinity;
+  const minTopSales =
+    topProducts.length > 0
+      ? topProducts[topProducts.length - 1].sales
+      : Infinity;
 
   // Get bottom products: those with sales > 0 but less than the minimum top sales
-  const bottomCandidates = productsCopy.filter(product => 
-    product.sales > 0 && product.sales < minTopSales
-  ).sort((a, b) => a.sales - b.sales);
+  const bottomCandidates = productsCopy
+    .filter((product) => product.sales > 0 && product.sales < minTopSales)
+    .sort((a, b) => a.sales - b.sales);
 
   // Take only up to 'count' bottom products
   const bottomProducts = bottomCandidates.slice(0, count);
@@ -78,7 +82,6 @@ function getTopAndBottomSales(productsArray: any, count = 5) {
     bottomProducts,
   };
 }
-
 
 // Error State
 const ErrorState = ({ onRetry }: { onRetry?: () => void }) => (
@@ -91,7 +94,12 @@ const ErrorState = ({ onRetry }: { onRetry?: () => void }) => (
           Something went wrong while loading the data
         </p>
         {onRetry && (
-          <Button variant="outline" size="sm" onClick={onRetry} className="mt-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRetry}
+            className="mt-1"
+          >
             <RefreshCw className="mr-1 h-3 w-3" />
             Retry
           </Button>
@@ -121,7 +129,12 @@ const EmptyState = ({
         <Icon className="h-6 w-6 text-muted-foreground" />
         <p className="text-muted-foreground text-xs">{message}</p>
         {actionText && onAction && (
-          <Button variant="outline" size="sm" onClick={onAction} className="mt-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onAction}
+            className="mt-1"
+          >
             {actionText}
           </Button>
         )}
@@ -263,29 +276,30 @@ export default function PlugDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const { userData: {user} } = useUser();
-  const { data, error: errorData, isLoading, mutate } = useSWR(
-    "/api/plug/products/"
-  );
+  const {
+    userData: { user },
+  } = useUser();
+  const {
+    data,
+    error: errorData,
+    isLoading,
+    mutate,
+  } = useSWR("/api/plug/products/");
 
-  const [productLoading, setProductLoading] = useState(true);
   const [socialLoading, setSocialLoading] = useState(true);
-  const [productError, setProductError] = useState(false);
   const [socialError, setSocialError] = useState(false);
 
   const [orders, setOrders] = useState<any[]>([]);
-  const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
   const [socialAnalytics, setSocialAnalytics] = useState<any[]>([]);
   const products = Array.isArray(data?.data) ? data?.data : [];
 
-const { topProducts, bottomProducts } = getTopAndBottomSales(products);
-  
+  const { topProducts, bottomProducts } = getTopAndBottomSales(products);
 
   const stockAlerts = useMemo(() => {
     if (!products.length) return [];
 
     const outOfStockItems = products
-      .filter((item: any) => item.stocks === 0)
+      .filter((item: any) => getTotalStocks(item) === 0)
       .map((item: any) => ({
         id: item.id,
         product: item.name,
@@ -297,15 +311,16 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
 
     const lowStockItems = products
       .filter(
-        (item: any) => item.stocks !== undefined && item.stocks > 0 && item.stocks <= 5
+        (item: any) =>
+          getTotalStocks(item) !== undefined && getTotalStocks(item) > 0 && getTotalStocks(item) <= 5
       )
       .map((item: any) => ({
         id: item.id,
         product: item.name,
         status: "Low Stock",
-        units: `Only ${formatQuantity(item.stocks)} units left`,
+        units: `Only ${formatQuantity(getTotalStocks(item))} units left`,
         salesRate: "Restock recommended",
-        progress: (item.stocks / 5) * 100,
+       
       }));
 
     return [...outOfStockItems, ...lowStockItems].slice(0, 3);
@@ -336,9 +351,7 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
             received: "7200",
             customer: "Kwame Osei",
             location: "Accra, Ghana",
-            items: [
-              { name: "Ankara Dress x 1", price: "₦12,500" },
-            ],
+            items: [{ name: "Ankara Dress x 1", price: "₦12,500" }],
             total: "₦12,500",
           },
           {
@@ -359,9 +372,7 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
             received: "14400",
             customer: "John Doe",
             location: "Nairobi, Kenya",
-            items: [
-              { name: "Kente Cloth x 3", price: "₦45,000" },
-            ],
+            items: [{ name: "Kente Cloth x 3", price: "₦45,000" }],
             total: "₦45,000",
           },
         ]);
@@ -374,14 +385,12 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
       }
     };
 
-   
-
     // Simulate loading social analytics
     const loadSocialAnalytics = async () => {
       try {
         setSocialLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1200));
-        
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+
         setSocialAnalytics([
           {
             platform: "Instagram",
@@ -391,8 +400,8 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
             color: "text-pink-600",
             stats: [
               { label: "Link clicks", value: "245", progress: 65 },
-              { label: "Conversions", value: "32 (13%)", progress: 13 }
-            ]
+              { label: "Conversions", value: "32 (13%)", progress: 13 },
+            ],
           },
           {
             platform: "Twitter",
@@ -402,8 +411,8 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
             color: "text-blue-500",
             stats: [
               { label: "Link clicks", value: "120", progress: 35 },
-              { label: "Conversions", value: "18 (15%)", progress: 15 }
-            ]
+              { label: "Conversions", value: "18 (15%)", progress: 15 },
+            ],
           },
           {
             platform: "YouTube",
@@ -413,8 +422,8 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
             color: "text-red-600",
             stats: [
               { label: "Link clicks", value: "85", progress: 25 },
-              { label: "Conversions", value: "8 (9%)", progress: 9 }
-            ]
+              { label: "Conversions", value: "8 (9%)", progress: 9 },
+            ],
           },
           {
             platform: "Online Store",
@@ -424,9 +433,9 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
             color: "text-purple-600",
             stats: [
               { label: "Visits", value: "320", progress: 45 },
-              { label: "Conversions", value: "48 (15%)", progress: 15 }
-            ]
-          }
+              { label: "Conversions", value: "48 (15%)", progress: 15 },
+            ],
+          },
         ]);
 
         setSocialError(false);
@@ -640,7 +649,6 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
                         <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
                           <p>{alert.units}</p>
                         </div>
-                        
                       </div>
                     </div>
                   ))}
@@ -669,8 +677,6 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
             <EmptyState
               message="No active orders found"
               icon={PackageCheck}
-              actionText="View All Orders"
-              onAction={() => console.log("View all orders clicked")}
             />
           ) : (
             <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
@@ -741,25 +747,20 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
         {/* Product Performance */}
         <section className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h2 className="text-sm sm:text-base font-semibold">Product Performance</h2>
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="text-xs"
-            >
+            <h2 className="text-sm sm:text-base font-semibold">
+              Product Performance
+            </h2>
+            <Button variant="outline" size="sm" asChild className="text-xs">
               <Link href="/dashboard/product">View All Products</Link>
             </Button>
           </div>
 
           {isLoading ? (
             <ProductLoadingSkeleton />
-          ) : productError ? (
+          ) : errorData ? (
             <ErrorState
               onRetry={() => {
-                setProductError(false);
-                setProductLoading(true);
-                setTimeout(() => setProductLoading(false), 1000);
+                mutate()
               }}
             />
           ) : (
@@ -835,7 +836,7 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex justify-between gap-1">
-                                <p className="text-xs sm:text-sm font-medium ">
+                                <p className="text-xs sm:text-sm font-medium capitalize">
                                   {truncateText(product.name, 30)}
                                 </p>
                                 <p className="text-xs sm:text-sm font-medium whitespace-nowrap">
@@ -843,7 +844,7 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
                                 </p>
                               </div>
                               <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
-                                <p>{product.sales || 0} units sold</p>
+                                <p>{formatQuantity(product.sales) || 0} units sold</p>
                               </div>
                             </div>
                           </div>
@@ -863,12 +864,7 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
             <h2 className="text-sm sm:text-base font-semibold">
               Social Analytics
             </h2>
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="text-xs"
-            >
+            <Button variant="outline" size="sm" asChild className="text-xs">
               <Link href="#">Detailed Reports</Link>
             </Button>
           </div>
@@ -927,34 +923,31 @@ const { topProducts, bottomProducts } = getTopAndBottomSales(products);
           )}
         </section>
         {/* Educational Tip */}
-        {isLoading ? 
-       (<EducationalTipSkeleton/>)
-       :  
-       (
-        <Card className="bg-primary/10 border-primary/20">
-          <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
-            <div className="rounded-full bg-primary/20 p-1.5 flex-shrink-0">
-              <LineChart className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-xs sm:text-sm">Business Tip</h3>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">
-                Sharing your products during peak hours (7-9 PM) can increase
-                your visibility by up to 40%.
-              </p>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto text-xs h-7 sm:h-8"
-            >
-              <ExternalLink className="h-3 w-3 mr-1" /> Learn
-            </Button>
-          </CardContent>
-        </Card>
-       )
-      }
-        
+        {isLoading ? (
+          <EducationalTipSkeleton />
+        ) : (
+          <Card className="bg-primary/10 border-primary/20">
+            <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+              <div className="rounded-full bg-primary/20 p-1.5 flex-shrink-0">
+                <LineChart className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-xs sm:text-sm">Business Tip</h3>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">
+                  Sharing your products during peak hours (7-9 PM) can increase
+                  your visibility by up to 40%.
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-auto text-xs h-7 sm:h-8"
+              >
+                <ExternalLink className="h-3 w-3 mr-1" /> Learn
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </TooltipProvider>
   );

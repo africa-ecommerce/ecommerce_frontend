@@ -1,4 +1,9 @@
+
+
+
 "use client";
+
+import type React from "react";
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -6,62 +11,18 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  Download,
-  Filter,
   HelpCircle,
   ImageIcon,
-  LineChart,
   Loader2,
-  MoreHorizontal,
-  PackageCheck,
-  PackagePlus,
-  Pencil,
   Plus,
-  QrCode,
-  RefreshCw,
-  Search,
-  Settings,
-  Sliders,
-  Tag,
   Trash2,
-  TrendingDown,
-  TrendingUp,
   Upload,
-  Users,
   X,
-  Zap,
 } from "lucide-react";
+import useSWR, { mutate } from "swr";
 
-import useSWR from "swr";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -69,54 +30,48 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { cn, truncateText } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFormResolver } from "@/hooks/useFormResolver";
-import { productFormSchema, ProductFormData } from "@/zod/schema";
+import { updateProductFormSchema, type UpdateFormData } from "@/zod/schema";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
-import { z } from "zod";
-import { mutate } from "swr";
-import { PRODUCT_CATEGORIES } from "@/app/constant";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export const PRODUCT_CATEGORIES = [
+  { value: "all", label: "All Categories" },
+  { value: "electronics", label: "Electronics" },
+  { value: "fashion", label: "Fashion" },
+  { value: "beauty_skincare", label: "Beauty & Skincare" },
+];
 
 interface Variation {
   id: string;
-  price: number;
-  stock: number;
+  stock?: string | number;
   size?: string;
   color?: string;
-  weight?: number;
-  [key: string]: any; // This adds an index signature
+  [key: string]: any;
+}
+
+interface EditProductModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  productId: string;
 }
 
 export function EditProductModal({
   open,
   onOpenChange,
   productId,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  productId: string;
-}) {
+}: EditProductModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropAreaRef = useRef<HTMLDivElement>(null);
-  const [selectedCategoryLabel, setSelectedCategoryLabel] = useState("");
-  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Fetch product data when modal opens
+
   const fetcher = async (url: string) => {
     const res = await fetch(url);
     if (!res.ok) {
@@ -126,117 +81,101 @@ export function EditProductModal({
     return res.json();
   };
 
+  // Fetch product data
   const {
     data: initialData,
     error,
     isLoading,
   } = useSWR(open && productId ? `/api/products/${productId}` : null, fetcher);
 
-  // Handle error
-  useEffect(() => {
-    if (error) {
-      errorToast(error.message || "Failed to fetch product");
-      onOpenChange(false);
-    }
-  }, [error, onOpenChange]);
+  console.log(initialData)
 
-  const updateProduct = async (data: ProductFormData) => {
+  const editProduct = async (data: UpdateFormData) => {
     try {
-      const formData = new FormData();
+      console.log("Submitting data:", JSON.stringify(data, null, 2));
+      console.log("Images count:", data.images?.length);
 
-      // Append the images
-      data.images.forEach((file: File) => {
+      const formData = new FormData();
+      data.images?.forEach((file: File) => {
         formData.append("images", file);
       });
 
-      // Append all other form data as JSON
       const { images, imageUrls, ...jsonData } = data;
+      console.log("JSON data:", jsonData);
       formData.append("productData", JSON.stringify(jsonData));
 
-      // Send with FormData
+      
+
       const response = await fetch(`/api/products/${productId}`, {
         method: "PUT",
         body: formData,
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        errorToast(result.error);
+        const errorResult = await response.json();
+        console.error("Server error:", errorResult);
+        errorToast(errorResult.error || "Server error");
         return null;
       }
 
-      successToast("Product updated successfully");
-      // Trigger revalidation of the product list
-      mutate("/api/products/supplier/");
-      return result.data;
+      const result = await response.json();
+      console.log("Success:", result);
+      successToast(result.message || "Product updated successfully");
+      return result;
     } catch (error) {
-      console.error(error);
+      console.error("Submission error:", error);
       errorToast("Something went wrong");
       return null;
     }
   };
 
   const {
-    form: { register, submit, errors, setValue, isSubmitting, watch, reset },
-  } = useFormResolver<ProductFormData>(
-    updateProduct,
-    productFormSchema,
+    form: { register, submit, errors, setValue, isSubmitting, watch },
+  } = useFormResolver<UpdateFormData>(
+    editProduct,
+    updateProductFormSchema,
     () => {
       onOpenChange(false);
       setCurrentStep(0);
-      mutate("/api/products/supplier/");
+       mutate("/api/products/supplier/");
+      
     },
-    initialData?.data || {
+    {
       hasVariations: false,
       variations: [],
-      images: [],
-      imageUrls: [],
+      price: undefined,
+      stock: undefined,
     }
   );
-  useEffect(() => {
-    if (initialData?.data && !isInitialized) {
-      const formattedData = {
-        ...initialData.data,
-        imageUrls:
-          initialData.data.imageUrls ||
-          (initialData.data.images && Array.isArray(initialData.data.images)
-            ? initialData.data.images
-            : []),
-        images: [],
-      };
-
-      // Reset the form with the formatted data
-      reset(formattedData);
-
-      // Handle category initialization
-      if (initialData.data.category) {
-        // Force set the category value
-        setValue("category", initialData.data.category);
-
-        // Find and set the display label
-        const categoryOption = PRODUCT_CATEGORIES.find(
-          (c) => c.value === initialData.data.category
-        );
-
-        if (categoryOption) {
-          setSelectedCategoryLabel(categoryOption.label);
-        } else {
-          setSelectedCategoryLabel(initialData.data.category);
-        }
-      }
-
-      setIsInitialized(true);
-    }
-  }, [initialData, reset, setValue, isInitialized]);
-
-  useEffect(() => {
-    if (!open) {
-      setIsInitialized(false);
-    }
-  }, [open]);
 
   const formData = watch();
+
+  // Populate form with initial data when it loads
+  useEffect(() => {
+    if (initialData?.data) {
+      setValue("name", initialData?.data.name);
+      setValue("category", initialData?.data.category);
+      setValue("price", initialData?.data.price);
+      setValue("description", initialData?.data.description || "");
+
+      // Handle variations if they exist
+      if (initialData.data.variations && initialData?.data.variations.length > 0) {
+        setValue("hasVariations", true);
+        setValue("variations", initialData?.data.variations);
+      } else {
+        setValue("hasVariations", false);
+        setValue("size", initialData?.data.size || "");
+        setValue("color", initialData?.data.color || "");
+        setValue("stock", initialData?.data.stock);
+      }
+
+      // Handle existing images
+      if (initialData?.data.images && initialData?.data.images.length > 0) {
+        const imageUrls = initialData?.data.images.map((img: any) => img);
+        setValue("imageUrls", imageUrls);
+      }
+    }
+  }, [initialData?.data, setValue]);
 
   // Handle drag and drop for images
   useEffect(() => {
@@ -274,45 +213,41 @@ export function EditProductModal({
       dropArea.removeEventListener("dragleave", handleDragLeave);
       dropArea.removeEventListener("drop", handleDrop);
     };
-  }, [open, formData.images, formData.imageUrls]);
+  }, [open]);
+
+
+  const closeModal = () => {
+    onOpenChange(false)
+    setCurrentStep(0);
+    
+  }
 
   const handleFiles = (files: FileList) => {
     const currentImages = formData.images || [];
-    const currentImageUrls = formData.imageUrls || [];
-
     const newFiles = Array.from(files).filter(
       (file) =>
-        (file.type === "image/jpeg" || file.type === "image/png") &&
-        file.size <= 5 * 1024 * 1024 // 5MB
+        (file.type === "image/jpeg" ||
+          file.type === "image/png" ||
+          file.type === "image/webp" ||
+          file.type === "image/svg+xml") &&
+        file.size <= 5 * 1024 * 1024
     );
 
     if (newFiles.length === 0) {
-      errorToast("Only JPG/PNG images under 5MB allowed");
+      errorToast("Only images under 5MB allowed");
       return;
     }
 
-    // Calculate how many more images we can add
-    const remainingSlots = 5 - currentImageUrls.length;
-
-    if (remainingSlots <= 0) {
-      errorToast("Maximum 5 images allowed");
-      return;
+    if (currentImages.length + newFiles.length > 3) {
+      errorToast("Maximum 3 images allowed");
+      newFiles.splice(3 - currentImages.length);
     }
 
-    // Trim to remaining slots if needed
-    const trimmedNewFiles =
-      remainingSlots < newFiles.length
-        ? newFiles.slice(0, remainingSlots)
-        : newFiles;
+    const newImages = [...currentImages, ...newFiles];
+    
 
-    // Generate object URLs for the new files
-    const newImageUrls = trimmedNewFiles.map((file) =>
-      URL.createObjectURL(file)
-    );
-
-    // Update the form values
-    setValue("images", [...currentImages, ...trimmedNewFiles]);
-    setValue("imageUrls", [...currentImageUrls, ...newImageUrls]);
+    setValue("images", newImages);
+   
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -325,25 +260,18 @@ export function EditProductModal({
     const newImages = [...(formData.images || [])];
     const newImageUrls = [...(formData.imageUrls || [])];
 
-    // If we're removing a URL that was initially loaded (not a new upload)
-    const isInitialImage = index < newImageUrls.length - newImages.length;
+    
 
-    if (isInitialImage) {
-      // Remove the image URL but keep track that we deleted it
-      // You might want to add a tracking array for deleted images here
-      newImageUrls.splice(index, 1);
-      setValue("imageUrls", newImageUrls);
-    } else {
-      // This is a newly uploaded image
-      const adjustedIndex = index - (newImageUrls.length - newImages.length);
-      // Revoke the object URL to prevent memory leaks
+    // If this is a new image, revoke the object URL
+    if (index >= (initialData?.data.images?.length || 0)) {
       URL.revokeObjectURL(newImageUrls[index]);
-      // Remove from both arrays
-      newImages.splice(adjustedIndex, 1);
-      newImageUrls.splice(index, 1);
-      setValue("images", newImages);
-      setValue("imageUrls", newImageUrls);
     }
+
+    newImages.splice(index, 1);
+    newImageUrls.splice(index, 1);
+
+    setValue("images", newImages);
+    setValue("imageUrls", newImageUrls);
   };
 
   const addVariation = () => {
@@ -351,9 +279,7 @@ export function EditProductModal({
       id: `var-${Date.now()}`,
       size: "",
       color: "",
-      stock: formData.stock || 0,
-      price: formData.price || 0,
-      weight: formData.weight || undefined,
+      stock: "",
     };
 
     setValue("variations", [...(formData.variations || []), newVariation]);
@@ -378,6 +304,12 @@ export function EditProductModal({
           },
         };
       }
+    } else if (field === "stock") {
+      // Special handling for stock field to handle empty string
+      updatedVariations[index] = {
+        ...updatedVariations[index],
+        [field]: value === "" ? "" : Number(value),
+      };
     } else {
       updatedVariations[index] = {
         ...updatedVariations[index],
@@ -395,11 +327,19 @@ export function EditProductModal({
     setValue("variations", updatedVariations);
   };
 
+  // Updated step navigation logic
   const goToNextStep = () => {
     if (currentStep < steps.length - 1) {
       setDirection(1);
 
-      if (currentStep === 1 && formData.hasVariations) {
+      // If we're on the first step (category) and variations are enabled,
+      // go directly to variations step (step 1)
+      if (currentStep === 0) {
+        setCurrentStep(1);
+      }
+      // If we're on variations step and variations are enabled,
+      // skip the single product details step
+      else if (currentStep === 1 && formData.hasVariations) {
         setCurrentStep(3); // Skip to media step
       } else {
         setCurrentStep(currentStep + 1);
@@ -411,6 +351,8 @@ export function EditProductModal({
     if (currentStep > 0) {
       setDirection(-1);
 
+      // If we're on media step and variations are enabled,
+      // go back to variations step
       if (currentStep === 3 && formData.hasVariations) {
         setCurrentStep(1);
       } else {
@@ -442,79 +384,47 @@ export function EditProductModal({
     { id: "review", title: "Review" },
   ];
 
-  const truncateName = (name: string, maxLength = 15) => {
-    if (!name) return "";
-    return name.length > maxLength
-      ? name.substring(0, maxLength) + "..."
-      : name;
-  };
-
+  // Improved step validation
   const isStepValid = () => {
     switch (currentStep) {
-      case 0:
-        return !!formData.name && !errors.name;
-      case 1:
-        // For variations step
+      case 0: // Category step
+        return (
+          !!formData.category &&
+          !errors.category &&
+          !!formData.name &&
+          !errors.name &&
+          !!formData.price && // Added price validation to first step
+          !errors.price
+        );
+      case 1: // Variations step
         if (formData.hasVariations) {
           // Check if at least one variation exists and has required fields
           return (
             formData.variations &&
             formData.variations.length > 0 &&
-            formData.variations.every((v) => !!v.price && v.stock >= 1)
+            formData.variations.every(
+              (v: Variation) =>
+                v.stock !== undefined && v.stock !== "" && Number(v.stock) >= 1
+            )
           );
         }
         return true; // If no variations, this step is valid
-      case 2: // For single product details
+      case 2: // Single product details
+        return !errors.stock;
+      case 3: // Media step
         return (
-          !!formData.name &&
-          !!formData.price &&
-          formData.stock !== undefined &&
-          formData.stock >= 1 && // Improved check
-          !errors.stock &&
-          !errors.name &&
-          !errors.price
-        );
-      case 3:
-        // For media step
-        return (
-          (formData.images?.length > 0 || formData.imageUrls?.length > 0) &&
+          ( formData.images?.length! > 0 || formData.imageUrls?.length! > 0) &&
           !errors.images
         );
-      case 4:
-        // For the review step specifically, double-check category
-        let categoryValue = formData.category;
-
-        // If it's not properly in form state, try to get it from the rendered label
-        if (!categoryValue && selectedCategoryLabel) {
-          const foundCategory = PRODUCT_CATEGORIES.find(
-            (c) => c.label === selectedCategoryLabel
-          );
-          if (foundCategory) {
-            categoryValue = foundCategory.value;
-          } else {
-            categoryValue = selectedCategoryLabel; // Use label as fallback
-          }
-        }
-
+      case 4: // Review step
         const baseValidation =
-          !!categoryValue && // Use our enhanced category checking
+          !!formData.category &&
           !!formData.name &&
           !!formData.price &&
           !errors.price &&
           ((formData.images && formData.images.length > 0) ||
             (formData.imageUrls && formData.imageUrls.length > 0));
-
-        if (formData.hasVariations) {
-          return (
-            baseValidation &&
-            formData.variations &&
-            formData.variations.length > 0 &&
-            formData.variations.every((v) => !!v.price && v.stock >= 1)
-          );
-        }
-
         return baseValidation;
-
       default:
         return false;
     }
@@ -523,42 +433,101 @@ export function EditProductModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log("Submit triggered", formData);
+
+    // If hasVariations is false, make sure variations is an empty array
     if (!formData.hasVariations) {
       setValue("variations", []);
     }
 
-    if (isNaN(formData.weight!)) {
-      setValue("weight", undefined);
+     if (formData.hasVariations) {
+      // When variations are enabled, reset single product fields
+      setValue("size", "");
+      setValue("color", "");
+      setValue("stock", undefined);
     }
 
-    // Make sure the category is set
-    if (!formData.category) {
-      errorToast("Please select a category");
-      return;
+    // Ensure we have valid data before submitting
+    try {
+      // Force validation using the submit function from your form hook
+      await submit(e);
+    } catch (error) {
+      console.error("Form submission error:", error);
+      errorToast("Please check all required fields");
     }
-
-    // Clean up dimension NaN values
-
-    // Make sure the form data is correctly structured before submission
-    // If there are no new images, but there are imageUrls, use those
-    if (
-      (formData.images?.length || 0) === 0 &&
-      (formData.imageUrls?.length || 0) > 0
-    ) {
-      setValue("images", formData.images);
-    }
-
-    await submit(e);
   };
+
+  
+
+  // If modal is not open, render nothing but ensure hooks are called
   if (!open) return null;
 
+  // Show loading state
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div className="flex flex-col items-center gap-4 rounded-lg bg-background p-8">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <p>Loading product data...</p>
-        </div>
+      <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-sm md:items-center">
+        <motion.div
+          initial={{ y: "100%" }}
+          animate={{ y: 0 }}
+          exit={{ y: "100%" }}
+          transition={{ type: "spring", damping: 30, stiffness: 300 }}
+          className="relative flex h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-background shadow-xl md:h-[85vh] md:max-h-[700px] md:w-[95vw] md:max-w-2xl md:rounded-lg"
+        >
+          <div className="flex items-center justify-between border-b px-4 py-3 md:px-6">
+            <h2 className="text-lg font-semibold">Edit Product</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => closeModal()}
+              className="h-9 w-9 rounded-full"
+            >
+              <X className="h-5 w-5" />
+              <span className="sr-only">Close</span>
+            </Button>
+          </div>
+          <div className="p-6 space-y-4">
+            <Skeleton className="h-8 w-1/3" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-sm md:items-center">
+        <motion.div
+          initial={{ y: "100%" }}
+          animate={{ y: 0 }}
+          exit={{ y: "100%" }}
+          transition={{ type: "spring", damping: 30, stiffness: 300 }}
+          className="relative flex h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-background shadow-xl md:h-[85vh] md:max-h-[700px] md:w-[95vw] md:max-w-2xl md:rounded-lg"
+        >
+          <div className="flex items-center justify-between border-b px-4 py-3 md:px-6">
+            <h2 className="text-lg font-semibold">Edit Product</h2>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => closeModal()}
+              className="h-9 w-9 rounded-full"
+            >
+              <X className="h-5 w-5" />
+              <span className="sr-only">Close</span>
+            </Button>
+          </div>
+          <div className="p-6 text-center">
+            <p className="text-destructive">Failed to load product data</p>
+            <Button onClick={() => closeModal()} className="mt-4">
+              Close
+            </Button>
+          </div>
+        </motion.div>
       </div>
     );
   }
@@ -575,9 +544,6 @@ export function EditProductModal({
       >
         {/* Header with swipe indicator for mobile */}
         <div className="sticky top-0 z-10 bg-background">
-          <div className="flex justify-center py-2 md:hidden">
-            <div className="h-1 w-10 rounded-full bg-muted-foreground/30"></div>
-          </div>
           <div className="flex items-center justify-between border-b px-4 py-3 md:px-6">
             <div className="flex items-center gap-2">
               {currentStep > 0 && (
@@ -596,7 +562,7 @@ export function EditProductModal({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onOpenChange(false)}
+              onClick={() => closeModal()}
               className="h-9 w-9 rounded-full"
             >
               <X className="h-5 w-5" />
@@ -605,7 +571,7 @@ export function EditProductModal({
           </div>
         </div>
 
-        {/* Progress indicator */}
+        {/* Progress indicator - simplified for mobile */}
         <div className="sticky top-[60px] z-10 border-b bg-background px-4 py-2 md:px-6">
           <div className="relative flex items-center justify-between">
             <div className="absolute left-0 right-0 top-1/2 h-[2px] bg-muted">
@@ -642,9 +608,9 @@ export function EditProductModal({
           </p>
         </div>
 
-        {/* Form content */}
+        {/* Form content with swipe gestures */}
         <ScrollArea className="flex-1">
-          <form onSubmit={submit}>
+          <form onSubmit={handleSubmit}>
             <AnimatePresence initial={false} custom={direction} mode="wait">
               <motion.div
                 key={currentStep}
@@ -656,31 +622,18 @@ export function EditProductModal({
                 transition={{ type: "tween", duration: 0.3 }}
                 className="h-full p-4 md:p-6"
               >
-                {/* Step 1: Category */}
+                {/* Step 1: Category - Now includes price field */}
                 {currentStep === 0 && (
                   <div className="space-y-6">
                     <div className="space-y-3">
-                      <Label htmlFor="category">Product Category</Label>
-
+                      <Label htmlFor="category">Product Category *</Label>
                       <Select
-                        value={formData.category || ""}
-                        onValueChange={(value) => {
-                          setValue("category", value);
-
-                          const categoryOption = PRODUCT_CATEGORIES.find(
-                            (c) => c.value === value
-                          );
-                          if (categoryOption) {
-                            setSelectedCategoryLabel(categoryOption.label);
-                          }
-                        }}
+                        {...register("category")}
+                        onValueChange={(value) => setValue("category", value)}
+                        defaultValue={formData.category}
                       >
                         <SelectTrigger id="category" className="h-12 text-base">
-                          {selectedCategoryLabel ? (
-                            <span>{selectedCategoryLabel}</span>
-                          ) : (
-                            <SelectValue placeholder="Select a category" />
-                          )}
+                          <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                         <SelectContent className="z-[200]">
                           {PRODUCT_CATEGORIES.map((category) => (
@@ -694,6 +647,11 @@ export function EditProductModal({
                           ))}
                         </SelectContent>
                       </Select>
+                      {errors.category && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.category.message}
+                        </p>
+                      )}
                     </div>
 
                     {formData.category && (
@@ -715,7 +673,7 @@ export function EditProductModal({
                     )}
 
                     <div className="space-y-3">
-                      <Label htmlFor="name">Product Name</Label>
+                      <Label htmlFor="name">Product Name *</Label>
                       <Input
                         id="name"
                         {...register("name")}
@@ -734,8 +692,29 @@ export function EditProductModal({
                       </p>
                     </div>
 
+                    {/* Price field moved to first step */}
                     <div className="space-y-3">
-                      <Label htmlFor="description">Description</Label>
+                      <Label htmlFor="price">Price (₦) *</Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        {...register("price", {
+                          valueAsNumber: true, // Convert to number automatically
+                        })}
+                        placeholder="0.00"
+                        className="h-12 text-base"
+                      />
+                      {errors.price && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.price.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="description">Description <span className="text-gray-500">(Recommended)</span></Label>
                       <div className="relative">
                         <Textarea
                           id="description"
@@ -744,6 +723,7 @@ export function EditProductModal({
                           className="min-h-[120px] text-base"
                           maxLength={1000}
                         />
+                        {/* Character counter */}
                         <div className="absolute bottom-2 right-2 text-sm text-muted-foreground">
                           {formData.description?.length || 0}/1000
                         </div>
@@ -757,7 +737,7 @@ export function EditProductModal({
                   </div>
                 )}
 
-                {/* Step 2: Variations (moved from step 3) */}
+                {/* Step 2: Variations - Enhanced with price field */}
                 {currentStep === 1 && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between rounded-lg bg-muted/30 p-4">
@@ -801,8 +781,8 @@ export function EditProductModal({
                         <ImageIcon className="mb-3 h-8 w-8 text-muted-foreground" />
                         <p className="mb-3 font-medium">No variations added</p>
                         <p className="text-sm text-muted-foreground mb-4">
-                          Add variations with different sizes, colors, prices,
-                          and stock levels.
+                          Add variations with different sizes, colors and stock
+                          levels.
                         </p>
                         <Button onClick={addVariation} type="button">
                           <Plus className="mr-2 h-4 w-4" /> Add First Variation
@@ -810,60 +790,65 @@ export function EditProductModal({
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {formData.variations?.map((variation, index) => (
-                          <div
-                            key={variation.id}
-                            className="rounded-xl border bg-muted/30 p-4"
-                          >
-                            <div className="mb-4 flex items-center justify-between">
-                              <h3 className="font-medium">
-                                Variation {index + 1}
-                              </h3>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => removeVariation(index)}
-                                className="text-destructive hover:text-destructive/80"
-                                type="button"
-                              >
-                                <Trash2 className="h-5 w-5" />
-                              </Button>
-                            </div>
+                        {formData.variations?.map(
+                          (variation: Variation, index) => (
+                            <div
+                              key={variation.id}
+                              className="rounded-xl border bg-muted/30 p-4"
+                            >
+                              <div className="mb-4 flex items-center justify-between">
+                                <h3 className="font-medium">
+                                  Variation {index + 1}
+                                </h3>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeVariation(index)}
+                                  className="text-destructive hover:text-destructive/80"
+                                  type="button"
+                                >
+                                  <Trash2 className="h-5 w-5" />
+                                </Button>
+                              </div>
 
-                            <div className="space-y-3 pb-6">
-                              <Label htmlFor={`size-${index}`}>Size *</Label>
-                              <Input
-                                id={`size-${index}`}
-                                placeholder="e.g. XL, 250ml, 32 inches"
-                                value={variation.size || ""}
-                                onChange={(e) =>
-                                  updateVariation(index, "size", e.target.value)
-                                }
-                                className="h-12 text-base"
-                              />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-3">
-                                <Label htmlFor={`price-${index}`}>
-                                  Price (₦) *
-                                </Label>
-                                <Input
-                                  id={`price-${index}`}
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  placeholder="0.00"
-                                  value={variation.price || ""}
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "price",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                  required
-                                />
+                              <div className="grid gap-4 grid-cols-2">
+                                <div className="space-y-3 pb-4">
+                                  <Label htmlFor={`size-${index}`}>
+                                    Size *
+                                  </Label>
+                                  <Input
+                                    id={`size-${index}`}
+                                    placeholder="e.g. XL, 250ml, 32 inches"
+                                    value={variation.size || ""}
+                                    onChange={(e) =>
+                                      updateVariation(
+                                        index,
+                                        "size",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="h-12 text-base"
+                                  />
+                                </div>
+
+                                <div className="space-y-3 pb-4">
+                                  <Label htmlFor={`color-${index}`}>
+                                    Color *
+                                  </Label>
+                                  <Input
+                                    id={`color-${index}`}
+                                    placeholder="e.g. Red"
+                                    value={variation.color || ""}
+                                    onChange={(e) =>
+                                      updateVariation(
+                                        index,
+                                        "color",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="h-12 text-base"
+                                  />
+                                </div>
                               </div>
 
                               <div className="space-y-3">
@@ -873,65 +858,35 @@ export function EditProductModal({
                                 <Input
                                   id={`stock-${index}`}
                                   type="number"
-                                  min="0"
-                                  placeholder="0"
-                                  value={variation.stock || ""}
+                                  placeholder="1"
+                                  value={
+                                    variation.stock === undefined
+                                      ? ""
+                                      : variation.stock
+                                  }
                                   onChange={(e) =>
                                     updateVariation(
                                       index,
                                       "stock",
-                                      Number(e.target.value)
+                                      e.target.value === ""
+                                        ? ""
+                                        : Number(e.target.value)
                                     )
                                   }
                                   className="h-12 text-base"
                                   required
                                 />
+                                {variation.stock !== "" &&
+                                  variation.stock !== undefined &&
+                                  Number(variation.stock) < 1 && (
+                                    <p className="text-xs text-red-500">
+                                      Stock must be at least 1
+                                    </p>
+                                  )}
                               </div>
                             </div>
-
-                            <div className="grid grid-cols-2 gap-4 mt-4">
-                              <div className="space-y-3">
-                                <Label htmlFor={`weight-${index}`}>
-                                  Weight (g)
-                                </Label>
-                                <Input
-                                  id={`weight-${index}`}
-                                  type="number"
-                                  min="1"
-                                  placeholder="e.g. 250"
-                                  value={variation.weight || ""}
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "weight",
-                                      Number(e.target.value)
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                />
-                              </div>
-
-                              <div className="space-y-3">
-                                <Label htmlFor={`color-${index}`}>
-                                  Color *
-                                </Label>
-                                <Input
-                                  id={`color-${index}`}
-                                  placeholder="e.g. Red"
-                                  value={variation.color || ""}
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "color",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
                     )}
 
@@ -941,16 +896,17 @@ export function EditProductModal({
                           <div className="flex items-start gap-3">
                             <HelpCircle className="h-5 w-5 flex-shrink-0" />
                             <p className="text-sm">
-                              When using variations, the general product details
-                              will be skipped. Each variation must have price
-                              and stock specified.
+                              When using variations, each variation must have
+                              stock specified. You'll skip the general product
+                              details step.
                             </p>
                           </div>
                         </div>
                       )}
                   </div>
                 )}
-                {/* Step 3: Single Product Details (moved from step 2) */}
+
+                {/* Step 3: Single Product Details - Price removed, now in step 1 */}
                 {currentStep === 2 && (
                   <div className="space-y-6">
                     <div className="rounded-lg bg-muted/30 p-4">
@@ -962,76 +918,20 @@ export function EditProductModal({
                         not using variations.
                       </p>
                     </div>
-
-                    <div className="space-y-3">
-                      <Label htmlFor="size">Size</Label>
-                      <Input
-                        id="size"
-                        {...register("size")}
-                        placeholder="e.g. XL, 250ml, 32 inches"
-                        className="h-12 text-base"
-                      />
-                      {errors.size && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {errors.size.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-4 grid-cols-2">
                       <div className="space-y-3">
-                        <Label htmlFor="price">Price (₦)</Label>
+                        <Label htmlFor="size">Size</Label>
                         <Input
-                          id="price"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          {...register("price", {
-                            valueAsNumber: true, // Convert to number automatically
-                          })}
-                          placeholder="0.00"
+                          id="size"
+                          {...register("size")}
+                          placeholder="e.g. XL, 250ml, 32 inches"
                           className="h-12 text-base"
                         />
-                        {errors.price && (
+                        {errors.size && (
                           <p className="text-xs text-red-500 mt-1">
-                            {errors.price.message}
+                            {errors.size.message}
                           </p>
                         )}
-                      </div>
-
-                      <div className="space-y-3">
-                        <Label htmlFor="stock">Stock</Label>
-                        <Input
-                          id="stock"
-                          type="number"
-                          min="0"
-                          {...register("stock", {
-                            valueAsNumber: true, // Convert to number automatically
-                          })}
-                          placeholder="0"
-                          className="h-12 text-base"
-                        />
-                        {errors.stock && (
-                          <p className="text-xs text-red-500 mt-1">
-                            {errors.stock.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-3">
-                        <Label htmlFor="weight">Weight (g)</Label>
-                        <Input
-                          id="weight"
-                          type="number"
-                          min="0"
-                          {...register("weight", {
-                            valueAsNumber: true, // Convert to number automatically
-                          })}
-                          placeholder="e.g. 250"
-                          className="h-12 text-base"
-                        />
                       </div>
 
                       <div className="space-y-3">
@@ -1045,6 +945,24 @@ export function EditProductModal({
                         />
                       </div>
                     </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="stock">Stock *</Label>
+                      <Input
+                        id="stock"
+                        type="number"
+                        {...register("stock", {
+                          valueAsNumber: true, // Convert to number automatically
+                        })}
+                        placeholder="0"
+                        className="h-12 text-base"
+                      />
+                      {errors.stock && (
+                        <p className="text-xs text-red-500 mt-1">
+                          Stock must be at least 1
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -1052,9 +970,9 @@ export function EditProductModal({
                 {currentStep === 3 && (
                   <div className="space-y-6">
                     <div className="space-y-3">
-                      <Label>Product Images</Label>
+                      <Label>Product Images *</Label>
                       <p className="text-sm text-muted-foreground">
-                        Max 5 images (5MB each) - JPG, PNG only
+                        Max 3 images (5MB each) - JPG, PNG, WEBP and SVG only
                       </p>
                       <div
                         ref={dropAreaRef}
@@ -1064,7 +982,7 @@ export function EditProductModal({
                         <input
                           ref={fileInputRef}
                           type="file"
-                          accept="image/jpeg, image/png"
+                          accept="image/jpeg, image/png, image/svg+xml, image/webp"
                           multiple
                           className="hidden"
                           onChange={handleFileInputChange}
@@ -1101,7 +1019,7 @@ export function EditProductModal({
                               className="group relative aspect-square overflow-hidden rounded-lg"
                             >
                               <img
-                                src={url}
+                                src={url || "/placeholder.svg"}
                                 alt={`Preview ${index + 1}`}
                                 className="h-full w-full object-cover"
                               />
@@ -1123,7 +1041,7 @@ export function EditProductModal({
                   </div>
                 )}
 
-                {/* Step 5: Review - Summary cards */}
+                {/* Step 5: Review - Enhanced summary cards */}
                 {currentStep === 4 && (
                   <div className="space-y-6">
                     <div className="space-y-3">
@@ -1147,7 +1065,7 @@ export function EditProductModal({
                               Name
                             </p>
                             <p className="font-medium truncate capitalize">
-                              {truncateName(formData.name) || "-"}
+                              {truncateText(formData.name) || "-"}
                             </p>
                           </div>
                           <div>
@@ -1156,6 +1074,14 @@ export function EditProductModal({
                             </p>
                             <p className="font-medium capitalize">
                               {formData.category || "-"}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">
+                              Base Price
+                            </p>
+                            <p className="font-medium">
+                              ₦{formData.price || "0.00"}
                             </p>
                           </div>
                           <div className="col-span-2 w-full">
@@ -1174,65 +1100,39 @@ export function EditProductModal({
                         </div>
                       </div>
 
-                      <div className="rounded-xl border bg-muted/30 p-5">
-                        <h4 className="mb-3 text-sm font-medium">
-                          Pricing & Specifications
-                        </h4>
-                        <div className="grid gap-4 grid-cols-2">
-                          {!formData.hasVariations && (
-                            <>
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Price
-                                </p>
-                                <p className="font-medium">
-                                  ₦{formData.price || "0.00"}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Stock
-                                </p>
-                                <p className="font-medium">
-                                  {formData.stock || "0"}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Color
-                                </p>
-                                <p className="font-medium capitalize ">
-                                  {formData.color || "-"}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Size
-                                </p>
-                                <p className="font-medium capitalize ">
-                                  {formData.size || "-"}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Weight
-                                </p>
-                                <p className="font-medium">
-                                  {formData.weight
-                                    ? `${formData.weight}g`
-                                    : "-"}
-                                </p>
-                              </div>
-                            </>
-                          )}
-                          {formData.hasVariations && (
-                            <div className="col-span-2 text-sm text-muted-foreground italic">
-                              Product is managed with variations. See details
-                              below.
+                      {!formData.hasVariations && (
+                        <div className="rounded-xl border bg-muted/30 p-5">
+                          <h4 className="mb-3 text-sm font-medium">
+                            Product Specifications
+                          </h4>
+                          <div className="grid gap-4 grid-cols-2">
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                Stock
+                              </p>
+                              <p className="font-medium">
+                                {formData.stock || "0"}
+                              </p>
                             </div>
-                          )}
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                Color
+                              </p>
+                              <p className="font-medium capitalize ">
+                                {formData.color || "-"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                Size
+                              </p>
+                              <p className="font-medium capitalize ">
+                                {formData.size || "-"}
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      )}
 
                       {formData.hasVariations &&
                         (formData.variations?.length || 0) > 0 && (
@@ -1241,64 +1141,45 @@ export function EditProductModal({
                               Variations ({formData.variations?.length})
                             </h4>
                             <div className="space-y-3">
-                              {formData.variations?.map((variation, index) => (
-                                <div
-                                  key={variation.id}
-                                  className="rounded-lg border p-3"
-                                >
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                      <p className="text-sm text-muted-foreground">
-                                        Variation
-                                      </p>
-                                      <p className="font-medium">
-                                        {variation.size || variation.color
-                                          ? [variation.size, variation.color]
-                                              .filter(Boolean)
-                                              .join(" / ")
-                                          : `Variation ${index + 1}`}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm text-muted-foreground">
-                                        Price
-                                      </p>
-                                      <p className="font-medium">
-                                        ₦
-                                        {variation.price ||
-                                          formData.price ||
-                                          "0.00"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm text-muted-foreground">
-                                        Stock
-                                      </p>
-                                      <p className="font-medium">
-                                        {variation.stock}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm text-muted-foreground">
-                                        Size
-                                      </p>
-                                      <p className="font-medium capitalize ">
-                                        {variation.size || "-"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm text-muted-foreground">
-                                        Weight
-                                      </p>
-                                      <p className="font-medium">
-                                        {variation.weight
-                                          ? `${variation.weight}g`
-                                          : "-"}
-                                      </p>
+                              {formData.variations?.map(
+                                (variation: Variation, index) => (
+                                  <div
+                                    key={variation.id}
+                                    className="rounded-lg border p-3"
+                                  >
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">
+                                          Variation
+                                        </p>
+                                        <p className="font-medium capitalize">
+                                          {variation.size || variation.color
+                                            ? [variation.size, variation.color]
+                                                .filter(Boolean)
+                                                .join(" / ")
+                                            : `Variation ${index + 1}`}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">
+                                          Stock
+                                        </p>
+                                        <p className="font-medium capitalize">
+                                          {variation.stock}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">
+                                          Size
+                                        </p>
+                                        <p className="font-medium capitalize ">
+                                          {variation.size || "-"}
+                                        </p>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              ))}
+                                )
+                              )}
                             </div>
                           </div>
                         )}
@@ -1315,7 +1196,7 @@ export function EditProductModal({
                                 className="aspect-square overflow-hidden rounded-lg"
                               >
                                 <img
-                                  src={url}
+                                  src={url || "/placeholder.svg"}
                                   alt={`Preview ${index + 1}`}
                                   className="h-full w-full object-cover"
                                 />
@@ -1340,6 +1221,7 @@ export function EditProductModal({
               onClick={() => goToPreviousStep()}
               className=""
               type="button"
+              disabled={currentStep === 0}
             >
               Back
             </Button>
@@ -1355,10 +1237,10 @@ export function EditProductModal({
                 </Button>
               ) : (
                 <Button
-                  onClick={(e) => handleSubmit(e)} // Ensure event is passed
+                  onClick={(e) => handleSubmit(e)}
                   disabled={isSubmitting || !isStepValid()}
                   className="flex-1 md:flex-none"
-                  type="button" // Change to "button" to avoid double submission
+                  type="button"
                 >
                   {isSubmitting ? (
                     <>
@@ -1366,7 +1248,7 @@ export function EditProductModal({
                       Saving...
                     </>
                   ) : (
-                    "Add Product"
+                    "Save Changes"
                   )}
                 </Button>
               )}
@@ -1408,5 +1290,25 @@ const categoryRecommendations = {
     "Include dimensions",
     "Specify materials used",
     "Add color variations",
+  ],
+  electronics: [
+    "Include technical specifications",
+    "List compatible devices",
+    "Specify warranty information",
+  ],
+  fashion: [
+    "Include size guide",
+    "Specify fabric/material",
+    "Add care instructions",
+  ],
+  beauty_skincare: [
+    "Include skin type compatibility",
+    "List key ingredients",
+    "Specify product volume/weight",
+  ],
+  all: [
+    "Include detailed description",
+    "Add high-quality images",
+    "Specify product dimensions",
   ],
 };

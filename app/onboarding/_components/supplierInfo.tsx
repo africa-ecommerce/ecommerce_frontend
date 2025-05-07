@@ -171,16 +171,15 @@ export default function SupplierInfo({
   };
 
   const handleLogoFile = (file: File) => {
-    // Check file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
       errorToast("Logo size must be less than 5MB");
       return;
     }
 
     // Check file type
-    const allowedTypes = ["image/jpeg", "image/png", "image/svg+xml"];
+    const allowedTypes = ["image/jpeg", "image/png", "image/svg+xml", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      errorToast("Only JPEG, PNG, and SVG formats are allowed");
+      errorToast("Only JPEG, PNG, WEBP and SVG formats are allowed");
       return;
     }
 
@@ -189,7 +188,6 @@ export default function SupplierInfo({
     setLogoUrl(objectUrl);
     setValue("avatar", file);
 
-    // Simulate upload completion (in a real app, you'd have an actual upload process)
     setUploading(true);
     setTimeout(() => {
       setUploading(false);
@@ -276,7 +274,7 @@ export default function SupplierInfo({
                         type="file"
                         id="avatar"
                         className="hidden"
-                        accept="image/jpeg,image/png,image/svg+xml"
+                        accept="image/jpeg,image/png,image/svg+xml,image/webp"
                         onChange={handleLogoInputChange}
                       />
 
@@ -311,7 +309,7 @@ export default function SupplierInfo({
                               or click to browse files
                             </p>
                             <p className="mt-1 text-xs text-muted-foreground">
-                              JPEG, PNG, SVG (max 5MB)
+                              JPEG, PNG, SVG, WEBP (max 5MB)
                             </p>
                           </div>
                           <Button

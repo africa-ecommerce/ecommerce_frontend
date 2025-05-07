@@ -1,7 +1,6 @@
 "use client";
 
 import { ToasterAdvanced } from "@/components/toaster-advanced";
-import { useToast } from "@/components/ui/use-toast-advanced";
 
 // This component serves as a client-side wrapper for toast functionality
 export function ClientToastWrapper() {

@@ -5,12 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
 import {
   ArrowLeft,
-  
   Package,
   Plus,
- 
   ShoppingBag,
-  Star,
   Truck,
   Users,
 } from "lucide-react";
@@ -27,8 +24,7 @@ import { CustomerReviews } from "./customer-reviews";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
 import { useUser } from "@/app/_components/provider/UserContext";
-import { formatPrice, truncateText } from "@/lib/utils";
-
+import { formatPrice, getTotalStock, truncateText } from "@/lib/utils";
 
 // Define fetcher function for useSWR
 const fetcher = async (url: string) => {
@@ -127,46 +123,47 @@ export default function ProductDetail() {
     data: product,
     error,
     isLoading,
-  } = useSWR(`/api/products/${productId}`, fetcher, {
-    revalidateOnFocus: false,
+  } = useSWR(`/api/marketplace/products/${productId}`, fetcher, {
+    revalidateOnFocus: true,
     revalidateIfStale: false,
     dedupingInterval: 600000, // 10 minutes
   });
 
   const [isAdding, setIsAdding] = useState(false);
-    const { items, addItem } = useShoppingCart()
-     const { userData: {user} } = useUser();
+  const { items, addItem } = useShoppingCart();
+  const {
+    userData: { user },
+  } = useUser();
 
-     console.log("product",product)
+  console.log("product", product);
 
-      const isInCart = items.some(item => item.id === product?.id)
-
+  const isInCart = items.some((item) => item.id === product?.id);
 
   const handleAddToStore = (e: React.MouseEvent) => {
-    e.preventDefault() // Prevent card click when clicking the button
-    e.stopPropagation() // Stop event propagation
-    
-    if (isInCart) return // Don't add if already in cart
-    
-    setIsAdding(true)
-    
+    e.preventDefault(); // Prevent card click when clicking the button
+    e.stopPropagation(); // Stop event propagation
+
+    if (isInCart) return; // Don't add if already in cart
+
+    setIsAdding(true);
+
     // Create cart item from product
     const cartItem = {
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.images && product.images.length > 0 ? product.images[0] : "/placeholder.svg",
-     
-    }
-    
-    // Add item to cart after a short delay to show loading state
-     setTimeout(() => {
-      addItem(cartItem, false) // Pass false to prevent opening the cart
-      setIsAdding(false)
-    }, 800)
-  }
+      image:
+        product.images && product.images.length > 0
+          ? product.images[0]
+          : "/placeholder.svg",
+    };
 
- 
+    // Add item to cart after a short delay to show loading state
+    setTimeout(() => {
+      addItem(cartItem, false); // Pass false to prevent opening the cart
+      setIsAdding(false);
+    }, 800);
+  };
 
   // Handle loading state with skeleton
   if (isLoading) {
@@ -225,22 +222,29 @@ export default function ProductDetail() {
                 className={`${
                   isInCart
                     ? "bg-green-100 text-green-800 hover:bg-green-100"
+                    : product?.isPlugged
+                    ? "bg-red-100 text-red-800 hover:bg-red-100"
                     : ""
                 }`}
                 onClick={handleAddToStore}
-                disabled={isAdding || isInCart || product.isPlugged}
+                disabled={isAdding || isInCart || product?.isPlugged}
                 aria-live="polite"
               >
                 {isAdding ? (
                   <span className="animate-pulse">Adding...</span>
-                ) : isInCart || product.isPlugged ? (
+                ) : isInCart ? (
                   <>
-                    <Package className="mr-1 h-3 w-3 md:h-4 md:w-4" />
+                    <Package className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="text-xs sm:text-sm">In Cart</span>
+                  </>
+                ) : product?.isPlugged ? (
+                  <>
+                    <Package className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="text-xs sm:text-sm">Added</span>
                   </>
                 ) : (
                   <>
-                    <Plus className="mr-1 h-3 w-3 md:h-4 md:w-4" />
+                    <Plus className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
                     <span className="text-xs sm:text-sm">Add to Store</span>
                   </>
                 )}
@@ -252,10 +256,7 @@ export default function ProductDetail() {
         <main className="flex-1">
           {/* Product Images */}
           <section className="p-4">
-            <ProductImageGallery
-              images={product?.images}
-             
-            />
+            <ProductImageGallery images={product?.images} />
 
             {product?.trending && (
               <Badge
@@ -276,7 +277,7 @@ export default function ProductDetail() {
                 </h2>
                 <div className="font-semibold">
                   {formatPrice(product?.price)}
-                  </div>
+                </div>
               </div>
               <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
                 <div className="flex items-center">
@@ -317,7 +318,6 @@ export default function ProductDetail() {
                         {truncateText(product?.supplier?.businessName)}
                       </div>
                       <div className="flex items-center text-sm text-muted-foreground capitalize">
-                        
                         {product?.supplier?.pickupLocation}
                       </div>
                     </div>
@@ -352,7 +352,7 @@ export default function ProductDetail() {
                 </div>
                 <div className="font-semibold text-sm">
                   {/* Fixed: Handle proper pluralization for stock units */}
-                  {formatPlural(product?.stock || 0, "unit", "units")}
+                  {formatPlural(getTotalStock(product) || 0, "unit", "units")}
                 </div>
               </div>
             </div>
@@ -377,9 +377,7 @@ export default function ProductDetail() {
               </TabsContent>
 
               <TabsContent value="specifications" className="mt-4">
-                <ProductSpecifications
-                  product={product}
-                />
+                <ProductSpecifications product={product} />
               </TabsContent>
 
               <TabsContent value="reviews" className="mt-4">
@@ -393,9 +391,6 @@ export default function ProductDetail() {
             </Tabs>
           </section>
         </main>
-
-      
-        
       </div>
     </TooltipProvider>
   );

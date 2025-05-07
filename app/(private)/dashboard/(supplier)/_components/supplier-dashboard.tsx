@@ -42,7 +42,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { formatPrice, formatQuantity, formatTimeAgo, truncateText } from "@/lib/utils";
+import { formatPrice, formatQuantity, formatTimeAgo, getTotalStock, truncateText } from "@/lib/utils";
 
 
 
@@ -242,7 +242,7 @@ export default function SupplierDashboard() {
     if (!products.length) return [];
 
     const outOfStockItems = products
-      .filter((item: any) => item.stock === 0)
+      .filter((item: any) => getTotalStock(item) === 0)
       .map((item: any) => ({
         id: item.id,
         product: item.name,
@@ -254,15 +254,15 @@ export default function SupplierDashboard() {
 
     const lowStockItems = products
       .filter(
-        (item: any) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
+        (item: any) => getTotalStock(item) !== undefined && getTotalStock(item) > 0 && getTotalStock(item) <= 5
       )
       .map((item: any) => ({
         id: item.id,
         product: item.name,
         status: "Low Stock",
-        units: `Only ${formatQuantity(item.stock)} units left`,
+        units: `Only ${formatQuantity(getTotalStock(item))} units left`,
         salesRate: "Restock recommended",
-        progress: (item.stock / 5) * 100,
+        
       }));
 
     return [...outOfStockItems, ...lowStockItems].slice(0, 3);

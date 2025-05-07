@@ -3,29 +3,22 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  BookmarkPlus,
-  Heart,
-  Info,
+ 
   Package,
   Plus,
   ShoppingBag,
-  Star,
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { cn, truncateText } from "@/lib/utils";
+import { cn, formatQuantity } from "@/lib/utils";
 import Image from "next/image";
-import { Product } from "@/types/product";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
 import { useUser } from "@/app/_components/provider/UserContext";
 
@@ -37,21 +30,16 @@ interface ProductCardProps {
 export function ProductCard({ product, className }: ProductCardProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { items, addItem } = useShoppingCart();
+    const { addItem, items } = useShoppingCart();
 
   const { userData: {user} } = useUser();
-  console.log("p", user)
 
 
   // Check if product is already in cart
   const isInCart = items.some((item) => item.id === product.id);
 
   // Format the sales count with proper handling for 0 and 99+
-  const formatCount = (count: number): string => {
-    if (count === 0) return "0";
-    if (count > 99) return "99+";
-    return count.toLocaleString();
-  };
+  
 
   // Handle image carousel effect
   useEffect(() => {
@@ -72,7 +60,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
     e.preventDefault(); // Prevent card click when clicking the button
     e.stopPropagation(); // Stop event propagation
 
-    if (isInCart) return; // Don't add if already in cart
+    // if (isInCart) return; // Don't add if already in cart
 
     setIsAdding(true);
 
@@ -89,7 +77,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
     // Add item to cart after a short delay to show loading state
     setTimeout(() => {
-      addItem(cartItem, false); // Pass false to prevent opening the cart
+      // addItem(cartItem, false); 
+      if (!isInCart) {
+        addItem(cartItem, false); // Second parameter opens the cart
+      }
       setIsAdding(false);
     }, 800);
   };
@@ -139,7 +130,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
               <div className="flex items-center">
                 <ShoppingBag className="mr-0.5 h-3 w-3" />
                 <span className="truncate">
-                  {formatCount(product?.sales || 0)} sold
+                  {formatQuantity(product?.sales || 0)} sold
                 </span>
               </div>
             </div>
@@ -160,7 +151,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
                   >
                     <Users className="h-3 w-3 flex-shrink-0" />
                     <span className="text-[10px] sm:text-xs">
-                      {formatCount(product?.plugsCount || 0)}{" "}
+                      {formatQuantity(product?.plugsCount)}{" "}
                       {product?.plugsCount === 1 ? "plug" : "plugs"}
                     </span>
                   </div>
@@ -174,7 +165,6 @@ export function ProductCard({ product, className }: ProductCardProps) {
             </div>
 
             {/* Supplier Info */}
-            
 
             {/* Action Buttons - Push to bottom with flex spacer */}
 
@@ -184,6 +174,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
                   className={`w-full h-8 sm:h-9 ${
                     isInCart
                       ? "bg-green-100 text-green-800 hover:bg-green-100"
+                      : product?.isPlugged
+                      ? "bg-red-100 text-red-800 hover:bg-red-100"
                       : ""
                   }`}
                   onClick={handleAddToStore}
@@ -192,7 +184,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
                 >
                   {isAdding ? (
                     <span className="animate-pulse">Adding...</span>
-                  ) : isInCart || product?.isPlugged ? (
+                  ) : isInCart ? (
+                    <>
+                      <Package className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="text-xs sm:text-sm">In Cart</span>
+                    </>
+                  ) : product?.isPlugged ? (
                     <>
                       <Package className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
                       <span className="text-xs sm:text-sm">Added</span>

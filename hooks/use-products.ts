@@ -1,7 +1,11 @@
+"use client"
+
 // hooks/useProducts.ts
 import useSWRInfinite from 'swr/infinite';
 import { ProductsResponse, ProductQueryParams } from '@/types/product';
 import { useDebounce } from './use-debounce';
+import { useEffect } from 'react';
+import { useShoppingCart } from '@/app/_components/provider/shoppingCartProvider';
 
 const fetcher = async (url: string) => {
   const response = await fetch(url);
@@ -26,6 +30,7 @@ export interface ProductsFilter {
 
 export function useProducts(filters: ProductsFilter, limit: number = 4) {
   const debouncedSearch = useDebounce(filters.search, 300);
+  const { isMutate } = useShoppingCart();
   
   // Convert filters to query params
   const getKey = (pageIndex: number, previousPageData: ProductsResponse | null) => {
@@ -77,7 +82,7 @@ export function useProducts(filters: ProductsFilter, limit: number = 4) {
       .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
       .join('&');
     
-    return `/api/products?${queryString}`;
+    return `/api/marketplace/products?${queryString}`;
   };
 
   const {
@@ -89,9 +94,28 @@ export function useProducts(filters: ProductsFilter, limit: number = 4) {
     mutate
   } = useSWRInfinite<ProductsResponse>(getKey, fetcher, {
     revalidateFirstPage: false,
-    revalidateOnFocus: false,
+    revalidateOnFocus: true,
     persistSize: true,
   });
+
+
+
+
+  useEffect(() => {
+  // This will trigger a refresh of all product data when isMutate is true
+  if (isMutate) {
+    console.log("Mutating products data due to isMutate flag");
+    mutate().then(() => {
+      // Reset the isMutate flag in the shopping cart context after mutation is complete
+      // This is the important part to prevent continuous mutations
+      if (typeof window !== 'undefined') {
+        // Use a custom event to communicate back to the ShoppingCartProvider
+        const resetEvent = new CustomEvent('reset-is-mutate');
+        window.dispatchEvent(resetEvent);
+      }
+    });
+  }
+}, [isMutate]);
 
   const isLoading = !data && !error;
   const isLoadingMore = size > 0 && data && typeof data[size - 1] === 'undefined';

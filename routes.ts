@@ -37,7 +37,7 @@ export const authRoutes = [
 export const supplierRoutes = ["/dashboard/inventory", "/dashboard/order"];
 
 /**@type {string[]}*/
-export const plugRoutes = ["/dashboard/store", "/dashboard/product"];
+export const plugRoutes = ["/dashboard/store", "/dashboard/product", "/studio"];
 
 // // Common  routes accessible to all authenticated users
 // /**@type {string[]}*/

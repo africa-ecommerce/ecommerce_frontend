@@ -1,22 +1,252 @@
-"use client"
 
-import { useState } from "react"
-import { ChevronLeft, Camera, Mail, Phone, MapPin, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+
+"use client";
+
+import { useState, useEffect } from "react";
+import {
+  ChevronLeft,
+  Camera,
+  Phone,
+  MapPin,
+  User,
+  Eye,
+  EyeOff,
+  Loader2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useFormResolver } from "@/hooks/useFormResolver";
+import { toast } from "@/components/ui/use-toast";
+import { z } from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useUser } from "@/app/_components/provider/UserContext";
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
+import { mutate } from "swr";
+import { passwordSchema, profileSchema, supplierInfoSchema } from "@/zod/schema";
+
+// Schemas
+
+
+const NIGERIAN_STATES = [
+  "Abia",
+  "Adamawa",
+  "Akwa Ibom",
+  "Anambra",
+  "Bauchi",
+  "Bayelsa",
+  "Benue",
+  "Borno",
+  "Cross River",
+  "Delta",
+  "Ebonyi",
+  "Edo",
+  "Ekiti",
+  "Enugu",
+  "Gombe",
+  "Imo",
+  "Jigawa",
+  "Kaduna",
+  "Kano",
+  "Katsina",
+  "Kebbi",
+  "Kogi",
+  "Kwara",
+  "Lagos",
+  "Nasarawa",
+  "Niger",
+  "Ogun",
+  "Ondo",
+  "Osun",
+  "Oyo",
+  "Plateau",
+  "Rivers",
+  "Sokoto",
+  "Taraba",
+  "Yobe",
+  "Zamfara",
+  "FCT",
+];
 
 interface ProfileSectionProps {
-  onBack: () => void
-  userType: "PLUG" | "SUPPLIER"
+  onBack: () => void;
+  userType: "PLUG" | "SUPPLIER";
 }
 
 export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
-  const [isEditing, setIsEditing] = useState(false)
+  const {
+    userData: { user },
+  } = useUser();
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Get user data based on user type
+  const userData = userType === "PLUG" ? user?.plug : user?.supplier;
+
+  // Prepare initial form values with empty defaults to prevent uncontrolled->controlled transition
+  const getInitialProfileValues = () => ({
+    businessName: userData?.businessName || "",
+    phone: userData?.phone || "",
+    state: userType === "PLUG" ? (userData?.state as any) || "" : undefined,
+    pickupLocation:
+      userType === "SUPPLIER" ? userData?.pickupLocation || "" : undefined,
+  });
+
+  // Update profile function
+  const updateProfile = async (data: any) => {
+    const formData = new FormData();
+
+    if (userType === "SUPPLIER" && avatarFile) {
+      formData.append("avatar", avatarFile);
+    }
+
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value as string);
+      }
+    });
+
+    // Log formData entries in a way that shows the actual data
+    console.log("FormData contents:");
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
+    try {
+      const response = await fetch("/api/auth/update-profile", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        errorToast(result.error);
+        return null;
+      }
+
+      successToast(result.message);
+
+      // Refresh user data after update
+      await mutate("/api/auth/current-user");
+
+      // Reset the form with the new values to ensure the updated data is displayed
+      profileForm.reset(data);
+
+      return result;
+    } catch (error) {
+      errorToast("Something went wrong");
+      return null;
+    }
+  };
+
+  // JSON-Compatible update profile function
+  
+  // Update password function
+  const updatePassword = async (data: any) => {
+    try {
+      const response = await fetch("/api/auth/update-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error(result.error);
+        errorToast(result.error || "Failed to update password");
+        return null;
+      }
+
+      successToast(result.message || "Password updated successfully");
+      passwordForm.reset();
+      return result;
+    } catch (error) {
+      errorToast("Something went wrong");
+      return null;
+    }
+  };
+
+  // Profile form
+  const profileFormSchema =
+    userType === "SUPPLIER" ? supplierInfoSchema : profileSchema;
+  const { form: profileForm } = useFormResolver(
+    updateProfile,
+    profileFormSchema,
+    undefined,
+    getInitialProfileValues()
+  );
+
+  // Password form
+  const { form: passwordForm } = useFormResolver(
+    updatePassword,
+    passwordSchema,
+    undefined,
+    {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    }
+  );
+
+  // Handle avatar change
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Set initial avatar preview if available
+  useEffect(() => {
+    if (userType === "SUPPLIER" && userData?.avatar) {
+      setAvatarPreview(userData.avatar);
+    }
+  }, [userData, userType]);
+
+  // Update form values when userData changes
+  useEffect(() => {
+    if (userData) {
+      const initialValues = getInitialProfileValues();
+      profileForm.reset(initialValues);
+    }
+  }, [userData]);
 
   return (
     <div className="animate-fade-in">
@@ -37,122 +267,279 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Profile Information</CardTitle>
-              <CardDescription className="text-sm">Manage your personal information</CardDescription>
+              <CardDescription className="text-sm">
+                Manage your personal information
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              {userType === "SUPPLIER" && (
-              <div className="flex flex-col items-center mb-6">
-                <div className="relative mb-4">
-                  <Avatar className="h-24 w-24 border-4 border-background">
-                    <AvatarImage src="/placeholder.svg?height=96&width=96" alt="User" />
-                    <AvatarFallback className="text-2xl">JD</AvatarFallback>
-                  </Avatar>
-                  <Button size="icon" variant="secondary" className="absolute bottom-0 right-0 h-8 w-8 rounded-full">
-                    <Camera className="h-4 w-4" />
+              <Form {...profileForm}>
+                <form onSubmit={profileForm.submit} className="space-y-6">
+                  {userType === "SUPPLIER" && (
+                    <div className="flex flex-col items-center mb-6">
+                      <div className="relative mb-4">
+                        <Avatar className="h-24 w-24 border-4 border-background">
+                          <AvatarImage
+                            src={
+                              avatarPreview ||
+                              "/placeholder.svg?height=96&width=96"
+                            }
+                            alt="User"
+                          />
+                          <AvatarFallback className="text-2xl">
+                            {userData?.businessName
+                              ?.slice(0, 2)
+                              .toUpperCase() || "BZ"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <label htmlFor="avatar-upload">
+                          <Button
+                            size="icon"
+                            variant="secondary"
+                            className="absolute bottom-0 right-0 h-8 w-8 rounded-full"
+                            type="button"
+                            onClick={() =>
+                              document.getElementById("avatar-upload")?.click()
+                            }
+                          >
+                            <Camera className="h-4 w-4" />
+                          </Button>
+                          <input
+                            id="avatar-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleAvatarChange}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
+                  <FormField
+                    control={profileForm.control}
+                    name="businessName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Business Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={profileForm.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="+2348012345678" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {userType === "PLUG" ? (
+                    <FormField
+                      control={profileForm.control}
+                      name="state"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>State</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value || ""}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select your state" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {NIGERIAN_STATES.map((state) => (
+                                <SelectItem key={state} value={state}>
+                                  {state}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ) : (
+                    <FormField
+                      control={profileForm.control}
+                      name="pickupLocation"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Pickup Location</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={profileForm.isSubmitting}
+                  >
+                    {profileForm.isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
                   </Button>
-                </div>
-                
-              </div>
-              )}
-
-              {isEditing ? (
-                <div className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="fullName">Business Name</Label>
-                    <Input id="fullName" defaultValue="John Doe" />
-                  </div>
-
-                 
-                  <div className="grid gap-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input id="phone" type="tel" defaultValue="+1 (555) 123-4567" />
-                  </div>
-
-                  <div className="grid gap-2">
-                    <Label htmlFor="address">{userType ==="SUPPLIER" ? "Pickup Location" : "Address"}</Label>
-                    <Input id="address" defaultValue="123 Main St, Anytown, USA" />
-                  </div>
-
-                  <div className="flex gap-2 justify-end">
-                    <Button variant="outline" onClick={() => setIsEditing(false)}>
-                      Cancel
-                    </Button>
-                    <Button onClick={() => setIsEditing(false)}>Save Changes</Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 py-2">
-                    <User className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Business Name</p>
-                      <p>John Doe</p>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  
-                 
-
-                  <div className="flex items-center gap-3 py-2">
-                    <Phone className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Phone Number</p>
-                      <p>+1 (555) 123-4567</p>
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div className="flex items-center gap-3 py-2">
-                    <MapPin className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Address</p>
-                      <p>123 Main St, Anytown, USA</p>
-                    </div>
-                  </div>
-
-                  <Button className="w-full" onClick={() => setIsEditing(true)}>
-                    Edit Profile
-                  </Button>
-                </div>
-              )}
+                </form>
+              </Form>
             </CardContent>
           </Card>
-
-          
         </TabsContent>
 
         <TabsContent value="security" className="space-y-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Password</CardTitle>
-              <CardDescription className="text-sm">Change your password</CardDescription>
+              <CardDescription className="text-sm">
+                Change your password
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <Input id="currentPassword" type="password" />
-              </div>
+            <CardContent>
+              <Form {...passwordForm}>
+                <form onSubmit={passwordForm.submit} className="space-y-4">
+                  <FormField
+                    control={passwordForm.control}
+                    name="currentPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Current Password</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              {...field}
+                              type={showCurrentPassword ? "text" : "password"}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-0 top-0 h-full"
+                              onClick={() =>
+                                setShowCurrentPassword(!showCurrentPassword)
+                              }
+                            >
+                              {showCurrentPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <div className="grid gap-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input id="newPassword" type="password" />
-              </div>
+                  <FormField
+                    control={passwordForm.control}
+                    name="newPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New Password</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              {...field}
+                              type={showNewPassword ? "text" : "password"}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-0 top-0 h-full"
+                              onClick={() =>
+                                setShowNewPassword(!showNewPassword)
+                              }
+                            >
+                              {showNewPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <div className="grid gap-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input id="confirmPassword" type="password" />
-              </div>
+                  <FormField
+                    control={passwordForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm New Password</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              {...field}
+                              type={showConfirmPassword ? "text" : "password"}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-0 top-0 h-full"
+                              onClick={() =>
+                                setShowConfirmPassword(!showConfirmPassword)
+                              }
+                            >
+                              {showConfirmPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <Button className="w-full">Change Password</Button>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={passwordForm.isSubmitting}
+                  >
+                    {passwordForm.isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Updating Password...
+                      </>
+                    ) : (
+                      "Change Password"
+                    )}
+                  </Button>
+                </form>
+              </Form>
             </CardContent>
           </Card>
-
-         
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

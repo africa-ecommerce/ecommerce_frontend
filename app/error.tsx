@@ -49,7 +49,7 @@ export default function Error({
         <div className="flex flex-col sm:flex-row gap-4">
           <Button onClick={() => reset()}>Try Again</Button>
           <Button variant="outline" asChild>
-            <Link href="/">Go to Homepage</Link>
+            <Link href="/">Contact support</Link>
           </Button>
         </div>
       </div>

@@ -1,4 +1,7 @@
+
 "use client";
+
+import type React from "react";
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,15 +15,11 @@ import {
   Plus,
   Trash2,
   Upload,
-  Users,
   X,
-  Zap,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
-
 import {
   Select,
   SelectContent,
@@ -30,27 +29,27 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-
 import { Label } from "@/components/ui/label";
 import { cn, truncateText } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useFormResolver } from "@/hooks/useFormResolver";
-import { productFormSchema, ProductFormData } from "@/zod/schema";
+import { productFormSchema, type ProductFormData } from "@/zod/schema";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import { mutate } from "swr";
-import { PRODUCT_CATEGORIES } from "@/app/constant";
 
-
+export const PRODUCT_CATEGORIES = [
+  { value: "all", label: "All Categories" },
+  { value: "electronics", label: "Electronics" },
+  { value: "fashion", label: "Fashion" },
+  { value: "beauty_skincare", label: "Beauty & Skincare" },
+];
 
 interface Variation {
   id: string;
-  price: number;
-  stock: number;
+  stock?: string | number;
   size?: string;
   color?: string;
-  weight?: number;
-  // dimensions?: Dimensions;
-  [key: string]: any; // This adds an index signature
+  [key: string]: any;
 }
 
 export function AddProductModal({
@@ -110,12 +109,13 @@ export function AddProductModal({
     () => {
       onOpenChange(false);
       setCurrentStep(0);
-
       mutate("/api/products/supplier/");
     },
     {
       hasVariations: false,
       variations: [],
+      price: undefined, // Initialize price as undefined
+      stock: undefined, // Initialize stock as undefined
     }
   );
 
@@ -157,14 +157,17 @@ export function AddProductModal({
       dropArea.removeEventListener("dragleave", handleDragLeave);
       dropArea.removeEventListener("drop", handleDrop);
     };
-  }, [open]); // Added open as a dependency
+  }, [open]);
 
   const handleFiles = (files: FileList) => {
     const currentImages = formData.images || [];
     const newFiles = Array.from(files).filter(
       (file) =>
-        (file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/webp" || file.type === "image/svg+xml") &&
-        file.size <= 5 * 1024 * 1024 // 5MB
+        (file.type === "image/jpeg" ||
+          file.type === "image/png" ||
+          file.type === "image/webp" ||
+          file.type === "image/svg+xml") &&
+        file.size <= 5 * 1024 * 1024
     );
 
     if (newFiles.length === 0) {
@@ -172,9 +175,9 @@ export function AddProductModal({
       return;
     }
 
-    if (currentImages.length + newFiles.length > 5) {
-      errorToast("Maximum 5 images allowed");
-      newFiles.splice(5 - currentImages.length);
+    if (currentImages.length + newFiles.length > 3) {
+      errorToast("Maximum 3 images allowed");
+      newFiles.splice(3 - currentImages.length);
     }
 
     const newImages = [...currentImages, ...newFiles];
@@ -210,14 +213,12 @@ export function AddProductModal({
       id: `var-${Date.now()}`,
       size: "",
       color: "",
-      stock: formData.stock || 0,
-      price: formData.price || 0,
-      weight: formData.weight || 0,
-     
+      stock: "", // Initialize as empty string instead of undefined
     };
 
     setValue("variations", [...(formData.variations || []), newVariation]);
   };
+
 
   const updateVariation = (
     index: number,
@@ -238,6 +239,12 @@ export function AddProductModal({
           },
         };
       }
+    } else if (field === "stock") {
+      // Special handling for stock field to handle empty string
+      updatedVariations[index] = {
+        ...updatedVariations[index],
+        [field]: value === "" ? "" : Number(value),
+      };
     } else {
       updatedVariations[index] = {
         ...updatedVariations[index],
@@ -248,6 +255,7 @@ export function AddProductModal({
     setValue("variations", updatedVariations);
   };
 
+
   const removeVariation = (index: number) => {
     const updatedVariations = [...(formData.variations || [])];
     updatedVariations.splice(index, 1);
@@ -255,14 +263,19 @@ export function AddProductModal({
     setValue("variations", updatedVariations);
   };
 
-  
+  // Updated step navigation logic
   const goToNextStep = () => {
     if (currentStep < steps.length - 1) {
       setDirection(1);
 
+      // If we're on the first step (category) and variations are enabled,
+      // go directly to variations step (step 1)
+      if (currentStep === 0) {
+        setCurrentStep(1);
+      }
       // If we're on variations step and variations are enabled,
       // skip the single product details step
-      if (currentStep === 1 && formData.hasVariations) {
+      else if (currentStep === 1 && formData.hasVariations) {
         setCurrentStep(3); // Skip to media step
       } else {
         setCurrentStep(currentStep + 1);
@@ -306,86 +319,70 @@ export function AddProductModal({
     { id: "media", title: "Media" },
     { id: "review", title: "Review" },
   ];
-  
 
-  // Custom validation function for steps
+  // Improved step validation
   const isStepValid = () => {
     switch (currentStep) {
-      case 0:
+      case 0: // Category step
         return (
           !!formData.category &&
           !errors.category &&
           !!formData.name &&
-          !errors.name
-        );
-      case 1:
-        // For variations step
-        if (formData.hasVariations) {
-          // Check if at least one variation exists and has required fields
-          return (
-            formData.variations &&
-            formData.variations.length > 0 &&
-            formData.variations.every((v) => !!v.price && v.stock >= 1)
-          );
-        }
-        return true; // If no variations, this step is valid
-      case 2: // For single product details
-        return (
-          
-          !!formData.price &&
-          formData.stock !== undefined &&
-          formData.stock >= 1 && // Improved check
-          !errors.stock &&
+          !errors.name &&
+          !!formData.price && // Added price validation to first step
           !errors.price
         );
-      case 3:
-        // For media step
+      case 1: // Variations step
+         if (formData.hasVariations) {
+        // Check if at least one variation exists and has required fields
+        return (
+          formData.variations &&
+          formData.variations.length > 0 &&
+          formData.variations.every((v: Variation) => 
+            v.stock !== undefined && 
+            v.stock !== "" && 
+            Number(v.stock) >= 1
+          ))
+        }
+        return true; // If no variations, this step is valid
+      case 2: // Single product details
+        return (
+         !errors.stock
+        );
+      case 3: // Media step
         return (
           (formData.images?.length > 0 || formData.imageUrls?.length > 0) &&
           !errors.images
         );
-      case 4:
-        // For review step
+      case 4: // Review step
         const baseValidation =
           !!formData.category &&
           !!formData.name &&
           !!formData.price &&
           !errors.price &&
-          formData.stock > 0 &&
           ((formData.images && formData.images.length > 0) ||
             (formData.imageUrls && formData.imageUrls.length > 0));
-
-        // Validation depends on whether we have variations
-        if (formData.hasVariations) {
-          return (
-            baseValidation &&
-            formData.variations &&
-            formData.variations.length > 0 &&
-            formData.variations.every((v) => !!v.price && v.stock >= 1)
-          );
-        }
-
-        return baseValidation;
+        return baseValidation
       default:
         return false;
     }
   };
-
-  // Update the handleSubmit function
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     console.log("Submit triggered", formData);
 
-    // Clean up NaN values before submission
-    if (isNaN(formData.weight!)) {
-      setValue("weight", undefined);
-    }
-
     // If hasVariations is false, make sure variations is an empty array
     if (!formData.hasVariations) {
       setValue("variations", []);
+    }
+
+    if (formData.hasVariations) {
+      // When variations are enabled, reset single product fields
+      setValue("size", "");
+      setValue("color", "");
+      setValue("stock", undefined);
     }
 
     // Ensure we have valid data before submitting
@@ -397,6 +394,7 @@ export function AddProductModal({
       errorToast("Please check all required fields");
     }
   };
+
 
   // If modal is not open, render nothing but ensure hooks are called
   if (!open) return null;
@@ -413,9 +411,7 @@ export function AddProductModal({
       >
         {/* Header with swipe indicator for mobile */}
         <div className="sticky top-0 z-10 bg-background">
-          <div className="flex justify-center py-2 md:hidden">
-            <div className="h-1 w-10 rounded-full bg-muted-foreground/30"></div>
-          </div>
+         
           <div className="flex items-center justify-between border-b px-4 py-3 md:px-6">
             <div className="flex items-center gap-2">
               {currentStep > 0 && (
@@ -457,7 +453,6 @@ export function AddProductModal({
             {steps.map((step, index) => (
               <div
                 key={step.id}
-                // onClick={() => setCurrentStep(index)}
                 className={cn(
                   "relative z-10 flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium transition-colors",
                   index < currentStep
@@ -495,11 +490,11 @@ export function AddProductModal({
                 transition={{ type: "tween", duration: 0.3 }}
                 className="h-full p-4 md:p-6"
               >
-                {/* Step 1: Category - Improved mobile layout */}
+                {/* Step 1: Category - Now includes price field */}
                 {currentStep === 0 && (
                   <div className="space-y-6">
                     <div className="space-y-3">
-                      <Label htmlFor="category">Product Category</Label>
+                      <Label htmlFor="category">Product Category *</Label>
                       <Select
                         {...register("category")}
                         onValueChange={(value) => setValue("category", value)}
@@ -520,6 +515,11 @@ export function AddProductModal({
                           ))}
                         </SelectContent>
                       </Select>
+                      {errors.category && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.category.message}
+                        </p>
+                      )}
                     </div>
 
                     {formData.category && (
@@ -541,7 +541,7 @@ export function AddProductModal({
                     )}
 
                     <div className="space-y-3">
-                      <Label htmlFor="name">Product Name</Label>
+                      <Label htmlFor="name">Product Name *</Label>
                       <Input
                         id="name"
                         {...register("name")}
@@ -560,8 +560,29 @@ export function AddProductModal({
                       </p>
                     </div>
 
+                    {/* Price field moved to first step */}
                     <div className="space-y-3">
-                      <Label htmlFor="description">Description</Label>
+                      <Label htmlFor="price">Price (₦) *</Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        {...register("price", {
+                          valueAsNumber: true, // Convert to number automatically
+                        })}
+                        placeholder="0.00"
+                        className="h-12 text-base"
+                      />
+                      {errors.price && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {errors.price.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="description">Description <span className="text-gray-500">(Recommended)</span></Label>
                       <div className="relative">
                         <Textarea
                           id="description"
@@ -584,7 +605,7 @@ export function AddProductModal({
                   </div>
                 )}
 
-                {/* Step 2: Variations (moved from step 3) */}
+                {/* Step 2: Variations - Enhanced with price field */}
                 {currentStep === 1 && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between rounded-lg bg-muted/30 p-4">
@@ -628,8 +649,8 @@ export function AddProductModal({
                         <ImageIcon className="mb-3 h-8 w-8 text-muted-foreground" />
                         <p className="mb-3 font-medium">No variations added</p>
                         <p className="text-sm text-muted-foreground mb-4">
-                          Add variations with different sizes, colors, prices,
-                          and stock levels.
+                          Add variations with different sizes, colors and stock
+                          levels.
                         </p>
                         <Button onClick={addVariation} type="button">
                           <Plus className="mr-2 h-4 w-4" /> Add First Variation
@@ -637,60 +658,65 @@ export function AddProductModal({
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {formData.variations?.map((variation, index) => (
-                          <div
-                            key={variation.id}
-                            className="rounded-xl border bg-muted/30 p-4"
-                          >
-                            <div className="mb-4 flex items-center justify-between">
-                              <h3 className="font-medium">
-                                Variation {index + 1}
-                              </h3>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => removeVariation(index)}
-                                className="text-destructive hover:text-destructive/80"
-                                type="button"
-                              >
-                                <Trash2 className="h-5 w-5" />
-                              </Button>
-                            </div>
+                        {formData.variations?.map(
+                          (variation: Variation, index) => (
+                            <div
+                              key={variation.id}
+                              className="rounded-xl border bg-muted/30 p-4"
+                            >
+                              <div className="mb-4 flex items-center justify-between">
+                                <h3 className="font-medium">
+                                  Variation {index + 1}
+                                </h3>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeVariation(index)}
+                                  className="text-destructive hover:text-destructive/80"
+                                  type="button"
+                                >
+                                  <Trash2 className="h-5 w-5" />
+                                </Button>
+                              </div>
 
-                            <div className="space-y-3 pb-6">
-                              <Label htmlFor={`size-${index}`}>Size *</Label>
-                              <Input
-                                id={`size-${index}`}
-                                placeholder="e.g. XL, 250ml, 32 inches"
-                                value={variation.size || ""}
-                                onChange={(e) =>
-                                  updateVariation(index, "size", e.target.value)
-                                }
-                                className="h-12 text-base"
-                              />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-3">
-                                <Label htmlFor={`price-${index}`}>
-                                  Price (₦) *
-                                </Label>
-                                <Input
-                                  id={`price-${index}`}
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  placeholder="0.00"
-                                  value={variation.price || undefined}
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "price",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                  required
-                                />
+                              <div className="grid gap-4 grid-cols-2">
+                                <div className="space-y-3 pb-4">
+                                  <Label htmlFor={`size-${index}`}>
+                                    Size *
+                                  </Label>
+                                  <Input
+                                    id={`size-${index}`}
+                                    placeholder="e.g. XL, 250ml, 32 inches"
+                                    value={variation.size || ""}
+                                    onChange={(e) =>
+                                      updateVariation(
+                                        index,
+                                        "size",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="h-12 text-base"
+                                  />
+                                </div>
+
+                                <div className="space-y-3 pb-4">
+                                  <Label htmlFor={`color-${index}`}>
+                                    Color *
+                                  </Label>
+                                  <Input
+                                    id={`color-${index}`}
+                                    placeholder="e.g. Red"
+                                    value={variation.color || ""}
+                                    onChange={(e) =>
+                                      updateVariation(
+                                        index,
+                                        "color",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="h-12 text-base"
+                                  />
+                                </div>
                               </div>
 
                               <div className="space-y-3">
@@ -700,65 +726,35 @@ export function AddProductModal({
                                 <Input
                                   id={`stock-${index}`}
                                   type="number"
-                                  min="0"
-                                  placeholder="0"
-                                  value={variation.stock || undefined}
+                                  placeholder="1"
+                                  value={
+                                    variation.stock === undefined
+                                      ? ""
+                                      : variation.stock
+                                  }
                                   onChange={(e) =>
                                     updateVariation(
                                       index,
                                       "stock",
-                                      Number(e.target.value)
+                                      e.target.value === ""
+                                        ? ""
+                                        : Number(e.target.value)
                                     )
                                   }
                                   className="h-12 text-base"
                                   required
                                 />
+                                {variation.stock !== "" &&
+                                  variation.stock !== undefined &&
+                                  Number(variation.stock) < 1 && (
+                                    <p className="text-xs text-red-500">
+                                      Stock must be at least 1
+                                    </p>
+                                  )}
                               </div>
                             </div>
-
-                            <div className="grid grid-cols-2 gap-4 mt-4">
-                              <div className="space-y-3">
-                                <Label htmlFor={`weight-${index}`}>
-                                  Weight (g)
-                                </Label>
-                                <Input
-                                  id={`weight-${index}`}
-                                  type="number"
-                                  min="1"
-                                  placeholder="e.g. 250"
-                                  value={variation.weight || undefined}
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "weight",
-                                      Number(e.target.value)
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                />
-                              </div>
-
-                              <div className="space-y-3">
-                                <Label htmlFor={`color-${index}`}>
-                                  Color *
-                                </Label>
-                                <Input
-                                  id={`color-${index}`}
-                                  placeholder="e.g. Red"
-                                  value={variation.color || ""}
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "color",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                          )
+                        )}
                       </div>
                     )}
 
@@ -768,16 +764,17 @@ export function AddProductModal({
                           <div className="flex items-start gap-3">
                             <HelpCircle className="h-5 w-5 flex-shrink-0" />
                             <p className="text-sm">
-                              When using variations, the general product details
-                              will be skipped. Each variation must have price
-                              and stock specified.
+                              When using variations, each variation must have
+                              stock specified. You'll skip the general product
+                              details step.
                             </p>
                           </div>
                         </div>
                       )}
                   </div>
                 )}
-                {/* Step 3: Single Product Details (moved from step 2) */}
+
+                {/* Step 3: Single Product Details - Price removed, now in step 1 */}
                 {currentStep === 2 && (
                   <div className="space-y-6">
                     <div className="rounded-lg bg-muted/30 p-4">
@@ -789,76 +786,20 @@ export function AddProductModal({
                         not using variations.
                       </p>
                     </div>
-
-                    <div className="space-y-3">
-                      <Label htmlFor="size">Size</Label>
-                      <Input
-                        id="size"
-                        {...register("size")}
-                        placeholder="e.g. XL, 250ml, 32 inches"
-                        className="h-12 text-base"
-                      />
-                      {errors.size && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {errors.size.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-4 grid-cols-2">
                       <div className="space-y-3">
-                        <Label htmlFor="price">Price (₦)</Label>
+                        <Label htmlFor="size">Size</Label>
                         <Input
-                          id="price"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          {...register("price", {
-                            valueAsNumber: true, // Convert to number automatically
-                          })}
-                          placeholder="0.00"
+                          id="size"
+                          {...register("size")}
+                          placeholder="e.g. XL, 250ml, 32 inches"
                           className="h-12 text-base"
                         />
-                        {errors.price && (
+                        {errors.size && (
                           <p className="text-xs text-red-500 mt-1">
-                            {errors.price.message}
+                            {errors.size.message}
                           </p>
                         )}
-                      </div>
-
-                      <div className="space-y-3">
-                        <Label htmlFor="stock">Stock</Label>
-                        <Input
-                          id="stock"
-                          type="number"
-                          min="0"
-                          {...register("stock", {
-                            valueAsNumber: true, // Convert to number automatically
-                          })}
-                          placeholder="0"
-                          className="h-12 text-base"
-                        />
-                        {errors.stock && (
-                          <p className="text-xs text-red-500 mt-1">
-                            {errors.stock.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-3">
-                        <Label htmlFor="weight">Weight (g)</Label>
-                        <Input
-                          id="weight"
-                          type="number"
-                          min="0"
-                          {...register("weight", {
-                            valueAsNumber: true, // Convert to number automatically
-                          })}
-                          placeholder="e.g. 250"
-                          className="h-12 text-base"
-                        />
                       </div>
 
                       <div className="space-y-3">
@@ -872,6 +813,24 @@ export function AddProductModal({
                         />
                       </div>
                     </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="stock">Stock *</Label>
+                      <Input
+                        id="stock"
+                        type="number"
+                        {...register("stock", {
+                          valueAsNumber: true, // Convert to number automatically
+                        })}
+                        placeholder="0"
+                        className="h-12 text-base"
+                      />
+                      {errors.stock && (
+                        <p className="text-xs text-red-500 mt-1">
+                          Stock must be at least 1
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -879,9 +838,9 @@ export function AddProductModal({
                 {currentStep === 3 && (
                   <div className="space-y-6">
                     <div className="space-y-3">
-                      <Label>Product Images</Label>
+                      <Label>Product Images *</Label>
                       <p className="text-sm text-muted-foreground">
-                        Max 5 images (5MB each) - JPG, PNG and SVG only
+                        Max 3 images (5MB each) - JPG, PNG, WEBP and SVG only
                       </p>
                       <div
                         ref={dropAreaRef}
@@ -928,7 +887,7 @@ export function AddProductModal({
                               className="group relative aspect-square overflow-hidden rounded-lg"
                             >
                               <img
-                                src={url}
+                                src={url || "/placeholder.svg"}
                                 alt={`Preview ${index + 1}`}
                                 className="h-full w-full object-cover"
                               />
@@ -950,7 +909,7 @@ export function AddProductModal({
                   </div>
                 )}
 
-                {/* Step 5: Review - Summary cards */}
+                {/* Step 5: Review - Enhanced summary cards */}
                 {currentStep === 4 && (
                   <div className="space-y-6">
                     <div className="space-y-3">
@@ -985,6 +944,14 @@ export function AddProductModal({
                               {formData.category || "-"}
                             </p>
                           </div>
+                          <div>
+                            <p className="text-sm text-muted-foreground">
+                              Base Price
+                            </p>
+                            <p className="font-medium">
+                              ₦{formData.price || "0.00"}
+                            </p>
+                          </div>
                           <div className="col-span-2 w-full">
                             <div className="rounded-xl border bg-muted/30 w-full p-5">
                               <h4 className="mb-3 text-sm font-medium">
@@ -1001,65 +968,39 @@ export function AddProductModal({
                         </div>
                       </div>
 
-                      <div className="rounded-xl border bg-muted/30 p-5">
-                        <h4 className="mb-3 text-sm font-medium">
-                          Pricing & Specifications
-                        </h4>
-                        <div className="grid gap-4 grid-cols-2">
-                          {!formData.hasVariations && (
-                            <>
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Price
-                                </p>
-                                <p className="font-medium">
-                                  ₦{formData.price || "0.00"}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Stock
-                                </p>
-                                <p className="font-medium">
-                                  {formData.stock || "0"}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Color
-                                </p>
-                                <p className="font-medium capitalize ">
-                                  {formData.color || "-"}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Size
-                                </p>
-                                <p className="font-medium capitalize ">
-                                  {formData.size || "-"}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">
-                                  Weight
-                                </p>
-                                <p className="font-medium">
-                                  {formData.weight
-                                    ? `${formData.weight}g`
-                                    : "-"}
-                                </p>
-                              </div>
-                            </>
-                          )}
-                          {formData.hasVariations && (
-                            <div className="col-span-2 text-sm text-muted-foreground italic">
-                              Product is managed with variations. See details
-                              below.
+                      {!formData.hasVariations && (
+                        <div className="rounded-xl border bg-muted/30 p-5">
+                          <h4 className="mb-3 text-sm font-medium">
+                            Product Specifications
+                          </h4>
+                          <div className="grid gap-4 grid-cols-2">
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                Stock
+                              </p>
+                              <p className="font-medium">
+                                {formData.stock || "0"}
+                              </p>
                             </div>
-                          )}
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                Color
+                              </p>
+                              <p className="font-medium capitalize ">
+                                {formData.color || "-"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                Size
+                              </p>
+                              <p className="font-medium capitalize ">
+                                {formData.size || "-"}
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      )}
 
                       {formData.hasVariations &&
                         (formData.variations?.length || 0) > 0 && (
@@ -1068,64 +1009,45 @@ export function AddProductModal({
                               Variations ({formData.variations?.length})
                             </h4>
                             <div className="space-y-3">
-                              {formData.variations?.map((variation, index) => (
-                                <div
-                                  key={variation.id}
-                                  className="rounded-lg border p-3"
-                                >
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                      <p className="text-sm text-muted-foreground">
-                                        Variation
-                                      </p>
-                                      <p className="font-medium">
-                                        {variation.size || variation.color
-                                          ? [variation.size, variation.color]
-                                              .filter(Boolean)
-                                              .join(" / ")
-                                          : `Variation ${index + 1}`}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm text-muted-foreground">
-                                        Price
-                                      </p>
-                                      <p className="font-medium">
-                                        ₦
-                                        {variation.price ||
-                                          formData.price ||
-                                          "0.00"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm text-muted-foreground">
-                                        Stock
-                                      </p>
-                                      <p className="font-medium">
-                                        {variation.stock}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm text-muted-foreground">
-                                        Size
-                                      </p>
-                                      <p className="font-medium capitalize ">
-                                        {variation.size || "-"}
-                                      </p>
-                                    </div>
-                                    <div>
-                                      <p className="text-sm text-muted-foreground">
-                                        Weight
-                                      </p>
-                                      <p className="font-medium">
-                                        {variation.weight
-                                          ? `${variation.weight}g`
-                                          : "-"}
-                                      </p>
+                              {formData.variations?.map(
+                                (variation: Variation, index) => (
+                                  <div
+                                    key={variation.id}
+                                    className="rounded-lg border p-3"
+                                  >
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">
+                                          Variation
+                                        </p>
+                                        <p className="font-medium capitalize">
+                                          {variation.size || variation.color
+                                            ? [variation.size, variation.color]
+                                                .filter(Boolean)
+                                                .join(" / ")
+                                            : `Variation ${index + 1}`}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">
+                                          Stock
+                                        </p>
+                                        <p className="font-medium capitalize">
+                                          {variation.stock}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">
+                                          Size
+                                        </p>
+                                        <p className="font-medium capitalize ">
+                                          {variation.size || "-"}
+                                        </p>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              ))}
+                                )
+                              )}
                             </div>
                           </div>
                         )}
@@ -1142,7 +1064,7 @@ export function AddProductModal({
                                 className="aspect-square overflow-hidden rounded-lg"
                               >
                                 <img
-                                  src={url}
+                                  src={url || "/placeholder.svg"}
                                   alt={`Preview ${index + 1}`}
                                   className="h-full w-full object-cover"
                                 />
@@ -1167,6 +1089,7 @@ export function AddProductModal({
               onClick={() => goToPreviousStep()}
               className=""
               type="button"
+              disabled={currentStep === 0}
             >
               Back
             </Button>
@@ -1182,10 +1105,10 @@ export function AddProductModal({
                 </Button>
               ) : (
                 <Button
-                  onClick={(e) => handleSubmit(e)} // Ensure event is passed
+                  onClick={(e) => handleSubmit(e)}
                   disabled={isSubmitting || !isStepValid()}
                   className="flex-1 md:flex-none"
-                  type="button" // Change to "button" to avoid double submission
+                  type="button"
                 >
                   {isSubmitting ? (
                     <>
@@ -1235,5 +1158,25 @@ const categoryRecommendations = {
     "Include dimensions",
     "Specify materials used",
     "Add color variations",
+  ],
+  electronics: [
+    "Include technical specifications",
+    "List compatible devices",
+    "Specify warranty information",
+  ],
+  fashion: [
+    "Include size guide",
+    "Specify fabric/material",
+    "Add care instructions",
+  ],
+  beauty_skincare: [
+    "Include skin type compatibility",
+    "List key ingredients",
+    "Specify product volume/weight",
+  ],
+  all: [
+    "Include detailed description",
+    "Add high-quality images",
+    "Specify product dimensions",
   ],
 };

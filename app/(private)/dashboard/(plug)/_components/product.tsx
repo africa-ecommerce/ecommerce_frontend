@@ -16,7 +16,6 @@ import {
   Package,
   FilterX,
   Users,
-  MessageSquare,
   Truck,
   Pencil,
   PackageCheck,
@@ -65,7 +64,9 @@ import EmptyState from "@/app/_components/empty-state";
 import DeleteDialog from "../../(supplier)/_components/delete-dialog";
 import { Tabs, TabsContent, TabsTrigger, TabsList } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { formatPrice, truncateText } from "@/lib/utils";
+import { getTotalStocks, truncateText } from "@/lib/utils";
+import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
+import { EditPriceModal } from "./edit-price-modal";
 
 const TipSkeleton = () => (
   <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
@@ -318,20 +319,6 @@ interface Order {
   progressStage: "Processing" | "Shipped" | "Delivered";
 }
 
-const deleteProductFn = async (productId: string) => {
-  const response = await fetch(`/api/plug/products/${productId}`, {
-    method: "DELETE",
-  });
-  const result = await response.json();
-
-  if (!response.ok) {
-    errorToast(result.error);
-    return null;
-  }
-  successToast(result.message);
-  return result;
-};
-
 export default function Products() {
   // State management
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -341,9 +328,37 @@ export default function Products() {
   // Add state for delete confirmation
   const [productToDelete, setProductToDelete] = useState<string>("");
 
+  const { setIsMutate } = useShoppingCart();
+
+  const [priceModalOpen, setPriceModalOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState("");
+
+
+
+ 
+
+  const { data, error, isLoading, mutate } = useSWR("/api/plug/products/");
+  const products = Array.isArray(data?.data) ? data?.data : [];
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
+
+  
+  const deleteProductFn = async (productId: string) => {
+    const response = await fetch(`/api/plug/products/${productId}`, {
+      method: "DELETE",
+    });
+    const result = await response.json();
+
+    if (!response.ok) {
+      errorToast(result.error);
+      return null;
+    }
+    setIsMutate(true);
+    successToast(result.message);
+    return result;
+  };
 
   {
     /* Fetch orders data */
@@ -381,34 +396,39 @@ export default function Products() {
   );
 
   // Fetch data
-  const { data, error, isLoading, mutate } = useSWR("/api/plug/products/");
-  const products = Array.isArray(data?.data) ? data?.data : [];
+
   console.log("products", products);
 
   // Filter items based on selected category, filter, and search query
   const filteredItems = products?.filter((item: any) => {
+    const totalStock = getTotalStocks(item);
+    const hasStock = totalStock !== undefined && totalStock !== null;
+
+    // Category filter
     if (selectedCategory !== "all" && item.category !== selectedCategory)
       return false;
-    if (
-      selectedFilter === "out-of-stock" &&
-      (item.stocks > 0 || item.stocks === undefined)
-    )
+
+    // Stock-based filters
+    if (selectedFilter === "out-of-stock" && hasStock && totalStock > 0)
       return false;
     if (
       selectedFilter === "low-stock" &&
-      (item.stocks === 0 || item.stocks === undefined || item.stocks > 5)
+      (!hasStock || totalStock === 0 || totalStock > 5)
     )
       return false;
     if (
       selectedFilter === "optimal" &&
-      (item.stocks === 0 || item.stocks === undefined || item.stocks <= 10)
+      (!hasStock || totalStock === 0 || totalStock <= 10)
     )
       return false;
+
+    // Search filter
     if (
       searchQuery &&
       !item.name?.toLowerCase().includes(searchQuery.toLowerCase())
     )
       return false;
+
     return true;
   });
 
@@ -420,7 +440,21 @@ export default function Products() {
 
   // Helper functions
   const getStockStatus = (item: any) => {
-    if (!item.stocks && item.stocks !== 0) return "unknown";
+    // If item has variations, calculate total stock across all variations
+    if (item.variations && item.variations.length > 0) {
+      const totalStock = item.variations.reduce(
+        (sum: number, variation: any) => sum + (variation.stocks || 0),
+        0
+      );
+
+      // Check total stock across all variations
+      if (totalStock === 0) return "out-of-stock";
+      if (totalStock <= 5) return "low-stock";
+      return "optimal";
+    }
+
+    // If no variations, use item stock directly
+    if (item.stocks === undefined || item.stocks === null) return "unknown";
     if (item.stocks === 0) return "out-of-stock";
     if (item.stocks <= 5) return "low-stock";
     return "optimal";
@@ -502,29 +536,53 @@ export default function Products() {
     return value !== undefined && value !== null ? value : "-";
   };
 
-  const stats = useMemo(() => {
-    if (!products.length)
-      return {
-        totalProducts: 0,
-        lowStockItems: 0,
-        outOfStock: 0,
-        totalProfit: 0,
-      };
-
+ const stats = useMemo(() => {
+  if (!products.length)
     return {
-      totalProducts: products.length,
-      lowStockItems: products.filter(
-        (item: any) =>
-          item.stocks !== undefined && item.stocks > 0 && item.stocks <= 5
-      ).length,
-      outOfStock: products.filter((item: any) => item.stocks === 0).length,
-      totalProfit: products.reduce(
-        (total: any, item: any) =>
-          total + ((item.price || 0) - (item.originalPrice || 0)),
-        0
-      ),
+      totalProducts: 0,
+      lowStockItems: 0,
+      outOfStock: 0,
+      totalProfit: 0,
     };
-  }, [products]);
+
+  return {
+    totalProducts: products.length,
+    lowStockItems: products.filter((item: any) => {
+      if (item.variations && item.variations.length > 0) {
+        // Get total stock across all variations
+        const totalStock = item.variations.reduce((sum: number, variation: any) => 
+          sum + (variation.stocks || 0), 0);
+        return totalStock > 0 && totalStock <= 5;
+      }
+      // If no variations, use item stock directly
+      return item.stocks !== undefined && item.stocks > 0 && item.stocks <= 5;
+    }).length,
+    outOfStock: products.filter((item: any) => {
+      if (item.variations && item.variations.length > 0) {
+        // Check if all variations have zero stock
+        const totalStock = item.variations.reduce((sum: number, variation: any) => 
+          sum + (variation.stocks || 0), 0);
+        return totalStock === 0;
+      }
+      // If no variations, check item stock directly
+      return item.stocks === 0;
+    }).length,
+    totalProfit: products.reduce((total: any, item: any) => {
+      if (item.variations && item.variations.length > 0) {
+        // Calculate profit across all variations
+        const variationProfit = item.variations.reduce(
+          (sum: number, variation: any) =>
+            sum + ((item.price || 0) - (item.originalPrice || 0)) * (variation.stocks || 0),
+          0
+        );
+        return total + variationProfit;
+      }
+      // If no variations, calculate profit using item stock directly
+      return total + ((item.price || 0) - (item.originalPrice || 0)) * (item.stocks || 0);
+    }, 0),
+  };
+}, [products]);
+  
 
   return (
     <TooltipProvider>
@@ -882,7 +940,7 @@ export default function Products() {
                                   <span
                                     className={getStockStatusColor(stockStatus)}
                                   >
-                                    {displayValue(item.stocks)}
+                                    {getTotalStocks(item)}
                                   </span>
                                 </div>
                               </td>
@@ -917,7 +975,9 @@ export default function Products() {
                                     <DropdownMenuItem
                                       className="text-xs sm:text-sm"
                                       onClick={() => {
-                                        // handleEdit(item.id);
+                                         setProductToEdit(item.id);
+                                        setPriceModalOpen(true)
+                                       
                                       }}
                                     >
                                       <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
@@ -1091,6 +1151,12 @@ export default function Products() {
           productToDelete={productToDelete}
           setProductToDelete={setProductToDelete}
           deleteResource={deleteResource}
+        />
+
+        <EditPriceModal
+          open={priceModalOpen}
+          onOpenChange={setPriceModalOpen}
+          itemId={productToEdit}
         />
       </div>
     </TooltipProvider>

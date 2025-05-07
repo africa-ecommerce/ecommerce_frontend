@@ -39,7 +39,7 @@ export const FilterSheet = ({
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-full sm:w-[400px] z-[200]">
-        <SheetHeader className="mb-6">
+        <SheetHeader className="m-4">
           <SheetTitle className="flex items-center justify-between">
             <span>Filters</span>
             <Button
@@ -61,7 +61,7 @@ export const FilterSheet = ({
               <Slider
                 value={filters.priceRange}
                 onValueChange={onPriceChange}
-                max={10000}
+                max={10000000}
                 step={100}
                 minStepsBetweenThumbs={1}
                 className="mb-4"

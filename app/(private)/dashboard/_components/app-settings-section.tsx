@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { ChevronLeft, Moon, Sun, Lock, Eye, Smartphone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"

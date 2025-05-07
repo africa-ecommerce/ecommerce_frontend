@@ -3,13 +3,13 @@
 import { useState } from "react"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { formatPrice } from "@/lib/utils"
+import { formatPrice, getTotalStock } from "@/lib/utils"
 
 interface Variation {
   id: string
   size?: string
   color?: string
-  weight?: string
+  stock?: string
   price?: string
 }
 
@@ -22,7 +22,7 @@ interface ProductSpecificationsProps {
   product: {
     size?: string
     color?: string
-    weight?: string 
+   
     price?: string
     stock?: string
     variations?: Variation[]
@@ -49,9 +49,7 @@ export function ProductSpecifications({
         // Format price as currency
         return  `${formatPrice(value)}` 
         
-      case 'weight':
-        // Add unit to weight if it's just a number
-        return `${value} g` 
+      
       case 'stock':
         // Format stock as integer
         return  value
@@ -70,7 +68,7 @@ export function ProductSpecifications({
       + name.slice(1).replace(/([A-Z])/g, ' $1')
   }
   
-  const allowedSpecs = ["size", "color", "weight", "price", "stock"]
+  const allowedSpecs = ["size", "color", "price", "stock"]
   
   const allSpecs: ProductSpecification[] = allowedSpecs
     .map(key => {
@@ -103,18 +101,25 @@ export function ProductSpecifications({
     <div className="space-y-3">
       <h3 className="text-lg font-semibold">Specifications</h3>
 
-      <div className="rounded-lg border divide-y">
-        {visibleSpecs.map((spec, index) => (
-          <div key={index} className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">{spec.name}</span>
+      {product?.variations?.length === 0 && (
+        <div className="rounded-lg border divide-y">
+          {visibleSpecs.map((spec, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {spec.name}
+                </span>
+              </div>
+              <span className="text-sm font-medium text-right">
+                {renderValue(spec.value)}
+              </span>
             </div>
-            <span className="text-sm font-medium text-right">
-              {renderValue(spec.value)}
-            </span>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Show More/Less button only if we have more than the initial count */}
       {false && allSpecs.length > initialVisibleCount.desktop && (
@@ -143,26 +148,45 @@ export function ProductSpecifications({
           <h3 className="text-lg font-semibold">Variations</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {product.variations.map((variation, index) => (
-              <div key={index} className="rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+              <div
+                key={index}
+                className="rounded-lg border p-3 hover:bg-muted/50 transition-colors"
+              >
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Variation {index + 1}</span>
+                    <span className="text-sm font-medium">
+                      Variation {index + 1}
+                    </span>
                     {variation.price !== undefined && (
-                      <span className="text-sm font-semibold">${formatPrice(variation.price)}</span>
+                      <span className="text-sm font-semibold">
+                        ${formatPrice(variation.price)}
+                      </span>
                     )}
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-xs text-muted-foreground">Size</span>
-                      <span className="text-xs">{variation.size || "-"}</span>
+                      <span className="text-xs text-muted-foreground">
+                        Size
+                      </span>
+                      <span className="text-xs capitalize">
+                        {variation.size || "-"}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-xs text-muted-foreground">Color</span>
-                      <span className="text-xs">{variation.color || "-"}</span>
+                      <span className="text-xs text-muted-foreground">
+                        Color
+                      </span>
+                      <span className="text-xs capitalize">
+                        {variation.color || "-"}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-xs text-muted-foreground">Weight</span>
-                      <span className="text-xs">{variation.weight || "-"}</span>
+                      <span className="text-xs text-muted-foreground">
+                        Stock
+                      </span>
+                      <span className="text-xs capitalize">
+                        {variation.stock || "-"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -172,5 +196,5 @@ export function ProductSpecifications({
         </div>
       )}
     </div>
-  )
+  );
 }

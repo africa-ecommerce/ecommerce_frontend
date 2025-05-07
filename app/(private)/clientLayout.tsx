@@ -6,12 +6,6 @@ import Link from "next/link";
 import {
   Home,
   Store,
-  LayoutGrid,
-  ChartNoAxesCombined,
-  User,
-  MessageCircle,
-  Settings,
-  HelpCircle,
   PackageOpen,
   Package,
   CircleEllipsis,
