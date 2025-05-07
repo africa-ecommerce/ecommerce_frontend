@@ -554,7 +554,6 @@
 // }
 
 
-
 "use client";
 
 import type React from "react";
@@ -603,13 +602,14 @@ export function DiscoveryModeDialog({
   const [direction, setDirection] = useState<"left" | "right" | null>(null);
   const [exitX, setExitX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [dragDelta, setDragDelta] = useState(0);
   const [swipeStartX, setSwipeStartX] = useState(0);
   const { items, addItem } = useShoppingCart();
   const [isAdding, setIsAdding] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
   const cardRef = useRef<HTMLDivElement>(null);
-  const swipeThreshold = 50; // Lower threshold for more sensitive swiping
+  const swipeThreshold = 40; // Lower threshold for more sensitive swiping
 
   const { userData } = useUser();
 
@@ -718,52 +718,61 @@ export function DiscoveryModeDialog({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, currentIndex]);
 
-  // Manual touch handlers for better mobile swipe control
+  // Improved touch handlers for smoother mobile experience
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (!isMobile) return;
     setSwipeStartX(e.touches[0].clientX);
     setIsDragging(true);
+    setDragDelta(0);
+
+    // Clear any existing transforms for a fresh start
+    if (cardRef.current) {
+      cardRef.current.style.transition = "none";
+      cardRef.current.style.transform = "translateX(0px)";
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isMobile || !isDragging) return;
+    if (!isDragging) return;
 
     const currentX = e.touches[0].clientX;
     const diff = currentX - swipeStartX;
+    setDragDelta(diff);
 
-    // Update visual feedback based on swipe direction
-    if (diff > 0) {
-      setDirection("right");
-    } else if (diff < 0) {
-      setDirection("left");
-    }
-
-    // Apply transform to the card for visual feedback
+    // Apply transform to the card with resistance for smoother feel
     if (cardRef.current) {
-      cardRef.current.style.transform = `translateX(${diff * 0.5}px)`;
+      // Add resistance effect - movement slows down as you drag further
+      const resistance = 0.6;
+      const moveX = diff * resistance;
+
+      // Apply the transform with a subtle rotation for a more natural feel
+      const rotate = moveX * 0.02; // Subtle rotation based on drag distance
+      cardRef.current.style.transform = `translateX(${moveX}px) rotate(${rotate}deg)`;
     }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (!isMobile || !isDragging) return;
+    if (!isDragging) return;
 
     const endX = e.changedTouches[0].clientX;
     const diff = endX - swipeStartX;
 
-    // Reset transform
+    // Reset the card with a smooth transition
     if (cardRef.current) {
-      cardRef.current.style.transform = "";
+      cardRef.current.style.transition = "transform 0.3s ease-out";
+      cardRef.current.style.transform = "translateX(0px) rotate(0deg)";
     }
 
-    // Handle swipe based on direction and distance
+    // Process the swipe based on direction and distance
     if (diff > swipeThreshold) {
-      handlePrev();
+      // Delay the prev action slightly to allow the animation to complete
+      setTimeout(() => handlePrev(), 50);
     } else if (diff < -swipeThreshold) {
-      handleNext();
+      // Delay the next action slightly to allow the animation to complete
+      setTimeout(() => handleNext(), 50);
     }
 
     setIsDragging(false);
-    setDirection(null);
+    setDragDelta(0);
   };
 
   // Framer Motion drag handlers (fallback)
@@ -772,8 +781,8 @@ export function DiscoveryModeDialog({
     info: PanInfo
   ) => {
     setIsDragging(false);
-    const threshold = 50; // Reduced threshold for more sensitive response
-    const velocityThreshold = 300; // Reduced velocity threshold
+    const threshold = 40; // Reduced threshold for more sensitive response
+    const velocityThreshold = 200; // Reduced velocity threshold for more responsive feel
 
     if (info.offset.x > threshold || info.velocity.x > velocityThreshold) {
       // Swiped right
@@ -785,8 +794,6 @@ export function DiscoveryModeDialog({
       // Swiped left
       handleNext();
     }
-
-    setDirection(null);
   };
 
   const handleDragStart = () => {
@@ -800,7 +807,7 @@ export function DiscoveryModeDialog({
     }
 
     setDirection("left");
-    setExitX(-500);
+    setExitX(-300);
 
     // Move to next product after animation
     setTimeout(() => {
@@ -822,7 +829,7 @@ export function DiscoveryModeDialog({
         onOpenChange(false);
       }
       setDirection(null);
-    }, 300);
+    }, 200);
   };
 
   const handlePrev = () => {
@@ -832,7 +839,7 @@ export function DiscoveryModeDialog({
     }
 
     setDirection("right");
-    setExitX(500);
+    setExitX(300);
 
     // Move to previous product after animation
     setTimeout(() => {
@@ -842,7 +849,7 @@ export function DiscoveryModeDialog({
         onOpenChange(false);
       }
       setDirection(null);
-    }, 300);
+    }, 200);
   };
 
   return (
@@ -911,20 +918,21 @@ export function DiscoveryModeDialog({
                   exit={{
                     x: exitX,
                     opacity: 0,
-                    scale: 0.8,
+                    scale: 0.9,
                   }}
                   transition={{
                     type: "spring",
-                    stiffness: 300,
-                    damping: 30,
+                    stiffness: 250,
+                    damping: 25,
+                    mass: 0.8,
                   }}
                   drag={isMobile ? "x" : false}
-                  dragConstraints={{ left: -100, right: 100 }} // Increased constraints for better feel
-                  dragElastic={0.8} // More elastic drag for better feedback
+                  dragConstraints={{ left: -120, right: 120 }}
+                  dragElastic={0.9}
                   onDragStart={handleDragStart}
                   onDragEnd={handleDragEnd}
                   whileTap={{ scale: 0.98 }}
-                  style={{ touchAction: "pan-y" }} // Allow vertical scrolling but handle horizontal
+                  style={{ touchAction: "pan-y" }}
                 >
                   <div className="relative h-full flex flex-col">
                     {/* Product Image */}
@@ -1138,49 +1146,12 @@ export function DiscoveryModeDialog({
               </motion.div>
             )}
 
-            {/* Like/Skip indicators that appear during swipe - improved visibility */}
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-between px-8">
-              <motion.div
-                className="bg-red-500/90 text-white font-bold text-xl p-3 rounded-lg rotate-[-20deg] shadow-lg backdrop-blur-sm"
-                initial={{ opacity: 0 }}
-                animate={{
-                  opacity: direction === "left" ? 0.9 : 0,
-                }}
-                transition={{ duration: 0.2 }}
-              >
-                SKIP
-              </motion.div>
-              <motion.div
-                className="bg-green-500/90 text-white font-bold text-xl p-3 rounded-lg rotate-[20deg] shadow-lg backdrop-blur-sm"
-                initial={{ opacity: 0 }}
-                animate={{
-                  opacity: direction === "right" ? 0.9 : 0,
-                }}
-                transition={{ duration: 0.2 }}
-              >
-                ADD
-              </motion.div>
-            </div>
-
             {/* Desktop Keyboard Instructions */}
             {currentIndex === 0 && !isMobile && (
               <div className="absolute bottom-24 left-0 right-0 flex justify-center">
                 <div className="bg-black/50 text-white px-4 py-2 rounded-lg text-sm backdrop-blur-sm">
                   Use ← → arrow keys to navigate
                 </div>
-              </div>
-            )}
-
-            {/* Edge indicators to show when at first or last product */}
-            {currentIndex === 0 && (
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 text-white px-3 py-1 rounded text-sm backdrop-blur-sm opacity-70">
-                First product
-              </div>
-            )}
-
-            {currentIndex === products.length - 1 && !hasNextPage && (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 text-white px-3 py-1 rounded text-sm backdrop-blur-sm opacity-70">
-                Last product
               </div>
             )}
 
