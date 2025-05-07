@@ -58,6 +58,8 @@ export default function ShareButton({ product }: ShareButtonProps) {
           shareLink = `https://wa.me/?text=${encodeURIComponent(`Check out this ${product.name}! ${shareUrl}`)}`;
           window.open(shareLink, '_blank');
           break;
+
+          
           
         case 'copy':
           // Copy to clipboard
