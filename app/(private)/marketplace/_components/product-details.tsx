@@ -137,7 +137,7 @@ export default function ProductDetail() {
   } = useUser();
 
   console.log("product", product);
-  console.log("data", product.data)
+  console.log("data", product?.data)
 
   const isInCart = items.some((item) => item.id === product?.id);
 
