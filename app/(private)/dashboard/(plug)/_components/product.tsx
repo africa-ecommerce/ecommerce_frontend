@@ -918,7 +918,13 @@ export default function Products() {
                                       className="w-full h-full object-cover"
                                     />
                                   </div>
-                                  <Link href={`/marketplace/product/${item.id}`}>
+                                  <Link
+                                    href={`/marketplace/product/${item.id}`}
+                                    onClick={(e) => {
+                                      // Stop event propagation to prevent interference with modal
+                                      e.stopPropagation();
+                                    }}
+                                  >
                                     <span className="font-medium text-xs sm:text-sm whitespace-nowrap max-w-[250px] capitalize underline text-blue-700">
                                       {truncateText(item.name, 15) || "-"}
                                     </span>
@@ -975,9 +981,8 @@ export default function Products() {
                                     <DropdownMenuItem
                                       className="text-xs sm:text-sm"
                                       onClick={() => {
-                                         setProductToEdit(item.id);
-                                        setPriceModalOpen(true)
-                                       
+                                        setProductToEdit(item.id);
+                                        setPriceModalOpen(true);
                                       }}
                                     >
                                       <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
