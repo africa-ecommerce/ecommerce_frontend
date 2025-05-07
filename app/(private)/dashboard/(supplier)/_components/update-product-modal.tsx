@@ -70,6 +70,7 @@ export function EditProductModal({
   const [direction, setDirection] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropAreaRef = useRef<HTMLDivElement>(null);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
 
   const fetcher = async (url: string) => {
@@ -159,7 +160,10 @@ export function EditProductModal({
       setValue("description", initialData?.data.description || "");
 
       // Handle variations if they exist
-      if (initialData.data.variations && initialData?.data.variations.length > 0) {
+      if (
+        initialData.data.variations &&
+        initialData?.data.variations.length > 0
+      ) {
         setValue("hasVariations", true);
         setValue("variations", initialData?.data.variations);
       } else {
@@ -173,6 +177,7 @@ export function EditProductModal({
       if (initialData?.data.images && initialData?.data.images.length > 0) {
         const imageUrls = initialData?.data.images.map((img: any) => img);
         setValue("imageUrls", imageUrls);
+        setImagePreviews(imageUrls); // Also set preview images
       }
     }
   }, [initialData?.data, setValue]);
@@ -222,33 +227,91 @@ export function EditProductModal({
     
   }
 
-  const handleFiles = (files: FileList) => {
-    const currentImages = formData.images || [];
-    const newFiles = Array.from(files).filter(
-      (file) =>
-        (file.type === "image/jpeg" ||
-          file.type === "image/png" ||
-          file.type === "image/webp" ||
-          file.type === "image/svg+xml") &&
-        file.size <= 5 * 1024 * 1024
-    );
+  // const handleFiles = (files: FileList) => {
+  //   const currentImages = formData.images || [];
+  //   const newFiles = Array.from(files).filter(
+  //     (file) =>
+  //       (file.type === "image/jpeg" ||
+  //         file.type === "image/png" ||
+  //         file.type === "image/webp" ||
+  //         file.type === "image/svg+xml") &&
+  //       file.size <= 5 * 1024 * 1024
+  //   );
 
-    if (newFiles.length === 0) {
-      errorToast("Only images under 5MB allowed");
-      return;
-    }
+  //   if (newFiles.length === 0) {
+  //     errorToast("Only images under 5MB allowed");
+  //     return;
+  //   }
 
-    if (currentImages.length + newFiles.length > 3) {
-      errorToast("Maximum 3 images allowed");
-      newFiles.splice(3 - currentImages.length);
-    }
+  //   if (currentImages.length + newFiles.length > 3) {
+  //     errorToast("Maximum 3 images allowed");
+  //     newFiles.splice(3 - currentImages.length);
+  //   }
 
-    const newImages = [...currentImages, ...newFiles];
+  //   const newImages = [...currentImages, ...newFiles];
     
 
-    setValue("images", newImages);
+  //   setValue("images", newImages);
    
-  };
+  // };
+
+  const handleFiles = (files: FileList) => {
+  const currentImages = formData.images || [];
+  const newFiles = Array.from(files).filter(
+    (file) =>
+      (file.type === "image/jpeg" ||
+        file.type === "image/png" ||
+        file.type === "image/webp" ||
+        file.type === "image/svg+xml") &&
+      file.size <= 5 * 1024 * 1024
+  );
+
+  if (newFiles.length === 0) {
+    errorToast("Only images under 5MB allowed");
+    return;
+  }
+
+  // Check total images count (existing + new)
+  const existingCount = (formData.imageUrls?.length || 0);
+  const newImagesCount = (formData.images?.length || 0);
+  const totalCount = existingCount + newImagesCount + newFiles.length;
+
+  if (totalCount > 3) {
+    errorToast("Maximum 3 images allowed");
+    // Only add as many images as we have room for
+    newFiles.splice(0, 3 - existingCount - newImagesCount);
+    if (newFiles.length === 0) return;
+  }
+
+  // Add new files to images array
+  const newImages = [...currentImages, ...newFiles];
+  setValue("images", newImages);
+  
+  // Generate and update preview URLs for all images
+  updateImagePreviews(newImages);
+};
+
+
+const updateImagePreviews = (imageFiles: File[]) => {
+  // Create a map of existing previews
+  const currentPreviews = new Map();
+  imageFiles.forEach((file, index) => {
+    // Generate preview URL for the file if it doesn't have one
+    if (!currentPreviews.has(file.name)) {
+      currentPreviews.set(file.name, URL.createObjectURL(file));
+    }
+  });
+
+  // Create merged array of all image URLs for display
+  const allPreviews = [
+    ...(formData.imageUrls || []), // Existing images from backend
+    ...Array.from(currentPreviews.values()), // New images with preview URLs
+  ];
+
+  // We don't update formData.imageUrls as that's reserved for backend images
+  // Instead, we'll use a separate state for previews
+  setImagePreviews(allPreviews);
+};
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -256,23 +319,61 @@ export function EditProductModal({
     }
   };
 
-  const removeImage = (index: number) => {
-    const newImages = [...(formData.images || [])];
-    const newImageUrls = [...(formData.imageUrls || [])];
+  // const removeImage = (index: number) => {
+  //   const newImages = [...(formData.images || [])];
+  //   const newImageUrls = [...(formData.imageUrls || [])];
 
     
 
-    // If this is a new image, revoke the object URL
-    if (index >= (initialData?.data.images?.length || 0)) {
-      URL.revokeObjectURL(newImageUrls[index]);
+  //   // If this is a new image, revoke the object URL
+  //   if (index >= (initialData?.data.images?.length || 0)) {
+  //     URL.revokeObjectURL(newImageUrls[index]);
+  //   }
+
+  //   newImages.splice(index, 1);
+  //   newImageUrls.splice(index, 1);
+
+  //   setValue("images", newImages);
+  //   setValue("imageUrls", newImageUrls);
+  // };
+const removeImage = (index: number) => {
+  const existingImagesCount = formData.imageUrls?.length || 0;
+
+  // If removing an existing image from backend
+  if (index < existingImagesCount) {
+    const newImageUrls = [...(formData.imageUrls || [])];
+    newImageUrls.splice(index, 1);
+    setValue("imageUrls", newImageUrls);
+
+    // Update previews
+    const newPreviews = [...imagePreviews];
+    newPreviews.splice(index, 1);
+    setImagePreviews(newPreviews);
+  }
+  // If removing a newly added image
+  else {
+    const newIndex = index - existingImagesCount;
+    const newImages = [...(formData.images || [])];
+
+    // Revoke object URL to prevent memory leaks
+    if (imagePreviews[index]) {
+      URL.revokeObjectURL(imagePreviews[index]);
     }
 
-    newImages.splice(index, 1);
-    newImageUrls.splice(index, 1);
-
+    newImages.splice(newIndex, 1);
     setValue("images", newImages);
-    setValue("imageUrls", newImageUrls);
-  };
+
+    // Update previews
+    const newPreviews = [...imagePreviews];
+    newPreviews.splice(index, 1);
+    setImagePreviews(newPreviews);
+
+    // If we have more new images, update their previews
+    if (newImages.length > 0) {
+      updateImagePreviews(newImages);
+    }
+  }
+};
 
   const addVariation = () => {
     const newVariation = {
@@ -714,7 +815,10 @@ export function EditProductModal({
                     </div>
 
                     <div className="space-y-3">
-                      <Label htmlFor="description">Description <span className="text-gray-500">(Recommended)</span></Label>
+                      <Label htmlFor="description">
+                        Description{" "}
+                        <span className="text-gray-500">(Recommended)</span>
+                      </Label>
                       <div className="relative">
                         <Textarea
                           id="description"
@@ -1007,13 +1111,43 @@ export function EditProductModal({
                       </div>
                     </div>
 
-                    {(formData.imageUrls?.length || 0) > 0 && (
+                    {/* {(formData.imageUrls?.length || 0) > 0 && (
                       <div className="space-y-3">
                         <Label>
                           Uploaded Images ({formData.imageUrls?.length})
                         </Label>
                         <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
                           {formData.imageUrls?.map((url, index) => (
+                            <div
+                              key={index}
+                              className="group relative aspect-square overflow-hidden rounded-lg"
+                            >
+                              <img
+                                src={url || "/placeholder.svg"}
+                                alt={`Preview ${index + 1}`}
+                                className="h-full w-full object-cover"
+                              />
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeImage(index);
+                                }}
+                                className="absolute right-2 top-2 rounded-full bg-destructive p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                                type="button"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )} */}
+
+                    {imagePreviews.length > 0 && (
+                      <div className="space-y-3">
+                        <Label>Uploaded Images ({imagePreviews.length})</Label>
+                        <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
+                          {imagePreviews.map((url, index) => (
                             <div
                               key={index}
                               className="group relative aspect-square overflow-hidden rounded-lg"
@@ -1184,13 +1318,35 @@ export function EditProductModal({
                           </div>
                         )}
 
-                      {(formData.imageUrls?.length || 0) > 0 && (
+                      {/* {(formData.imageUrls?.length || 0) > 0 && (
                         <div className="rounded-xl border bg-muted/30 p-5">
                           <h4 className="mb-3 text-sm font-medium">
                             Images ({formData.imageUrls?.length})
                           </h4>
                           <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
                             {formData.imageUrls?.map((url, index) => (
+                              <div
+                                key={index}
+                                className="aspect-square overflow-hidden rounded-lg"
+                              >
+                                <img
+                                  src={url || "/placeholder.svg"}
+                                  alt={`Preview ${index + 1}`}
+                                  className="h-full w-full object-cover"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )} */}
+
+                      {imagePreviews.length > 0 && (
+                        <div className="rounded-xl border bg-muted/30 p-5">
+                          <h4 className="mb-3 text-sm font-medium">
+                            Images ({imagePreviews.length})
+                          </h4>
+                          <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
+                            {imagePreviews.map((url, index) => (
                               <div
                                 key={index}
                                 className="aspect-square overflow-hidden rounded-lg"
