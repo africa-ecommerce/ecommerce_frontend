@@ -70,8 +70,7 @@ export function ProductSpecifications({
   
   const allowedSpecs = ["size", "color", "price", "stock"]
   
-  const allSpecs: ProductSpecification[] = allowedSpecs
-    .map(key => {
+  const allSpecs: ProductSpecification[] = allowedSpecs?.map(key => {
       const value = product[key]
       const formattedValue = formatValue(key, value)
       return {
@@ -103,7 +102,7 @@ export function ProductSpecifications({
 
       {product?.variations?.length === 0 && (
         <div className="rounded-lg border divide-y">
-          {visibleSpecs.map((spec, index) => (
+          {visibleSpecs?.map((spec, index) => (
             <div
               key={index}
               className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors"
@@ -147,7 +146,7 @@ export function ProductSpecifications({
         <div className="mt-6 space-y-3">
           <h3 className="text-lg font-semibold">Variations</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {product.variations.map((variation, index) => (
+            {product.variations?.map((variation, index) => (
               <div
                 key={index}
                 className="rounded-lg border p-3 hover:bg-muted/50 transition-colors"

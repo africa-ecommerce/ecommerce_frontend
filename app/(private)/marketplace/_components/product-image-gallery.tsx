@@ -235,7 +235,7 @@ export function ProductImageGallery({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const allMedia = images.map((img) => ({ type: "image" as const, url: img }));
+  const allMedia = images?.map((img) => ({ type: "image" as const, url: img }));
 
   const handlePrevious = (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -339,7 +339,7 @@ export function ProductImageGallery({
         <div className={cn("mt-4 w-full", isMobile ? "" : "max-w-4xl mx-auto")}>
           <h3 className="text-sm font-medium mb-2">Gallery</h3>
           <div className="grid grid-cols-4 gap-2">
-            {allMedia.map((media, index) => (
+            {allMedia?.map((media, index) => (
               <button
                 key={index}
                 className={cn(
