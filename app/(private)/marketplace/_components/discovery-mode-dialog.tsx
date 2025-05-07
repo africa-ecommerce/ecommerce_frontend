@@ -558,7 +558,7 @@
 
 import type React from "react";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 import { Info, Plus, Users, X } from "lucide-react";
 
@@ -609,7 +609,10 @@ export function DiscoveryModeDialog({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
   const cardRef = useRef<HTMLDivElement>(null);
-  const swipeThreshold = 40; // Lower threshold for more sensitive swiping
+  // const swipeThreshold = 40; // Lower threshold for more sensitive swiping
+  const swipeThreshold = 50; // Optimized threshold for better UX
+  const SWIPE_VELOCITY = 1000; // Increased velocity threshold for quick swipes
+  const CARD_EXIT_OFFSET = 500; // Increased exit offset for smoother exit
 
   const { userData } = useUser();
 
@@ -776,82 +779,132 @@ export function DiscoveryModeDialog({
   };
 
   // Framer Motion drag handlers (fallback)
-  const handleDragEnd = (
-    event: MouseEvent | TouchEvent | PointerEvent,
-    info: PanInfo
-  ) => {
-    setIsDragging(false);
-    const threshold = 40; // Reduced threshold for more sensitive response
-    const velocityThreshold = 200; // Reduced velocity threshold for more responsive feel
+  // const handleDragEnd = (
+  //   event: MouseEvent | TouchEvent | PointerEvent,
+  //   info: PanInfo
+  // ) => {
+  //   setIsDragging(false);
+  //   const threshold = 40; // Reduced threshold for more sensitive response
+  //   const velocityThreshold = 200; // Reduced velocity threshold for more responsive feel
 
-    if (info.offset.x > threshold || info.velocity.x > velocityThreshold) {
-      // Swiped right
-      handlePrev();
-    } else if (
-      info.offset.x < -threshold ||
-      info.velocity.x < -velocityThreshold
-    ) {
-      // Swiped left
-      handleNext();
-    }
-  };
+  //   if (info.offset.x > threshold || info.velocity.x > velocityThreshold) {
+  //     // Swiped right
+  //     handlePrev();
+  //   } else if (
+  //     info.offset.x < -threshold ||
+  //     info.velocity.x < -velocityThreshold
+  //   ) {
+  //     // Swiped left
+  //     handleNext();
+  //   }
+  // };
+
+   const handleDragEnd = useCallback(
+     (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+       const { offset, velocity } = info;
+       if (
+         Math.abs(velocity.x) > SWIPE_VELOCITY ||
+         Math.abs(offset.x) > swipeThreshold
+       ) {
+         const direction = velocity.x < 0 || offset.x < 0 ? "left" : "right";
+         direction === "left" ? handleNext() : handlePrev();
+       }
+     },
+     [currentIndex, products, hasNextPage]
+   );
 
   const handleDragStart = () => {
     setIsDragging(true);
   };
 
-  const handleNext = () => {
-    if (currentIndex >= products.length - 1 && !hasNextPage) {
+  const handleNext = useCallback(() => {
+    const newIndex = currentIndex + 1;
+    if (newIndex >= products.length && !hasNextPage) {
       onOpenChange(false);
       return;
     }
 
     setDirection("left");
-    setExitX(-300);
+    setExitX(-CARD_EXIT_OFFSET);
 
-    // Move to next product after animation
     setTimeout(() => {
-      if (currentIndex < products.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-
-        // If we're approaching the end of loaded products, trigger loading more
-        if (
-          currentIndex >= products.length - 3 &&
-          hasNextPage &&
-          !isLoadingMore
-        ) {
+      if (newIndex < products.length) {
+        setCurrentIndex(newIndex);
+        if (newIndex >= products.length - 3 && hasNextPage && !isLoadingMore) {
           loadMore();
         }
       } else if (hasNextPage) {
-        // If we're at the end but more products can be loaded, show loading state
         loadMore();
-      } else {
-        onOpenChange(false);
       }
-      setDirection(null);
-    }, 200);
-  };
+    }, 0);
+  }, [currentIndex, products, hasNextPage, isLoadingMore]);
 
-  const handlePrev = () => {
-    if (currentIndex <= 0) {
-      onOpenChange(false);
-      return;
-    }
+  // const handleNext = () => {
+  //   if (currentIndex >= products.length - 1 && !hasNextPage) {
+  //     onOpenChange(false);
+  //     return;
+  //   }
 
-    setDirection("right");
-    setExitX(300);
+  //   setDirection("left");
+  //   setExitX(-300);
 
-    // Move to previous product after animation
-    // setTimeout(() => {
-      if (currentIndex > 0) {
-        setCurrentIndex(currentIndex - 1);
-      } else {
-        onOpenChange(false);
-      }
-      setDirection(null);
-    // }, 200);
-  };
+  //   // Move to next product after animation
+  //   setTimeout(() => {
+  //     if (currentIndex < products.length - 1) {
+  //       setCurrentIndex(currentIndex + 1);
 
+  //       // If we're approaching the end of loaded products, trigger loading more
+  //       if (
+  //         currentIndex >= products.length - 3 &&
+  //         hasNextPage &&
+  //         !isLoadingMore
+  //       ) {
+  //         loadMore();
+  //       }
+  //     } else if (hasNextPage) {
+  //       // If we're at the end but more products can be loaded, show loading state
+  //       loadMore();
+  //     } else {
+  //       onOpenChange(false);
+  //     }
+  //     setDirection(null);
+  //   }, 200);
+  // };
+
+  // const handlePrev = () => {
+  //   if (currentIndex <= 0) {
+  //     onOpenChange(false);
+  //     return;
+  //   }
+
+  //   setDirection("right");
+  //   setExitX(300);
+
+  //   // Move to previous product after animation
+  //   // setTimeout(() => {
+  //   if (currentIndex > 0) {
+  //     setCurrentIndex(currentIndex - 1);
+  //   } else {
+  //     onOpenChange(false);
+  //   }
+  //   setDirection(null);
+  //   // }, 200);
+  // };
+
+       const handlePrev = useCallback(() => {
+         const newIndex = currentIndex - 1;
+         if (newIndex < 0) {
+           onOpenChange(false);
+           return;
+         }
+
+         setDirection("right");
+         setExitX(CARD_EXIT_OFFSET);
+
+         setTimeout(() => {
+           setCurrentIndex(newIndex);
+         }, 0);
+       }, [currentIndex]);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md p-0 gap-0 h-[90vh] sm:h-[80vh] max-h-[800px] sm:max-h-[600px] overflow-hidden">
@@ -895,7 +948,7 @@ export function DiscoveryModeDialog({
                     </div>
                   </div>
                 )}
-                <motion.div
+                {/* <motion.div
                   ref={cardRef}
                   key={currentProduct?.id || `empty-product-${currentIndex}`}
                   className="absolute w-full h-full"
@@ -932,6 +985,44 @@ export function DiscoveryModeDialog({
                   onDragStart={handleDragStart}
                   onDragEnd={handleDragEnd}
                   whileTap={{ scale: 0.98 }}
+                  style={{ touchAction: "pan-y" }}
+                > */}
+
+                <motion.div
+                  key={currentProduct?.id || `empty-product-${currentIndex}`}
+                  className="absolute w-full h-full"
+                  custom={direction}
+                  initial={{
+                    x:
+                      direction === "left"
+                        ? CARD_EXIT_OFFSET
+                        : direction === "right"
+                        ? -CARD_EXIT_OFFSET
+                        : 0,
+                    opacity: 0,
+                    scale: 0.95,
+                  }}
+                  animate={{
+                    x: 0,
+                    opacity: 1,
+                    scale: 1,
+                  }}
+                  exit={{
+                    x: exitX,
+                    opacity: 0,
+                    scale: 0.95,
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 20,
+                    mass: 0.5,
+                  }}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }} // Disable elastic drag
+                  dragElastic={0.1}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
                   style={{ touchAction: "pan-y" }}
                 >
                   <div className="relative h-full flex flex-col">
