@@ -60,7 +60,7 @@ export const formatQuantity = (quantity: number) => {
 
 export const formatPrice = (price: string) => {
  
-  return `₦${price.toLocaleString()}`;
+  return `₦${price?.toLocaleString()}`;
 };
 
 export const truncateText = (text: string, maxLength: number = 20) => {
