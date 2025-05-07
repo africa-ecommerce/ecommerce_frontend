@@ -79,17 +79,17 @@ export function EditProductModal({
       const error = await res.json();
       throw new Error(error.error || "Failed to fetch product");
     }
-    return res.json();
+    const { data } = await res.json();
+  return data;
   };
 
   // Fetch product data
   const {
-    data: initialData,
+    data,
     error,
     isLoading,
   } = useSWR(open && productId ? `/api/products/${productId}` : null, fetcher);
 
-  console.log(initialData)
 
   const editProduct = async (data: UpdateFormData) => {
     try {
@@ -155,34 +155,34 @@ export function EditProductModal({
 
   // Populate form with initial data when it loads
   useEffect(() => {
-    if (initialData?.data) {
-      setValue("name", initialData?.data.name);
-      setValue("category", initialData?.data.category);
-      setValue("price", initialData?.data.price);
-      setValue("description", initialData?.data.description || "");
+    if (data) {
+      setValue("name", data.name);
+      setValue("category", data.category);
+      setValue("price", data.price);
+      setValue("description", data.description || "");
 
       // Handle variations if they exist
       if (
-        initialData.data.variations &&
-        initialData?.data.variations.length > 0
+        data.variations &&
+        data.variations.length > 0
       ) {
         setValue("hasVariations", true);
-        setValue("variations", initialData?.data.variations);
+        setValue("variations", data.variations);
       } else {
         setValue("hasVariations", false);
-        setValue("size", initialData?.data.size || "");
-        setValue("color", initialData?.data.color || "");
-        setValue("stock", initialData?.data.stock);
+        setValue("size", data.size || "");
+        setValue("color", data.color || "");
+        setValue("stock", data.stock);
       }
 
       // Handle existing images
-      if (initialData?.data.images && initialData?.data.images.length > 0) {
-        const imageUrls = initialData?.data.images.map((img: any) => img);
+      if (data.images && data.images.length > 0) {
+        const imageUrls = data.images.map((img: any) => img);
         setValue("imageUrls", imageUrls);
         setImagePreviews(imageUrls); // Also set preview images
       }
     }
-  }, [initialData?.data, setValue]);
+  }, [data, setValue]);
 
   // Handle drag and drop for images
   useEffect(() => {
@@ -333,7 +333,7 @@ const updateImagePreviews = (imageFiles: File[]) => {
     
 
   //   // If this is a new image, revoke the object URL
-  //   if (index >= (initialData?.data.images?.length || 0)) {
+  //   if (index >= (data.images?.length || 0)) {
   //     URL.revokeObjectURL(newImageUrls[index]);
   //   }
 

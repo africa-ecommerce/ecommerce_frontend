@@ -46,22 +46,13 @@ export function EditPriceModal({
 
   // Fetch pricing data with useSWR - only when modal is open and itemId exists
   const {
-  data,
-  error: swrError,
-  isLoading,
-  mutate,
-} = useSWR(
-  open && itemId ? [`/api/plug/products/${itemId}`, 'edit-price-modal'] : null, 
-  ([url]) => fetcher(url),
-  {
-    // Using a dedicated cache namespace
-    dedupingInterval: 0, // Disable deduping to ensure fresh data each time
-    revalidateOnFocus: false // Prevent revalidation on focus which could affect other components
-  }
+    data,
+    error: swrError,
+    isLoading,
+    mutate,
+  } = useSWR(open && itemId ? `/api/plug/products/${itemId}` : null, fetcher);
 
-);
-
-console.log("editModal", data)
+  console.log(data);
 
   // Calculate profit whenever price changes
   useEffect(() => {
