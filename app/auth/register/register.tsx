@@ -22,8 +22,10 @@ export const handleOAuthLogin = (provider: "google") => {
     const nestedCallback = urlParams.get("callbackUrl") || "/dashboard";
 
     const finalCallback = encodeURIComponent(nestedCallback);
-    const redirectUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/${provider}?callbackUrl=${finalCallback}`;
-    window.location.href = redirectUrl;
+    // const redirectUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/${provider}?callbackUrl=${finalCallback}`;
+    // window.location.href = redirectUrl;
+     const redirectUrl = `/api/auth/${provider}?callbackUrl=${finalCallback}`;
+     window.location.href = redirectUrl;
   } catch (error) {
     console.error(`${provider} login error:`, error);
   }
