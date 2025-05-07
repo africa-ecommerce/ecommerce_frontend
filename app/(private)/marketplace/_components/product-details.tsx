@@ -123,7 +123,7 @@ export default function ProductDetail() {
     data: product,
     error,
     isLoading,
-  } = useSWR(`/api/marketplace/products/${productId}`, fetcher, {
+  } = useSWR(`/api/products/${productId}`, fetcher, {
     revalidateOnFocus: true,
     revalidateIfStale: false,
     dedupingInterval: 600000, // 10 minutes
