@@ -127,7 +127,7 @@ export default function ProductDetail() {
   } = useSWR(`/api/products/${productId}`, fetcher, {
     revalidateOnFocus: true,
     revalidateIfStale: false,
-    dedupingInterval: 600000, // 10 minutes
+    dedupingInterval: 6000, // 10 minutes
   });
 
   const [isAdding, setIsAdding] = useState(false);
