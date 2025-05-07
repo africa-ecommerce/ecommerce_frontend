@@ -101,9 +101,9 @@ export function EditProductModal({
         formData.append("images", file);
       });
 
-      const { images, imageUrls, ...jsonData } = data;
+      const { images, ...jsonData } = data;
       console.log("JSON data:", jsonData);
-      console.log("imageUrls:", imageUrls);
+      // console.log("imageUrls:", imageUrls);
       console.log("images", images)
       formData.append("productData", JSON.stringify(jsonData));
 
