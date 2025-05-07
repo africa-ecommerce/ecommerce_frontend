@@ -103,6 +103,8 @@ export function EditProductModal({
 
       const { images, imageUrls, ...jsonData } = data;
       console.log("JSON data:", jsonData);
+      console.log("imageUrls:", imageUrls);
+      console.log("images", images)
       formData.append("productData", JSON.stringify(jsonData));
 
       
@@ -275,6 +277,9 @@ export function EditProductModal({
   const existingCount = (formData.imageUrls?.length || 0);
   const newImagesCount = (formData.images?.length || 0);
   const totalCount = existingCount + newImagesCount + newFiles.length;
+  console.log("totalCount", totalCount)
+  console.log("existingCount", existingCount)
+  console.log("newImagesCount", newImagesCount)
 
   if (totalCount > 3) {
     errorToast("Maximum 3 images allowed");
@@ -285,6 +290,7 @@ export function EditProductModal({
 
   // Add new files to images array
   const newImages = [...currentImages, ...newFiles];
+  console.log("newImages", newImages)
   setValue("images", newImages);
   
   // Generate and update preview URLs for all images
@@ -310,6 +316,7 @@ const updateImagePreviews = (imageFiles: File[]) => {
 
   // We don't update formData.imageUrls as that's reserved for backend images
   // Instead, we'll use a separate state for previews
+  console.log("allPreview", allPreviews)
   setImagePreviews(allPreviews);
 };
 
