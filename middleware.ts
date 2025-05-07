@@ -25,6 +25,24 @@ export async function middleware(request: NextRequest) {
   const { nextUrl } = request;
   const pathname = nextUrl.pathname;
 
+
+
+       
+ if (request.nextUrl.pathname.startsWith('/api/og/')) {
+    // Get response
+    const response = NextResponse.next();
+    
+    // Add cache headers for CDNs and browsers
+    response.headers.set('Cache-Control', 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400');
+    response.headers.set('Vary', 'Accept-Encoding, Accept');
+    
+    return response;
+  }
+
+
+
+
+
   // Skip middleware for API routes and public assets
   if (pathname.startsWith("/api") || pathname.includes(".")) {
     return NextResponse.next();
