@@ -55,7 +55,9 @@ export default function ShareButton({ product }: ShareButtonProps) {
           break;
           
         case 'whatsapp':
-          shareLink = `https://wa.me/?text=${encodeURIComponent(`Check out this ${product.name}! ${shareUrl}`)}`;
+          shareLink = `https://wa.me/?text=${encodeURIComponent(
+            `Check out this ${product.name}! ${ogImageUrl}`
+          )}`;
           window.open(shareLink, '_blank');
           break;
 
