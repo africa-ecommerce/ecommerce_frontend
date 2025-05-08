@@ -223,8 +223,50 @@ export function EditProductModal({
   }
 
   
-  const handleFiles = (files: FileList) => {
-  const currentImages = formData.images || [];
+//   const handleFiles = (files: FileList) => {
+//   const currentImages = formData.images || [];
+//   const newFiles = Array.from(files).filter(
+//     (file) =>
+//       (file.type === "image/jpeg" ||
+//         file.type === "image/png" ||
+//         file.type === "image/webp" ||
+//         file.type === "image/svg+xml") &&
+//       file.size <= 5 * 1024 * 1024
+//   );
+
+//   if (newFiles.length === 0) {
+//     errorToast("Only images under 5MB allowed");
+//     return;
+//   }
+
+//   // Check total images count (existing + new)
+//   const existingCount = (formData.imageUrls?.length || 0);
+//   const newImagesCount = (formData.images?.length || 0);
+//   const totalCount = existingCount + newImagesCount + newFiles.length;
+//   console.log("totalCount", totalCount)
+//   console.log("existingCount", existingCount)
+//   console.log("newImagesCount", newImagesCount)
+ 
+//   if (totalCount > 3) {
+//     errorToast("Maximum 3 images allowed");
+//     // Only add as many images as we have room for
+//     newFiles.splice(0, 3 - existingCount - newImagesCount);
+//     console.log("newFiles", newFiles.length)
+//     if (newFiles.length === 0) return;
+//   }
+
+//   // Add new files to images array
+//   const newImages = [...currentImages, ...newFiles];
+//   console.log("newImages", newImages)
+//   setValue("images", newImages);
+  
+//   // Generate and update preview URLs for all images
+//   updateImagePreviews(newImages);
+// };
+
+
+const handleFiles = (files: FileList) => {
+  // First check file types and sizes
   const newFiles = Array.from(files).filter(
     (file) =>
       (file.type === "image/jpeg" ||
@@ -239,25 +281,30 @@ export function EditProductModal({
     return;
   }
 
-  // Check total images count (existing + new)
-  const existingCount = (formData.imageUrls?.length || 0);
-  const newImagesCount = (formData.images?.length || 0);
-  const totalCount = existingCount + newImagesCount + newFiles.length;
-  console.log("totalCount", totalCount)
-  console.log("existingCount", existingCount)
-  console.log("newImagesCount", newImagesCount)
- 
-  if (totalCount > 3) {
-    errorToast("Maximum 3 images allowed");
-    // Only add as many images as we have room for
-    newFiles.splice(0, 3 - existingCount - newImagesCount);
-    console.log("newFiles", newFiles.length)
-    if (newFiles.length === 0) return;
+  // Get current counts
+  const existingImagesCount = formData.imageUrls?.length || 0;
+  const currentNewImagesCount = formData.images?.length || 0;
+  const totalCurrentCount = existingImagesCount + currentNewImagesCount;
+  
+  // Check if we're already at the limit
+  if (totalCurrentCount >= 3) {
+    errorToast("Maximum 3 images already reached");
+    return;
+  }
+  
+  // Calculate how many more images we can add
+  const spaceRemaining = 3 - totalCurrentCount;
+  
+  // If we're trying to add more than our limit allows
+  if (newFiles.length > spaceRemaining) {
+    errorToast(`Only ${spaceRemaining} more image${spaceRemaining > 1 ? 's' : ''} can be added (max 3 total)`);
+    // Trim array to only include what we can add
+    newFiles.splice(spaceRemaining);
   }
 
-  // Add new files to images array
+  // Now add the files (which may have been trimmed)
+  const currentImages = formData.images || [];
   const newImages = [...currentImages, ...newFiles];
-  console.log("newImages", newImages)
   setValue("images", newImages);
   
   // Generate and update preview URLs for all images
