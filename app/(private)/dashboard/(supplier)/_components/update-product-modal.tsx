@@ -243,11 +243,15 @@ export function EditProductModal({
   const existingCount = (formData.imageUrls?.length || 0);
   const newImagesCount = (formData.images?.length || 0);
   const totalCount = existingCount + newImagesCount + newFiles.length;
+  console.log("totalCount", totalCount)
+  console.log("existingCount", existingCount)
+  console.log("newImagesCount", newImagesCount)
  
   if (totalCount > 3) {
     errorToast("Maximum 3 images allowed");
     // Only add as many images as we have room for
     newFiles.splice(0, 3 - existingCount - newImagesCount);
+    console.log("newFiles", newFiles.length)
     if (newFiles.length === 0) return;
   }
 
