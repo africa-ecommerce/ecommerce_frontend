@@ -93,8 +93,7 @@ export function EditProductModal({
 
   const editProduct = async (data: UpdateFormData) => {
     try {
-      console.log("Submitting data:", JSON.stringify(data, null, 2));
-      console.log("Images count:", data.images?.length);
+      
 
       const formData = new FormData();
       data.images?.forEach((file: File) => {
@@ -102,9 +101,6 @@ export function EditProductModal({
       });
 
       const { images, ...jsonData } = data;
-      console.log("JSON data:", jsonData);
-      // console.log("imageUrls:", imageUrls);
-      console.log("images", images)
       formData.append("productData", JSON.stringify(jsonData));
 
       
@@ -116,17 +112,14 @@ export function EditProductModal({
 
       if (!response.ok) {
         const errorResult = await response.json();
-        console.error("Server error:", errorResult);
         errorToast(errorResult.error || "Server error");
         return null;
       }
 
       const result = await response.json();
-      console.log("Success:", result);
       successToast(result.message || "Product updated successfully");
       return result;
     } catch (error) {
-      console.error("Submission error:", error);
       errorToast("Something went wrong");
       return null;
     }
@@ -229,34 +222,7 @@ export function EditProductModal({
     
   }
 
-  // const handleFiles = (files: FileList) => {
-  //   const currentImages = formData.images || [];
-  //   const newFiles = Array.from(files).filter(
-  //     (file) =>
-  //       (file.type === "image/jpeg" ||
-  //         file.type === "image/png" ||
-  //         file.type === "image/webp" ||
-  //         file.type === "image/svg+xml") &&
-  //       file.size <= 5 * 1024 * 1024
-  //   );
-
-  //   if (newFiles.length === 0) {
-  //     errorToast("Only images under 5MB allowed");
-  //     return;
-  //   }
-
-  //   if (currentImages.length + newFiles.length > 3) {
-  //     errorToast("Maximum 3 images allowed");
-  //     newFiles.splice(3 - currentImages.length);
-  //   }
-
-  //   const newImages = [...currentImages, ...newFiles];
-    
-
-  //   setValue("images", newImages);
-   
-  // };
-
+  
   const handleFiles = (files: FileList) => {
   const currentImages = formData.images || [];
   const newFiles = Array.from(files).filter(
@@ -277,10 +243,7 @@ export function EditProductModal({
   const existingCount = (formData.imageUrls?.length || 0);
   const newImagesCount = (formData.images?.length || 0);
   const totalCount = existingCount + newImagesCount + newFiles.length;
-  console.log("totalCount", totalCount)
-  console.log("existingCount", existingCount)
-  console.log("newImagesCount", newImagesCount)
-
+ 
   if (totalCount > 3) {
     errorToast("Maximum 3 images allowed");
     // Only add as many images as we have room for
@@ -326,23 +289,9 @@ const updateImagePreviews = (imageFiles: File[]) => {
     }
   };
 
-  // const removeImage = (index: number) => {
-  //   const newImages = [...(formData.images || [])];
-  //   const newImageUrls = [...(formData.imageUrls || [])];
+ 
 
-    
 
-  //   // If this is a new image, revoke the object URL
-  //   if (index >= (data.images?.length || 0)) {
-  //     URL.revokeObjectURL(newImageUrls[index]);
-  //   }
-
-  //   newImages.splice(index, 1);
-  //   newImageUrls.splice(index, 1);
-
-  //   setValue("images", newImages);
-  //   setValue("imageUrls", newImageUrls);
-  // };
 const removeImage = (index: number) => {
   const existingImagesCount = formData.imageUrls?.length || 0;
 
@@ -560,7 +509,6 @@ const removeImage = (index: number) => {
       // Force validation using the submit function from your form hook
       await submit(e);
     } catch (error) {
-      console.error("Form submission error:", error);
       errorToast("Please check all required fields");
     }
   };

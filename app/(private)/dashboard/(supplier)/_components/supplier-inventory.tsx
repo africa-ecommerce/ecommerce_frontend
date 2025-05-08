@@ -412,7 +412,7 @@ const totalStock = getTotalStock(item);
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
           <div>
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold">
+            <h1 className="text-base sm:text-lg md:text-xl font-bold">
               Inventory Management
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground">
@@ -450,7 +450,7 @@ const totalStock = getTotalStock(item);
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-xl font-bold">
+                    <div className="text-lg font-bold">
                       {stats.totalProducts}
                     </div>
                   </>
@@ -480,7 +480,7 @@ const totalStock = getTotalStock(item);
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-xl font-bold text-amber-500">
+                    <div className="text-lg font-bold text-amber-500">
                       {stats.lowStockItems}
                     </div>
                     {stats.lowStockItems > 0 && (
@@ -516,7 +516,7 @@ const totalStock = getTotalStock(item);
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-xl font-bold text-destructive">
+                    <div className="text-lg font-bold text-destructive">
                       {stats.outOfStock}
                     </div>
                     {stats.outOfStock > 0 && (
@@ -552,7 +552,7 @@ const totalStock = getTotalStock(item);
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-xl font-bold">
+                    <div className="text-lg font-bold">
                       {formatPrice(stats.inventoryValue)}
                     </div>
                   </>

@@ -49,7 +49,6 @@ export function EditPriceModal({
     data,
     error: swrError,
     isLoading,
-    mutate,
   } = useSWR(open && itemId ? `/api/plug/products/${itemId}` : null, fetcher);
 
   console.log(data);

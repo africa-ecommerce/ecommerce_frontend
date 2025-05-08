@@ -333,10 +333,6 @@ export default function Products() {
   const [priceModalOpen, setPriceModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState("");
 
-
-
- 
-
   const { data, error, isLoading, mutate } = useSWR("/api/plug/products/");
   const products = Array.isArray(data?.data) ? data?.data : [];
 
@@ -344,7 +340,6 @@ export default function Products() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
 
-  
   const deleteProductFn = async (productId: string) => {
     const response = await fetch(`/api/plug/products/${productId}`, {
       method: "DELETE",
@@ -536,53 +531,61 @@ export default function Products() {
     return value !== undefined && value !== null ? value : "-";
   };
 
- const stats = useMemo(() => {
-  if (!products.length)
-    return {
-      totalProducts: 0,
-      lowStockItems: 0,
-      outOfStock: 0,
-      totalProfit: 0,
-    };
+  const stats = useMemo(() => {
+    if (!products.length)
+      return {
+        totalProducts: 0,
+        lowStockItems: 0,
+        outOfStock: 0,
+        totalProfit: 0,
+      };
 
-  return {
-    totalProducts: products.length,
-    lowStockItems: products.filter((item: any) => {
-      if (item.variations && item.variations.length > 0) {
-        // Get total stock across all variations
-        const totalStock = item.variations.reduce((sum: number, variation: any) => 
-          sum + (variation.stocks || 0), 0);
-        return totalStock > 0 && totalStock <= 5;
-      }
-      // If no variations, use item stock directly
-      return item.stocks !== undefined && item.stocks > 0 && item.stocks <= 5;
-    }).length,
-    outOfStock: products.filter((item: any) => {
-      if (item.variations && item.variations.length > 0) {
-        // Check if all variations have zero stock
-        const totalStock = item.variations.reduce((sum: number, variation: any) => 
-          sum + (variation.stocks || 0), 0);
-        return totalStock === 0;
-      }
-      // If no variations, check item stock directly
-      return item.stocks === 0;
-    }).length,
-    totalProfit: products.reduce((total: any, item: any) => {
-      if (item.variations && item.variations.length > 0) {
-        // Calculate profit across all variations
-        const variationProfit = item.variations.reduce(
-          (sum: number, variation: any) =>
-            sum + ((item.price || 0) - (item.originalPrice || 0)) * (variation.stocks || 0),
-          0
+    return {
+      totalProducts: products.length,
+      lowStockItems: products.filter((item: any) => {
+        if (item.variations && item.variations.length > 0) {
+          // Get total stock across all variations
+          const totalStock = item.variations.reduce(
+            (sum: number, variation: any) => sum + (variation.stocks || 0),
+            0
+          );
+          return totalStock > 0 && totalStock <= 5;
+        }
+        // If no variations, use item stock directly
+        return item.stocks !== undefined && item.stocks > 0 && item.stocks <= 5;
+      }).length,
+      outOfStock: products.filter((item: any) => {
+        if (item.variations && item.variations.length > 0) {
+          // Check if all variations have zero stock
+          const totalStock = item.variations.reduce(
+            (sum: number, variation: any) => sum + (variation.stocks || 0),
+            0
+          );
+          return totalStock === 0;
+        }
+        // If no variations, check item stock directly
+        return item.stocks === 0;
+      }).length,
+      totalProfit: products.reduce((total: any, item: any) => {
+        if (item.variations && item.variations.length > 0) {
+          // Calculate profit across all variations
+          const variationProfit = item.variations.reduce(
+            (sum: number, variation: any) =>
+              sum +
+              ((item.price || 0) - (item.originalPrice || 0)) *
+                (variation.stocks || 0),
+            0
+          );
+          return total + variationProfit;
+        }
+        // If no variations, calculate profit using item stock directly
+        return (
+          total +
+          ((item.price || 0) - (item.originalPrice || 0)) * (item.stocks || 0)
         );
-        return total + variationProfit;
-      }
-      // If no variations, calculate profit using item stock directly
-      return total + ((item.price || 0) - (item.originalPrice || 0)) * (item.stocks || 0);
-    }, 0),
-  };
-}, [products]);
-  
+      }, 0),
+    };
+  }, [products]);
 
   return (
     <TooltipProvider>
@@ -590,7 +593,7 @@ export default function Products() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
           <div>
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold">
+            <h1 className="text-base sm:text-lg md:text-xl font-bold">
               Products
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground">
@@ -627,7 +630,7 @@ export default function Products() {
                 {isLoading ? (
                   <Skeleton className="h-6 w-16" />
                 ) : (
-                  <div className="text-xl font-bold">{stats.totalProducts}</div>
+                  <div className="text-lg font-bold">{stats.totalProducts}</div>
                 )}
               </CardContent>
             </Card>
@@ -654,7 +657,7 @@ export default function Products() {
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-xl font-bold text-amber-500">
+                    <div className="text-lg font-bold text-amber-500">
                       {stats.lowStockItems}
                     </div>
                   </>
@@ -684,7 +687,7 @@ export default function Products() {
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-xl font-bold text-destructive">
+                    <div className="text-lg font-bold text-destructive">
                       {stats.outOfStock}
                     </div>
                   </>
@@ -713,7 +716,7 @@ export default function Products() {
                 {isLoading ? (
                   <Skeleton className="h-6 w-16" />
                 ) : (
-                  <div className="text-xl font-bold">
+                  <div className="text-lg font-bold">
                     {`₦${stats.totalProfit.toLocaleString()}`}
                   </div>
                 )}
@@ -919,11 +922,7 @@ export default function Products() {
                                     />
                                   </div>
                                   <Link
-                                    href={`/marketplace/product/${item.id}`}
-                                    onClick={(e) => {
-                                      // Stop event propagation to prevent interference with modal
-                                      e.stopPropagation();
-                                    }}
+                                    href={`/marketplace/product/${item.originalId}`}
                                   >
                                     <span className="font-medium text-xs sm:text-sm whitespace-nowrap max-w-[250px] capitalize underline text-blue-700">
                                       {truncateText(item.name, 15) || "-"}
