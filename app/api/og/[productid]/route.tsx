@@ -332,7 +332,7 @@ export async function GET(
 
   try {
     // Fetch product data from your database or API
-    const product = await getProductById(productId);
+    const product = await getProductById();
 
     if (!product) {
       return new Response("Product not found", { status: 404 });
@@ -580,10 +580,10 @@ export async function GET(
 }
 
 // Mock function - replace with your actual data fetching logic
-async function getProductById(id: string) {
+async function getProductById() {
   // In production, fetch this from your database or API
   return {
-    id,
+    // id,
     name: "Beautiful Apartment in Central Location",
     price: 149.99,
     currency: "USD",
