@@ -59,15 +59,23 @@ export function generateOpenGraphImageUrl({
   // If version is not provided, generate it based on content
   const contentVersion = version || generateContentVersion(product);
 
+  // Create a slug-friendly product name for the URL
+  const productSlug = encodeURIComponent(product.name);
+
   // Create a secure signature to prevent URL manipulation
   const signature = createHash("sha256")
-    .update(`${product.name}-${contentVersion}-${process.env.OG_SECRET_KEY}`)
+    .update(
+      `${productSlug}-${contentVersion}-${
+        process.env.OG_SECRET_KEY || "default-secret"
+      }`
+    )
     .digest("hex")
     .slice(0, 12);
 
-  // Build the URL with the signature and platform info
-  return `${baseUrl}/api/og/${product.name}?signature=${signature}&v=${contentVersion}&platform=${platform}`;
+  // Build the URL with the signature and platform info - using correct route pattern
+  return `${baseUrl}/api/og/${productSlug}?signature=${signature}&v=${contentVersion}&platform=${platform}`;
 }
+
 
 /**
  * Generates comprehensive Open Graph metadata for different platforms
@@ -76,7 +84,7 @@ export function generateOpenGraphMetadata(
   product: Product
 ): Record<string, string> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://yourdomain.com";
-  const productUrl = `${baseUrl}/products/${product.name}`;
+  const productUrl = `${baseUrl}/products/${encodeURIComponent(product.name)}`;
   const contentVersion = generateContentVersion(product);
 
   // Generate platform-specific image URLs
@@ -160,7 +168,7 @@ export function generateOpenGraphMetadata(
  */
 export function generateProductJsonLd(product: Product): string {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://yourdomain.com";
-  const productUrl = `${baseUrl}/products/${product.name}`;
+  const productUrl = `${baseUrl}/products/${encodeURIComponent(product.name)}`;
   const imageUrl = product.imageUrl;
 
   const jsonLd = {

@@ -325,10 +325,20 @@ export async function GET(
   const { productId } = params;
   const searchParams = request.nextUrl.searchParams;
 
+
+   // Log the request details for debugging
+    console.log("OG Image Request:", {
+      productId,
+      searchParams: Object.fromEntries(searchParams.entries()),
+    });
+
   // Get query parameters
   const signature = searchParams.get("signature");
   const version = searchParams.get("v") || "1";
   const platform = searchParams.get("platform") || "default";
+
+
+ 
 
   try {
     // Fetch product data from your database or API
@@ -338,7 +348,6 @@ export async function GET(
 
     if (!product) {
       return new Response("Product not found", { status: 404 });
-      console.log("!product")
     }
 
     // Validate signature to prevent URL manipulation if signature is provided

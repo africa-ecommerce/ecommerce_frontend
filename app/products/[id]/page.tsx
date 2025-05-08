@@ -183,7 +183,7 @@ export async function generateMetadata({
     openGraph: {
       title: product.name,
       description: ogMetadata["og:description"],
-      url: `/products/${product.name}`,
+      url: `/products/${encodeURIComponent(product.name)}`,
       images: [
         {
           url: ogMetadata["og:image"],
@@ -212,7 +212,7 @@ export async function generateMetadata({
     },
     // Use alternates if you have multiple languages or regions
     alternates: {
-      canonical: `/products/${product.name}`,
+      canonical: `/products/${encodeURIComponent(product.name)}`,
     },
   };
 }

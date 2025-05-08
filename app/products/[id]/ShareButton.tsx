@@ -20,71 +20,75 @@ interface ShareButtonProps {
 
 export default function ShareButton({ product }: ShareButtonProps) {
   const [isSharing, setIsSharing] = useState(false);
-  const [copySuccess, setCopySuccess] = useState('');
+  const [copySuccess, setCopySuccess] = useState("");
 
   // Platform-specific share URLs
-  const shareUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/products/${product.name}`
-    : `/products/${product.name}`;
-  
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/products/${encodeURIComponent(product.name)}`
+      : `/products/${encodeURIComponent(product.name)}`;
+
   const contentVersion = generateContentVersion(product);
 
   // Handle share for different platforms
-  const handleShare = async (platform: 'twitter' | 'facebook' | 'whatsapp' | 'copy') => {
+  const handleShare = async (
+    platform: "twitter" | "facebook" | "whatsapp" | "copy"
+  ) => {
     setIsSharing(true);
-    
+
     try {
       // Generate platform-specific URL if needed
       const ogImageUrl = generateOpenGraphImageUrl({
         product,
         version: contentVersion,
-        platform: platform === 'copy' ? 'default' : platform,
+        platform: platform === "copy" ? "default" : platform,
       });
-      
-      let shareLink = '';
-      
+
+      let shareLink = "";
+
       switch (platform) {
-        case 'twitter':
-          shareLink = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(`Check out this ${product.name}!`)}`;
-          window.open(shareLink, '_blank', 'width=550,height=420');
+        case "twitter":
+          shareLink = `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+            shareUrl
+          )}&text=${encodeURIComponent(`Check out this ${product.name}!`)}`;
+          window.open(shareLink, "_blank", "width=550,height=420");
           break;
-          
-        case 'facebook':
-          shareLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-          window.open(shareLink, '_blank', 'width=550,height=420');
-          break;
-          
-        case 'whatsapp':
-          shareLink = `https://wa.me/?text=${encodeURIComponent(
-            `Check out this ${product.name}! ${ogImageUrl}`
+
+        case "facebook":
+          shareLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+            shareUrl
           )}`;
-          window.open(shareLink, '_blank');
+          window.open(shareLink, "_blank", "width=550,height=420");
           break;
 
+        case "whatsapp":
+          shareLink = `https://wa.me/?text=${encodeURIComponent(
+            `Check out this ${product.name}! ${shareUrl}`
+          )}`;
+          window.open(shareLink, "_blank");
+          break;
 
-          
-          
-        case 'copy':
+        case "copy":
           // Copy to clipboard
           await navigator.clipboard.writeText(shareUrl);
-          setCopySuccess('Link copied!');
-          setTimeout(() => setCopySuccess(''), 2000);
+          setCopySuccess("Link copied!");
+          setTimeout(() => setCopySuccess(""), 2000);
           break;
       }
     } catch (error) {
-      console.error('Error sharing:', error);
+      console.error("Error sharing:", error);
     } finally {
       setIsSharing(false);
     }
   };
-  
+
   return (
     <div className="share-container">
       <h3>Share this listing</h3>
-      
+
       <div className="share-buttons">
         <button
-          onClick={() => handleShare('twitter')}
+          onClick={() => handleShare("twitter")}
           disabled={isSharing}
           className="share-button twitter"
           aria-label="Share on Twitter"
@@ -94,9 +98,9 @@ export default function ShareButton({ product }: ShareButtonProps) {
           </svg>
           Twitter
         </button>
-        
+
         <button
-          onClick={() => handleShare('facebook')}
+          onClick={() => handleShare("facebook")}
           disabled={isSharing}
           className="share-button facebook"
           aria-label="Share on Facebook"
@@ -106,9 +110,9 @@ export default function ShareButton({ product }: ShareButtonProps) {
           </svg>
           Facebook
         </button>
-        
+
         <button
-          onClick={() => handleShare('whatsapp')}
+          onClick={() => handleShare("whatsapp")}
           disabled={isSharing}
           className="share-button whatsapp"
           aria-label="Share on WhatsApp"
@@ -119,9 +123,9 @@ export default function ShareButton({ product }: ShareButtonProps) {
           </svg>
           WhatsApp
         </button>
-        
+
         <button
-          onClick={() => handleShare('copy')}
+          onClick={() => handleShare("copy")}
           disabled={isSharing}
           className="share-button copy"
           aria-label="Copy link"
@@ -129,24 +133,24 @@ export default function ShareButton({ product }: ShareButtonProps) {
           <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
             <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
           </svg>
-          {copySuccess || 'Copy Link'}
+          {copySuccess || "Copy Link"}
         </button>
       </div>
-      
+
       <style jsx>{`
         .share-container {
           margin-top: 2rem;
           padding: 1rem;
           border-top: 1px solid #eaeaea;
         }
-        
+
         .share-buttons {
           display: flex;
           gap: 0.75rem;
           margin-top: 0.75rem;
           flex-wrap: wrap;
         }
-        
+
         .share-button {
           display: flex;
           align-items: center;
@@ -158,32 +162,32 @@ export default function ShareButton({ product }: ShareButtonProps) {
           cursor: pointer;
           transition: all 0.2s ease;
         }
-        
+
         .twitter {
-          background-color: #1DA1F2;
+          background-color: #1da1f2;
           color: white;
         }
-        
+
         .facebook {
-          background-color: #1877F2;
+          background-color: #1877f2;
           color: white;
         }
-        
+
         .whatsapp {
-          background-color: #25D366;
+          background-color: #25d366;
           color: white;
         }
-        
+
         .copy {
           background-color: #e0e0e0;
           color: #333;
         }
-        
+
         .share-button:hover {
           opacity: 0.9;
           transform: translateY(-1px);
         }
-        
+
         .share-button:disabled {
           opacity: 0.5;
           cursor: not-allowed;
