@@ -334,8 +334,11 @@ export async function GET(
     // Fetch product data from your database or API
     const product = await getProductById();
 
+    console.log("product", product)
+
     if (!product) {
       return new Response("Product not found", { status: 404 });
+      console.log("!product")
     }
 
     // Validate signature to prevent URL manipulation if signature is provided
