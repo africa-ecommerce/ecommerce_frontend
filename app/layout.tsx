@@ -103,7 +103,8 @@ export const metadata: Metadata = {
   title: "Pluggn - Empower Your Digital Business Journeys",
   description:
     "Connect with customers across Africa and beyond. Sell online, in-store, or through WhatsApp with Pluggn's all-in-one platform.",
-   image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800" 
+
+  //  image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800" 
 };
 
 // Loading component for Suspense fallback
