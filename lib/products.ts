@@ -39,6 +39,9 @@ export const getProductServer = async (id: string) => {
     },
   });
 
+  console.log("res", res)
+  console.log("baseUrl", baseUrl)
+
   if (!res.ok) {
     const errorData = await res.json();
     throw new Error(
@@ -47,5 +50,7 @@ export const getProductServer = async (id: string) => {
   }
 
   const {data} = await res.json();
+
+  console.log("data", data)
   return  data;
 };

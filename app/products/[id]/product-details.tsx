@@ -6,6 +6,8 @@ interface ProductDetailsProps {
 }
 
 export default function ProductDetails({ product }: ProductDetailsProps) {
+
+    console.log("product", product)
   // Format price
   const formattedPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
