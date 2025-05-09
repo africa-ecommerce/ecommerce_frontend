@@ -14,7 +14,7 @@ export const revalidate = 3600 // Revalidate every hour
 
 export default async function Image({ params }: { params: { id: string } }) {
   // Fetch product data
-  const product = await getProduct(params.id)
+  const product = await getProductServer(params.id)
 
   if (!product) {
     return new ImageResponse(

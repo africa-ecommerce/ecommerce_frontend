@@ -29,7 +29,7 @@ export const getProduct = async (id: string) => {
 export const getProductServer = async (id: string) => {
   // When using from another API route or server component,
   // you may need the full URL instead of relative path
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
   const res = await fetch(`${baseUrl}/api/products/${id}`, {
     // Ensures the request isn't cached
     cache: "no-store",

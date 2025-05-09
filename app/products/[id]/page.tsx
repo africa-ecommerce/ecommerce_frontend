@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getProduct } from "@/lib/products";
+import { getProductServer } from "@/lib/products";
 import ProductDetails from "./product-details";
 
 // Generate metadata for the page
@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: { id: string };
   searchParams: { [key: string]: string | string[] | undefined };
 }): Promise<Metadata> {
-  const product = await getProduct(params.id);
+  const product = await getProductServer(params.id);
 
   console.log("ppproduct", product);
 
