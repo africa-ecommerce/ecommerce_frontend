@@ -149,6 +149,7 @@
 // }
 
 
+
 import { Metadata } from "next";
 import {
   generateOpenGraphMetadata,
@@ -177,13 +178,16 @@ export async function generateMetadata({
 
   const ogMetadata = generateOpenGraphMetadata(product);
 
+  // Use encodeURIComponent for URL paths
+  const productUrlPath = product.name.replace(/\s+/g, "-").toLowerCase();
+
   return {
     title: product.name,
-    description: ogMetadata["description"],
+    description: product.description || ogMetadata["description"],
     openGraph: {
       title: product.name,
       description: ogMetadata["og:description"],
-      url: `/products/${encodeURIComponent(product.name)}`,
+      url: `/products/${encodeURIComponent(productUrlPath)}`,
       images: [
         {
           url: ogMetadata["og:image"],
@@ -203,6 +207,61 @@ export async function generateMetadata({
       images: [ogMetadata["twitter:image"]],
       site: `@${process.env.NEXT_PUBLIC_TWITTER_HANDLE || "yourbrand"}`,
     },
+
+    // import { Metadata } from "next";
+    // import {
+    //   generateOpenGraphMetadata,
+    //   generateProductJsonLd,
+    // } from "@/lib/openGraph";
+    // import { notFound } from "next/navigation";
+    // import ShareButton from "./ShareButton";
+
+    // interface ProductPageProps {
+    //   params: {
+    //     id: string;
+    //   };
+    // }
+
+    // // Define dynamic metadata for this page
+    // export async function generateMetadata({
+    //   params,
+    // }: ProductPageProps): Promise<Metadata> {
+    //   const product = await getProductById();
+
+    //   if (!product) {
+    //     return {
+    //       title: "Product Not Found",
+    //     };
+    //   }
+
+    //   const ogMetadata = generateOpenGraphMetadata(product);
+
+    //   return {
+    //     title: product.name,
+    //     description: ogMetadata["description"],
+    //     openGraph: {
+    //       title: product.name,
+    //       description: ogMetadata["og:description"],
+    //       url: `/products/${encodeURIComponent(product.name)}`,
+    //       images: [
+    //         {
+    //           url: ogMetadata["og:image"],
+    //           width: 1200,
+    //           height: 630,
+    //           alt: `Image of ${product.name}`,
+    //         },
+    //       ],
+    //       // Changed from "product" to "website" which is an allowed value
+    //       type: "website",
+    //       siteName: process.env.NEXT_PUBLIC_BRAND_NAME || "Your Brand",
+    //     },
+    //     twitter: {
+    //       card: "summary_large_image",
+    //       title: product.name,
+    //       description: ogMetadata["twitter:description"],
+    //       images: [ogMetadata["twitter:image"]],
+    //       site: `@${process.env.NEXT_PUBLIC_TWITTER_HANDLE || "yourbrand"}`,
+    //     },
     // Move product-specific metadata to the "other" property
     other: {
       "product:price:amount": product.price.toString(),
