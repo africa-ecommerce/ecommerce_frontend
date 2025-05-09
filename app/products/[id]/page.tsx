@@ -94,10 +94,14 @@ export async function generateMetadata({
         title: "Product Not Found",
       };
     }
+
+    console.log("ppproduct", product);
     
     // Create absolute URLs for the Open Graph images
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
     const ogImageUrl = `${baseUrl}/api/og/${params.id}.png`;
+
+    console.log("ogImageUrl", ogImageUrl);
     
     return {
       title: product.name,
