@@ -332,6 +332,7 @@ export default function Products() {
 
   const [priceModalOpen, setPriceModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState("");
+  const [currentItemData, setCurrentItemData] = useState(null);
 
   const { data, error, isLoading, mutate } = useSWR("/api/plug/products/");
   const products = Array.isArray(data?.data) ? data?.data : [];
@@ -906,101 +907,110 @@ export default function Products() {
                         currentItems.map((item: any) => {
                           const stockStatus = getStockStatus(item);
                           return (
-                            <tr
-                              key={item.id}
-                              className="border-b hover:bg-muted/30"
-                            >
-                              <td className="p-2 sm:p-3">
-                                <div className="flex items-center gap-2 sm:gap-3">
-                                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
-                                    <Image
-                                      src={item.images[0] || "/placeholder.svg"}
-                                      alt={item.name}
-                                      width={32}
-                                      height={32}
-                                      className="w-full h-full object-cover"
-                                    />
+                            <div>
+                              <tr
+                                key={item.id}
+                                className="border-b hover:bg-muted/30"
+                              >
+                                <td className="p-2 sm:p-3">
+                                  <div className="flex items-center gap-2 sm:gap-3">
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
+                                      <Image
+                                        src={
+                                          item.images[0] || "/placeholder.svg"
+                                        }
+                                        alt={item.name}
+                                        width={32}
+                                        height={32}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                    <Link
+                                      href={`/marketplace/product/${item.originalId}`}
+                                    >
+                                      <span className="font-medium text-xs sm:text-sm whitespace-nowrap max-w-[250px] capitalize underline text-blue-700">
+                                        {truncateText(item.name, 15) || "-"}
+                                      </span>
+                                    </Link>
                                   </div>
-                                  <Link
-                                    href={`/marketplace/product/${item.originalId}`}
-                                  >
-                                    <span className="font-medium text-xs sm:text-sm whitespace-nowrap max-w-[250px] capitalize underline text-blue-700">
-                                      {truncateText(item.name, 15) || "-"}
+                                </td>
+                                <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
+                                  {item.price
+                                    ? `₦${item.price.toLocaleString()}`
+                                    : "-"}
+                                </td>
+                                <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
+                                  {item.originalPrice
+                                    ? `₦${item.originalPrice.toLocaleString()}`
+                                    : "-"}
+                                </td>
+                                <td className="p-2 sm:p-3 text-xs sm:text-sm">
+                                  <div className="flex items-center gap-1">
+                                    <span
+                                      className={getStockStatusColor(
+                                        stockStatus
+                                      )}
+                                    >
+                                      {getTotalStocks(item)}
                                     </span>
-                                  </Link>
-                                </div>
-                              </td>
-                              <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                {item.price
-                                  ? `₦${item.price.toLocaleString()}`
-                                  : "-"}
-                              </td>
-                              <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                {item.originalPrice
-                                  ? `₦${item.originalPrice.toLocaleString()}`
-                                  : "-"}
-                              </td>
-                              <td className="p-2 sm:p-3 text-xs sm:text-sm">
-                                <div className="flex items-center gap-1">
-                                  <span
-                                    className={getStockStatusColor(stockStatus)}
-                                  >
-                                    {getTotalStocks(item)}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="p-2 sm:p-3">
-                                {getStockStatusBadge(stockStatus)}
-                              </td>
-                              <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                <div className="flex items-center gap-1">
-                                  <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground" />
-                                  <span>{displayValue(item.plugsCount)}</span>
-                                </div>
-                              </td>
-                              <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                {displayValue(item.sales)}
-                              </td>
-                              <td className="p-2 sm:p-3">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7 sm:h-8 sm:w-8"
-                                    >
-                                      <MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                      <span className="sr-only">Open menu</span>
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel className="text-xs sm:text-sm">
-                                      Actions
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuItem
-                                      className="text-xs sm:text-sm"
-                                      onClick={() => {
-                                        setProductToEdit(item.id);
-                                        setPriceModalOpen(true);
-                                      }}
-                                    >
-                                      <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
-                                      Manage
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      className="text-destructive text-xs sm:text-sm"
-                                      onClick={() =>
-                                        setProductToDelete(item.id)
-                                      }
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
-                                      Remove
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </td>
-                            </tr>
+                                  </div>
+                                </td>
+                                <td className="p-2 sm:p-3">
+                                  {getStockStatusBadge(stockStatus)}
+                                </td>
+                                <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
+                                  <div className="flex items-center gap-1">
+                                    <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground" />
+                                    <span>{displayValue(item.plugsCount)}</span>
+                                  </div>
+                                </td>
+                                <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
+                                  {displayValue(item.sales)}
+                                </td>
+                                <td className="p-2 sm:p-3">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 sm:h-8 sm:w-8"
+                                      >
+                                        <MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                        <span className="sr-only">
+                                          Open menu
+                                        </span>
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuLabel className="text-xs sm:text-sm">
+                                        Actions
+                                      </DropdownMenuLabel>
+                                      <DropdownMenuItem
+                                        className="text-xs sm:text-sm"
+                                        onClick={() => {
+                                          setProductToEdit(item.id);
+                                          setCurrentItemData(item);
+                                          setPriceModalOpen(true);
+                                        }}
+                                      >
+                                        <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                        Manage
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        className="text-destructive text-xs sm:text-sm"
+                                        onClick={() =>
+                                          setProductToDelete(item.id)
+                                        }
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                        Remove
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </td>
+                              </tr>
+                            </div>
                           );
                         })
                       )}
@@ -1158,6 +1168,7 @@ export default function Products() {
         />
 
         <EditPriceModal
+          itemData={currentItemData}
           open={priceModalOpen}
           onOpenChange={setPriceModalOpen}
           itemId={productToEdit}

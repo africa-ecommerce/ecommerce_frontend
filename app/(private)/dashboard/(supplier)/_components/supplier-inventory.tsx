@@ -185,9 +185,11 @@ export default function Inventory() {
   const [productToDelete, setProductToDelete] = useState<string>("");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
+  const [currentItemData, setCurrentItemData] = useState(null);
 
-  const handleEdit = (productId: string) => {
+  const handleEdit = (productId: string, item: any) => {
     setSelectedProductId(productId);
+    setCurrentItemData(item);
     setEditModalOpen(true);
   };
 
@@ -217,41 +219,36 @@ export default function Inventory() {
 
   // Filter items based on selected category, filter, and search query
   const filteredItems = products?.filter((item: any) => {
-    
-    
-const totalStock = getTotalStock(item);
-  const hasStock = totalStock !== undefined && totalStock !== null;
-  
-  // Category filter
-  if (selectedCategory !== "all" && item.category !== selectedCategory)
-    return false;
-  
-  // Stock-based filters
-  if (
-    selectedFilter === "out-of-stock" &&
-    (hasStock && totalStock > 0)
-  )
-    return false;
-  if (
-    selectedFilter === "low-stock" &&
-    (!hasStock || totalStock === 0 || totalStock > 5)
-  )
-    return false;
-  if (
-    selectedFilter === "optimal" &&
-    (!hasStock || totalStock === 0 || totalStock <= 10)
-  )
-    return false;
-  
-  // Search filter
-  if (
-    searchQuery &&
-    !item.name?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-    return false;
-  
-  return true;
-});
+    const totalStock = getTotalStock(item);
+    const hasStock = totalStock !== undefined && totalStock !== null;
+
+    // Category filter
+    if (selectedCategory !== "all" && item.category !== selectedCategory)
+      return false;
+
+    // Stock-based filters
+    if (selectedFilter === "out-of-stock" && hasStock && totalStock > 0)
+      return false;
+    if (
+      selectedFilter === "low-stock" &&
+      (!hasStock || totalStock === 0 || totalStock > 5)
+    )
+      return false;
+    if (
+      selectedFilter === "optimal" &&
+      (!hasStock || totalStock === 0 || totalStock <= 10)
+    )
+      return false;
+
+    // Search filter
+    if (
+      searchQuery &&
+      !item.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+      return false;
+
+    return true;
+  });
 
   // Get current items for pagination
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -261,25 +258,25 @@ const totalStock = getTotalStock(item);
 
   // Helper functions
   const getStockStatus = (item: any) => {
-  // If item has variations, calculate total stock across all variations
-  if (item.variations && item.variations.length > 0) {
-    const totalStock = item.variations.reduce(
-      (sum: number, variation: any) => sum + (variation.stock || 0), 
-      0
-    );
-    
-    // Check total stock across all variations
-    if (totalStock === 0) return "out-of-stock";
-    if (totalStock <= 5) return "low-stock";
+    // If item has variations, calculate total stock across all variations
+    if (item.variations && item.variations.length > 0) {
+      const totalStock = item.variations.reduce(
+        (sum: number, variation: any) => sum + (variation.stock || 0),
+        0
+      );
+
+      // Check total stock across all variations
+      if (totalStock === 0) return "out-of-stock";
+      if (totalStock <= 5) return "low-stock";
+      return "optimal";
+    }
+
+    // If no variations, use item stock directly
+    if (item.stock === undefined || item.stock === null) return "unknown";
+    if (item.stock === 0) return "out-of-stock";
+    if (item.stock <= 5) return "low-stock";
     return "optimal";
-  }
-  
-  // If no variations, use item stock directly
-  if (item.stock === undefined || item.stock === null) return "unknown";
-  if (item.stock === 0) return "out-of-stock";
-  if (item.stock <= 5) return "low-stock";
-  return "optimal";
-};
+  };
 
   const getStockStatusColor = (status: any) => {
     switch (status) {
@@ -369,25 +366,29 @@ const totalStock = getTotalStock(item);
     return {
       totalProducts: products.length,
       lowStockItems: products.filter((item: any) => {
-      if (item.variations && item.variations.length > 0) {
-        // Get total stock across all variations
-        const totalStock = item.variations.reduce((sum: number, variation: any) => 
-          sum + (variation.stock || 0), 0);
-        return totalStock > 0 && totalStock <= 5;
-      }
-      // If no variations, use item stock directly
-      return item.stock !== undefined && item.stock > 0 && item.stock <= 5;
-    }).length,
-    outOfStock: products.filter((item: any) => {
-      if (item.variations && item.variations.length > 0) {
-        // Check if all variations have zero stock
-        const totalStock = item.variations.reduce((sum: number, variation: any) => 
-          sum + (variation.stock || 0), 0);
-        return totalStock === 0;
-      }
-      // If no variations, check item stock directly
-      return item.stock === 0;
-    }).length,
+        if (item.variations && item.variations.length > 0) {
+          // Get total stock across all variations
+          const totalStock = item.variations.reduce(
+            (sum: number, variation: any) => sum + (variation.stock || 0),
+            0
+          );
+          return totalStock > 0 && totalStock <= 5;
+        }
+        // If no variations, use item stock directly
+        return item.stock !== undefined && item.stock > 0 && item.stock <= 5;
+      }).length,
+      outOfStock: products.filter((item: any) => {
+        if (item.variations && item.variations.length > 0) {
+          // Check if all variations have zero stock
+          const totalStock = item.variations.reduce(
+            (sum: number, variation: any) => sum + (variation.stock || 0),
+            0
+          );
+          return totalStock === 0;
+        }
+        // If no variations, check item stock directly
+        return item.stock === 0;
+      }).length,
       inventoryValue: products.reduce((total: number, item: any) => {
         if (item.variations && item.variations.length > 0) {
           // Calculate value across all variations
@@ -596,10 +597,7 @@ const totalStock = getTotalStock(item);
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
           <div className="flex justify-end gap-2">
-            
             <div className="flex justify-end gap-2">
-              
-
               <Button
                 size="sm"
                 onClick={() => setShowEnhancedAddProduct(true)}
@@ -840,7 +838,7 @@ const totalStock = getTotalStock(item);
                                     <DropdownMenuItem
                                       className="text-xs sm:text-sm"
                                       onClick={() => {
-                                        handleEdit(item.id);
+                                        handleEdit(item.id, item);
                                       }}
                                     >
                                       <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
@@ -910,6 +908,7 @@ const totalStock = getTotalStock(item);
         />
 
         <EditProductModal
+          itemData={currentItemData}
           open={editModalOpen}
           onOpenChange={setEditModalOpen}
           productId={selectedProductId}

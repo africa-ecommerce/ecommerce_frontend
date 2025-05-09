@@ -59,12 +59,14 @@ interface EditProductModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   productId: string;
+  itemData?: any
 }
 
 export function EditProductModal({
   open,
   onOpenChange,
   productId,
+  itemData
 }: EditProductModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
@@ -85,10 +87,13 @@ export function EditProductModal({
 
   // Fetch product data
   const {
-    data,
+    data: fetchedData,
     error,
-    isLoading,
-  } = useSWR(open && productId ? `/api/products/${productId}` : null, fetcher);
+    isLoading: isFetching,
+  } = useSWR(open && productId && !itemData ? `/api/products/${productId}` : null, fetcher);
+
+   const data = itemData || fetchedData;
+   const isLoading = !itemData && isFetching;
 
 
   const editProduct = async (data: UpdateFormData) => {

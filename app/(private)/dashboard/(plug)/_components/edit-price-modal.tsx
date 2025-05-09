@@ -25,6 +25,7 @@ interface PriceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   itemId: string;
+  itemData?: any; // Add this new prop to accept direct data
 }
 
 const fetcher = (url: string) =>
@@ -32,11 +33,11 @@ const fetcher = (url: string) =>
     if (!res.ok) throw new Error("Failed to fetch pricing data");
     return res.json();
   });
-
 export function EditPriceModal({
   open,
   onOpenChange,
   itemId,
+  itemData, // Accept the item data directly
 }: PriceModalProps) {
   const [price, setPrice] = useState<string>("");
   const [profit, setProfit] = useState<number>(0);
@@ -44,18 +45,23 @@ export function EditPriceModal({
   const [touched, setTouched] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Fetch pricing data with useSWR - only when modal is open and itemId exists
+  // Only fetch if we don't have itemData and modal is open
   const {
     data,
     error: swrError,
-    isLoading,
-  } = useSWR(open && itemId ? `/api/plug/products/${itemId}` : null, fetcher);
+    isLoading: isFetching,
+  } = useSWR(
+    open && itemId && !itemData ? `/api/plug/products/${itemId}` : null,
+    fetcher
+  );
 
-  console.log(data);
+  // Use the direct data or fall back to fetched data
+  const productData = itemData || data?.data;
+  const isLoading = !itemData && isFetching;
 
   // Calculate profit whenever price changes
   useEffect(() => {
-    if (!data?.data) return;
+    if (!productData) return;
 
     const numericPrice = Number.parseFloat(price.replace(/,/g, "")) || 0;
 
@@ -63,16 +69,16 @@ export function EditPriceModal({
     if (touched) {
       if (!price) {
         setError("Please enter a price");
-      } else if (numericPrice < data.data.originalPrice) {
+      } else if (numericPrice < productData.originalPrice) {
         setError(
-          `Price must be at least ₦${data.data.originalPrice?.toLocaleString()}`
+          `Price must be at least ₦${productData.originalPrice?.toLocaleString()}`
         );
       } else {
         setError(null);
-        setProfit(numericPrice - data.data.originalPrice);
+        setProfit(numericPrice - productData.originalPrice);
       }
     }
-  }, [price, touched, data]);
+  }, [price, touched, productData]);
 
   // Format price with commas as thousands separators
   const formatPrice = (value: string) => {
@@ -104,11 +110,11 @@ export function EditPriceModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!data?.data) return;
+    if (!productData) return;
 
     const numericPrice = Number.parseFloat(price.replace(/,/g, "")) || 0;
 
-    if (!price || numericPrice < data.data.originalPrice) {
+    if (!price || numericPrice < productData.originalPrice) {
       setTouched(true);
       return;
     }
@@ -148,13 +154,13 @@ export function EditPriceModal({
 
   // Reset form when modal opens with a different item
   useEffect(() => {
-    if (open && data?.data?.pendingPrice) {
-      setPrice(data.data?.pendingPrice?.toLocaleString());
+    if (open && productData?.pendingPrice) {
+      setPrice(productData.pendingPrice?.toLocaleString());
       setProfit(0);
       setTouched(false);
       setError(null);
     }
-  }, [open, data]);
+  }, [open, productData]);
 
   // Handle SWR error
   if (swrError && open) {
@@ -186,10 +192,10 @@ export function EditPriceModal({
             </div>
           ) : (
             <DialogDescription>
-              {data?.data && (
+              {productData && (
                 <>
                   Set a price for your product. Minimum price is ₦
-                  {data.data.originalPrice?.toLocaleString()}.
+                  {productData.originalPrice?.toLocaleString()}.
                 </>
               )}
             </DialogDescription>
@@ -207,7 +213,7 @@ export function EditPriceModal({
             </Alert>
 
             {/* Pending Price Change Display */}
-            {data?.data?.pendingPrice && (
+            {productData?.pendingPrice && (
               <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
                 <h4 className="mb-2 font-medium text-blue-800">
                   Pending Price Change
@@ -215,13 +221,13 @@ export function EditPriceModal({
                 <div className="mb-2">
                   <span className="text-sm text-blue-700">Pending Price: </span>
                   <span className="font-medium text-blue-900">
-                    ₦{data.data.pendingPrice?.toLocaleString()}
+                    ₦{productData.pendingPrice?.toLocaleString()}
                   </span>
                 </div>
                 <div className="mb-2">
                   <span className="text-sm text-blue-700">Effective: </span>
                   <span className="font-medium text-blue-900">
-                    {formatDaysRemaining(data.data.priceEffectiveAt)}
+                    {formatDaysRemaining(productData.priceEffectiveAt)}
                   </span>
                 </div>
               </div>
