@@ -72,10 +72,9 @@
 //   return <ProductDetails product={product} />;
 // }
 
-
 // File: app/products/[id]/page.tsx (Server Component)
 import type { Metadata } from "next";
-import { getProduct } from "@/lib/products";
+import { getProductServer } from "@/lib/products"; // Import the server-side version
 import ClientProductPage from "./client-product-page";
 
 // Generate metadata for the page (remains server-side)
@@ -87,7 +86,8 @@ export async function generateMetadata({
   searchParams: { [key: string]: string | string[] | undefined };
 }): Promise<Metadata> {
   try {
-    const product = await getProduct(params.id);
+    // Use the server version that forwards cookies
+    const product = await getProductServer(params.id);
     
     if (!product) {
       return {
