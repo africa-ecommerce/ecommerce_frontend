@@ -575,7 +575,10 @@ export async function middleware(request: NextRequest) {
   }
 
   // Handle public routes
-  if (publicRoutes.includes(pathname)) {
+  if (
+    publicRoutes.includes(pathname) ||
+    (pathname.startsWith("/products/") && pathname.split("/").length === 3)
+  ) {
     return NextResponse.next();
   }
 
@@ -619,9 +622,10 @@ export async function middleware(request: NextRequest) {
     // Handle onboarding status redirects
     // If user is not onboarded and trying to access protected routes (except onboarding)
     if (
-      !authResult.user.isOnboarded &&
-      !publicRoutes.includes(pathname) &&
-      !isOnboardingRoute
+      (!authResult.user.isOnboarded && !publicRoutes.includes(pathname)) ||
+      (pathname.startsWith("/products/") &&
+        pathname.split("/").length === 3 &&
+        !isOnboardingRoute)
     ) {
       return NextResponse.redirect(new URL("/onboarding", nextUrl.origin));
     }
