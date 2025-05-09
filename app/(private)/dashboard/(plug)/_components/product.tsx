@@ -907,7 +907,7 @@ export default function Products() {
                         currentItems.map((item: any) => {
                           const stockStatus = getStockStatus(item);
                           return (
-                            <div>
+                           
                               <tr
                                 key={item.id}
                                 className="border-b hover:bg-muted/30"
@@ -1010,7 +1010,7 @@ export default function Products() {
                                   </DropdownMenu>
                                 </td>
                               </tr>
-                            </div>
+                           
                           );
                         })
                       )}
