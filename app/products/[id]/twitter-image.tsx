@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og"
-import { getProductServer } from "@/lib/products"
+import { getProduct } from "@/lib/products"
 
 // Image metadata
 export const alt = "Product listing"
@@ -14,7 +14,7 @@ export const revalidate = 3600 // Revalidate every hour
 
 export default async function Image({ params }: { params: { id: string } }) {
   // Fetch product data
-  const product = await getProductServer(params.id)
+  const product = await getProduct(params.id)
 
   console.log("tproduct", product)
   

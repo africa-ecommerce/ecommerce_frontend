@@ -3,8 +3,34 @@
  * @param id Product ID to fetch
  * @returns The product data
  */
+// export const getProduct = async (id: string) => {
+//   const res = await fetch(`/api/products/${id}`);
+
+//   if (!res.ok) {
+//     const errorData = await res.json();
+//     throw new Error(
+//       errorData.error || `Failed to fetch product with id: ${id}`
+//     );
+//   }
+
+  
+
+//   const {data} = await res.json();
+
+
+//   return data;
+// };
+
 export const getProduct = async (id: string) => {
-  const res = await fetch(`/api/products/${id}`);
+  const res = await fetch(`/api/products/${id}`, {
+    // Include credentials to send cookies with the request
+    credentials: "include",
+    // Ensures fresh data
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+    }
+  });
 
   if (!res.ok) {
     const errorData = await res.json();
@@ -13,11 +39,7 @@ export const getProduct = async (id: string) => {
     );
   }
 
-  
-
   const {data} = await res.json();
-
-
   return data;
 };
 
