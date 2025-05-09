@@ -6,10 +6,13 @@ export const runtime = "edge";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { path: string[] } }
 ) {
   try {
-    const product = await getProductServer(params.id);
+
+    const fullPath = params.path.join('/');
+    const productId = fullPath.split('.')[0];
+    const product = await getProductServer(productId);
 
     console.log("getProductServer", product);
 
