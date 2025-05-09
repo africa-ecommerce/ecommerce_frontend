@@ -939,7 +939,7 @@ async function getProductById() {
   //   productId.toLowerCase() === "beautiful-apartment-in-central-location"
   // ) {
     return {
-      name: "Beautiful Apartment in Central Location",
+      name: "Beautiful Apartment in Central Locations",
       price: 149.99,
       currency: "USD",
       duration: "night",

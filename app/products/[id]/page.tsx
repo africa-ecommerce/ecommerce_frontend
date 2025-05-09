@@ -347,7 +347,7 @@ async function getProductById() {
   // In production, fetch this from your database or API
   return {
     // id,
-    name: "Beautiful Apartment in Central Location",
+    name: "Beautiful Apartment in Central Locations",
     price: 149.99,
     currency: "USD",
     duration: "night",
