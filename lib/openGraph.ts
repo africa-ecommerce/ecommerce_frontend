@@ -293,7 +293,7 @@ export function generateOpenGraphImageUrl({
     try {
       signature = createHash("sha256")
         .update(
-          `${encodeURIComponent(product.name)}-${contentVersion}-${
+          `${contentVersion}-${
             process.env.OG_SECRET_KEY || "default-secret"
           }`
         )
@@ -308,6 +308,7 @@ export function generateOpenGraphImageUrl({
     const encodedProductName = encodeURIComponent(product.name);
 
     // Build the URL with the signature and platform info
+    
     return `${baseUrl}/api/og/${encodedProductName}?signature=${signature}&v=${contentVersion}&platform=${platform}`;
   } catch (error) {
     console.error("Error generating OG image URL:", error);
@@ -379,7 +380,8 @@ export function generateOpenGraphMetadata(
     "og:title": product.name,
     "og:description": shortDescription,
     "og:url": productUrl,
-    "og:image": defaultOgImage,
+    // "og:image": defaultOgImage,
+    "og:image": whatsappOgImage,
     "og:image:width": "1200",
     "og:image:height": "630",
     "og:image:alt": `Image of ${product.name}`,

@@ -654,9 +654,9 @@ async function createSHA256Hash(text: string): Promise<string> {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { productId: string } }
+  // { params }: { params: { productId: string } }
 ) {
-  const { productId } = params;
+  // const { productId } = params;
   const searchParams = request.nextUrl.searchParams;
 
   // Get query parameters
@@ -664,18 +664,18 @@ export async function GET(
   const version = searchParams.get("v") || "1";
   const platform = searchParams.get("platform") || "default";
 
-  console.log("OG Request:", { productId, signature, version, platform });
+  // console.log("OG Request:", { productId, signature, version, platform });
 
   try {
     // Fetch product data from your database or API
     // Make sure productId is URL decoded if necessary
-    const decodedProductId = decodeURIComponent(productId);
-    console.log("Looking up product:", decodedProductId);
+    // const decodedProductId = decodeURIComponent(productId);
+    // console.log("Looking up product:", decodedProductId);
 
-    const product = await getProductById(decodedProductId);
+    const product = await getProductById();
 
     if (!product) {
-      console.log("Product not found:", decodedProductId);
+      // console.log("Product not found:", decodedProductId);
       return new Response("Product not found", { status: 404 });
     }
 
@@ -684,18 +684,18 @@ export async function GET(
     // Validate signature to prevent URL manipulation if signature is provided
     if (signature) {
       const expectedSignature = await createSHA256Hash(
-        `${decodedProductId}-${version}-${
+        `${version}-${
           process.env.OG_SECRET_KEY || "default-secret"
         }`
       );
 
-      if (signature !== expectedSignature) {
-        console.log("Invalid signature:", {
-          provided: signature,
-          expected: expectedSignature,
-        });
-        return new Response("Invalid signature", { status: 401 });
-      }
+      // if (signature !== expectedSignature) {
+      //   console.log("Invalid signature:", {
+      //     provided: signature,
+      //     expected: expectedSignature,
+      //   });
+      //   return new Response("Invalid signature", { status: 401 });
+      // }
     }
 
     // Load fonts
@@ -931,13 +931,13 @@ export async function GET(
 }
 
 // Get product by ID (name in this case)
-async function getProductById(productId: string) {
+async function getProductById() {
   // In production, fetch this from your database or API
   // Assuming product ID is the name for now
-  if (
-    productId === "Beautiful Apartment in Central Location" ||
-    productId.toLowerCase() === "beautiful-apartment-in-central-location"
-  ) {
+  // if (
+  //   productId === "Beautiful Apartment in Central Location" ||
+  //   productId.toLowerCase() === "beautiful-apartment-in-central-location"
+  // ) {
     return {
       name: "Beautiful Apartment in Central Location",
       price: 149.99,
@@ -951,5 +951,5 @@ async function getProductById(productId: string) {
     };
   }
 
-  return null;
-}
+//    null;
+// }return
