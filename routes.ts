@@ -20,7 +20,7 @@
 // export const DEFAULT_LOGIN_REDIRECT = "/dashboard"; /////----> /dashboard or onboarding
 
 /**@type {string[]}*/
-export const publicRoutes = ["/", "/pruducts/[slug]"];
+export const publicRoutes = ["/", "/products/[slug]"];
 
 /**@type {string[]}*/
 export const authRoutes = [
