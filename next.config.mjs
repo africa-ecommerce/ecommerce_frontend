@@ -61,8 +61,6 @@
 // export default nextConfig
 
 
-
-
 let userConfig = undefined
 try {
   userConfig = await import('./v0-user-next.config')
@@ -74,18 +72,16 @@ try {
 const nextConfig = {
   async rewrites() {
     return [
-      // Forward all API requests EXCEPT those starting with /api/og
+      // Handle routes that don't start with /api/og
       {
         source: "/api/:path*",
-        // Don't match if path starts with 'og/'
-        has: [
-          {
-            type: 'path',
-            key: 'path',
-            value: '^(?!og/).*$'  // Regex: match anything that doesn't start with 'og/'
-          }
-        ],
+        // Using a matcher in the source pattern itself, not 'has' condition
         destination: `${process.env.BACKEND_URL}/:path*`,
+      },
+      // If you need to exclude /api/og routes, add a specific rule for them
+      {
+        source: "/api/og/:path*",
+        destination: "/api/og/:path*", // Keep original destination for og routes
       },
     ];
   },
