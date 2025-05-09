@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { getProduct } from "@/lib/products";
+import { getProductServer } from "@/lib/products";
 import type { NextRequest } from "next/server";
 
 export const runtime = "edge";
@@ -9,9 +9,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const product = await getProduct(params.id);
+    const product = await getProductServer(params.id);
 
-    console.log("GETproduct", product);
+    console.log("getProductServer", product);
 
     if (!product) {
       return new Response("Product not found", { status: 404 });
