@@ -22,14 +22,16 @@
 // };
 
 export const getProduct = async (id: string) => {
-  const res = await fetch(`/api/products/${id}`, {
+      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
+
+  const res = await fetch(`${baseUrl}/products/${id}`, {
     // Include credentials to send cookies with the request
     credentials: "include",
     // Ensures fresh data
     cache: "no-store",
     headers: {
       "Content-Type": "application/json",
-    }
+    },
   });
 
   if (!res.ok) {
