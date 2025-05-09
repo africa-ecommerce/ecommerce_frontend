@@ -58,7 +58,7 @@ export default async function ProductPage({
 }: {
   params: { id: string };
 }) {
-  const product = await getProduct(params.id);
+  const product = await getProductServer(params.id);
 
   console.log("product", product);
 
