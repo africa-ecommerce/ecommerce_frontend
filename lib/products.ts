@@ -13,7 +13,11 @@ export const getProduct = async (id: string) => {
     );
   }
 
+  
+
   const {data} = await res.json();
+
+
   return data;
 };
 
