@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og"
-import { getProduct } from "@/lib/products"
+import { getProductServer } from "@/lib/products"
 
 // Image metadata
 export const alt = "Product listing"
