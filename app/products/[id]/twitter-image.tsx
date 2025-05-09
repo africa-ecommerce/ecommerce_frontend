@@ -17,6 +17,7 @@ export default async function Image({ params }: { params: { id: string } }) {
   const product = await getProduct(params.id)
 
   console.log("tproduct", product)
+  
 
   if (!product) {
     return new ImageResponse(
