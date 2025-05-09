@@ -73,15 +73,15 @@ const nextConfig = {
   async rewrites() {
     return [
       // Handle routes that don't start with /api/og
+     {
+        source: "/api/og/:path*",
+        // point back to itself so Next.js will serve your OG handler
+        destination: "/api/og/:path*",
+      },
+      // 2. Then proxy _all other_ /api/* to your backend
       {
         source: "/api/:path*",
-        // Using a matcher in the source pattern itself, not 'has' condition
         destination: `${process.env.BACKEND_URL}/:path*`,
-      },
-      // If you need to exclude /api/og routes, add a specific rule for them
-      {
-        source: "/api/og/:path*",
-        destination: "/api/og/:path*", // Keep original destination for og routes
       },
     ];
   },
