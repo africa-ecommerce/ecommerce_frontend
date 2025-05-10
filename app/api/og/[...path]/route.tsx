@@ -1087,7 +1087,9 @@ export async function GET(
               }}
             >
               <img
-                src={"/pluggn-logo.png"}
+                src={
+                  "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/300px-PNG_transparency_demonstration_1.png"
+                }
                 alt={product.name}
                 style={{
                   width: "100%",
