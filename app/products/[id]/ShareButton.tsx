@@ -170,8 +170,6 @@
 //   );
 // }
 
-
-
 "use client";
 
 import { useState } from "react";
@@ -247,13 +245,12 @@ export default function ShareButton({
         );
         break;
       case "whatsapp":
-        // WhatsApp specific handling for optimal card display
-        // Using the URL directly rather than including it in the text
-        // This ensures WhatsApp properly scrapes the OG metadata
+        // WhatsApp requires the URL to be in the text parameter for proper OG card display
+        // The format must be: text + space + URL
         window.open(
           `https://api.whatsapp.com/send?text=${encodeURIComponent(
-            text
-          )}&link=${encodeURIComponent(url)}`,
+            `${text}\n\n${url}`
+          )}`,
           "_blank"
         );
         break;
