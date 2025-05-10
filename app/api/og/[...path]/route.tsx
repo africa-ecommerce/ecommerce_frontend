@@ -385,26 +385,33 @@ export async function GET(
               }}
             >
               {usePlaceholderImage ? (
-                <div style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  width: "100%",
-                  height: "100%",
-                }}>
-                  <div style={{
-                    fontSize: 36,
-                    color: "#6B7280",
-                    textAlign: "center",
-                    padding: "20px",
-                  }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 36,
+                      color: "#6B7280",
+                      textAlign: "center",
+                      padding: "20px",
+                    }}
+                  >
                     {product.name}
                   </div>
                 </div>
               ) : (
                 <img
-                  src={product.images?.[0] || "/placeholder.svg"}
+                  // src={product.images?.[0] || "/placeholder.svg"}
+                  src={
+                    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3"
+                  }
                   alt={product.name}
                   width={400}
                   height={300}
@@ -517,9 +524,10 @@ export async function GET(
                   maxWidth: "100%",
                 }}
               >
-                {description || (product.category ? `Category: ${product.category}` : '')}
+                {description ||
+                  (product.category ? `Category: ${product.category}` : "")}
               </p>
-              
+
               {/* Supplier info */}
               {product.supplier && (
                 <p
