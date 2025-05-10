@@ -443,7 +443,7 @@ const Resp = new ImageResponse(
               width: "80%",
               height: "80%",
               background: `radial-gradient(ellipse at center, ${colors.secondary}30 0%, transparent 70%)`,
-              transform: "rotate(-15deg)",
+              // transform: "rotate(-15deg)",
               zIndex: 0,
               opacity: 0.8,
             }}
@@ -486,7 +486,7 @@ const Resp = new ImageResponse(
                   height: "90%",
                   backgroundColor: "rgba(255,255,255,0.04)",
                   borderRadius: "30% 70% 70% 30% / 30% 30% 70% 70%",
-                  transform: "rotate(-5deg)",
+                  // transform: "rotate(-5deg)",
                   filter: "blur(8px)",
                   zIndex: 0,
                 }}
@@ -632,7 +632,7 @@ const Resp = new ImageResponse(
                     fontWeight: 700,
                     fontSize: 18,
                     boxShadow: "0 8px 16px -4px rgba(255, 215, 0, 0.5)",
-                    transform: "rotate(5deg)",
+                    // transform: "rotate(5deg)",
                   }}
                 >
                   FEATURED
