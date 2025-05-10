@@ -1087,7 +1087,7 @@ export async function GET(
               }}
             >
               <img
-                src={product.images[0] || "/placeholder.svg"}
+                src={"/placeholder-logo.png"}
                 alt={product.name}
                 style={{
                   width: "100%",
