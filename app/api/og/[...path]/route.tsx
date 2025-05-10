@@ -436,7 +436,7 @@ export async function GET(request: NextRequest, { params }: { params: { path: st
               marginRight: 50,
               position: "relative",
               boxShadow: `0 25px 50px -12px ${style.accentColor}40`,
-              transform: "perspective(1000px) rotateY(-5deg)",
+              // transform: "perspective(1000px) rotateY(-5deg)",
               border: `1px solid ${style.accentColor}30`,
             }}
           >
@@ -731,7 +731,7 @@ export async function GET(request: NextRequest, { params }: { params: { path: st
               left: "50%",
               width: 400,
               height: 400,
-              transform: "translate(-50%, -50%)",
+              // transform: "translate(-50%, -50%)",
               border: "2px dashed rgba(255, 0, 0, 0.3)",
               borderRadius: 8,
               zIndex: 10,
