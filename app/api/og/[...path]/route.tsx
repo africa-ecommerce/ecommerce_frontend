@@ -94,8 +94,7 @@ export async function GET(
               }}
             >
               <img
-                // src={product.images[0] || "/placeholder.svg"}
-                src={"https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3"}
+                src={product.images[0] || "/placeholder.svg"}
                 alt={product.name}
                 style={{
                   width: "100%",
