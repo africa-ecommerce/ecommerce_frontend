@@ -982,8 +982,6 @@
 // }
 
 
-
-
 import { ImageResponse } from "next/og";
 import { getProductServer } from "@/lib/products";
 import type { NextRequest } from "next/server";
@@ -995,6 +993,14 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { path: string[] } }
 ) {
+  // Set CORS headers to allow WhatsApp web crawler to access this image
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "content-type": "image/png",
+    "cache-control": "public, max-age=31536000, immutable",
+  };
   try {
     // Extract the product ID by removing any file extension
     const fullPath = params.path.join("/");
@@ -1023,7 +1029,9 @@ export async function GET(
 
     // Using 1200x630 dimensions which are optimal for WhatsApp
     // WhatsApp prefers 1.91:1 aspect ratio (close to 1200x630)
-    return new ImageResponse(
+    // Set proper dimensions and options for WhatsApp
+    // WhatsApp prefers 1.91:1 ratio (exactly 1200x630)
+    const imageResponse = new ImageResponse(
       (
         <div
           style={{
@@ -1256,14 +1264,13 @@ export async function GET(
         width: 1200,
         height: 630,
         // Enhanced quality for WhatsApp preview
-        // quality: 100,
-        // Set content type explicitly
-        headers: {
-          "content-type": "image/png",
-          "cache-control": "public, max-age=31536000, immutable",
-        },
+        quality: 100,
+        // Pass through our headers
+        headers,
       }
     );
+
+    return imageResponse;
   } catch (error) {
     console.error("Error generating OG image:", error);
     return new Response("Error generating image", { status: 500 });

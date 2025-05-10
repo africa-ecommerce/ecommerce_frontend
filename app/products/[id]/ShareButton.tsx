@@ -202,11 +202,10 @@ export default function ShareButton({
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
 
-  // Get the full URL to the product with a timestamp for cache busting
+  // Get the full URL to the product - no query params for best WhatsApp compatibility
   const getShareUrl = () => {
     if (typeof window === "undefined") return "";
-    const baseUrl = `${window.location.origin}/products/${productId}`;
-    return baseUrl;
+    return `${window.location.origin}/products/${productId}`;
   };
 
   // Get the OG image URL - Include timestamp to prevent caching in preview dialog
@@ -245,12 +244,10 @@ export default function ShareButton({
         );
         break;
       case "whatsapp":
-        // WhatsApp requires the URL to be in the text parameter for proper OG card display
-        // The format must be: text + space + URL
+        // For WhatsApp, we ONLY share the URL by itself for best card display
+        // WhatsApp will scrape the OG metadata and show a large card only when URL is by itself
         window.open(
-          `https://api.whatsapp.com/send?text=${encodeURIComponent(
-            `${text}\n\n${url}`
-          )}`,
+          `https://api.whatsapp.com/send?text=${encodeURIComponent(url)}`,
           "_blank"
         );
         break;
