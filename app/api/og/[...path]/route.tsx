@@ -512,7 +512,7 @@ const Resp = new ImageResponse(
                     maxHeight: "100%",
                     objectFit: "contain",
                     filter: "drop-shadow(0px 20px 30px rgba(0,0,0,0.3))",
-                    transform: "perspective(800px) rotateY(-5deg)",
+                    // transform: "perspective(800px) rotateY(-5deg)",
                   }}
                 />
                 
