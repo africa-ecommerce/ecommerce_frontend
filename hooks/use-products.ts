@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import { useShoppingCart } from '@/app/_components/provider/shoppingCartProvider';
 
 const fetcher = async (url: string) => {
-  const response = await fetch(url);
+  const response = await fetch(url, { credentials: "include" });
   if (!response.ok) {
     throw new Error('Failed to fetch products');
   }

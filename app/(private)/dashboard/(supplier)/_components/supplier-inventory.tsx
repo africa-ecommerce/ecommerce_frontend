@@ -163,6 +163,7 @@ const EmptyProductsState = ({
 const deleteProductFn = async (id: string) => {
   const response = await fetch(`/api/products/${id}`, {
     method: "DELETE",
+     credentials: "include" 
   });
   const result = await response.json();
 
@@ -200,7 +201,7 @@ export default function Inventory() {
   const { deleteResource } = useDeleteResource(
     "/api/products/supplier/",
     async () => {
-      const res = await fetch("/api/products/supplier/");
+      const res = await fetch("/api/products/supplier/", { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch products");
       return res.json();
     },

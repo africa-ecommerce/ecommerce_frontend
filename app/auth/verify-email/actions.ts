@@ -11,7 +11,8 @@ export async function verifyEmailToken(token: string): Promise<VerificationStatu
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token }),
-    })
+      credentials: "include",
+    });
 
     const data = await response.json()
 

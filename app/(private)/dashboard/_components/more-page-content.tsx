@@ -75,6 +75,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       });
 
       const result = await response.json()

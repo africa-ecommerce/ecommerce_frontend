@@ -344,6 +344,7 @@ export default function Products() {
   const deleteProductFn = async (productId: string) => {
     const response = await fetch(`/api/plug/products/${productId}`, {
       method: "DELETE",
+       credentials: "include" 
     });
     const result = await response.json();
 
@@ -384,7 +385,9 @@ export default function Products() {
   const { deleteResource } = useDeleteResource(
     "/api/plug/products/",
     async () => {
-      const res = await fetch("/api/plug/products/");
+      const res = await fetch("/api/plug/products/", {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to fetch products");
       return res.json();
     },

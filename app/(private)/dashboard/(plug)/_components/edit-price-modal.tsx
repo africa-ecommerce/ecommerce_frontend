@@ -29,7 +29,7 @@ interface PriceModalProps {
 }
 
 const fetcher = (url: string) =>
-  fetch(url).then((res) => {
+  fetch(url, { credentials: "include" }).then((res) => {
     if (!res.ok) throw new Error("Failed to fetch pricing data");
     return res.json();
   });
@@ -127,6 +127,7 @@ export function EditPriceModal({
         headers: {
           "Content-Type": "application/json",
         },
+         credentials: "include",
         body: JSON.stringify({
           price: numericPrice,
         }),

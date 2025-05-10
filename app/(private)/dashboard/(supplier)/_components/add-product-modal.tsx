@@ -81,6 +81,7 @@ export function AddProductModal({
       const response = await fetch("/api/products", {
         method: "POST",
         body: formData,
+         credentials: "include" 
       });
 
       if (!response.ok) {

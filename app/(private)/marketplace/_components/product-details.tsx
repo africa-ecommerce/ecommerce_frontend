@@ -28,7 +28,7 @@ import { formatPrice, getTotalStock, truncateText } from "@/lib/utils";
 
 // Define fetcher function for useSWR
 const fetcher = async (url: string) => {
-  const res = await fetch(url);
+  const res = await fetch(url, { credentials: "include" });
   if (!res.ok) {
     throw new Error("Failed to fetch product data");
   }

@@ -74,6 +74,7 @@ export const getProductServer = async (id: string) => {
   const res = await fetch(`${baseUrl}/products/${id}`, {
     // Ensures the request isn't cached
     cache: "no-store",
+     credentials: "include" ,
     // For server-to-server communication, including forwarded cookies
     headers: {
       "Content-Type": "application/json",

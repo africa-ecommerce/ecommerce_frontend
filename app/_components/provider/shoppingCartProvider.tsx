@@ -227,6 +227,7 @@ export function ShoppingCartProvider({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(products),
+       credentials: "include" 
     });
 
     const result = await response.json();

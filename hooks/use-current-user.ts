@@ -3,7 +3,9 @@ import useSWR from "swr";
 
 const currentUserFetcher = async () => {
   try {
-    const response = await fetch("/api/auth/current-user");
+    const response = await fetch("/api/auth/current-user", {
+      credentials: "include",
+    });
     
     if (!response.ok) {
       console.error("User fetch error:", response.status, response.statusText);

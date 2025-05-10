@@ -71,8 +71,8 @@ export default function Login() {
   const {
     form: { register, submit, errors, isSubmitting },
   } = useFormResolver(loginUser, LoginSchema, (data) => {
-    // router.push(`${data.redirectUrl}`);
-    window.location.reload();
+    router.push(`${data.redirectUrl}`);
+    // window.location.reload();
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

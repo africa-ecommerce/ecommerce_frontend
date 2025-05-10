@@ -76,7 +76,7 @@ export function EditProductModal({
 
 
   const fetcher = async (url: string) => {
-    const res = await fetch(url);
+    const res = await fetch(url, { credentials: "include" });
     if (!res.ok) {
       const error = await res.json();
       throw new Error(error.error || "Failed to fetch product");
@@ -113,6 +113,7 @@ export function EditProductModal({
       const response = await fetch(`/api/products/${productId}`, {
         method: "PUT",
         body: formData,
+         credentials: "include" 
       });
 
       if (!response.ok) {

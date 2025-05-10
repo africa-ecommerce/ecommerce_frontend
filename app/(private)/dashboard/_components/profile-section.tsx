@@ -144,6 +144,7 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
       const response = await fetch("/api/auth/update-profile", {
         method: "POST",
         body: formData,
+         credentials: "include" 
       });
 
       const result = await response.json();
@@ -178,6 +179,7 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
         headers: {
           "Content-Type": "application/json",
         },
+         credentials: "include" ,
         body: JSON.stringify(data),
       });
 

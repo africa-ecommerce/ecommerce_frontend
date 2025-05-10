@@ -6,7 +6,7 @@ import { ProductsResponse } from "@/types/product";
  * Generic fetcher function for SWR
  */
 export const fetcher = async <T>(url: string): Promise<T> => {
-  const res = await fetch(url);
+  const res = await fetch(url, { credentials: "include" });
 
   if (!res.ok) {
     const error = new Error("An error occurred while fetching the data.");

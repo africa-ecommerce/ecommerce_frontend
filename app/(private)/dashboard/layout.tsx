@@ -8,7 +8,7 @@ import { useUser } from "@/app/_components/provider/UserContext";
 
 // Define a global fetcher function that can be reused
 const globalFetcher = async (url: string) => {
-  const response = await fetch(url);
+  const response = await fetch(url, { credentials: "include" });
   if (!response.ok) {
     throw new Error("Something went wrong");
   }
