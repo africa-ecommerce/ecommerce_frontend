@@ -121,8 +121,8 @@ export async function generateMetadata({
         images: [
           {
             url: ogImageUrl,
-            width: imageWidth,
-            height: imageHeight,
+            width: 1200, // Must be exact
+            height: 630, // Must be exact
             alt: product.name,
           },
         ],
@@ -139,16 +139,16 @@ export async function generateMetadata({
       // These exact tags are crucial for WhatsApp large cards
       other: {
         // WhatsApp and Facebook require these specific tags
-        "og:image:width": String(imageWidth),
-        "og:image:height": String(imageHeight),
+        "og:image:width": "1200",
+        "og:image:height": "630",
         "og:image:type": "image/png",
         // This forces WhatsApp to see this as a product
         "og:type": "product.item",
+        "og:image:url": ogImageUrl,
         // Apple-specific tags to ensure proper display on iOS
         "twitter:card": "summary_large_image",
         "twitter:image": ogImageUrl,
         // Force WhatsApp to use the large card format
-        "og:image:url": ogImageUrl,
         // Critical - some platforms (including WhatsApp) need this
         "og:url": `${baseUrl}/products/${params.id}`,
       },

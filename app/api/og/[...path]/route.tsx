@@ -980,8 +980,6 @@
 //   // Otherwise return random CTA from list
 //   return ctas[Math.floor(Math.random() * ctas.length)];
 // }
-
-
 import { ImageResponse } from "next/og";
 import { getProductServer } from "@/lib/products";
 import type { NextRequest } from "next/server";
@@ -1001,6 +999,7 @@ export async function GET(
     "content-type": "image/png",
     "cache-control": "public, max-age=31536000, immutable",
   };
+
   try {
     // Extract the product ID by removing any file extension
     const fullPath = params.path.join("/");
@@ -1027,23 +1026,21 @@ export async function GET(
     // Format rating if available
     const ratingDisplay = product.rating ? `★${product.rating}` : null;
 
-    // Using 1200x630 dimensions which are optimal for WhatsApp
-    // WhatsApp prefers 1.91:1 aspect ratio (close to 1200x630)
-    // Set proper dimensions and options for WhatsApp
-    // WhatsApp prefers 1.91:1 ratio (exactly 1200x630)
-    const imageResponse = new ImageResponse(
+    // IMPORTANT: Using exactly 1200x630 dimensions which are optimal for WhatsApp
+    // WhatsApp requires specific dimensions - 1.91:1 aspect ratio
+    return new ImageResponse(
       (
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            width: "100%",
-            height: "100%",
+            width: "1200px", // Explicitly set width
+            height: "630px", // Explicitly set height
             backgroundColor: "white",
             position: "relative",
           }}
         >
-          {/* Background gradient for visual appeal */}
+          {/* Background gradient */}
           <div
             style={{
               position: "absolute",
@@ -1075,7 +1072,7 @@ export async function GET(
             <div
               style={{
                 display: "flex",
-                width: "50%",
+                width: "45%", // Slightly smaller to fit better
                 height: "75%",
                 borderRadius: 16,
                 overflow: "hidden",
@@ -1084,10 +1081,12 @@ export async function GET(
                 boxShadow:
                   "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
                 border: "1px solid rgba(229, 231, 235, 1)",
+                backgroundColor: "#ffffff", // Add background for image placeholder
               }}
             >
               <img
                 src={
+                  product.imageUrl ||
                   "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/300px-PNG_transparency_demonstration_1.png"
                 }
                 alt={product.name}
@@ -1121,7 +1120,7 @@ export async function GET(
               style={{
                 display: "flex",
                 flexDirection: "column",
-                width: "50%",
+                width: "55%", // Slightly larger for better text display
                 height: "100%",
                 justifyContent: "center",
               }}
@@ -1221,7 +1220,7 @@ export async function GET(
               zIndex: 2,
             }}
           >
-            {/* Logo placeholder - replace with your actual logo */}
+            {/* Logo placeholder */}
             <div
               style={{
                 display: "flex",
@@ -1265,14 +1264,12 @@ export async function GET(
       {
         width: 1200,
         height: 630,
-        // Enhanced quality for WhatsApp preview
-        quality: 100,
+        // Enhanced quality for WhatsApp preview (reduced file size but still high quality)
+        quality: 90,
         // Pass through our headers
         headers,
       }
     );
-
-    return imageResponse;
   } catch (error) {
     console.error("Error generating OG image:", error);
     return new Response("Error generating image", { status: 500 });

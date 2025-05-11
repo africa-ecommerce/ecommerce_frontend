@@ -205,6 +205,7 @@ export default function ShareButton({
   // Get the full URL to the product - no query params for best WhatsApp compatibility
   const getShareUrl = () => {
     if (typeof window === "undefined") return "";
+    // Important: Use the canonical URL format for best social media card support
     return `${window.location.origin}/products/${productId}`;
   };
 
@@ -244,12 +245,28 @@ export default function ShareButton({
         );
         break;
       case "whatsapp":
-        // For WhatsApp, we ONLY share the URL by itself for best card display
-        // WhatsApp will scrape the OG metadata and show a large card only when URL is by itself
+        // CRITICAL: For WhatsApp, we ONLY share the URL by itself with no text
+        // WhatsApp will only display large cards when the URL is shared alone
         window.open(
           `https://api.whatsapp.com/send?text=${encodeURIComponent(url)}`,
           "_blank"
         );
+        break;
+      case "whatsapp-direct":
+        // Alternative direct WhatsApp sharing method
+        // This will just open WhatsApp with the URL pre-filled
+        // User should be instructed to not add any text
+        if (navigator.userAgent.match(/Android/i)) {
+          window.open(
+            `whatsapp://send?text=${encodeURIComponent(url)}`,
+            "_blank"
+          );
+        } else {
+          window.open(
+            `https://wa.me/?text=${encodeURIComponent(url)}`,
+            "_blank"
+          );
+        }
         break;
       default:
         // Use Web Share API if available
@@ -331,17 +348,23 @@ export default function ShareButton({
               </div>
             </div>
 
-            <div className="flex justify-between">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setOpen(false)}
-              >
-                Close
-              </Button>
-              <Button size="sm" onClick={handleCopyLink}>
-                {copied ? "Copied!" : "Copy link"}
-              </Button>
+            <div className="flex flex-col space-y-2">
+              <p className="text-sm text-muted-foreground">
+                <strong>For WhatsApp:</strong> For best results, only share the
+                URL alone without any additional text.
+              </p>
+              <div className="flex justify-between">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setOpen(false)}
+                >
+                  Close
+                </Button>
+                <Button size="sm" onClick={handleCopyLink}>
+                  {copied ? "Copied!" : "Copy link"}
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
