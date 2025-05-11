@@ -980,6 +980,8 @@
 //   // Otherwise return random CTA from list
 //   return ctas[Math.floor(Math.random() * ctas.length)];
 // }
+
+// File: app/api/og/[...path]/route.ts
 import { ImageResponse } from "next/og";
 import { getProductServer } from "@/lib/products";
 import type { NextRequest } from "next/server";
@@ -992,12 +994,13 @@ export async function GET(
   { params }: { params: { path: string[] } }
 ) {
   // Set CORS headers to allow WhatsApp web crawler to access this image
+  // WhatsApp needs specific headers to properly recognize and display the image
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "content-type": "image/png",
-    "cache-control": "public, max-age=31536000, immutable",
+    "Content-Type": "image/png", // Specifically use Content-Type (capital C and T)
+    "Cache-Control": "public, max-age=31536000, immutable", // Proper capitalization
   };
 
   try {
@@ -1265,7 +1268,7 @@ export async function GET(
         width: 1200,
         height: 630,
         // Enhanced quality for WhatsApp preview (reduced file size but still high quality)
-        quality: 90,
+        quality: 85, // Slightly reduced to ensure file size constraints
         // Pass through our headers
         headers,
       }
