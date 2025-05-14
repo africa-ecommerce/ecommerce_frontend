@@ -2,8 +2,6 @@
 
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
-import { Button } from "@/components/ui/button"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 // Font families
@@ -65,60 +63,7 @@ export default function TypographyCustomizer({ typography, onUpdateTypography }:
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="sizes">
-          <AccordionTrigger>Font Sizes</AccordionTrigger>
-          <AccordionContent className="space-y-4 pt-2">
-            <div className="grid gap-2">
-              <Label htmlFor="heading-size">Heading Size</Label>
-              <div className="flex items-center gap-4">
-                <Slider id="heading-size" defaultValue={[24]} max={48} min={16} step={1} className="flex-1" />
-                <span className="text-sm font-medium">24px</span>
-              </div>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="body-size">Body Text Size</Label>
-              <div className="flex items-center gap-4">
-                <Slider id="body-size" defaultValue={[16]} max={24} min={12} step={1} className="flex-1" />
-                <span className="text-sm font-medium">16px</span>
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="weights">
-          <AccordionTrigger>Font Weights</AccordionTrigger>
-          <AccordionContent className="space-y-4 pt-2">
-            <div className="grid gap-2">
-              <Label htmlFor="heading-weight">Heading Weight</Label>
-              <Select defaultValue="600">
-                <SelectTrigger id="heading-weight">
-                  <SelectValue placeholder="Select weight" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="400">Regular (400)</SelectItem>
-                  <SelectItem value="500">Medium (500)</SelectItem>
-                  <SelectItem value="600">Semi-Bold (600)</SelectItem>
-                  <SelectItem value="700">Bold (700)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="body-weight">Body Text Weight</Label>
-              <Select defaultValue="400">
-                <SelectTrigger id="body-weight">
-                  <SelectValue placeholder="Select weight" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="300">Light (300)</SelectItem>
-                  <SelectItem value="400">Regular (400)</SelectItem>
-                  <SelectItem value="500">Medium (500)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+       
       </Accordion>
 
       {/* <Button className="w-full mt-4">Apply Typography Changes</Button> */}

@@ -348,7 +348,7 @@ export function AddProductModal({
         return true; // If no variations, this step is valid
       case 2: // Single product details
         return (
-         !errors.stock
+         !errors.stock && formData.stock! >= 1
         );
       case 3: // Media step
         return (

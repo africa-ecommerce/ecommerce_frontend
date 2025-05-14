@@ -151,13 +151,22 @@ import { Upload } from "lucide-react"
 interface LayoutCustomizerProps {
   content: Record<string, string>
   onUpdateContent: (content: Record<string, string>) => void
+  metadata: Record<string, string>
+  onUpdateMetadata: (metadata: Record<string, string>) => void
 }
 
-export default function LayoutCustomizer({ content, onUpdateContent }: LayoutCustomizerProps) {
+export default function LayoutCustomizer({ content, onUpdateContent,
+  metadata,
+  onUpdateMetadata,
+ }: LayoutCustomizerProps) {
   const [activeTab, setActiveTab] = useState("brand")
 
   const updateContent = (key: string, value: string) => {
     onUpdateContent({ [key]: value })
+  }
+
+  const updateMetadata = (key: string, value: string) => {
+    onUpdateMetadata({ [key]: value })
   }
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -174,12 +183,12 @@ export default function LayoutCustomizer({ content, onUpdateContent }: LayoutCus
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Layout & Content</h2>
+      <h2 className="text-lg font-semibold">Content</h2>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-5">
+        <TabsList className="grid grid-cols-4">
           <TabsTrigger value="brand">Brand</TabsTrigger>
-          <TabsTrigger value="header">Header</TabsTrigger>
+          {/* <TabsTrigger value="header">Header</TabsTrigger> */}
           <TabsTrigger value="hero">Hero</TabsTrigger>
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="footer">Footer</TabsTrigger>
@@ -196,7 +205,7 @@ export default function LayoutCustomizer({ content, onUpdateContent }: LayoutCus
             />
           </div>
 
-          <div className="grid gap-2">
+          {/* <div className="grid gap-2">
             <Label htmlFor="brand-logo">Brand Logo</Label>
             <div className="flex items-center gap-2">
               <div className="h-10 w-32 border rounded flex items-center justify-center bg-muted/30">
@@ -224,33 +233,41 @@ export default function LayoutCustomizer({ content, onUpdateContent }: LayoutCus
               </div>
             </div>
             <p className="text-xs text-muted-foreground">Recommended size: 120x40px</p>
-          </div>
+          </div> */}
 
           <div className="grid gap-2">
             <Label htmlFor="site-title">Site Title (Metadata)</Label>
             <Input
               id="site-title"
-              value={content.META_TITLE}
-              onChange={(e) => updateContent("META_TITLE", e.target.value)}
+              value={metadata.title}
+              onChange={(e) => updateMetadata("title", e.target.value)}
               placeholder="Your Site Title"
             />
-            <p className="text-xs text-muted-foreground">Used for SEO and browser tabs</p>
+            <p className="text-xs text-muted-foreground">
+              Used for SEO and browser tabs
+            </p>
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="site-description">Site Description (Metadata)</Label>
+            <Label htmlFor="site-description">
+              Site Description (Metadata)
+            </Label>
             <Textarea
               id="site-description"
-              value={content.META_DESCRIPTION}
-              onChange={(e) => updateContent("META_DESCRIPTION", e.target.value)}
+              value={metadata.description}
+              onChange={(e) =>
+                updateMetadata("description", e.target.value)
+              }
               placeholder="Brief description of your site"
               rows={2}
             />
-            <p className="text-xs text-muted-foreground">Used for SEO and social sharing</p>
+            <p className="text-xs text-muted-foreground">
+              Used for SEO and social sharing
+            </p>
           </div>
         </TabsContent>
 
-        <TabsContent value="header" className="space-y-4 pt-4">
+        {/* <TabsContent value="header" className="space-y-4 pt-4">
           <div className="grid gap-2">
             <Label htmlFor="header-text">Store Name</Label>
             <Input
@@ -269,7 +286,7 @@ export default function LayoutCustomizer({ content, onUpdateContent }: LayoutCus
               placeholder="FREE SHIPPING ON ALL ORDERS OVER $75"
             />
           </div>
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="hero" className="space-y-4 pt-4">
           <div className="grid gap-2">
@@ -286,7 +303,9 @@ export default function LayoutCustomizer({ content, onUpdateContent }: LayoutCus
             <Textarea
               id="hero-subtitle"
               value={content.HERO_DESCRIPTION}
-              onChange={(e) => updateContent("HERO_DESCRIPTION", e.target.value)}
+              onChange={(e) =>
+                updateContent("HERO_DESCRIPTION", e.target.value)
+              }
               rows={3}
             />
           </div>
@@ -296,7 +315,9 @@ export default function LayoutCustomizer({ content, onUpdateContent }: LayoutCus
             <Input
               id="primary-cta"
               value={content.PRIMARY_CTA_TEXT}
-              onChange={(e) => updateContent("PRIMARY_CTA_TEXT", e.target.value)}
+              onChange={(e) =>
+                updateContent("PRIMARY_CTA_TEXT", e.target.value)
+              }
               placeholder="Shop Now"
             />
           </div>
@@ -306,21 +327,23 @@ export default function LayoutCustomizer({ content, onUpdateContent }: LayoutCus
             <Input
               id="secondary-cta"
               value={content.SECONDARY_CTA_TEXT}
-              onChange={(e) => updateContent("SECONDARY_CTA_TEXT", e.target.value)}
+              onChange={(e) =>
+                updateContent("SECONDARY_CTA_TEXT", e.target.value)
+              }
               placeholder="Learn More"
             />
           </div>
         </TabsContent>
 
         <TabsContent value="about" className="space-y-4 pt-4">
-          <div className="grid gap-2">
+          {/* <div className="grid gap-2">
             <Label htmlFor="about-title">About Section Title</Label>
             <Input
               id="about-title"
               value={content.ABOUT_TITLE}
               onChange={(e) => updateContent("ABOUT_TITLE", e.target.value)}
             />
-          </div>
+          </div> */}
 
           <div className="grid gap-2">
             <Label htmlFor="about-text">About Section Content</Label>
@@ -330,20 +353,13 @@ export default function LayoutCustomizer({ content, onUpdateContent }: LayoutCus
               onChange={(e) => updateContent("ABOUT_TEXT", e.target.value)}
               rows={5}
             />
-            <p className="text-xs text-muted-foreground">HTML formatting is supported</p>
+            <p className="text-xs text-muted-foreground">
+              HTML formatting is supported
+            </p>
           </div>
         </TabsContent>
 
         <TabsContent value="footer" className="space-y-4 pt-4">
-          <div className="grid gap-2">
-            <Label htmlFor="footer-logo">Footer Logo Text</Label>
-            <Input
-              id="footer-logo"
-              value={content.FOOTER_LOGO_TEXT}
-              onChange={(e) => updateContent("FOOTER_LOGO_TEXT", e.target.value)}
-            />
-          </div>
-
           <div className="grid gap-2">
             <Label htmlFor="instagram-link">Instagram Link</Label>
             <Input
@@ -375,16 +391,25 @@ export default function LayoutCustomizer({ content, onUpdateContent }: LayoutCus
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="whatsapp">WhatsApp Number</Label>
+            <Label htmlFor="phoneNumber">Phone Number</Label>
             <Input
-              id="whatsapp"
-              value={content.WHATSAPP_NUMBER}
-              onChange={(e) => updateContent("WHATSAPP_NUMBER", e.target.value)}
+              id="phoneNumber"
+              value={content.PHONE_NUMBER}
+              onChange={(e) => updateContent("PHONE_NUMBER", e.target.value)}
               placeholder="+1234567890"
             />
           </div>
 
           <div className="grid gap-2">
+            <Label htmlFor="mail">Mail</Label>
+            <Input
+              id="mail"
+              value={content.MAIL}
+              onChange={(e) => updateContent("MAIL", e.target.value)}
+            />
+          </div>
+
+          {/* <div className="grid gap-2">
             <Label htmlFor="brand-address">Brand Address</Label>
             <Textarea
               id="brand-address"
@@ -402,10 +427,10 @@ export default function LayoutCustomizer({ content, onUpdateContent }: LayoutCus
               value={content.COPYRIGHT_TEXT}
               onChange={(e) => updateContent("COPYRIGHT_TEXT", e.target.value)}
             />
-          </div>
+          </div> */}
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
 

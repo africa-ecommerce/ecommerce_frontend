@@ -524,7 +524,7 @@ const removeImage = (index: number) => {
         }
         return true; // If no variations, this step is valid
       case 2: // Single product details
-        return !errors.stock;
+        return !errors.stock && formData.stock! >= 1
       case 3: // Media step
         return (
           ( formData.images?.length! > 0 || formData.imageUrls?.length! > 0) &&
