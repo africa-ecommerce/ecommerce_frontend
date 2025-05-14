@@ -1692,7 +1692,6 @@
 //   );
 // }
 
-
 "use client";
 
 import type React from "react";
@@ -1723,11 +1722,12 @@ import LayoutCustomizer from "./layout-customizer";
 import PreviewFrame from "./preview-frame";
 import { useToast } from "@/hooks/use-toast";
 import PublishDialog from "./publish-dialog";
-import { saveThemeCustomizerData,
+import {
+  saveThemeCustomizerData,
   loadThemeCustomizerData,
   clearThemeCustomizerData,
-  addToHistory } from "@/lib/storage-helpers";
-
+  addToHistory,
+} from "@/lib/storage-helpers";
 
 // Default template configuration
 const defaultConfig = {
@@ -1743,7 +1743,6 @@ const defaultConfig = {
     FONT_FAMILY: "Inter, sans-serif",
   },
 
- 
   content: {
     BRAND_NAME: "Fashion Boutique",
     HEADER_TEXT: "Fashion Boutique",
@@ -1800,15 +1799,17 @@ export default function ThemeCustomizer() {
   const [publishResult, setPublishResult] = useState<any>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const [isInputFocused, setIsInputFocused] = useState(false); // New state to track input focus
   const { toast } = useToast();
-  const [siteName, setSiteName] = useState("")
+  const [siteName, setSiteName] = useState("");
 
   // Track previous page for comparison
   const prevPageRef = useRef(selectedPage);
 
   // Track whether initial load has completed
   const initialLoadRef = useRef(false);
+
+  // Reference to the sidebar for handling click events
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Function to save to localStorage
   const saveToLocalStorage = useCallback(() => {
@@ -1868,8 +1869,8 @@ export default function ThemeCustomizer() {
   useEffect(() => {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
-      // Only auto-close sidebar on mobile if not input focused
-      if (window.innerWidth < 768 && !isInputFocused) {
+      // Auto-close sidebar on mobile
+      if (window.innerWidth < 768) {
         setSidebarOpen(false);
       } else {
         setSidebarOpen(true);
@@ -1882,39 +1883,7 @@ export default function ThemeCustomizer() {
     return () => {
       window.removeEventListener("resize", checkScreenSize);
     };
-  }, [isInputFocused]); // Add isInputFocused as dependency
-
-  // Set up global event listeners for input focus/blur
-  useEffect(() => {
-    // Function to handle when any input or textarea inside the sidebar gets focus
-    const handleInputFocus = (e) => {
-      if (isMobile && e.target.matches('input, textarea')) {
-        setIsInputFocused(true);
-        setSidebarOpen(true); // Keep sidebar open when an input is focused
-      }
-    };
-
-    // Function to handle when any input or textarea loses focus
-    const handleInputBlur = (e) => {
-      if (isMobile && e.target.matches('input, textarea')) {
-        setIsInputFocused(false);
-        // We don't auto-close here to avoid UX issues, let user close manually
-      }
-    };
-
-    // Get the sidebar element
-    const sidebarElement = document.querySelector('.sidebar-container');
-    
-    if (sidebarElement) {
-      sidebarElement.addEventListener('focusin', handleInputFocus);
-      sidebarElement.addEventListener('focusout', handleInputBlur);
-      
-      return () => {
-        sidebarElement.removeEventListener('focusin', handleInputFocus);
-        sidebarElement.removeEventListener('focusout', handleInputBlur);
-      };
-    }
-  }, [isMobile]);
+  }, []);
 
   // Trigger debounced save whenever config, history, historyIndex, or selectedPage changes
   // Don't save during initial load
@@ -1998,7 +1967,7 @@ export default function ThemeCustomizer() {
   const handleConfirmPublish = async () => {
     try {
       setIsPublishing(true);
-     const data = {config, siteName}
+      const data = { config, siteName };
       // Call the publish API
       const response = await fetch("/api/sites/publish", {
         method: "POST",
@@ -2070,24 +2039,26 @@ export default function ThemeCustomizer() {
     setSidebarOpen(!sidebarOpen);
   };
 
+  // Handle overlay click - prevent closing unless close button is clicked
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    // Do nothing - this prevents the click from bubbling up and closing the sidebar
+    e.stopPropagation();
+  };
+
   return (
     <div className="flex h-screen overflow-hidden relative">
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Sidebar Overlay - Modified to prevent unintended closing */}
       {isMobile && sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/30 z-30"
-          onClick={() => {
-            // Only close sidebar when clicking overlay if no input is focused
-            if (!isInputFocused) {
-              setSidebarOpen(false);
-            }
-          }}
+          onClick={handleOverlayClick}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Added ref for DOM access */}
       <div
-        className={`sidebar-container ${
+        ref={sidebarRef}
+        className={`${
           isMobile
             ? "fixed z-40 h-full transition-transform duration-300 ease-in-out w-[85%]"
             : "relative w-[320px]"
