@@ -104,7 +104,6 @@ export default function ThemeCustomizer() {
   const [publishResult, setPublishResult] = useState<any>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const [isInputFocused, setIsInputFocused] = useState(false);
   const { toast } = useToast();
   const [siteName, setSiteName] = useState("");
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -169,15 +168,19 @@ export default function ThemeCustomizer() {
     }
   }, []);
 
-  // Check screen size on mount and window resize
+  // Setup mobile detection and sidebar state
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-      // Auto-close sidebar on mobile only if entering mobile view
-      if (window.innerWidth < 768) {
-        setSidebarOpen(false);
-      } else {
-        setSidebarOpen(true);
+      const isMobileView = window.innerWidth < 768;
+      setIsMobile(isMobileView);
+      // Only auto-close when FIRST switching to mobile view
+      // Don't auto-open/close during resize to avoid interfering with user interactions
+      if (isMobileView !== isMobile) {
+        if (isMobileView) {
+          setSidebarOpen(false);
+        } else {
+          setSidebarOpen(true);
+        }
       }
     };
 
@@ -187,87 +190,14 @@ export default function ThemeCustomizer() {
     return () => {
       window.removeEventListener("resize", checkScreenSize);
     };
-  }, []);
+  }, [isMobile]);
 
-  // Handle clicks outside the sidebar to close it on mobile
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      // Don't close the sidebar if:
-      // 1. We're not on mobile
-      // 2. The sidebar is already closed
-      // 3. The click is inside the sidebar
-      // 4. An input is currently focused
-      // 5. The click is on an input, button, or interactive element
-      if (
-        !isMobile ||
-        !sidebarOpen ||
-        isInputFocused ||
-        (sidebarRef.current &&
-          sidebarRef.current.contains(event.target as Node))
-      ) {
-        return;
-      }
+  // We're completely removing the outside click handler as it's causing issues with inputs
+  // The sidebar will now only close when the X button is clicked or when the overlay is clicked
+  // This prevents any issues with form inputs causing sidebar closures
 
-      // Check if the click is on an interactive element
-      const target = event.target as HTMLElement;
-      const isInteractiveElement =
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.tagName === "BUTTON" ||
-        target.tagName === "SELECT" ||
-        target.tagName === "LABEL" ||
-        target.closest('[role="button"]') !== null;
-
-      if (isInteractiveElement) {
-        return;
-      }
-
-      // Close the sidebar if it's a click outside on a non-interactive element
-      setSidebarOpen(false);
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isMobile, sidebarOpen, isInputFocused]);
-
-  // Setup global focus monitoring for form inputs
-  useEffect(() => {
-    const handleFocusIn = (e: FocusEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.tagName === "SELECT"
-      ) {
-        setIsInputFocused(true);
-      }
-    };
-
-    const handleFocusOut = (e: FocusEvent) => {
-      // Small delay to ensure we're not in the middle of switching focus between inputs
-      setTimeout(() => {
-        const activeElement = document.activeElement;
-        if (
-          !activeElement ||
-          (activeElement.tagName !== "INPUT" &&
-            activeElement.tagName !== "TEXTAREA" &&
-            activeElement.tagName !== "SELECT")
-        ) {
-          setIsInputFocused(false);
-        }
-      }, 100);
-    };
-
-    document.addEventListener("focusin", handleFocusIn);
-    document.addEventListener("focusout", handleFocusOut);
-
-    return () => {
-      document.removeEventListener("focusin", handleFocusIn);
-      document.removeEventListener("focusout", handleFocusOut);
-    };
-  }, []);
+  // We're completely removing the focus monitoring since it was causing issues
+  // Instead, we're simplifying our approach to only handle explicitly defined close actions
 
   // Trigger debounced save whenever config, history, historyIndex, or selectedPage changes
   // Don't save during initial load
@@ -392,13 +322,13 @@ export default function ThemeCustomizer() {
 
   return (
     <div className="flex h-screen overflow-hidden relative">
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Sidebar Overlay - Only close when directly clicking the overlay */}
       {isMobile && sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/30 z-30"
           onClick={(e) => {
-            // Only close if the click is directly on the overlay (not bubbled from children)
-            if (e.target === e.currentTarget && !isInputFocused) {
+            // Only close if the click is directly on the overlay itself
+            if (e.target === e.currentTarget) {
               setSidebarOpen(false);
             }
           }}
@@ -429,7 +359,10 @@ export default function ThemeCustomizer() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setSidebarOpen(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSidebarOpen(false);
+              }}
             >
               <X className="h-5 w-5" />
             </Button>
@@ -509,7 +442,10 @@ export default function ThemeCustomizer() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={toggleSidebar}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleSidebar();
+                }}
                 className="md:hidden"
               >
                 <Menu className="h-5 w-5" />
