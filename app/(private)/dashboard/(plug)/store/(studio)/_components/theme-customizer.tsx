@@ -1691,7 +1691,6 @@
 //     </div>
 //   );
 // }
-
 "use client";
 
 import type React from "react";
@@ -1802,6 +1801,7 @@ export default function ThemeCustomizer() {
   const [isEditingInput, setIsEditingInput] = useState(false);
   const { toast } = useToast();
   const [siteName, setSiteName] = useState("");
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Track previous page for comparison
   const prevPageRef = useRef(selectedPage);
@@ -1882,6 +1882,43 @@ export default function ThemeCustomizer() {
       window.removeEventListener("resize", checkScreenSize);
     };
   }, []);
+
+  // Add event listener to detect clicks outside sidebar when on mobile
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Only do this on mobile and when sidebar is open
+      if (isMobile && sidebarOpen && sidebarRef.current) {
+        // Don't close if editing inputs or clicking inside sidebar
+        if (
+          isEditingInput ||
+          sidebarRef.current.contains(event.target as Node)
+        ) {
+          return;
+        }
+
+        // Check if the click was on the close button which has its own handler
+        const target = event.target as HTMLElement;
+        if (
+          target.closest("button") &&
+          target.closest("button")?.innerHTML.includes("X")
+        ) {
+          return;
+        }
+
+        // Otherwise close the sidebar
+        setSidebarOpen(false);
+      }
+    };
+
+    // Add event listener only if mobile and sidebar is open
+    if (isMobile && sidebarOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobile, sidebarOpen, isEditingInput]);
 
   // Trigger debounced save whenever config, history, historyIndex, or selectedPage changes
   // Don't save during initial load
@@ -2039,27 +2076,25 @@ export default function ThemeCustomizer() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Handle sidebar overlay clicks - prevent closing when editing inputs
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (!isEditingInput) {
-      setSidebarOpen(false);
+  // Handler for input focus state
+  const handleInputFocusChange = (isFocused: boolean) => {
+    setIsEditingInput(isFocused);
+    // Ensure sidebar stays open when input is focused on mobile
+    if (isFocused && isMobile) {
+      setSidebarOpen(true);
     }
-    // If isEditingInput is true, we prevent the default action
-    // which keeps the sidebar open when focusing/typing in inputs
   };
 
   return (
     <div className="flex h-screen overflow-hidden relative">
       {/* Mobile Sidebar Overlay */}
       {isMobile && sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/30 z-30"
-          onClick={handleOverlayClick}
-        />
+        <div className="fixed inset-0 bg-black/30 z-30" />
       )}
 
       {/* Sidebar */}
       <div
+        ref={sidebarRef}
         className={`${
           isMobile
             ? "fixed z-40 h-full transition-transform duration-300 ease-in-out w-[85%]"
@@ -2141,7 +2176,7 @@ export default function ThemeCustomizer() {
                     metadata: { ...config.metadata, ...metadata },
                   })
                 }
-                onFocusChange={setIsEditingInput}
+                onFocusChange={handleInputFocusChange}
               />
             </TabsContent>
           </ScrollArea>

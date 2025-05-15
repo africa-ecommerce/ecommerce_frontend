@@ -433,7 +433,6 @@
 //     </div>
 //   );
 // }
-
 "use client";
 
 import type React from "react";
@@ -451,7 +450,7 @@ interface LayoutCustomizerProps {
   onUpdateContent: (content: Record<string, string>) => void;
   metadata: Record<string, string>;
   onUpdateMetadata: (metadata: Record<string, string>) => void;
-  onFocusChange?: (isEditing: boolean) => void;
+  onFocusChange: (isFocused: boolean) => void;
 }
 
 export default function LayoutCustomizer({
@@ -459,7 +458,7 @@ export default function LayoutCustomizer({
   onUpdateContent,
   metadata,
   onUpdateMetadata,
-  onFocusChange = () => {},
+  onFocusChange,
 }: LayoutCustomizerProps) {
   const [activeTab, setActiveTab] = useState("brand");
 
@@ -471,19 +470,7 @@ export default function LayoutCustomizer({
     onUpdateMetadata({ [key]: value });
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // In a real app, this would upload to a server and return a URL
-    // For this demo, we'll use a placeholder
-    updateContent("BRAND_LOGO", "/placeholder.svg?height=40&width=120");
-
-    // Reset the input
-    e.target.value = "";
-  };
-
-  // Handlers for focus and blur events
+  // Event handlers for input and textarea focus
   const handleFocus = () => {
     onFocusChange(true);
   };
