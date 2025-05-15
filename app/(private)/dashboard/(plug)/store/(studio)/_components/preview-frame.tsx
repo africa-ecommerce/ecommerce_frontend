@@ -1679,7 +1679,7 @@ export default function PreviewFrame({
 
   // Add view mode switcher buttons for easy switching between device types
   const ViewModeSwitcher = () => (
-    <div className="absolute top-4 left-4 bg-white rounded-lg shadow-md p-2 z-50 flex items-center space-x-2">
+    <div className="absolute top-4 left-4 bg-white rounded-lg shadow-md p-2 z-20 flex items-center space-x-2">
       <button
         className={cn(
           "text-xs px-2 py-1 rounded transition-colors",
@@ -1769,7 +1769,7 @@ export default function PreviewFrame({
       <ViewModeSwitcher />
 
       {/* Control panel - higher z-index to ensure visibility */}
-      <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-md p-2 flex items-center space-x-3 z-50">
+      <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-md p-2 flex items-center space-x-3 z-20">
         <button
           className="p-1 rounded hover:bg-gray-100 w-6 h-6 flex items-center justify-center"
           onClick={() => {
@@ -1780,6 +1780,8 @@ export default function PreviewFrame({
         >
           -
         </button>
+
+        
 
         <div className="flex items-center space-x-1">
           <span className="text-sm font-medium">
