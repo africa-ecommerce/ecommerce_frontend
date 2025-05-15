@@ -1799,11 +1799,9 @@ export default function ThemeCustomizer() {
   const [publishResult, setPublishResult] = useState<any>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [isEditingInput, setIsEditingInput] = useState(false);
   const { toast } = useToast();
   const [siteName, setSiteName] = useState("");
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
 
   // Track previous page for comparison
   const prevPageRef = useRef(selectedPage);
@@ -1884,37 +1882,6 @@ export default function ThemeCustomizer() {
       window.removeEventListener("resize", checkScreenSize);
     };
   }, []);
-
-  // Register focus and blur handlers for mobile inputs
-  useEffect(() => {
-    if (typeof window !== "undefined" && isMobile) {
-      // Set up the events to track input focus and blur
-      const handleInputFocus = () => {
-        setIsInputFocused(true);
-      };
-
-      const handleInputBlur = () => {
-        setIsInputFocused(false);
-      };
-
-      // Add focus and blur listeners to all input and textarea elements in sidebar
-      const sidebar = sidebarRef.current;
-      if (sidebar) {
-        const inputs = sidebar.querySelectorAll("input, textarea");
-        inputs.forEach((input) => {
-          input.addEventListener("focus", handleInputFocus);
-          input.addEventListener("blur", handleInputBlur);
-        });
-
-        return () => {
-          inputs.forEach((input) => {
-            input.removeEventListener("focus", handleInputFocus);
-            input.removeEventListener("blur", handleInputBlur);
-          });
-        };
-      }
-    }
-  }, [isMobile, sidebarOpen]);
 
   // Trigger debounced save whenever config, history, historyIndex, or selectedPage changes
   // Don't save during initial load
@@ -1999,14 +1966,16 @@ export default function ThemeCustomizer() {
     try {
       setIsPublishing(true);
       const data = { config, siteName };
+
+      console.log("siteName", data.siteName);
+
       // Call the publish API
-      const response = await fetch("/api/sites/publish", {
+      const response = await fetch("/api/site", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-
         body: JSON.stringify(data),
       });
 
@@ -2070,11 +2039,13 @@ export default function ThemeCustomizer() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Handler for overlay click - don't close sidebar if input is focused
+  // Handle sidebar overlay clicks - prevent closing when editing inputs
   const handleOverlayClick = (e: React.MouseEvent) => {
-    if (!isInputFocused && e.target === overlayRef.current) {
+    if (!isEditingInput) {
       setSidebarOpen(false);
     }
+    // If isEditingInput is true, we prevent the default action
+    // which keeps the sidebar open when focusing/typing in inputs
   };
 
   return (
@@ -2082,7 +2053,6 @@ export default function ThemeCustomizer() {
       {/* Mobile Sidebar Overlay */}
       {isMobile && sidebarOpen && (
         <div
-          ref={overlayRef}
           className="fixed inset-0 bg-black/30 z-30"
           onClick={handleOverlayClick}
         />
@@ -2090,7 +2060,6 @@ export default function ThemeCustomizer() {
 
       {/* Sidebar */}
       <div
-        ref={sidebarRef}
         className={`${
           isMobile
             ? "fixed z-40 h-full transition-transform duration-300 ease-in-out w-[85%]"
@@ -2172,6 +2141,7 @@ export default function ThemeCustomizer() {
                     metadata: { ...config.metadata, ...metadata },
                   })
                 }
+                onFocusChange={setIsEditingInput}
               />
             </TabsContent>
           </ScrollArea>

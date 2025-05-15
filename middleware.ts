@@ -1,838 +1,3 @@
-// import { NextResponse, NextRequest } from "next/server";
-// import {
-//   authRoutes,
-//   publicRoutes,
-//   supplierRoutes,
-//   plugRoutes,
-//   DEFAULT_LOGIN_REDIRECT,
-//   pathnameStartsWith,
-// } from "@/routes";
-// import { jwtVerify } from "jose";
-
-// // This should match the secret from your backend
-// const JWT_SECRET = process.env.JWT_SECRET || "defaultsecret";
-// // Convert to proper format for jose
-// const JWT_SECRET_KEY = new TextEncoder().encode(JWT_SECRET);
-
-// // Global refresh state tracking (for concurrent request handling)
-// let refreshPromise: Promise<{
-//   success: boolean;
-//   newTokens?: { accessToken: string };
-// }> | null = null;
-// let refreshPromiseTimestamp: number = 0;
-// const REFRESH_CACHE_TTL = 10000; // 10 seconds in milliseconds
-
-// export async function middleware(request: NextRequest) {
-//   const { nextUrl } = request;
-//   const pathname = nextUrl.pathname;
-
-//   // Skip middleware for API routes and public assets
-//   if (pathname.startsWith("/api") || pathname.includes(".")) {
-//     // Special handling for OG routes
-//     if (request.nextUrl.pathname.startsWith("/api/og/")) {
-//       const response = NextResponse.next();
-//       response.headers.set(
-//         "Cache-Control",
-//         "public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400"
-//       );
-//       response.headers.set("Vary", "Accept-Encoding, Accept");
-//       return response;
-//     }
-//     return NextResponse.next();
-//   }
-
-//   // Handle authentication routes
-//   if (authRoutes.includes(pathname)) {
-//     const accessToken = request.cookies.get("accessToken");
-//     const refreshToken = request.cookies.get("refreshToken");
-
-//     if (accessToken || refreshToken) {
-//       return NextResponse.redirect(
-//         new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
-//       );
-//     }
-//     return NextResponse.next();
-//   }
-
-//   // Handle public routes
-//   if (publicRoutes.includes(pathname)) {
-//     return NextResponse.next();
-//   }
-
-//   // Handle protected routes
-//   const authResult = await verifyAuth(request);
-
-//   // If not authenticated and trying to access protected route
-//   if (!authResult.isAuthenticated) {
-//     // IMPORTANT: If we have a refresh token and no access token, we might be in a refresh cycle
-//     const refreshToken = request.cookies.get("refreshToken")?.value;
-//     const accessToken = request.cookies.get("accessToken")?.value;
-
-//     // If we have only refresh token, we need a special handling to avoid loops
-//     if (refreshToken && !accessToken) {
-//       // Check if this is already a post-refresh redirect
-//       const hasAttemptedRefresh =
-//         request.headers.get("X-Refresh-Attempt") === "true";
-
-//       if (hasAttemptedRefresh) {
-//         // If we've already tried refreshing and still don't have an access token,
-//         // then something is wrong - clear the cookies and go to login
-//         console.log(
-//           "Refresh attempted but still no access token - redirecting to login"
-//         );
-//         const response = NextResponse.redirect(
-//           new URL("/auth/login", nextUrl.origin)
-//         );
-
-//         // Clear problematic cookies
-//         response.cookies.delete("refreshToken");
-//         response.cookies.delete("accessToken");
-
-//         return response;
-//       }
-//     }
-
-//     let callbackUrl = pathname;
-//     if (nextUrl.search) {
-//       callbackUrl += nextUrl.search;
-//     }
-
-//     const encodedCallBackUrl = encodeURIComponent(callbackUrl);
-//     return NextResponse.redirect(
-//       new URL(`/auth/login?callbackUrl=${encodedCallBackUrl}`, nextUrl.origin)
-//     );
-//   }
-
-//   // User is authenticated at this point
-//   if (authResult.user) {
-//     const userType = authResult.user.userType;
-
-//     // ROLE-BASED ACCESS CONTROL
-//     // Check if supplier is trying to access plug routes
-//     if (userType === "SUPPLIER" && pathnameStartsWith(pathname, plugRoutes)) {
-//       // Redirect supplier to their dashboard if they try to access plug routes
-//       return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
-//     }
-
-//     // Check if plug is trying to access supplier routes
-//     if (userType === "PLUG" && pathnameStartsWith(pathname, supplierRoutes)) {
-//       // Redirect plug to their dashboard if they try to access supplier routes
-//       return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
-//     }
-
-//     // Onboarding routes check
-//     const isOnboardingRoute =
-//       pathname === "/onboarding" || pathname.startsWith("/onboarding/");
-
-//     // Handle onboarding status redirects
-//     // If user is not onboarded and trying to access protected routes (except onboarding)
-//     if (
-//       !authResult.user.isOnboarded &&
-//       !publicRoutes.includes(pathname) &&
-//       !isOnboardingRoute
-//     ) {
-//       return NextResponse.redirect(new URL("/onboarding", nextUrl.origin));
-//     }
-
-//     // If user is already onboarded but trying to access onboarding routes
-//     if (authResult.user.isOnboarded && isOnboardingRoute) {
-//       return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
-//     }
-//   }
-
-//   // Pass user data to server components via headers
-//   const response = NextResponse.next();
-
-//   if (authResult.isAuthenticated && authResult.user) {
-//     // Store essential user data in a request header that server components can access
-//     response.headers.set(
-//       "X-User-Data",
-//       JSON.stringify({
-//         id: authResult.user.id,
-//         name: authResult.user.name,
-//         isOnboarded: authResult.user.isOnboarded,
-//         userType: authResult.user.userType,
-//       })
-//     );
-//   }
-
-//   return response;
-// }
-
-// // This function handles concurrent refresh token requests and returns success/failure
-// async function getRefreshResult(
-//   request: NextRequest
-// ): Promise<{ success: boolean; newTokens?: { accessToken: string } }> {
-//   const currentTime = Date.now();
-
-//   // If there's an existing refresh operation in progress and it's still fresh
-//   if (
-//     refreshPromise &&
-//     currentTime - refreshPromiseTimestamp < REFRESH_CACHE_TTL
-//   ) {
-//     console.log("Using cached refresh operation"); // Reusing existing refresh operation
-//     return await refreshPromise;
-//   }
-
-//   // Start a new refresh operation and cache it
-//   refreshPromiseTimestamp = currentTime;
-//   refreshPromise = refreshTokens(request);
-
-//   // Set up cleanup of the cache after completion
-//   refreshPromise.finally(() => {
-//     // Keep the result cached for a short time before clearing
-//     setTimeout(() => {
-//       if (currentTime === refreshPromiseTimestamp) {
-//         refreshPromise = null;
-//       }
-//     }, REFRESH_CACHE_TTL);
-//   });
-
-//   // Wait for the refresh to complete
-//   const result = await refreshPromise;
-//   return result;
-// }
-
-// // Function to refresh tokens - now returns success/failure status
-// async function refreshTokens(
-//   request: NextRequest
-// ): Promise<{ success: boolean; newTokens?: { accessToken: string } }> {
-//   try {
-//     // Add a flag to prevent recursive refresh attempts
-//     const hasAttemptedRefresh = request.headers.get("X-Refresh-Attempt");
-//     if (hasAttemptedRefresh === "true") {
-//       console.log("Preventing recursive refresh");
-//       return { success: false };
-//     }
-
-//     const headers = new Headers(request.headers);
-//     headers.set("X-Refresh-Attempt", "true");
-
-//     console.log("Starting refresh token request");
-//     const response = await fetch(`${process.env.BACKEND_URL}/auth/refresh`, {
-//       method: "POST",
-//       headers,
-//       credentials: "include",
-//     });
-//     console.log("Refresh request complete with status:", response.status);
-
-//     if (!response.ok) {
-//       console.log("Refresh request failed with status:", response.status);
-//       return { success: false };
-//     }
-
-//     // Your backend sets cookies in the response but doesn't include tokens in the body
-//     // We'll need to use the cookies set by the backend - we won't be able to extract tokens directly
-//     console.log("Refresh successful, new cookies should be set");
-
-//     return {
-//       success: true,
-//       // No tokens from the response body - we'll rely on cookies in the next request
-//     };
-//   } catch (error) {
-//     console.error("Refresh tokens failed with error:", error);
-//     return { success: false };
-//   }
-// }
-
-// // Verify auth directly from the JWT without an API call - using jose instead of jsonwebtoken
-// async function verifyAuth(request: NextRequest): Promise<{
-//   isAuthenticated: boolean;
-//   user?: {
-//     id: string;
-//     name: string;
-//     isOnboarded: boolean;
-//     userType: string;
-//   };
-// }> {
-//   try {
-//     console.log("Starting auth verification process");
-
-//     // Get the access token from cookies
-//     const accessToken = request.cookies.get("accessToken")?.value;
-//     const refreshToken = request.cookies.get("refreshToken")?.value;
-
-//     console.log(
-//       "Token check: Access token exists:",
-//       !!accessToken,
-//       "Refresh token exists:",
-//       !!refreshToken
-//     );
-
-//     // If no tokens at all, return not authenticated immediately
-//     if (!accessToken && !refreshToken) {
-//       console.log("No tokens found, not authenticated");
-//       return { isAuthenticated: false };
-//     }
-
-    
-//     if (accessToken) {
-//       try {
-//         // Verify and decode the JWT directly in the middleware using jose
-//         const { payload } = await jwtVerify(accessToken, JWT_SECRET_KEY, {
-//           algorithms: ["HS256"], // Make sure this matches what your backend uses
-//         });
-
-//         // Return the user data directly from the JWT
-//         return {
-//           isAuthenticated: true,
-//           user: {
-//             id: payload.userId as string,
-//             name: payload.name as string,
-//             isOnboarded: payload.isOnboarded as boolean,
-//             userType: payload.userType as string,
-//           },
-//         };
-//       } catch (error) {
-//         // Token validation failed (could be expired), try refresh
-//         if (refreshToken) {
-//           // Use the concurrent request handling for refresh
-//           const refreshSuccessful = await getRefreshResult(request);
-
-//           if (refreshSuccessful) {
-//             // Get fresh cookie data after refresh
-//             const newAccessToken = request.cookies.get("accessToken")?.value;
-
-//             // Important: Only proceed if we definitely have a new access token
-//             if (newAccessToken) {
-//               try {
-//                 // Verify the new token
-//                 const { payload } = await jwtVerify(
-//                   newAccessToken,
-//                   JWT_SECRET_KEY,
-//                   {
-//                     algorithms: ["HS256"],
-//                   }
-//                 );
-
-//                 return {
-//                   isAuthenticated: true,
-//                   user: {
-//                     id: payload.userId as string,
-//                     name: payload.name as string,
-//                     isOnboarded: payload.isOnboarded as boolean,
-//                     userType: payload.userType as string,
-//                   },
-//                 };
-//               } catch (error) {
-//                 // If the new token verification fails, authentication fails
-//                 console.error("New token verification failed:", error);
-//                 return { isAuthenticated: false };
-//               }
-//             }
-//           }
-
-//           // If refresh failed or no new access token was obtained, authentication fails
-//           return { isAuthenticated: false };
-//         }
-//         // For JWT errors or failed refresh, authentication fails
-//         return { isAuthenticated: false };
-//       }
-//     }
-
-//     // If access token failed or doesn't exist, try refresh flow
-//     else if (refreshToken) {
-//       // CRITICAL: Check if we've already attempted refresh in this request
-//       const hasAttemptedRefresh = request.headers.get("X-Refresh-Attempt");
-//       if (hasAttemptedRefresh === "true") {
-//         console.log(
-//           "Refresh already attempted in this request cycle - breaking potential loop"
-//         );
-//         return { isAuthenticated: false };
-//       }
-
-//       console.log("Attempting to refresh tokens");
-
-//       // Use the concurrent request handling for refresh
-//       const refreshResult = await getRefreshResult(request);
-//       console.log(
-//         "Refresh result:",
-//         refreshResult.success ? "success" : "failed"
-//       );
-
-//       if (refreshResult.success) {
-//         console.log(
-//           "Refresh succeeded, but we need to redirect to apply the new cookies"
-//         );
-
-//         // Important: For Next.js middleware, we need to end this request cycle and
-//         // start a new one to get the updated cookies. This is a key insight!
-
-//         // We'll return isAuthenticated: false to trigger a redirect, but the
-//         // next request will have the new cookies and should authenticate successfully
-//         return { isAuthenticated: false };
-//       } else {
-//         console.log("Refresh failed, user is not authenticated");
-//       }
-//     }
-
-//     // Default: authentication failed
-//     console.log("Authentication failed");
-//     return { isAuthenticated: false };
-//   } catch (error) {
-//     console.error("Auth verification failed with error:", error);
-//     return { isAuthenticated: false };
-//   }
-// }
-
-// export const config = {
-//   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
-// };
-
-// // Verify auth directly from the JWT without an API call - using jose instead of jsonwebtoken
-// async function verifyAuth(request: NextRequest): Promise<{
-//   isAuthenticated: boolean;
-//   user?: {
-//     id: string;
-//     name: string;
-//     isOnboarded: boolean;
-//     userType: string;
-//   };
-// }> {
-//   try {
-//     // Get the access token from cookies
-//     const accessToken = request.cookies.get("accessToken")?.value;
-//     const refreshToken = request.cookies.get("refreshToken")?.value;
-
-//     // If no tokens at all, return not authenticated immediately
-//     if (!accessToken && !refreshToken) {
-//       return { isAuthenticated: false };
-//     }
-
-//     if (accessToken) {
-//       try {
-//         // Verify and decode the JWT directly in the middleware using jose
-//         const { payload } = await jwtVerify(accessToken, JWT_SECRET_KEY, {
-//           algorithms: ["HS256"], // Make sure this matches what your backend uses
-//         });
-
-//         // Return the user data directly from the JWT
-//         return {
-//           isAuthenticated: true,
-//           user: {
-//             id: payload.userId as string,
-//             name: payload.name as string,
-//             isOnboarded: payload.isOnboarded as boolean,
-//             userType: payload.userType as string,
-//           },
-//         };
-//       } catch (error) {
-//         // Token validation failed (could be expired), try refresh
-//         if (refreshToken) {
-//           // Use the concurrent request handling for refresh
-//           const refreshSuccessful = await getRefreshResult(request);
-
-//           if (refreshSuccessful) {
-//             // Get fresh cookie data after refresh
-//             const newAccessToken = request.cookies.get("accessToken")?.value;
-
-//             // Important: Only proceed if we definitely have a new access token
-//             if (newAccessToken) {
-//               try {
-//                 // Verify the new token
-//                 const { payload } = await jwtVerify(
-//                   newAccessToken,
-//                   JWT_SECRET_KEY,
-//                   {
-//                     algorithms: ["HS256"],
-//                   }
-//                 );
-
-//                 return {
-//                   isAuthenticated: true,
-//                   user: {
-//                     id: payload.userId as string,
-//                     name: payload.name as string,
-//                     isOnboarded: payload.isOnboarded as boolean,
-//                     userType: payload.userType as string,
-//                   },
-//                 };
-//               } catch (error) {
-//                 // If the new token verification fails, authentication fails
-//                 console.error("New token verification failed:", error);
-//                 return { isAuthenticated: false };
-//               }
-//             }
-//           }
-
-//           // If refresh failed or no new access token was obtained, authentication fails
-//           return { isAuthenticated: false };
-//         }
-//         // For JWT errors or failed refresh, authentication fails
-//         return { isAuthenticated: false };
-//       }
-//     } else if (refreshToken) {
-//       // Only have refresh token, try to get an access token
-//       const refreshSuccessful = await getRefreshResult(request);
-
-//       if (refreshSuccessful) {
-//         // Check if we got a new access token
-//         const newAccessToken = request.cookies.get("accessToken")?.value;
-
-//         if (newAccessToken) {
-//           try {
-//             // Verify the new token
-//             const { payload } = await jwtVerify(
-//               newAccessToken,
-//               JWT_SECRET_KEY,
-//               {
-//                 algorithms: ["HS256"],
-//               }
-//             );
-
-//             return {
-//               isAuthenticated: true,
-//               user: {
-//                 id: payload.userId as string,
-//                 name: payload.name as string,
-//                 isOnboarded: payload.isOnboarded as boolean,
-//                 userType: payload.userType as string,
-//               },
-//             };
-//           } catch (error) {
-//             console.error("New token verification failed:", error);
-//             return { isAuthenticated: false };
-//           }
-//         }
-//       }
-
-//       return { isAuthenticated: false };
-//     }
-
-//     return { isAuthenticated: false };
-//   } catch (error) {
-//     console.error("Auth verification failed:", error);
-//     return { isAuthenticated: false };
-//   }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-// import { NextResponse, NextRequest } from "next/server";
-// import {
-//   authRoutes,
-//   publicRoutes,
-//   supplierRoutes,
-//   plugRoutes,
-//   DEFAULT_LOGIN_REDIRECT,
-//   pathnameStartsWith,
-// } from "@/routes";
-// import { jwtVerify } from "jose";
-
-// // This should match the secret from your backend
-// const JWT_SECRET = process.env.JWT_SECRET || "defaultsecret";
-// // Convert to proper format for jose
-// const JWT_SECRET_KEY = new TextEncoder().encode(JWT_SECRET);
-
-// // Global refresh state tracking (for concurrent request handling)
-// let refreshPromise: Promise<boolean> | null = null;
-// let refreshPromiseTimestamp: number = 0;
-// const REFRESH_CACHE_TTL = 10000; // 10 seconds in milliseconds
-
-// export async function middleware(request: NextRequest) {
-//   const { nextUrl } = request;
-//   const pathname = nextUrl.pathname;
-
-//   if (request.nextUrl.pathname.startsWith("/api/og/")) {
-//     // Get response
-//     const response = NextResponse.next();
-
-//     // Add cache headers for CDNs and browsers
-//     response.headers.set(
-//       "Cache-Control",
-//       "public, max-age=86400, s-maxage=86400, stale-while-revalidate=86400"
-//     );
-//     response.headers.set("Vary", "Accept-Encoding, Accept");
-
-//     return response;
-//   }
-
-//   // Skip middleware for API routes and public assets
-//   if (pathname.startsWith("/api") || pathname.includes(".")) {
-//     return NextResponse.next();
-//   }
-
-//   // Handle authentication routes
-//   if (authRoutes.includes(pathname)) {
-//     const accessToken = request.cookies.get("accessToken");
-//     const refreshToken = request.cookies.get("refreshToken");
-
-//     if (accessToken || refreshToken) {
-//       return NextResponse.redirect(
-//         new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
-//       );
-//     }
-//     return NextResponse.next();
-//   }
-
-//   // Handle public routes
-//   if (
-//     publicRoutes.includes(pathname) ||
-//     (pathname.startsWith("/products/") && pathname.split("/").length === 3)
-//   ) {
-//     return NextResponse.next();
-//   }
-
-//   // Handle protected routes
-//   const authResult = await verifyAuth(request);
-
-//   // If not authenticated and trying to access protected route
-//   if (!authResult.isAuthenticated) {
-//     let callbackUrl = pathname;
-//     if (nextUrl.search) {
-//       callbackUrl += nextUrl.search;
-//     }
-
-//     const encodedCallBackUrl = encodeURIComponent(callbackUrl);
-//     return NextResponse.redirect(
-//       new URL(`/auth/login?callbackUrl=${encodedCallBackUrl}`, nextUrl.origin)
-//     );
-//   }
-
-//   // User is authenticated at this point
-//   if (authResult.user) {
-//     const userType = authResult.user.userType;
-
-//     // ROLE-BASED ACCESS CONTROL
-//     // Check if supplier is trying to access plug routes
-//     if (userType === "SUPPLIER" && pathnameStartsWith(pathname, plugRoutes)) {
-//       // Redirect supplier to their dashboard if they try to access plug routes
-//       return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
-//     }
-
-//     // Check if plug is trying to access supplier routes
-//     if (userType === "PLUG" && pathnameStartsWith(pathname, supplierRoutes)) {
-//       // Redirect plug to their dashboard if they try to access supplier routes
-//       return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
-//     }
-
-//     // Onboarding routes check
-//     const isOnboardingRoute =
-//       pathname === "/onboarding" || pathname.startsWith("/onboarding/");
-
-//     // Handle onboarding status redirects
-//     // If user is not onboarded and trying to access protected routes (except onboarding)
-//     if (
-//       (!authResult.user.isOnboarded && !publicRoutes.includes(pathname)) ||
-//       (pathname.startsWith("/products/") &&
-//         pathname.split("/").length === 3 &&
-//         !isOnboardingRoute)
-//     ) {
-//       return NextResponse.redirect(new URL("/onboarding", nextUrl.origin));
-//     }
-
-//     // If user is already onboarded but trying to access onboarding routes
-//     if (authResult.user.isOnboarded && isOnboardingRoute) {
-//       return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
-//     }
-//   }
-
-//   // Pass user data to server components via headers
-//   const response = NextResponse.next();
-
-//   if (authResult.isAuthenticated && authResult.user) {
-//     // Store essential user data in a request header that server components can access
-//     response.headers.set(
-//       "X-User-Data",
-//       JSON.stringify({
-//         id: authResult.user.id,
-//         name: authResult.user.name,
-//         isOnboarded: authResult.user.isOnboarded,
-//         userType: authResult.user.userType,
-//       })
-//     );
-//   }
-
-//   return response;
-// }
-
-// // This function handles concurrent refresh token requests
-// async function getRefreshResult(request: NextRequest): Promise<boolean> {
-//   const currentTime = Date.now();
-
-//   // If there's an existing refresh operation in progress and it's still fresh
-//   if (
-//     refreshPromise &&
-//     currentTime - refreshPromiseTimestamp < REFRESH_CACHE_TTL
-//   ) {
-//     console.log("Using cached refresh operation"); // Reusing existing refresh operation
-//     return await refreshPromise;
-//   }
-
-//   // Start a new refresh operation and cache it
-//   refreshPromiseTimestamp = currentTime;
-//   refreshPromise = refreshTokens(request);
-
-//   // Set up cleanup of the cache after completion
-//   refreshPromise.finally(() => {
-//     // Keep the result cached for a short time before clearing
-//     setTimeout(() => {
-//       if (currentTime === refreshPromiseTimestamp) {
-//         refreshPromise = null;
-//       }
-//     }, REFRESH_CACHE_TTL);
-//   });
-
-//   return await refreshPromise;
-// }
-
-// // Function to refresh tokens
-// async function refreshTokens(request: NextRequest): Promise<boolean> {
-//   try {
-//     const response = await fetch(`${process.env.BACKEND_URL}/auth/refresh`, {
-//       method: "POST",
-//       headers: { Cookie: request.headers.get("Cookie") || "" },
-//       credentials: "include",
-//     });
-
-//     return response.ok;
-//   } catch (error) {
-//     console.error("Refresh tokens failed:", error);
-//     return false;
-//   }
-// }
-
-// // Verify auth directly from the JWT without an API call - using jose instead of jsonwebtoken
-// async function verifyAuth(request: NextRequest): Promise<{
-//   isAuthenticated: boolean;
-//   user?: {
-//     id: string;
-//     name: string;
-//     isOnboarded: boolean;
-//     userType: string;
-//   };
-// }> {
-//   try {
-//     // Get the access token from cookies
-//     const accessToken = request.cookies.get("accessToken")?.value;
-//     const refreshToken = request.cookies.get("refreshToken")?.value;
-
-//     // If no tokens at all, return not authenticated immediately
-//     if (!accessToken && !refreshToken) {
-//       return { isAuthenticated: false };
-//     }
-
-//     if (accessToken) {
-//       try {
-//         // Verify and decode the JWT directly in the middleware using jose
-//         const { payload } = await jwtVerify(accessToken, JWT_SECRET_KEY, {
-//           algorithms: ["HS256"], // Make sure this matches what your backend uses
-//         });
-
-//         // Return the user data directly from the JWT
-//         return {
-//           isAuthenticated: true,
-//           user: {
-//             id: payload.userId as string,
-//             name: payload.name as string,
-//             isOnboarded: payload.isOnboarded as boolean,
-//             userType: payload.userType as string,
-//           },
-//         };
-//       } catch (error) {
-//         // Token validation failed (could be expired), try refresh
-//         if (refreshToken) {
-//           // Use the concurrent request handling for refresh
-//           const refreshSuccessful = await getRefreshResult(request);
-
-//           if (refreshSuccessful) {
-//             // Get fresh cookie data after refresh
-//             const newAccessToken = request.cookies.get("accessToken")?.value;
-
-//             // Important: Only proceed if we definitely have a new access token
-//             if (newAccessToken) {
-//               try {
-//                 // Verify the new token
-//                 const { payload } = await jwtVerify(
-//                   newAccessToken,
-//                   JWT_SECRET_KEY,
-//                   {
-//                     algorithms: ["HS256"],
-//                   }
-//                 );
-
-//                 return {
-//                   isAuthenticated: true,
-//                   user: {
-//                     id: payload.userId as string,
-//                     name: payload.name as string,
-//                     isOnboarded: payload.isOnboarded as boolean,
-//                     userType: payload.userType as string,
-//                   },
-//                 };
-//               } catch (error) {
-//                 // If the new token verification fails, authentication fails
-//                 console.error("New token verification failed:", error);
-//                 return { isAuthenticated: false };
-//               }
-//             }
-//           }
-
-//           // If refresh failed or no new access token was obtained, authentication fails
-//           return { isAuthenticated: false };
-//         }
-//         // For JWT errors or failed refresh, authentication fails
-//         return { isAuthenticated: false };
-//       }
-//     } else if (refreshToken) {
-//       // Only have refresh token, try to get an access token
-//       const refreshSuccessful = await getRefreshResult(request);
-
-//       if (refreshSuccessful) {
-//         // Check if we got a new access token
-//         const newAccessToken = request.cookies.get("accessToken")?.value;
-
-//         if (newAccessToken) {
-//           try {
-//             // Verify the new token
-//             const { payload } = await jwtVerify(
-//               newAccessToken,
-//               JWT_SECRET_KEY,
-//               {
-//                 algorithms: ["HS256"],
-//               }
-//             );
-
-//             return {
-//               isAuthenticated: true,
-//               user: {
-//                 id: payload.userId as string,
-//                 name: payload.name as string,
-//                 isOnboarded: payload.isOnboarded as boolean,
-//                 userType: payload.userType as string,
-//               },
-//             };
-//           } catch (error) {
-//             console.error("New token verification failed:", error);
-//             return { isAuthenticated: false };
-//           }
-//         }
-//       }
-
-//       return { isAuthenticated: false };
-//     }
-
-//     return { isAuthenticated: false };
-//   } catch (error) {
-//     console.error("Auth verification failed:", error);
-//     return { isAuthenticated: false };
-//   }
-// }
-
-// export const config = {
-//   matcher: ["/((?!_next/static|_next/image|favicon.ico|api/og/).*)"],
-// };
-
-
 
 import { NextResponse, NextRequest } from "next/server";
 import {
@@ -850,13 +15,9 @@ const JWT_SECRET = process.env.JWT_SECRET || "defaultsecret";
 // Convert to proper format for jose
 const JWT_SECRET_KEY = new TextEncoder().encode(JWT_SECRET);
 
-// Global refresh state tracking (for concurrent request handling)
-let refreshPromise: Promise<{
-  success: boolean;
-  newTokens?: { accessToken: string };
-}> | null = null;
-let refreshPromiseTimestamp: number = 0;
-const REFRESH_CACHE_TTL = 10000; // 10 seconds in milliseconds
+// Token expiration times (matching backend)
+const ACCESS_TOKEN_EXPIRY = 15 * 60 * 60 * 1000; // 15 mins (in milliseconds)
+const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 days (in milliseconds)
 
 export async function middleware(request: NextRequest) {
   const { nextUrl } = request;
@@ -880,7 +41,6 @@ export async function middleware(request: NextRequest) {
 
   // Handle authentication routes
   if (authRoutes.includes(pathname)) {
-    // UPDATED: Check both cookie names (and correctly access .value)
     const accessToken = request.cookies.get("accessToken")?.value;
     const refreshToken = request.cookies.get("refreshToken")?.value;
 
@@ -892,8 +52,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Handle public routes
-  // Check if the pathname is a public route or a product route with only one segment after "/products/" like "/products/123"
+  // Handle public routes or product detail pages
   if (
     publicRoutes.includes(pathname) ||
     (pathname.startsWith("/products/") && pathname.split("/").length === 3)
@@ -901,298 +60,335 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Handle protected routes
-  const authResult = await verifyAuth(request);
+  // Get current cookies state
+  const accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
 
-  // If not authenticated and trying to access protected route
-  if (!authResult.isAuthenticated) {
-    // IMPORTANT: If we have a refresh token and no access token, we might be in a refresh cycle
-    const refreshToken = request.cookies.get("refreshToken")?.value;
-    const accessToken = request.cookies.get("accessToken")?.value;
+  // Track refresh attempts to prevent loops
+  const refreshAttemptCount = parseInt(
+    request.cookies.get("refreshAttempt")?.value || "0"
+  );
 
-    // If we have only refresh token, we need a special handling to avoid loops
-    if (refreshToken && !accessToken) {
-      // Check if this is already a post-refresh redirect
-      const hasAttemptedRefresh =
-        request.headers.get("X-Refresh-Attempt") === "true";
-
-      if (hasAttemptedRefresh) {
-        // If we've already tried refreshing and still don't have an access token,
-        // then something is wrong - clear the cookies and go to login
-        console.log(
-          "Refresh attempted but still no access token - redirecting to login"
-        );
-        const response = NextResponse.redirect(
-          new URL("/auth/login", nextUrl.origin)
-        );
-
-        // Clear problematic cookies
-        response.cookies.delete("refreshToken");
-        response.cookies.delete("accessToken");
-
-        return response;
-      }
-    }
-
+  // CRITICAL: If we've tried refreshing too many times, clear cookies and force login
+  if (refreshAttemptCount >= 2) {
+    console.log(
+      "Too many refresh attempts - redirecting to login and clearing cookies"
+    );
     let callbackUrl = pathname;
     if (nextUrl.search) {
       callbackUrl += nextUrl.search;
     }
+    const encodedCallBackUrl = encodeURIComponent(callbackUrl);
+    const response = NextResponse.redirect(
+      new URL(`/auth/login?callbackUrl=${encodedCallBackUrl}`, nextUrl.origin)
+    );
+    response.cookies.delete("accessToken");
+    response.cookies.delete("refreshToken");
+    response.cookies.delete("refreshAttempt");
+    return response;
+  }
 
+  // No tokens at all, redirect to login
+  if (!accessToken && !refreshToken) {
+    let callbackUrl = pathname;
+    if (nextUrl.search) {
+      callbackUrl += nextUrl.search;
+    }
     const encodedCallBackUrl = encodeURIComponent(callbackUrl);
     return NextResponse.redirect(
       new URL(`/auth/login?callbackUrl=${encodedCallBackUrl}`, nextUrl.origin)
     );
   }
 
-  // User is authenticated at this point
-  if (authResult.user) {
-    const userType = authResult.user.userType;
+  // Try validating the access token first
+  if (accessToken) {
+    try {
+      // Verify and decode the JWT directly
+      const { payload } = await jwtVerify(accessToken, JWT_SECRET_KEY, {
+        algorithms: ["HS256"],
+      });
 
-    // ROLE-BASED ACCESS CONTROL
-    // Check if supplier is trying to access plug routes
-    if (userType === "SUPPLIER" && pathnameStartsWith(pathname, plugRoutes)) {
-      // Redirect supplier to their dashboard if they try to access plug routes
-      return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
-    }
+      // Token is valid, reset refresh attempt counter
+      const response = NextResponse.next();
 
-    // Check if plug is trying to access supplier routes
-    if (userType === "PLUG" && pathnameStartsWith(pathname, supplierRoutes)) {
-      // Redirect plug to their dashboard if they try to access supplier routes
-      return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
-    }
-
-    // Onboarding routes check
-    const isOnboardingRoute =
-      pathname === "/onboarding" || pathname.startsWith("/onboarding/");
-
-    // Handle onboarding status redirects
-    // If user is not onboarded and trying to access protected routes (except onboarding)
-    //check if the pathname is a product route with only one segment after "/products/" like "/products/123"
-    if (
-      (!authResult.user.isOnboarded && !publicRoutes.includes(pathname)) ||
-      (pathname.startsWith("/products/") &&
-        pathname.split("/").length === 3 &&
-        !isOnboardingRoute)
-    ) {
-      return NextResponse.redirect(new URL("/onboarding", nextUrl.origin));
-    }
-
-    // If user is already onboarded but trying to access onboarding routes
-    if (authResult.user.isOnboarded && isOnboardingRoute) {
-      return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
-    }
-  }
-
-  // Pass user data to server components via headers
-  const response = NextResponse.next();
-
-  if (authResult.isAuthenticated && authResult.user) {
-    // Store essential user data in a request header that server components can access
-    response.headers.set(
-      "X-User-Data",
-      JSON.stringify({
-        id: authResult.user.id,
-        name: authResult.user.name,
-        isOnboarded: authResult.user.isOnboarded,
-        userType: authResult.user.userType,
-      })
-    );
-  }
-
-  return response;
-}
-
-// This function handles concurrent refresh token requests and returns success/failure
-async function getRefreshResult(
-  request: NextRequest
-): Promise<{ success: boolean; newTokens?: { accessToken: string } }> {
-  const currentTime = Date.now();
-
-  // If there's an existing refresh operation in progress and it's still fresh
-  if (
-    refreshPromise &&
-    currentTime - refreshPromiseTimestamp < REFRESH_CACHE_TTL
-  ) {
-    console.log("Using cached refresh operation"); // Reusing existing refresh operation
-    return await refreshPromise;
-  }
-
-  // Start a new refresh operation and cache it
-  refreshPromiseTimestamp = currentTime;
-  refreshPromise = refreshTokens(request);
-
-  // Set up cleanup of the cache after completion
-  refreshPromise.finally(() => {
-    // Keep the result cached for a short time before clearing
-    setTimeout(() => {
-      if (currentTime === refreshPromiseTimestamp) {
-        refreshPromise = null;
+      // If there was a previous refresh attempt, clear it
+      if (refreshAttemptCount > 0) {
+        response.cookies.delete("refreshAttempt");
       }
-    }, REFRESH_CACHE_TTL);
-  });
 
-  // Wait for the refresh to complete
-  const result = await refreshPromise;
-  return result;
-}
-
-// Function to refresh tokens - now returns success/failure status
-async function refreshTokens(
-  request: NextRequest
-): Promise<{ success: boolean; newTokens?: { accessToken: string } }> {
-  try {
-    // Add a flag to prevent recursive refresh attempts
-    const hasAttemptedRefresh = request.headers.get("X-Refresh-Attempt");
-    if (hasAttemptedRefresh === "true") {
-      console.log("Preventing recursive refresh");
-      return { success: false };
-    }
-
-    const headers = new Headers(request.headers);
-    headers.set("X-Refresh-Attempt", "true");
-
-    console.log("Starting refresh token request");
-    const response = await fetch(`${process.env.BACKEND_URL}/auth/refresh`, {
-      method: "POST",
-      headers,
-      credentials: "include",
-    });
-    console.log("Refresh request complete with status:", response.status);
-
-    if (!response.ok) {
-      console.log("Refresh request failed with status:", response.status);
-      return { success: false };
-    }
-
-    // Your backend sets cookies in the response but doesn't include tokens in the body
-    // We'll need to use the cookies set by the backend - we won't be able to extract tokens directly
-    console.log("Refresh successful, new cookies should be set");
-
-    return {
-      success: true,
-      // No tokens from the response body - we'll rely on cookies in the next request
-    };
-  } catch (error) {
-    console.error("Refresh tokens failed with error:", error);
-    return { success: false };
-  }
-}
-
-// Verify auth directly from the JWT without an API call - using jose instead of jsonwebtoken
-async function verifyAuth(request: NextRequest): Promise<{
-  isAuthenticated: boolean;
-  user?: {
-    id: string;
-    name: string;
-    isOnboarded: boolean;
-    userType: string;
-  };
-}> {
-  try {
-    console.log("Starting auth verification process");
-
-    // Get the access token from cookies
-    const accessToken = request.cookies.get("accessToken")?.value;
-    const refreshToken = request.cookies.get("refreshToken")?.value;
-
-    console.log(
-      "Token check: Access token exists:",
-      !!accessToken,
-      "Refresh token exists:",
-      !!refreshToken
-    );
-
-    // If no tokens at all, return not authenticated immediately
-    if (!accessToken && !refreshToken) {
-      console.log("No tokens found, not authenticated");
-      return { isAuthenticated: false };
-    }
-
-    if (accessToken) {
-      try {
-        // Verify and decode the JWT directly in the middleware using jose
-        const { payload } = await jwtVerify(accessToken, JWT_SECRET_KEY, {
-          algorithms: ["HS256"], // Make sure this matches what your backend uses
-        });
-
-        // Return the user data directly from the JWT
-        return {
-          isAuthenticated: true,
-          user: {
-            id: payload.userId as string,
-            name: payload.name as string,
-            isOnboarded: payload.isOnboarded as boolean,
-            userType: payload.userType as string,
-          },
+      // Pass user data to server components
+      if (payload) {
+        const userData = {
+          id: payload.userId as string,
+          name: (payload.name as string) || "",
+          isOnboarded: payload.isOnboarded as boolean,
+          userType: payload.userType as string,
         };
-      } catch (error) {
-        // Token validation failed (could be expired), try refresh
-        if (refreshToken) {
-          // Use the concurrent request handling for refresh
-          const refreshResult = await getRefreshResult(request);
 
-          if (refreshResult.success) {
-            // IMPORTANT: We need a new request cycle to get the new cookies
-            // In Next.js middleware, we can't directly access cookies set after a fetch
-            // So we'll redirect to apply the new cookies
-            console.log(
-              "Refresh successful, but need to redirect for new cookies"
-            );
-            return { isAuthenticated: false };
-          }
+        console.log("Setting user data from access token:", userData);
 
-          // If refresh failed or no new access token was obtained, authentication fails
-          return { isAuthenticated: false };
+        response.headers.set("X-User-Data", JSON.stringify(userData));
+
+        const userType = payload.userType as string;
+        const isOnboarded = payload.isOnboarded as boolean;
+
+        // ROLE-BASED ACCESS CONTROL
+        // Check if supplier is trying to access plug routes
+        if (
+          userType === "SUPPLIER" &&
+          pathnameStartsWith(pathname, plugRoutes)
+        ) {
+          return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
         }
-        // For JWT errors or failed refresh, authentication fails
-        return { isAuthenticated: false };
+
+        // Check if plug is trying to access supplier routes
+        if (
+          userType === "PLUG" &&
+          pathnameStartsWith(pathname, supplierRoutes)
+        ) {
+          return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
+        }
+
+        // Onboarding check
+        const isOnboardingRoute =
+          pathname === "/onboarding" || pathname.startsWith("/onboarding/");
+
+        // If not onboarded and trying to access protected routes
+        if (
+          !isOnboarded &&
+          !isOnboardingRoute &&
+          !publicRoutes.includes(pathname) &&
+          !(
+            pathname.startsWith("/products/") &&
+            pathname.split("/").length === 3
+          )
+        ) {
+          return NextResponse.redirect(new URL("/onboarding", nextUrl.origin));
+        }
+
+        // If already onboarded but trying to access onboarding routes
+        if (isOnboarded && isOnboardingRoute) {
+          return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
+        }
       }
+
+      return response;
+    } catch (error) {
+      // Token validation failed (expired), fall through to refresh logic
+      console.log("Access token invalid, trying refresh flow");
     }
+  }
 
-    // If access token failed or doesn't exist, try refresh flow
-    else if (refreshToken) {
-      // CRITICAL: Check if we've already attempted refresh in this request
-      const hasAttemptedRefresh = request.headers.get("X-Refresh-Attempt");
-      if (hasAttemptedRefresh === "true") {
-        console.log(
-          "Refresh already attempted in this request cycle - breaking potential loop"
-        );
-        return { isAuthenticated: false };
-      }
+  // We're here because either:
+  // 1. No access token but has refresh token
+  // 2. Access token was invalid and we have a refresh token
 
-      console.log("Attempting to refresh tokens");
+  if (refreshToken) {
+    console.log(
+      `Attempting to refresh tokens (attempt #${refreshAttemptCount + 1})`
+    );
 
-      // Use the concurrent request handling for refresh
-      const refreshResult = await getRefreshResult(request);
-      console.log(
-        "Refresh result:",
-        refreshResult.success ? "success" : "failed"
+    try {
+      // Create a new request to refresh token endpoint
+      const refreshReq = new Request(
+        `${process.env.BACKEND_URL}/auth/refresh`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: `refreshToken=${refreshToken}`,
+          },
+          credentials: "include",
+        }
       );
 
-      if (refreshResult.success) {
-        console.log(
-          "Refresh succeeded, but we need to redirect to apply the new cookies"
-        );
+      const refreshRes = await fetch(refreshReq);
 
-        // Important: For Next.js middleware, we need to end this request cycle and
-        // start a new one to get the updated cookies. This is a key insight!
+      // Add debug
+      console.log("Refresh response status:", refreshRes.status);
 
-        // We'll return isAuthenticated: false to trigger a redirect, but the
-        // next request will have the new cookies and should authenticate successfully
-        return { isAuthenticated: false };
+      if (refreshRes.ok) {
+        console.log("Refresh successful, continuing");
+
+        // Parse response to get tokens
+        const refreshData = await refreshRes.json();
+
+        // Add debug
+        console.log("Refresh data success:", refreshData.success);
+
+        if (refreshData.success || refreshData.accessToken) {
+          // Check for tokens even if success property missing
+          // Create a response that continues to the original path
+          // IMPORTANT: Use next() instead of redirect() to avoid losing cookies
+          const response = NextResponse.next();
+
+          // Set cookies manually (this is more reliable than forwarding set-cookie headers)
+          // We use same cookie config as backend
+          const cookieConfig = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite:
+              process.env.NODE_ENV === "production"
+                ? ("none" as const)
+                : ("lax" as const),
+            path: "/",
+          };
+
+          // Set the new access token cookie
+          response.cookies.set("accessToken", refreshData.accessToken, {
+            ...cookieConfig,
+            maxAge: Math.floor(ACCESS_TOKEN_EXPIRY / 1000), // Convert to seconds
+          });
+
+          // Set the new refresh token cookie if it's included in the response
+          if (refreshData.refreshToken) {
+            response.cookies.set("refreshToken", refreshData.refreshToken, {
+              ...cookieConfig,
+              maxAge: Math.floor(REFRESH_TOKEN_EXPIRY / 1000), // Convert to seconds
+            });
+          }
+
+          // Clear any refresh attempt counter
+          response.cookies.delete("refreshAttempt");
+
+          console.log("Cookies set, returning to original request");
+
+          // CRITICAL: Decode the new access token to extract user data
+          try {
+            const { payload } = await jwtVerify(
+              refreshData.accessToken,
+              JWT_SECRET_KEY,
+              {
+                algorithms: ["HS256"],
+              }
+            );
+
+            // Pass user data to server components
+            if (payload) {
+              const userData = {
+                id: payload.userId as string,
+                name: (payload.name as string) || "",
+                isOnboarded: payload.isOnboarded as boolean,
+                userType: payload.userType as string,
+              };
+
+              console.log("Setting user data from refreshed token:", userData);
+
+              response.headers.set("X-User-Data", JSON.stringify(userData));
+
+              // Apply the same role-based access control as in the normal flow
+              const userType = payload.userType as string;
+              const isOnboarded = payload.isOnboarded as boolean;
+
+              // ROLE-BASED ACCESS CONTROL
+              // Check if supplier is trying to access plug routes
+              if (
+                userType === "SUPPLIER" &&
+                pathnameStartsWith(pathname, plugRoutes)
+              ) {
+                return NextResponse.redirect(
+                  new URL("/dashboard", nextUrl.origin)
+                );
+              }
+
+              // Check if plug is trying to access supplier routes
+              if (
+                userType === "PLUG" &&
+                pathnameStartsWith(pathname, supplierRoutes)
+              ) {
+                return NextResponse.redirect(
+                  new URL("/dashboard", nextUrl.origin)
+                );
+              }
+
+              // Onboarding check
+              const isOnboardingRoute =
+                pathname === "/onboarding" ||
+                pathname.startsWith("/onboarding/");
+
+              // If not onboarded and trying to access protected routes
+              if (
+                !isOnboarded &&
+                !isOnboardingRoute &&
+                !publicRoutes.includes(pathname) &&
+                !(
+                  pathname.startsWith("/products/") &&
+                  pathname.split("/").length === 3
+                )
+              ) {
+                return NextResponse.redirect(
+                  new URL("/onboarding", nextUrl.origin)
+                );
+              }
+
+              // If already onboarded but trying to access onboarding routes
+              if (isOnboarded && isOnboardingRoute) {
+                return NextResponse.redirect(
+                  new URL("/dashboard", nextUrl.origin)
+                );
+              }
+            }
+          } catch (error) {
+            console.error("Error decoding refreshed token:", error);
+            // If we can't decode the token, continue anyway - the client will
+            // eventually redirect to login on its own
+          }
+
+          // Return the response that continues with the original request
+          return response;
+        } else {
+          console.log("Refresh failed - no tokens in response");
+        }
       } else {
-        console.log("Refresh failed, user is not authenticated");
+        console.log("Refresh failed with status:", refreshRes.status);
+        try {
+          const errorData = await refreshRes.json();
+          console.log("Error details:", errorData);
+        } catch (e) {
+          console.log("Could not parse error response");
+        }
       }
-    }
 
-    // Default: authentication failed
-    console.log("Authentication failed");
-    return { isAuthenticated: false };
-  } catch (error) {
-    console.error("Auth verification failed with error:", error);
-    return { isAuthenticated: false };
+      // If we got here, refresh failed
+      let callbackUrl = pathname;
+      if (nextUrl.search) {
+        callbackUrl += nextUrl.search;
+      }
+      const encodedCallBackUrl = encodeURIComponent(callbackUrl);
+      const response = NextResponse.redirect(
+        new URL(`/auth/login?callbackUrl=${encodedCallBackUrl}`, nextUrl.origin)
+      );
+      response.cookies.delete("accessToken");
+      response.cookies.delete("refreshToken");
+      response.cookies.delete("refreshAttempt");
+      return response;
+    } catch (error) {
+      console.error("Error during token refresh:", error);
+      // Something went wrong with the refresh request
+      let callbackUrl = pathname;
+      if (nextUrl.search) {
+        callbackUrl += nextUrl.search;
+      }
+      const encodedCallBackUrl = encodeURIComponent(callbackUrl);
+      const response = NextResponse.redirect(
+        new URL(`/auth/login?callbackUrl=${encodedCallBackUrl}`, nextUrl.origin)
+      );
+      response.cookies.delete("accessToken");
+      response.cookies.delete("refreshToken");
+      response.cookies.delete("refreshAttempt");
+      return response;
+    }
   }
+
+  // Fallback - if we somehow get here, redirect to login
+  let callbackUrl = pathname;
+  if (nextUrl.search) {
+    callbackUrl += nextUrl.search;
+  }
+  const encodedCallBackUrl = encodeURIComponent(callbackUrl);
+  return NextResponse.redirect(
+    new URL(`/auth/login?callbackUrl=${encodedCallBackUrl}`, nextUrl.origin)
+  );
 }
 
 export const config = {
