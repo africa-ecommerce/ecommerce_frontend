@@ -46,7 +46,7 @@ export default function ClientLayoutWrapper({
   }
 
   return (
-    <UserProvider  userData={user}>
+    <UserProvider  userData={user} isLoading={isLoading}>
       <ClientLayout userType={userType}>{children}</ClientLayout>
     </UserProvider>
   );

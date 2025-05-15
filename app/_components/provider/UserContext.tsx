@@ -6,19 +6,22 @@ import { createContext, useContext, ReactNode } from "react";
 
 interface UserContextType {
   userData: any | null;
+  isLoading: boolean
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ 
   children,
-  userData
+  userData,
+  isLoading
 }: { 
   children: ReactNode;
   userData: any | null;
+  isLoading: boolean
 }) {
   return (
-    <UserContext.Provider value={{ userData }}>{children}</UserContext.Provider>
+    <UserContext.Provider value={{ userData, isLoading }}>{children}</UserContext.Provider>
   );
 }
 
