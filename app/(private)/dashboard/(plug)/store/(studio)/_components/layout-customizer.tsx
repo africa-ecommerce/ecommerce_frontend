@@ -434,13 +434,11 @@
 //   );
 // }
 
-
-
 "use client"
 
 import type React from "react"
 
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -460,9 +458,6 @@ export default function LayoutCustomizer({ content, onUpdateContent,
   onUpdateMetadata,
  }: LayoutCustomizerProps) {
   const [activeTab, setActiveTab] = useState("brand")
-
-  // Add these refs to track input focus state
-  const inFocusRef = useRef(false);
 
   const updateContent = (key: string, value: string) => {
     onUpdateContent({ [key]: value })
@@ -484,40 +479,6 @@ export default function LayoutCustomizer({ content, onUpdateContent,
     e.target.value = ""
   }
 
-  // Create focus and blur handlers for all inputs
-  const handleInputFocus = () => {
-    inFocusRef.current = true;
-    // Add a class to the body to indicate an input is focused
-    if (typeof document !== 'undefined') {
-      document.body.classList.add('input-focused');
-    }
-  };
-
-  const handleInputBlur = () => {
-    inFocusRef.current = false;
-    // Remove the class when input loses focus
-    if (typeof document !== 'undefined') {
-      document.body.classList.remove('input-focused');
-    }
-  };
-
-  // Apply focus/blur event handlers to all input elements on mount
-  useEffect(() => {
-    // Add preventSidebarClose handling for custom keyboard events
-    const preventSidebarClose = (e) => {
-      if (inFocusRef.current) {
-        e.stopPropagation();
-      }
-    };
-
-    // We'll capture any click events on the document body
-    document.addEventListener('click', preventSidebarClose, true);
-    
-    return () => {
-      document.removeEventListener('click', preventSidebarClose, true);
-    };
-  }, []);
-
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold">Content</h2>
@@ -525,6 +486,7 @@ export default function LayoutCustomizer({ content, onUpdateContent,
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-4">
           <TabsTrigger value="brand">Brand</TabsTrigger>
+          {/* <TabsTrigger value="header">Header</TabsTrigger> */}
           <TabsTrigger value="hero">Hero</TabsTrigger>
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="footer">Footer</TabsTrigger>
@@ -538,10 +500,38 @@ export default function LayoutCustomizer({ content, onUpdateContent,
               value={content.BRAND_NAME}
               onChange={(e) => updateContent("BRAND_NAME", e.target.value)}
               placeholder="Your Brand Name"
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
             />
           </div>
+
+          {/* <div className="grid gap-2">
+            <Label htmlFor="brand-logo">Brand Logo</Label>
+            <div className="flex items-center gap-2">
+              <div className="h-10 w-32 border rounded flex items-center justify-center bg-muted/30">
+                {content.BRAND_LOGO ? (
+                  <img
+                    src={content.BRAND_LOGO || "/placeholder.svg"}
+                    alt="Brand Logo"
+                    className="max-h-full max-w-full object-contain"
+                  />
+                ) : (
+                  <span className="text-xs text-muted-foreground">No logo</span>
+                )}
+              </div>
+              <div className="relative">
+                <Input id="logo-upload" type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById("logo-upload")?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Logo
+                </Button>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">Recommended size: 120x40px</p>
+          </div> */}
 
           <div className="grid gap-2">
             <Label htmlFor="site-title">Site Title (Metadata)</Label>
@@ -550,8 +540,6 @@ export default function LayoutCustomizer({ content, onUpdateContent,
               value={metadata.title}
               onChange={(e) => updateMetadata("title", e.target.value)}
               placeholder="Your Site Title"
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
             />
             <p className="text-xs text-muted-foreground">
               Used for SEO and browser tabs
@@ -570,14 +558,33 @@ export default function LayoutCustomizer({ content, onUpdateContent,
               }
               placeholder="Brief description of your site"
               rows={2}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
             />
             <p className="text-xs text-muted-foreground">
               Used for SEO and social sharing
             </p>
           </div>
         </TabsContent>
+
+        {/* <TabsContent value="header" className="space-y-4 pt-4">
+          <div className="grid gap-2">
+            <Label htmlFor="header-text">Store Name</Label>
+            <Input
+              id="header-text"
+              value={content.HEADER_TEXT}
+              onChange={(e) => updateContent("HEADER_TEXT", e.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="announcement-text">Announcement Bar Text</Label>
+            <Input
+              id="announcement-text"
+              value={content.ANNOUNCEMENT_TEXT}
+              onChange={(e) => updateContent("ANNOUNCEMENT_TEXT", e.target.value)}
+              placeholder="FREE SHIPPING ON ALL ORDERS OVER $75"
+            />
+          </div>
+        </TabsContent> */}
 
         <TabsContent value="hero" className="space-y-4 pt-4">
           <div className="grid gap-2">
@@ -586,8 +593,6 @@ export default function LayoutCustomizer({ content, onUpdateContent,
               id="hero-title"
               value={content.HERO_TITLE}
               onChange={(e) => updateContent("HERO_TITLE", e.target.value)}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
             />
           </div>
 
@@ -600,8 +605,6 @@ export default function LayoutCustomizer({ content, onUpdateContent,
                 updateContent("HERO_DESCRIPTION", e.target.value)
               }
               rows={3}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
             />
           </div>
 
@@ -614,8 +617,6 @@ export default function LayoutCustomizer({ content, onUpdateContent,
                 updateContent("PRIMARY_CTA_TEXT", e.target.value)
               }
               placeholder="Shop Now"
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
             />
           </div>
 
@@ -628,13 +629,20 @@ export default function LayoutCustomizer({ content, onUpdateContent,
                 updateContent("SECONDARY_CTA_TEXT", e.target.value)
               }
               placeholder="Learn More"
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
             />
           </div>
         </TabsContent>
 
         <TabsContent value="about" className="space-y-4 pt-4">
+          {/* <div className="grid gap-2">
+            <Label htmlFor="about-title">About Section Title</Label>
+            <Input
+              id="about-title"
+              value={content.ABOUT_TITLE}
+              onChange={(e) => updateContent("ABOUT_TITLE", e.target.value)}
+            />
+          </div> */}
+
           <div className="grid gap-2">
             <Label htmlFor="about-text">About Section Content</Label>
             <Textarea
@@ -642,8 +650,6 @@ export default function LayoutCustomizer({ content, onUpdateContent,
               value={content.ABOUT_TEXT}
               onChange={(e) => updateContent("ABOUT_TEXT", e.target.value)}
               rows={5}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
             />
             <p className="text-xs text-muted-foreground">
               HTML formatting is supported
@@ -659,8 +665,6 @@ export default function LayoutCustomizer({ content, onUpdateContent,
               value={content.INSTAGRAM_LINK}
               onChange={(e) => updateContent("INSTAGRAM_LINK", e.target.value)}
               placeholder="https://instagram.com/yourbrand"
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
             />
           </div>
 
@@ -671,8 +675,6 @@ export default function LayoutCustomizer({ content, onUpdateContent,
               value={content.FACEBOOK_LINK}
               onChange={(e) => updateContent("FACEBOOK_LINK", e.target.value)}
               placeholder="https://facebook.com/yourbrand"
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
             />
           </div>
 
@@ -683,8 +685,6 @@ export default function LayoutCustomizer({ content, onUpdateContent,
               value={content.TWITTER_LINK}
               onChange={(e) => updateContent("TWITTER_LINK", e.target.value)}
               placeholder="https://twitter.com/yourbrand"
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
             />
           </div>
 
@@ -695,8 +695,6 @@ export default function LayoutCustomizer({ content, onUpdateContent,
               value={content.PHONE_NUMBER}
               onChange={(e) => updateContent("PHONE_NUMBER", e.target.value)}
               placeholder="+1234567890"
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
             />
           </div>
 
@@ -706,10 +704,28 @@ export default function LayoutCustomizer({ content, onUpdateContent,
               id="mail"
               value={content.MAIL}
               onChange={(e) => updateContent("MAIL", e.target.value)}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
             />
           </div>
+
+          {/* <div className="grid gap-2">
+            <Label htmlFor="brand-address">Brand Address</Label>
+            <Textarea
+              id="brand-address"
+              value={content.BRAND_ADDRESS}
+              onChange={(e) => updateContent("BRAND_ADDRESS", e.target.value)}
+              rows={3}
+              placeholder="123 Fashion Street, New York, NY 10001"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="copyright">Copyright Text</Label>
+            <Input
+              id="copyright"
+              value={content.COPYRIGHT_TEXT}
+              onChange={(e) => updateContent("COPYRIGHT_TEXT", e.target.value)}
+            />
+          </div> */}
         </TabsContent>
       </Tabs>
     </div>
