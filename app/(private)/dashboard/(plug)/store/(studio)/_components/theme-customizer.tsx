@@ -92,7 +92,7 @@ function useDebounce(callback: Function, delay: number) {
 export default function ThemeCustomizer() {
   const [activeTab, setActiveTab] = useState("template");
   const [viewMode, setViewMode] = useState<"desktop" | "tablet" | "mobile">(
-    "desktop"
+    "mobile"
   );
   const [config, setConfig] = useState({ ...defaultConfig });
   const [selectedPage, setSelectedPage] = useState("index");
@@ -105,7 +105,7 @@ export default function ThemeCustomizer() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const { toast } = useToast();
-  const [siteName, setSiteName] = useState("");
+  const [subdomain, setSubdomain] = useState("");
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Track previous page for comparison
@@ -281,7 +281,7 @@ export default function ThemeCustomizer() {
   const handleConfirmPublish = async () => {
     try {
       setIsPublishing(true);
-      const data = { config, siteName };
+      const data = { config, subdomain };
       // Call the publish API
       const response = await fetch("/api/site", {
         method: "POST",
@@ -538,8 +538,8 @@ export default function ThemeCustomizer() {
       {/* Publish Dialog */}
       <PublishDialog
         isOpen={isPublishDialogOpen}
-        siteName={siteName}
-        onSiteNameChange={setSiteName}
+        subdomain={subdomain}
+        onSubdomainChange={setSubdomain}
         onClose={() => setIsPublishDialogOpen(false)}
         onConfirm={handleConfirmPublish}
         isPublishing={isPublishing}
