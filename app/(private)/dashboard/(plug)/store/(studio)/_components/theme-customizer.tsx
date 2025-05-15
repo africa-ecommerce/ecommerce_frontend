@@ -1691,7 +1691,6 @@
 //     </div>
 //   );
 // }
-
 "use client";
 
 import type React from "react";
@@ -1784,6 +1783,52 @@ function useDebounce(callback: Function, delay: number) {
   );
 }
 
+// Mobile sidebar component to isolate sidebar behavior
+const MobileSidebar = ({
+  isOpen,
+  onClose,
+  children,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}) => {
+  // Prevent backdrop events from propagating - the most comprehensive approach
+  const preventEvents = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  return (
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/30 z-30"
+          onClick={preventEvents}
+          onTouchStart={preventEvents}
+          onTouchEnd={preventEvents}
+          onTouchMove={preventEvents}
+          onMouseDown={preventEvents}
+          onMouseUp={preventEvents}
+        />
+      )}
+      <div
+        className={`fixed z-40 h-full transition-transform duration-300 ease-in-out w-[85%] bg-background flex flex-col overflow-hidden border-r shadow-lg ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between p-4 border-b">
+          <h2 className="font-semibold text-sm">Customization</h2>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-5 w-5" />
+          </Button>
+        </div>
+        {children}
+      </div>
+    </>
+  );
+};
+
 export default function ThemeCustomizer() {
   const [activeTab, setActiveTab] = useState("template");
   const [viewMode, setViewMode] = useState<"desktop" | "tablet" | "mobile">(
@@ -1807,9 +1852,6 @@ export default function ThemeCustomizer() {
 
   // Track whether initial load has completed
   const initialLoadRef = useRef(false);
-
-  // Reference to the sidebar for handling click events
-  const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Function to save to localStorage
   const saveToLocalStorage = useCallback(() => {
@@ -1868,11 +1910,14 @@ export default function ThemeCustomizer() {
   // Check screen size on mount and window resize
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-      // Auto-close sidebar on mobile
-      if (window.innerWidth < 768) {
+      const isMobileView = window.innerWidth < 768;
+      setIsMobile(isMobileView);
+
+      // Only auto-close sidebar on initial load or resize
+      // Don't auto-close when already interacting with the app
+      if (isMobileView && !initialLoadRef.current) {
         setSidebarOpen(false);
-      } else {
+      } else if (!isMobileView) {
         setSidebarOpen(true);
       }
     };
@@ -2035,127 +2080,114 @@ export default function ThemeCustomizer() {
     }
   };
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+  const openSidebar = () => {
+    setSidebarOpen(true);
   };
 
-  // Handle overlay click - prevent closing unless close button is clicked
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    // Do nothing - this prevents the click from bubbling up and closing the sidebar
-    e.stopPropagation();
+  const closeSidebar = () => {
+    setSidebarOpen(false);
   };
+
+  // Sidebar content - shared between mobile and desktop versions
+  const sidebarContent = (
+    <>
+      {isSaving && (
+        <div className="absolute top-4 right-12 text-xs text-muted-foreground">
+          Saving...
+        </div>
+      )}
+
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="flex-1 flex flex-col"
+      >
+        <TabsList className="grid grid-cols-3 h-auto p-0 bg-transparent border-b">
+          <TabsTrigger
+            value="template"
+            className="py-3 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary md:text-base text-sm"
+          >
+            Template
+          </TabsTrigger>
+          <TabsTrigger
+            value="styles"
+            className="py-3 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary md:text-base text-sm"
+          >
+            Style
+          </TabsTrigger>
+          <TabsTrigger
+            value="content"
+            className="py-3 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary md:text-base text-sm"
+          >
+            Content
+          </TabsTrigger>
+        </TabsList>
+
+        <ScrollArea className="flex-1 max-h-[calc(100vh-112px)]">
+          <TabsContent value="template" className="m-0 p-4">
+            <TemplateSelector
+              selectedTemplate={config.templateId}
+              onSelectTemplate={(templateId) => updateConfig({ templateId })}
+              selectedPage={selectedPage}
+              onSelectPage={handlePageSelect}
+            />
+          </TabsContent>
+
+          <TabsContent value="styles" className="m-0 p-4">
+            <ColorCustomizer
+              colors={config.styles}
+              onUpdateColors={(styles) =>
+                updateConfig({ styles: { ...config.styles, ...styles } })
+              }
+            />
+          </TabsContent>
+
+          <TabsContent value="content" className="m-0 p-4">
+            <LayoutCustomizer
+              content={config.content}
+              onUpdateContent={(content) =>
+                updateConfig({ content: { ...config.content, ...content } })
+              }
+              metadata={config.metadata}
+              onUpdateMetadata={(metadata) =>
+                updateConfig({
+                  metadata: { ...config.metadata, ...metadata },
+                })
+              }
+            />
+          </TabsContent>
+        </ScrollArea>
+      </Tabs>
+    </>
+  );
 
   return (
     <div className="flex h-screen overflow-hidden relative">
-      {/* Mobile Sidebar Overlay - Modified to prevent unintended closing */}
-      {isMobile && sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/30 z-30"
-          onClick={handleOverlayClick}
-        />
-      )}
-
-      {/* Sidebar - Added ref for DOM access */}
-      <div
-        ref={sidebarRef}
-        className={`${
-          isMobile
-            ? "fixed z-40 h-full transition-transform duration-300 ease-in-out w-[85%]"
-            : "relative w-[320px]"
-        } ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }  bg-background flex flex-col overflow-hidden border-r shadow-lg`}
-      >
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="font-semibold md:text-base text-sm">
-            Customization{" "}
-            {isSaving && (
-              <span className="text-xs text-muted-foreground ml-2">
-                (Saving...)
-              </span>
-            )}
-          </h2>
-          {isMobile && (
-            <Button variant="ghost" size="icon" onClick={toggleSidebar}>
-              <X className="h-5 w-5" />
-            </Button>
-          )}
+      {/* Conditionally render either mobile or desktop sidebar */}
+      {isMobile ? (
+        <MobileSidebar isOpen={sidebarOpen} onClose={closeSidebar}>
+          {sidebarContent}
+        </MobileSidebar>
+      ) : (
+        <div className="relative w-[320px] bg-background flex flex-col overflow-hidden border-r shadow-lg">
+          <div className="flex items-center justify-between p-4 border-b">
+            <h2 className="font-semibold text-base">Customization</h2>
+          </div>
+          {sidebarContent}
         </div>
-
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="flex-1 flex flex-col"
-        >
-          <TabsList className="grid grid-cols-3 h-auto p-0 bg-transparent border-b">
-            <TabsTrigger
-              value="template"
-              className="py-3 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary md:text-base text-sm"
-            >
-              Template
-            </TabsTrigger>
-            <TabsTrigger
-              value="styles"
-              className="py-3 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary md:text-base text-sm"
-            >
-              Style
-            </TabsTrigger>
-            <TabsTrigger
-              value="content"
-              className="py-3 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary md:text-base text-sm"
-            >
-              Content
-            </TabsTrigger>
-          </TabsList>
-
-          <ScrollArea className="flex-1 max-h-[calc(100vh-112px)]">
-            <TabsContent value="template" className="m-0 p-4">
-              <TemplateSelector
-                selectedTemplate={config.templateId}
-                onSelectTemplate={(templateId) => updateConfig({ templateId })}
-                selectedPage={selectedPage}
-                onSelectPage={handlePageSelect}
-              />
-            </TabsContent>
-
-            <TabsContent value="styles" className="m-0 p-4">
-              <ColorCustomizer
-                colors={config.styles}
-                onUpdateColors={(styles) =>
-                  updateConfig({ styles: { ...config.styles, ...styles } })
-                }
-              />
-            </TabsContent>
-
-            <TabsContent value="content" className="m-0 p-4">
-              <LayoutCustomizer
-                content={config.content}
-                onUpdateContent={(content) =>
-                  updateConfig({ content: { ...config.content, ...content } })
-                }
-                metadata={config.metadata}
-                onUpdateMetadata={(metadata) =>
-                  updateConfig({
-                    metadata: { ...config.metadata, ...metadata },
-                  })
-                }
-              />
-            </TabsContent>
-          </ScrollArea>
-        </Tabs>
-      </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="border-b bg-background p-2 md:p-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {/* Mobile sidebar toggle */}
-            {!sidebarOpen && (
+            {/* Mobile sidebar toggle - only show when sidebar is closed */}
+            {isMobile && !sidebarOpen && (
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={toggleSidebar}
+                onClick={openSidebar}
                 className="md:hidden"
               >
                 <Menu className="h-5 w-5" />
