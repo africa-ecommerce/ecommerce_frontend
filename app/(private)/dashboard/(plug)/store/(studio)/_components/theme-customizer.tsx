@@ -153,6 +153,7 @@ export default function ThemeCustomizer() {
     {
       retryOnError: false,
       dedupingInterval: 5000,
+      revalidateOnFocus: false,
       onSuccess: (data) => {
         if (data) {
           try {
