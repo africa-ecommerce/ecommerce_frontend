@@ -64,6 +64,7 @@ export default function PublishDialog({
   const [copied, setCopied] = useState(false);
   const [inputError, setInputError] = useState("");
   const [isValidFormat, setIsValidFormat] = useState(false);
+  const [isTouched, setIsTouched] = useState(false);
   const [nameAvailable, setNameAvailable] = useState<boolean | null>(null);
 
   const originalSubdomainRef = useRef(subdomain);
@@ -103,6 +104,11 @@ export default function PublishDialog({
   const isOriginalSubdomain = (name: string) =>
     isEditing && name === originalSubdomainRef.current;
 
+  console.log("originalSubdomain", isOriginalSubdomain(subdomain))
+
+  console.log("subdomain", subdomain);
+  console.log("currentoriginalSubdomainRef", originalSubdomainRef.current)
+
   // Validation effect
   useEffect(() => {
     if (debouncedSubdomain) {
@@ -141,7 +147,7 @@ export default function PublishDialog({
 
     if (data) {
       setNameAvailable(data.available);
-      setInputError(data.available ? "" : "This site name is already taken");
+      
     }
 
     if (error) {
@@ -167,6 +173,9 @@ export default function PublishDialog({
       originalSubdomainRef.current = "";
     }
   }, [isOpen, isEditing]);
+
+
+  
 
   // View state management
   useEffect(() => {
@@ -229,15 +238,23 @@ export default function PublishDialog({
     }
   };
 
+  console.log("touched2", isTouched)
+
 
   const handleSubdomainChange = (value: string) => {
   // Allow typing but immediately validate format
   onSubdomainChange(value);
 
+  setIsTouched(true);
+
+  console.log("touched", isTouched)
+  console.log("true")
+
   // Check if this is the original subdomain when in edit mode
   if (isOriginalSubdomain(value)) {
     skipValidationForOriginal.current = true;
     setNameAvailable(true);
+   
     setInputError("");
     return; // Exit early since we don't need further validation
   } else {
@@ -268,8 +285,6 @@ export default function PublishDialog({
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md md:max-w-lg p-0 overflow-hidden rounded-xl bg-gradient-to-br from-white to-slate-50">
-        
-
         <DialogHeader className="p-4 sm:p-6 pb-2">
           <DialogTitle className="text-xl sm:text-2xl font-bold text-center">
             {currentView === "success"
@@ -664,11 +679,28 @@ export default function PublishDialog({
                       )}
                       {!inputError &&
                         nameAvailable === true &&
+                        isTouched &&
                         subdomain.trim() !== "" && (
                           <p className="mt-1 text-xs sm:text-sm text-green-600">
-                            {isOriginalSubdomain(subdomain)
+                            {isEditing &&
+                            subdomain === originalSubdomainRef.current
                               ? "This is your current domain and is available to use."
                               : "Great! This domain is available."}
+                          </p>
+                        )}
+                        
+                        {isEditing && !isTouched && (
+                       <p className="mt-1 text-xs sm:text-sm text-green-600">
+                        This is your current domain and is available to use.
+                       </p>)
+                        }
+
+                      {!inputError &&
+                        !isEditing &&
+                        nameAvailable === true &&
+                        subdomain.trim() !== "" && (
+                          <p className="mt-1 text-xs sm:text-sm text-green-600">
+                            Great! This domain is available.
                           </p>
                         )}
                     </div>
