@@ -445,9 +445,7 @@ export default function PublishDialog({
                     <CheckCircle className="h-8 w-8 sm:h-12 sm:w-12 text-green-500" />
                   </div>
                   <h3 className="text-lg sm:text-xl font-medium mb-2">
-                    {isEditing
-                      ? "Website Updated Successfully!"
-                      : "Website Published Successfully!"}
+                    Website Published Successfully!
                   </h3>
                   <p className="text-slate-500 text-sm sm:text-base">
                     Your website is now live and ready to be shared with the

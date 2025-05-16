@@ -165,7 +165,7 @@ export default function ThemeCustomizer() {
             }
           } catch (error) {
             console.error("Error parsing user config:", error);
-           errorToast("Could not load your saved configuration")
+           errorToast("Could not load your site configuration")
           }
         }
         setIsLoading(false);
