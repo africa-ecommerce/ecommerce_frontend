@@ -690,7 +690,7 @@ export default function PublishDialog({
                         isTouched &&
                         subdomain.trim() !== "" && (
                           <p className="mt-1 text-xs sm:text-sm text-green-600">
-                            { subdomain === originalSubdomainRef.current
+                            { subdomain.toLowerCase() === originalSubdomainRef.current.toLowerCase()
                               ? "This is your current domain and is available to use."
                               : "Great! This domain is available."}
                           </p>
