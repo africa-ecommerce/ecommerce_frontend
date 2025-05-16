@@ -151,6 +151,8 @@ export default function ThemeCustomizer() {
     user?.plug?.configUrl ? user.plug.configUrl : null,
     fetcher,
     {
+      retryOnError: false,
+      dedupingInterval: 5000,
       onSuccess: (data) => {
         if (data) {
           try {
@@ -196,11 +198,7 @@ export default function ThemeCustomizer() {
         }
       } catch (error) {
         console.error("Error saving to localStorage:", error);
-        toast({
-          title: "Save error",
-          description: "Failed to save your changes locally",
-          variant: "destructive",
-        });
+       
       } finally {
         setIsSaving(false);
       }
