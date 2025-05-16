@@ -135,6 +135,8 @@ export default function PublishDialog({
     fetcher
   );
 
+  console.log("data", data)
+
   // Handle subdomain availability
   useEffect(() => {
     if (!debouncedSubdomain) return;
@@ -147,6 +149,10 @@ export default function PublishDialog({
 
     if (data) {
       setNameAvailable(data.available);
+      console.log("yesss")
+      if(!data.available){
+        setInputError("This site name is already taken")
+      }
       
     }
 
@@ -228,9 +234,12 @@ export default function PublishDialog({
       });
       const data = await response.json();
 
+      console.log("data", data)
+
       if (data.available) {
         onConfirm(subdomain);
       } else {
+        console.log("error")
         setInputError("This site name is already taken");
       }
     } catch (err) {

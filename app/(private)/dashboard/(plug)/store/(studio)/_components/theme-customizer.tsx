@@ -146,40 +146,87 @@ export default function ThemeCustomizer() {
     }
   }, [user])
 
-  // Fetch user config if available
-  const { data: userConfig, error: userConfigError, mutate: mutateConfig } = useSWR(
-    user?.plug?.configUrl ? user.plug.configUrl : null,
-    fetcher,
-    {
-      retryOnError: false,
-      dedupingInterval: 5000,
-      revalidateOnFocus: false,
-      onSuccess: (data) => {
-        if (data) {
-          try {
-            // Parse and validate the config
-            const parsedConfig = typeof data === 'string' ? JSON.parse(data) : data;
+  // // Fetch user config if available
+  // const { data: userConfig, error: userConfigError, mutate: mutateConfig } = useSWR(
+  //   user?.plug?.configUrl ? user.plug.configUrl : null,
+  //   fetcher,
+  //   {
+  //     revalidateOnError: false,
+  //     retryOnError: false,
+  //     dedupingInterval: 5000,
+  //     revalidateOnFocus: false,
+  //     onSuccess: (data) => {
+  //       if (data) {
+  //         try {
+  //           // Parse and validate the config
+  //           const parsedConfig = typeof data === 'string' ? JSON.parse(data) : data;
             
-            if (parsedConfig && parsedConfig.templateId) {
-              setConfig(parsedConfig);
-              setHistory([parsedConfig]);
-              setHistoryIndex(0);
-              setIsEditing(true);
-            }
-          } catch (error) {
-            console.error("Error parsing user config:", error);
-           errorToast("Could not load your site configuration")
+  //           if (parsedConfig && parsedConfig.templateId) {
+  //             setConfig(parsedConfig);
+  //             setHistory([parsedConfig]);
+  //             setHistoryIndex(0);
+  //             setIsEditing(true);
+  //           }
+  //         } catch (error) {
+  //           console.error("Error parsing user config:", error);
+  //         //  errorToast("Could not load your site configuration")
+  //         }
+  //       }
+  //       setIsLoading(false);
+  //     },
+  //     onError: (err) => {
+  //       console.error("Error fetching user config:", err);
+  //       errorToast("Could not load your site configuration");
+  //       setIsLoading(false);
+  //     },
+  //   }
+  // );
+
+
+  const {
+    data: userConfig,
+    error: userConfigError,
+    mutate: mutateConfig,
+  } = useSWR(user?.plug?.configUrl ? user.plug.configUrl : null, fetcher, {
+    revalidateOnError: false,
+    retryOnError: false,
+    dedupingInterval: 5000,
+    revalidateOnFocus: false,
+    shouldRetryOnError: false, // Additional safeguard against retries
+    errorRetryCount: 0, // Ensure no retries happen
+    onSuccess: (data) => {
+      if (data) {
+        try {
+          // Parse and validate the config
+          const parsedConfig =
+            typeof data === "string" ? JSON.parse(data) : data;
+
+          if (parsedConfig && parsedConfig.templateId) {
+            setConfig(parsedConfig);
+            setHistory([parsedConfig]);
+            setHistoryIndex(0);
+            setIsEditing(true);
           }
+        } catch (error) {
+          console.error("Error parsing user config:", error);
+          // Silent error handling here - we'll let the component handle UI feedback
         }
-        setIsLoading(false);
-      },
-      onError: (err) => {
-        console.error("Error fetching user config:", err);
-        errorToast("Could not load your site configuration");
-        setIsLoading(false);
-      },
+      }
+      setIsLoading(false);
+    },
+    onError: (err) => {
+      console.error("Error fetching user config:", err);
+      setIsLoading(false);
+      // Don't call errorToast here directly
+    },
+  });
+
+
+  useEffect(() => {
+    if (userConfigError) {
+      errorToast("Could not load your site configuration");
     }
-  );
+  }, [userConfigError]);
 
   // Function to save to localStorage
   const saveToLocalStorage = useCallback(() => {
