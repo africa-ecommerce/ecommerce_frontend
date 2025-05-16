@@ -326,12 +326,9 @@ export default function ThemeCustomizer() {
       setHistory([{ ...defaultConfig }]);
       setHistoryIndex(0);
       setSelectedPage("index");
-      toast({
-        title: "Data cleared",
-        description: "All saved customizations have been reset to defaults",
-      });
+     
     }
-  }, [toast]);
+  }, []);
 
   const handlePublish = async () => {
     setIsPublishDialogOpen(true);

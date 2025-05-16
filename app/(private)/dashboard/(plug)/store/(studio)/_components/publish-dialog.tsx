@@ -678,12 +678,12 @@ export default function PublishDialog({
                         </p>
                       )}
                       {!inputError &&
+                      isEditing &&
                         nameAvailable === true &&
                         isTouched &&
                         subdomain.trim() !== "" && (
                           <p className="mt-1 text-xs sm:text-sm text-green-600">
-                            {isEditing &&
-                            subdomain === originalSubdomainRef.current
+                            { subdomain === originalSubdomainRef.current
                               ? "This is your current domain and is available to use."
                               : "Great! This domain is available."}
                           </p>

@@ -3,7 +3,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   BarChart3,
@@ -49,6 +49,7 @@ import { useUser } from "@/app/_components/provider/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import { useSwrUser } from "@/hooks/use-current-user";
+import { clearThemeCustomizerData } from "@/lib/storage-helpers";
 
 
 
@@ -345,6 +346,13 @@ function StoreView({
  
   const {mutate}  = useSwrUser()
 
+  const clearSavedData = useCallback(() => {
+    if (typeof window !== "undefined") {
+      clearThemeCustomizerData()
+     
+    }
+  }, []);
+
   const deleteStore = async () => {
     const response = await fetch("/api/site", {
       method: "DELETE",
@@ -357,6 +365,7 @@ function StoreView({
       return null;
     }
     mutate()
+    clearSavedData()
     successToast(result.message);
     return result;
   };
