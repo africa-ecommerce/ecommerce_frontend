@@ -172,7 +172,7 @@ export default function ThemeCustomizer() {
       },
       onError: (err) => {
         console.error("Error fetching user config:", err);
-        errorToast("Could not load your saved configuration");
+        errorToast("Could not load your site configuration");
         setIsLoading(false);
       },
     }
@@ -467,7 +467,7 @@ export default function ThemeCustomizer() {
             </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="flex-1 max-h-[calc(100vh-112px)]">
+          <ScrollArea className="flex-1 max-h-[calc(100vh-224px)]">
             <TabsContent value="template" className="m-0 p-4">
               <TemplateSelector
                 selectedTemplate={config.templateId}

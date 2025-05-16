@@ -103,38 +103,6 @@ interface TemplateCardProps {
   onSelect: () => void;
 }
 
-// function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
-//   return (
-//     <div
-//       className={cn(
-//         "border rounded-lg overflow-hidden cursor-pointer transition-all",
-//         isSelected ? "ring-2 ring-primary" : "hover:border-primary/50"
-//       )}
-//       onClick={onSelect}
-//     >
-//       <div className="relative">
-//         <Image
-//           src={template.image || "/placeholder.svg"}
-//           alt={template.name}
-//           width={300}
-//           height={200}
-//           className="w-full h-[150px] object-cover"
-//         />
-//         {isSelected && (
-//           <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
-//             <Check className="h-4 w-4" />
-//           </div>
-//         )}
-//       </div>
-//       <div className="p-2">
-//         <h3 className="font-medium md:text-sm text-xs">{template.name}</h3>
-//         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-//           {template.description}
-//         </p>
-//       </div>
-//     </div>
-//   );
-// }
 
 function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
   return (
@@ -215,7 +183,7 @@ export default function TemplateSelector({
 
         <TabsContent value="templates" className="mt-0 space-y-4">
 
-
+       
         <div className="relative">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
