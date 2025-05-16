@@ -102,7 +102,7 @@ export default function PublishDialog({
   };
 
   const isOriginalSubdomain = (name: string) =>
-    isEditing && name === originalSubdomainRef.current;
+    isEditing && name.toLowerCase() === originalSubdomainRef.current.toLowerCase();
 
   console.log("originalSubdomain", isOriginalSubdomain(subdomain))
 
