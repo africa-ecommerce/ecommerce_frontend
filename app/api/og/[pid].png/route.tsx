@@ -1349,7 +1349,7 @@ export async function GET(
             <img
               width="400"
               height="400"
-              src={product.imageUrl || 'https://via.placeholder.com/400'}
+              src={product.image || 'https://via.placeholder.com/400'}
               style={{ objectFit: 'cover' }}
               alt={product.name}
             />

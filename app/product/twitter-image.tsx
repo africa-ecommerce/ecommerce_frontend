@@ -49,7 +49,7 @@ export default async function Image({ params }: { params: { id: string } }) {
     product.description.length > 100 ? `${product.description.substring(0, 97)}...` : product.description
 
   // Format rating if available
-  const ratingDisplay = product.rating ? `★${product.rating}` : null
+  const ratingDisplay = product?.rating ? `★${product?.rating}` : null
 
   return new ImageResponse(
     <div
@@ -104,7 +104,7 @@ export default async function Image({ params }: { params: { id: string } }) {
           }}
         >
           <img
-            src={product.images[0] || "/placeholder.svg"}
+            src={product.image || "/placeholder.svg"}
             alt={product.name}
             style={{
               width: "100%",
