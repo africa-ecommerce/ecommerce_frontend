@@ -49,7 +49,7 @@ export default async function Image({ params }: { params: { id: string } }) {
     product.description.length > 100 ? `${product.description.substring(0, 97)}...` : product.description
 
   // Format rating if available
-  const ratingDisplay = product?.rating ? `★${product?.rating}` : null
+  const ratingDisplay =  null
 
   return new ImageResponse(
     <div
