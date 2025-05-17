@@ -33,7 +33,7 @@ const templates = [
     category: "fashion",
   },
   {
-    id: "fashion-boutique",
+    id: "primary",
     name: "Fashion Boutique",
     description: "Elegant and minimalist fashion boutique template",
     image: "/fashionNova.png",
