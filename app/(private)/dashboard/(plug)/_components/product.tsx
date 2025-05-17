@@ -1196,6 +1196,8 @@ export default function Products() {
           productName={productToShare?.name || ""}
           productId={productToShare?.id || ""}
           plugId={user?.plug.id}
+
+          
         />
       </div>
     </TooltipProvider>
