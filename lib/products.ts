@@ -97,7 +97,7 @@ export async function getProductServer(productId: string, plugId?: string) {
 // Function for client-side product fetching using SWR
 export function getProduct(productId: string | undefined, plugId?: string) {
   // Create a unique key for SWR based on the parameters
-  const key = productId ? `/api/public/product/${productId}${plugId ? `/${plugId}` : ''}` : null;
+  const key = productId ? `/public/products/${productId}${plugId ? `/${plugId}` : ''}` : null;
 
   // Use SWR for client-side data fetching with caching and revalidation
   const { data, error, isLoading, mutate } = useSWR(
