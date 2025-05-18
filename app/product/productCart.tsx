@@ -51,7 +51,7 @@ export const SingleProductCart = ({ productId, referralId, platform }: SinglePro
   }
 
   // Calculate total
-  const subtotal = productData.price * quantity
+  const subtotal = productData?.price * quantity
   const deliveryFee = 1500
   const total = subtotal + deliveryFee
 
@@ -77,7 +77,7 @@ export const SingleProductCart = ({ productId, referralId, platform }: SinglePro
 
   // Format price in Naira
   const formatPrice = (price: number) => {
-    return `₦${price.toLocaleString()}`
+    return `₦${price?.toLocaleString()}`
   }
 
   return (
