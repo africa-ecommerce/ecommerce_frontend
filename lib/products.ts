@@ -21,7 +21,7 @@ export async function getProductServer(productId: string, plugId?: string) {
         "Content-Type": "application/json",
       },
       // Since this runs on the server, we can use cache options
-      cache: "force-cache",
+      // cache: "force-cache",
     });
 
     if (!response.ok) {
