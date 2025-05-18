@@ -251,7 +251,6 @@
 
 
 
-
 "use client"
 
 import { useState } from "react"
@@ -310,13 +309,7 @@ const templates = [
     image: "/placeholder.svg?height=200&width=300",
     category: "electronics",
   },
-  {
-    id: "home-decor",
-    name: "Home Decor",
-    description: "Stylish home decoration and furniture store",
-    image: "/placeholder.svg?height=200&width=300",
-    category: "home",
-  },
+  
 ]
 
 // Available pages
@@ -354,17 +347,20 @@ interface TemplateCardProps {
 }
 
 function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
+  // Check if this is a template (has category property) and not the primary template
+  const isComingSoonTemplate = "category" in template && template.id !== "primary"
+
   return (
     <div
       className={cn(
         "border rounded-lg overflow-hidden transition-all",
         isSelected
           ? "ring-2 ring-primary cursor-default opacity-75"
-          : template.id === "primary"
-            ? "hover:border-primary/50 cursor-pointer"
-            : "cursor-not-allowed",
+          : isComingSoonTemplate
+            ? "cursor-not-allowed"
+            : "hover:border-primary/50 cursor-pointer",
       )}
-      onClick={isSelected || template.id !== "primary" ? undefined : onSelect}
+      onClick={isSelected || isComingSoonTemplate ? undefined : onSelect}
     >
       <div className="relative">
         <Image
@@ -374,7 +370,7 @@ function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
           height={200}
           className="w-full h-[150px] object-cover"
         />
-        {template.id !== "primary" && (
+        {isComingSoonTemplate && (
           <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
             <span className="text-white font-medium text-sm bg-primary/80 px-3 py-1 rounded-md">Coming Soon</span>
           </div>
