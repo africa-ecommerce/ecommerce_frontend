@@ -261,7 +261,7 @@ export async function generateMetadata({
     }
 
     // This is critical for WhatsApp to display large cards
-    const ogImageUrl = `${baseUrl}/api/og/${productId}`;
+    const ogImageUrl = `${baseUrl}/api/og/${productId}/${plugId}`;
     // if (plugId) {
     //   ogImageUrl += `?ref=${plugId}`;
 

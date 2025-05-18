@@ -1408,8 +1408,7 @@
 // }
 
 
-
-// File: app/api/og/[pid].png/route.tsx
+// File: app/api/og/[pid]/[ref].png/route.tsx
 import { ImageResponse } from 'next/og'
 import { getProductServer } from '@/lib/products'
  
@@ -1417,44 +1416,27 @@ export const runtime = 'edge'
  
 export async function GET(
   request: Request,
-  { params }: { params: { pid: string } }
+  { params }: { params: { pid: string, ref: string } }
 ) {
   try {
     const productId = params.pid
+    const ref = params.ref // Get ref directly from path params
     
-    // Parse the URL to check for tracking parameters
+    // Parse the URL to check for additional tracking parameters
     const url = new URL(request.url)
-    const ref = url.searchParams.get('ref') // This is our plugId
     const platform = url.searchParams.get('platform')
     
+    // Handle special case for "null" or "undefined" strings that might be in the path
+    const actualRef = (ref === 'null' || ref === 'undefined') ? undefined : ref
+    
     // Fetch the product data with both productId and plugId (ref)
-    const product = await getProductServer(productId, ref || undefined)
+    const product = await getProductServer(productId, ref)
 
     console.log("ogProduct", product)
     
     if (!product?.data) {
       return new Response('Product not found', { status: 404 })
     }
-    
-    // Track this OG image view if needed (optional)
-    // if (ref || platform) {
-    //   try {
-    //     await fetch(`${process.env.API_URL}/api/analytics/track`, {
-    //       method: 'POST',
-    //       headers: { 'Content-Type': 'application/json' },
-    //       body: JSON.stringify({
-    //         event: 'og_image_view',
-    //         productId,
-    //         referralId: ref,
-    //         platform,
-    //         timestamp: new Date().toISOString()
-    //       })
-    //     })
-    //   } catch (error) {
-    //     // Just log error but don't fail the image generation
-    //     console.error('Error tracking OG image view:', error)
-    //   }
-    // }
     
     // You can use different templates based on platform
     const template = platform === 'instagram' ? 'instagram' : 'default'
@@ -1485,7 +1467,7 @@ export async function GET(
             />
           </div>
           
-          {/* Product?.data? name */}
+          {/* Product name */}
           <div style={{ 
             display: 'flex', 
             flexDirection: 'column', 
@@ -1514,13 +1496,13 @@ export async function GET(
             </div>
             
             {/* Referral info if available */}
-            {ref && (
+            {actualRef && (
               <div style={{ 
                 marginTop: 32,
                 fontSize: 24,
                 color: '#6B7280',
               }}>
-                Shared by: {ref}
+                Shared by: {actualRef}
               </div>
             )}
           </div>
