@@ -45,6 +45,8 @@ export const SingleProductCart = ({ productId, referralId, platform }: SinglePro
 
   const { product: productData, isLoading, isError } = getProduct(productId, referralId);
 
+  console.log("productData", productData)
+
 
   const updateQuantity = (change: number) => {
     setQuantity(Math.max(1, quantity + change))

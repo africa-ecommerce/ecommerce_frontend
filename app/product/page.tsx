@@ -189,11 +189,9 @@
 // export default Page;
 
 
-
-
 import React from "react";
 import { SingleProductCart } from "./productCart";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { getProductServer } from "@/lib/products";
 
 // Define types for search params
@@ -202,6 +200,15 @@ type SearchParams = {
   ref?: string;
   platform?: string;
 };
+
+// Add a separate generateViewport export function
+export function generateViewport(): Viewport {
+  return {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  };
+}
 
 export async function generateMetadata({
   searchParams,
@@ -223,6 +230,8 @@ export async function generateMetadata({
   try {
     // Use the server version with both productId and plugId
     const product = await getProductServer(productId, plugId);
+
+    console.log("pageProduct", product);
 
     if (!product) {
       return {
@@ -255,7 +264,7 @@ export async function generateMetadata({
     const ogImageUrl = `${baseUrl}/api/og/${productId}.png`;
     // if (plugId) {
     //   ogImageUrl += `?ref=${plugId}`;
-      
+
     //   if (searchParams.platform) {
     //     ogImageUrl += `&platform=${searchParams.platform}`;
     //   }
@@ -313,12 +322,7 @@ export async function generateMetadata({
         "og:image:url": ogImageUrl,
         "og:image": ogImageUrl,
       },
-      // Viewport configurations
-      viewport: {
-        width: "device-width",
-        initialScale: 1,
-        maximumScale: 1,
-      },
+      // Removed viewport configuration from here
     };
   } catch (error) {
     console.error("Error generating metadata:", error);
