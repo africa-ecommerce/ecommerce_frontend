@@ -35,46 +35,20 @@ export async function getProductServer(productId: string, plugId?: string) {
   }
 }
 
-// Define interface for the product data
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  description?: string;
-  images?: string[];
-  size?: string;
-  color?: string;
-  seller?: string;
-  inStock?: boolean;
-  features?: string[];
-}
 
-// Define the return type for the API response
-interface ProductResponse {
-  data?: Product;
-  success?: boolean;
-  message?: string;
-}
 
-// Define the return type for our getProduct function
-interface ProductResult {
-  product: ProductResponse | null;
-  isLoading: boolean;
-  isError: Error | null;
-  mutate: () => void;
-}
 
 export function getProduct(
-  productId: string | undefined,
+  productId?: string,
   plugId?: string
-): ProductResult {
+) {
   // Create a unique key for SWR based on the parameters
   const key = productId
     ? `/public/products/${productId}${plugId ? `/${plugId}` : ""}`
     : null;
 
   // Use SWR for client-side data fetching with caching and revalidation
-  const { data, error, isLoading, mutate } = useSWR<ProductResponse, Error>(
+  const { data, error, isLoading, mutate } = useSWR(
     key,
     async () => {
       if (!productId) return null;
