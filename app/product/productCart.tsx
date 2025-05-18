@@ -264,7 +264,7 @@ export const SingleProductCart = ({
                     size="lg"
                     className="w-full"
                     onClick={handleCheckout}
-                    disabled={!productData.inStock}
+                   
                   >
                     Proceed to Checkout
                   </Button>
