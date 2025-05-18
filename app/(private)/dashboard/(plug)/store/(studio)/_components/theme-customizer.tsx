@@ -45,7 +45,7 @@ import { errorToast } from "@/components/ui/use-toast-advanced";
 
 // Default template configuration
 const defaultConfig = {
-  templateId: "basic",
+  templateId: "primary",
   styles: {
     PRIMARY_COLOR: "#000000",
     SECONDARY_COLOR: "#f5f5f5",
