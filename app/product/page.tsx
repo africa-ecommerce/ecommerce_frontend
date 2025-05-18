@@ -231,9 +231,9 @@ export async function generateMetadata({
     // Use the server version with both productId and plugId
     const product = await getProductServer(productId, plugId);
 
-    console.log("pageProduct", product);
+    console.log("pageProduct", product.data);
 
-    if (!product) {
+    if (!product.data) {
       return {
         title: "Product Not Found",
       };
@@ -273,11 +273,11 @@ export async function generateMetadata({
     // }
 
     return {
-      title: product?.name,
-      description: product?.description,
+      title: product?.data?.name,
+      description: product?.data?.description,
       openGraph: {
-        title: product?.name,
-        description: product?.description,
+        title: product?.data?.name,
+        description: product?.data?.description,
         type: "website",
         // Use the tracking URL that includes referral info
         url: trackingUrl,
@@ -288,21 +288,21 @@ export async function generateMetadata({
             url: ogImageUrl,
             width: 1200,
             height: 630,
-            alt: product?.name,
+            alt: product?.data?.name,
             type: "image/png", // Explicitly define image type
           },
         ],
       },
       twitter: {
         card: "summary_large_image",
-        title: product?.name,
-        description: product?.description,
+        title: product?.data?.name,
+        description: product?.data?.description,
         site: "@yoursitename", // Replace with your Twitter handle if available
         creator: "@yoursitename", // Replace with your Twitter handle if available
         images: [
           {
             url: ogImageUrl,
-            alt: product?.name,
+            alt: product?.data?.name,
           },
         ],
       },
@@ -317,7 +317,7 @@ export async function generateMetadata({
         "og:image:height": "630",
         "og:image:type": "image/png",
         // Product specific tags that help WhatsApp identify this as a product
-        "og:price:amount": product?.price?.toString() || "",
+        "og:price:amount": product?.data?.price?.toString() || "",
         // Force WhatsApp to cache and refresh the image
         "og:image:url": ogImageUrl,
         "og:image": ogImageUrl,

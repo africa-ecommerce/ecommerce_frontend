@@ -1,5 +1,5 @@
 // // import { ImageResponse } from "next/og";
-// // import { getProduct?Server } from "@/lib/products";
+// // import { getProduct?.data?Server } from "@/lib/products";
 // // import type { NextRequest } from "next/server";
 
 // // export const runtime = "edge";
@@ -1430,7 +1430,7 @@ export async function GET(
     // Fetch the product data with both productId and plugId (ref)
     const product = await getProductServer(productId, ref || undefined)
     
-    if (!product) {
+    if (!product?.data) {
       return new Response('Product not found', { status: 404 })
     }
     
@@ -1477,13 +1477,13 @@ export async function GET(
             <img
               width="400"
               height="400"
-              src={product?.images[0] || 'https://via.placeholder.com/400'}
+              src={product?.data?.images[0] || 'https://via.placeholder.com/400'}
               style={{ objectFit: 'cover' }}
-              alt={product?.name}
+              alt={product?.data?.name}
             />
           </div>
           
-          {/* Product? name */}
+          {/* Product?.data? name */}
           <div style={{ 
             display: 'flex', 
             flexDirection: 'column', 
@@ -1492,12 +1492,12 @@ export async function GET(
             textAlign: 'center',
           }}>
             <h1 style={{ fontSize: 48, margin: '0 0 16px 0', color: '#111827' }}>
-              {product?.name}
+              {product?.data?.name}
             </h1>
             
             {/* Price */}
             <p style={{ fontSize: 36, margin: '0 0 24px 0', color: '#1F2937' }}>
-              ${product?.price?.toFixed(2)}
+              ${product?.data?.price?.toFixed(2)}
             </p>
             
             {/* CTA */}

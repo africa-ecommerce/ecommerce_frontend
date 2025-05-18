@@ -96,20 +96,51 @@ export async function getProductServer(productId: string, plugId?: string) {
   }
 }
 
-// Function for client-side product fetching using SWR
-export function getProduct(productId: string | undefined, plugId?: string) {
+
+
+// Define interface for the product data
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+  images?: string[];
+  size?: string;
+  color?: string;
+  seller?: string;
+  inStock?: boolean;
+  features?: string[];
+}
+
+// Define the return type for the API response
+interface ProductResponse {
+  data?: Product;
+  success?: boolean;
+  message?: string;
+}
+
+// Define the return type for our getProduct function
+interface ProductResult {
+  product: ProductResponse | null;
+  isLoading: boolean;
+  isError: Error | null;
+  mutate: () => void;
+}
+
+export function getProduct(productId: string | undefined, plugId?: string): ProductResult {
   // Create a unique key for SWR based on the parameters
   const key = productId ? `/public/products/${productId}${plugId ? `/${plugId}` : ''}` : null;
 
   // Use SWR for client-side data fetching with caching and revalidation
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR<ProductResponse, Error>(
     key,
     async () => {
       if (!productId) return null;
 
       const body: { productId: string; plugId?: string } = { productId };
 
-      console.log("body", body)
+      console.log("body", body);
+      
       if (plugId) body.plugId = plugId;
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/public/products`, {
@@ -132,9 +163,9 @@ export function getProduct(productId: string | undefined, plugId?: string) {
   );
 
   return {
-    product: data,
+    product: data || null,
     isLoading,
-    isError: error,
+    isError: error || null,
     mutate,
   };
 }
