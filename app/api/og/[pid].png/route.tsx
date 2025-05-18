@@ -1429,6 +1429,8 @@ export async function GET(
     
     // Fetch the product data with both productId and plugId (ref)
     const product = await getProductServer(productId, ref || undefined)
+
+    console.log("ogProduct", product)
     
     if (!product?.data) {
       return new Response('Product not found', { status: 404 })
