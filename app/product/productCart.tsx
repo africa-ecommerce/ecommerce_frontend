@@ -113,9 +113,9 @@ export const SingleProductCart = ({ productId, referralId, platform }: SinglePro
                     <p className="text-xl font-semibold mb-4">{formatPrice(productData?.price)}</p>
 
                     <div className="mb-6">
-                      <p className="mb-4">{productData.description}</p>
+                      <p className="mb-4">{productData?.description}</p>
                       <ul className="space-y-2">
-                        {productData.features.map((feature, index) => (
+                        {productData?.features.map((feature, index) => (
                           <li key={index} className="flex items-start">
                             <span className="mr-2 text-primary">•</span>
                             <span>{feature}</span>
