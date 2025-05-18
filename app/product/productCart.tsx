@@ -321,7 +321,7 @@ export const SingleProductCart = ({ productId, referralId, platform }: SinglePro
   const router = useRouter()
 
   useEffect(() => {
-    const fetchProductData = async () => {
+    const fetchProductData = () => {
       if (!productId) {
         setIsLoading(false);
         return;
@@ -329,7 +329,7 @@ export const SingleProductCart = ({ productId, referralId, platform }: SinglePro
       
       try {
         setIsLoading(true);
-        const { product, isError } = await getProduct(productId, referralId);
+        const { product, isError } =  getProduct(productId, referralId);
         
         if (isError || !product) {
           console.error("Error fetching product data");
@@ -354,6 +354,8 @@ export const SingleProductCart = ({ productId, referralId, platform }: SinglePro
   const updateQuantity = (change: number) => {
     setQuantity(Math.max(1, quantity + change))
   }
+
+  console.log("productData", productData)
 
   // Calculate pricing information with useMemo to prevent unnecessary recalculations
   const pricing = useMemo(() => {
