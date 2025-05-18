@@ -73,7 +73,7 @@ export async function getProductServer(productId: string, plugId?: string) {
     if (plugId) body.plugId = plugId;
 
     // Fetch from the API
-    const response = await fetch(`${process.env.BACKEND_URL}/public/products/`, {
+    const response = await fetch(`${process.env.BACKEND_URL}/general/products/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ export async function getProductServer(productId: string, plugId?: string) {
 // Function for client-side product fetching using SWR
 export function getProduct(productId: string | undefined, plugId?: string) {
   // Create a unique key for SWR based on the parameters
-  const key = productId ? `/public/products/${productId}${plugId ? `/${plugId}` : ''}` : null;
+  const key = productId ? `/general/products/${productId}${plugId ? `/${plugId}` : ''}` : null;
 
   // Use SWR for client-side data fetching with caching and revalidation
   const { data, error, isLoading, mutate } = useSWR(
@@ -108,7 +108,7 @@ export function getProduct(productId: string | undefined, plugId?: string) {
       const body: { productId: string; plugId?: string } = { productId };
       if (plugId) body.plugId = plugId;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/public/products/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/general/products/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
