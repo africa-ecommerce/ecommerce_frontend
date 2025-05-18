@@ -1407,7 +1407,6 @@
 //   }
 // }
 
-
 // File: app/api/og/[pid]/[ref].png/route.tsx
 import { ImageResponse } from 'next/og'
 import { getProductServer } from '@/lib/products'
@@ -1430,7 +1429,8 @@ export async function GET(
     const actualRef = (ref === 'null' || ref === 'undefined') ? undefined : ref
     
     // Fetch the product data with both productId and plugId (ref)
-    const product = await getProductServer(productId, ref)
+    // Use actualRef to handle the case where ref is "null" or "undefined"
+    const product = await getProductServer(productId, actualRef)
 
     console.log("ogProduct", product)
     
@@ -1457,17 +1457,24 @@ export async function GET(
           }}
         >
           {/* Product image */}
-          <div style={{ marginBottom: 40, borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 16px rgba(0,0,0,0.1)' }}>
+          <div style={{ 
+            display: 'flex',  // Added explicit display: flex
+            justifyContent: 'center',
+            marginBottom: 40, 
+            borderRadius: 16, 
+            overflow: 'hidden', 
+            boxShadow: '0 8px 16px rgba(0,0,0,0.1)' 
+          }}>
             <img
               width="400"
               height="400"
-              src={product?.data?.images[0] || 'https://via.placeholder.com/400'}
+              src={product?.data?.images?.[0] || 'https://via.placeholder.com/400'}
               style={{ objectFit: 'cover' }}
-              alt={product?.data?.name}
+              alt={product?.data?.name || 'Product image'}
             />
           </div>
           
-          {/* Product name */}
+          {/* Product details container */}
           <div style={{ 
             display: 'flex', 
             flexDirection: 'column', 
@@ -1475,17 +1482,31 @@ export async function GET(
             padding: '0 48px',
             textAlign: 'center',
           }}>
-            <h1 style={{ fontSize: 48, margin: '0 0 16px 0', color: '#111827' }}>
-              {product?.data?.name}
+            {/* Product name */}
+            <h1 style={{ 
+              display: 'flex',  // Added explicit display: flex
+              fontSize: 48, 
+              margin: '0 0 16px 0', 
+              color: '#111827' 
+            }}>
+              {product?.data?.name || 'Product'}
             </h1>
             
             {/* Price */}
-            <p style={{ fontSize: 36, margin: '0 0 24px 0', color: '#1F2937' }}>
-              ${product?.data?.price?.toFixed(2)}
+            <p style={{ 
+              display: 'flex',  // Added explicit display: flex
+              fontSize: 36, 
+              margin: '0 0 24px 0', 
+              color: '#1F2937' 
+            }}>
+              ${product?.data?.price?.toFixed(2) || '0.00'}
             </p>
             
             {/* CTA */}
             <div style={{
+              display: 'flex',  // Added explicit display: flex
+              justifyContent: 'center',
+              alignItems: 'center',
               backgroundColor: '#4F46E5',
               color: 'white',
               padding: '12px 24px',
@@ -1498,6 +1519,8 @@ export async function GET(
             {/* Referral info if available */}
             {actualRef && (
               <div style={{ 
+                display: 'flex',  // Added explicit display: flex
+                justifyContent: 'center',
                 marginTop: 32,
                 fontSize: 24,
                 color: '#6B7280',
