@@ -1005,7 +1005,7 @@ export default function Products() {
                                       className="text-xs sm:text-sm"
                                       onClick={() => {
                                         setProductToShare({
-                                          id: item.originalId || item.id,
+                                          id: item.id,
                                           name: item.name,
                                         });
                                         setShareModalOpen(true);
