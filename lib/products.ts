@@ -108,7 +108,7 @@ export function getProduct(productId: string | undefined, plugId?: string) {
       const body: { productId: string; plugId?: string } = { productId };
       if (plugId) body.plugId = plugId;
 
-      const response = await fetch("/api/public/product", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/public/product`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
