@@ -1,29 +1,38 @@
-// import React from 'react'
-// import SingleProductCart from './productCart'
-// import { Metadata, ResolvingMetadata } from 'next';
-// import { getProductServer } from '@/lib/products';
 
 
+
+
+// import React from "react";
+// import {SingleProductCart} from "./productCart";
+// import { Metadata } from "next";
+// import { getProductServer } from "@/lib/products";
+
+// // Define types for search params
 // type SearchParams = {
-//   pid?: string
-//   ref?: string
-//   platform?: string
-// }
+//   pid?: string;
+//   ref?: string;
+//   platform?: string;
+// };
 
-
-// export async function generateMetadata({ 
-//   searchParams 
-// }: { 
-//   searchParams: SearchParams 
+// export async function generateMetadata({
+//   searchParams,
+// }: {
+//   searchParams: SearchParams;
 // }): Promise<Metadata> {
-//   // Get the product ID from search params
-//   const productId = searchParams.pid
+//   // Get the product ID from search params - updated to use pid
+//   const productId = searchParams.pid;
 
-
+//   // If no product ID is provided, return default metadata
+//   if (!productId) {
+//     return {
+//       title: "Product Not Found",
+//       description: "The requested product could not be found",
+//     };
+//   }
 
 //   try {
-//     // Use the server version that forwards cookies
-//     const product = await getProductServer(params.id);
+//     // Use the server version that forwards cookies - updated to use productId from query
+//     const product = await getProductServer(productId);
 
 //     if (!product) {
 //       return {
@@ -34,12 +43,37 @@
 //     // Create absolute URLs for the Open Graph images
 //     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "";
 //     if (!baseUrl) {
-//       console.warn("NEXT_PUBLIC_BASE_URL is not defined. OG images will not work correctly.");
+//       console.warn(
+//         "NEXT_PUBLIC_BASE_URL is not defined. OG images will not work correctly."
+//       );
 //     }
-    
+
+//     // Create tracking URL for sharing that includes all parameters
+//     let trackingUrl = `${baseUrl}/product?pid=${productId}`;
+
+//     // Add referral info if available
+//     if (searchParams.ref) {
+//       trackingUrl += `&ref=${searchParams.ref}`;
+//     }
+
+//     // Add platform info if available
+//     if (searchParams.platform) {
+//       trackingUrl += `&platform=${searchParams.platform}`;
+//     }
+
 //     // This is critical for WhatsApp to display large cards
-//     const ogImageUrl = `${baseUrl}/api/og/${params.id}.png`;
-    
+//     // Updated to use productId from query
+//     const ogImageUrl = `${baseUrl}/api/og/${productId}.png`;
+
+//     // Track this view server-side if needed
+//     // if (searchParams.ref || searchParams.platform) {
+//     //   await trackProductView(
+//     //     productId,
+//     //     searchParams.ref,
+//     //     searchParams.platform
+//     //   ).catch((err) => console.error("Error tracking view:", err));
+//     // }
+
 //     return {
 //       title: product.name,
 //       description: product.description,
@@ -47,18 +81,19 @@
 //         title: product.name,
 //         description: product.description,
 //         type: "website",
-//         // WhatsApp requires these specific properties
-//         url: `${baseUrl}/products/${params.id}`,
+//         // Use the tracking URL that includes referral info
+//         url: trackingUrl,
 //         siteName: process.env.NEXT_PUBLIC_SITE_NAME || "Your Store",
-//         // locale: "en_US",
 //         // Only specify a single image with exact dimensions
-//         images: [{
-//           url: ogImageUrl,
-//           width: 1200,
-//           height: 630,
-//           alt: product.name,
-//           type: "image/png", // Explicitly define image type
-//         }]
+//         images: [
+//           {
+//             url: ogImageUrl,
+//             width: 1200,
+//             height: 630,
+//             alt: product.name,
+//             type: "image/png", // Explicitly define image type
+//           },
+//         ],
 //       },
 //       twitter: {
 //         card: "summary_large_image",
@@ -66,14 +101,17 @@
 //         description: product.description,
 //         site: "@yoursitename", // Replace with your Twitter handle if available
 //         creator: "@yoursitename", // Replace with your Twitter handle if available
-//         images: [{
-//           url: ogImageUrl,
-//           alt: product.name,
-//         }]
+//         images: [
+//           {
+//             url: ogImageUrl,
+//             alt: product.name,
+//           },
+//         ],
 //       },
 //       // These specific meta tags are crucial for WhatsApp
 //       alternates: {
-//         canonical: `${baseUrl}/products/${params.id}`,
+//         // Use the tracking URL here too
+//         canonical: trackingUrl,
 //       },
 //       other: {
 //         // WhatsApp specific tags
@@ -82,12 +120,11 @@
 //         "og:image:type": "image/png",
 //         // Product specific tags that help WhatsApp identify this as a product
 //         "og:price:amount": product.price?.toString() || "",
-//         // "og:price:currency": "USD",
 //         // Force WhatsApp to cache and refresh the image
 //         "og:image:url": ogImageUrl,
 //         "og:image": ogImageUrl,
 //       },
-//       // Viewport configurations 
+//       // Viewport configurations
 //       viewport: {
 //         width: "device-width",
 //         initialScale: 1,
@@ -103,22 +140,59 @@
 //   }
 // }
 
+// // Server-side tracking function
+// // async function trackProductView(
+// //   productId: string,
+// //   referralId?: string,
+// //   platform?: string
+// // ) {
+// //   try {
+// //     // You can implement your tracking logic here
+// //     // This could log to your database or call an analytics service
 
+// //     // Example implementation:
+// //     const response = await fetch(
+// //       `${process.env.NEXT_PUBLIC_API_URL}/api/analytics/track`,
+// //       {
+// //         method: "POST",
+// //         headers: { "Content-Type": "application/json" },
+// //         body: JSON.stringify({
+// //           event: "product_view",
+// //           productId,
+// //           referralId,
+// //           platform,
+// //           timestamp: new Date().toISOString(),
+// //         }),
+// //       }
+// //     );
 
-// const page = () => {
+// //     return response.ok;
+// //   } catch (error) {
+// //     console.error("Error tracking product view:", error);
+// //     return false;
+// //   }
+// // }
+
+// // Pass the search params to the SingleProductCart component
+// const Page = ({ searchParams }: { searchParams: SearchParams }) => {
 //   return (
 //     <div>
-//       <SingleProductCart/>
+//       <SingleProductCart
+//         productId={searchParams.pid}
+//         referralId={searchParams.ref}
+//         platform={searchParams.platform}
+//       />
 //     </div>
-//   )
-// }
+//   );
+// };
 
-// export default page
+// export default Page;
+
 
 
 
 import React from "react";
-import {SingleProductCart} from "./productCart";
+import { SingleProductCart } from "./productCart";
 import { Metadata } from "next";
 import { getProductServer } from "@/lib/products";
 
@@ -134,8 +208,9 @@ export async function generateMetadata({
 }: {
   searchParams: SearchParams;
 }): Promise<Metadata> {
-  // Get the product ID from search params - updated to use pid
+  // Get the product ID and referral ID from search params
   const productId = searchParams.pid;
+  const plugId = searchParams.ref; // ref is our plugId
 
   // If no product ID is provided, return default metadata
   if (!productId) {
@@ -146,8 +221,8 @@ export async function generateMetadata({
   }
 
   try {
-    // Use the server version that forwards cookies - updated to use productId from query
-    const product = await getProductServer(productId);
+    // Use the server version with both productId and plugId
+    const product = await getProductServer(productId, plugId);
 
     if (!product) {
       return {
@@ -167,8 +242,8 @@ export async function generateMetadata({
     let trackingUrl = `${baseUrl}/product?pid=${productId}`;
 
     // Add referral info if available
-    if (searchParams.ref) {
-      trackingUrl += `&ref=${searchParams.ref}`;
+    if (plugId) {
+      trackingUrl += `&ref=${plugId}`;
     }
 
     // Add platform info if available
@@ -177,16 +252,15 @@ export async function generateMetadata({
     }
 
     // This is critical for WhatsApp to display large cards
-    // Updated to use productId from query
     const ogImageUrl = `${baseUrl}/api/og/${productId}.png`;
-
-    // Track this view server-side if needed
-    // if (searchParams.ref || searchParams.platform) {
-    //   await trackProductView(
-    //     productId,
-    //     searchParams.ref,
-    //     searchParams.platform
-    //   ).catch((err) => console.error("Error tracking view:", err));
+    // if (plugId) {
+    //   ogImageUrl += `?ref=${plugId}`;
+      
+    //   if (searchParams.platform) {
+    //     ogImageUrl += `&platform=${searchParams.platform}`;
+    //   }
+    // } else if (searchParams.platform) {
+    //   ogImageUrl += `?platform=${searchParams.platform}`;
     // }
 
     return {
@@ -254,39 +328,6 @@ export async function generateMetadata({
     };
   }
 }
-
-// Server-side tracking function
-// async function trackProductView(
-//   productId: string,
-//   referralId?: string,
-//   platform?: string
-// ) {
-//   try {
-//     // You can implement your tracking logic here
-//     // This could log to your database or call an analytics service
-
-//     // Example implementation:
-//     const response = await fetch(
-//       `${process.env.NEXT_PUBLIC_API_URL}/api/analytics/track`,
-//       {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({
-//           event: "product_view",
-//           productId,
-//           referralId,
-//           platform,
-//           timestamp: new Date().toISOString(),
-//         }),
-//       }
-//     );
-
-//     return response.ok;
-//   } catch (error) {
-//     console.error("Error tracking product view:", error);
-//     return false;
-//   }
-// }
 
 // Pass the search params to the SingleProductCart component
 const Page = ({ searchParams }: { searchParams: SearchParams }) => {

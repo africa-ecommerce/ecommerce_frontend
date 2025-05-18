@@ -1281,6 +1281,134 @@
 
 
 
+// // File: app/api/og/[pid].png/route.tsx
+// import { ImageResponse } from 'next/og'
+// import { getProductServer } from '@/lib/products'
+ 
+// export const runtime = 'edge'
+ 
+// export async function GET(
+//   request: Request,
+//   { params }: { params: { pid: string } }
+// ) {
+//   try {
+//     const productId = params.pid
+    
+//     // Fetch the product data
+//     const product = await getProductServer(productId)
+    
+//     if (!product) {
+//       return new Response('Product not found', { status: 404 })
+//     }
+    
+//     // Parse the URL to check for tracking parameters
+//     const url = new URL(request.url)
+//     const ref = url.searchParams.get('ref')
+//     const platform = url.searchParams.get('platform')
+    
+//     // Track this OG image view if needed (optional)
+//     if (ref || platform) {
+//       try {
+//         await fetch(`${process.env.API_URL}/api/analytics/track`, {
+//           method: 'POST',
+//           headers: { 'Content-Type': 'application/json' },
+//           body: JSON.stringify({
+//             event: 'og_image_view',
+//             productId,
+//             referralId: ref,
+//             platform,
+//             timestamp: new Date().toISOString()
+//           })
+//         })
+//       } catch (error) {
+//         // Just log error but don't fail the image generation
+//         console.error('Error tracking OG image view:', error)
+//       }
+//     }
+    
+//     // You can use different templates based on platform
+//     const template = platform === 'instagram' ? 'instagram' : 'default'
+    
+//     return new ImageResponse(
+//       (
+//         <div
+//           style={{
+//             display: 'flex',
+//             height: '100%',
+//             width: '100%',
+//             alignItems: 'center',
+//             justifyContent: 'center',
+//             flexDirection: 'column',
+//             backgroundImage: 'linear-gradient(to bottom right, #FFFFFF, #F3F4F6)',
+//             fontSize: 32,
+//             fontWeight: 600,
+//           }}
+//         >
+//           {/* Product image */}
+//           <div style={{ marginBottom: 40, borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 16px rgba(0,0,0,0.1)' }}>
+//             <img
+//               width="400"
+//               height="400"
+//               src={product.image || 'https://via.placeholder.com/400'}
+//               style={{ objectFit: 'cover' }}
+//               alt={product.name}
+//             />
+//           </div>
+          
+//           {/* Product name */}
+//           <div style={{ 
+//             display: 'flex', 
+//             flexDirection: 'column', 
+//             alignItems: 'center',
+//             padding: '0 48px',
+//             textAlign: 'center',
+//           }}>
+//             <h1 style={{ fontSize: 48, margin: '0 0 16px 0', color: '#111827' }}>
+//               {product.name}
+//             </h1>
+            
+//             {/* Price */}
+//             <p style={{ fontSize: 36, margin: '0 0 24px 0', color: '#1F2937' }}>
+//               ${product.price?.toFixed(2)}
+//             </p>
+            
+//             {/* CTA */}
+//             <div style={{
+//               backgroundColor: '#4F46E5',
+//               color: 'white',
+//               padding: '12px 24px',
+//               borderRadius: 8,
+//               fontWeight: 'bold',
+//             }}>
+//               Click to Buy Now
+//             </div>
+            
+//             {/* Referral info if available */}
+//             {ref && (
+//               <div style={{ 
+//                 marginTop: 32,
+//                 fontSize: 24,
+//                 color: '#6B7280',
+//               }}>
+//                 Shared by: {ref}
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       ),
+//       {
+//         width: 1200,
+//         height: 630,
+//       },
+//     )
+//   } catch (error) {
+//     console.error('Error generating OG image:', error)
+//     return new Response('Error generating image', { status: 500 })
+//   }
+// }
+
+
+
 // File: app/api/og/[pid].png/route.tsx
 import { ImageResponse } from 'next/og'
 import { getProductServer } from '@/lib/products'
@@ -1294,17 +1422,17 @@ export async function GET(
   try {
     const productId = params.pid
     
-    // Fetch the product data
-    const product = await getProductServer(productId)
+    // Parse the URL to check for tracking parameters
+    const url = new URL(request.url)
+    const ref = url.searchParams.get('ref') // This is our plugId
+    const platform = url.searchParams.get('platform')
+    
+    // Fetch the product data with both productId and plugId (ref)
+    const product = await getProductServer(productId, ref || undefined)
     
     if (!product) {
       return new Response('Product not found', { status: 404 })
     }
-    
-    // Parse the URL to check for tracking parameters
-    const url = new URL(request.url)
-    const ref = url.searchParams.get('ref')
-    const platform = url.searchParams.get('platform')
     
     // Track this OG image view if needed (optional)
     if (ref || platform) {
@@ -1349,7 +1477,7 @@ export async function GET(
             <img
               width="400"
               height="400"
-              src={product.image || 'https://via.placeholder.com/400'}
+              src={product.images[0] || 'https://via.placeholder.com/400'}
               style={{ objectFit: 'cover' }}
               alt={product.name}
             />

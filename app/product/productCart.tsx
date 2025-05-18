@@ -5,33 +5,34 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import Link from "next/link"
+// import Link from "next/link"
 import { Minus, Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { useRouter } from "next/navigation"
+import { getProduct } from "@/lib/products"
 
 // Single product data
-const productData = {
-  id: 1,
-  name: "Traditional Ankara Fabric Blouse",
-  price: 12500,
-  description:
-    "Beautiful handcrafted Ankara fabric blouse with modern design elements. Made from high-quality cotton with vibrant patterns that showcase African heritage and craftsmanship.",
-  features: [
-    "100% authentic Ankara fabric",
-    "Handmade by local artisans",
-    "Breathable cotton material",
-    "Vibrant colors that don't fade easily",
-  ],
-  image: "/placeholder.svg?height=400&width=400",
-  size: "M",
-  color: "Multicolor",
-  seller: "Adire Textiles",
-  inStock: true,
-}
+// const productData = {
+//   id: 1,
+//   name: "Traditional Ankara Fabric Blouse",
+//   price: 12500,
+//   description:
+//     "Beautiful handcrafted Ankara fabric blouse with modern design elements. Made from high-quality cotton with vibrant patterns that showcase African heritage and craftsmanship.",
+//   features: [
+//     "100% authentic Ankara fabric",
+//     "Handmade by local artisans",
+//     "Breathable cotton material",
+//     "Vibrant colors that don't fade easily",
+//   ],
+//   image: "/placeholder.svg?height=400&width=400",
+//   size: "M",
+//   color: "Multicolor",
+//   seller: "Adire Textiles",
+//   inStock: true,
+// }
 interface SingleProductCartProps {
   productId?: string
   referralId?: string
@@ -41,6 +42,9 @@ interface SingleProductCartProps {
 export const SingleProductCart = ({ productId, referralId, platform }: SingleProductCartProps) => {
   const [quantity, setQuantity] = useState(1)
   const router = useRouter()
+
+  const { product: productData, isLoading, isError } = getProduct(productId, referralId);
+
 
   const updateQuantity = (change: number) => {
     setQuantity(Math.max(1, quantity + change))
@@ -89,8 +93,8 @@ export const SingleProductCart = ({ productId, referralId, platform }: SinglePro
                   {/* Product Image */}
                   <div className="flex-shrink-0 relative w-full md:w-1/2 aspect-square rounded-md overflow-hidden">
                     <Image
-                      src={productData.image || "/placeholder.svg"}
-                      alt={productData.name}
+                      src={productData?.images[0] || "/placeholder.svg"}
+                      alt={productData?.name}
                       fill
                       className="object-cover"
                       priority
@@ -99,14 +103,14 @@ export const SingleProductCart = ({ productId, referralId, platform }: SinglePro
 
                   {/* Product Details */}
                   <div className="flex-1">
-                    <h2 className="text-xl md:text-2xl font-bold mb-2">{productData.name}</h2>
+                    <h2 className="text-xl md:text-2xl font-bold mb-2">{productData?.name}</h2>
                     <div className="flex flex-wrap text-sm text-muted-foreground mb-4">
-                      <span className="mr-4">Size: {productData.size}</span>
-                      <span className="mr-4">Color: {productData.color}</span>
-                      <span>Seller: {productData.seller}</span>
+                      <span className="mr-4">Size: {productData?.size}</span>
+                      <span className="mr-4">Color: {productData?.color}</span>
+                      <span>Seller: {productData?.seller}</span>
                     </div>
 
-                    <p className="text-xl font-semibold mb-4">{formatPrice(productData.price)}</p>
+                    <p className="text-xl font-semibold mb-4">{formatPrice(productData?.price)}</p>
 
                     <div className="mb-6">
                       <p className="mb-4">{productData.description}</p>
@@ -144,8 +148,8 @@ export const SingleProductCart = ({ productId, referralId, platform }: SinglePro
                     </div>
 
                     <div className="flex items-center text-sm">
-                      <span className={productData.inStock ? "text-green-600" : "text-red-600"}>
-                        {productData.inStock ? "In Stock" : "Out of Stock"}
+                      <span className={productData?.inStock ? "text-green-600" : "text-red-600"}>
+                        {productData?.inStock ? "In Stock" : "Out of Stock"}
                       </span>
                     </div>
                   </div>
@@ -163,7 +167,7 @@ export const SingleProductCart = ({ productId, referralId, platform }: SinglePro
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Product Price</span>
-                      <span>{formatPrice(productData.price)}</span>
+                      <span>{formatPrice(productData?.price)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Quantity</span>
