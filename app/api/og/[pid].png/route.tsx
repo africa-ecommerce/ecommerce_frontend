@@ -1,5 +1,5 @@
 // // import { ImageResponse } from "next/og";
-// // import { getProductServer } from "@/lib/products";
+// // import { getProduct?Server } from "@/lib/products";
 // // import type { NextRequest } from "next/server";
 
 // // export const runtime = "edge";
@@ -1435,24 +1435,24 @@ export async function GET(
     }
     
     // Track this OG image view if needed (optional)
-    if (ref || platform) {
-      try {
-        await fetch(`${process.env.API_URL}/api/analytics/track`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            event: 'og_image_view',
-            productId,
-            referralId: ref,
-            platform,
-            timestamp: new Date().toISOString()
-          })
-        })
-      } catch (error) {
-        // Just log error but don't fail the image generation
-        console.error('Error tracking OG image view:', error)
-      }
-    }
+    // if (ref || platform) {
+    //   try {
+    //     await fetch(`${process.env.API_URL}/api/analytics/track`, {
+    //       method: 'POST',
+    //       headers: { 'Content-Type': 'application/json' },
+    //       body: JSON.stringify({
+    //         event: 'og_image_view',
+    //         productId,
+    //         referralId: ref,
+    //         platform,
+    //         timestamp: new Date().toISOString()
+    //       })
+    //     })
+    //   } catch (error) {
+    //     // Just log error but don't fail the image generation
+    //     console.error('Error tracking OG image view:', error)
+    //   }
+    // }
     
     // You can use different templates based on platform
     const template = platform === 'instagram' ? 'instagram' : 'default'
@@ -1477,13 +1477,13 @@ export async function GET(
             <img
               width="400"
               height="400"
-              src={product.images[0] || 'https://via.placeholder.com/400'}
+              src={product?.images[0] || 'https://via.placeholder.com/400'}
               style={{ objectFit: 'cover' }}
-              alt={product.name}
+              alt={product?.name}
             />
           </div>
           
-          {/* Product name */}
+          {/* Product? name */}
           <div style={{ 
             display: 'flex', 
             flexDirection: 'column', 
@@ -1492,12 +1492,12 @@ export async function GET(
             textAlign: 'center',
           }}>
             <h1 style={{ fontSize: 48, margin: '0 0 16px 0', color: '#111827' }}>
-              {product.name}
+              {product?.name}
             </h1>
             
             {/* Price */}
             <p style={{ fontSize: 36, margin: '0 0 24px 0', color: '#1F2937' }}>
-              ${product.price?.toFixed(2)}
+              ${product?.price?.toFixed(2)}
             </p>
             
             {/* CTA */}
