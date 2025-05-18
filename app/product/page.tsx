@@ -231,9 +231,9 @@ export async function generateMetadata({
     // Use the server version with both productId and plugId
     const product = await getProductServer(productId, plugId);
 
-    console.log("pageProduct", product.data);
+    console.log("pageProduct", product?.data);
 
-    if (!product.data) {
+    if (!product?.data) {
       return {
         title: "Product Not Found",
       };
