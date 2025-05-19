@@ -1,5 +1,3 @@
-
-
 let userConfig = undefined
 try {
   userConfig = await import('./v0-user-next.config')
@@ -10,9 +8,12 @@ try {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async rewrites() {
+    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ecommerce-backend-peach-sigma.vercel.app';
+    console.log(`Using BACKEND_URL: ${backendUrl}`);
+    
     return [
       // Handle routes that don't start with /api/og
-     {
+      {
         source: "/api/og/:path*",
         // point back to itself so Next.js will serve your OG handler
         destination: "/api/og/:path*",
@@ -20,7 +21,7 @@ const nextConfig = {
       // 2. Then proxy _all other_ /api/* to your backend
       {
         source: "/api/:path*",
-        destination: `${process.env.BACKEND_URL}/:path*`,
+        destination: `${backendUrl}/:path*`,
       },
     ];
   },
@@ -38,10 +39,11 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  // Set environment variables with fallbacks to prevent undefined issues
   env: {
-    BACKEND_URL: process.env.BACKEND_URL,
-    APP_URL: process.env.APP_URL,
-    NEXT_PUBLIC_BACKEND_URL: process.env.BACKEND_URL,
+    BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ecommerce-backend-peach-sigma.vercel.app',
+    APP_URL: process.env.APP_URL || process.env.VERCEL_URL || 'https://ecommerce-backend-peach-sigma.vercel.app',
+    NEXT_PUBLIC_BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ecommerce-backend-peach-sigma.vercel.app',
   }
 }
 
