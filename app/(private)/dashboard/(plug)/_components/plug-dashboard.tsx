@@ -665,7 +665,7 @@ export default function PlugDashboard() {
               Order Management
             </h2>
             <Button variant="outline" size="sm" asChild className="text-xs">
-              <Link href="/dashboard/order">View All Orders</Link>
+              <Link href="/dashboard/product">View All Orders</Link>
             </Button>
           </div>
 
