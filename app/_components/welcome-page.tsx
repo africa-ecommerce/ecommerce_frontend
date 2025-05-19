@@ -64,14 +64,14 @@ export default function WelcomePage() {
               className="hidden xs:inline-flex"
               asChild
             >
-              <Link href="/auth/register">Sign Up</Link>
+              <Link href="/dashboard">Sign In</Link>
             </Button>
             <Button
               size="sm"
               className="bg-orange-500 hover:bg-orange-600 hidden xs:inline-flex"
               asChild
             >
-              <Link href="/dashboard">Get Started</Link>
+              <Link href="/auth/register">Get Started</Link>
             </Button>
           </div>
         </div>
