@@ -34,7 +34,7 @@ export default function Login() {
   useEffect(() => {
     if (redirectPath) {
       // Using window.location.href ensures a full page reload
-      window.location.href = redirectPath;
+      window.location.replace(redirectPath);
     }
   }, [redirectPath]);
 
