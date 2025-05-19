@@ -72,9 +72,9 @@ export async function generateMetadata({
     // This is critical for WhatsApp to display large cards
     const ogImageUrl = `${baseUrl}/api/og/${productId}/${plugId}`;
 
-    const twitterImageUrl = `${baseUrl}/product/twitter-image?pid=${productId}${
+    const twitterImageUrl = `${baseUrl}/api/twitter-image?pid=${productId}${
       plugId ? `&ref=${plugId}` : ""
-    }${searchParams.platform ? `&platform=${searchParams.platform}` : ""}`;
+    }`;
 
     return {
       title: product?.data?.name,
