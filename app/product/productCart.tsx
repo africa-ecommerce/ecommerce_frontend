@@ -39,7 +39,7 @@ export const SingleProductCart = ({
   const router = useRouter();
 
   // Use SWR directly in the component
-  const { data, error } = useSWR(
+  const { data, error, isLoading } = useSWR(
     productId
       ? `/public/products/${productId}${referralId ? `/${referralId}` : ""}`
       : null,
@@ -67,7 +67,6 @@ export const SingleProductCart = ({
 
   // Extract product data from the response
   const productData: Product | null = data?.data || null;
-  const isLoading = !error && !data;
 
   console.log("productData", productData);
 
@@ -113,19 +112,95 @@ export const SingleProductCart = ({
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-screen">
-        <p>Loading product information...</p>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold mb-6">Product Details</h1>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Product Image Skeleton */}
+                  <div className="flex-shrink-0 relative w-full md:w-1/2 aspect-square rounded-md overflow-hidden bg-muted animate-pulse"></div>
+
+                  {/* Product Details Skeleton */}
+                  <div className="flex-1 space-y-4">
+                    <div className="h-8 bg-muted rounded-md w-3/4 animate-pulse"></div>
+                    <div className="flex space-x-4">
+                      <div className="h-4 bg-muted rounded-md w-20 animate-pulse"></div>
+                      <div className="h-4 bg-muted rounded-md w-20 animate-pulse"></div>
+                    </div>
+                    <div className="h-6 bg-muted rounded-md w-24 animate-pulse"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-muted rounded-md w-full animate-pulse"></div>
+                      <div className="h-4 bg-muted rounded-md w-full animate-pulse"></div>
+                      <div className="h-4 bg-muted rounded-md w-3/4 animate-pulse"></div>
+                    </div>
+                    <div className="h-10 bg-muted rounded-md w-40 animate-pulse"></div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Order Summary Skeleton */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-20">
+              <Card>
+                <CardContent className="p-6 space-y-6">
+                  <div className="h-6 bg-muted rounded-md w-1/2 animate-pulse"></div>
+                  <div className="space-y-4">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="flex justify-between">
+                        <div className="h-4 bg-muted rounded-md w-24 animate-pulse"></div>
+                        <div className="h-4 bg-muted rounded-md w-16 animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="h-10 bg-muted rounded-md w-full animate-pulse"></div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error || !productData) {
     return (
-      <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-screen">
-        <p>Product not found or unavailable.</p>
+      <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[50vh]">
+        <div className="text-center max-w-md">
+          <div className="mb-6 text-muted-foreground">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="64"
+              height="64"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mx-auto"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold mb-3">Product Not Found</h2>
+          <p className="text-muted-foreground mb-6">
+            We couldn't find the product you're looking for. It may have been
+            removed or is temporarily unavailable.
+          </p>
+          <Button onClick={() => router.push("/")} className="mx-auto">
+            Return to Home
+          </Button>
+        </div>
       </div>
     );
   }
+
 
   return (
     <div className="flex flex-col min-h-screen pb-16 md:pb-0">
