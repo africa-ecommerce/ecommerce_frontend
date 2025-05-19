@@ -235,6 +235,8 @@ export const SingleProductCart = ({
                       {productData.color && (
                         <span className="mr-4">Color: {productData.color}</span>
                       )}
+
+                      
                       {productData.seller && (
                         <span>Seller: {productData.seller}</span>
                       )}
