@@ -14,7 +14,6 @@ import {
 } from "next/font/google";
 import { ToastProvider } from "./_components/provider/ClientToastWrapper";
 import ThemeWrapper from "./themeWrapper";
-import { GlobalLoadingIndicatorAdvanced } from "@/components/ui/loading-indicator-advanced";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -63,9 +62,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-background">
         <ThemeWrapper>
           <ToastProvider>
-            <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh]">
-                  <GlobalLoadingIndicatorAdvanced />
-                </div>}>
+            <Suspense>
               {children}
             </Suspense>
           </ToastProvider>
