@@ -91,7 +91,7 @@ export default function PublishDialog({
     if (name.length < MIN_SUBDOMAIN_LENGTH)
       return {
         isValid: false,
-        error: `Site name must be at least ${MIN_SUBDOMAIN_LENGTH} characters`,
+        error: `Subdomain must be at least ${MIN_SUBDOMAIN_LENGTH} characters`,
       };
     if (!/^[a-z0-9-]+$/i.test(name))
       return {
@@ -151,7 +151,7 @@ export default function PublishDialog({
       setNameAvailable(data.available);
       console.log("yesss")
       if(!data.available){
-        setInputError("This site name is already taken")
+        setInputError("This subdomain is already taken")
       }
       
     }
@@ -240,10 +240,10 @@ export default function PublishDialog({
         onConfirm(subdomain);
       } else {
         console.log("error")
-        setInputError("This site name is already taken");
+        setInputError("This subdomain is already taken");
       }
     } catch (err) {
-      setInputError("Couldn't verify site name availability");
+      setInputError("Couldn't verify subdomain availability");
     }
   };
 
@@ -282,7 +282,7 @@ export default function PublishDialog({
     if (!isValid) {
       setInputError("Only letters, numbers, and hyphens are allowed");
     } else if (value.length < MIN_SUBDOMAIN_LENGTH) {
-      setInputError(`Site name must be at least ${MIN_SUBDOMAIN_LENGTH} characters`);
+      setInputError(`Subdomain must be at least ${MIN_SUBDOMAIN_LENGTH} characters`);
     } else {
       setInputError(""); // Clear error when input is valid
     }
@@ -649,7 +649,7 @@ export default function PublishDialog({
                                 ? "focus:ring-green-500"
                                 : "focus:ring-blue-500"
                             } text-xs sm:text-sm`}
-                            placeholder="your-site-name"
+                            placeholder="your-subdomain"
                             value={subdomain}
                             onChange={(e) =>
                               handleSubdomainChange(e.target.value)
