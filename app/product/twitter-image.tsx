@@ -357,6 +357,10 @@ export async function GET(request: NextRequest) {
     // Get the full URL and its searchParams
     const url = new URL(request.url);
     const searchParams = url.searchParams;
+
+
+    console.log("url", url)
+    console.log("searchParams", searchParams)
     
     // Extract the necessary parameters
     const productId = searchParams.get('pid');
