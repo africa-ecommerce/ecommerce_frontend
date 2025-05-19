@@ -17,7 +17,7 @@ export default async function PrivateLayout({
     <ClientLayoutWrapper serverUserType={userType} initialUserData={userData}>
       <ShoppingCartProvider
         exclude={userData?.userType === "SUPPLIER"}
-        excludePaths={["/dashboard", "/dashboard/*", "/studio"]}
+        excludePaths={["/dashboard", "/dashboard/*"]}
       >
         {children}
       </ShoppingCartProvider>

@@ -66,7 +66,7 @@ export default function TypographyCustomizer({ typography, onUpdateTypography }:
        
       </Accordion>
 
-      {/* <Button className="w-full mt-4">Apply Typography Changes</Button> */}
+    
     </div>
   )
 }

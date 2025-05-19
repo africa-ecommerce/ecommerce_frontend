@@ -271,35 +271,7 @@ function FontSelector({ value, onChange }: FontSelectorProps) {
   );
 }
 
-// interface PaletteCardProps {
-//   palette: (typeof colorPalettes)[0];
-//   onSelect: () => void;
-// }
 
-// function PaletteCard({ palette, onSelect }: PaletteCardProps) {
-//   return (
-//     <div
-//       className="border rounded-lg p-2 sm:p-3 cursor-pointer hover:border-primary hover:shadow-sm transition-all"
-//       onClick={onSelect}
-//     >
-//       <h3 className="font-medium text-xs sm:text-sm mb-1 sm:mb-2 truncate">
-//         {palette.name}
-//       </h3>
-//       <div className="flex flex-wrap gap-1">
-//         {Object.entries(palette.colors)
-//           .filter(([key]) => key !== "FONT_FAMILY")
-//           .slice(0, 3)
-//           .map(([key, color], i) => (
-//             <div
-//               key={i}
-//               className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border shadow-sm"
-//               style={{ backgroundColor: color }}
-//             />
-//           ))}
-//       </div>
-//     </div>
-//   );
-// }
 
 interface PaletteCardProps {
   palette: (typeof colorPalettes)[0];

@@ -146,42 +146,7 @@ export default function ThemeCustomizer() {
     }
   }, [user])
 
-  // // Fetch user config if available
-  // const { data: userConfig, error: userConfigError, mutate: mutateConfig } = useSWR(
-  //   user?.plug?.configUrl ? user.plug.configUrl : null,
-  //   fetcher,
-  //   {
-  //     revalidateOnError: false,
-  //     retryOnError: false,
-  //     dedupingInterval: 5000,
-  //     revalidateOnFocus: false,
-  //     onSuccess: (data) => {
-  //       if (data) {
-  //         try {
-  //           // Parse and validate the config
-  //           const parsedConfig = typeof data === 'string' ? JSON.parse(data) : data;
-            
-  //           if (parsedConfig && parsedConfig.templateId) {
-  //             setConfig(parsedConfig);
-  //             setHistory([parsedConfig]);
-  //             setHistoryIndex(0);
-  //             setIsEditing(true);
-  //           }
-  //         } catch (error) {
-  //           console.error("Error parsing user config:", error);
-  //         //  errorToast("Could not load your site configuration")
-  //         }
-  //       }
-  //       setIsLoading(false);
-  //     },
-  //     onError: (err) => {
-  //       console.error("Error fetching user config:", err);
-  //       errorToast("Could not load your site configuration");
-  //       setIsLoading(false);
-  //     },
-  //   }
-  // );
-
+  
 
   const {
     data: userConfig,
