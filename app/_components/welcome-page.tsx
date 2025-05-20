@@ -1700,7 +1700,7 @@ export default function Home() {
                     className="border-[#FF7A21] text-[#FF7A21] hover:bg-[#FF7A21] hover:text-white h-12 px-6 text-base w-full sm:w-auto"
                     onClick={() => scrollToSection("how-it-works")}
                   >
-                    <ArrowRight className="mr-2 h-4 w-4" /> Learn More
+                    Learn More
                   </Button>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
@@ -2092,9 +2092,11 @@ export default function Home() {
               <div className="flex items-center justify-center mt-6 lg:mt-0">
                 <div className="relative w-full max-w-[500px] aspect-[4/3] rounded-xl overflow-hidden shadow-xl">
                   <Image
-                    src="/placeholder.svg?height=375&width=500"
+                    src="/store-builder-interface.png"
                     alt="Pluggn Store Builder Interface"
                     fill
+                    height="375"
+                    width="500"
                     className="object-cover"
                   />
                 </div>
