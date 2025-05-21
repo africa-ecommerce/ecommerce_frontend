@@ -1,5 +1,4 @@
-
-"use client"
+"use client";
 
 import Link from "next/link";
 import { ArrowRight, Package, Truck } from "lucide-react";
@@ -7,8 +6,9 @@ import { Card } from "@/components/ui/card";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { userTypeSchema } from "@/zod/schema";
 import { FormData } from "../page";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { UserTypeModal } from "./user-type-modal";
 
 interface UserTypeProps {
   onNext: () => void;
@@ -16,24 +16,27 @@ interface UserTypeProps {
   initialData?: { userType?: string };
 }
 
-export default function UserType({ onNext, update, initialData }: UserTypeProps) {
+export default function UserType({
+  onNext,
+  update,
+  initialData,
+}: UserTypeProps) {
   const {
     form: { setValue, submit, watch },
-  } = useFormResolver(
-    (data) => {
-      update(data);
-      onNext();
-      return Promise.resolve(true);
-    },
-    userTypeSchema
-  );
+  } = useFormResolver((data) => {
+    update(data);
+    onNext();
+    return Promise.resolve(true);
+  }, userTypeSchema);
 
   const userType = watch("userType");
+
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Set initial data if available
   useEffect(() => {
     if (initialData?.userType) {
-      setValue("userType", initialData.userType  as "SUPPLIER" | "PLUG");
+      setValue("userType", initialData.userType as "SUPPLIER" | "PLUG");
     }
   }, [initialData, setValue]);
 
@@ -93,14 +96,12 @@ export default function UserType({ onNext, update, initialData }: UserTypeProps)
       </div>
 
       <div className="mt-8 text-center">
-        <p className="text-sm text-gray-500 mb-4">
+        <p
+          className="text-sm text-gray-500 mb-4 cursor-pointer hover:text-orange-500 transition-colors"
+          onClick={() => setIsModalOpen(true)}
+        >
           Not sure which option is right for you?{" "}
-          <Link
-            href="/help/user-types"
-            className="text-orange-500 hover:underline"
-          >
-            Learn more about user types
-          </Link>
+          <span className="underline">Learn more about user types</span>
         </p>
 
         <Button
@@ -111,6 +112,11 @@ export default function UserType({ onNext, update, initialData }: UserTypeProps)
           Continue <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
       </div>
+
+      <UserTypeModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </>
   );
 }
