@@ -130,7 +130,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
             </div>
 
             <div className="grid gap-4">
-              <Card className="overflow-hidden">
+              <Card className="overflow-hidden max-w-xl">
                 <CardContent className="p-0">
                   <button
                     onClick={() => setActiveSection("profile")}
@@ -189,7 +189,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                 </CardContent>
               </Card>
 
-              <Card className="overflow-hidden">
+              <Card className="overflow-hidden max-w-xl">
                 <CardContent className="p-0">
                   <button
                     onClick={() => setActiveSection("notifications")}
@@ -221,7 +221,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                 </CardContent>
               </Card>
 
-              <Card className="overflow-hidden">
+              <Card className="overflow-hidden max-w-xl">
                 <CardContent className="p-0">
                   <button
                     onClick={() => setActiveSection("help")}
