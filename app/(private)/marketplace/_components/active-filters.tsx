@@ -52,7 +52,7 @@ export const ActiveFilters = ({
           </Badge>
         )}
         
-        {(filters.priceRange[0] > 0 || filters.priceRange[1] < 10000) && (
+        {(filters.priceRange[0] > 0 || filters.priceRange[1] < 9999999) && (
           <Badge variant="outline" className="flex items-center gap-1 py-1 px-2">
             Price: ₦{filters.priceRange[0].toLocaleString()} - ₦{filters.priceRange[1].toLocaleString()}
             <X 

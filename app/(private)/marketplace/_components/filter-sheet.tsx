@@ -61,8 +61,8 @@ export const FilterSheet = ({
               <Slider
                 value={filters.priceRange}
                 onValueChange={onPriceChange}
-                max={10000000}
-                step={100}
+                max={9999999}
+                step={10000}
                 minStepsBetweenThumbs={1}
                 className="mb-4"
               />
