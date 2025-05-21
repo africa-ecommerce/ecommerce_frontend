@@ -267,7 +267,7 @@ const Page = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white">
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-orange-400" />
-      <div className="w-full max-w-3xl px-4 py-8">
+      <div className="w-full max-w-xl px-4 py-8">
         <div className="mb-8">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-gray-500">

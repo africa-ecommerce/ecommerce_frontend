@@ -38,7 +38,7 @@ export function UserTypeModal({ isOpen, onClose }: UserTypeModalProps) {
       }}
     >
       <div
-        className={`w-full max-w-md bg-white rounded-t-xl p-6 transition-transform duration-300 transform ${
+        className={`w-full max-w-xl bg-white rounded-t-xl p-6 transition-transform duration-300 transform ${
           isOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
