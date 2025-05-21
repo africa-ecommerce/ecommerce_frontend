@@ -68,8 +68,8 @@ export default function UserType({
           <div>
             <h3 className="font-semibold text-lg">Supplier</h3>
             <p className="text-gray-500 text-sm">
-              I want to sell my products on the platform and connect with plugs
-              who can help expand my market reach.
+              I want to sell my products on the platform and have different people selling my products
+              which helps expand my market reach.
             </p>
           </div>
         </Card>
