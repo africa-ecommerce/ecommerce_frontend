@@ -63,7 +63,7 @@ export const FilterSheet = ({
                 onValueChange={onPriceChange}
                 max={9999999}
                 step={10000}
-                // minStepsBetweenThumbs={1}
+                minStepsBetweenThumbs={1}
                 className="mb-4"
               />
               <div className="flex justify-between text-sm text-muted-foreground">
