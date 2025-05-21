@@ -25,7 +25,7 @@ export const ActiveFilters = ({
   const hasActiveFilters = 
     filters.search || 
     filters.priceRange[0] > 0 || 
-    filters.priceRange[1] < 10000 || 
+    filters.priceRange[1] < 9999999 || 
     filters.selectedCategories.length > 0 || 
     filters.selectedRatings.length > 0;
   

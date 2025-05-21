@@ -30,7 +30,7 @@ export default function MarketplacePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [showDiscoveryMode, setShowDiscoveryMode] = useState(false);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 9999999]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
@@ -93,7 +93,7 @@ export default function MarketplacePage() {
       if (priceRange[0] > 0) params.set("minPrice", priceRange[0].toString());
       else params.delete("minPrice");
 
-      if (priceRange[1] < 10000000)
+      if (priceRange[1] < 9999999)
         params.set("maxPrice", priceRange[1].toString());
       else params.delete("maxPrice");
 
@@ -135,7 +135,7 @@ export default function MarketplacePage() {
     if (minPrice || maxPrice) {
       setPriceRange([
         minPrice ? parseInt(minPrice) : 0,
-        maxPrice ? parseInt(maxPrice) : 10000000,
+        maxPrice ? parseInt(maxPrice) : 9999999,
       ]);
     }
     if (categories) setSelectedCategories(categories.split(","));
@@ -159,7 +159,7 @@ export default function MarketplacePage() {
   };
 
   const resetFilters = () => {
-    setPriceRange([0, 10000000]);
+    setPriceRange([0, 9999999]);
     setSelectedCategories([]);
     setSelectedRatings([]);
     setSearchQuery("");
@@ -189,7 +189,7 @@ export default function MarketplacePage() {
   };
 
   const clearPriceRange = () => {
-    setPriceRange([0, 10000000]);
+    setPriceRange([0, 9999999]);
   };
 
   const applyFilters = () => {
