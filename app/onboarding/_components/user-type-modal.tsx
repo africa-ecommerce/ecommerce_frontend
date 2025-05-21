@@ -128,9 +128,7 @@ export function UserTypeModal({ isOpen, onClose }: UserTypeModalProps) {
             <p className="text-gray-700 mt-2">
               • Choose <span className="font-medium">Plug</span> if you want to earn by selling products without handling inventory or manufacturing.
             </p>
-            <p className="text-sm text-gray-600 mt-4 italic">
-              You can always change your user type later through your account settings.
-            </p>
+           
           </div>
         </div>
 
