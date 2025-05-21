@@ -126,10 +126,11 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                 </Button>
                 <h1 className="text-xl md:text-2xl font-bold">More</h1>
               </div>
+              
             </div>
 
             <div className="grid gap-4">
-              <Card className="w-[500px]">
+              <Card className="overflow-hidden">
                 <CardContent className="p-0">
                   <button
                     onClick={() => setActiveSection("profile")}
@@ -188,7 +189,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                 </CardContent>
               </Card>
 
-              <Card className="w-[500px]">
+              <Card className="overflow-hidden">
                 <CardContent className="p-0">
                   <button
                     onClick={() => setActiveSection("notifications")}
@@ -220,7 +221,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                 </CardContent>
               </Card>
 
-              <Card className="w-[500px]">
+              <Card className="overflow-hidden">
                 <CardContent className="p-0">
                   <button
                     onClick={() => setActiveSection("help")}
@@ -246,9 +247,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-destructive/10">
                         <LogOut className="h-4 w-4 text-destructive" />
                       </div>
-                      <span>
-                        {isLoggingOut ? "Signing Out..." : "Sign Out"}
-                      </span>
+                      <span>{isLoggingOut ? "Signing Out..." : "Sign Out"}</span>
                     </div>
                   </button>
                 </CardContent>
