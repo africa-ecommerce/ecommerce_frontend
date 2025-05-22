@@ -75,25 +75,11 @@ export function EditProductModal({
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
 
-  const fetcher = async (url: string) => {
-    const res = await fetch(url, { credentials: "include" });
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.error || "Failed to fetch product");
-    }
-    const { data } = await res.json();
-  return data;
-  };
+  
 
-  // Fetch product data
-  const {
-    data: fetchedData,
-    error,
-    isLoading: isFetching,
-  } = useSWR(open && productId && !itemData ? `/api/products/${productId}` : null, fetcher);
-
-   const data = itemData || fetchedData;
-   const isLoading = !itemData && isFetching;
+  
+   const data = itemData
+   const isLoading = !itemData
 
 
   const editProduct = async (data: UpdateFormData) => {
@@ -229,47 +215,6 @@ export function EditProductModal({
   }
 
   
-//   const handleFiles = (files: FileList) => {
-//   const currentImages = formData.images || [];
-//   const newFiles = Array.from(files).filter(
-//     (file) =>
-//       (file.type === "image/jpeg" ||
-//         file.type === "image/png" ||
-//         file.type === "image/webp" ||
-//         file.type === "image/svg+xml") &&
-//       file.size <= 5 * 1024 * 1024
-//   );
-
-//   if (newFiles.length === 0) {
-//     errorToast("Only images under 5MB allowed");
-//     return;
-//   }
-
-//   // Check total images count (existing + new)
-//   const existingCount = (formData.imageUrls?.length || 0);
-//   const newImagesCount = (formData.images?.length || 0);
-//   const totalCount = existingCount + newImagesCount + newFiles.length;
-//   console.log("totalCount", totalCount)
-//   console.log("existingCount", existingCount)
-//   console.log("newImagesCount", newImagesCount)
- 
-//   if (totalCount > 3) {
-//     errorToast("Maximum 3 images allowed");
-//     // Only add as many images as we have room for
-//     newFiles.splice(0, 3 - existingCount - newImagesCount);
-//     console.log("newFiles", newFiles.length)
-//     if (newFiles.length === 0) return;
-//   }
-
-//   // Add new files to images array
-//   const newImages = [...currentImages, ...newFiles];
-//   console.log("newImages", newImages)
-//   setValue("images", newImages);
-  
-//   // Generate and update preview URLs for all images
-//   updateImagePreviews(newImages);
-// };
-
 
 const handleFiles = (files: FileList) => {
   // First check file types and sizes
@@ -611,40 +556,7 @@ const removeImage = (index: number) => {
     );
   }
 
-  // Show error state
-  if (error) {
-    return (
-      <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-sm md:items-center">
-        <motion.div
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "100%" }}
-          transition={{ type: "spring", damping: 30, stiffness: 300 }}
-          className="relative flex h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-background shadow-xl md:h-[85vh] md:max-h-[700px] md:w-[95vw] md:max-w-2xl md:rounded-lg"
-        >
-          <div className="flex items-center justify-between border-b px-4 py-3 md:px-6">
-            <h2 className="text-lg font-semibold">Edit Product</h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => closeModal()}
-              className="h-9 w-9 rounded-full"
-            >
-              <X className="h-5 w-5" />
-              <span className="sr-only">Close</span>
-            </Button>
-          </div>
-          <div className="p-6 text-center">
-            <p className="text-destructive">Failed to load product data</p>
-            <Button onClick={() => closeModal()} className="mt-4">
-              Close
-            </Button>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-
+ 
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-sm md:items-center">
       <motion.div

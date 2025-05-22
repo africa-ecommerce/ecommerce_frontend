@@ -8,8 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import { Upload } from "lucide-react"
+
 
 interface LayoutCustomizerProps {
   content: Record<string, string>
@@ -32,17 +31,7 @@ export default function LayoutCustomizer({ content, onUpdateContent,
     onUpdateMetadata({ [key]: value })
   }
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    // In a real app, this would upload to a server and return a URL
-    // For this demo, we'll use a placeholder
-    updateContent("BRAND_LOGO", "/placeholder.svg?height=40&width=120")
-
-    // Reset the input
-    e.target.value = ""
-  }
+  
 
   return (
     <div className="space-y-4">
@@ -51,7 +40,6 @@ export default function LayoutCustomizer({ content, onUpdateContent,
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-4">
           <TabsTrigger value="brand">Brand</TabsTrigger>
-          {/* <TabsTrigger value="header">Header</TabsTrigger> */}
           <TabsTrigger value="hero">Hero</TabsTrigger>
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="footer">Footer</TabsTrigger>

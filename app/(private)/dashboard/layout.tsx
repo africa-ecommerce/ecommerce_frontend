@@ -35,13 +35,16 @@ export default function DashboardLayout({
     }
     }, []);
 
+   
+    
+
   return (
     <SWRConfig
       value={{
         fetcher: globalFetcher,
         revalidateOnFocus: true,
         dedupingInterval: 5000,
-      }}
+        shouldRetryOnError: false,      }}
     >
       <div>{children}</div>
     </SWRConfig>

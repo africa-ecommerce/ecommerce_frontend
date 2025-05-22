@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import useSWR, { mutate } from "swr";
+import { mutate } from "swr";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -45,15 +45,6 @@ export function EditPriceModal({
   const [touched, setTouched] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Only fetch if we don't have itemData and modal is open
-  // const {
-  //   data,
-  //   error: swrError,
-  //   isLoading: isFetching,
-  // } = useSWR(
-  //   open && itemId && !itemData ? `/api/plug/products/${itemId}` : null,
-  //   fetcher
-  // );
 
   // Use the direct data or fall back to fetched data
   const productData = itemData;
@@ -164,24 +155,7 @@ export function EditPriceModal({
     }
   }, [open, productData]);
 
-  // Handle SWR error
-  // if (swrError && open) {
-  //   return (
-  //     <Dialog open={open} onOpenChange={onOpenChange}>
-  //       <DialogContent className="max-w-sm md:max-w-md">
-  //         <DialogHeader>
-  //           <DialogTitle>Error</DialogTitle>
-  //           <DialogDescription>
-  //             Failed to load pricing data. Please try again later.
-  //           </DialogDescription>
-  //         </DialogHeader>
-  //         <DialogFooter>
-  //           <Button onClick={() => onOpenChange(false)}>Close</Button>
-  //         </DialogFooter>
-  //       </DialogContent>
-  //     </Dialog>
-  //   );
-  // }
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
