@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { formatPrice, getTotalStock } from "@/lib/utils"
+import { formatPrice } from "@/lib/utils"
 
 interface Variation {
   id: string

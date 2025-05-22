@@ -13,7 +13,7 @@ import {
   Poppins,
 } from "next/font/google";
 import { ToastProvider } from "./_components/provider/ClientToastWrapper";
-import ThemeWrapper from "./themeWrapper";
+import { ToasterAdvanced } from "@/components/toaster-advanced";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -60,13 +60,13 @@ export default function RootLayout({
       className={`${inter.variable} ${robotoMono.variable} ${playfair.variable} ${poppins.variable}`}
     >
       <body className="min-h-screen bg-background">
-        <ThemeWrapper>
+      
           <ToastProvider>
             <Suspense>
               {children}
+              <ToasterAdvanced />
             </Suspense>
           </ToastProvider>
-        </ThemeWrapper>
       </body>
     </html>
   );

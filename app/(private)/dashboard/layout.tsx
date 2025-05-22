@@ -44,7 +44,8 @@ export default function DashboardLayout({
         fetcher: globalFetcher,
         revalidateOnFocus: true,
         dedupingInterval: 5000,
-        shouldRetryOnError: false,      }}
+        shouldRetryOnError: false      
+      }}
     >
       <div>{children}</div>
     </SWRConfig>
