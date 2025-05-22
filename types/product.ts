@@ -41,17 +41,15 @@ export interface ProductsResponse {
   meta: ProductsResponseMeta;
 }
 
+// types/product.ts (or wherever your ProductQueryParams is defined)
 export interface ProductQueryParams {
-  cursor: string;
-  limit?: number;
+  limit: number;
+  cursor?: string;
   search?: string;
-  category?: string;
   minPrice?: number;
   maxPrice?: number;
-  sortBy?: string;
-  order?: 'asc' | 'desc';
-  createdAfter?: string;
-  createdBefore?: string;
-  tags?: string;
+  category?: string;
   rating?: number;
+  excludeIds?: string; // New parameter for backend optimization
+  tags?: string;
 }

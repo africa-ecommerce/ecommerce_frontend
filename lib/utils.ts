@@ -6,6 +6,21 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 
+
+export const cacheUtils = {
+  // Clear all product-related cache
+  clearProductCache: async () => {
+    const { mutate } = await import('swr');
+    return mutate(
+      key => typeof key === 'string' && key.includes('/api/marketplace/products'),
+      undefined,
+      { revalidate: false }
+    );
+  },
+}
+
+
+
 export const isValidCallbackUrl = (url: string) => {
 
   try {
