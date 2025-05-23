@@ -1,447 +1,3 @@
-// "use client"
-
-// // hooks/useProducts.ts
-// import useSWRInfinite from 'swr/infinite';
-// import { ProductsResponse, ProductQueryParams } from '@/types/product';
-// import { useDebounce } from './use-debounce';
-// import { useEffect } from 'react';
-// import { useShoppingCart } from '@/app/_components/provider/shoppingCartProvider';
-
-// const fetcher = async (url: string) => {
-//   const response = await fetch(url, { credentials: "include" });
-//   if (!response.ok) {
-//     throw new Error('Failed to fetch products');
-//   }
-//   return response.json();
-// };
-
-// export interface ProductsFilter {
-//   search: string;
-//   priceRange: [number, number];
-//   selectedCategories: string[];
-//   selectedRatings: number[];
-//   sortBy?: string;
-//   order?: 'asc' | 'desc';
-//   businessType?: string;
-//   createdAfter?: Date;
-//   createdBefore?: Date;
-//   tags?: string;
-// }
-
-// export function useProducts(filters: ProductsFilter, limit: number = 4) {
-//   const debouncedSearch = useDebounce(filters.search, 300);
-//   const { isMutate } = useShoppingCart();
-  
-//   // Convert filters to query params
-//   const getKey = (pageIndex: number, previousPageData: ProductsResponse | null) => {
-//     // Reached the end
-//     if (previousPageData && !previousPageData.meta.hasNextPage) return null;
-    
-//     // First page or with cursor for pagination
-//     const cursor = pageIndex > 0 && previousPageData ? previousPageData.meta.nextCursor : undefined;
-    
-//     // Build query parameters
-//     const params: ProductQueryParams = {
-//       limit,
-//       cursor,
-//       search: debouncedSearch || undefined,
-//       minPrice: filters.priceRange[0] || undefined,
-//       maxPrice: filters.priceRange[1] || undefined,
-//       sortBy: filters.sortBy,
-//       order: filters.order,
-//       businessType: filters.businessType,
-//     };
-    
-//     // Add category filter if any selected
-//     if (filters.selectedCategories.length === 1) {
-//       params.category = filters.selectedCategories[0];
-//     } else if (filters.selectedCategories.length > 1) {
-//       // For multiple categories, the backend might need to handle this differently
-//       // This is a simplification assuming backend supports comma-separated values
-//       params.category = filters.selectedCategories.join(',');
-//     }
-    
-//     // Add rating filter (lowest selected rating)
-//     if (filters.selectedRatings.length > 0) {
-//       // Get the minimum rating from selected ratings
-//       params.rating = Math.min(...filters.selectedRatings);
-//     }
-    
-//     // Add date filters if present
-//     if (filters.createdAfter) {
-//       params.createdAfter = filters.createdAfter.toISOString();
-//     }
-    
-//     if (filters.createdBefore) {
-//       params.createdBefore = filters.createdBefore.toISOString();
-//     }
-    
-//     // Build the URL with query parameters
-//     const queryString = Object.entries(params)
-//       .filter(([_, value]) => value !== undefined)
-//       .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
-//       .join('&');
-    
-//     return `/api/marketplace/products?${queryString}`;
-//   };
-
-//   const {
-//     data,
-//     error,
-//     size,
-//     setSize,
-//     isValidating,
-//     mutate
-//   } = useSWRInfinite<ProductsResponse>(getKey, fetcher, {
-//     revalidateFirstPage: false,
-//     revalidateOnFocus: true,
-//     persistSize: true,
-//   });
-
-
-
-
-//   useEffect(() => {
-//   // This will trigger a refresh of all product data when isMutate is true
-//   if (isMutate) {
-//     console.log("Mutating products data due to isMutate flag");
-//     mutate().then(() => {
-//       // Reset the isMutate flag in the shopping cart context after mutation is complete
-//       // This is the important part to prevent continuous mutations
-//       if (typeof window !== 'undefined') {
-//         // Use a custom event to communicate back to the ShoppingCartProvider
-//         const resetEvent = new CustomEvent('reset-is-mutate');
-//         window.dispatchEvent(resetEvent);
-//       }
-//     });
-//   }
-// }, [isMutate]);
-
-//   const isLoading = !data && !error;
-//   const isLoadingMore = size > 0 && data && typeof data[size - 1] === 'undefined';
-  
-//   // Flatten the products from all pages
-//   const products = data ? data.flatMap(page => page.data) : [];
-  
-//   // Determine if we have more pages to load
-//   const hasNextPage = data ? data[data.length - 1]?.meta.hasNextPage : false;
-
-//   return {
-//     products,
-//     error,
-//     isLoading,
-//     isLoadingMore,
-//     isValidating,
-//     size,
-//     setSize,
-//     hasNextPage,
-//     mutate
-//   };
-// }
-
-// "use client";
-
-// // hooks/useProducts.ts
-// import useSWRInfinite from "swr/infinite";
-// import { ProductsResponse, ProductQueryParams } from "@/types/product";
-// import { useDebounce } from "./use-debounce";
-// import { useEffect, useRef, useMemo, useCallback } from "react";
-// import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
-
-// const fetcher = async (url: string) => {
-//   const response = await fetch(url, { credentials: "include" });
-//   if (!response.ok) {
-//     throw new Error("Failed to fetch products");
-//   }
-//   return response.json();
-// };
-
-// export interface ProductsFilter {
-//   search: string;
-//   priceRange: [number, number];
-//   selectedCategories: string[];
-//   selectedRatings: number[];
-//   tags?: string;
-// }
-
-// // Configuration constants
-// const CONFIG = {
-//   MAX_EXCLUDE_IDS: 100,
-//   DEBOUNCE_DELAY: 300,
-//   MAX_URL_LENGTH: 2000, // Conservative limit for URL length
-//   DEFAULT_LIMIT: 4,
-// } as const;
-
-// export function useProducts(
-//   filters: ProductsFilter,
-//   limit: number = CONFIG.DEFAULT_LIMIT
-// ) {
-//   const debouncedSearch = useDebounce(filters.search, CONFIG.DEBOUNCE_DELAY);
-//   const { isMutate } = useShoppingCart();
-
-//   // Create a stable filter reference for change detection
-//   const filterKey = useMemo(() => {
-//     return JSON.stringify({
-//       search: debouncedSearch,
-//       priceRange: filters.priceRange,
-//       selectedCategories: [...filters.selectedCategories].sort(),
-//       selectedRatings: [...filters.selectedRatings].sort(),
-//       tags: filters.tags,
-//     });
-//   }, [
-//     debouncedSearch,
-//     filters.priceRange,
-//     filters.selectedCategories,
-//     filters.selectedRatings,
-//     filters.tags,
-//   ]);
-
-//   // Keep track of loaded product IDs across pages
-//   const loadedProductIds = useRef<Set<string>>(new Set());
-//   const previousFilterKey = useRef<string | undefined>(undefined);
-
-//   const hasFilterChanged = useMemo(() => {
-//     return (
-//       previousFilterKey.current !== undefined &&
-//       previousFilterKey.current !== filterKey
-//     );
-//   }, [filterKey]);
-
-//   // Reset loaded products when filters change
-//   useEffect(() => {
-//     if (hasFilterChanged) {
-//       loadedProductIds.current.clear();
-//       console.log("🔄 Filter changed, cleared loaded product IDs");
-//     }
-//     previousFilterKey.current = filterKey;
-//   }, [filterKey, hasFilterChanged]);
-
-//   // Smart exclude IDs generation with multiple optimization strategies
-//   const generateExcludeIds = useCallback(
-//     (pageIndex: number): string | undefined => {
-//       // Only exclude for subsequent pages
-//       if (pageIndex === 0 || loadedProductIds.current.size === 0) {
-//         return undefined;
-//       }
-
-//       const allIds = Array.from(loadedProductIds.current);
-
-//       // Strategy 1: Limit by count (most recent IDs are more relevant)
-//       const limitedIds = allIds.slice(-CONFIG.MAX_EXCLUDE_IDS);
-
-//       // Strategy 2: Check URL length (fallback protection)
-//       const testExcludeStr = limitedIds.join(",");
-//       if (testExcludeStr.length > CONFIG.MAX_URL_LENGTH * 0.3) {
-//         // Use 30% of URL for excludeIds
-//         const safeCount = Math.floor(CONFIG.MAX_EXCLUDE_IDS * 0.7); // Use 70% of max as safety margin
-//         const safeIds = limitedIds.slice(-safeCount);
-//         console.log(
-//           `⚠️ URL length optimization: Using ${safeIds.length}/${allIds.length} exclude IDs`
-//         );
-//         return safeIds.join(",");
-//       }
-
-//       console.log(
-//         `📝 Excluding ${limitedIds.length}/${allIds.length} product IDs`
-//       );
-//       return testExcludeStr;
-//     },
-//     []
-//   );
-
-//   // Convert filters to query params
-//   const getKey = useCallback(
-//     (pageIndex: number, previousPageData: ProductsResponse | null) => {
-//       // If filters changed, reset to first page
-//       if (hasFilterChanged && pageIndex > 0) {
-//         return null;
-//       }
-
-//       // Reached the end
-//       if (previousPageData && !previousPageData.meta.hasNextPage) return null;
-
-//       // First page or with cursor for pagination
-//       const cursor =
-//         pageIndex > 0 && previousPageData
-//           ? previousPageData.meta.nextCursor
-//           : undefined;
-
-//       // Build query parameters
-//       const params: ProductQueryParams = {
-//         limit,
-//         cursor,
-//         search: debouncedSearch || undefined,
-//         minPrice: filters.priceRange[0] > 0 ? filters.priceRange[0] : undefined,
-//         maxPrice:
-//           filters.priceRange[1] < 9999999 ? filters.priceRange[1] : undefined,
-//       };
-
-//       // Add category filter if any selected
-//       if (filters.selectedCategories.length === 1) {
-//         params.category = filters.selectedCategories[0];
-//       } else if (filters.selectedCategories.length > 1) {
-//         params.category = filters.selectedCategories.join(",");
-//       }
-
-//       // Add rating filter (lowest selected rating)
-//       if (filters.selectedRatings.length > 0) {
-//         params.rating = Math.min(...filters.selectedRatings);
-//       }
-
-//       // BACKEND OPTIMIZATION: Exclude already loaded products
-//       const excludeIds = generateExcludeIds(pageIndex);
-//       if (excludeIds) {
-//         params.excludeIds = excludeIds;
-//       }
-
-//       // Build the URL with query parameters
-//       const queryString = Object.entries(params)
-//         .filter(
-//           ([_, value]) => value !== undefined && value !== null && value !== ""
-//         )
-//         .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
-//         .join("&");
-
-//       const finalUrl = `/api/marketplace/products?${queryString}`;
-
-//       // Development logging
-//       if (process.env.NODE_ENV === "development" && excludeIds) {
-//         console.log(`🌐 Request URL (Page ${pageIndex + 1}):`, finalUrl);
-//         console.log(
-//           `📊 Stats: ${loadedProductIds.current.size} total IDs, excluding ${
-//             excludeIds.split(",").length
-//           }`
-//         );
-//       }
-
-//       return finalUrl;
-//     },
-//     [
-//       hasFilterChanged,
-//       limit,
-//       debouncedSearch,
-//       filters.priceRange,
-//       filters.selectedCategories,
-//       filters.selectedRatings,
-//       generateExcludeIds,
-//     ]
-//   );
-
-//   const { data, error, size, setSize, isValidating, mutate } =
-//     useSWRInfinite<ProductsResponse>(getKey, fetcher, {
-//       revalidateFirstPage: false,
-//       revalidateOnFocus: false,
-//       persistSize: false,
-//       revalidateOnReconnect: true,
-//       dedupingInterval: 2000,
-//       revalidateAll: false,
-//       focusThrottleInterval: 5000,
-//       loadingTimeout: 10000,
-//       revalidateIfStale: true,
-//       errorRetryCount: 2,
-//       errorRetryInterval: 1000,
-//       shouldRetryOnError: (error) => error.status >= 500 || !error.status,
-//       onLoadingSlow: (key) => {
-//         console.warn("⏱️ Slow loading detected for products:", key);
-//       },
-//       onError: (error, key) => {
-//         console.error("❌ Products fetch error:", error.message, "Key:", key);
-//       },
-//       compare: (a, b) => {
-//         return JSON.stringify(a) === JSON.stringify(b);
-//       },
-//     });
-
-//   // Flatten the products from all pages
-//   const products = useMemo(
-//     () => (data ? data.flatMap((page) => page.data) : []),
-//     [data]
-//   );
-
-//   // Update loaded product IDs when new data comes in
-//   useEffect(() => {
-//     if (data) {
-//       let newIds = 0;
-//       data.forEach((page) => {
-//         page.data.forEach((product) => {
-//           if (!loadedProductIds.current.has(product.id)) {
-//             loadedProductIds.current.add(product.id);
-//             newIds++;
-//           }
-//         });
-//       });
-
-   
-//     }
-//   }, [data]);
-
-//   // Reset pagination when filters change
-//   useEffect(() => {
-//     if (hasFilterChanged) {
-//       console.log("🔄 Filters changed, resetting pagination");
-//       setSize(1);
-//     }
-//   }, [hasFilterChanged, setSize]);
-
-//   // Handle shopping cart mutations
-//   useEffect(() => {
-//     if (isMutate) {
-//       console.log("🛒 Mutating products data due to cart changes");
-//       mutate().then(() => {
-//         if (typeof window !== "undefined") {
-//           const resetEvent = new CustomEvent("reset-is-mutate");
-//           window.dispatchEvent(resetEvent);
-//         }
-//       });
-//     }
-//   }, [isMutate, mutate]);
-
-//   const isLoading = !data && !error;
-//   const isLoadingMore =
-//     size > 0 && data && typeof data[size - 1] === "undefined";
-
-//   // Determine if we have more pages to load
-//   const hasNextPage = data ? data[data.length - 1]?.meta.hasNextPage : false;
-
-//   // Check if we have no results
-//   const isEmpty = !isLoading && !isLoadingMore && products.length === 0;
-
-//   // Utility functions
-//   const clearCache = useCallback(async () => {
-//     const { cacheUtils } = await import("@/lib/utils");
-//     await cacheUtils.clearProductCache();
-//     loadedProductIds.current.clear();
-//     console.log("🧹 Cache and loaded IDs cleared");
-//   }, []);
-
-//   const refreshData = useCallback(() => {
-//     console.log("🔄 Refreshing products data");
-//     mutate();
-//   }, [mutate]);
-
-  
-
-//   return {
-//     products,
-//     error,
-//     isLoading,
-//     isLoadingMore,
-//     isValidating,
-//     isEmpty,
-//     size,
-//     setSize,
-//     hasNextPage,
-//     mutate,
-//     hasFilterChanged,
-//     // Utility functions
-//     clearCache,
-//     refreshData,
-   
-//   };
-// }
-
-
-
 "use client";
 
 // hooks/useProducts.ts
@@ -464,22 +20,16 @@ export interface ProductsFilter {
   priceRange: [number, number];
   selectedCategories: string[];
   selectedRatings: number[];
+  sortBy?: string;
+  order?: "asc" | "desc";
+  businessType?: string;
+  createdAfter?: Date;
+  createdBefore?: Date;
   tags?: string;
 }
 
-// Configuration constants
-const CONFIG = {
-  MAX_EXCLUDE_IDS: 100,
-  DEBOUNCE_DELAY: 300,
-  MAX_URL_LENGTH: 2000,
-  DEFAULT_LIMIT: 4,
-} as const;
-
-export function useProducts(
-  filters: ProductsFilter,
-  limit: number = CONFIG.DEFAULT_LIMIT
-) {
-  const debouncedSearch = useDebounce(filters.search, CONFIG.DEBOUNCE_DELAY);
+export function useProducts(filters: ProductsFilter, limit: number = 4) {
+  const debouncedSearch = useDebounce(filters.search, 300);
   const { isMutate } = useShoppingCart();
 
   // Create a stable filter reference for change detection
@@ -489,6 +39,11 @@ export function useProducts(
       priceRange: filters.priceRange,
       selectedCategories: [...filters.selectedCategories].sort(),
       selectedRatings: [...filters.selectedRatings].sort(),
+      sortBy: filters.sortBy,
+      order: filters.order,
+      businessType: filters.businessType,
+      createdAfter: filters.createdAfter?.toISOString(),
+      createdBefore: filters.createdBefore?.toISOString(),
       tags: filters.tags,
     });
   }, [
@@ -496,232 +51,140 @@ export function useProducts(
     filters.priceRange,
     filters.selectedCategories,
     filters.selectedRatings,
+    filters.sortBy,
+    filters.order,
+    filters.businessType,
+    filters.createdAfter,
+    filters.createdBefore,
     filters.tags,
   ]);
 
-  // Keep track of loaded product IDs across pages for the CURRENT filter set
-  const loadedProductIds = useRef<Set<string>>(new Set());
-  const previousFilterKey = useRef<string>(filterKey);
-  const filterChangeRef = useRef<boolean>(false);
+  // Keep track of previous filter to detect changes
+  const previousFilterKey = useRef<string | undefined>(undefined);
+    const hasFilterChanged =
+    previousFilterKey.current !== undefined &&
+    previousFilterKey.current !== filterKey;
 
-  // Detect filter changes
-  const hasFilterChanged = useMemo(() => {
-    const changed = previousFilterKey.current !== filterKey;
-    if (changed) {
-      console.log("🔄 Filter change detected:", {
-        old: previousFilterKey.current,
-        new: filterKey,
-      });
-    }
-    return changed;
+  // Update the previous filter key
+  useEffect(() => {
+    previousFilterKey.current = filterKey;
   }, [filterKey]);
 
-  // Reset state when filters change
-  useEffect(() => {
-    if (hasFilterChanged) {
-      loadedProductIds.current.clear();
-      filterChangeRef.current = true;
-      console.log("🔄 Filter changed, cleared loaded product IDs");
-    }
-    previousFilterKey.current = filterKey;
-  }, [hasFilterChanged, filterKey]);
-
-  // Smart exclude IDs generation - only for same filter set
-  const generateExcludeIds = useCallback(
-    (pageIndex: number): string | undefined => {
-      // Don't exclude on first page or if filter just changed
-      if (
-        pageIndex === 0 ||
-        filterChangeRef.current ||
-        loadedProductIds.current.size === 0
-      ) {
-        return undefined;
-      }
-
-      const allIds = Array.from(loadedProductIds.current);
-      const limitedIds = allIds.slice(-CONFIG.MAX_EXCLUDE_IDS);
-
-      // Check URL length
-      const testExcludeStr = limitedIds.join(",");
-      if (testExcludeStr.length > CONFIG.MAX_URL_LENGTH * 0.3) {
-        const safeCount = Math.floor(CONFIG.MAX_EXCLUDE_IDS * 0.7);
-        const safeIds = limitedIds.slice(-safeCount);
-        console.log(
-          `⚠️ URL length optimization: Using ${safeIds.length}/${allIds.length} exclude IDs`
-        );
-        return safeIds.join(",");
-      }
-
-      console.log(
-        `📝 Excluding ${limitedIds.length}/${
-          allIds.length
-        } product IDs for page ${pageIndex + 1}`
-      );
-      return testExcludeStr;
-    },
-    []
-  );
-
   // Convert filters to query params
-  const getKey = useCallback(
-    (pageIndex: number, previousPageData: ProductsResponse | null) => {
-      // Reset filter change flag after first page load
-      if (pageIndex === 0 && filterChangeRef.current) {
-        filterChangeRef.current = false;
-      }
+  const getKey = (
+    pageIndex: number,
+    previousPageData: ProductsResponse | null
+  ) => {
+    // If filters changed, reset to first page
+    if (hasFilterChanged && pageIndex > 0) {
+      return null;
+    }
 
-      // Reached the end
-      if (previousPageData && !previousPageData.meta.hasNextPage) {
-        console.log("📄 No more pages available");
-        return null;
-      }
+    // Reached the end
+    if (previousPageData && !previousPageData.meta.hasNextPage) return null;
 
-      // Get cursor for pagination
-      const cursor =
-        pageIndex > 0 && previousPageData
-          ? previousPageData.meta.nextCursor
-          : undefined;
+    // First page or with cursor for pagination
+    const cursor =
+      pageIndex > 0 && previousPageData
+        ? previousPageData.meta.nextCursor
+        : undefined;
 
-      // Build query parameters
-      const params: ProductQueryParams = {
-        limit,
-        cursor,
-        search: debouncedSearch || undefined,
-        minPrice: filters.priceRange[0] > 0 ? filters.priceRange[0] : undefined,
-        maxPrice:
-          filters.priceRange[1] < 9999999 ? filters.priceRange[1] : undefined,
-      };
-
-      // Add category filter
-      if (filters.selectedCategories.length === 1) {
-        params.category = filters.selectedCategories[0];
-      } else if (filters.selectedCategories.length > 1) {
-        params.category = filters.selectedCategories.join(",");
-      }
-
-      // Add rating filter
-      if (filters.selectedRatings.length > 0) {
-        params.rating = Math.min(...filters.selectedRatings);
-      }
-
-      // Add exclude IDs for deduplication (only for same filter set)
-      const excludeIds = generateExcludeIds(pageIndex);
-      if (excludeIds) {
-        params.excludeIds = excludeIds;
-      }
-
-      // Build the URL
-      const queryString = Object.entries(params)
-        .filter(
-          ([_, value]) => value !== undefined && value !== null && value !== ""
-        )
-        .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
-        .join("&");
-
-      const finalUrl = `/api/marketplace/products?${queryString}`;
-
-      // Development logging
-      if (process.env.NODE_ENV === "development") {
-        console.log(`🌐 Request URL (Page ${pageIndex + 1}):`, finalUrl);
-        if (excludeIds) {
-          console.log(
-            `📊 Stats: ${loadedProductIds.current.size} total IDs, excluding ${
-              excludeIds.split(",").length
-            }`
-          );
-        }
-      }
-
-      return finalUrl;
-    },
-    [
+    // Build query parameters
+    const params: ProductQueryParams = {
       limit,
-      debouncedSearch,
-      filters.priceRange,
-      filters.selectedCategories,
-      filters.selectedRatings,
-      generateExcludeIds,
-    ]
-  );
+      cursor,
+      search: debouncedSearch || undefined,
+      minPrice: filters.priceRange[0] > 0 ? filters.priceRange[0] : undefined,
+      maxPrice:
+        filters.priceRange[1] < 9999999 ? filters.priceRange[1] : undefined,
+      sortBy: filters.sortBy,
+      order: filters.order,
+      businessType: filters.businessType,
+    };
+
+    // Add category filter if any selected
+    if (filters.selectedCategories.length === 1) {
+      params.category = filters.selectedCategories[0];
+    } else if (filters.selectedCategories.length > 1) {
+      params.category = filters.selectedCategories.join(",");
+    }
+
+    // Add rating filter (lowest selected rating)
+    if (filters.selectedRatings.length > 0) {
+      params.rating = Math.min(...filters.selectedRatings);
+    }
+
+    
+   
+
+    // Build the URL with query parameters
+    const queryString = Object.entries(params)
+      .filter(
+        ([_, value]) => value !== undefined && value !== null && value !== ""
+      )
+      .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
+      .join("&");
+
+    return `/api/marketplace/products?${queryString}`;
+  };
 
   const { data, error, size, setSize, isValidating, mutate } =
     useSWRInfinite<ProductsResponse>(getKey, fetcher, {
+      // Use the infiniteConfig from swr-config
       revalidateFirstPage: false,
       revalidateOnFocus: false,
-      persistSize: false, // Important: don't persist size across filter changes
+      persistSize: false, // IMPORTANT: This prevents pagination from persisting across filter changes
       revalidateOnReconnect: true,
       dedupingInterval: 2000,
       revalidateAll: false,
-      focusThrottleInterval: 5000,
-      loadingTimeout: 15000, // Increased timeout
-      revalidateIfStale: false, // Prevent unnecessary revalidation
-      errorRetryCount: 3,
-      errorRetryInterval: 1500,
-      shouldRetryOnError: (error) => {
-        // Only retry on server errors or network issues
-        return error.status >= 500 || !error.status;
-      },
+
+      // Error handling
+      errorRetryCount: 2,
+      shouldRetryOnError: (error) => error.status >= 500 || !error.status,
+
+      // Performance monitoring
       onLoadingSlow: (key) => {
-        console.warn("⏱️ Slow loading detected for products:", key);
+        console.warn("Slow loading detected for products:", key);
       },
+
       onError: (error, key) => {
-        console.error("❌ Products fetch error:", error.message, "Key:", key);
+        console.error("Products fetch error:", error.message, "Key:", key);
       },
-      // Add a more robust comparison function
+
+      focusThrottleInterval: 5000, // Throttle revalidation on focus
+
+      // Revalidation settings - Important for your use case
+
+      revalidateIfStale: true, // Revalidate if data is stale
+
+      // Error handling
+
+      errorRetryInterval: 1000,
+
+      // Performance settings
+      loadingTimeout: 10000, // 10 second timeout
+
+     
+
+      // Custom key comparison for better cache invalidation
       compare: (a, b) => {
-        if (!a && !b) return true;
-        if (!a || !b) return false;
+        // Custom comparison logic if needed
         return JSON.stringify(a) === JSON.stringify(b);
       },
     });
 
-  // Flatten the products from all pages
-  const products = useMemo(
-    () => (data ? data.flatMap((page) => page.data) : []),
-    [data]
-  );
-
-  // Update loaded product IDs when new data comes in
+  // Reset pagination when filters change
   useEffect(() => {
-    if (data && data.length > 0) {
-      let newIds = 0;
-      const currentIds = new Set<string>();
-
-      // Collect all current product IDs
-      data.forEach((page) => {
-        page.data.forEach((product) => {
-          currentIds.add(product.id);
-          if (!loadedProductIds.current.has(product.id)) {
-            loadedProductIds.current.add(product.id);
-            newIds++;
-          }
-        });
-      });
-
-      if (newIds > 0) {
-        console.log(
-          `✅ Added ${newIds} new product IDs, total: ${loadedProductIds.current.size}`
-        );
-      }
-    }
-  }, [data]);
-
-  // Reset pagination when filters change - this is crucial
-  useEffect(() => {
-    if (hasFilterChanged && size > 1) {
-      console.log(
-        "🔄 Filters changed, resetting pagination from",
-        size,
-        "to 1"
-      );
+    if (hasFilterChanged) {
+      console.log("Filters changed, resetting pagination");
       setSize(1);
     }
-  }, [hasFilterChanged, setSize, size]);
+  }, [hasFilterChanged, setSize]);
 
   // Handle shopping cart mutations
   useEffect(() => {
     if (isMutate) {
-      console.log("🛒 Mutating products data due to cart changes");
+      console.log("Mutating products data due to isMutate flag");
       mutate().then(() => {
         if (typeof window !== "undefined") {
           const resetEvent = new CustomEvent("reset-is-mutate");
@@ -731,41 +194,26 @@ export function useProducts(
     }
   }, [isMutate, mutate]);
 
-  // Loading states
   const isLoading = !data && !error;
   const isLoadingMore =
     size > 0 && data && typeof data[size - 1] === "undefined";
 
+  // Flatten the products from all pages
+  const products = data ? data.flatMap((page) => page.data) : [];
+
   // Determine if we have more pages to load
-  const hasNextPage = useMemo(() => {
-    if (!data || data.length === 0) return false;
-    const lastPage = data[data.length - 1];
-    return lastPage?.meta?.hasNextPage ?? false;
-  }, [data]);
+  const hasNextPage = data ? data[data.length - 1]?.meta.hasNextPage : false;
 
   // Check if we have no results
   const isEmpty = !isLoading && !isLoadingMore && products.length === 0;
 
-  // Utility functions
+  // Utility functions using cacheUtils
   const clearCache = useCallback(async () => {
-    try {
-      const { cacheUtils } = await import("@/lib/utils");
-      await cacheUtils.clearProductCache();
-      loadedProductIds.current.clear();
-      console.log("🧹 Cache and loaded IDs cleared");
-      // Force a fresh fetch
-      mutate();
-    } catch (error) {
-      console.error("Failed to clear cache:", error);
-      // Fallback: just clear loaded IDs and mutate
-      loadedProductIds.current.clear();
-      mutate();
-    }
-  }, [mutate]);
+    const { cacheUtils } = await import("@/lib/utils");
+    await cacheUtils.clearProductCache();
+  }, []);
 
   const refreshData = useCallback(() => {
-    console.log("🔄 Refreshing products data");
-    loadedProductIds.current.clear();
     mutate();
   }, [mutate]);
 
@@ -780,9 +228,13 @@ export function useProducts(
     setSize,
     hasNextPage,
     mutate,
-    hasFilterChanged,
+    hasFilterChanged, // Expose this for debugging
     // Utility functions
     clearCache,
     refreshData,
   };
 }
+
+
+
+
