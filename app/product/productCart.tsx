@@ -600,9 +600,7 @@ export const SingleProduct = ({
                                     {/* Quantity selector for selected variations */}
                                     {isSelected && variation.stock > 0 && (
                                       <div className="flex items-center justify-between pt-3 border-t border-muted">
-                                        <span className="text-sm font-medium">
-                                          Quantity:
-                                        </span>
+                                       
                                         <div className="flex items-center space-x-2">
                                           <Button
                                             variant="outline"
@@ -759,8 +757,7 @@ export const SingleProduct = ({
                     )}
 
                     {/* Out of Stock WhatsApp Signup */}
-                    {(isOutOfStock ||
-                      (hasVariations && selectedVariations.length === 0)) && (
+                    {(isOutOfStock) && (
                       <div className="bg-muted/50 rounded-lg p-4 mb-4">
                         <h3 className="font-medium mb-2">
                           Good news travels fast!
