@@ -412,7 +412,6 @@ export function AddProductModal({
       >
         {/* Header with swipe indicator for mobile */}
         <div className="sticky top-0 z-10 bg-background">
-         
           <div className="flex items-center justify-between border-b px-4 py-3 md:px-6">
             <div className="flex items-center gap-2">
               {currentStep > 0 && (
@@ -583,7 +582,10 @@ export function AddProductModal({
                     </div>
 
                     <div className="space-y-3">
-                      <Label htmlFor="description">Description <span className="text-gray-500">(Recommended)</span></Label>
+                      <Label htmlFor="description">
+                        Description{" "}
+                        <span className="text-gray-500">(Recommended)</span>
+                      </Label>
                       <div className="relative">
                         <Textarea
                           id="description"
@@ -843,6 +845,16 @@ export function AddProductModal({
                       <p className="text-sm text-muted-foreground">
                         Max 3 images (5MB each) - JPG, PNG, WEBP and SVG only
                       </p>
+                      <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3 text-blue-800 dark:text-blue-300">
+                        <div className="flex items-start gap-2">
+                          <ImageIcon className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                          <p className="text-sm">
+                            <strong>Note:</strong> The first image you upload
+                            will be used as the main product image displayed in
+                            listings and previews.
+                          </p>
+                        </div>
+                      </div>
                       <div
                         ref={dropAreaRef}
                         className="flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-muted-foreground/30 bg-muted/30 p-6 text-center transition-colors hover:border-primary hover:bg-muted/50"
@@ -880,6 +892,11 @@ export function AddProductModal({
                       <div className="space-y-3">
                         <Label>
                           Uploaded Images ({formData.imageUrls?.length})
+                          {formData.imageUrls?.length > 0 && (
+                            <span className="ml-2 text-xs text-muted-foreground">
+                              • First image is main image
+                            </span>
+                          )}
                         </Label>
                         <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
                           {formData.imageUrls?.map((url, index) => (
@@ -887,6 +904,11 @@ export function AddProductModal({
                               key={index}
                               className="group relative aspect-square overflow-hidden rounded-lg"
                             >
+                              {index === 0 && (
+                                <div className="absolute left-2 top-2 rounded-full bg-primary px-2 py-1 text-xs text-white z-10">
+                                  Main
+                                </div>
+                              )}
                               <img
                                 src={url || "/placeholder.svg"}
                                 alt={`Preview ${index + 1}`}
@@ -909,7 +931,6 @@ export function AddProductModal({
                     )}
                   </div>
                 )}
-
                 {/* Step 5: Review - Enhanced summary cards */}
                 {currentStep === 4 && (
                   <div className="space-y-6">
@@ -958,8 +979,8 @@ export function AddProductModal({
                               <h4 className="mb-3 text-sm font-medium">
                                 Description
                               </h4>
-                              <ScrollArea className="h-[150px] w-full rounded-md border p-2">
-                                <p className="text-muted-foreground whitespace-pre-line capitalize break-words">
+                              <ScrollArea className="max-h-[200px] w-full overflow-y-auto overflow-x-hidden rounded-md border p-2">
+                                <p className="text-muted-foreground leading-relaxed break-all word-wrap overflow-wrap-anywhere hyphens-auto text-sm">
                                   {formData.description ||
                                     "No description provided"}
                                 </p>

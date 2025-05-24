@@ -108,8 +108,8 @@ export const SingleProduct = ({
     if (variation.name) return variation.name;
 
     const parts = [];
-    if (variation.size) parts.push(variation.size);
-    if (variation.color) parts.push(variation.color);
+    if (variation.size) parts.push(variation.size.toUpperCase());
+    if (variation.color) parts.push(variation.color.charAt(0).toUpperCase() + variation.color.slice(1));
 
     return parts.join(" - ") || `Variation ${variation.id}`;
   };

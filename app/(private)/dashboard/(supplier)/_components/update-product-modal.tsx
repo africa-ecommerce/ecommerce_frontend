@@ -1002,6 +1002,17 @@ const removeImage = (index: number) => {
                       <p className="text-sm text-muted-foreground">
                         Max 3 images (5MB each) - JPG, PNG, WEBP and SVG only
                       </p>
+
+                      <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3 text-blue-800 dark:text-blue-300">
+                        <div className="flex items-start gap-2">
+                          <ImageIcon className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                          <p className="text-sm">
+                            <strong>Note:</strong> The first image you upload
+                            will be used as the main product image displayed in
+                            listings and previews.
+                          </p>
+                        </div>
+                      </div>
                       <div
                         ref={dropAreaRef}
                         className="flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-muted-foreground/30 bg-muted/30 p-6 text-center transition-colors hover:border-primary hover:bg-muted/50"
@@ -1034,7 +1045,6 @@ const removeImage = (index: number) => {
                         </Button>
                       </div>
                     </div>
-
 
                     {imagePreviews.length > 0 && (
                       <div className="space-y-3">
@@ -1116,8 +1126,8 @@ const removeImage = (index: number) => {
                               <h4 className="mb-3 text-sm font-medium">
                                 Description
                               </h4>
-                              <ScrollArea className="h-[150px] w-full rounded-md border p-2">
-                                <p className="text-muted-foreground whitespace-pre-line capitalize break-words">
+                              <ScrollArea className="max-h-[200px] w-full overflow-y-auto overflow-x-hidden rounded-md border p-2">
+                                <p className="text-muted-foreground leading-relaxed break-all word-wrap overflow-wrap-anywhere hyphens-auto text-sm">
                                   {formData.description ||
                                     "No description provided"}
                                 </p>
@@ -1211,7 +1221,6 @@ const removeImage = (index: number) => {
                           </div>
                         )}
 
-                     
                       {imagePreviews.length > 0 && (
                         <div className="rounded-xl border bg-muted/30 p-5">
                           <h4 className="mb-3 text-sm font-medium">
