@@ -1008,8 +1008,7 @@ const removeImage = (index: number) => {
                           <ImageIcon className="h-4 w-4 flex-shrink-0 mt-0.5" />
                           <p className="text-sm">
                             <strong>Note:</strong> The first image you upload
-                            will be used as the main product image displayed in
-                            listings and previews.
+                            will be used as the main product image.
                           </p>
                         </div>
                       </div>
