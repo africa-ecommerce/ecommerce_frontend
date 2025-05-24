@@ -87,7 +87,7 @@ export default function PublishDialog({
   };
 
   const validateSubdomainFormat = (name: string) => {
-    if (!name.trim()) return { isValid: false, error: "Site name is required" };
+    if (!name.trim()) return { isValid: false, error: "Subdomain is required" };
     if (name.length < MIN_SUBDOMAIN_LENGTH)
       return {
         isValid: false,
@@ -158,7 +158,7 @@ export default function PublishDialog({
 
     if (error) {
       console.error("Error checking subdomain:", error);
-      setInputError("Couldn't verify site name availability");
+      setInputError("Couldn't verify subdomain availability");
       setNameAvailable(false);
     }
   }, [data, error, debouncedSubdomain]);

@@ -1,8 +1,3 @@
-
-
-
-
-
 "use client";
 
 import { useState } from "react";
@@ -114,115 +109,121 @@ export function ShareModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Share Product</DialogTitle>
-          <DialogDescription>
-            Customize your message and share this product with your friends and
-            followers
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] p-4 sm:p-6">
+        <div className="flex flex-col h-full max-h-[calc(90vh-2rem)]">
+          <DialogHeader className="flex-shrink-0 pb-3">
+            <DialogTitle className="text-lg sm:text-xl">
+              Share Product
+            </DialogTitle>
+            <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
+              Customize your message and share with friends
+            </DialogDescription>
+          </DialogHeader>
 
-        {/* Custom Tagline Section */}
-        <div className="space-y-3 mt-4">
-          <div>
-            <label
-              htmlFor="tagline"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block"
-            >
-              Your Message (Optional)
-            </label>
-            <Textarea
-              id="tagline"
-              placeholder={defaultTagline}
-              value={customTagline}
-              onChange={(e) => setCustomTagline(e.target.value)}
-              className="min-h-[80px] resize-none text-sm"
-              maxLength={200}
-            />
-            <div className="flex justify-between items-center mt-1">
-              <p className="text-xs text-gray-500">
-                Emojis welcome! 🎉 Leave blank to use default message
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+            {/* Custom Tagline Section */}
+            <div className="space-y-2">
+              <label
+                htmlFor="tagline"
+                className="text-xs font-medium text-gray-700 dark:text-gray-300 block"
+              >
+                Your Message (Optional)
+              </label>
+              <Textarea
+                id="tagline"
+                placeholder={defaultTagline}
+                value={customTagline}
+                onChange={(e) => setCustomTagline(e.target.value)}
+                className="min-h-[60px] h-16 resize-none text-xs leading-relaxed"
+                maxLength={200}
+              />
+              <div className="flex justify-between items-center">
+                <p className="text-[10px] text-gray-500">Emojis welcome! 🎉</p>
+                <p className="text-[10px] text-gray-400">
+                  {customTagline.length}/200
+                </p>
+              </div>
+            </div>
+
+            {/* Preview Section - Compact */}
+            <div className="bg-gray-50 dark:bg-gray-800 p-2 rounded border">
+              <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400 mb-1">
+                Preview:
               </p>
-              <p className="text-xs text-gray-400">
-                {customTagline.length}/200
+              <p className="text-xs text-gray-800 dark:text-gray-200 leading-snug">
+                {getFinalMessage()}
               </p>
+            </div>
+
+            {/* Copy Link Section */}
+            <div className="flex items-center space-x-2">
+              <Input
+                value={shareUrl}
+                readOnly
+                className="flex-1 text-[10px] h-8"
+              />
+              <Button
+                variant={copied ? "ghost" : "secondary"}
+                size="sm"
+                onClick={handleCopyLink}
+                className="flex-shrink-0 h-8 px-2"
+              >
+                <Copy className="h-3 w-3 mr-1" />
+                <span className="text-xs">{copied ? "✓" : "Copy"}</span>
+              </Button>
+            </div>
+
+            {/* Social Media Buttons - More Compact */}
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
+                onClick={() => handleShare("whatsapp")}
+              >
+                <WhatsApp className="h-5 w-5 text-green-500" />
+                <span className="text-[10px]">WhatsApp</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
+                onClick={() => handleShare("twitter")}
+              >
+                <Twitter className="h-5 w-5 text-sky-500" />
+                <span className="text-[10px]">Twitter</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
+                onClick={() => handleShare("facebook")}
+              >
+                <Facebook className="h-5 w-5 text-blue-600" />
+                <span className="text-[10px]">Facebook</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
+                onClick={() => handleShare("instagram")}
+              >
+                <Instagram className="h-5 w-5 text-pink-500" />
+                <span className="text-[10px]">Instagram</span>
+              </Button>
             </div>
           </div>
 
-          {/* Preview Section */}
-          <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border">
-            <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-              Preview:
-            </p>
-            <p className="text-sm text-gray-800 dark:text-gray-200">
-              {getFinalMessage()}
-            </p>
-          </div>
+          <DialogFooter className="flex-shrink-0 pt-3 mt-2">
+            <Button
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+              className="w-full h-8 text-sm"
+            >
+              Close
+            </Button>
+          </DialogFooter>
         </div>
-
-        {/* Copy Link Section */}
-        <div className="flex items-center space-x-2 mt-4">
-          <Input
-            value={shareUrl}
-            readOnly
-            className="flex-1 text-xs sm:text-sm"
-          />
-          <Button
-            variant={copied ? "ghost" : "secondary"}
-            size="sm"
-            onClick={handleCopyLink}
-            className="flex-shrink-0"
-          >
-            <Copy className="h-3.5 w-3.5 mr-1" />
-            {copied ? "Copied" : "Copy"}
-          </Button>
-        </div>
-
-        {/* Social Media Buttons */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-          <Button
-            variant="outline"
-            className="flex flex-col items-center justify-center h-20 sm:h-24 gap-1"
-            onClick={() => handleShare("whatsapp")}
-          >
-            <WhatsApp className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
-            <span className="text-xs">WhatsApp</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            className="flex flex-col items-center justify-center h-20 sm:h-24 gap-1"
-            onClick={() => handleShare("twitter")}
-          >
-            <Twitter className="h-6 w-6 sm:h-8 sm:w-8 text-sky-500" />
-            <span className="text-xs">Twitter</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            className="flex flex-col items-center justify-center h-20 sm:h-24 gap-1"
-            onClick={() => handleShare("facebook")}
-          >
-            <Facebook className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
-            <span className="text-xs">Facebook</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            className="flex flex-col items-center justify-center h-20 sm:h-24 gap-1"
-            onClick={() => handleShare("instagram")}
-          >
-            <Instagram className="h-6 w-6 sm:h-8 sm:w-8 text-pink-500" />
-            <span className="text-xs">Instagram</span>
-          </Button>
-        </div>
-
-        <DialogFooter className="mt-4 sm:mt-6">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
