@@ -427,7 +427,7 @@ export const SingleProduct = ({
   const [notificationSignedUp, setNotificationSignedUp] = useState(false);
   const router = useRouter();
 
-  // Use SWR directly in the component
+  // Replace your existing SWR configuration with this:
   const { data, error, isLoading, mutate } = useSWR(
     productId
       ? `/public/products/${productId}${referralId ? `/${referralId}` : ""}`
@@ -441,6 +441,12 @@ export const SingleProduct = ({
         }
       );
 
+      // Handle 404 specifically - don't throw error, return null
+      if (response.status === 404) {
+        return { data: null }; // This will make productData null
+      }
+
+      // For other HTTP errors, throw to trigger error state
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
@@ -454,6 +460,7 @@ export const SingleProduct = ({
     }
   );
 
+  // The rest of your component logic remains the same
   const productData: ProductData = data?.data || null;
 
   // Handle variations logic
