@@ -79,7 +79,7 @@ export default function StorePage() {
   const copyStoreUrl = () => {
     if (!user?.plug?.subdomain) return;
 
-    const storeUrl = `https://${user.plug.subdomain}.pluggn.com`;
+    const storeUrl = `https://${user.plug.subdomain}.pluggn.store`;
     navigator.clipboard.writeText(storeUrl);
 
     setCopied(true);
@@ -126,7 +126,7 @@ export default function StorePage() {
               className="h-9 flex-1 sm:flex-auto"
             >
               <a
-                href={`https://${user?.plug?.subdomain}.pluggn.com`}
+                href={`https://${user?.plug?.subdomain}.pluggn.store`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -383,7 +383,7 @@ function StoreView({
                 Your Store URL
               </h3>
               <div className="text-sm text-muted-foreground break-all w-full pr-2 overflow-hidden text-ellipsis">
-                https://{storeSubdomain}.pluggn.com
+                https://{storeSubdomain}.pluggn.store
               </div>
             </div>
             <div className="flex gap-2 w-full md:w-auto">
@@ -407,7 +407,7 @@ function StoreView({
               </Button>
               <Button asChild variant="default" className="flex-1 md:flex-auto">
                 <a
-                  href={`https://${storeSubdomain}.pluggn.com`}
+                  href={`https://${storeSubdomain}.pluggn.store`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

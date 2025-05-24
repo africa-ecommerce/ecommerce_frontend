@@ -10,6 +10,7 @@ import {
   ShoppingBag,
   Truck,
   Users,
+  CheckCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -99,6 +100,7 @@ const ProductSkeleton = () => {
               <div className="grid grid-cols-2 gap-4">
                 <Skeleton className="h-20 rounded-lg" />
                 <Skeleton className="h-20 rounded-lg" />
+                <Skeleton className="h-20 rounded-lg" />
               </div>
 
               {/* Tabs Skeleton */}
@@ -113,11 +115,12 @@ const ProductSkeleton = () => {
     </div>
   );
 };
+
 export default function ProductDetail() {
   const router = useRouter();
   const params = useParams();
   const productId = params.id;
-  console.log("productId", productId)
+  console.log("productId", productId);
 
   // Use SWR for data fetching with caching
   const {
@@ -127,7 +130,7 @@ export default function ProductDetail() {
   } = useSWR(`/api/products/${productId}`, fetcher, {
     revalidateOnFocus: true,
     revalidateIfStale: false,
-    dedupingInterval: 600000, 
+    dedupingInterval: 600000,
     shouldRetryOnError: false,
   });
 
@@ -138,7 +141,7 @@ export default function ProductDetail() {
   } = useUser();
 
   console.log("product", product);
-  console.log("data", product?.data)
+  console.log("data", product?.data);
 
   const isInCart = items.some((item) => item.id === product?.id);
 
@@ -203,6 +206,22 @@ export default function ProductDetail() {
   // Utility function to format plural text
   const formatPlural = (count: number, singular: any, plural: any) => {
     return count === 1 ? `1 ${singular}` : `${count} ${plural}`;
+  };
+
+  // Hardcoded fulfillment rate for now
+  const fulfillmentRate = 94;
+  const getFulfillmentRateDescription = (rate: number) => {
+    if (rate >= 85) return "Excellent";
+    if (rate >= 70) return "Very Good";
+    if (rate >= 60) return "Good";
+    if (rate >= 45) return "Fair";
+    return "Poor";
+  };
+
+  const getFulfillmentRateColor = (rate: number) => {
+    if (rate >= 60) return "text-green-600"; // Good and above - green
+    if (rate >= 45) return "text-yellow-600"; // Fair - yellow
+    return "text-red-600"; // Poor - red
   };
 
   return (
@@ -330,7 +349,7 @@ export default function ProductDetail() {
             </Card>
 
             {/* Delivery & Stock Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
                 <div className="flex items-center gap-2">
                   <Truck className="h-5 w-5 text-muted-foreground" />
@@ -358,6 +377,34 @@ export default function ProductDetail() {
                   {formatPlural(getTotalStock(product) || 0, "unit", "units")}
                 </div>
               </div>
+
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <div className="text-xs md:text-sm font-medium">
+                      Fulfillment Rate
+                    </div>
+                    <div
+                      className={`text-xs font-medium ${getFulfillmentRateColor(
+                        fulfillmentRate
+                      )}`}
+                    >
+                      {getFulfillmentRateDescription(fulfillmentRate)}
+                    </div>
+                  </div>
+                </div>
+                <div className="font-semibold text-sm">{fulfillmentRate}%</div>
+              </div>
+            </div>
+
+            {/* Fulfillment Rate Description */}
+            <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
+              <p>
+                <span className="font-medium">Fulfillment Rate:</span> The
+                percentage of orders successfully delivered without returns or
+                issues.
+              </p>
             </div>
 
             {/* Product Details Tabs */}

@@ -1211,28 +1211,7 @@ const removeImage = (index: number) => {
                           </div>
                         )}
 
-                      {/* {(formData.imageUrls?.length || 0) > 0 && (
-                        <div className="rounded-xl border bg-muted/30 p-5">
-                          <h4 className="mb-3 text-sm font-medium">
-                            Images ({formData.imageUrls?.length})
-                          </h4>
-                          <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
-                            {formData.imageUrls?.map((url, index) => (
-                              <div
-                                key={index}
-                                className="aspect-square overflow-hidden rounded-lg"
-                              >
-                                <img
-                                  src={url || "/placeholder.svg"}
-                                  alt={`Preview ${index + 1}`}
-                                  className="h-full w-full object-cover"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )} */}
-
+                     
                       {imagePreviews.length > 0 && (
                         <div className="rounded-xl border bg-muted/30 p-5">
                           <h4 className="mb-3 text-sm font-medium">

@@ -431,6 +431,7 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
                             <Input
                               {...field}
                               type={showCurrentPassword ? "text" : "password"}
+                              placeholder="******"
                             />
                             <Button
                               type="button"
@@ -465,6 +466,7 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
                             <Input
                               {...field}
                               type={showNewPassword ? "text" : "password"}
+                              placeholder="******"
                             />
                             <Button
                               type="button"
@@ -499,6 +501,7 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
                             <Input
                               {...field}
                               type={showConfirmPassword ? "text" : "password"}
+                              placeholder="******"
                             />
                             <Button
                               type="button"

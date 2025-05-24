@@ -83,7 +83,7 @@ export default function PublishDialog({
   };
 
   const getDisplayUrl = (url: string) => {
-    return url || `https://www.${subdomain}.pluggn.com`;
+    return url || `https://www.${subdomain}.pluggn.store`;
   };
 
   const validateSubdomainFormat = (name: string) => {
@@ -369,7 +369,7 @@ export default function PublishDialog({
                   <p className="text-slate-500 text-sm sm:text-base">
                     We're {isEditing ? "updating" : "preparing"}{" "}
                     <span className="font-medium">
-                      www.{subdomain}.pluggn.com
+                      www.{subdomain}.pluggn.store
                     </span>{" "}
                     {isEditing
                       ? "with your latest changes."
@@ -676,7 +676,7 @@ export default function PublishDialog({
                             )}
                         </div>
                         <span className="inline-flex items-center px-2 sm:px-3 rounded-r-md border border-l-0 border-slate-300 bg-slate-50 text-slate-500 text-xs sm:text-sm">
-                          .pluggn.com
+                          .pluggn.store
                         </span>
                       </div>
                       {inputError && (

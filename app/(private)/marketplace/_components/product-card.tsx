@@ -60,7 +60,6 @@ export function ProductCard({ product, className }: ProductCardProps) {
     e.preventDefault(); // Prevent card click when clicking the button
     e.stopPropagation(); // Stop event propagation
 
-    // if (isInCart) return; // Don't add if already in cart
 
     setIsAdding(true);
 
@@ -77,7 +76,6 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
     // Add item to cart after a short delay to show loading state
     setTimeout(() => {
-      // addItem(cartItem, false); 
       if (!isInCart) {
         addItem(cartItem, false); // Second parameter opens the cart
       }

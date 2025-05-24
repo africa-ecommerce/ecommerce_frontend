@@ -224,26 +224,7 @@ export function DiscoveryModeDialog({
     setDragDelta(0);
   };
 
-  // Framer Motion drag handlers (fallback)
-  // const handleDragEnd = (
-  //   event: MouseEvent | TouchEvent | PointerEvent,
-  //   info: PanInfo
-  // ) => {
-  //   setIsDragging(false);
-  //   const threshold = 40; // Reduced threshold for more sensitive response
-  //   const velocityThreshold = 200; // Reduced velocity threshold for more responsive feel
-
-  //   if (info.offset.x > threshold || info.velocity.x > velocityThreshold) {
-  //     // Swiped right
-  //     handlePrev();
-  //   } else if (
-  //     info.offset.x < -threshold ||
-  //     info.velocity.x < -velocityThreshold
-  //   ) {
-  //     // Swiped left
-  //     handleNext();
-  //   }
-  // };
+  
 
    const handleDragEnd = useCallback(
      (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
