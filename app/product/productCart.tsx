@@ -529,7 +529,7 @@ export const SingleProduct = ({
                           <Label className="text-sm font-medium mb-3 block">
                             Available Options (Select multiple)
                           </Label>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[320px] md:max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
                             {productData.variations.map((variation) => {
                               const isSelected = isVariationSelected(
                                 variation.id
@@ -600,7 +600,6 @@ export const SingleProduct = ({
                                     {/* Quantity selector for selected variations */}
                                     {isSelected && variation.stock > 0 && (
                                       <div className="flex items-center justify-between pt-3 border-t border-muted">
-                                       
                                         <div className="flex items-center space-x-2">
                                           <Button
                                             variant="outline"
@@ -751,13 +750,13 @@ export const SingleProduct = ({
                             ? "Currently Out of Stock"
                             : currentStock <= 5
                             ? `Only ${currentStock} left in stock`
-                            : "In Stock"}
+                            : ""}
                         </span>
                       </div>
                     )}
 
                     {/* Out of Stock WhatsApp Signup */}
-                    {(isOutOfStock) && (
+                    {isOutOfStock && (
                       <div className="bg-muted/50 rounded-lg p-4 mb-4">
                         <h3 className="font-medium mb-2">
                           Good news travels fast!
