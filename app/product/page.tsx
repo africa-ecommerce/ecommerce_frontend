@@ -1,5 +1,5 @@
 import React from "react";
-import { SingleProductCart } from "./productCart";
+import { SingleProduct } from "./productCart";
 import { Metadata, Viewport } from "next";
 import { getProductServer } from "@/lib/products";
 
@@ -140,7 +140,7 @@ export async function generateMetadata({
 const Page = ({ searchParams }: { searchParams: SearchParams }) => {
   return (
     <div>
-      <SingleProductCart
+      <SingleProduct
         productId={searchParams.pid}
         referralId={searchParams.ref}
         platform={searchParams.platform}

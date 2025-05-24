@@ -65,7 +65,7 @@ export function WriteReviewModal({ open, onOpenChange, productId, productName }:
     setIsSubmitting(true)
     try {
       // Replace with your actual API endpoint
-      const response = await fetch("/api/reviews", {
+      const response = await fetch("/api/plug/products/review", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
