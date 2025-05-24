@@ -393,11 +393,9 @@ export const SingleProduct = ({
                         </Badge>
                       )}
                     </div>
-
                     <p className="text-2xl font-bold text-primary mb-4">
                       {formatPrice(productData.price)}
                     </p>
-
                     {/* Variations Selection */}
                     {hasVariations && (
                       <div className="space-y-4 mb-6">
@@ -480,8 +478,9 @@ export const SingleProduct = ({
                         )}
                       </div>
                     )}
-
                     {/* Description */}
+                    // Replace the existing description section with this:
+                    {/* Description Dropdown */}
                     {productData.description && (
                       <div className="mb-6">
                         <button
@@ -502,18 +501,15 @@ export const SingleProduct = ({
 
                         {isDescriptionExpanded && (
                           <div className="mt-2 border border-muted rounded-lg bg-background">
-                            <div className="max-h-40 overflow-y-auto p-4">
-                              <p className="text-muted-foreground leading-relaxed break-words whitespace-pre-wrap">
+                            <div className="max-h-40 overflow-y-auto overflow-x-hidden p-4">
+                              <p className="text-muted-foreground leading-relaxed break-all word-wrap overflow-wrap-anywhere hyphens-auto text-sm">
                                 {formatDescription(productData.description)}
                               </p>
-
-                              
                             </div>
                           </div>
                         )}
                       </div>
                     )}
-
                     {/* Quantity and Stock */}
                     {!isOutOfStock && (
                       <div className="flex items-center space-x-4 mb-6">
@@ -546,7 +542,6 @@ export const SingleProduct = ({
                         </span>
                       </div>
                     )}
-
                     {/* Stock Status */}
                     <div className="flex items-center text-sm mb-4">
                       <span
@@ -565,7 +560,6 @@ export const SingleProduct = ({
                           : "In Stock"}
                       </span>
                     </div>
-
                     {/* Out of Stock WhatsApp Signup */}
                     {isOutOfStock && (
                       <div className="bg-muted/50 rounded-lg p-4 mb-4">
@@ -614,7 +608,6 @@ export const SingleProduct = ({
                         </p>
                       </div>
                     )}
-
                     {/* Seller Info */}
                     {productData.seller && (
                       <div className="text-sm text-muted-foreground">
