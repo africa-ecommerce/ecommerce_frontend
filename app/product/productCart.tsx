@@ -339,7 +339,7 @@ export const SingleProduct = ({
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-6">
                   {/* Enhanced Image Gallery */}
-                  <div className="flex-shrink-0 w-full md:w-1/2">
+                  <div className="flex-shrink-0 w-full md:w-[45%]">
                     {/* Main Image */}
                     <div className="relative aspect-square rounded-lg overflow-hidden mb-4 bg-muted">
                       <Image
@@ -478,8 +478,7 @@ export const SingleProduct = ({
                         )}
                       </div>
                     )}
-                    {/* Description */}
-                    // Replace the existing description section with this:
+                    
                     {/* Description Dropdown */}
                     {productData.description && (
                       <div className="mb-6">
@@ -501,7 +500,7 @@ export const SingleProduct = ({
 
                         {isDescriptionExpanded && (
                           <div className="mt-2 border border-muted rounded-lg bg-background">
-                            <div className="max-h-40 overflow-y-auto overflow-x-hidden p-4">
+                            <div className="max-h-[200px] overflow-y-auto overflow-x-hidden p-4">
                               <p className="text-muted-foreground leading-relaxed break-all word-wrap overflow-wrap-anywhere hyphens-auto text-sm">
                                 {formatDescription(productData.description)}
                               </p>
