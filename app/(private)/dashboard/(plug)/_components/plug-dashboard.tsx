@@ -550,10 +550,7 @@ export default function PlugDashboard() {
                 </CardHeader>
                 <CardContent className="p-2 sm:p-3 pt-0">
                   <div className="text-base sm:text-lg font-bold">₦12,500</div>
-                  <div className="flex items-center text-[10px] text-amber-600 mt-0.5">
-                    <Clock className="h-2.5 w-2.5 mr-1" />
-                    <span>Release in 2 days</span>
-                  </div>
+                 
                 </CardContent>
               </Card>
 
@@ -938,13 +935,7 @@ export default function PlugDashboard() {
                   your visibility by up to 40%.
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-auto text-xs h-7 sm:h-8"
-              >
-                <ExternalLink className="h-3 w-3 mr-1" /> Learn
-              </Button>
+             
             </CardContent>
           </Card>
         )}

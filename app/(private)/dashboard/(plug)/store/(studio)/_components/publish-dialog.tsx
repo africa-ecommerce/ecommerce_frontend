@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -366,9 +365,9 @@ export default function PublishDialog({
                       ? "Updating your site..."
                       : "Publishing your site..."}
                   </h3>
-                  <p className="text-slate-500 text-sm sm:text-base">
+                  <p className="text-slate-500 text-sm sm:text-base px-2">
                     We're {isEditing ? "updating" : "preparing"}{" "}
-                    <span className="font-medium">
+                    <span className="font-medium break-all">
                       www.{subdomain}.pluggn.store
                     </span>{" "}
                     {isEditing
@@ -380,7 +379,7 @@ export default function PublishDialog({
                 <div className="space-y-3 pt-2">
                   <div className="flex items-center">
                     <CheckCircle
-                      className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 ${
+                      className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0 ${
                         publishProgress > 30
                           ? "text-green-500"
                           : "text-slate-300"
@@ -400,7 +399,7 @@ export default function PublishDialog({
                   </div>
                   <div className="flex items-center">
                     <CheckCircle
-                      className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 ${
+                      className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0 ${
                         publishProgress > 60
                           ? "text-green-500"
                           : "text-slate-300"
@@ -418,7 +417,7 @@ export default function PublishDialog({
                   </div>
                   <div className="flex items-center">
                     <CheckCircle
-                      className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 ${
+                      className={`h-4 w-4 sm:h-5 sm:w-5 mr-2 flex-shrink-0 ${
                         publishProgress > 85
                           ? "text-green-500"
                           : "text-slate-300"
@@ -467,7 +466,7 @@ export default function PublishDialog({
                     <h4 className="font-medium text-slate-700 text-sm sm:text-base">
                       Your website address
                     </h4>
-                    <div className="flex gap-1 sm:gap-2">
+                    <div className="flex gap-1 sm:gap-2 flex-shrink-0">
                       <Button
                         size="sm"
                         variant="ghost"
@@ -506,10 +505,10 @@ export default function PublishDialog({
                     </div>
                   </div>
                   <div className="flex items-center gap-2 overflow-hidden rounded-md border bg-white p-2">
-                    <div className="bg-slate-100 rounded-full p-1.5">
+                    <div className="bg-slate-100 rounded-full p-1.5 flex-shrink-0">
                       <Globe className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600" />
                     </div>
-                    <code className="text-xs sm:text-sm font-medium text-slate-700 truncate flex-1">
+                    <code className="text-xs sm:text-sm font-medium text-slate-700 truncate flex-1 min-w-0">
                       {getDisplayUrl(publishResult.siteUrl)}
                     </code>
                   </div>
@@ -525,7 +524,7 @@ export default function PublishDialog({
                       );
                     }}
                   >
-                    <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
                     Visit Site
                   </Button>
                   <Button
@@ -622,11 +621,11 @@ export default function PublishDialog({
                     </label>
 
                     <div className="relative mt-1">
-                      <div className="flex">
-                        <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-slate-300 bg-slate-50 text-slate-500 text-xs sm:text-sm">
+                      <div className="flex min-w-0">
+                        <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-slate-300 bg-slate-50 text-slate-500 text-xs sm:text-sm flex-shrink-0">
                           www.
                         </span>
-                        <div className="relative flex-1">
+                        <div className="relative flex-1 min-w-0">
                           <input
                             type="text"
                             id="subdomain"
@@ -635,7 +634,7 @@ export default function PublishDialog({
                                 ? "border-red-300"
                                 : nameAvailable === true
                                 ? "border-green-300"
-                                : "border-slate-300"
+                                : "border-slate-300" 
                             } ${
                               inputError
                                 ? "focus:border-red-500"
@@ -675,12 +674,12 @@ export default function PublishDialog({
                               </div>
                             )}
                         </div>
-                        <span className="inline-flex items-center px-2 sm:px-3 rounded-r-md border border-l-0 border-slate-300 bg-slate-50 text-slate-500 text-xs sm:text-sm">
+                        <span className="inline-flex items-center px-2 sm:px-3 rounded-r-md border border-l-0 border-slate-300 bg-slate-50 text-slate-500 text-xs sm:text-sm flex-shrink-0">
                           .pluggn.store
                         </span>
                       </div>
                       {inputError && (
-                        <p className="mt-1 text-xs sm:text-sm text-red-600">
+                        <p className="mt-1 text-xs sm:text-sm text-red-600 break-words">
                           {inputError}
                         </p>
                       )}
@@ -689,7 +688,7 @@ export default function PublishDialog({
                         nameAvailable === true &&
                         isTouched &&
                         subdomain.trim() !== "" && (
-                          <p className="mt-1 text-xs sm:text-sm text-green-600">
+                          <p className="mt-1 text-xs sm:text-sm text-green-600 break-words">
                             { subdomain.toLowerCase() === originalSubdomainRef.current.toLowerCase()
                               ? "This is your current domain and is available to use."
                               : "Great! This domain is available."}
@@ -697,7 +696,7 @@ export default function PublishDialog({
                         )}
                         
                         {isEditing && !isTouched && (
-                       <p className="mt-1 text-xs sm:text-sm text-green-600">
+                       <p className="mt-1 text-xs sm:text-sm text-green-600 break-words">
                         This is your current domain and is available to use.
                        </p>)
                         }
@@ -706,7 +705,7 @@ export default function PublishDialog({
                         !isEditing &&
                         nameAvailable === true &&
                         subdomain.trim() !== "" && (
-                          <p className="mt-1 text-xs sm:text-sm text-green-600">
+                          <p className="mt-1 text-xs sm:text-sm text-green-600 break-words">
                             Great! This domain is available.
                           </p>
                         )}
@@ -720,25 +719,27 @@ export default function PublishDialog({
 
                   <div className="space-y-2 sm:space-y-3 pt-1 sm:pt-2">
                     <div className="flex items-center">
-                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 sm:mr-3" />
+                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 sm:mr-3 flex-shrink-0" />
                       <p className="text-xs sm:text-sm text-slate-600">
                         Free SSL certificate for secure browsing
                       </p>
                     </div>
                     <div className="flex items-center">
-                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 sm:mr-3" />
+                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 sm:mr-3 flex-shrink-0" />
                       <p className="text-xs sm:text-sm text-slate-600">
                         Optimized for all devices and screen sizes
                       </p>
                     </div>
                     <div className="flex items-center">
-                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 sm:mr-3" />
+                      <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 sm:mr-3 flex-shrink-0" />
                       <p className="text-xs sm:text-sm text-slate-600">
                         Easy sharing on social media
                       </p>
                     </div>
                   </div>
                 </div>
+
+                
 
                 <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
                   <Button
