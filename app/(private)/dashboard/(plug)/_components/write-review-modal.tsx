@@ -47,11 +47,7 @@ const reviewTemplates = [
     title: "Solid Purchase",
     text: "This product met my expectations. Good build quality and exactly what was advertised on the Pluggn marketplace. Shipping was reasonable and the item arrived in perfect condition.",
   },
-  {
-    id: "template-3",
-    title: "Room for Improvement", 
-    text: "The product has some good qualities but didn't fully meet my expectations. While the Pluggn platform made ordering easy, the item quality could be better for the price point.",
-  },
+ 
   
 ]
 
@@ -164,7 +160,7 @@ export function WriteReviewModal({
             <div className="space-y-2">
               <Label>Your Review</Label>
               <div className="p-3 bg-muted rounded-md min-h-[150px]">
-                <p className="text-sm">{existingReview.review}</p>
+                <p className="text-sm break-all">{existingReview.review}</p>
               </div>
             </div>
 

@@ -10,7 +10,7 @@ import {
   ChevronRight,
   HelpCircle,
   MoreHorizontal,
-  Pencil,
+  Settings,
   Plus,
   Search,
   Tag,
@@ -842,7 +842,7 @@ export default function Inventory() {
                                         handleEdit(item.id, item);
                                       }}
                                     >
-                                      <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
                                       Manage
                                     </DropdownMenuItem>
 

@@ -135,7 +135,7 @@ export function ShareModal({
                 placeholder={defaultTagline}
                 value={customTagline}
                 onChange={(e) => setCustomTagline(e.target.value)}
-                className="min-h-[60px] h-16 resize-none text-xs leading-relaxed"
+                className="min-h-[70px] h-16 resize-none text-xs leading-relaxed break-all"
                 maxLength={200}
               />
               <div className="flex justify-between items-center">
@@ -151,7 +151,7 @@ export function ShareModal({
               <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400 mb-1">
                 Preview:
               </p>
-              <p className="text-xs text-gray-800 dark:text-gray-200 leading-snug">
+              <p className="text-xs text-gray-800 dark:text-gray-200 leading-snug break-all">
                 {getFinalMessage()}
               </p>
             </div>

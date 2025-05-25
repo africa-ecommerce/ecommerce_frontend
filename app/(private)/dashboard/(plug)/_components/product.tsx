@@ -2,12 +2,6 @@
 
 
 
-
-
-
-
-
-
 "use client"
 
 import { useState, useMemo } from "react"
@@ -27,6 +21,7 @@ import {
   FilterX,
   Users,
   Truck,
+  Settings,
   Pencil,
   PackageCheck,
   Share2,
@@ -893,7 +888,7 @@ export default function Products() {
                                         setPriceModalOpen(true)
                                       }}
                                     >
-                                      <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Manage
+                                      <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Manage
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       className="text-xs sm:text-sm"
