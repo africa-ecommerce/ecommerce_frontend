@@ -327,21 +327,14 @@ export default function MarketplacePage() {
                   Failed to load products: {error.message}
                 </AlertDescription>
               </Alert>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-4 mr-2"
-                onClick={refreshData}
-              >
-                Retry
-              </Button>
+             
               <Button
                 variant="outline"
                 size="sm"
                 className="mt-4"
                 onClick={() => window.location.reload()}
               >
-                Refresh Page
+                Retry
               </Button>
             </div>
           )}
