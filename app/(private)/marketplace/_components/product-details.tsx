@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProductImageGallery } from "./product-image-gallery";
 import { ProductSpecifications } from "./product-specifications";
-import { CustomerReviews } from "./customer-reviews";
+import { PlugReviews } from "./plug-reviews"
 import { Skeleton } from "@/components/ui/skeleton";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
 import { useUser } from "@/app/_components/provider/UserContext";
@@ -431,12 +431,9 @@ export default function ProductDetail() {
               </TabsContent>
 
               <TabsContent value="reviews" className="mt-4">
-                <CustomerReviews
-                  overallRating={product?.rating}
-                  totalReviews={product?.totalReviews}
-                  ratingDistribution={product?.ratingDistribution}
-                  reviews={product?.reviews}
-                />
+              <PlugReviews
+    reviews={product?.reviews || []}
+  />
               </TabsContent>
             </Tabs>
           </section>
