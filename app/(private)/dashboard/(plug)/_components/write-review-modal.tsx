@@ -140,7 +140,9 @@ export function WriteReviewModal({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Write a Review</DialogTitle>
-          <DialogDescription>Share your thoughts about {productName}.</DialogDescription>
+          <DialogDescription>
+            Share your thoughts about {productName}.
+          </DialogDescription>
         </DialogHeader>
         {existingReview ? (
           // Show existing review
@@ -151,7 +153,11 @@ export function WriteReviewModal({
                 {[1, 2, 3, 4, 5].map((value) => (
                   <Star
                     key={value}
-                    className={`h-6 w-6 ${value <= existingReview.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+                    className={`h-6 w-6 ${
+                      value <= existingReview.rating
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300"
+                    }`}
                   />
                 ))}
               </div>
@@ -165,7 +171,10 @@ export function WriteReviewModal({
             </div>
 
             <div className="text-xs text-muted-foreground">
-              <p>You have already reviewed this product. You can delete your review if you want to remove it.</p>
+              <p>
+                You have already reviewed this product. You can delete your
+                review if you want to remove it.
+              </p>
             </div>
           </div>
         ) : (
@@ -175,9 +184,18 @@ export function WriteReviewModal({
               <Label htmlFor="rating">Rating</Label>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((value) => (
-                  <button key={value} type="button" onClick={() => setRating(value)} className="focus:outline-none">
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setRating(value)}
+                    className="focus:outline-none"
+                  >
                     <Star
-                      className={`h-6 w-6 ${value <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+                      className={`h-6 w-6 ${
+                        value <= rating
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300"
+                      }`}
                     />
                   </button>
                 ))}
@@ -198,41 +216,66 @@ export function WriteReviewModal({
                   onChange={(e) => setReviewText(e.target.value)}
                   className="min-h-[150px]"
                 />
+
+                <div className="text-xs text-muted-foreground">
+                  <p>Tips for a helpful review:</p>
+                  <ul className="list-disc pl-4 space-y-1 mt-1">
+                    <li>Mention specific features you liked or disliked</li>
+                    <li>
+                      Comment on the quality, durability, and value for money
+                    </li>
+                    <li>Keep it concise and honest</li>
+                  </ul>
+                </div>
               </TabsContent>
               <TabsContent value="templates" className="space-y-4">
                 <Label>Select a template to start with</Label>
-                <RadioGroup value={selectedTemplate} onValueChange={handleTemplateSelect}>
+                <RadioGroup
+                  value={selectedTemplate}
+                  onValueChange={handleTemplateSelect}
+                >
                   {reviewTemplates.map((template) => (
-                    <div key={template.id} className="flex items-start space-x-2 border p-3 rounded-md">
-                      <RadioGroupItem value={template.id} id={template.id} className="mt-1" />
+                    <div
+                      key={template.id}
+                      className="flex items-start space-x-2 border p-3 rounded-md"
+                    >
+                      <RadioGroupItem
+                        value={template.id}
+                        id={template.id}
+                        className="mt-1"
+                      />
                       <div className="space-y-1">
-                        <Label htmlFor={template.id} className="font-medium cursor-pointer">
+                        <Label
+                          htmlFor={template.id}
+                          className="font-medium cursor-pointer"
+                        >
                           {template.title}
                         </Label>
-                        <p className="text-sm text-muted-foreground">{template.text.substring(0, 100)}...</p>
+                        <p className="text-sm text-muted-foreground">
+                          {template.text.substring(0, 100)}...
+                        </p>
                       </div>
                     </div>
                   ))}
                 </RadioGroup>
               </TabsContent>
             </Tabs>
-
-            <div className="text-xs text-muted-foreground">
-              <p>Tips for a helpful review:</p>
-              <ul className="list-disc pl-4 space-y-1 mt-1">
-                <li>Mention specific features you liked or disliked</li>
-                <li>Comment on the quality, durability, and value for money</li>
-                <li>Keep it concise and honest</li>
-              </ul>
-            </div>
           </div>
         )}
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting || isDeleting}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isSubmitting || isDeleting}
+          >
             Cancel
           </Button>
           {existingReview ? (
-            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
               {isDeleting ? "Deleting..." : "Delete Review"}
             </Button>
           ) : (
@@ -243,5 +286,5 @@ export function WriteReviewModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

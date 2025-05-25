@@ -452,10 +452,7 @@ export default function SupplierDashboard() {
                     <div className="text-base sm:text-lg font-bold">
                       ₦45,500
                     </div>
-                    <div className="flex items-center text-[10px] text-amber-600 mt-0.5">
-                      <AlertCircle className="h-2.5 w-2.5 mr-1" />
-                      <span>3 pending orders</span>
-                    </div>
+                    
                   </>
                 )}
               </CardContent>
@@ -849,13 +846,7 @@ export default function SupplierDashboard() {
                   maintain sales volume during economic downturns.
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="ml-auto text-xs h-7 sm:h-8"
-              >
-                <ExternalLink className="h-3 w-3 mr-1" /> Learn
-              </Button>
+             
             </CardContent>
           </Card>
         )}

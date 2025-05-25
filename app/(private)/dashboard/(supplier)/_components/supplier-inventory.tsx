@@ -846,10 +846,7 @@ export default function Inventory() {
                                       Manage
                                     </DropdownMenuItem>
 
-                                    <DropdownMenuItem className="text-xs sm:text-sm">
-                                      <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
-                                      Promote
-                                    </DropdownMenuItem>
+                                   
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                       className="text-destructive text-xs sm:text-sm"
