@@ -897,8 +897,8 @@ export default function PlugDashboard() {
                       <Image 
                         src={platform.imageSrc}
                         alt={`${platform.platform} logo`}
-                        width={12}
-                        height={12}
+                        width={14}
+                        height={14}
                         className="object-contain"
                       />
                     </div>
