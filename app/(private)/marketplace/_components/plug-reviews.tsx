@@ -251,9 +251,7 @@ export function PlugReviews({ reviews, className }: PlugReviewsProps) {
                     <span className="font-medium text-sm sm:text-base">
                       {formatBusinessName(review.businessName)}
                     </span>
-                    <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full self-start sm:self-center">
-                      Verified Purchase
-                    </span>
+                   
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {formatDate(review.createdAt)}
