@@ -58,13 +58,24 @@ export const FilterSheet = ({
           <div>
             <h3 className="text-sm font-medium mb-4">Price Range</h3>
             <div className="px-2">
-              <Slider
+              {/* <Slider
                 value={filters.priceRange}
                 onValueChange={onPriceChange}
                 max={9999999}
                 defaultValue={[9999999]}
                 step={10000}
-                // minStepsBetweenThumbs={1}
+                minStepsBetweenThumbs={1}
+                className="mb-4"
+              /> */}
+
+              <Slider
+                value={filters.priceRange}
+                onValueChange={onPriceChange}
+                min={0} // Add minimum value
+                max={1000000} // Reasonable maximum (adjust as needed)
+                defaultValue={[0, 1000000]} // Provide both min and max default values
+                step={10000}
+                minStepsBetweenThumbs={1}
                 className="mb-4"
               />
               <div className="flex justify-between text-sm text-muted-foreground">
@@ -81,10 +92,15 @@ export const FilterSheet = ({
             <h3 className="text-sm font-medium mb-3">Categories</h3>
             <div className="space-y-2">
               {PRODUCT_CATEGORIES.map((category) => (
-                <div key={category.value} className="flex items-center space-x-2">
+                <div
+                  key={category.value}
+                  className="flex items-center space-x-2"
+                >
                   <Checkbox
                     id={`cat-${category.value}`}
-                    checked={filters.selectedCategories.includes(category.value)}
+                    checked={filters.selectedCategories.includes(
+                      category.value
+                    )}
                     onCheckedChange={() => onToggleCategory(category.value)}
                   />
                   <Label htmlFor={`cat-${category.value}`} className="text-sm">
@@ -108,12 +124,17 @@ export const FilterSheet = ({
                     checked={filters.selectedRatings.includes(rating)}
                     onCheckedChange={() => onToggleRating(rating)}
                   />
-                  <Label htmlFor={`rating-${rating}`} className="text-sm flex items-center">
+                  <Label
+                    htmlFor={`rating-${rating}`}
+                    className="text-sm flex items-center"
+                  >
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}
                         className={`h-4 w-4 ${
-                          i < rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"
+                          i < rating
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-muted-foreground"
                         }`}
                       />
                     ))}
@@ -127,10 +148,7 @@ export const FilterSheet = ({
           <Separator />
 
           {/* Apply Button */}
-          <Button 
-            className="w-full"
-            onClick={onApplyFilters}
-          >
+          <Button className="w-full" onClick={onApplyFilters}>
             Apply Filters
           </Button>
         </div>
