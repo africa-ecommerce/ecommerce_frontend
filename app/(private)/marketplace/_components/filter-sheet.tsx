@@ -66,7 +66,7 @@ export const FilterSheet = ({
                 defaultValue={[9999999]}
                 step={25000}
                 minStepsBetweenThumbs={1}
-                
+                className="mb-4"
               />
 
              
