@@ -58,26 +58,18 @@ export const FilterSheet = ({
           <div>
             <h3 className="text-sm font-medium mb-4">Price Range</h3>
             <div className="px-2">
-              {/* <Slider
+              <Slider
                 value={filters.priceRange}
                 onValueChange={onPriceChange}
                 max={9999999}
+                min={1000}
                 defaultValue={[9999999]}
                 step={10000}
                 minStepsBetweenThumbs={1}
                 className="mb-4"
-              /> */}
-
-              <Slider
-                value={filters.priceRange}
-                onValueChange={onPriceChange}
-                min={0} // Add minimum value
-                max={1000000} // Reasonable maximum (adjust as needed)
-                defaultValue={[0, 1000000]} // Provide both min and max default values
-                step={10000}
-                minStepsBetweenThumbs={1}
-                className="mb-4"
               />
+
+             
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>₦{filters.priceRange[0].toLocaleString()}</span>
                 <span>₦{filters.priceRange[1].toLocaleString()}</span>
