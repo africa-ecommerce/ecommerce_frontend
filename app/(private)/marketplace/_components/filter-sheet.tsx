@@ -62,6 +62,7 @@ export const FilterSheet = ({
                 value={filters.priceRange}
                 onValueChange={onPriceChange}
                 max={9999999}
+                defaultValue={[9999999]}
                 step={10000}
                 minStepsBetweenThumbs={1}
                 className="mb-4"

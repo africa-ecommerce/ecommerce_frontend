@@ -77,7 +77,7 @@ export const ActiveFilters = ({
         
         {filters.selectedRatings.map(rating => (
           <Badge key={rating} variant="outline" className="flex items-center gap-1 py-1 px-2">
-            {rating}+ Stars
+            {rating}{rating === 5 ? "" : "+"} Stars
             <X 
               className="h-3 w-3 cursor-pointer" 
               onClick={() => onRemoveRating(rating)} 
