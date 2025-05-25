@@ -73,10 +73,7 @@ export function PlugReviews({ reviews, className }: PlugReviewsProps) {
     );
   };
 
-  const markAsHelpful = (reviewId: string) => {
-    if (helpfulReviews.includes(reviewId)) return;
-    setHelpfulReviews((prev) => [...prev, reviewId]);
-  };
+
 
   const calculatePercentage = (count: number) => {
     return totalReviews > 0 ? (count / totalReviews) * 100 : 0;
@@ -108,7 +105,7 @@ export function PlugReviews({ reviews, className }: PlugReviewsProps) {
   if (!reviews || reviews.length === 0) {
     return (
       <div className={cn("space-y-6 px-4 sm:px-0", className)}>
-        <h3 className="text-xl font-semibold">Customer Reviews</h3>
+        <h3 className="text-xl font-semibold">Plug Reviews</h3>
         <div className="text-center py-12">
           <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h4 className="text-lg font-medium mb-2">No reviews yet</h4>
@@ -122,7 +119,7 @@ export function PlugReviews({ reviews, className }: PlugReviewsProps) {
 
   return (
     <div className={cn("space-y-6 px-4 sm:px-0", className)}>
-      <h3 className="text-xl font-semibold">Customer Reviews</h3>
+      <h3 className="text-xl font-semibold">Plug Reviews</h3>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Overall rating */}
@@ -195,12 +192,12 @@ export function PlugReviews({ reviews, className }: PlugReviewsProps) {
               </div>
               <p className="text-sm text-muted-foreground">
                 {overallRating >= 4.5
-                  ? "Excellent customer satisfaction"
+                  ? "Excellent plug satisfaction"
                   : overallRating >= 4.0
-                  ? "Very good customer satisfaction"
+                  ? "Very good plug satisfaction"
                   : overallRating >= 3.0
-                  ? "Good customer satisfaction"
-                  : "Mixed customer feedback"}
+                  ? "Good plug satisfaction"
+                  : "Mixed plug feedback"}
               </p>
             </div>
             <div className="rounded-lg bg-muted p-3">
@@ -307,39 +304,7 @@ export function PlugReviews({ reviews, className }: PlugReviewsProps) {
               )}
             </div>
 
-            <div className="flex items-center justify-between pt-2 border-t">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs flex items-center gap-1 h-8 px-2"
-                onClick={() => markAsHelpful(review.id)}
-                disabled={helpfulReviews.includes(review.id)}
-              >
-                <ThumbsUp
-                  className={cn(
-                    "h-3.5 w-3.5",
-                    helpfulReviews.includes(review.id) &&
-                      "fill-primary text-primary"
-                  )}
-                />
-                <span>
-                  {helpfulReviews.includes(review.id)
-                    ? "Marked helpful"
-                    : "Helpful"}
-                </span>
-              </Button>
-              <span className="text-xs text-muted-foreground">
-                {review.rating === 5
-                  ? "⭐ Excellent"
-                  : review.rating === 4
-                  ? "👍 Good"
-                  : review.rating === 3
-                  ? "👌 Average"
-                  : review.rating === 2
-                  ? "👎 Poor"
-                  : "❌ Very Poor"}
-              </span>
-            </div>
+          
           </div>
         ))}
 
