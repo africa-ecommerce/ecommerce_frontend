@@ -1556,7 +1556,7 @@ export default function Products() {
 
   const [reviewModalOpen, setReviewModalOpen] = useState(false)
   const [productToReview, setProductToReview] = useState<{
-    id: string
+    originalId: string
     name: string
   } | null>(null)
 
@@ -2142,7 +2142,7 @@ export default function Products() {
                                       className="text-xs sm:text-sm"
                                       onClick={() => {
                                         setProductToReview({
-                                          id: item.id,
+                                          originalId: item.originalId,
                                           name: item.name,
                                         })
                                         setReviewModalOpen(true)
@@ -2317,9 +2317,9 @@ export default function Products() {
         <WriteReviewModal
           open={reviewModalOpen}
           onOpenChange={setReviewModalOpen}
-          productId={productToReview?.id || ""}
+          productId={productToReview?.originalId || ""}
           productName={productToReview?.name || ""}
-          existingReview={productToReview?.id ? products.find((p: any) => p.id === productToReview.id)?.review : null}
+          existingReview={productToReview?.originalId ? products.find((p: any) => p.originalId === productToReview.originalId)?.review : null}
         />
       </div>
     </TooltipProvider>
