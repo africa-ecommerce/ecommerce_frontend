@@ -13,11 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Copy,
-  Facebook,
-  Instagram,
-  Twitter,
-  PhoneIcon as WhatsApp,
+  Copy
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast-advanced";
 import Image from "next/image";
@@ -182,7 +178,7 @@ export function ShareModal({
                 className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
                 onClick={() => handleShare("whatsapp")}
               >
-                <Image src={"/whatsapp.svg"}  
+                <Image src={"/whatsapp.png"}  
                 height={20} width={20} alt="WhatsApp"
                 />
                 <span className="text-[10px]">WhatsApp</span>
@@ -193,7 +189,7 @@ export function ShareModal({
                 className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
                 onClick={() => handleShare("twitter")}
               >
-                <Image src={"/twitter.webp"}  
+                <Image src={"/twitter.png"}  
                 height={20} width={20} alt="Twitter"
                 />
                 <span className="text-[10px]">Twitter</span>
@@ -204,7 +200,7 @@ export function ShareModal({
                 className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
                 onClick={() => handleShare("facebook")}
               >
-               <Image src={"/facebook.webp"}  
+               <Image src={"/facebook.png"}  
                 height={20} width={20} alt="Facebook"
                 />
                 <span className="text-[10px]">Facebook</span>
@@ -215,7 +211,7 @@ export function ShareModal({
                 className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
                 onClick={() => handleShare("instagram")}
               >
-                <Image src={"/instagramLogo.jpeg"}  
+                <Image src={"/instagram_logo.png"}  
                 height={20} width={20} alt="Instagram"
                 />
                 <span className="text-[10px]">Instagram</span>

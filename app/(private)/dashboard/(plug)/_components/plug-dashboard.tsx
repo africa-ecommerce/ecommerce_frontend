@@ -399,7 +399,7 @@ export default function PlugDashboard() {
             percentage: "65%",
             description: "Of your sales come from Instagram",
             color: "text-pink-600",
-            imageSrc: "/instagramLogo",
+            imageSrc: "/instagram_logo.png",
             stats: [
               { label: "Link clicks", value: "245", progress: 65 },
               { label: "Conversions", value: "32 (13%)", progress: 13 },
@@ -410,7 +410,7 @@ export default function PlugDashboard() {
             percentage: "25%",
             description: "Of your sales come from Twitter",
             color: "text-blue-500",
-            imageSrc: "/twitter.webp",
+            imageSrc: "/twitter.png",
             stats: [
               { label: "Link clicks", value: "120", progress: 35 },
               { label: "Conversions", value: "18 (15%)", progress: 15 },
@@ -421,7 +421,7 @@ export default function PlugDashboard() {
             percentage: "10%",
             description: "Of your sales come from Facebook",
             color: "text-red-600",
-            imageSrc: "/facebook.webp",
+            imageSrc: "/facebook.png",
             stats: [
               { label: "Link clicks", value: "85", progress: 25 },
               { label: "Conversions", value: "8 (9%)", progress: 9 },
@@ -432,7 +432,7 @@ export default function PlugDashboard() {
             percentage: "15%",
             description: "Of your sales come from your Whatsapp",
             color: "text-purple-600",
-            imageSrc: "/whatsapp.svg",
+            imageSrc: "/whatsapp.png",
             stats: [
               { label: "Visits", value: "320", progress: 45 },
               { label: "Conversions", value: "48 (15%)", progress: 15 },
