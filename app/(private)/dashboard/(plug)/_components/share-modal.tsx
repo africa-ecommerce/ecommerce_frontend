@@ -204,7 +204,7 @@ export function ShareModal({
                 className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
                 onClick={() => handleShare("facebook")}
               >
-               <Image src={"/facebook.png"}  
+               <Image src={"/facebook.webp"}  
                 height={20} width={20} alt="Facebook"
                 />
                 <span className="text-[10px]">Facebook</span>

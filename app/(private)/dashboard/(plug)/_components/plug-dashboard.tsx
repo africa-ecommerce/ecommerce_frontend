@@ -21,6 +21,8 @@ import {
   Wallet,
   Youtube,
 } from "lucide-react";
+import Image from "next/image";
+
 
 import { Button } from "@/components/ui/button";
 import {
@@ -396,8 +398,8 @@ export default function PlugDashboard() {
             platform: "Instagram",
             percentage: "65%",
             description: "Of your sales come from Instagram",
-            icon: Instagram,
             color: "text-pink-600",
+            imageSrc: "/instagramLogo",
             stats: [
               { label: "Link clicks", value: "245", progress: 65 },
               { label: "Conversions", value: "32 (13%)", progress: 13 },
@@ -407,30 +409,30 @@ export default function PlugDashboard() {
             platform: "Twitter",
             percentage: "25%",
             description: "Of your sales come from Twitter",
-            icon: Twitter,
             color: "text-blue-500",
+            imageSrc: "/twitter.webp",
             stats: [
               { label: "Link clicks", value: "120", progress: 35 },
               { label: "Conversions", value: "18 (15%)", progress: 15 },
             ],
           },
           {
-            platform: "YouTube",
+            platform: "Facebook",
             percentage: "10%",
-            description: "Of your sales come from YouTube",
-            icon: Youtube,
+            description: "Of your sales come from Facebook",
             color: "text-red-600",
+            imageSrc: "/facebook.webp",
             stats: [
               { label: "Link clicks", value: "85", progress: 25 },
               { label: "Conversions", value: "8 (9%)", progress: 9 },
             ],
           },
           {
-            platform: "Online Store",
+            platform: "Whatsapp",
             percentage: "15%",
-            description: "Of your sales come from your store",
-            icon: Globe,
+            description: "Of your sales come from your Whatsapp",
             color: "text-purple-600",
+            imageSrc: "/whatsapp.svg",
             stats: [
               { label: "Visits", value: "320", progress: 45 },
               { label: "Conversions", value: "48 (15%)", progress: 15 },
@@ -884,39 +886,44 @@ export default function PlugDashboard() {
             />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              {socialAnalytics.map((platform) => {
-                const Icon = platform.icon;
-                return (
-                  <Card key={platform.platform}>
-                    <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-sm sm:text-base font-medium">
-                          Platform Traffic
-                        </CardTitle>
-                        <Icon className={`h-4 w-4 ${platform.color}`} />
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-3 sm:p-4 pt-0">
-                      <div className="2xl font-bold">{platform.percentage}</div>
-                      <p className="text-[10px] xs:text-xs text-muted-foreground">
-                        {platform.description}
-                      </p>
-                      <div className="mt-3 space-y-2">
-                        {platform.stats.map((stat: any, i: number) => (
-                          <div key={i}>
-                            <div className="flex justify-between text-[10px] xs:text-xs">
-                              <span>{stat.label}</span>
-                              <span className="font-medium">{stat.value}</span>
-                            </div>
-                            <Progress value={stat.progress} className="h-1" />
+            {socialAnalytics.map((platform) => {
+              return (
+                <Card key={platform.platform}>
+                  <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm sm:text-base font-medium">
+                        Platform Traffic
+                      </CardTitle>
+                      <Image 
+                        src={platform.imageSrc}
+                        alt={`${platform.platform} logo`}
+                        width={12}
+                        height={12}
+                        className="object-contain"
+                      />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-3 sm:p-4 pt-0">
+                    <div className="2xl font-bold">{platform.percentage}</div>
+                    <p className="text-[10px] xs:text-xs text-muted-foreground">
+                      {platform.description}
+                    </p>
+                    <div className="mt-3 space-y-2">
+                      {platform.stats.map((stat: any, i: number) => (
+                        <div key={i}>
+                          <div className="flex justify-between text-[10px] xs:text-xs">
+                            <span>{stat.label}</span>
+                            <span className="font-medium">{stat.value}</span>
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                          <Progress value={stat.progress} className="h-1" />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
           )}
         </section>
         {/* Educational Tip */}
