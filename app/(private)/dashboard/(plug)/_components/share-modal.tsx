@@ -20,6 +20,7 @@ import {
   PhoneIcon as WhatsApp,
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast-advanced";
+import Image from "next/image";
 
 interface ShareModalProps {
   open: boolean;
@@ -181,7 +182,9 @@ export function ShareModal({
                 className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
                 onClick={() => handleShare("whatsapp")}
               >
-                <WhatsApp className="h-5 w-5 text-green-500" />
+                <Image src={"/whatsapp.svg"}  
+                height={20} width={20} alt="WhatsApp"
+                />
                 <span className="text-[10px]">WhatsApp</span>
               </Button>
 
@@ -190,7 +193,9 @@ export function ShareModal({
                 className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
                 onClick={() => handleShare("twitter")}
               >
-                <Twitter className="h-5 w-5 text-sky-500" />
+                <Image src={"/twitter.webp"}  
+                height={20} width={20} alt="Twitter"
+                />
                 <span className="text-[10px]">Twitter</span>
               </Button>
 
@@ -199,7 +204,9 @@ export function ShareModal({
                 className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
                 onClick={() => handleShare("facebook")}
               >
-                <Facebook className="h-5 w-5 text-blue-600" />
+               <Image src={"/facebook.png"}  
+                height={20} width={20} alt="Facebook"
+                />
                 <span className="text-[10px]">Facebook</span>
               </Button>
 
@@ -208,7 +215,9 @@ export function ShareModal({
                 className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
                 onClick={() => handleShare("instagram")}
               >
-                <Instagram className="h-5 w-5 text-pink-500" />
+                <Image src={"/instagramLogo.jpeg"}  
+                height={20} width={20} alt="Instagram"
+                />
                 <span className="text-[10px]">Instagram</span>
               </Button>
             </div>
