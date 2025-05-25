@@ -22,6 +22,7 @@ import {
 import { Alert } from "@/components/ui/alert";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDebounce } from "@/hooks/use-debounce";
+import { truncateText } from "@/lib/utils";
 
 interface PublishDialogProps {
   isOpen: boolean;
@@ -508,8 +509,8 @@ export default function PublishDialog({
                     <div className="bg-slate-100 rounded-full p-1.5 flex-shrink-0">
                       <Globe className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600" />
                     </div>
-                    <code className="text-xs sm:text-sm font-medium text-slate-700 truncate flex-1 min-w-0 break-all">
-                      {getDisplayUrl(publishResult.siteUrl)}
+                    <code className="text-xs sm:text-sm font-medium text-slate-700 flex-1 min-w-0 break-all">
+                      {getDisplayUrl(truncateText(publishResult.siteUrl, 10))}
                     </code>
                   </div>
                 </div>
