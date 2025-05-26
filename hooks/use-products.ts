@@ -20,12 +20,12 @@ export interface ProductsFilter {
   priceRange: [number, number];
   selectedCategories: string[];
   selectedRatings: number[];
-  sortBy?: string;
+  // sortBy?: string;
   order?: "asc" | "desc";
-  businessType?: string;
+  // businessType?: string;
   createdAfter?: Date;
   createdBefore?: Date;
-  tags?: string;
+  // tags?: string;
 }
 
 export function useProducts(filters: ProductsFilter, limit: number = 4) {
@@ -39,29 +39,27 @@ export function useProducts(filters: ProductsFilter, limit: number = 4) {
       priceRange: filters.priceRange,
       selectedCategories: [...filters.selectedCategories].sort(),
       selectedRatings: [...filters.selectedRatings].sort(),
-      sortBy: filters.sortBy,
+
       order: filters.order,
-      businessType: filters.businessType,
+
       createdAfter: filters.createdAfter?.toISOString(),
       createdBefore: filters.createdBefore?.toISOString(),
-      tags: filters.tags,
     });
   }, [
     debouncedSearch,
     filters.priceRange,
     filters.selectedCategories,
     filters.selectedRatings,
-    filters.sortBy,
+
     filters.order,
-    filters.businessType,
+
     filters.createdAfter,
     filters.createdBefore,
-    filters.tags,
   ]);
 
   // Keep track of previous filter to detect changes
   const previousFilterKey = useRef<string | undefined>(undefined);
-    const hasFilterChanged =
+  const hasFilterChanged =
     previousFilterKey.current !== undefined &&
     previousFilterKey.current !== filterKey;
 
@@ -97,9 +95,8 @@ export function useProducts(filters: ProductsFilter, limit: number = 4) {
       minPrice: filters.priceRange[0] > 0 ? filters.priceRange[0] : undefined,
       maxPrice:
         filters.priceRange[1] < 9999999 ? filters.priceRange[1] : undefined,
-      sortBy: filters.sortBy,
+
       order: filters.order,
-      businessType: filters.businessType,
     };
 
     // Add category filter if any selected
@@ -113,9 +110,6 @@ export function useProducts(filters: ProductsFilter, limit: number = 4) {
     if (filters.selectedRatings.length > 0) {
       params.rating = Math.min(...filters.selectedRatings);
     }
-
-    
-   
 
     // Build the URL with query parameters
     const queryString = Object.entries(params)
@@ -163,8 +157,6 @@ export function useProducts(filters: ProductsFilter, limit: number = 4) {
 
       // Performance settings
       loadingTimeout: 10000, // 10 second timeout
-
-     
 
       // Custom key comparison for better cache invalidation
       compare: (a, b) => {
@@ -234,7 +226,3 @@ export function useProducts(filters: ProductsFilter, limit: number = 4) {
     refreshData,
   };
 }
-
-
-
-
