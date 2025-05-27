@@ -667,6 +667,34 @@ export default function CheckoutPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Help Section */}
+              <Card className="mt-6">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold mb-4">Need Help?</h3>
+                  <div className="space-y-4 text-sm">
+                    <div className="flex items-start">
+                      <span className="mr-2 text-primary">•</span>
+                      <p>
+                        Orders are typically delivered within 2-4 business days
+                      </p>
+                    </div>
+                    <div className="flex items-start">
+                      <span className="mr-2 text-primary">•</span>
+                      <p>We accept returns within 7 days of delivery</p>
+                    </div>
+                    <div className="flex items-start">
+                      <span className="mr-2 text-primary">•</span>
+                      <p>Free delivery on orders above ₦10,000</p>
+                    </div>
+                    <div className="text-center mt-4">
+                      <Button variant="link" className="text-primary">
+                        Contact Support
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
