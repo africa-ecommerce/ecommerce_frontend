@@ -114,20 +114,7 @@ export default function CheckoutPage() {
                 } transition-all duration-300`}
               ></div>
             </div>
-            <div className="flex flex-col items-center">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                  // currentStep === "payment"
-                  //   ? "bg-primary text-primary-foreground"
-                     currentStep === "review"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                }`}
-              >
-                {currentStep === "review" ? <Check className="h-4 w-4" /> : "2"}
-              </div>
-              {/* <span className="text-xs mt-1 text-center">Payment</span> */}
-            </div>
+           
             <div className="flex-1 h-1 mx-2 bg-muted max-w-20 md:max-w-none">
               <div
                 className={`h-full bg-primary ${
