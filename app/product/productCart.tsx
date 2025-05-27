@@ -295,7 +295,7 @@ export const SingleProduct = ({
     if (referralId) {
       checkoutUrl += `&ref=${referralId}`;
     }
-
+ 
     if (platform) {
       checkoutUrl += `&platform=${platform}`;
     }

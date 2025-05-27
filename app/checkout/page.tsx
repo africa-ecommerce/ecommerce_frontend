@@ -59,7 +59,7 @@ const total = subtotal + deliveryFee;
 export default function CheckoutPage() {
   const [currentStep, setCurrentStep] = useState("delivery");
   const [deliveryMethod, setDeliveryMethod] = useState("standard");
-  const [paymentMethod, setPaymentMethod] = useState("card");
+  // const [paymentMethod, setPaymentMethod] = useState("card");
   const [selectedAddress, setSelectedAddress] = useState("address-1");
 
   // Format price in Naira
@@ -68,13 +68,13 @@ export default function CheckoutPage() {
   };
 
   const goToNextStep = () => {
-    if (currentStep === "delivery") setCurrentStep("payment");
-    else if (currentStep === "payment") setCurrentStep("review");
+    if (currentStep === "delivery") setCurrentStep("review");
+    // else if (currentStep === "payment") setCurrentStep("review");
   };
 
   const goToPreviousStep = () => {
-    if (currentStep === "payment") setCurrentStep("delivery");
-    else if (currentStep === "review") setCurrentStep("payment");
+    // if (currentStep === "payment") setCurrentStep("delivery");
+     if (currentStep === "review")  setCurrentStep("delivery");
   };
 
   return (
@@ -117,16 +117,16 @@ export default function CheckoutPage() {
             <div className="flex flex-col items-center">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                  currentStep === "payment"
-                    ? "bg-primary text-primary-foreground"
-                    : currentStep === "review"
+                  // currentStep === "payment"
+                  //   ? "bg-primary text-primary-foreground"
+                     currentStep === "review"
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground"
                 }`}
               >
                 {currentStep === "review" ? <Check className="h-4 w-4" /> : "2"}
               </div>
-              <span className="text-xs mt-1 text-center">Payment</span>
+              {/* <span className="text-xs mt-1 text-center">Payment</span> */}
             </div>
             <div className="flex-1 h-1 mx-2 bg-muted max-w-20 md:max-w-none">
               <div
@@ -354,248 +354,14 @@ export default function CheckoutPage() {
 
                   <div className="mt-6">
                     <Button className="w-full" onClick={goToNextStep}>
-                      Continue to Payment
+                      Continue 
                     </Button>
                   </div>
                 </CardContent>
               </Card>
             )}
 
-            {currentStep === "payment" && (
-              <Card>
-                <CardContent className="p-4 md:p-6">
-                  <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
-
-                  <div className="space-y-6">
-                    <Tabs
-                      defaultValue="card"
-                      value={paymentMethod}
-                      onValueChange={setPaymentMethod}
-                    >
-                      {/* Mobile: Stack tabs vertically */}
-                      <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto gap-1 p-1">
-                        <TabsTrigger
-                          value="card"
-                          className="text-xs px-2 py-2 h-auto"
-                        >
-                          Card
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="mobile"
-                          className="text-xs px-2 py-2 h-auto"
-                        >
-                          Mobile
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="bank"
-                          className="text-xs px-2 py-2 h-auto"
-                        >
-                          Bank
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="cash"
-                          className="text-xs px-2 py-2 h-auto"
-                        >
-                          Cash
-                        </TabsTrigger>
-                      </TabsList>
-
-                      <TabsContent value="card" className="mt-4 space-y-4">
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="md:col-span-2">
-                              <Label htmlFor="card-number">Card Number</Label>
-                              <Input
-                                id="card-number"
-                                placeholder="1234 5678 9012 3456"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="expiry">Expiry Date</Label>
-                              <Input id="expiry" placeholder="MM/YY" />
-                            </div>
-                            <div>
-                              <Label htmlFor="cvv">CVV</Label>
-                              <Input id="cvv" placeholder="123" />
-                            </div>
-                            <div className="md:col-span-2">
-                              <Label htmlFor="name">Name on Card</Label>
-                              <Input id="name" placeholder="John Doe" />
-                            </div>
-                          </div>
-
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              id="save-card"
-                              className="rounded border-gray-300"
-                            />
-                            <Label htmlFor="save-card" className="text-sm">
-                              Save card for future payments
-                            </Label>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-center space-x-4 py-4">
-                          <Image
-                            src="/placeholder.svg?height=30&width=50&text=Visa"
-                            alt="Visa"
-                            width={50}
-                            height={30}
-                          />
-                          <Image
-                            src="/placeholder.svg?height=30&width=50&text=MC"
-                            alt="Mastercard"
-                            width={50}
-                            height={30}
-                          />
-                          <Image
-                            src="/placeholder.svg?height=30&width=50&text=Verve"
-                            alt="Verve"
-                            width={50}
-                            height={30}
-                          />
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="mobile" className="mt-4 space-y-4">
-                        <RadioGroup defaultValue="mtn" className="space-y-3">
-                          <div className="flex items-center space-x-2 p-3 border rounded-md">
-                            <RadioGroupItem
-                              value="mtn"
-                              id="mtn"
-                              className="flex-shrink-0"
-                            />
-                            <Label
-                              htmlFor="mtn"
-                              className="flex items-center flex-1 min-w-0"
-                            >
-                              <div className="w-8 h-8 bg-yellow-400 rounded-full mr-2 flex items-center justify-center text-xs font-bold flex-shrink-0">
-                                MTN
-                              </div>
-                              <span className="min-w-0">MTN Mobile Money</span>
-                            </Label>
-                          </div>
-
-                          <div className="flex items-center space-x-2 p-3 border rounded-md">
-                            <RadioGroupItem
-                              value="airtel"
-                              id="airtel"
-                              className="flex-shrink-0"
-                            />
-                            <Label
-                              htmlFor="airtel"
-                              className="flex items-center flex-1 min-w-0"
-                            >
-                              <div className="w-8 h-8 bg-red-500 rounded-full mr-2 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-                                AIR
-                              </div>
-                              <span className="min-w-0">Airtel Money</span>
-                            </Label>
-                          </div>
-
-                          <div className="flex items-center space-x-2 p-3 border rounded-md">
-                            <RadioGroupItem
-                              value="mpesa"
-                              id="mpesa"
-                              className="flex-shrink-0"
-                            />
-                            <Label
-                              htmlFor="mpesa"
-                              className="flex items-center flex-1 min-w-0"
-                            >
-                              <div className="w-8 h-8 bg-green-600 rounded-full mr-2 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-                                M
-                              </div>
-                              <span className="min-w-0">M-Pesa</span>
-                            </Label>
-                          </div>
-                        </RadioGroup>
-
-                        <div>
-                          <Label htmlFor="phone-number">Phone Number</Label>
-                          <Input
-                            id="phone-number"
-                            placeholder="+234 800 000 0000"
-                          />
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="bank" className="mt-4 space-y-4">
-                        <div className="p-4 bg-muted rounded-md">
-                          <h3 className="font-medium mb-2">
-                            Bank Transfer Instructions
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            Make a transfer to the account below. Your order
-                            will be processed once payment is confirmed.
-                          </p>
-
-                          <div className="space-y-2">
-                            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                              <span className="text-sm text-muted-foreground">
-                                Bank Name:
-                              </span>
-                              <span className="text-sm font-medium">
-                                First Bank of Nigeria
-                              </span>
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                              <span className="text-sm text-muted-foreground">
-                                Account Name:
-                              </span>
-                              <span className="text-sm font-medium">
-                                AfriConnect Ltd
-                              </span>
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                              <span className="text-sm text-muted-foreground">
-                                Account Number:
-                              </span>
-                              <span className="text-sm font-medium">
-                                1234567890
-                              </span>
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
-                              <span className="text-sm text-muted-foreground">
-                                Reference:
-                              </span>
-                              <span className="text-sm font-medium">
-                                ORD-12345
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="cash" className="mt-4 space-y-4">
-                        <div className="p-4 bg-muted rounded-md">
-                          <h3 className="font-medium mb-2">Cash on Delivery</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Pay with cash when your order is delivered. Please
-                            ensure you have the exact amount as our delivery
-                            agents may not carry change.
-                          </p>
-                        </div>
-                      </TabsContent>
-                    </Tabs>
-                  </div>
-
-                  <div className="mt-6 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={goToPreviousStep}
-                    >
-                      Back
-                    </Button>
-                    <Button className="flex-1" onClick={goToNextStep}>
-                      Review Order
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+           
 
             {currentStep === "review" && (
               <Card>
@@ -672,7 +438,7 @@ export default function CheckoutPage() {
 
                     <Separator />
 
-                    <div>
+                    {/* <div>
                       <h3 className="font-medium mb-3">Payment Method</h3>
 
                       <div className="flex items-center">
@@ -681,7 +447,7 @@ export default function CheckoutPage() {
                           Visa card ending in 3456
                         </span>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
 
                   <div className="mt-6 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
