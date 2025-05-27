@@ -786,12 +786,11 @@
 
 
 
-
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
-import { PaystackButton } from "react-paystack";
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import {
   ArrowLeft,
   ChevronRight,
@@ -810,6 +809,15 @@ import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+
+// Dynamic import of PaystackButton to prevent SSR issues
+const PaystackButton = dynamic(
+  () => import("react-paystack").then((mod) => mod.PaystackButton),
+  {
+    ssr: false,
+    loading: () => <Button className="flex-1">Loading Payment...</Button>,
+  }
+);
 
 // Sample cart items
 const cartItems = [
@@ -842,11 +850,17 @@ export default function CheckoutPage() {
   const [deliveryMethod, setDeliveryMethod] = useState("standard");
   const [paymentMethod, setPaymentMethod] = useState("online");
   const [selectedAddress, setSelectedAddress] = useState("address-1");
+  const [isClient, setIsClient] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     email: "amina.mohammed@email.com",
     name: "Amina Mohammed",
     phone: "+234 812 345 6789",
   });
+
+  // Ensure we're on the client side before rendering client-only components
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Calculate delivery fee based on method
   const getDeliveryFee = () => {
@@ -922,6 +936,11 @@ export default function CheckoutPage() {
         </Button>
       );
     } else {
+      // Only render PaystackButton on client side
+      if (!isClient) {
+        return <Button className="flex-1">Loading Payment...</Button>;
+      }
+
       return (
         <PaystackButton
           {...paystackConfig}
