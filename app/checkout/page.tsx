@@ -198,14 +198,10 @@ export default function CheckoutPage() {
           </Button>
         </div>
       )}
-      {/* Top Navigation Bar - Mobile Only */}
-      <div className="sticky top-0 z-20 flex items-center p-4 bg-background/80 backdrop-blur-md border-b md:hidden">
-        <h1 className="text-lg font-medium">Checkout</h1>
-      </div>
+     
 
       <div className="container mx-auto px-4 py-4 md:py-8 max-w-7xl">
-        {/* Checkout Title - Desktop Only */}
-        <h1 className="text-2xl font-bold mb-6 hidden md:block">Checkout</h1>
+      
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="lg:col-span-2">

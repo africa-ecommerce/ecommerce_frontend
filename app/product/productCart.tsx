@@ -68,7 +68,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
 
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { setOrderSummary, addProductToOrder } = useProductStore()
+  const { setOrderSummary, addProductToOrder, orderSummary } = useProductStore()
 
   // Get URL parameters for back navigation
   const urlProductId = searchParams.get("pid")
@@ -177,6 +177,47 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     setQuantityInput(quantity.toString())
   }, [quantity])
 
+
+
+  useEffect(() => {
+    // Restore state from persisted order summary when component mounts
+    if (
+      orderSummary &&
+      orderSummary.productId === currentProductId &&
+      productData
+    ) {
+      if (hasVariations && orderSummary.items.length > 0) {
+        // Restore selected variations from order summary
+        const restoredVariations: SelectedVariation[] = [];
+
+        orderSummary.items.forEach((item) => {
+          if (item.variationId) {
+            const variation = productData.variations?.find(
+              (v) => v.id === item.variationId
+            );
+            if (variation) {
+              restoredVariations.push({
+                variation,
+                quantity: item.quantity,
+              });
+            }
+          }
+        });
+
+        if (restoredVariations.length > 0) {
+          setSelectedVariations(restoredVariations);
+        }
+      } else if (!hasVariations && orderSummary.items.length > 0) {
+        // Restore quantity for simple products
+        const orderItem = orderSummary.items[0];
+        if (orderItem && orderItem.id === currentProductId) {
+          setQuantity(orderItem.quantity);
+          setQuantityInput(orderItem.quantity.toString());
+        }
+      }
+    }
+  }, [orderSummary, currentProductId, productData, hasVariations]);
+
   const formatDescription = (text: string) => {
     if (!text) return ""
     return text.charAt(0).toUpperCase() + text.slice(1)
@@ -281,9 +322,69 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     return { subtotal,  total, items }
   }, [currentPrice, quantity, selectedVariations, hasVariations, productData])
 
+  // const handleCheckout = () => {
+  //   if (!productData) return
+
+  //   // Store product data in Zustand
+  //   if (hasVariations && selectedVariations.length > 0) {
+  //     // Handle multiple variations
+  //     const items = selectedVariations.map((sv) => ({
+  //       id: productData.id,
+  //       name: productData.name,
+  //       price: sv.variation.price || productData.price,
+  //       quantity: sv.quantity,
+  //       image: productData.images?.[0] || "/placeholder.svg",
+  //       variationId: sv.variation.id,
+  //       variationName: getVariationDisplayName(sv.variation),
+  //       seller: productData.seller,
+  //     }))
+
+  //     const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    
+  //     const total = subtotal 
+
+  //     setOrderSummary({
+  //       items,
+  //       subtotal,
+  //       total,
+  //       productId: productData.id,
+  //       referralId: currentReferralId,
+  //       platform: currentPlatform,
+  //     })
+  //   } else if (!hasVariations) {
+  //     // Handle simple product
+  //     const productItem = {
+  //       id: productData.id,
+  //       name: productData.name,
+  //       price: currentPrice,
+  //       quantity,
+  //       image: productData.images?.[0] || "/placeholder.svg",
+  //       seller: productData.seller,
+  //     }
+
+  //     addProductToOrder(productItem, productData.id, currentReferralId, currentPlatform)
+  //   }
+
+  //   // Navigate to checkout
+  //   let checkoutUrl = `/checkout?pid=${currentProductId}`
+
+   
+
+  //   if (currentReferralId) {
+  //     checkoutUrl += `&ref=${currentReferralId}`
+  //   }
+
+  //   if (currentPlatform) {
+  //     checkoutUrl += `&platform=${currentPlatform}`
+  //   }
+
+  //   router.push(checkoutUrl)
+  // }
+
+
   const handleCheckout = () => {
     if (!productData) return
-
+  
     // Store product data in Zustand
     if (hasVariations && selectedVariations.length > 0) {
       // Handle multiple variations
@@ -297,11 +398,10 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
         variationName: getVariationDisplayName(sv.variation),
         seller: productData.seller,
       }))
-
+  
       const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    
       const total = subtotal 
-
+  
       setOrderSummary({
         items,
         subtotal,
@@ -320,32 +420,31 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
         image: productData.images?.[0] || "/placeholder.svg",
         seller: productData.seller,
       }
-
-      addProductToOrder(productItem, productData.id, currentReferralId, currentPlatform)
+  
+      // Use setOrderSummary instead of addProductToOrder for consistency
+      setOrderSummary({
+        items: [productItem],
+        subtotal: currentPrice * quantity,
+        total: currentPrice * quantity,
+        productId: productData.id,
+        referralId: currentReferralId,
+        platform: currentPlatform,
+      })
     }
-
+  
     // Navigate to checkout
     let checkoutUrl = `/checkout?pid=${currentProductId}`
-
-    // if (hasVariations && selectedVariations.length > 0) {
-    //   // Add selected variations to checkout URL
-    //   const variationsParam = selectedVariations.map((sv) => `${sv.variation.id}:${sv.quantity}`).join(",")
-    //   checkoutUrl += `&variations=${encodeURIComponent(variationsParam)}`
-    // } else if (!hasVariations) {
-    //   checkoutUrl += `&qty=${quantity}`
-    // }
-
+  
     if (currentReferralId) {
       checkoutUrl += `&ref=${currentReferralId}`
     }
-
+  
     if (currentPlatform) {
       checkoutUrl += `&platform=${currentPlatform}`
     }
-
+  
     router.push(checkoutUrl)
   }
-
   const handleWhatsAppSignup = () => {
     console.log("WhatsApp signup:", whatsappNumber)
     setNotificationSignedUp(true)
