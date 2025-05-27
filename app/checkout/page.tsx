@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +5,14 @@ import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CreditCard, Truck, MapPin, Plus, Banknote, ArrowLeft } from "lucide-react";
+import {
+  CreditCard,
+  Truck,
+  MapPin,
+  Plus,
+  Banknote,
+  ArrowLeft,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -198,11 +203,8 @@ export default function CheckoutPage() {
           </Button>
         </div>
       )}
-     
 
       <div className="container mx-auto px-4 py-4 md:py-8 max-w-7xl">
-      
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="lg:col-span-2">
             {currentStep === "delivery" && (
@@ -618,19 +620,23 @@ export default function CheckoutPage() {
 
                   <div className="space-y-4">
                     <div className="flex items-start space-x-2">
-                      
-                        By continuing i agree to the{" "}
-                        <a href="/terms" className="text-primary">
+                      <p className="text-xs text-muted-foreground">
+                        By continuing I agree to the{" "}
+                        <a
+                          href="/terms"
+                          className="text-primary hover:underline"
+                        >
                           Terms of Service
                         </a>{" "}
                         and{" "}
-                        <a href="/privacy" className="text-primary">
+                        <a
+                          href="/privacy"
+                          className="text-primary hover:underline"
+                        >
                           Privacy Policy
                         </a>
-                      
+                      </p>
                     </div>
-
-                    
                   </div>
 
                   <div className="mt-6 text-center">
@@ -647,7 +653,6 @@ export default function CheckoutPage() {
               {/* Help Section */}
               <Card className="mt-6">
                 <CardContent className="p-6">
-                 
                   <div className="space-y-4 text-sm">
                     <div className="flex items-start">
                       <span className="mr-2 text-primary">•</span>
@@ -663,7 +668,6 @@ export default function CheckoutPage() {
                       <span className="mr-2 text-primary">•</span>
                       <p>Free delivery on orders above ₦10,000</p>
                     </div>
-                   
                   </div>
                 </CardContent>
               </Card>
