@@ -143,7 +143,7 @@ export default function CheckoutPage() {
                     : "bg-muted text-muted-foreground"
                 }`}
               >
-                3
+                2
               </div>
               <span className="text-xs mt-1 text-center">Review</span>
             </div>
