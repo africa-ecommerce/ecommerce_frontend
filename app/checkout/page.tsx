@@ -147,14 +147,14 @@ export default function CheckoutPage() {
     if (paymentMethod === "cash") {
       return (
         <Button className="flex-1" onClick={handleCashOnDeliveryOrder}>
-          Place Order (Cash on Delivery)
+          Place Order (Pay on Delivery)
         </Button>
       );
     } else {
       // Only render PaystackButton on client side
-      if (!isClient) {
-        return <Button className="flex-1">Loading Payment...</Button>;
-      }
+      // if (!isClient) {
+      //   return <Button className="flex-1">Loading Payment...</Button>;
+      // }
 
       return (
         <PaystackButton
@@ -176,46 +176,7 @@ export default function CheckoutPage() {
         {/* Checkout Title - Desktop Only */}
         <h1 className="text-2xl font-bold mb-6 hidden md:block">Checkout</h1>
 
-        {/* Checkout Progress Indicator - Simplified to 2 steps */}
-        {/* <div className="mb-6">
-          <div className="flex items-center justify-center max-w-md mx-auto md:max-w-none">
-            <div className="flex flex-col items-center">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                  currentStep === "delivery"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-primary text-primary-foreground"
-                }`}
-              >
-                {currentStep === "delivery" ? (
-                  "1"
-                ) : (
-                  <Check className="h-4 w-4" />
-                )}
-              </div>
-              <span className="text-xs mt-1 text-center">Delivery</span>
-            </div>
-            <div className="flex-1 h-1 mx-4 bg-muted max-w-32">
-              <div
-                className={`h-full bg-primary ${
-                  currentStep === "delivery" ? "w-0" : "w-full"
-                } transition-all duration-300`}
-              ></div>
-            </div>
-            <div className="flex flex-col items-center">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                  currentStep === "review"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground"
-                }`}
-              >
-                2
-              </div>
-              <span className="text-xs mt-1 text-center">Review</span>
-            </div>
-          </div>
-        </div> */}
+        
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           <div className="lg:col-span-2">
@@ -574,7 +535,7 @@ export default function CheckoutPage() {
                         ) : (
                           <>
                             <Banknote className="h-5 w-5 text-muted-foreground mr-2 flex-shrink-0" />
-                            <span className="text-sm">Cash on Delivery</span>
+                            <span className="text-sm">Pay on Delivery</span>
                           </>
                         )}
                       </div>
