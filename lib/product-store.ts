@@ -15,7 +15,6 @@ interface ProductItem {
 interface OrderSummary {
   items: ProductItem[]
   subtotal: number
-  deliveryFee: number
   total: number
   productId: string
   referralId: string | null
@@ -46,7 +45,7 @@ export const useProductStore = create<ProductStore>()(
         const orderSummary: OrderSummary = {
           items: [product],
           subtotal,
-          deliveryFee,
+         
           total,
           productId,
           referralId,
