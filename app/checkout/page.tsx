@@ -451,7 +451,7 @@ export default function CheckoutPage() {
                             <Banknote className="h-4 w-4 mr-2 text-muted-foreground flex-shrink-0" />
                             <div className="min-w-0">
                               <span className="font-medium block">
-                                Cash on Delivery
+                                Pay on Delivery
                               </span>
                               <p className="text-xs text-muted-foreground">
                                 Pay when your order arrives
