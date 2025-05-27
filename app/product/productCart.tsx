@@ -246,7 +246,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
   // Calculate pricing information
   const pricing = useMemo(() => {
     if (!productData) {
-      return { subtotal: 0, deliveryFee: 1500, total: 1500, items: [] }
+      return { subtotal: 0, total: 0, items: [] }
     }
 
     let subtotal = 0
@@ -276,10 +276,9 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
       })
     }
 
-    const deliveryFee = 1500
-    const total = subtotal + deliveryFee
+    const total = subtotal
 
-    return { subtotal, deliveryFee, total, items }
+    return { subtotal,  total, items }
   }, [currentPrice, quantity, selectedVariations, hasVariations, productData])
 
   const handleCheckout = () => {
