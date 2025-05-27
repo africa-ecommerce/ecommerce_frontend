@@ -322,64 +322,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     return { subtotal,  total, items }
   }, [currentPrice, quantity, selectedVariations, hasVariations, productData])
 
-  // const handleCheckout = () => {
-  //   if (!productData) return
-
-  //   // Store product data in Zustand
-  //   if (hasVariations && selectedVariations.length > 0) {
-  //     // Handle multiple variations
-  //     const items = selectedVariations.map((sv) => ({
-  //       id: productData.id,
-  //       name: productData.name,
-  //       price: sv.variation.price || productData.price,
-  //       quantity: sv.quantity,
-  //       image: productData.images?.[0] || "/placeholder.svg",
-  //       variationId: sv.variation.id,
-  //       variationName: getVariationDisplayName(sv.variation),
-  //       seller: productData.seller,
-  //     }))
-
-  //     const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    
-  //     const total = subtotal 
-
-  //     setOrderSummary({
-  //       items,
-  //       subtotal,
-  //       total,
-  //       productId: productData.id,
-  //       referralId: currentReferralId,
-  //       platform: currentPlatform,
-  //     })
-  //   } else if (!hasVariations) {
-  //     // Handle simple product
-  //     const productItem = {
-  //       id: productData.id,
-  //       name: productData.name,
-  //       price: currentPrice,
-  //       quantity,
-  //       image: productData.images?.[0] || "/placeholder.svg",
-  //       seller: productData.seller,
-  //     }
-
-  //     addProductToOrder(productItem, productData.id, currentReferralId, currentPlatform)
-  //   }
-
-  //   // Navigate to checkout
-  //   let checkoutUrl = `/checkout?pid=${currentProductId}`
-
-   
-
-  //   if (currentReferralId) {
-  //     checkoutUrl += `&ref=${currentReferralId}`
-  //   }
-
-  //   if (currentPlatform) {
-  //     checkoutUrl += `&platform=${currentPlatform}`
-  //   }
-
-  //   router.push(checkoutUrl)
-  // }
+  
 
 
   const handleCheckout = () => {

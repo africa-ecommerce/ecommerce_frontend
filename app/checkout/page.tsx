@@ -618,16 +618,8 @@ export default function CheckoutPage() {
 
                   <div className="space-y-4">
                     <div className="flex items-start space-x-2">
-                      <input
-                        type="checkbox"
-                        id="terms"
-                        className="rounded border-gray-300 mt-0.5 flex-shrink-0"
-                      />
-                      <Label
-                        htmlFor="terms"
-                        className="text-xs leading-relaxed"
-                      >
-                        I agree to the{" "}
+                      
+                        By continuing i agree to the{" "}
                         <a href="/terms" className="text-primary">
                           Terms of Service
                         </a>{" "}
@@ -635,22 +627,10 @@ export default function CheckoutPage() {
                         <a href="/privacy" className="text-primary">
                           Privacy Policy
                         </a>
-                      </Label>
+                      
                     </div>
 
-                    <div className="flex items-start space-x-2">
-                      <input
-                        type="checkbox"
-                        id="whatsapp"
-                        className="rounded border-gray-300 mt-0.5 flex-shrink-0"
-                      />
-                      <Label
-                        htmlFor="whatsapp"
-                        className="text-xs leading-relaxed"
-                      >
-                        Send order updates via WhatsApp
-                      </Label>
-                    </div>
+                    
                   </div>
 
                   <div className="mt-6 text-center">
@@ -667,7 +647,7 @@ export default function CheckoutPage() {
               {/* Help Section */}
               <Card className="mt-6">
                 <CardContent className="p-6">
-                  <h3 className="font-semibold mb-4">Need Help?</h3>
+                 
                   <div className="space-y-4 text-sm">
                     <div className="flex items-start">
                       <span className="mr-2 text-primary">•</span>
@@ -683,11 +663,7 @@ export default function CheckoutPage() {
                       <span className="mr-2 text-primary">•</span>
                       <p>Free delivery on orders above ₦10,000</p>
                     </div>
-                    <div className="text-center mt-4">
-                      <Button variant="link" className="text-primary">
-                        Contact Support
-                      </Button>
-                    </div>
+                   
                   </div>
                 </CardContent>
               </Card>
