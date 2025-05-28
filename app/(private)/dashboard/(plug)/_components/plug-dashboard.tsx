@@ -4,11 +4,8 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
-  Clock,
-  ExternalLink,
-  Globe,
+  
   HelpCircle,
-  Instagram,
   LineChart,
   Package,
   PackageCheck,
@@ -16,10 +13,9 @@ import {
   Share2,
   ShoppingBag,
   Truck,
-  Twitter,
   Users,
   Wallet,
-  Youtube,
+  
 } from "lucide-react";
 import Image from "next/image";
 

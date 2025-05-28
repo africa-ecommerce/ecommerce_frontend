@@ -8,14 +8,12 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useTheme } from "next-themes";
 
 interface AppSettingsSectionProps {
   onBack: () => void
 }
 
 export function AppSettingsSection({ onBack }: AppSettingsSectionProps) {
- const { setTheme } = useTheme();
 
   return (
     <div className="animate-fade-in">
@@ -45,7 +43,7 @@ export function AppSettingsSection({ onBack }: AppSettingsSectionProps) {
                   className={`border rounded-lg p-4 cursor-pointer flex flex-col items-center gap-2 
                    
                   `}
-                  onClick={() => setTheme("light")}
+                  onClick={() =>{}}
                 >
                   <div className="h-20 w-full bg-white border rounded-md flex items-center justify-center">
                     <Sun className="h-8 w-8 text-amber-500" />
@@ -57,7 +55,7 @@ export function AppSettingsSection({ onBack }: AppSettingsSectionProps) {
                   className={`border rounded-lg p-4 cursor-pointer flex flex-col items-center gap-2 
                    
                 `}
-                  onClick={() => setTheme("dark")}
+                  onClick={() => {}}
                 >
                   <div className="h-20 w-full bg-gray-900 border rounded-md flex items-center justify-center">
                     <Moon className="h-8 w-8 text-gray-100" />

@@ -17,7 +17,6 @@ import {
   Package,
   Palette,
   CheckCircle,
-  ArrowRight,
   Star,
   Instagram,
   Facebook,

@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useProductStore } from "@/lib/product-store";
+import { useProductStore } from "@/hooks/product-store";
 
 // Dynamic import of PaystackButton to prevent SSR issues
 const PaystackButton = dynamic(
