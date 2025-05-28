@@ -651,6 +651,8 @@ export default function SupplierInfo({
         );
         if (response.ok) {
           const suggestions = await response.json();
+
+          console.log("api", suggestions)
           setLocationSuggestions(suggestions?.data.description || []);
 
           console.log("suggestions", suggestions?.data.description)
