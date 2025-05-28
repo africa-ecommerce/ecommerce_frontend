@@ -144,7 +144,7 @@ export default function CheckoutPage() {
     onClose: () => {
       alert("Payment cancelled");
     },
-  };
+  }; 
 
   // Format price in Naira
   const formatPrice = (price) => {
