@@ -295,6 +295,9 @@ export const supplierInfoSchema = z.object({
 
 
 
+
+
+
 const variationSchema = z.object({
   id: z.string(),
   size: z.string().optional(),
@@ -338,3 +341,56 @@ export const productFormSchema = z
 
 // Export the type that exactly matches the schema
 export type ProductFormData = z.infer<typeof productFormSchema>
+
+
+
+
+// Updated supplier info schema to include address fields
+export const updateSupplierSchema = z.object({
+  businessName: z
+    .string()
+    .min(1, "Business name is required")
+    .max(100, "Business name cannot exceed 100 characters")
+    .describe("The name of your business"),
+    phone: z
+    .string().min(1, "Phone number is required")
+    .refine(
+      (val) => {
+        
+        
+
+        // Otherwise validate as Nigerian phone number
+        return /^(\+?234|0)[\d]{10}$/.test(val);
+      },
+      {
+        message: "Please enter a valid Nigerian phone number",
+      }
+    )
+    .refine(
+      (val) => {
+       
+
+        // Check length requirements when value exists
+        return val.length >= 11 && val.length <= 15;
+      },
+      {
+        message: "Phone number must be between 11 and 15 digits",
+      }
+    )
+    .transform((val) => {
+      
+    
+
+      // Normalize phone number to standard format
+      if (val.startsWith("0")) {
+        return `+234${val.slice(1)}`;
+      }
+      if (val.startsWith("234")) {
+        return `+${val}`;
+      }
+      return val;
+    }),
+      supplierAddress: supplierAddressSchema,
+
+})
+
