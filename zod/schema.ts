@@ -195,7 +195,6 @@ export const supplierAddressSchema = z.object({
   streetAddress: z
     .string()
     .min(1, "Street address is required")
-    .min(10, "Street address must be at least 10 characters")
     .max(200, "Street address must not exceed 200 characters"),
 
   directions: z

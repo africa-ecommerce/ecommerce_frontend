@@ -340,7 +340,7 @@ export default function ProductDetail() {
                         {truncateText(product?.supplier?.businessName)}
                       </div>
                       <div className="flex items-center text-sm text-muted-foreground capitalize">
-                        {product?.supplier?.pickupLocation}
+                        {product?.supplier?.pickupLocation.lga}, {product?.supplier?.pickupLocation.state}
                       </div>
                     </div>
                   </div>
