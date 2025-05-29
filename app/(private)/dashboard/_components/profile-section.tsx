@@ -111,7 +111,7 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   // State management for supplier address
   const [selectedState, setSelectedState] = useState<string>("");
   const [availableLgas, setAvailableLgas] = useState<string[]>([]);
@@ -174,11 +174,25 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
       formData.append("avatar", avatarFile);
     }
 
-    // For supplier, send the supplierAddress object
+    // For supplier, send the supplierAddress fields individually
     if (userType === "SUPPLIER") {
       formData.append("businessName", data.businessName);
       formData.append("phone", data.phone);
-      formData.append("supplierAddress", data.supplierAddress);
+
+      // Append supplierAddress fields individually
+      formData.append(
+        "supplierAddress.streetAddress",
+        data.supplierAddress.streetAddress || ""
+      );
+      formData.append(
+        "supplierAddress.directions",
+        data.supplierAddress.directions || ""
+      );
+      formData.append(
+        "supplierAddress.state",
+        data.supplierAddress.state || ""
+      );
+      formData.append("supplierAddress.lga", data.supplierAddress.lga || "");
     } else {
       // For plug, send individual fields
       Object.entries(data).forEach(([key, value]) => {
@@ -198,7 +212,7 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
       const response = await fetch("/api/auth/update-profile", {
         method: "POST",
         body: formData,
-        credentials: "include"
+        credentials: "include",
       });
 
       const result = await response.json();
@@ -278,7 +292,11 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
   const watchedState = profileForm.watch("supplierAddress.state");
 
   useEffect(() => {
-    if (userType === "SUPPLIER" && watchedState && watchedState !== selectedState) {
+    if (
+      userType === "SUPPLIER" &&
+      watchedState &&
+      watchedState !== selectedState
+    ) {
       setSelectedState(watchedState);
       const lgas = getLgasForState(watchedState);
       setAvailableLgas(lgas);
@@ -454,8 +472,6 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
                     // Supplier Address Fields
                     <div className="space-y-6">
                       <div className="border-t pt-3">
-                       
-                        
                         {/* Street Address */}
                         <FormField
                           control={profileForm.control}
@@ -463,7 +479,8 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
                           render={({ field }) => (
                             <FormItem className="mb-4">
                               <FormLabel>
-                                Street Address <span className="text-red-500">*</span>
+                                Street Address{" "}
+                                <span className="text-red-500">*</span>
                               </FormLabel>
                               <FormControl>
                                 <Textarea
@@ -484,7 +501,10 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
                           render={({ field }) => (
                             <FormItem className="mb-4">
                               <FormLabel>
-                                Directions <span className="text-gray-500">(Optional)</span>
+                                Directions{" "}
+                                <span className="text-gray-500">
+                                  (Optional)
+                                </span>
                               </FormLabel>
                               <FormControl>
                                 <Textarea
@@ -536,12 +556,15 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
                           render={({ field }) => (
                             <FormItem className="mb-4">
                               <FormLabel>
-                                Local Government Area <span className="text-red-500">*</span>
+                                Local Government Area{" "}
+                                <span className="text-red-500">*</span>
                               </FormLabel>
                               <Select
                                 onValueChange={field.onChange}
                                 value={field.value || ""}
-                                disabled={!selectedState || availableLgas.length === 0}
+                                disabled={
+                                  !selectedState || availableLgas.length === 0
+                                }
                               >
                                 <FormControl>
                                   <SelectTrigger>
