@@ -1,5 +1,5 @@
 
-import NaijaStates from "naija-state-local-government";
+import { getLgasForState, getStatesAsStrings } from "@/lib/utils";
 import * as z from "zod";
 
 
@@ -187,79 +187,9 @@ export const profileSchema = z.object({
 });
 
 
-// export const supplierAddressSchema = z.object({
-//   streetAddress: z
-//     .string()
-//     .min(1, "Street address is required")
-//     .min(10, "Street address must be at least 10 characters")
-//     .max(200, "Street address must not exceed 200 characters"),
-
-//   directions: z
-//     .string()
-//     .max(500, "Directions must not exceed 500 characters")
-//     .optional()
-//     .or(z.literal("")),
-
-//   state: z
-//     .string()
-//     .min(1, "State is required")
-//     .refine((state) => {
-//       const states = NaijaStates.states();
-//       return states.some((s) => s.toLowerCase() === state.toLowerCase());
-//     }, "Please select a valid state"),
-
-//   lga: z.string().min(1, "Local Government Area is required"),
-// });
 
 
 
-const getStatesAsStrings = (): string[] => {
-  try {
-    const statesData = NaijaStates.states();
-    if (Array.isArray(statesData)) {
-      return statesData.map((state: any) => {
-        return typeof state === 'string' ? state : (state as any).state || (state as any).name;
-      }).filter(Boolean);
-    }
-    return [];
-  } catch (error) {
-    console.error("Error fetching states:", error);
-    return [];
-  }
-};
-
-// Helper function to get LGAs for a state
-const getLgasForState = (stateName: string): string[] => {
-  try {
-    const statesData = NaijaStates.states();
-    
-    if (Array.isArray(statesData)) {
-      const stateData = statesData.find((state: any) => {
-        const currentStateName = typeof state === 'string' ? state : (state as any).state || (state as any).name;
-        return currentStateName === stateName;
-      });
-      
-      if (stateData && typeof stateData === 'object' && (stateData as any).lgas) {
-        return Array.isArray((stateData as any).lgas) ? (stateData as any).lgas : [];
-      }
-    }
-    
-    // Fallback: try the direct lgas method
-    const lgasResult = NaijaStates.lgas(stateName);
-    if (Array.isArray(lgasResult)) {
-      return lgasResult;
-    }
-    
-    if (lgasResult && typeof lgasResult === 'object' && (lgasResult as any).lgas) {
-      return Array.isArray((lgasResult as any).lgas) ? (lgasResult as any).lgas : [];
-    }
-    
-    return [];
-  } catch (error) {
-    console.error("Error fetching LGAs for state:", stateName, error);
-    return [];
-  }
-};
 
 export const supplierAddressSchema = z.object({
   streetAddress: z

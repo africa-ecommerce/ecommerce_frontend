@@ -3,8 +3,6 @@ import React, { useState, useEffect } from "react";
 import NaijaStates from "naija-state-local-government";
 import SupplierSuccess from "./supplier-success";
 import { supplierAddressSchema } from "@/zod/schema";
-import { z } from "zod";
-import type { FieldError } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import {
   Select,
@@ -18,78 +16,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { FormData as CustomFormData } from "../page";
 import { ArrowLeft } from "lucide-react";
+import { getLgasForState } from "@/lib/utils";
 
-// Helper function to get LGAs for a state
-const getLgasForState = (stateName: string): string[] => {
-  try {
-    // First, try to get the state data from the states array
-    const statesData = NaijaStates.states();
 
-    if (Array.isArray(statesData)) {
-      const stateData = statesData.find((state: any) => {
-        const currentStateName =
-          typeof state === "string"
-            ? state
-            : (state as any).state || (state as any).name;
-        return currentStateName === stateName;
-      });
 
-      if (
-        stateData &&
-        typeof stateData === "object" &&
-        (stateData as any).lgas
-      ) {
-        return Array.isArray((stateData as any).lgas)
-          ? (stateData as any).lgas
-          : [];
-      }
-    }
-
-    // Fallback: try the direct lgas method
-    const lgasResult = NaijaStates.lgas(stateName);
-    if (Array.isArray(lgasResult)) {
-      return lgasResult;
-    }
-
-    // If lgasResult is an object with lgas property
-    if (
-      lgasResult &&
-      typeof lgasResult === "object" &&
-      (lgasResult as any).lgas
-    ) {
-      return Array.isArray((lgasResult as any).lgas)
-        ? (lgasResult as any).lgas
-        : [];
-    }
-
-    return [];
-  } catch (error) {
-    console.error("Error fetching LGAs for state:", stateName, error);
-    return [];
-  }
-};
-
-// Zod schema for supplier address validation with proper typing
-const supplierAddressSchemaWithLgaValidation: z.ZodSchema =
-  supplierAddressSchema.refine(
-    (data: any) => {
-      if (!data.state || !data.lga) return true; // Let individual field validation handle empty fields
-
-      try {
-        const lgas = getLgasForState(data.state);
-        return lgas.some(
-          (lga: string) => lga.toLowerCase() === data.lga.toLowerCase()
-        );
-      } catch {
-        return false;
-      }
-    },
-    {
-      message:
-        "Please select a valid Local Government Area for the selected state",
-      path: ["lga"],
-    }
-  );
 
 
 
@@ -151,7 +81,7 @@ const SupplierAddress = ({
       } as CustomFormData);
       return result;
     },
-    supplierAddressSchemaWithLgaValidation,
+    supplierAddressSchema,
     () => setIsSuccess(true)
   );
 

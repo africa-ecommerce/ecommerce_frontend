@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx"
+import NaijaStates from "naija-state-local-government";
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -106,3 +107,70 @@ export const getTotalStock = (item: any) => {
     }
     return item.stocks
   };
+
+
+  export const getLgasForState = (stateName: string): string[] => {
+    try {
+      // First, try to get the state data from the states array
+      const statesData = NaijaStates.states();
+  
+      if (Array.isArray(statesData)) {
+        const stateData = statesData.find((state: any) => {
+          const currentStateName =
+            typeof state === "string"
+              ? state
+              : (state as any).state || (state as any).name;
+          return currentStateName === stateName;
+        });
+  
+        if (
+          stateData &&
+          typeof stateData === "object" &&
+          (stateData as any).lgas
+        ) {
+          return Array.isArray((stateData as any).lgas)
+            ? (stateData as any).lgas
+            : [];
+        }
+      }
+  
+      // Fallback: try the direct lgas method
+      const lgasResult = NaijaStates.lgas(stateName);
+      if (Array.isArray(lgasResult)) {
+        return lgasResult;
+      }
+  
+      // If lgasResult is an object with lgas property
+      if (
+        lgasResult &&
+        typeof lgasResult === "object" &&
+        (lgasResult as any).lgas
+      ) {
+        return Array.isArray((lgasResult as any).lgas)
+          ? (lgasResult as any).lgas
+          : [];
+      }
+  
+      return [];
+    } catch (error) {
+      console.error("Error fetching LGAs for state:", stateName, error);
+      return [];
+    }
+  };
+
+
+  export const getStatesAsStrings = (): string[] => {
+    try {
+      const statesData = NaijaStates.states();
+      if (Array.isArray(statesData)) {
+        return statesData.map((state: any) => {
+          return typeof state === 'string' ? state : (state as any).state || (state as any).name;
+        }).filter(Boolean);
+      }
+      return [];
+    } catch (error) {
+      console.error("Error fetching states:", error);
+      return [];
+    }
+  };
+  
