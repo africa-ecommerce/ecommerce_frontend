@@ -8,12 +8,14 @@ import {
   plugInfoSchema,
   profileSchema,
   supplierInfoSchema,
+  supplierAddressSchema,
 } from "@/zod/schema";
 import { z } from "zod";
 import PlugInfo from "./_components/plug-info";
 import ProfileStep from "./_components/profile-step";
 import SupplierInfo from "./_components/supplierInfo";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
+import SupplierAddress from "./_components/supplier-address";
 
 // Extract the actual type from the schema
 type UserTypeValue = z.infer<typeof userTypeSchema>["userType"];
@@ -27,6 +29,7 @@ export type PlugData = {
 export type SupplierData = {
   userType?: UserTypeValue;
   supplierInfo?: z.infer<typeof supplierInfoSchema>;
+  supplierAddress?: z.infer<typeof supplierAddressSchema>;
 };
 
 export type FormData = PlugData | SupplierData;
@@ -34,7 +37,7 @@ export type FormData = PlugData | SupplierData;
 const Page = () => {
   // Define separate steps for each user type
   const plugSteps = ["User Type", "Plug Info", "Profile"];
-  const supplierSteps = ["User Type", "Supplier Info"];
+  const supplierSteps = ["User Type", "Supplier Info", "Supplier Address"];
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({} as FormData);
@@ -59,46 +62,49 @@ const Page = () => {
     setStep((prev) => Math.min(prev + 1, totalSteps));
   };
 
+  
+
   const handleSubmitSupplier = async (data: FormData): Promise<any> => {
     // Check if data is SupplierData type before accessing supplierInfo
     if ("supplierInfo" in data) {
       console.log("submitted supplier data", data);
       try {
-        // Create a FormData object to properly handle file uploads
-        const formData = new FormData();
-
+        // Create a FormData object to properly handle file uploads (rename to avoid conflict)
+        const formDataForUpload = new FormData();
+  
         // Handle the avatar file if it exists
         if (data.supplierInfo?.avatar instanceof File) {
-          formData.append("avatar", data.supplierInfo.avatar);
+          formDataForUpload.append("avatar", data.supplierInfo.avatar);
         }
-
+  
         // Extract the avatar from supplierInfo to avoid stringification issues
         const { avatar, ...supplierInfoWithoutAvatar } =
           data.supplierInfo || {};
-
+  
         // Create a clean data object with userType at the top level,
-        // just like in handleSubmitPlug
+        // and include supplier address
         const processedData = {
           userType: data.userType,
           supplierInfo: supplierInfoWithoutAvatar,
+          supplierAddress: data.supplierAddress, // Add this line
         };
-
+  
         // Append the JSON data as a string
-        formData.append("userData", JSON.stringify(processedData));
-
+        formDataForUpload.append("userData", JSON.stringify(processedData));
+  
         // Send the FormData to the server
         const response = await fetch("/api/onboarding", {
           method: "POST",
-          body: formData,
+          body: formDataForUpload,
           credentials: "include",
         });
-
+  
         const result = await response.json();
         if (!response.ok) {
           errorToast(result.error);
           return null; // Return null to indicate failure
         }
-
+  
         successToast(result.message);
         return result; // Return the result to be passed to onSuccess
       } catch (error) {
@@ -250,13 +256,20 @@ const Page = () => {
         case 2:
           return (
             <SupplierInfo
-              onSubmit={handleSubmitSupplier}
+              onNext={handleNext}
               onPrev={handlePrev}
-              formData={formData} // Pass the current formData
+              update={updateFormData} // Pass the current formData
               initialData={supplierData.supplierInfo}
             />
           );
-
+        case 3:
+          return (
+            <SupplierAddress
+              onSubmit={handleSubmitSupplier}
+              onPrev={handlePrev}
+              formData={formData} // Pass the current formData to the component
+            />
+          );
         default:
           return null;
       }
