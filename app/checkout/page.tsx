@@ -993,17 +993,31 @@ export default function CheckoutPage() {
   // Watch state changes to update LGAs
   const watchedState = watch("customerAddress.state");
 
+  // useEffect(() => {
+  //   if (watchedState && watchedState !== selectedState) {
+  //     setSelectedState(watchedState);
+  //     const lgas = getLgasForState(watchedState);
+  //     setAvailableLgas(lgas);
+  //     // Reset LGA selection when state changes
+  //     setValue("customerAddress.lga", "");
+  //     // Update store
+  //     setCustomerAddress({ state: watchedState, lga: "" });
+  //   }
+  // }, [watchedState, selectedState, setValue, setCustomerAddress]);
+
+
+
   useEffect(() => {
-    if (watchedState && watchedState !== selectedState) {
-      setSelectedState(watchedState);
-      const lgas = getLgasForState(watchedState);
-      setAvailableLgas(lgas);
-      // Reset LGA selection when state changes
-      setValue("customerAddress.lga", "");
-      // Update store
-      setCustomerAddress({ state: watchedState, lga: "" });
-    }
-  }, [watchedState, selectedState, setValue, setCustomerAddress]);
+  if (watchedState && watchedState !== selectedState) {
+    setSelectedState(watchedState);
+    const lgas = getLgasForState(watchedState);
+    setAvailableLgas(lgas);
+    
+    // Don't automatically reset LGA - let user see if their stored LGA is still valid
+    // Only update the state in the store
+    setCustomerAddress({ state: watchedState });
+  }
+}, [watchedState, selectedState, setValue, setCustomerAddress]);
 
   // Watch form values for real-time validation and store updates
   const watchedCustomerInfo = watch("customerInfo");
