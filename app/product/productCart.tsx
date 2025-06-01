@@ -70,7 +70,7 @@ export const SingleProduct = ({
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setOrderSummary, addProductToOrder, orderSummary } =
+  const { setOrderSummary, orderSummary } =
     useProductStore();
 
   // Get URL parameters for back navigation
@@ -116,6 +116,8 @@ export const SingleProduct = ({
   );
 
   const productData: ProductData = data?.data || null;
+
+  console.log("productData", productData)
 
   // Handle back navigation for non-store platforms
 
