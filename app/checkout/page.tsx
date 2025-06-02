@@ -1,4 +1,3 @@
-
 "use client";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
@@ -45,6 +44,10 @@ const PaystackButton = dynamic(
 );
 
 export default function CheckoutPage() {
+  const [buyerCoordinates, setBuyerCoordinates] = useState<{
+    latitude: number | null;
+    longitude: number | null;
+  }>({ latitude: null, longitude: null });
   // Replace local state with Zustand store
   const {
     checkoutData,
@@ -73,7 +76,6 @@ export default function CheckoutPage() {
 
   // Get values from store
   const currentStep = checkoutData.currentStep;
-  const deliveryMethod = checkoutData.deliveryMethod;
   const paymentMethod = checkoutData.paymentMethod;
 
   // Form resolver for customer info and address
@@ -126,7 +128,6 @@ export default function CheckoutPage() {
     orderSummary?.subtotal ||
     cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Function to fetch logistics pricing
   const fetchLogisticsPricing = async (
     state: string,
     lga: string,
@@ -169,9 +170,23 @@ export default function CheckoutPage() {
 
       const data = await response.json();
 
-      // Assuming the API returns a price field
+      // Assuming the API returns a price field and buyer coordinates
       if (data.price !== undefined) {
         setLogisticsPricing(data.price);
+
+        // Store buyer coordinates if available, otherwise use fallback
+        if (data.buyerLatitude && data.buyerLongitude) {
+          setBuyerCoordinates({
+            latitude: data.buyerLatitude,
+            longitude: data.buyerLongitude,
+          });
+        } else {
+          // Use fallback coordinates (Lagos, Nigeria as example)
+          setBuyerCoordinates({
+            latitude: 6.5244 + (Math.random() - 0.5) * 0.1, // Add some randomness
+            longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
+          });
+        }
       } else {
         throw new Error("Invalid pricing response format");
       }
@@ -179,8 +194,125 @@ export default function CheckoutPage() {
       console.error("Error fetching logistics pricing:", error);
       setPricingError("Failed to calculate delivery fee");
       setLogisticsPricing(null);
+
+      // Set fallback coordinates even on error
+      setBuyerCoordinates({
+        latitude: 6.5244 + (Math.random() - 0.5) * 0.1,
+        longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
+      });
     } finally {
       setIsLoadingPricing(false);
+    }
+  };
+
+  // Helper function to calculate supplier amount
+  const calculateSupplierAmount = () => {
+    if (!orderSummary?.items) return 0;
+
+    return orderSummary.items.reduce((total, item) => {
+      const originalPrice = item.originalPrice || item.price;
+      return total + originalPrice * item.quantity;
+    }, 0);
+  };
+
+  // Helper function to calculate total quantity
+  const calculateTotalQuantity = () => {
+    if (!orderSummary?.items) return 0;
+
+    return orderSummary.items.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  // Helper function to format order items
+  const formatOrderItems = () => {
+    if (!orderSummary?.items) return [];
+
+    return orderSummary.items.map((item) => ({
+      productId: orderSummary.productId,
+      quantity: item.quantity,
+      ...(item.variationId && { variantId: item.variationId }),
+    }));
+  };
+
+  // Helper function to prepare order data
+  const prepareOrderData = (
+    paymentMethod: string,
+    paymentReference?: string
+  ) => {
+    const supplierAmount = calculateSupplierAmount();
+    const plugAmount = subtotal - supplierAmount;
+
+    const orderData = {
+      // Buyer information
+      buyerName: checkoutData.customerInfo.name,
+      buyerEmail: checkoutData.customerInfo.email,
+      buyerPhone: checkoutData.customerInfo.phone,
+      buyerAddress: checkoutData.customerAddress.streetAddress,
+      buyerLga: checkoutData.customerAddress.lga,
+      buyerState: checkoutData.customerAddress.state,
+      buyerDirections: checkoutData.customerAddress.directions || "",
+      buyerInstructions: checkoutData.deliveryInstructions || "",
+      buyerLatitude: buyerCoordinates.latitude || 6.5244,
+      buyerLongitude: buyerCoordinates.longitude || 3.3792,
+
+      // Supplier information
+      supplierAddress: orderSummary?.pickupLocation?.streetAddress || "",
+      supplierState: orderSummary?.pickupLocation?.state || "",
+      supplierLga: orderSummary?.pickupLocation?.lga || "",
+      supplierDirections: orderSummary?.pickupLocation?.direction || "",
+      supplierLatitude: orderSummary?.pickupLocation?.latitude || 0,
+      supplierLongitude: orderSummary?.pickupLocation?.longitude || 0,
+      supplierId: orderSummary?.items?.[0]?.supplierId || "",
+
+      // Order details
+      paymentMethod: paymentMethod,
+      totalAmount: total,
+      deliveryFee: deliveryFee,
+      supplierAmount: supplierAmount,
+      plugAmount: plugAmount,
+      plugId: orderSummary?.referralId || "",
+      orderItems: formatOrderItems(),
+
+      // Payment reference for online payments
+      ...(paymentReference && { paymentReference }),
+    };
+
+    return orderData;
+  };
+
+  // Function to place order
+  const placeOrder = async (
+    paymentMethod: string,
+    paymentReference?: string
+  ) => {
+    try {
+      const orderData = prepareOrderData(paymentMethod, paymentReference);
+
+      console.log("Placing order with data:", orderData);
+
+      const response = await fetch("/api/orders/place-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to place order");
+      }
+
+      const result = await response.json();
+      console.log("Order placed successfully:", result);
+
+      // Clear all checkout data and order summary
+      clearCheckoutData();
+      useProductStore.getState().clearOrderSummary();
+
+      return result;
+    } catch (error) {
+      console.error("Error placing order:", error);
+      throw error;
     }
   };
 
@@ -232,7 +364,7 @@ export default function CheckoutPage() {
   };
 
   const deliveryFee = getDeliveryFee();
-  const total = subtotal + deliveryFee
+  const total = subtotal + deliveryFee;
 
   // Initialize states and form data
   useEffect(() => {
@@ -339,7 +471,6 @@ export default function CheckoutPage() {
     }
   }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors]);
 
-  // Paystack configuration
   const paystackConfig = {
     email: watchedCustomerInfo?.email || "",
     amount: total * 100, // Paystack expects amount in kobo
@@ -361,18 +492,20 @@ export default function CheckoutPage() {
     },
     publicKey: "pk_test_eff9334b69c4057bd0b89b293824020426f0d011",
     text: "Place Order",
-    onSuccess: (reference) => {
-      alert(`Payment successful! Reference: ${reference.reference}`);
-      console.log("Payment successful:", reference);
-      // Clear checkout data after successful payment
-      clearCheckoutData();
-      submit();
+    onSuccess: async (reference) => {
+      try {
+        await placeOrder("online", reference.reference);
+        alert(`Payment successful! Reference: ${reference.reference}`);
+        console.log("Payment successful:", reference);
+        submit();
+      } catch (error) {
+        console.error("Error placing order after successful payment:", error);
+      }
     },
     onClose: () => {
       alert("Payment cancelled");
     },
   };
-
   // Format price in Naira
   const formatPrice = (price) => {
     return `₦${price.toLocaleString()}`;
@@ -399,14 +532,23 @@ export default function CheckoutPage() {
     if (currentStep === "review") setCurrentStep("delivery");
   };
 
-  const handleCashOnDeliveryOrder = () => {
-    // Handle cash on delivery order
-    alert("Order placed successfully! You will pay on delivery.");
-    console.log("Cash on delivery order placed");
-    console.log("Final checkout data:", getCheckoutData());
-    // Clear checkout data after successful order
-    clearCheckoutData();
-    // Here you would typically send the order to your backend
+  // const handleCashOnDeliveryOrder = () => {
+  //   // Handle cash on delivery order
+  //   alert("Order placed successfully! You will pay on delivery.");
+  //   console.log("Cash on delivery order placed");
+  //   console.log("Final checkout data:", getCheckoutData());
+  //   // Clear checkout data after successful order
+  //   clearCheckoutData();
+  //   // Here you would typically send the order to your backend
+  // };
+
+  const handleCashOnDeliveryOrder = async () => {
+    try {
+      await placeOrder("cash");
+      alert("Order placed successfully! You will pay on delivery.");
+    } catch (error) {
+      alert(`Failed to place order: ${error.message}`);
+    }
   };
 
   // Handle delivery method change

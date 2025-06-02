@@ -32,18 +32,48 @@ interface SelectedVariation {
   quantity: number;
 }
 
-// Add this interface to your existing interfaces
+// // Add this interface to your existing interfaces
+// interface PickupLocation {
+//   latitude: number;
+//   longitude: number;
+// }
+
+// // Update your ProductData interface to include pickupLocation
+// interface ProductData {
+//   id: string;
+//   name: string;
+//   description: string;
+//   price: number;
+//   images: string[];
+//   size: string;
+//   color: string;
+//   stocks: number;
+//   variations: ProductVariation[];
+//   features?: string[];
+//   seller?: string;
+//   inStock?: boolean;
+//   pickupLocation?: PickupLocation; // Add this line
+// }
+
+
+
+// Update the PickupLocation interface
 interface PickupLocation {
   latitude: number;
   longitude: number;
+  direction?: string; // Added
+  state?: string; // Added
+  lga?: string; // Added
+  streetAddress?: string; // Added
 }
 
-// Update your ProductData interface to include pickupLocation
+// Update the ProductData interface
 interface ProductData {
   id: string;
   name: string;
   description: string;
   price: number;
+  originalPrice?: number; // Added
   images: string[];
   size: string;
   color: string;
@@ -52,7 +82,8 @@ interface ProductData {
   features?: string[];
   seller?: string;
   inStock?: boolean;
-  pickupLocation?: PickupLocation; // Add this line
+  pickupLocation?: PickupLocation;
+  supplierId?: string; // Added
 }
 
 
@@ -351,8 +382,18 @@ export const SingleProduct = ({
     return { subtotal, total, items };
   }, [currentPrice, quantity, selectedVariations, hasVariations, productData]);
 
+  
+
   // const handleCheckout = () => {
   //   if (!productData) return;
+
+  //   // Extract pickup location from product data
+  //   const pickupLocation = productData.pickupLocation
+  //     ? {
+  //         latitude: productData.pickupLocation.latitude,
+  //         longitude: productData.pickupLocation.longitude,
+  //       }
+  //     : undefined;
 
   //   // Store product data in Zustand
   //   if (hasVariations && selectedVariations.length > 0) {
@@ -381,6 +422,7 @@ export const SingleProduct = ({
   //       productId: productData.id,
   //       referralId: currentReferralId,
   //       platform: currentPlatform,
+  //       pickupLocation, // Add this line
   //     });
   //   } else if (!hasVariations) {
   //     // Handle simple product
@@ -401,6 +443,7 @@ export const SingleProduct = ({
   //       productId: productData.id,
   //       referralId: currentReferralId,
   //       platform: currentPlatform,
+  //       pickupLocation, // Add this line
   //     });
   //   }
 
@@ -419,82 +462,92 @@ export const SingleProduct = ({
   // };
 
 
-  const handleCheckout = () => {
-    if (!productData) return;
 
-    // Extract pickup location from product data
-    const pickupLocation = productData.pickupLocation
-      ? {
-          latitude: productData.pickupLocation.latitude,
-          longitude: productData.pickupLocation.longitude,
-        }
-      : undefined;
+const handleCheckout = () => {
+  if (!productData) return;
 
-    // Store product data in Zustand
-    if (hasVariations && selectedVariations.length > 0) {
-      // Handle multiple variations
-      const items = selectedVariations.map((sv) => ({
-        id: productData.id,
-        name: productData.name,
-        price: sv.variation.price || productData.price,
-        quantity: sv.quantity,
-        image: productData.images?.[0] || "/placeholder.svg",
-        variationId: sv.variation.id,
-        variationName: getVariationDisplayName(sv.variation),
-        seller: productData.seller,
-      }));
+  // Extract pickup location from product data with all new fields
+  const pickupLocation = productData.pickupLocation
+    ? {
+        latitude: productData.pickupLocation.latitude,
+        longitude: productData.pickupLocation.longitude,
+        direction: productData.pickupLocation.direction,
+        state: productData.pickupLocation.state,
+        lga: productData.pickupLocation.lga,
+        streetAddress: productData.pickupLocation.streetAddress,
+      }
+    : undefined;
 
-      const subtotal = items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-      );
-      const total = subtotal;
+  // Store product data in Zustand
+  if (hasVariations && selectedVariations.length > 0) {
+    // Handle multiple variations
+    const items = selectedVariations.map((sv) => ({
+      id: productData.id,
+      name: productData.name,
+      price: sv.variation.price || productData.price,
+      originalPrice: productData.originalPrice, // Added
+      quantity: sv.quantity,
+      image: productData.images?.[0] || "/placeholder.svg",
+      variationId: sv.variation.id,
+      variationName: getVariationDisplayName(sv.variation),
+      seller: productData.seller,
+      supplierId: productData.supplierId, // Added
+    }));
 
-      setOrderSummary({
-        items,
-        subtotal,
-        total,
-        productId: productData.id,
-        referralId: currentReferralId,
-        platform: currentPlatform,
-        pickupLocation, // Add this line
-      });
-    } else if (!hasVariations) {
-      // Handle simple product
-      const productItem = {
-        id: productData.id,
-        name: productData.name,
-        price: currentPrice,
-        quantity,
-        image: productData.images?.[0] || "/placeholder.svg",
-        seller: productData.seller,
-      };
+    const subtotal = items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+    const total = subtotal;
 
-      // Use setOrderSummary instead of addProductToOrder for consistency
-      setOrderSummary({
-        items: [productItem],
-        subtotal: currentPrice * quantity,
-        total: currentPrice * quantity,
-        productId: productData.id,
-        referralId: currentReferralId,
-        platform: currentPlatform,
-        pickupLocation, // Add this line
-      });
-    }
+    setOrderSummary({
+      items,
+      subtotal,
+      total,
+      productId: productData.id,
+      referralId: currentReferralId,
+      platform: currentPlatform,
+      pickupLocation,
+    });
+  } else if (!hasVariations) {
+    // Handle simple product
+    const productItem = {
+      id: productData.id,
+      name: productData.name,
+      price: currentPrice,
+      originalPrice: productData.originalPrice, // Added
+      quantity,
+      image: productData.images?.[0] || "/placeholder.svg",
+      seller: productData.seller,
+      supplierId: productData.supplierId, // Added
+    };
 
-    // Navigate to checkout
-    let checkoutUrl = `/checkout?pid=${currentProductId}`;
+    // Use setOrderSummary instead of addProductToOrder for consistency
+    setOrderSummary({
+      items: [productItem],
+      subtotal: currentPrice * quantity,
+      total: currentPrice * quantity,
+      productId: productData.id,
+      referralId: currentReferralId,
+      platform: currentPlatform,
+      pickupLocation,
+    });
+  }
 
-    if (currentReferralId) {
-      checkoutUrl += `&ref=${currentReferralId}`;
-    }
+  // Navigate to checkout
+  let checkoutUrl = `/checkout?pid=${currentProductId}`;
 
-    if (currentPlatform) {
-      checkoutUrl += `&platform=${currentPlatform}`;
-    }
+  if (currentReferralId) {
+    checkoutUrl += `&ref=${currentReferralId}`;
+  }
 
-    router.push(checkoutUrl);
-  };
+  if (currentPlatform) {
+    checkoutUrl += `&platform=${currentPlatform}`;
+  }
+
+  router.push(checkoutUrl);
+};
+
 
   const handleWhatsAppSignup = () => {
     console.log("WhatsApp signup:", whatsappNumber);
