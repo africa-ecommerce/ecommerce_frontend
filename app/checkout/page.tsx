@@ -958,7 +958,7 @@ export default function CheckoutPage() {
                             <br />
                             {checkoutData.customerInfo.phone || "Phone Number"}
                           </p>
-                          <div className="flex items-center mt-2">
+                          {/* <div className="flex items-center mt-2">
                             <Truck className="h-4 w-4 text-muted-foreground mr-1 flex-shrink-0" />
                             <span className="text-sm text-muted-foreground">
                               {deliveryMethod === "standard" &&
@@ -967,7 +967,7 @@ export default function CheckoutPage() {
                                 "Express Delivery (1-2 business days)"}
                               {deliveryMethod === "pickup" && "Store Pickup"}
                             </span>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                     </div>
