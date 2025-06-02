@@ -98,16 +98,16 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
     switch (activeSection) {
       case "profile":
         return <ProfileSection onBack={handleBackFromSection} userType={userType} />;
-      case "verification":
-        return <VerificationSection onBack={handleBackFromSection} />;
+      // case "verification":
+      //   return <VerificationSection onBack={handleBackFromSection} />;
       case "payment":
         return <PaymentSection onBack={handleBackFromSection} />;
-      case "notifications":
-        return <NotificationSection onBack={handleBackFromSection} />;
-      case "settings":
-        return <AppSettingsSection onBack={handleBackFromSection} />;
-      case "help":
-        return <HelpSupportSection onBack={handleBackFromSection} />;
+      // case "notifications":
+      //   return <NotificationSection onBack={handleBackFromSection} />;
+      // case "settings":
+      //   return <AppSettingsSection onBack={handleBackFromSection} />;
+      // case "help":
+      //   return <HelpSupportSection onBack={handleBackFromSection} />;
      
       default:
         return (
@@ -146,7 +146,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                   </button>
 
                   <Separator />
-                  {userType === "SUPPLIER" && (
+                  {/* {userType === "SUPPLIER" && (
                     <>
                       <button
                         onClick={() => setActiveSection("verification")}
@@ -172,7 +172,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                       </button>
                       <Separator />
                     </>
-                  )}
+                  )} */}
 
                   <button
                     onClick={() => setActiveSection("payment")}
@@ -189,7 +189,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                 </CardContent>
               </Card>
 
-              <Card className="overflow-hidden">
+              {/* <Card className="overflow-hidden">
                 <CardContent className="p-0">
                   <button
                     onClick={() => setActiveSection("notifications")}
@@ -219,11 +219,11 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </button>
                 </CardContent>
-              </Card>
+              </Card> */}
 
               <Card className="overflow-hidden">
                 <CardContent className="p-0">
-                  <button
+                  {/* <button
                     onClick={() => setActiveSection("help")}
                     className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors"
                   >
@@ -234,7 +234,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                       <span>Help & Support</span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </button>
+                  </button> */}
 
                   <Separator />
 

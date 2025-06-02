@@ -271,7 +271,7 @@ const ErrorOrdersState = ({ onRetry }: { onRetry?: () => void }) => (
     icon={<AlertCircle className="h-12 w-12 text-destructive" />}
     title="Failed to load orders"
     description="There was an error loading your orders. Please try again."
-    actionText="Retry"
+    actionText="Try Again"
     onAction={onRetry}
   />
 )
