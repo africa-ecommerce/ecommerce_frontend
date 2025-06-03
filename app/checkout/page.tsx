@@ -205,6 +205,8 @@ export default function CheckoutPage() {
     }
   };
 
+
+  
   // Helper function to calculate supplier amount
   const calculateSupplierAmount = () => {
     if (!orderSummary?.items) return 0;
@@ -361,6 +363,7 @@ export default function CheckoutPage() {
     } finally{
       setIsLoading(false);
     }
+  }
 
   // Watch address fields for automatic pricing calculation
   const watchedState = watch("customerAddress.state");
