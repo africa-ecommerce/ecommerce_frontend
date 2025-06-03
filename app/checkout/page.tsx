@@ -136,7 +136,7 @@ const [lastFetchedCustomerInfo, setLastFetchedCustomerInfo] = useState<string>("
 
 
 const fetchBuyerInfo = useCallback(
-  async (name, email, phone) => {
+  async (name: string, email: string, phone: string) => {
     if (!name || !email || !phone) return;
 
     // Create a unique key for this customer info combination
@@ -684,7 +684,7 @@ const watchedPhone = watch("customerInfo.phone");
     },
   };
   
-  const formatPrice = (price) => {
+  const formatPrice = (price: string | number) => {
     return `₦${price.toLocaleString()}`;
   };
 
@@ -720,12 +720,12 @@ const watchedPhone = watch("customerInfo.phone");
 
 
   // Handle payment method change
-  const handlePaymentMethodChange = (method) => {
+  const handlePaymentMethodChange = (method: "online" | "cash") => {
     setPaymentMethod(method);
   };
 
   // Handle delivery instructions change
-  const handleDeliveryInstructionsChange = (instructions) => {
+  const handleDeliveryInstructionsChange = (instructions: string) => {
     setDeliveryInstructions(instructions);
   };
 
