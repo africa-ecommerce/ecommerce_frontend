@@ -162,7 +162,7 @@ export default function CheckoutPage() {
         supplierLng: supplierLng.toString(),
       });
 
-      const response = await fetch(`/api/logistic/pricing?${params}`);
+      const response = await fetch(`/api/logistics/pricing?${params}`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch pricing: ${response.statusText}`);
@@ -275,46 +275,7 @@ export default function CheckoutPage() {
     return orderData;
   };
 
-  // Function to place order
-  // const placeOrder = async (
-  //   paymentMethod: string,
-  //   paymentReference?: string
-  // ) => {
-  //   try {
-  //     setIsLoading(true)
-  //     const orderData = prepareOrderData(paymentMethod, paymentReference);
-
-  //     console.log("Placing order with data:", orderData);
-
-  //     const response = await fetch("/api/orders/place-order", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(orderData),
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       errorToast(errorData.error || "Failed to place order");
-  //     }
-
-  //     const result = await response.json();
-  //    successToast(result.message || "Order placed successfully");
-
-  //     // Clear all checkout data and order summary
-  //     clearCheckoutData();
-  //     useProductStore.getState().clearOrderSummary();
-
-  //     return result;
-  //   } catch (error) {
-  //     console.error("Error placing order:", error);
-  //     errorToast("An error occurred while placing the order");
-  //   } finally{
-  //     setIsLoading(false);
-  //   }
-  // };
-
+  
 
 
  const placeOrder = async (
