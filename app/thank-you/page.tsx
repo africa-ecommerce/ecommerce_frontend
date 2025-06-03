@@ -208,7 +208,7 @@ export default function ThankYouPage() {
     );
   }
 
-  const { plugBussinessName, plugStore, buyerName } = orderData;
+  const { plugBusinessName, plugStore, buyerName } = orderData;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-accent/10 relative overflow-hidden">
@@ -275,7 +275,7 @@ export default function ThankYouPage() {
                       </span>
                       , thank you for choosing{" "}
                       <span className="font-bold text-accent">
-                        {plugBussinessName}
+                        {plugBusinessName}
                       </span>
                       !
                     </p>
