@@ -573,6 +573,10 @@ const fetchBuyerInfo = useCallback(
           clearTimeout(buyerInfoTimeoutRef.current);
         }
 
+        console.log("watchedCustomerInfo", 
+          watchedCustomerInfo
+        )
+
         // Set a debounced timeout to fetch buyer info
         buyerInfoTimeoutRef.current = setTimeout(() => {
           fetchBuyerInfo(
