@@ -548,6 +548,10 @@ const fetchBuyerInfo = useCallback(
 
   // Watch form values for real-time validation and store updates
   const watchedCustomerInfo = watch("customerInfo");
+
+  const watchedName = watch("customerInfo.name");
+const watchedEmail = watch("customerInfo.email"); 
+const watchedPhone = watch("customerInfo.phone");
   const watchedCustomerAddress = watch("customerAddress");
 
  
@@ -562,33 +566,92 @@ const fetchBuyerInfo = useCallback(
 
  
 
+  // useEffect(() => {
+  //   if (watchedCustomerInfo) {
+  //     setCustomerInfo(watchedCustomerInfo);
+
+  //     // Check if customer info is complete and valid
+  //     if (isCustomerInfoComplete(watchedCustomerInfo)) {
+  //       // Clear existing timeout
+  //       if (buyerInfoTimeoutRef.current) {
+  //         clearTimeout(buyerInfoTimeoutRef.current);
+  //       }
+
+  //       console.log("watchedCustomerInfo", 
+  //         watchedCustomerInfo
+  //       )
+
+  //       // Set a debounced timeout to fetch buyer info
+  //       buyerInfoTimeoutRef.current = setTimeout(() => {
+  //         fetchBuyerInfo(
+  //           watchedCustomerInfo.name,
+  //           watchedCustomerInfo.email,
+  //           watchedCustomerInfo.phone
+  //         );
+  //       }, 1000); // 1 second delay to avoid too many API calls
+  //     }
+  //   }
+  // }, [
+  //   watchedCustomerInfo,
+  //   setCustomerInfo,
+  //   isCustomerInfoComplete,
+  //   fetchBuyerInfo,
+  // ]);
+
   useEffect(() => {
-    if (watchedCustomerInfo) {
-      setCustomerInfo(watchedCustomerInfo);
+    console.log("Individual fields changed:", {
+      name: watchedName,
+      email: watchedEmail,
+      phone: watchedPhone,
+    });
 
-      // Check if customer info is complete and valid
-      if (isCustomerInfoComplete(watchedCustomerInfo)) {
-        // Clear existing timeout
-        if (buyerInfoTimeoutRef.current) {
-          clearTimeout(buyerInfoTimeoutRef.current);
-        }
+    // Create customerInfo object from individual watched fields
+    const currentCustomerInfo = {
+      name: watchedName || "",
+      email: watchedEmail || "",
+      phone: watchedPhone || "",
+    };
 
-        console.log("watchedCustomerInfo", 
-          watchedCustomerInfo
-        )
+    // Update store with current info
+    setCustomerInfo(currentCustomerInfo);
 
-        // Set a debounced timeout to fetch buyer info
-        buyerInfoTimeoutRef.current = setTimeout(() => {
-          fetchBuyerInfo(
-            watchedCustomerInfo.name,
-            watchedCustomerInfo.email,
-            watchedCustomerInfo.phone
-          );
-        }, 1000); // 1 second delay to avoid too many API calls
+    // Check if customer info is complete and valid
+    if (isCustomerInfoComplete(currentCustomerInfo)) {
+      console.log(
+        "Customer info is complete, setting timeout to fetch buyer info"
+      );
+
+      // Clear existing timeout
+      if (buyerInfoTimeoutRef.current) {
+        clearTimeout(buyerInfoTimeoutRef.current);
       }
+
+      // Set a debounced timeout to fetch buyer info
+      buyerInfoTimeoutRef.current = setTimeout(() => {
+        console.log("Timeout triggered, calling fetchBuyerInfo with:", {
+          name: currentCustomerInfo.name,
+          email: currentCustomerInfo.email,
+          phone: currentCustomerInfo.phone,
+        });
+
+        fetchBuyerInfo(
+          currentCustomerInfo.name,
+          currentCustomerInfo.email,
+          currentCustomerInfo.phone
+        );
+      }, 1000); // 1 second delay to avoid too many API calls
+    } else {
+      console.log("Customer info incomplete:", {
+        name: currentCustomerInfo?.name?.length || 0,
+        email: currentCustomerInfo?.email?.length || 0,
+        phone: currentCustomerInfo?.phone?.length || 0,
+        isComplete: isCustomerInfoComplete(currentCustomerInfo),
+      });
     }
   }, [
-    watchedCustomerInfo,
+    watchedName, // Watch individual fields instead of the object
+    watchedEmail,
+    watchedPhone,
     setCustomerInfo,
     isCustomerInfoComplete,
     fetchBuyerInfo,
