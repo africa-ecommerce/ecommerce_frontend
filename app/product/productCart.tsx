@@ -371,10 +371,7 @@ const handleCheckout = () => {
     ? {
         latitude: productData.pickupLocation.latitude,
         longitude: productData.pickupLocation.longitude,
-        direction: productData.pickupLocation.direction,
-        state: productData.pickupLocation.state,
-        lga: productData.pickupLocation.lga,
-        streetAddress: productData.pickupLocation.streetAddress,
+        
       }
     : undefined;
 
@@ -384,13 +381,14 @@ const handleCheckout = () => {
     const items = selectedVariations.map((sv) => ({
       id: productData.originalId,
       name: productData.name,
-      price: sv.variation.price || productData.price,
+      price:  productData.price,
       originalPrice: productData.originalPrice, // Added
       quantity: sv.quantity,
+      size: sv.variation.size,
+      color: sv.variation.color,
       image: productData.images?.[0] || "/placeholder.svg",
       variationId: sv.variation.id,
       variationName: getVariationDisplayName(sv.variation),
-      seller: productData.seller,
       supplierId: productData.supplierId, // Added
     }));
 
@@ -415,10 +413,11 @@ const handleCheckout = () => {
       id: productData.originalId,
       name: productData.name,
       price: currentPrice,
+      size: productData.size,
+      color: productData.color,
       originalPrice: productData.originalPrice, // Added
       quantity,
       image: productData.images?.[0] || "/placeholder.svg",
-      seller: productData.seller,
       supplierId: productData.supplierId, // Added
     };
 

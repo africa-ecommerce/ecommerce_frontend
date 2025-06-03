@@ -1551,29 +1551,31 @@ export default function CheckoutPage() {
   const { orderSummary, updateDeliveryFee } = useProductStore();
 
   // Get cart items from Zustand or fallback to sample data
-  const cartItems = orderSummary?.items || [
-    {
-      id: "1",
-      name: "Traditional Ankara Fabric Blouse",
-      price: 12500,
-      quantity: 1,
-      image: "/placeholder.svg?height=80&width=80",
-      seller: "Adire Textiles",
-    },
-    {
-      id: "2",
-      name: "Handcrafted Leather Sandals",
-      price: 8700,
-      quantity: 2,
-      image: "/placeholder.svg?height=80&width=80",
-      seller: "Lagos Leatherworks",
-    },
-  ];
+  // const cartItems = orderSummary?.items || [
+  //   {
+  //     id: "1",
+  //     name: "Traditional Ankara Fabric Blouse",
+  //     price: 12500,
+  //     quantity: 1,
+  //     image: "/placeholder.svg?height=80&width=80",
+  //     seller: "Adire Textiles",
+  //   },
+  //   {
+  //     id: "2",
+  //     name: "Handcrafted Leather Sandals",
+  //     price: 8700,
+  //     quantity: 2,
+  //     image: "/placeholder.svg?height=80&width=80",
+  //     seller: "Lagos Leatherworks",
+  //   },
+  // ];
+
+  const cartItems = orderSummary?.items
 
   // Calculate subtotal from Zustand or fallback calculation
   const subtotal =
     orderSummary?.subtotal ||
-    cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    cartItems?.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   // Watch address fields for SWR key generation
   const watchedState = watch("customerAddress.state");
@@ -1709,6 +1711,17 @@ export default function CheckoutPage() {
   };
 
   // Helper function to format order items
+  // const formatOrderItems = () => {
+  //   if (!orderSummary?.items) return [];
+
+  //   return orderSummary.items.map((item) => ({
+  //     productId: orderSummary.productId,
+  //     quantity: item.quantity,
+  //     ...(item.variationId && { variantId: item.variationId }),
+  //   }));
+  // };
+
+
   const formatOrderItems = () => {
     if (!orderSummary?.items) return [];
 
@@ -1716,16 +1729,64 @@ export default function CheckoutPage() {
       productId: orderSummary.productId,
       quantity: item.quantity,
       ...(item.variationId && { variantId: item.variationId }),
+      // Add color and size to the order items
+      ...(item.color && { color: item.color }),
+      ...(item.size && { size: item.size }),
     }));
   };
 
-  // Helper function to prepare order data
+  // // Helper function to prepare order data
+  // const prepareOrderData = (
+  //   paymentMethod: string,
+  //   paymentReference?: string
+  // ) => {
+  //   const supplierAmount = calculateSupplierAmount();
+  //   const plugAmount = subtotal! - supplierAmount;
+
+  //   const orderData = {
+  //     // Buyer information
+  //     buyerName: checkoutData.customerInfo.name,
+  //     buyerEmail: checkoutData.customerInfo.email,
+  //     buyerPhone: checkoutData.customerInfo.phone,
+  //     buyerAddress: checkoutData.customerAddress.streetAddress,
+  //     buyerLga: checkoutData.customerAddress.lga,
+  //     buyerState: checkoutData.customerAddress.state,
+  //     buyerDirections: checkoutData.customerAddress.directions || "",
+  //     buyerInstructions: checkoutData.deliveryInstructions || "",
+  //     buyerLatitude: buyerCoordinates.latitude || 6.5244,
+  //     buyerLongitude: buyerCoordinates.longitude || 3.3792,
+
+  //     // Supplier information
+  //     // supplierAddress: orderSummary?.pickupLocation?.streetAddress || "",
+  //     // supplierState: orderSummary?.pickupLocation?.state || "",
+  //     // supplierLga: orderSummary?.pickupLocation?.lga || "",
+  //     // supplierDirections: orderSummary?.pickupLocation?.direction || "",
+  //     // supplierLatitude: orderSummary?.pickupLocation?.latitude || 0,
+  //     // supplierLongitude: orderSummary?.pickupLocation?.longitude || 0,
+  //     supplierId: orderSummary?.items?.[0]?.supplierId || "",
+
+  //     // Order details
+  //     paymentMethod: paymentMethod,
+  //     totalAmount: total,
+  //     deliveryFee: deliveryFee,
+  //     supplierAmount: supplierAmount,
+  //     plugAmount: plugAmount,
+  //     plugId: orderSummary?.referralId || "",
+  //     orderItems: formatOrderItems(),
+
+  //     // Payment reference for online payments
+  //     ...(paymentReference && { paymentReference }),
+  //   };
+
+  //   return orderData;
+  // };
+
   const prepareOrderData = (
     paymentMethod: string,
     paymentReference?: string
   ) => {
     const supplierAmount = calculateSupplierAmount();
-    const plugAmount = subtotal - supplierAmount;
+    const plugAmount = subtotal! - supplierAmount;
 
     const orderData = {
       // Buyer information
@@ -1741,12 +1802,6 @@ export default function CheckoutPage() {
       buyerLongitude: buyerCoordinates.longitude || 3.3792,
 
       // Supplier information
-      supplierAddress: orderSummary?.pickupLocation?.streetAddress || "",
-      supplierState: orderSummary?.pickupLocation?.state || "",
-      supplierLga: orderSummary?.pickupLocation?.lga || "",
-      supplierDirections: orderSummary?.pickupLocation?.direction || "",
-      supplierLatitude: orderSummary?.pickupLocation?.latitude || 0,
-      supplierLongitude: orderSummary?.pickupLocation?.longitude || 0,
       supplierId: orderSummary?.items?.[0]?.supplierId || "",
 
       // Order details
@@ -1756,7 +1811,7 @@ export default function CheckoutPage() {
       supplierAmount: supplierAmount,
       plugAmount: plugAmount,
       plugId: orderSummary?.referralId || "",
-      orderItems: formatOrderItems(),
+      orderItems: formatOrderItems(), // This now includes color and size
 
       // Payment reference for online payments
       ...(paymentReference && { paymentReference }),
@@ -1977,8 +2032,7 @@ export default function CheckoutPage() {
         {
           display_name: "Order Items",
           variable_name: "order_items",
-          value: cartItems
-            .map((item) => `${item.name} x${item.quantity}`)
+          value: cartItems?.map((item) => `${item.name} x${item.quantity}`)
             .join(", "),
         },
       ],
@@ -2525,7 +2579,7 @@ export default function CheckoutPage() {
                       <h3 className="font-medium mb-3">Items in Your Order</h3>
 
                       <div className="space-y-4">
-                        {cartItems.map((item) => (
+                        {cartItems?.map((item) => (
                           <div
                             key={item.id}
                             className="flex items-start space-x-3"
@@ -2640,9 +2694,9 @@ export default function CheckoutPage() {
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground text-sm">
-                        Subtotal ({cartItems.length} items)
+                        Subtotal ({cartItems?.length} items)
                       </span>
-                      <span className="text-sm">{formatPrice(subtotal)}</span>
+                      <span className="text-sm">{formatPrice(subtotal!)}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground text-sm">

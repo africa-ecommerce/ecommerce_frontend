@@ -9,22 +9,20 @@ interface ProductItem {
   id: string;
   name: string;
   price: number;
+  color?: string;
+  size?: string;
   originalPrice?: number; // Added originalPrice
   quantity: number;
   image: string;
   variationId?: string;
   variationName?: string;
-  seller?: string;
   supplierId?: string; // Added supplierId
 }
 
 interface PickupLocation {
   latitude: number;
   longitude: number;
-  direction?: string; // Added direction
-  state?: string; // Added state
-  lga?: string; // Added lga
-  streetAddress?: string; // Added streetAddress
+ 
 }
 
 interface OrderSummary {
@@ -83,7 +81,7 @@ export const useProductStore = create<ProductStore>()(
         const subtotal = product.price * product.quantity;
         // Don't add delivery fee here - let it be calculated dynamically
         // or set a default that can be updated later
-        const defaultDeliveryFee = 1500; // This can be updated via updateDeliveryFee
+        const defaultDeliveryFee = 0; // This can be updated via updateDeliveryFee
         const total = subtotal + defaultDeliveryFee;
 
         const orderSummary: OrderSummary = {
