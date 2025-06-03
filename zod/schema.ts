@@ -230,7 +230,7 @@ const customerInfoSchema = z.object({
        }
        return val;
      })
-     .optional(),
+    
 });
 
 

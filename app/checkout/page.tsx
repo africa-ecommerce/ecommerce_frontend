@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { deliveryFormSchema } from "@/zod/schema";
 import { useCheckoutStore } from "@/hooks/checkout-store";
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 
 // Dynamic import of PaystackButton to prevent SSR issues
 const PaystackButton = dynamic(
@@ -53,7 +54,6 @@ export default function CheckoutPage() {
     checkoutData,
     setCustomerInfo,
     setCustomerAddress,
-    setDeliveryMethod,
     setPaymentMethod,
     setDeliveryInstructions,
     setCurrentStep,
@@ -65,6 +65,7 @@ export default function CheckoutPage() {
   const [selectedState, setSelectedState] = useState<string>("");
   const [availableLgas, setAvailableLgas] = useState<string[]>([]);
   const [states, setStates] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Logistics pricing state
   const [logisticsPricing, setLogisticsPricing] = useState<number | null>(null);
@@ -273,15 +274,57 @@ export default function CheckoutPage() {
   };
 
   // Function to place order
-  const placeOrder = async (
+  // const placeOrder = async (
+  //   paymentMethod: string,
+  //   paymentReference?: string
+  // ) => {
+  //   try {
+  //     setIsLoading(true)
+  //     const orderData = prepareOrderData(paymentMethod, paymentReference);
+
+  //     console.log("Placing order with data:", orderData);
+
+  //     const response = await fetch("/api/orders/place-order", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(orderData),
+  //     });
+
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       errorToast(errorData.error || "Failed to place order");
+  //     }
+
+  //     const result = await response.json();
+  //    successToast(result.message || "Order placed successfully");
+
+  //     // Clear all checkout data and order summary
+  //     clearCheckoutData();
+  //     useProductStore.getState().clearOrderSummary();
+
+  //     return result;
+  //   } catch (error) {
+  //     console.error("Error placing order:", error);
+  //     errorToast("An error occurred while placing the order");
+  //   } finally{
+  //     setIsLoading(false);
+  //   }
+  // };
+
+
+
+ const placeOrder = async (
     paymentMethod: string,
     paymentReference?: string
   ) => {
     try {
+      setIsLoading(true)
       const orderData = prepareOrderData(paymentMethod, paymentReference);
-
+  
       console.log("Placing order with data:", orderData);
-
+  
       const response = await fetch("/api/orders/place-order", {
         method: "POST",
         headers: {
@@ -289,25 +332,35 @@ export default function CheckoutPage() {
         },
         body: JSON.stringify(orderData),
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to place order");
+        errorToast(errorData.error || "Failed to place order");
+        return;
       }
-
+  
       const result = await response.json();
-      console.log("Order placed successfully:", result);
-
+      successToast(result.message || "Order placed successfully");
+  
+      // Store order success data for thank you page
+      if (result.data) {
+        sessionStorage.setItem('orderSuccess', JSON.stringify(result.data));
+      }
+  
       // Clear all checkout data and order summary
       clearCheckoutData();
       useProductStore.getState().clearOrderSummary();
-
+  
+      // Navigate to thank you page
+      router.push('/thank-you');
+  
       return result;
     } catch (error) {
       console.error("Error placing order:", error);
-      throw error;
+      errorToast("An error occurred while placing the order");
+    } finally{
+      setIsLoading(false);
     }
-  };
 
   // Watch address fields for automatic pricing calculation
   const watchedState = watch("customerAddress.state");
@@ -464,6 +517,48 @@ export default function CheckoutPage() {
     }
   }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors]);
 
+  // const paystackConfig = {
+  //   email: watchedCustomerInfo?.email || "",
+  //   amount: total * 100, // Paystack expects amount in kobo
+  //   metadata: {
+  //     name: watchedCustomerInfo?.name || "",
+  //     phone: watchedCustomerInfo?.phone || "",
+  //     address: watchedCustomerAddress
+  //       ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
+  //       : "",
+  //     custom_fields: [
+  //       {
+  //         display_name: "Order Items",
+  //         variable_name: "order_items",
+  //         value: cartItems
+  //           .map((item) => `${item.name} x${item.quantity}`)
+  //           .join(", "),
+  //       },
+  //     ],
+  //   },
+  //   publicKey: "pk_test_eff9334b69c4057bd0b89b293824020426f0d011",
+  //   text: isLoading ? "Processing..." : "Place Order",
+  //   onSuccess: async (reference) => {
+  //     try {
+  //       await placeOrder("online", reference.reference);
+      
+  //       console.log("Payment successful:", reference);
+  //       submit();
+  //     } catch (error) {
+  //       console.error("Error placing order after successful payment:", error);
+  //     }
+  //   },
+  //   onClose: () => {
+  //     alert("Payment cancelled");
+  //   },
+  // };
+
+
+
+  
+  // Format price in Naira
+  
+
   const paystackConfig = {
     email: watchedCustomerInfo?.email || "",
     amount: total * 100, // Paystack expects amount in kobo
@@ -484,13 +579,12 @@ export default function CheckoutPage() {
       ],
     },
     publicKey: "pk_test_eff9334b69c4057bd0b89b293824020426f0d011",
-    text: "Place Order",
+    text: isLoading ? "Processing..." : "Place Order",
     onSuccess: async (reference) => {
       try {
         await placeOrder("online", reference.reference);
-      
         console.log("Payment successful:", reference);
-        submit();
+        // Note: No need to call submit() here as placeOrder now handles navigation
       } catch (error) {
         console.error("Error placing order after successful payment:", error);
       }
@@ -499,7 +593,7 @@ export default function CheckoutPage() {
       alert("Payment cancelled");
     },
   };
-  // Format price in Naira
+  
   const formatPrice = (price) => {
     return `₦${price.toLocaleString()}`;
   };
@@ -549,7 +643,7 @@ export default function CheckoutPage() {
     if (paymentMethod === "cash") {
       return (
         <Button className="flex-1" onClick={handleCashOnDeliveryOrder}>
-          Place Order (Pay on Delivery)
+          {isLoading ? "Processing..." : "Place Order (Pay on Delivery)"}
         </Button>
       );
     } else {
