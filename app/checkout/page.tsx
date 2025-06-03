@@ -101,8 +101,7 @@ export default function CheckoutPage() {
 
   const searchParams = useSearchParams();
   const platform = searchParams.get("platform");
-  const { orderSummary } = useProductStore();
-
+  const { orderSummary, updateDeliveryFee } = useProductStore();
   // Get cart items from Zustand or fallback to sample data
   const cartItems = orderSummary?.items || [
     {
@@ -128,6 +127,85 @@ export default function CheckoutPage() {
     orderSummary?.subtotal ||
     cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
+  // const fetchLogisticsPricing = async (
+  //   state: string,
+  //   lga: string,
+  //   streetAddress: string
+  // ) => {
+  //   if (!state || !lga || !streetAddress) {
+  //     setLogisticsPricing(null);
+  //     return;
+  //   }
+
+  //   // Check if we have supplier coordinates from orderSummary
+  //   const supplierLat = orderSummary?.pickupLocation?.latitude;
+  //   const supplierLng = orderSummary?.pickupLocation?.longitude;
+
+  //   if (!supplierLat || !supplierLng) {
+  //     console.warn(
+  //       "Supplier coordinates not available in orderSummary.pickupLocation"
+  //     );
+  //     setPricingError("Supplier location not available");
+  //     return;
+  //   }
+
+  //   setIsLoadingPricing(true);
+  //   setPricingError(null);
+
+  //   try {
+  //     const params = new URLSearchParams({
+  //       state,
+  //       lga,
+  //       streetAddress,
+  //       supplierLat: supplierLat.toString(),
+  //       supplierLng: supplierLng.toString(),
+  //     });
+
+  //     const response = await fetch(`/api/logistics/pricing?${params}`);
+
+  //     if (!response.ok) {
+  //       throw new Error(`Failed to fetch pricing: ${response.statusText}`);
+  //     }
+
+  //     const data = await response.json();
+
+  //     // Assuming the API returns a price field and buyer coordinates
+  //     if (data?.data.price !== undefined) {
+  //       setLogisticsPricing(data?.data.price);
+
+  //       // Store buyer coordinates if available, otherwise use fallback
+  //       if (data?.data.buyerLatitude && data?.data.buyerLongitude) {
+  //         setBuyerCoordinates({
+  //           latitude: data?.data.buyerLatitude,
+  //           longitude: data?.data.buyerLongitude,
+  //         });
+  //       } else {
+  //         // Use fallback coordinates (Lagos, Nigeria as example)
+  //         setBuyerCoordinates({
+  //           latitude: 6.5244 + (Math.random() - 0.5) * 0.1, // Add some randomness
+  //           longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
+  //         });
+  //       }
+  //     } else {
+  //       throw new Error("Invalid pricing response format");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching logistics pricing:", error);
+  //     setPricingError("Failed to calculate delivery fee");
+  //     setLogisticsPricing(null);
+
+  //     // Set fallback coordinates even on error
+  //     setBuyerCoordinates({
+  //       latitude: 6.5244 + (Math.random() - 0.5) * 0.1,
+  //       longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
+  //     });
+  //   } finally {
+  //     setIsLoadingPricing(false);
+  //   }
+  // };
+
+
+
   const fetchLogisticsPricing = async (
     state: string,
     lga: string,
@@ -137,22 +215,25 @@ export default function CheckoutPage() {
       setLogisticsPricing(null);
       return;
     }
-
+  
     // Check if we have supplier coordinates from orderSummary
     const supplierLat = orderSummary?.pickupLocation?.latitude;
     const supplierLng = orderSummary?.pickupLocation?.longitude;
-
+  
     if (!supplierLat || !supplierLng) {
       console.warn(
         "Supplier coordinates not available in orderSummary.pickupLocation"
       );
       setPricingError("Supplier location not available");
+      setLogisticsPricing(null);
+      // Update store with fallback fee
+      updateDeliveryFee(1500);
       return;
     }
-
+  
     setIsLoadingPricing(true);
     setPricingError(null);
-
+  
     try {
       const params = new URLSearchParams({
         state,
@@ -161,29 +242,29 @@ export default function CheckoutPage() {
         supplierLat: supplierLat.toString(),
         supplierLng: supplierLng.toString(),
       });
-
+  
       const response = await fetch(`/api/logistics/pricing?${params}`);
-
+  
       if (!response.ok) {
         throw new Error(`Failed to fetch pricing: ${response.statusText}`);
       }
-
+  
       const data = await response.json();
-
-      // Assuming the API returns a price field and buyer coordinates
-      if (data.price !== undefined) {
-        setLogisticsPricing(data.price);
-
-        // Store buyer coordinates if available, otherwise use fallback
-        if (data.buyerLatitude && data.buyerLongitude) {
+  
+      if (data?.data?.price !== undefined) {
+        setLogisticsPricing(data.data.price);
+        // Update the store with the fetched delivery fee
+        updateDeliveryFee(data.data.price);
+  
+        // Store buyer coordinates if available
+        if (data?.data.buyerLatitude && data?.data.buyerLongitude) {
           setBuyerCoordinates({
-            latitude: data.buyerLatitude,
-            longitude: data.buyerLongitude,
+            latitude: data.data.buyerLatitude,
+            longitude: data.data.buyerLongitude,
           });
         } else {
-          // Use fallback coordinates (Lagos, Nigeria as example)
           setBuyerCoordinates({
-            latitude: 6.5244 + (Math.random() - 0.5) * 0.1, // Add some randomness
+            latitude: 6.5244 + (Math.random() - 0.5) * 0.1,
             longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
           });
         }
@@ -194,8 +275,9 @@ export default function CheckoutPage() {
       console.error("Error fetching logistics pricing:", error);
       setPricingError("Failed to calculate delivery fee");
       setLogisticsPricing(null);
-
-      // Set fallback coordinates even on error
+      // Update store with fallback fee
+      updateDeliveryFee(1500);
+  
       setBuyerCoordinates({
         latitude: 6.5244 + (Math.random() - 0.5) * 0.1,
         longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
@@ -204,7 +286,6 @@ export default function CheckoutPage() {
       setIsLoadingPricing(false);
     }
   };
-
 
   
   // Helper function to calculate supplier amount
@@ -364,15 +445,20 @@ export default function CheckoutPage() {
   }, [platform, orderSummary, cartItems]);
 
   // Calculate delivery fee based on method and logistics pricing
-  const getDeliveryFee = () => {
-    // If we have logistics pricing, use it
-    if (logisticsPricing !== null) {
+ const getDeliveryFee = () => {
+    // First check if we have logistics pricing from the API
+    if (logisticsPricing !== null && !isLoadingPricing && !pricingError) {
       return logisticsPricing;
     }
-
+    
+    // Then check if we have delivery fee in the store
+    if (orderSummary?.deliveryFee !== undefined) {
+      return orderSummary.deliveryFee;
+    }
+    
+    // Final fallback
     return 1500;
   };
-
   const deliveryFee = getDeliveryFee();
   const total = subtotal + deliveryFee;
 
@@ -481,46 +567,7 @@ export default function CheckoutPage() {
     }
   }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors]);
 
-  // const paystackConfig = {
-  //   email: watchedCustomerInfo?.email || "",
-  //   amount: total * 100, // Paystack expects amount in kobo
-  //   metadata: {
-  //     name: watchedCustomerInfo?.name || "",
-  //     phone: watchedCustomerInfo?.phone || "",
-  //     address: watchedCustomerAddress
-  //       ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
-  //       : "",
-  //     custom_fields: [
-  //       {
-  //         display_name: "Order Items",
-  //         variable_name: "order_items",
-  //         value: cartItems
-  //           .map((item) => `${item.name} x${item.quantity}`)
-  //           .join(", "),
-  //       },
-  //     ],
-  //   },
-  //   publicKey: "pk_test_eff9334b69c4057bd0b89b293824020426f0d011",
-  //   text: isLoading ? "Processing..." : "Place Order",
-  //   onSuccess: async (reference) => {
-  //     try {
-  //       await placeOrder("online", reference.reference);
-      
-  //       console.log("Payment successful:", reference);
-  //       submit();
-  //     } catch (error) {
-  //       console.error("Error placing order after successful payment:", error);
-  //     }
-  //   },
-  //   onClose: () => {
-  //     alert("Payment cancelled");
-  //   },
-  // };
-
-
-
-  
-  // Format price in Naira
+ 
   
 
   const paystackConfig = {
@@ -1194,23 +1241,25 @@ export default function CheckoutPage() {
                       <span className="text-sm">{formatPrice(subtotal)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground text-sm">
-                        Delivery Fee
-                        {isLoadingPricing && (
-                          <Loader2 className="h-3 w-3 animate-spin ml-1 inline" />
-                        )}
-                      </span>
-                      <span className="text-sm">
-                        {isLoadingPricing
-                          ? "Calculating..."
-                          : deliveryFee === 0
-                          ? "Free"
-                          : formatPrice(deliveryFee)}
-                      </span>
-                    </div>
-                    {pricingError && (
-                      <div className="text-xs text-red-600">{pricingError}</div>
-                    )}
+  <span className="text-muted-foreground text-sm">
+    Delivery Fee
+    {isLoadingPricing && (
+      <Loader2 className="h-3 w-3 animate-spin ml-1 inline" />
+    )}
+  </span>
+  <span className="text-sm">
+    {isLoadingPricing
+      ? "Calculating..."
+      : deliveryFee === 0
+      ? "Free"
+      : formatPrice(deliveryFee)}
+  </span>
+</div>
+{pricingError && (
+  <div className="text-xs text-red-600 mt-1">
+    {pricingError} - Using standard rate
+  </div>
+)}
                     <Separator className="my-4" />
                     <div className="flex justify-between font-bold">
                       <span>Total</span>
