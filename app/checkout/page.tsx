@@ -495,7 +495,7 @@ export default function CheckoutPage() {
     onSuccess: async (reference) => {
       try {
         await placeOrder("online", reference.reference);
-        alert(`Payment successful! Reference: ${reference.reference}`);
+      
         console.log("Payment successful:", reference);
         submit();
       } catch (error) {
@@ -532,22 +532,12 @@ export default function CheckoutPage() {
     if (currentStep === "review") setCurrentStep("delivery");
   };
 
-  // const handleCashOnDeliveryOrder = () => {
-  //   // Handle cash on delivery order
-  //   alert("Order placed successfully! You will pay on delivery.");
-  //   console.log("Cash on delivery order placed");
-  //   console.log("Final checkout data:", getCheckoutData());
-  //   // Clear checkout data after successful order
-  //   clearCheckoutData();
-  //   // Here you would typically send the order to your backend
-  // };
+ 
 
   const handleCashOnDeliveryOrder = async () => {
     try {
       await placeOrder("cash");
-      alert("Order placed successfully! You will pay on delivery.");
     } catch (error) {
-      alert(`Failed to place order: ${error.message}`);
     }
   };
 

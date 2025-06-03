@@ -69,7 +69,7 @@ interface PickupLocation {
 
 // Update the ProductData interface
 interface ProductData {
-  id: string;
+  originalId: string;
   name: string;
   description: string;
   price: number;
@@ -482,7 +482,7 @@ const handleCheckout = () => {
   if (hasVariations && selectedVariations.length > 0) {
     // Handle multiple variations
     const items = selectedVariations.map((sv) => ({
-      id: productData.id,
+      id: productData.originalId,
       name: productData.name,
       price: sv.variation.price || productData.price,
       originalPrice: productData.originalPrice, // Added
@@ -504,7 +504,7 @@ const handleCheckout = () => {
       items,
       subtotal,
       total,
-      productId: productData.id,
+      productId: productData.originalId,
       referralId: currentReferralId,
       platform: currentPlatform,
       pickupLocation,
@@ -512,7 +512,7 @@ const handleCheckout = () => {
   } else if (!hasVariations) {
     // Handle simple product
     const productItem = {
-      id: productData.id,
+      id: productData.originalId,
       name: productData.name,
       price: currentPrice,
       originalPrice: productData.originalPrice, // Added
@@ -527,7 +527,7 @@ const handleCheckout = () => {
       items: [productItem],
       subtotal: currentPrice * quantity,
       total: currentPrice * quantity,
-      productId: productData.id,
+      productId: productData.originalId,
       referralId: currentReferralId,
       platform: currentPlatform,
       pickupLocation,
