@@ -58,7 +58,6 @@ export default function CheckoutPage() {
     setDeliveryInstructions,
     setCurrentStep,
     clearCheckoutData,
-    getCheckoutData,
   } = useCheckoutStore();
 
   // Local state for UI-specific needs
@@ -215,12 +214,6 @@ export default function CheckoutPage() {
     }, 0);
   };
 
-  // Helper function to calculate total quantity
-  const calculateTotalQuantity = () => {
-    if (!orderSummary?.items) return 0;
-
-    return orderSummary.items.reduce((total, item) => total + item.quantity, 0);
-  };
 
   // Helper function to format order items
   const formatOrderItems = () => {
@@ -541,10 +534,6 @@ export default function CheckoutPage() {
     }
   };
 
-  // Handle delivery method change
-  const handleDeliveryMethodChange = (method) => {
-    setDeliveryMethod(method);
-  };
 
   // Handle payment method change
   const handlePaymentMethodChange = (method) => {
@@ -1090,16 +1079,7 @@ export default function CheckoutPage() {
                             <br />
                             {checkoutData.customerInfo.phone || "Phone Number"}
                           </p>
-                          {/* <div className="flex items-center mt-2">
-                            <Truck className="h-4 w-4 text-muted-foreground mr-1 flex-shrink-0" />
-                            <span className="text-sm text-muted-foreground">
-                              {deliveryMethod === "standard" &&
-                                "Standard Delivery (2-4 business days)"}
-                              {deliveryMethod === "express" &&
-                                "Express Delivery (1-2 business days)"}
-                              {deliveryMethod === "pickup" && "Store Pickup"}
-                            </span>
-                          </div> */}
+                         
                         </div>
                       </div>
                     </div>
