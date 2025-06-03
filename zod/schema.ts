@@ -192,47 +192,40 @@ const customerInfoSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
   phone: z
-     .string()
-     .refine(
-       (val) => {
-         // If empty string or undefined, it's valid (optional)
-         if (!val) return true;
- 
-         // Otherwise validate as Nigerian phone number
-         return /^(\+?234|0)[\d]{10}$/.test(val);
-       },
-       {
-         message: "Please enter a valid Nigerian phone number",
-       }
-     )
-     .refine(
-       (val) => {
-         // Skip validation if empty
-         if (!val) return true;
- 
-         // Check length requirements when value exists
-         return val.length >= 11 && val.length <= 15;
-       },
-       {
-         message: "Phone number must be between 11 and 15 digits",
-       }
-     )
-     .transform((val) => {
-       // Return as is if empty/undefined
-       if (!val) return val;
- 
-       // Normalize phone number to standard format
-       if (val.startsWith("0")) {
-         return `+234${val.slice(1)}`;
-       }
-       if (val.startsWith("234")) {
-         return `+${val}`;
-       }
-       return val;
-     })
-    
+    .string()
+    .min(1, "Phone number is required") // Add this line to make it required
+    .refine(
+      (val) => {
+        // Remove the empty check since we want it required
+        // Otherwise validate as Nigerian phone number
+        return /^(\+?234|0)[\d]{10}$/.test(val);
+      },
+      {
+        message: "Please enter a valid Nigerian phone number",
+      }
+    )
+    .refine(
+      (val) => {
+        // Remove the empty check since we want it required
+        // Check length requirements
+        return val.length >= 11 && val.length <= 15;
+      },
+      {
+        message: "Phone number must be between 11 and 15 digits",
+      }
+    )
+    .transform((val) => {
+      // Remove empty check since field is now required
+      // Normalize phone number to standard format
+      if (val.startsWith("0")) {
+        return `+234${val.slice(1)}`;
+      }
+      if (val.startsWith("234")) {
+        return `+${val}`;
+      }
+      return val;
+    }),
 });
-
 
 
 
