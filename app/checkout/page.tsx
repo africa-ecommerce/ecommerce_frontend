@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   Loader2,
 } from "lucide-react";
+import { useCallback, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -67,6 +68,11 @@ export default function CheckoutPage() {
   const [states, setStates] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+
+// Add these state variables in your CheckoutPage component
+const [isLoadingBuyerInfo, setIsLoadingBuyerInfo] = useState(false);
+const [hasFetchedBuyerInfo, setHasFetchedBuyerInfo] = useState(false);
+ const buyerInfoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   // Logistics pricing state
   const [logisticsPricing, setLogisticsPricing] = useState<number | null>(null);
   const [isLoadingPricing, setIsLoadingPricing] = useState(false);
@@ -127,84 +133,86 @@ export default function CheckoutPage() {
     orderSummary?.subtotal ||
     cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // const fetchLogisticsPricing = async (
-  //   state: string,
-  //   lga: string,
-  //   streetAddress: string
-  // ) => {
-  //   if (!state || !lga || !streetAddress) {
-  //     setLogisticsPricing(null);
-  //     return;
-  //   }
-
-  //   // Check if we have supplier coordinates from orderSummary
-  //   const supplierLat = orderSummary?.pickupLocation?.latitude;
-  //   const supplierLng = orderSummary?.pickupLocation?.longitude;
-
-  //   if (!supplierLat || !supplierLng) {
-  //     console.warn(
-  //       "Supplier coordinates not available in orderSummary.pickupLocation"
-  //     );
-  //     setPricingError("Supplier location not available");
-  //     return;
-  //   }
-
-  //   setIsLoadingPricing(true);
-  //   setPricingError(null);
-
-  //   try {
-  //     const params = new URLSearchParams({
-  //       state,
-  //       lga,
-  //       streetAddress,
-  //       supplierLat: supplierLat.toString(),
-  //       supplierLng: supplierLng.toString(),
-  //     });
-
-  //     const response = await fetch(`/api/logistics/pricing?${params}`);
-
-  //     if (!response.ok) {
-  //       throw new Error(`Failed to fetch pricing: ${response.statusText}`);
-  //     }
-
-  //     const data = await response.json();
-
-  //     // Assuming the API returns a price field and buyer coordinates
-  //     if (data?.data.price !== undefined) {
-  //       setLogisticsPricing(data?.data.price);
-
-  //       // Store buyer coordinates if available, otherwise use fallback
-  //       if (data?.data.buyerLatitude && data?.data.buyerLongitude) {
-  //         setBuyerCoordinates({
-  //           latitude: data?.data.buyerLatitude,
-  //           longitude: data?.data.buyerLongitude,
-  //         });
-  //       } else {
-  //         // Use fallback coordinates (Lagos, Nigeria as example)
-  //         setBuyerCoordinates({
-  //           latitude: 6.5244 + (Math.random() - 0.5) * 0.1, // Add some randomness
-  //           longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
-  //         });
-  //       }
-  //     } else {
-  //       throw new Error("Invalid pricing response format");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching logistics pricing:", error);
-  //     setPricingError("Failed to calculate delivery fee");
-  //     setLogisticsPricing(null);
-
-  //     // Set fallback coordinates even on error
-  //     setBuyerCoordinates({
-  //       latitude: 6.5244 + (Math.random() - 0.5) * 0.1,
-  //       longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
-  //     });
-  //   } finally {
-  //     setIsLoadingPricing(false);
-  //   }
-  // };
+ const fetchBuyerInfo = useCallback(async (name, email, phone) => {
+      if (!name || !email || !phone || hasFetchedBuyerInfo) return;
+      
+      setIsLoadingBuyerInfo(true);
+      
+      try {
+        const params = new URLSearchParams({
+          buyerName: name.trim(),
+          buyerEmail: email.trim(),
+          buyerPhone: phone.trim(),
+        });
+    
+        const response = await fetch(`/api/orders/buyer-info?${params}`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch buyer info: ${response.statusText}`);
+        }
+    
+        const result = await response.json();
+        
+        // Check if we have valid data
+        if (result?.data?.streetAddress && result?.data?.state && result?.data?.lga) {
+          // Auto-fill the address fields
+          setValue("customerAddress.streetAddress", result.data.streetAddress);
+          setValue("customerAddress.state", result.data.state);
+          setValue("customerAddress.lga", result.data.lga);
+          
+          if (result.data.directions) {
+            setValue("customerAddress.directions", result.data.directions);
+          }
+    
+          // Update the store as well
+          setCustomerAddress({
+            streetAddress: result.data.streetAddress,
+            state: result.data.state,
+            lga: result.data.lga,
+            directions: result.data.directions || "",
+          });
+    
+          // Set selected state to trigger LGA loading
+          setSelectedState(result.data.state);
+          
+          // Load LGAs for the state
+          const lgas = getLgasForState(result.data.state);
+          setAvailableLgas(lgas);
+    
+          // Mark that we've fetched buyer info to prevent duplicate calls
+          setHasFetchedBuyerInfo(true);
+          
+          console.log("Auto-filled buyer delivery info:", result.data);
+        } else {
+          console.log("No previous delivery info found for this buyer");
+        }
+      } catch (error) {
+        console.error("Error fetching buyer info:", error);
+        // Silently fail - this is a convenience feature
+      } finally {
+        setIsLoadingBuyerInfo(false);
+      }
+    }, [setValue, setCustomerAddress, hasFetchedBuyerInfo]);
 
 
+
+   const isCustomerInfoComplete = useCallback((customerInfo) => {
+      if (!customerInfo?.name || !customerInfo?.email || !customerInfo?.phone) {
+        return false;
+      }
+    
+      // Basic validation checks
+      const nameValid = customerInfo.name.trim().length >= 2;
+      const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerInfo.email);
+      const phoneValid = /^(\+?234|0)[\d]{10}$/.test(customerInfo.phone) && 
+                        customerInfo.phone.length >= 11 && 
+                        customerInfo.phone.length <= 15;
+    
+      return nameValid && emailValid && phoneValid;
+    }, []);
+    
+
+ 
 
   const fetchLogisticsPricing = async (
     state: string,
@@ -518,11 +526,54 @@ export default function CheckoutPage() {
   const watchedCustomerAddress = watch("customerAddress");
 
   // Update store when form values change
+  // useEffect(() => {
+  //   if (watchedCustomerInfo) {
+  //     setCustomerInfo(watchedCustomerInfo);
+  //   }
+  // }, [watchedCustomerInfo, setCustomerInfo]);
+
+
   useEffect(() => {
+    return () => {
+      if (buyerInfoTimeoutRef.current) {
+        clearTimeout(buyerInfoTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Reset the hasFetchedBuyerInfo flag when customer info changes significantly
+  useEffect(() => {
+    // Reset the flag if any of the core customer info fields change
+    setHasFetchedBuyerInfo(false);
+  }, [
+    watchedCustomerInfo?.name,
+    watchedCustomerInfo?.email,
+    watchedCustomerInfo?.phone,
+  ]);
+
+   useEffect(() => {
     if (watchedCustomerInfo) {
       setCustomerInfo(watchedCustomerInfo);
+      
+      // Check if customer info is complete and valid
+      if (isCustomerInfoComplete(watchedCustomerInfo)) {
+        // Clear existing timeout
+        if (buyerInfoTimeoutRef.current) {
+          clearTimeout(buyerInfoTimeoutRef.current);
+        }
+        
+        // Set a debounced timeout to fetch buyer info
+        buyerInfoTimeoutRef.current = setTimeout(() => {
+          fetchBuyerInfo(
+            watchedCustomerInfo.name,
+            watchedCustomerInfo.email,
+            watchedCustomerInfo.phone
+          );
+        }, 1000); // 1 second delay to avoid too many API calls
+      }
     }
-  }, [watchedCustomerInfo, setCustomerInfo]);
+  }, [watchedCustomerInfo, setCustomerInfo, isCustomerInfoComplete, fetchBuyerInfo]);
+  
 
   useEffect(() => {
     if (watchedCustomerAddress) {
@@ -701,9 +752,17 @@ export default function CheckoutPage() {
                   <div className="space-y-6">
                     {/* Customer Information */}
                     <div>
-                      <h3 className="font-medium mb-3">Customer Information</h3>
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-medium">Customer Information</h3>
+                        {isLoadingBuyerInfo && (
+                          <div className="flex items-center text-sm text-muted-foreground">
+                            <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                            <span>Loading your info...</span>
+                          </div>
+                        )}
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
+                        {/* <div className="space-y-2">
                           <Label htmlFor="customerName">
                             Full Name <span className="text-red-500">*</span>
                           </Label>
@@ -778,6 +837,99 @@ export default function CheckoutPage() {
                               onChange: async (e) => {
                                 const value = e.target.value;
                                 // Update store immediately
+                                setCustomerInfo({ phone: value });
+                                if (value && errors.customerInfo?.phone) {
+                                  const isValid = await trigger(
+                                    "customerInfo.phone"
+                                  );
+                                  if (isValid)
+                                    clearErrors("customerInfo.phone");
+                                }
+                              },
+                            })}
+                            placeholder="Enter your phone number"
+                            className={
+                              errors.customerInfo?.phone ? "border-red-500" : ""
+                            }
+                          />
+                          {errors.customerInfo?.phone && (
+                            <p className="text-sm text-red-600">
+                              {errors.customerInfo.phone.message}
+                            </p>
+                          )}
+                        </div>
+                      </div> */}
+                        [⚠️ Suspicious Content]{" "}
+                        <div className="space-y-2">
+                          <Label htmlFor="customerName">
+                            Full Name <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="customerName"
+                            {...register("customerInfo.name", {
+                              onChange: async (e) => {
+                                const value = e.target.value;
+                                setCustomerInfo({ name: value });
+                                if (value && errors.customerInfo?.name) {
+                                  const isValid = await trigger(
+                                    "customerInfo.name"
+                                  );
+                                  if (isValid) clearErrors("customerInfo.name");
+                                }
+                              },
+                            })}
+                            placeholder="Enter your full name"
+                            className={
+                              errors.customerInfo?.name ? "border-red-500" : ""
+                            }
+                          />
+                          {errors.customerInfo?.name && (
+                            <p className="text-sm text-red-600">
+                              {errors.customerInfo.name.message}
+                            </p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="customerEmail">
+                            Email Address{" "}
+                            <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="customerEmail"
+                            type="email"
+                            {...register("customerInfo.email", {
+                              onChange: async (e) => {
+                                const value = e.target.value;
+                                setCustomerInfo({ email: value });
+                                if (value && errors.customerInfo?.email) {
+                                  const isValid = await trigger(
+                                    "customerInfo.email"
+                                  );
+                                  if (isValid)
+                                    clearErrors("customerInfo.email");
+                                }
+                              },
+                            })}
+                            placeholder="Enter your email address"
+                            className={
+                              errors.customerInfo?.email ? "border-red-500" : ""
+                            }
+                          />
+                          {errors.customerInfo?.email && (
+                            <p className="text-sm text-red-600">
+                              {errors.customerInfo.email.message}
+                            </p>
+                          )}
+                        </div>
+                        <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="customerPhone">
+                            Phone Number <span className="text-red-500">*</span>
+                          </Label>
+                          <Input
+                            id="customerPhone"
+                            {...register("customerInfo.phone", {
+                              onChange: async (e) => {
+                                const value = e.target.value;
                                 setCustomerInfo({ phone: value });
                                 if (value && errors.customerInfo?.phone) {
                                   const isValid = await trigger(
@@ -1184,7 +1336,6 @@ export default function CheckoutPage() {
                             <br />
                             {checkoutData.customerInfo.phone || "Phone Number"}
                           </p>
-                         
                         </div>
                       </div>
                     </div>
@@ -1241,25 +1392,25 @@ export default function CheckoutPage() {
                       <span className="text-sm">{formatPrice(subtotal)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-  <span className="text-muted-foreground text-sm">
-    Delivery Fee
-    {isLoadingPricing && (
-      <Loader2 className="h-3 w-3 animate-spin ml-1 inline" />
-    )}
-  </span>
-  <span className="text-sm">
-    {isLoadingPricing
-      ? "Calculating..."
-      : deliveryFee === 0
-      ? "Free"
-      : formatPrice(deliveryFee)}
-  </span>
-</div>
-{pricingError && (
-  <div className="text-xs text-red-600 mt-1">
-    {pricingError} - Using standard rate
-  </div>
-)}
+                      <span className="text-muted-foreground text-sm">
+                        Delivery Fee
+                        {isLoadingPricing && (
+                          <Loader2 className="h-3 w-3 animate-spin ml-1 inline" />
+                        )}
+                      </span>
+                      <span className="text-sm">
+                        {isLoadingPricing
+                          ? "Calculating..."
+                          : deliveryFee === 0
+                          ? "Free"
+                          : formatPrice(deliveryFee)}
+                      </span>
+                    </div>
+                    {pricingError && (
+                      <div className="text-xs text-red-600 mt-1">
+                        {pricingError} - Using standard rate
+                      </div>
+                    )}
                     <Separator className="my-4" />
                     <div className="flex justify-between font-bold">
                       <span>Total</span>
