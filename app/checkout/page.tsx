@@ -134,66 +134,6 @@ const [lastFetchedCustomerInfo, setLastFetchedCustomerInfo] = useState<string>("
     orderSummary?.subtotal ||
     cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-//  const fetchBuyerInfo = useCallback(async (name, email, phone) => {
-//       if (!name || !email || !phone || hasFetchedBuyerInfo) return;
-      
-      
-//       try {
-//         const params = new URLSearchParams({
-//           buyerName: name.trim(),
-//           buyerEmail: email.trim(),
-//           buyerPhone: phone.trim(),
-//         });
-    
-//         const response = await fetch(`/api/orders/buyer-info?${params}`);
-        
-//         if (!response.ok) {
-//           throw new Error(`Failed to fetch buyer info: ${response.statusText}`);
-//         }
-    
-//         const result = await response.json();
-
-//         console.log("result", result)
-        
-//         // Check if we have valid data
-//         if (result?.data?.streetAddress && result?.data?.state && result?.data?.lga) {
-//           // Auto-fill the address fields
-//           setValue("customerAddress.streetAddress", result.data.streetAddress);
-//           setValue("customerAddress.state", result.data.state);
-//           setValue("customerAddress.lga", result.data.lga);
-          
-//           if (result.data.directions) {
-//             setValue("customerAddress.directions", result.data.directions);
-//           }
-    
-//           // Update the store as well
-//           setCustomerAddress({
-//             streetAddress: result.data.streetAddress,
-//             state: result.data.state,
-//             lga: result.data.lga,
-//             directions: result.data.directions || "",
-//           });
-    
-//           // Set selected state to trigger LGA loading
-//           setSelectedState(result.data.state);
-          
-//           // Load LGAs for the state
-//           const lgas = getLgasForState(result.data.state);
-//           setAvailableLgas(lgas);
-    
-//           // Mark that we've fetched buyer info to prevent duplicate calls
-//           setHasFetchedBuyerInfo(true);
-          
-//           console.log("Auto-filled buyer delivery info:", result.data);
-//         } else {
-//           console.log("No previous delivery info found for this buyer");
-//         }
-//       } catch (error) {
-//         console.error("Error fetching buyer info:", error);
-//         // Silently fail - this is a convenience feature
-//       } 
-//     }, [setValue, setCustomerAddress, hasFetchedBuyerInfo]);
-
 
 
 const fetchBuyerInfo = useCallback(
@@ -202,6 +142,14 @@ const fetchBuyerInfo = useCallback(
 
     // Create a unique key for this customer info combination
     const customerKey = `${name.trim()}-${email.trim()}-${phone.trim()}`;
+
+    console.log("fetchBuyerInfo called with:", {
+      name,
+      email,
+      phone,
+      customerKey,
+    }
+    )
 
     // Check if we already fetched info for this exact combination
     if (lastFetchedCustomerInfo === customerKey) {
@@ -612,39 +560,7 @@ const fetchBuyerInfo = useCallback(
     };
   }, []);
 
-  // Reset the hasFetchedBuyerInfo flag when customer info changes significantly
-  // useEffect(() => {
-  //   // Reset the flag if any of the core customer info fields change
-  //   setHasFetchedBuyerInfo(false);
-  // }, [
-  //   watchedCustomerInfo?.name,
-  //   watchedCustomerInfo?.email,
-  //   watchedCustomerInfo?.phone,
-  // ]);
-
-  //  useEffect(() => {
-  //   if (watchedCustomerInfo) {
-  //     setCustomerInfo(watchedCustomerInfo);
-      
-  //     // Check if customer info is complete and valid
-  //     if (isCustomerInfoComplete(watchedCustomerInfo)) {
-  //       // Clear existing timeout
-  //       if (buyerInfoTimeoutRef.current) {
-  //         clearTimeout(buyerInfoTimeoutRef.current);
-  //       }
-        
-  //       // Set a debounced timeout to fetch buyer info
-  //       buyerInfoTimeoutRef.current = setTimeout(() => {
-  //         fetchBuyerInfo(
-  //           watchedCustomerInfo.name,
-  //           watchedCustomerInfo.email,
-  //           watchedCustomerInfo.phone
-  //         );
-  //       }, 1000); // 1 second delay to avoid too many API calls
-  //     }
-  //   }
-  // }, [watchedCustomerInfo, setCustomerInfo, isCustomerInfoComplete, fetchBuyerInfo]);
-
+ 
 
   useEffect(() => {
     if (watchedCustomerInfo) {
