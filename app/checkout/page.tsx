@@ -152,6 +152,8 @@ const [hasFetchedBuyerInfo, setHasFetchedBuyerInfo] = useState(false);
         }
     
         const result = await response.json();
+
+        console.log("result", result)
         
         // Check if we have valid data
         if (result?.data?.streetAddress && result?.data?.state && result?.data?.lga) {
@@ -859,7 +861,7 @@ const [hasFetchedBuyerInfo, setHasFetchedBuyerInfo] = useState(false);
                           )}
                         </div>
                       </div> */}
-                        [⚠️ Suspicious Content]{" "}
+                        
                         <div className="space-y-2">
                           <Label htmlFor="customerName">
                             Full Name <span className="text-red-500">*</span>
