@@ -69,8 +69,7 @@ export default function CheckoutPage() {
   const [isLoading, setIsLoading] = useState(false);
 
 
-// Add these state variables in your CheckoutPage component
-// const [hasFetchedBuyerInfo, setHasFetchedBuyerInfo] = useState(false);
+
 
 const [lastFetchedCustomerInfo, setLastFetchedCustomerInfo] = useState<string>("");
  const buyerInfoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -143,17 +142,11 @@ const fetchBuyerInfo = useCallback(
     // Create a unique key for this customer info combination
     const customerKey = `${name.trim()}-${email.trim()}-${phone.trim()}`;
 
-    console.log("fetchBuyerInfo called with:", {
-      name,
-      email,
-      phone,
-      customerKey,
-    }
-    )
+    
 
     // Check if we already fetched info for this exact combination
     if (lastFetchedCustomerInfo === customerKey) {
-      console.log("Already fetched info for this customer");
+      
       return;
     }
 
@@ -172,7 +165,6 @@ const fetchBuyerInfo = useCallback(
 
       const result = await response.json();
 
-      console.log("result", result);
 
       // Check if we have valid data
       if (
@@ -207,7 +199,6 @@ const fetchBuyerInfo = useCallback(
         // Mark this customer info as fetched
         setLastFetchedCustomerInfo(customerKey);
 
-        console.log("Auto-filled buyer delivery info:", result.data);
       } else {
         console.log("No previous delivery info found for this buyer");
       }
@@ -566,44 +557,9 @@ const watchedPhone = watch("customerInfo.phone");
 
  
 
-  // useEffect(() => {
-  //   if (watchedCustomerInfo) {
-  //     setCustomerInfo(watchedCustomerInfo);
-
-  //     // Check if customer info is complete and valid
-  //     if (isCustomerInfoComplete(watchedCustomerInfo)) {
-  //       // Clear existing timeout
-  //       if (buyerInfoTimeoutRef.current) {
-  //         clearTimeout(buyerInfoTimeoutRef.current);
-  //       }
-
-  //       console.log("watchedCustomerInfo", 
-  //         watchedCustomerInfo
-  //       )
-
-  //       // Set a debounced timeout to fetch buyer info
-  //       buyerInfoTimeoutRef.current = setTimeout(() => {
-  //         fetchBuyerInfo(
-  //           watchedCustomerInfo.name,
-  //           watchedCustomerInfo.email,
-  //           watchedCustomerInfo.phone
-  //         );
-  //       }, 1000); // 1 second delay to avoid too many API calls
-  //     }
-  //   }
-  // }, [
-  //   watchedCustomerInfo,
-  //   setCustomerInfo,
-  //   isCustomerInfoComplete,
-  //   fetchBuyerInfo,
-  // ]);
-
+  
   useEffect(() => {
-    console.log("Individual fields changed:", {
-      name: watchedName,
-      email: watchedEmail,
-      phone: watchedPhone,
-    });
+   
 
     // Create customerInfo object from individual watched fields
     const currentCustomerInfo = {
@@ -617,9 +573,7 @@ const watchedPhone = watch("customerInfo.phone");
 
     // Check if customer info is complete and valid
     if (isCustomerInfoComplete(currentCustomerInfo)) {
-      console.log(
-        "Customer info is complete, setting timeout to fetch buyer info"
-      );
+     
 
       // Clear existing timeout
       if (buyerInfoTimeoutRef.current) {
@@ -628,11 +582,7 @@ const watchedPhone = watch("customerInfo.phone");
 
       // Set a debounced timeout to fetch buyer info
       buyerInfoTimeoutRef.current = setTimeout(() => {
-        console.log("Timeout triggered, calling fetchBuyerInfo with:", {
-          name: currentCustomerInfo.name,
-          email: currentCustomerInfo.email,
-          phone: currentCustomerInfo.phone,
-        });
+       
 
         fetchBuyerInfo(
           currentCustomerInfo.name,
@@ -641,12 +591,7 @@ const watchedPhone = watch("customerInfo.phone");
         );
       }, 1000); // 1 second delay to avoid too many API calls
     } else {
-      console.log("Customer info incomplete:", {
-        name: currentCustomerInfo?.name?.length || 0,
-        email: currentCustomerInfo?.email?.length || 0,
-        phone: currentCustomerInfo?.phone?.length || 0,
-        isComplete: isCustomerInfoComplete(currentCustomerInfo),
-      });
+     
     }
   }, [
     watchedName, // Watch individual fields instead of the object
