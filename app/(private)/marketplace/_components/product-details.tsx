@@ -305,9 +305,9 @@ export default function ProductDetail() {
                 <div className="flex items-center">
                   <ShoppingBag className="mr-1 h-3.5 w-3.5" />
                   {/* Fixed: Show "0 sold" when sales is 0 */}
-                  {product?.sales >= 100
+                  {product?.sold >= 100
                     ? "99+"
-                    : `${product?.sales || 0}`}{" "}
+                    : `${product?.sold || 0}`}{" "}
                   sold
                 </div>
                 <span>•</span>

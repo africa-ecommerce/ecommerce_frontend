@@ -818,7 +818,7 @@ export default function Inventory() {
                                 </div>
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                {displayValue(item.sales)}
+                                {displayValue(item.sold)}
                               </td>
                               <td className="p-2 sm:p-3">
                                 <DropdownMenu>

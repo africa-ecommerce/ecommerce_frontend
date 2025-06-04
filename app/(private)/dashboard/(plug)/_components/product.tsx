@@ -992,7 +992,7 @@ export default function Products() {
                                 </div>
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                {displayValue(item.sales)}
+                                {displayValue(item.sold)}
                               </td>
                               <td className="p-2 sm:p-3">
                                 <DropdownMenu>
@@ -1112,25 +1112,25 @@ export default function Products() {
             <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10 overflow-x-auto">
               <TabsTrigger
                 value="active"
-                className="text-xs sm:text-sm whitespace-nowrap"
+                className="text-[10px] sm:text-xs whitespace-nowrap"
               >
                 Pending ({orderCounts.active})
               </TabsTrigger>
               <TabsTrigger
                 value="shipped"
-                className="text-xs sm:text-sm whitespace-nowrap"
+                className="text-[10px] sm:text-xs whitespace-nowrap"
               >
                 Shipped ({orderCounts.shipped})
               </TabsTrigger>
               <TabsTrigger
                 value="delivered"
-                className="text-xs sm:text-sm whitespace-nowrap"
+                className="text-[10px] sm:text-xs whitespace-nowrap"
               >
                 Delivered ({orderCounts.delivered})
               </TabsTrigger>
               <TabsTrigger
                 value="cancelled"
-                className="text-xs sm:text-sm whitespace-nowrap"
+                className="text-[10px] sm:text-xs whitespace-nowrap"
               >
                 Cancelled ({orderCounts.cancelled})
               </TabsTrigger>
