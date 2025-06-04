@@ -206,7 +206,7 @@ const EmptyOrdersState = ({ status }: { status: string }) => {
     cancelled: {
       icon: <X className="h-12 w-12 text-muted-foreground" />,
       title: "No Cancelled Orders",
-      description: "You haven't cancelled any orders yet.",
+      description: "You don't have any cancelled order yet.",
     },
   }
 
@@ -418,7 +418,7 @@ export default function Products() {
     // Calculate total amount from order items
     const totalAmount =
       order.orderItems?.reduce((total: number, item: any) => {
-        return total + order.plugAmount || 0 * item.quantity;
+        return total + order.plugPrice || 0 * item.quantity;
       }, 0) || 0;
 
     const formatDate = (dateString: string) => {
@@ -519,7 +519,7 @@ export default function Products() {
                     )}
                 </div>
                 <div className="text-sm font-medium">
-                  ₦{(order.plugAmount || 0 * item.quantity).toLocaleString()}
+                  ₦{(order.plugPrice || 0 * item.quantity).toLocaleString()}
                 </div>
               </div>
             ))}

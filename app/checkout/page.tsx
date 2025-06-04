@@ -268,21 +268,28 @@ export default function CheckoutPage() {
     if (!orderSummary?.items) return 0;
 
     return orderSummary.items.reduce((total, item) => {
-      const originalPrice = item.originalPrice || item.price;
+      const originalPrice = item.price
       return total + originalPrice * item.quantity;
     }, 0);
   };
 
   const formatOrderItems = () => {
     if (!orderSummary?.items) return [];
-
+  
     return orderSummary.items.map((item) => ({
       productId: orderSummary.productId,
       quantity: item.quantity,
-      ...(item.variationId && { variantId: item.variationId }),
-      // Add color and size to the order items
-      ...(item.color && { color: item.color }),
-      ...(item.size && { size: item.size }),
+     
+      ...(item.variationId && { 
+        variantId: item.variationId,
+        variantColor: item.color,
+        variantSize: item.size
+      }),
+      // For non-variation items, use product-level color and size
+      ...(!item.variationId && {
+        productColor: item.color,
+        productSize: item.size
+      }),
     }));
   };
 
@@ -315,6 +322,8 @@ export default function CheckoutPage() {
       deliveryFee: deliveryFee,
       supplierAmount: supplierAmount,
       plugAmount: plugAmount,
+      plugPrice: orderSummary?.items?.[0]?.price, // Price from useProductStore
+      supplierPrice: orderSummary?.items?.[0]?.originalPrice, // Original price from useProductStore
       plugId: orderSummary?.referralId || "",
       orderItems: formatOrderItems(), // This now includes color and size
 
