@@ -363,7 +363,7 @@ export default function Products() {
 
   const getOrdersUrl = (status: string) => {
     if (status === "active") status = "pending"; // Map active to pending for API
-    return `/api/orders/plug?orderStatus=${status}`;
+    return `/api/orders/plug?orderStatus=${status.toUpperCase()}`;
   };
 
   const {
