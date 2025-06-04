@@ -2148,12 +2148,7 @@ export default function CheckoutPage() {
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <h3 className="font-medium">Customer Information</h3>
-                        {isBuyerInfoLoading && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                            <span>Loading previous info...</span>
-                          </div>
-                        )}
+                       
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -2450,19 +2445,20 @@ export default function CheckoutPage() {
                         </div>
 
                         {/* Delivery Pricing Status */}
-                        {(isLogisticsPricingLoading ||
+                        {
+                        (isLogisticsPricingLoading ||
                           logisticsPricingError ||
                           logisticsPricingData?.data?.price !== undefined) && (
                           <div className="p-3 border rounded-md bg-muted/50">
                             <div className="flex items-center gap-2">
-                              {isLogisticsPricingLoading && (
+                              {/* {isLogisticsPricingLoading && (
                                 <>
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                   <span className="text-sm text-muted-foreground">
                                     Calculating optimized delivery fee...
                                   </span>
                                 </>
-                              )}
+                              )} */}
                               {logisticsPricingError && (
                                 <span className="text-sm text-red-600">
                                   Unable to calculate delivery fee - using
