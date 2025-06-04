@@ -68,7 +68,7 @@ const swrOptions = {
 const logisticsPricingOptions = {
   ...swrOptions,
   refreshInterval: 30000, // Refresh every 30 seconds for pricing
-  revalidateOnFocus: true, // Revalidate when user focuses window
+  revalidateOnFocus: false, // Revalidate when user focuses window
   dedupingInterval: 2000, // Shorter deduping for pricing
 };
 
@@ -167,7 +167,6 @@ export default function CheckoutPage() {
   const {
     data: buyerInfoData,
     error: buyerInfoError,
-    isLoading: isBuyerInfoLoading,
   } = useSWR(buyerInfoKey, fetcher, buyerInfoOptions);
 
   // SWR for logistics pricing

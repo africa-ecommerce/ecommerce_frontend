@@ -655,7 +655,7 @@ const handleCheckout = () => {
                   {/* Product Details */}
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-2">
-                      <h1 className="text-xl md:text-2xl font-bold">
+                      <h1 className="text-xl md:text-2xl font-bold capitalize">
                         {productData.name}
                       </h1>
                       {!hasVariations &&
