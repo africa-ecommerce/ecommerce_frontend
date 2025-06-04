@@ -1095,7 +1095,7 @@ export default function CheckoutPage() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <h4 className="font-medium text-sm">
-                                {item.name}
+                                <span className="capitalize">{item.name}</span>
                                 {item.variationName && (
                                   <span className="text-muted-foreground ml-2">
                                     ({item.variationName})
@@ -1199,21 +1199,7 @@ export default function CheckoutPage() {
                       </span>
                       <span className="text-sm">{formatPrice(subtotal!)}</span>
                     </div>
-                    {/* <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground text-sm">
-                        Delivery Fee
-                        {isLogisticsPricingLoading && (
-                          <Loader2 className="h-3 w-3 animate-spin ml-1 inline" />
-                        )}
-                      </span>
-                      <span className="text-sm">
-                        {deliveryFee === null
-                          ? "Calculating..."
-                          : deliveryFee === 0
-                          ? "Free"
-                          : formatPrice(deliveryFee)}
-                      </span>
-                    </div> */}
+                   
 
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground text-sm">
@@ -1291,10 +1277,7 @@ export default function CheckoutPage() {
                       <span className="mr-2 text-primary">•</span>
                       <p>We accept returns within 7 days of delivery</p>
                     </div>
-                    <div className="flex items-start">
-                      <span className="mr-2 text-primary">•</span>
-                      <p>Free delivery on orders above ₦10,000</p>
-                    </div>
+                   
                     <div className="flex items-start">
                       <span className="mr-2 text-primary">•</span>
                       <p>Detailed addresses help reduce delivery costs</p>
