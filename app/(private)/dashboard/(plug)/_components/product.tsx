@@ -1187,6 +1187,28 @@ export default function Products() {
           </div>
         </section>
 
+        {isLoading ? (
+          <TipSkeleton />
+        ) : (
+          <Card className="bg-blue-50 border-blue-200 mb-3 sm:mb-4">
+            <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+              <div className="rounded-full bg-blue-100 p-1.5 flex-shrink-0">
+                <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-xs sm:text-sm text-blue-800">
+                  Don't Forget to Call!
+                </h3>
+                <p className="text-[10px] sm:text-xs text-blue-600">
+                  After delivery, call your customer to check their
+                  satisfaction. This personal touch creates loyal customers and
+                  repeat business.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Order Management Hub - Better mobile tabs */}
         <section className="space-y-3 sm:space-y-4">
           <div>
@@ -1207,7 +1229,7 @@ export default function Products() {
                 value="shipped"
                 className="text-[10px] sm:text-xs whitespace-nowrap"
               >
-                Shipped 
+                Shipped
               </TabsTrigger>
               <TabsTrigger
                 value="delivered"
