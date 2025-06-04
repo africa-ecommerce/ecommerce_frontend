@@ -308,23 +308,7 @@ export default function Products() {
   // Process orders data
   const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];
 
-  // Calculate order counts from the main orders data
-  const orderCounts = useMemo(() => {
-    return {
-      active: orders.filter(
-        (order: any) => order.orderStatus?.toLowerCase() === "pending"
-      ).length,
-      shipped: orders.filter(
-        (order: any) => order.orderStatus?.toLowerCase() === "shipped"
-      ).length,
-      delivered: orders.filter(
-        (order: any) => order.orderStatus?.toLowerCase() === "delivered"
-      ).length,
-      cancelled: orders.filter(
-        (order: any) => order.orderStatus?.toLowerCase() === "cancelled"
-      ).length,
-    };
-  }, [orders]);
+
 
   const { deleteResource } = useDeleteResource(
     "/api/plug/products/",
@@ -434,7 +418,7 @@ export default function Products() {
     // Calculate total amount from order items
     const totalAmount =
       order.orderItems?.reduce((total: number, item: any) => {
-        return total + order.productAmount * item.quantity;
+        return total + order.plugAmount || 0 * item.quantity;
       }, 0) || 0;
 
     const formatDate = (dateString: string) => {
@@ -499,7 +483,7 @@ export default function Products() {
               <div key={item.id} className="flex justify-between items-center">
                 <div className="flex-1">
                   <div className="text-sm font-medium capitalize">
-                    {item.productName} x {item.quantity}
+                    {item.productName} <span className="lowercase">x</span> {item.quantity}
                   </div>
                   {/* Show variant details if available */}
                   {item.variantId &&
@@ -535,7 +519,7 @@ export default function Products() {
                     )}
                 </div>
                 <div className="text-sm font-medium">
-                  ₦{(order.productAmount * item.quantity).toLocaleString()}
+                  ₦{(order.plugAmount || 0 * item.quantity).toLocaleString()}
                 </div>
               </div>
             ))}
@@ -1217,25 +1201,25 @@ export default function Products() {
                 value="active"
                 className="text-[10px] sm:text-xs whitespace-nowrap"
               >
-                Pending ({orderCounts.active})
+                Pending
               </TabsTrigger>
               <TabsTrigger
                 value="shipped"
                 className="text-[10px] sm:text-xs whitespace-nowrap"
               >
-                Shipped ({orderCounts.shipped})
+                Shipped 
               </TabsTrigger>
               <TabsTrigger
                 value="delivered"
                 className="text-[10px] sm:text-xs whitespace-nowrap"
               >
-                Delivered ({orderCounts.delivered})
+                Delivered
               </TabsTrigger>
               <TabsTrigger
                 value="cancelled"
                 className="text-[10px] sm:text-xs whitespace-nowrap"
               >
-                Cancelled ({orderCounts.cancelled})
+                Cancelled
               </TabsTrigger>
             </TabsList>
 
