@@ -2052,8 +2052,8 @@ export default function CheckoutPage() {
     },
   };
 
-  const formatPrice = (price: string | number) => {
-    return `₦${price.toLocaleString()}`;
+  const formatPrice = (price?: string | number) => {
+    return `₦${price?.toLocaleString()}`;
   };
 
   const goToNextStep = async () => {
