@@ -1384,173 +1384,7 @@ const LoadingSkeleton = () => (
   </Card>
 )
 
-// Updated OrderCard component to match the API data structure and design
-const OrderCard = ({ order }: { order: any }) => {
-  const getStatusBadge = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "pending":
-        return (
-          <Badge variant="default" className="bg-orange-500 hover:bg-orange-600">
-            Active
-          </Badge>
-        )
-      case "shipped":
-        return (
-          <Badge variant="secondary" className="bg-blue-500 text-white hover:bg-blue-600">
-            Shipped
-          </Badge>
-        )
-      case "delivered":
-        return (
-          <Badge variant="outline" className="bg-green-500 text-white hover:bg-green-600">
-            Delivered
-          </Badge>
-        )
-      case "cancelled":
-        return <Badge variant="destructive">Cancelled</Badge>
-      default:
-        return <Badge variant="outline">Unknown</Badge>
-    }
-  }
 
-  const getProgress = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "pending":
-        return 25
-      case "shipped":
-        return 75
-      case "delivered":
-        return 100
-      case "cancelled":
-        return 0
-      default:
-        return 0
-    }
-  }
-
-  // Calculate total amount from order items
-  const totalAmount =
-    order.orderItems?.reduce((total: number, item: any) => {
-      return total + order.productAmount * item.quantity
-    }, 0) || 0
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
-  }
-
-  const capitalizeWords = (str: string) => {
-    return (
-      str
-        ?.split(" ")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(" ") || ""
-    )
-  }
-
-  return (
-    <Card className="mb-3 sm:mb-4 last:mb-0">
-      <CardHeader className="p-3 sm:p-4 pb-2">
-        <div className="flex justify-between items-start gap-2">
-          <div className="min-w-0">
-            <CardTitle className="text-sm font-medium">{order.orderId}</CardTitle>
-            <CardDescription className="text-xs mt-1">{formatDate(order.createdAt)}</CardDescription>
-          </div>
-          {getStatusBadge(order.orderStatus)}
-        </div>
-      </CardHeader>
-
-      <CardContent className="p-3 sm:p-4 pt-0 space-y-3">
-        {/* Customer Info */}
-        <div className="flex items-center gap-2 text-sm">
-          <Users className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">{capitalizeWords(order.buyerName)}</span>
-          <span className="text-muted-foreground">•</span>
-          <span className="text-muted-foreground">
-            {capitalizeWords(order.buyerLga)}, {capitalizeWords(order.buyerState)}
-          </span>
-        </div>
-
-        {/* Phone Number */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Phone className="h-4 w-4" />
-          <span>{order.buyerPhone}</span>
-        </div>
-
-        {/* Products */}
-        <div className="space-y-2">
-          {order.orderItems?.map((item: any, index: number) => (
-            <div key={item.id} className="flex justify-between items-center">
-              <div className="flex-1">
-                <div className="text-sm font-medium capitalize">
-                  {item.productName} x {item.quantity}
-                </div>
-                {/* Show variant details if available */}
-                {item.variantId && (item.variantColor || item.variantSize) && (
-                  <div className="flex gap-2 text-xs text-muted-foreground mt-1">
-                    {item.variantColor && <span className="capitalize">{item.variantColor}</span>}
-                    {item.variantSize && <span className="capitalize">{item.variantSize}</span>}
-                  </div>
-                )}
-                {/* Show product color/size if no variant but has product color/size */}
-                {!item.variantId && (item.productColor || item.productSize) && (
-                  <div className="flex gap-2 text-xs text-muted-foreground mt-1">
-                    {item.productColor && <span className="capitalize">{item.productColor}</span>}
-                    {item.productSize && <span className="capitalize">{item.productSize}</span>}
-                  </div>
-                )}
-              </div>
-              <div className="text-sm font-medium">₦{(order.productAmount * item.quantity).toLocaleString()}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Total */}
-        <div className="flex justify-between items-center pt-2 border-t">
-          <span className="font-medium">Total</span>
-          <span className="font-bold">₦{totalAmount.toLocaleString()}</span>
-        </div>
-
-        {/* Progress for non-cancelled orders */}
-        {order.orderStatus?.toLowerCase() !== "cancelled" && (
-          <>
-            <Progress value={getProgress(order.orderStatus)} className="h-1 mt-3" />
-            <div className="flex justify-between text-[10px] xs:text-xs mt-1">
-              <span>Pending</span>
-              <span>Shipped</span>
-              <span>Delivered</span>
-            </div>
-          </>
-        )}
-      </CardContent>
-
-      {/* Action Buttons */}
-      <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
-        {order.orderStatus?.toLowerCase() === "shipped" ? (
-          <>
-            <Button variant="outline" size="sm" className="flex-1 h-8 text-xs">
-              <Share2 className="h-3 w-3 mr-1" />
-              Share Tracking
-            </Button>
-            <Button size="sm" className="flex-1 h-8 text-xs">
-              <Truck className="h-3 w-3 mr-1" />
-              Track Order
-            </Button>
-          </>
-        ) : (
-          <Button variant="outline" size="sm" className="w-full h-8 text-xs">
-            <Package className="h-3 w-3 mr-1" />
-            View Details
-          </Button>
-        )}
-      </CardFooter>
-    </Card>
-  )
-}
 
 const ErrorState = ({ onRetry }: { onRetry?: () => void }) => (
   <EmptyState
@@ -1634,64 +1468,64 @@ const scrollableClasses = "max-h-[calc(100vh-400px)] overflow-y-auto pr-2"
 
 export default function Products() {
   // State management
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [selectedFilter, setSelectedFilter] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   // Add state for delete confirmation
-  const [productToDelete, setProductToDelete] = useState<string>("")
-  const [activeOrderTab, setActiveOrderTab] = useState("active") // Add this state
-  const { userData } = useUser()
-  const { user } = userData || { user: null }
+  const [productToDelete, setProductToDelete] = useState<string>("");
+  const [activeOrderTab, setActiveOrderTab] = useState("active"); // Add this state
+  const { userData } = useUser();
+  const { user } = userData || { user: null };
 
-  console.log("user", user)
+  console.log("user", user);
 
-  const { setIsMutate } = useShoppingCart()
+  const { setIsMutate } = useShoppingCart();
 
-  const [priceModalOpen, setPriceModalOpen] = useState(false)
-  const [productToEdit, setProductToEdit] = useState("")
-  const [currentItemData, setCurrentItemData] = useState(null)
+  const [priceModalOpen, setPriceModalOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState("");
+  const [currentItemData, setCurrentItemData] = useState(null);
 
   // Add these state variables inside the Products component, near the other state variables
-  const [shareModalOpen, setShareModalOpen] = useState(false)
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [productToShare, setProductToShare] = useState<{
-    id: string
-    name: string
-  } | null>(null)
+    id: string;
+    name: string;
+  } | null>(null);
 
-  const [reviewModalOpen, setReviewModalOpen] = useState(false)
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [productToReview, setProductToReview] = useState<{
-    originalId: string
-    name: string
-  } | null>(null)
+    originalId: string;
+    name: string;
+  } | null>(null);
 
-  const { data, error, isLoading, mutate } = useSWR("/api/plug/products/")
-  const products = Array.isArray(data?.data) ? data?.data : []
+  const { data, error, isLoading, mutate } = useSWR("/api/plug/products/");
+  const products = Array.isArray(data?.data) ? data?.data : [];
 
   // Pagination state
-  const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(6)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(6);
 
   const deleteProductFn = async (productId: string) => {
     const response = await fetch(`/api/plug/products/${productId}`, {
       method: "DELETE",
       credentials: "include",
-    })
-    const result = await response.json()
+    });
+    const result = await response.json();
 
     if (!response.ok) {
-      errorToast(result.error)
-      return null
+      errorToast(result.error);
+      return null;
     }
-    setIsMutate(true)
-    successToast(result.message)
-    return result
-  }
+    setIsMutate(true);
+    successToast(result.message);
+    return result;
+  };
 
   const getOrdersUrl = (status: string) => {
-    if (status === "active") status = "pending" // Map active to pending for API
-    return `/api/orders/plug?orderStatus=${status.toUpperCase()}`
-  }
+    if (status === "active") status = "pending"; // Map active to pending for API
+    return `/api/orders/plug?orderStatus=${status.toUpperCase()}`;
+  };
 
   const {
     data: ordersData,
@@ -1705,104 +1539,348 @@ export default function Products() {
     dedupingInterval: 10000, // Prevent duplicate requests within 10 seconds
     errorRetryCount: 3,
     errorRetryInterval: 5000,
-  })
+  });
 
-  console.log("ordersData", ordersData)
+  console.log("ordersData", ordersData);
 
   // Process orders data
-  const orders = Array.isArray(ordersData?.data) ? ordersData?.data : []
+  const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];
 
   // Calculate order counts from the main orders data
   const orderCounts = useMemo(() => {
     return {
-      active: orders.filter((order: any) => order.orderStatus?.toLowerCase() === "pending").length,
-      shipped: orders.filter((order: any) => order.orderStatus?.toLowerCase() === "shipped").length,
-      delivered: orders.filter((order: any) => order.orderStatus?.toLowerCase() === "delivered").length,
-      cancelled: orders.filter((order: any) => order.orderStatus?.toLowerCase() === "cancelled").length,
-    }
-  }, [orders])
+      active: orders.filter(
+        (order: any) => order.orderStatus?.toLowerCase() === "pending"
+      ).length,
+      shipped: orders.filter(
+        (order: any) => order.orderStatus?.toLowerCase() === "shipped"
+      ).length,
+      delivered: orders.filter(
+        (order: any) => order.orderStatus?.toLowerCase() === "delivered"
+      ).length,
+      cancelled: orders.filter(
+        (order: any) => order.orderStatus?.toLowerCase() === "cancelled"
+      ).length,
+    };
+  }, [orders]);
 
   const { deleteResource } = useDeleteResource(
     "/api/plug/products/",
     async () => {
       const res = await fetch("/api/plug/products/", {
         credentials: "include",
-      })
-      if (!res.ok) throw new Error("Failed to fetch products")
-      return res.json()
+      });
+      if (!res.ok) throw new Error("Failed to fetch products");
+      return res.json();
     },
-    deleteProductFn,
-  )
+    deleteProductFn
+  );
 
   // Fetch data
 
-  console.log("products", products)
+  console.log("products", products);
 
   // Filter items based on selected category, filter, and search query
   const filteredItems = products?.filter((item: any) => {
-    const totalStock = getTotalStocks(item)
-    const hasStock = totalStock !== undefined && totalStock !== null
+    const totalStock = getTotalStocks(item);
+    const hasStock = totalStock !== undefined && totalStock !== null;
 
     // Category filter
-    if (selectedCategory !== "all" && item.category !== selectedCategory) return false
+    if (selectedCategory !== "all" && item.category !== selectedCategory)
+      return false;
 
     // Stock-based filters
-    if (selectedFilter === "out-of-stock" && hasStock && totalStock > 0) return false
-    if (selectedFilter === "low-stock" && (!hasStock || totalStock === 0 || totalStock > 5)) return false
-    if (selectedFilter === "optimal" && (!hasStock || totalStock === 0 || totalStock <= 10)) return false
+    if (selectedFilter === "out-of-stock" && hasStock && totalStock > 0)
+      return false;
+    if (
+      selectedFilter === "low-stock" &&
+      (!hasStock || totalStock === 0 || totalStock > 5)
+    )
+      return false;
+    if (
+      selectedFilter === "optimal" &&
+      (!hasStock || totalStock === 0 || totalStock <= 10)
+    )
+      return false;
 
     // Search filter
-    if (searchQuery && !item.name?.toLowerCase().includes(searchQuery.toLowerCase())) return false
+    if (
+      searchQuery &&
+      !item.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+      return false;
 
-    return true
-  })
+    return true;
+  });
 
   // Get current items for pagination
-  const indexOfLastItem = currentPage * itemsPerPage
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage
-  const currentItems = filteredItems?.slice(indexOfFirstItem, indexOfLastItem)
-  const totalPages = Math.ceil((filteredItems?.length || 0) / itemsPerPage)
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredItems?.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil((filteredItems?.length || 0) / itemsPerPage);
+
+  // Updated OrderCard component to match the API data structure and design
+  const OrderCard = ({ order }: { order: any }) => {
+    // const getStatusBadge = (status: string) => {
+    //   switch (status?.toLowerCase()) {
+    //     case "pending":
+    //       return (
+    //         <Badge variant="default" className="bg-orange-500 hover:bg-orange-600">
+    //           Active
+    //         </Badge>
+    //       )
+    //     case "shipped":
+    //       return (
+    //         <Badge variant="secondary" className="bg-blue-500 text-white hover:bg-blue-600">
+    //           Shipped
+    //         </Badge>
+    //       )
+    //     case "delivered":
+    //       return (
+    //         <Badge variant="outline" className="bg-green-500 text-white hover:bg-green-600">
+    //           Delivered
+    //         </Badge>
+    //       )
+    //     case "cancelled":
+    //       return <Badge variant="destructive">Cancelled</Badge>
+    //     default:
+    //       return <Badge variant="outline">Unknown</Badge>
+    //   }
+    // }
+
+    const getStatusBadge = (status: string) => {
+      // If no status is provided, determine from activeOrderTab or other context
+      const currentStatus = status || activeOrderTab;
+
+      switch (currentStatus?.toLowerCase()) {
+        case "pending":
+        case "active":
+          return (
+            <Badge
+              variant="default"
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              Pending
+            </Badge>
+          );
+        case "shipped":
+          return (
+            <Badge
+              variant="secondary"
+              className="bg-blue-500 text-white hover:bg-blue-600"
+            >
+              Shipped
+            </Badge>
+          );
+        case "delivered":
+          return (
+            <Badge
+              variant="outline"
+              className="bg-green-500 text-white hover:bg-green-600"
+            >
+              Delivered
+            </Badge>
+          );
+        case "cancelled":
+          return <Badge variant="destructive">Cancelled</Badge>;
+        default:
+          return (
+            <Badge
+              variant="default"
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              Pending
+            </Badge>
+          );
+      }
+    };
+
+    // Calculate total amount from order items
+    const totalAmount =
+      order.orderItems?.reduce((total: number, item: any) => {
+        return total + order.productAmount * item.quantity;
+      }, 0) || 0;
+
+    const formatDate = (dateString: string) => {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    };
+
+    const capitalizeWords = (str: string) => {
+      return (
+        str
+          ?.split(" ")
+          .map(
+            (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          )
+          .join(" ") || ""
+      );
+    };
+
+    return (
+      <Card className="mb-3 sm:mb-4 last:mb-0">
+        <CardHeader className="p-3 sm:p-4 pb-2">
+          <div className="flex justify-between items-start gap-2">
+            <div className="min-w-0">
+              <CardTitle className="text-sm font-medium">
+                {order.orderId}
+              </CardTitle>
+              <CardDescription className="text-xs mt-1">
+                {formatDate(order.createdAt)}
+              </CardDescription>
+            </div>
+            {getStatusBadge(activeOrderTab)}
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-3 sm:p-4 pt-0 space-y-3">
+          {/* Customer Info */}
+          <div className="flex items-center gap-2 text-sm">
+            <Users className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">
+              {capitalizeWords(order.buyerName)}
+            </span>
+            <span className="text-muted-foreground">•</span>
+            <span className="text-muted-foreground">
+              {capitalizeWords(order.buyerLga)},{" "}
+              {capitalizeWords(order.buyerState)}
+            </span>
+          </div>
+
+          {/* Phone Number */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Phone className="h-4 w-4" />
+            <span>{order.buyerPhone}</span>
+          </div>
+
+          {/* Products */}
+          <div className="space-y-2">
+            {order.orderItems?.map((item: any, index: number) => (
+              <div key={item.id} className="flex justify-between items-center">
+                <div className="flex-1">
+                  <div className="text-sm font-medium capitalize">
+                    {item.productName} x {item.quantity}
+                  </div>
+                  {/* Show variant details if available */}
+                  {item.variantId &&
+                    (item.variantColor || item.variantSize) && (
+                      <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+                        {item.variantColor && (
+                          <span className="capitalize">
+                            {item.variantColor}
+                          </span>
+                        )}
+                        {item.variantSize && (
+                          <span className="capitalize">
+                            ({item.variantSize})
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  {/* Show product color/size if no variant but has product color/size */}
+                  {!item.variantId &&
+                    (item.productColor || item.productSize) && (
+                      <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+                        {item.productColor && (
+                          <span className="capitalize">
+                            {item.productColor}
+                          </span>
+                        )}
+                        {item.productSize && (
+                          <span className="capitalize">
+                            ({item.productSize})
+                          </span>
+                        )}
+                      </div>
+                    )}
+                </div>
+                <div className="text-sm font-medium">
+                  ₦{(order.productAmount * item.quantity).toLocaleString()}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Total */}
+          <div className="flex justify-between items-center pt-2 border-t">
+            <span className="font-medium">Total</span>
+            <span className="font-bold">₦{totalAmount.toLocaleString()}</span>
+          </div>
+        </CardContent>
+
+        {/* Action Buttons */}
+        <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
+          {activeOrderTab === "shipped" && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 h-8 text-xs"
+              >
+                <Share2 className="h-3 w-3 mr-1" />
+                Share Tracking
+              </Button>
+              <Button size="sm" className="flex-1 h-8 text-xs">
+                <Truck className="h-3 w-3 mr-1" />
+                Track Order
+              </Button>
+            </>
+          )}
+        </CardFooter>
+      </Card>
+    );
+  };
 
   // Helper functions
   const getStockStatus = (item: any) => {
     // If item has variations, calculate total stock across all variations
     if (item.variations && item.variations.length > 0) {
-      const totalStock = item.variations.reduce((sum: number, variation: any) => sum + (variation.stocks || 0), 0)
+      const totalStock = item.variations.reduce(
+        (sum: number, variation: any) => sum + (variation.stocks || 0),
+        0
+      );
 
       // Check total stock across all variations
-      if (totalStock === 0) return "out-of-stock"
-      if (totalStock <= 5) return "low-stock"
-      return "optimal"
+      if (totalStock === 0) return "out-of-stock";
+      if (totalStock <= 5) return "low-stock";
+      return "optimal";
     }
 
     // If no variations, use item stock directly
-    if (item.stocks === undefined || item.stocks === null) return "unknown"
-    if (item.stocks === 0) return "out-of-stock"
-    if (item.stocks <= 5) return "low-stock"
-    return "optimal"
-  }
+    if (item.stocks === undefined || item.stocks === null) return "unknown";
+    if (item.stocks === 0) return "out-of-stock";
+    if (item.stocks <= 5) return "low-stock";
+    return "optimal";
+  };
 
   const getStockStatusColor = (status: any) => {
     switch (status) {
       case "out-of-stock":
-        return "text-destructive"
+        return "text-destructive";
       case "low-stock":
-        return "text-amber-500"
+        return "text-amber-500";
       case "optimal":
-        return "text-green-500"
+        return "text-green-500";
       default:
-        return "text-muted-foreground"
+        return "text-muted-foreground";
     }
-  }
+  };
 
   const getStockStatusBadge = (status: any) => {
     switch (status) {
       case "out-of-stock":
         return (
-          <Badge variant="destructive" className="text-xs py-0 px-2 whitespace-nowrap">
+          <Badge
+            variant="destructive"
+            className="text-xs py-0 px-2 whitespace-nowrap"
+          >
             Out of Stock
           </Badge>
-        )
+        );
       case "low-stock":
         return (
           <Badge
@@ -1811,7 +1889,7 @@ export default function Products() {
           >
             Low Stock
           </Badge>
-        )
+        );
       case "optimal":
         return (
           <Badge
@@ -1820,7 +1898,7 @@ export default function Products() {
           >
             In Stock
           </Badge>
-        )
+        );
       default:
         return (
           <Badge
@@ -1829,31 +1907,31 @@ export default function Products() {
           >
             Unknown
           </Badge>
-        )
+        );
     }
-  }
+  };
 
   const clearSearch = () => {
-    setSearchQuery("")
-  }
+    setSearchQuery("");
+  };
 
   // Pagination controls
   const nextPage = () => {
     if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1)
+      setCurrentPage(currentPage + 1);
     }
-  }
+  };
 
   const prevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(currentPage - 1)
+      setCurrentPage(currentPage - 1);
     }
-  }
+  };
 
   // Display value helper
   const displayValue = (value: any) => {
-    return value !== undefined && value !== null ? value : "-"
-  }
+    return value !== undefined && value !== null ? value : "-";
+  };
 
   const stats = useMemo(() => {
     if (!products.length)
@@ -1862,43 +1940,54 @@ export default function Products() {
         lowStockItems: 0,
         outOfStock: 0,
         totalProfit: 0,
-      }
+      };
 
     return {
       totalProducts: products.length,
       lowStockItems: products.filter((item: any) => {
         if (item.variations && item.variations.length > 0) {
           // Get total stock across all variations
-          const totalStock = item.variations.reduce((sum: number, variation: any) => sum + (variation.stocks || 0), 0)
-          return totalStock > 0 && totalStock <= 5
+          const totalStock = item.variations.reduce(
+            (sum: number, variation: any) => sum + (variation.stocks || 0),
+            0
+          );
+          return totalStock > 0 && totalStock <= 5;
         }
         // If no variations, use item stock directly
-        return item.stocks !== undefined && item.stocks > 0 && item.stocks <= 5
+        return item.stocks !== undefined && item.stocks > 0 && item.stocks <= 5;
       }).length,
       outOfStock: products.filter((item: any) => {
         if (item.variations && item.variations.length > 0) {
           // Check if all variations have zero stock
-          const totalStock = item.variations.reduce((sum: number, variation: any) => sum + (variation.stocks || 0), 0)
-          return totalStock === 0
+          const totalStock = item.variations.reduce(
+            (sum: number, variation: any) => sum + (variation.stocks || 0),
+            0
+          );
+          return totalStock === 0;
         }
         // If no variations, check item stock directly
-        return item.stocks === 0
+        return item.stocks === 0;
       }).length,
       totalProfit: products.reduce((total: any, item: any) => {
         if (item.variations && item.variations.length > 0) {
           // Calculate profit across all variations
           const variationProfit = item.variations.reduce(
             (sum: number, variation: any) =>
-              sum + ((item.price || 0) - (item.originalPrice || 0)) * (variation.stocks || 0),
-            0,
-          )
-          return total + variationProfit
+              sum +
+              ((item.price || 0) - (item.originalPrice || 0)) *
+                (variation.stocks || 0),
+            0
+          );
+          return total + variationProfit;
         }
         // If no variations, calculate profit using item stock directly
-        return total + ((item.price || 0) - (item.originalPrice || 0)) * (item.stocks || 0)
+        return (
+          total +
+          ((item.price || 0) - (item.originalPrice || 0)) * (item.stocks || 0)
+        );
       }, 0),
-    }
-  }, [products])
+    };
+  }, [products]);
 
   return (
     <TooltipProvider>
@@ -1906,14 +1995,20 @@ export default function Products() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
           <div>
-            <h1 className="text-base sm:text-lg md:text-xl font-bold">Products</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground">View products that you have plugged into</p>
+            <h1 className="text-base sm:text-lg md:text-xl font-bold">
+              Products
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              View products that you have plugged into
+            </p>
           </div>
         </div>
 
         {/* Products Stats */}
         <section className="space-y-3">
-          <h2 className="text-sm sm:text-base font-semibold">Products Command Center</h2>
+          <h2 className="text-sm sm:text-base font-semibold">
+            Products Command Center
+          </h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {/* Total Products Card */}
@@ -1964,7 +2059,9 @@ export default function Products() {
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-lg font-bold text-amber-500">{stats.lowStockItems}</div>
+                    <div className="text-lg font-bold text-amber-500">
+                      {stats.lowStockItems}
+                    </div>
                   </>
                 )}
               </CardContent>
@@ -1992,7 +2089,9 @@ export default function Products() {
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-lg font-bold text-destructive">{stats.outOfStock}</div>
+                    <div className="text-lg font-bold text-destructive">
+                      {stats.outOfStock}
+                    </div>
                   </>
                 )}
               </CardContent>
@@ -2035,9 +2134,12 @@ export default function Products() {
                 <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-xs sm:text-sm">Important Notice</h3>
+                <h3 className="font-medium text-xs sm:text-sm">
+                  Important Notice
+                </h3>
                 <p className="text-[10px] sm:text-xs text-muted-foreground">
-                  Unable to find a product, Note suppliers can sometimes discontinue a product
+                  Unable to find a product, Note suppliers can sometimes
+                  discontinue a product
                 </p>
               </div>
             </CardContent>
@@ -2077,30 +2179,34 @@ export default function Products() {
                   variant={selectedFilter === "all" ? "default" : "outline"}
                   size="sm"
                   onClick={() => {
-                    setSelectedFilter("all")
-                    setCurrentPage(1)
+                    setSelectedFilter("all");
+                    setCurrentPage(1);
                   }}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
                 >
                   All
                 </Button>
                 <Button
-                  variant={selectedFilter === "out-of-stock" ? "default" : "outline"}
+                  variant={
+                    selectedFilter === "out-of-stock" ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => {
-                    setSelectedFilter("out-of-stock")
-                    setCurrentPage(1)
+                    setSelectedFilter("out-of-stock");
+                    setCurrentPage(1);
                   }}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
                 >
                   Out of Stock
                 </Button>
                 <Button
-                  variant={selectedFilter === "low-stock" ? "default" : "outline"}
+                  variant={
+                    selectedFilter === "low-stock" ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => {
-                    setSelectedFilter("low-stock")
-                    setCurrentPage(1)
+                    setSelectedFilter("low-stock");
+                    setCurrentPage(1);
                   }}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
                 >
@@ -2110,8 +2216,8 @@ export default function Products() {
                   variant={selectedFilter === "optimal" ? "default" : "outline"}
                   size="sm"
                   onClick={() => {
-                    setSelectedFilter("optimal")
-                    setCurrentPage(1)
+                    setSelectedFilter("optimal");
+                    setCurrentPage(1);
                   }}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
                 >
@@ -2122,8 +2228,8 @@ export default function Products() {
                 <Select
                   value={selectedCategory}
                   onValueChange={(value) => {
-                    setSelectedCategory(value)
-                    setCurrentPage(1)
+                    setSelectedCategory(value);
+                    setCurrentPage(1);
                   }}
                 >
                   <SelectTrigger className="w-[120px] md:w-[150px] text-xs md:text-sm h-8 sm:h-9">
@@ -2131,7 +2237,11 @@ export default function Products() {
                   </SelectTrigger>
                   <SelectContent>
                     {PRODUCT_CATEGORIES.map((category) => (
-                      <SelectItem key={category.value} value={category.value} className="text-xs md:text-sm">
+                      <SelectItem
+                        key={category.value}
+                        value={category.value}
+                        className="text-xs md:text-sm"
+                      >
                         {category.label}
                       </SelectItem>
                     ))}
@@ -2153,10 +2263,14 @@ export default function Products() {
                         <th className="p-2 sm:p-3  text-left">Selling Price</th>
                         <th className="p-2 sm:p-3  text-left">Cost Price</th>
                         <th className="p-2 sm:p-3  text-left">Stock</th>
-                        <th className="p-2 sm:p-3  w-[70px] text-left">Status</th>
+                        <th className="p-2 sm:p-3  w-[70px] text-left">
+                          Status
+                        </th>
                         <th className="p-2 sm:p-3  text-left">Plugs</th>
                         <th className="p-2 sm:p-3  text-left">Sales</th>
-                        <th className="p-2 sm:p-3  w-[70px] text-left">Actions</th>
+                        <th className="p-2 sm:p-3  w-[70px] text-left">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2180,9 +2294,9 @@ export default function Products() {
                             ) : (
                               <EmptyFilterState
                                 onResetFilters={() => {
-                                  setSelectedCategory("all")
-                                  setSelectedFilter("all")
-                                  setSearchQuery("")
+                                  setSelectedCategory("all");
+                                  setSelectedFilter("all");
+                                  setSearchQuery("");
                                 }}
                               />
                             )}
@@ -2190,9 +2304,12 @@ export default function Products() {
                         </tr>
                       ) : (
                         currentItems.map((item: any) => {
-                          const stockStatus = getStockStatus(item)
+                          const stockStatus = getStockStatus(item);
                           return (
-                            <tr key={item.id} className="border-b hover:bg-muted/30">
+                            <tr
+                              key={item.id}
+                              className="border-b hover:bg-muted/30"
+                            >
                               <td className="p-2 sm:p-3">
                                 <div className="flex items-center gap-2 sm:gap-3">
                                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
@@ -2204,7 +2321,9 @@ export default function Products() {
                                       className="w-full h-full object-cover"
                                     />
                                   </div>
-                                  <Link href={`/marketplace/product/${item.originalId}`}>
+                                  <Link
+                                    href={`/marketplace/product/${item.originalId}`}
+                                  >
                                     <span className="font-medium text-xs sm:text-sm whitespace-nowrap max-w-[250px] capitalize underline text-blue-700">
                                       {truncateText(item.name, 15) || "-"}
                                     </span>
@@ -2212,17 +2331,27 @@ export default function Products() {
                                 </div>
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                {item.price ? `₦${item.price.toLocaleString()}` : "-"}
+                                {item.price
+                                  ? `₦${item.price.toLocaleString()}`
+                                  : "-"}
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                {item.originalPrice ? `₦${item.originalPrice.toLocaleString()}` : "-"}
+                                {item.originalPrice
+                                  ? `₦${item.originalPrice.toLocaleString()}`
+                                  : "-"}
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm">
                                 <div className="flex items-center gap-1">
-                                  <span className={getStockStatusColor(stockStatus)}>{getTotalStocks(item)}</span>
+                                  <span
+                                    className={getStockStatusColor(stockStatus)}
+                                  >
+                                    {getTotalStocks(item)}
+                                  </span>
                                 </div>
                               </td>
-                              <td className="p-2 sm:p-3">{getStockStatusBadge(stockStatus)}</td>
+                              <td className="p-2 sm:p-3">
+                                {getStockStatusBadge(stockStatus)}
+                              </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
                                 <div className="flex items-center gap-1">
                                   <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground" />
@@ -2235,22 +2364,29 @@ export default function Products() {
                               <td className="p-2 sm:p-3">
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 sm:h-8 sm:w-8"
+                                    >
                                       <MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                       <span className="sr-only">Open menu</span>
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel className="text-xs sm:text-sm">Actions</DropdownMenuLabel>
+                                    <DropdownMenuLabel className="text-xs sm:text-sm">
+                                      Actions
+                                    </DropdownMenuLabel>
                                     <DropdownMenuItem
                                       className="text-xs sm:text-sm"
                                       onClick={() => {
-                                        setProductToEdit(item.id)
-                                        setCurrentItemData(item)
-                                        setPriceModalOpen(true)
+                                        setProductToEdit(item.id);
+                                        setCurrentItemData(item);
+                                        setPriceModalOpen(true);
                                       }}
                                     >
-                                      <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Manage
+                                      <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Manage
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       className="text-xs sm:text-sm"
@@ -2258,11 +2394,12 @@ export default function Products() {
                                         setProductToShare({
                                           id: item.id,
                                           name: item.name,
-                                        })
-                                        setShareModalOpen(true)
+                                        });
+                                        setShareModalOpen(true);
                                       }}
                                     >
-                                      <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Share
+                                      <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Share
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       className="text-xs sm:text-sm"
@@ -2270,24 +2407,28 @@ export default function Products() {
                                         setProductToReview({
                                           originalId: item.originalId,
                                           name: item.name,
-                                        })
-                                        setReviewModalOpen(true)
+                                        });
+                                        setReviewModalOpen(true);
                                       }}
                                     >
-                                      <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Review
+                                      <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Review
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                       className="text-destructive text-xs sm:text-sm"
-                                      onClick={() => setProductToDelete(item.id)}
+                                      onClick={() =>
+                                        setProductToDelete(item.id)
+                                      }
                                     >
-                                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Remove
+                                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Remove
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </td>
                             </tr>
-                          )
+                          );
                         })
                       )}
                     </tbody>
@@ -2296,8 +2437,10 @@ export default function Products() {
               </CardContent>
               <CardFooter className="flex items-center justify-between p-3 sm:p-4 border-t">
                 <div className="text-xs sm:text-sm text-muted-foreground">
-                  Showing {Math.min(indexOfFirstItem + 1, filteredItems?.length || 0)}-
-                  {Math.min(indexOfLastItem, filteredItems?.length || 0)} of {filteredItems?.length || 0} products
+                  Showing{" "}
+                  {Math.min(indexOfFirstItem + 1, filteredItems?.length || 0)}-
+                  {Math.min(indexOfLastItem, filteredItems?.length || 0)} of{" "}
+                  {filteredItems?.length || 0} products
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -2327,21 +2470,35 @@ export default function Products() {
         {/* Order Management Hub - Better mobile tabs */}
         <section className="space-y-3 sm:space-y-4">
           <div>
-            <h2 className="text-base sm:text-lg font-semibold">Order Management</h2>
+            <h2 className="text-base sm:text-lg font-semibold">
+              Order Management
+            </h2>
           </div>
 
           <Tabs value={activeOrderTab} onValueChange={setActiveOrderTab}>
             <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10 overflow-x-auto">
-              <TabsTrigger value="active" className="text-[10px] sm:text-xs whitespace-nowrap">
+              <TabsTrigger
+                value="active"
+                className="text-[10px] sm:text-xs whitespace-nowrap"
+              >
                 Pending ({orderCounts.active})
               </TabsTrigger>
-              <TabsTrigger value="shipped" className="text-[10px] sm:text-xs whitespace-nowrap">
+              <TabsTrigger
+                value="shipped"
+                className="text-[10px] sm:text-xs whitespace-nowrap"
+              >
                 Shipped ({orderCounts.shipped})
               </TabsTrigger>
-              <TabsTrigger value="delivered" className="text-[10px] sm:text-xs whitespace-nowrap">
+              <TabsTrigger
+                value="delivered"
+                className="text-[10px] sm:text-xs whitespace-nowrap"
+              >
                 Delivered ({orderCounts.delivered})
               </TabsTrigger>
-              <TabsTrigger value="cancelled" className="text-[10px] sm:text-xs whitespace-nowrap">
+              <TabsTrigger
+                value="cancelled"
+                className="text-[10px] sm:text-xs whitespace-nowrap"
+              >
                 Cancelled ({orderCounts.cancelled})
               </TabsTrigger>
             </TabsList>
@@ -2439,11 +2596,13 @@ export default function Products() {
           productName={productToReview?.name || ""}
           existingReview={
             productToReview?.originalId
-              ? products.find((p: any) => p.originalId === productToReview.originalId)?.review
+              ? products.find(
+                  (p: any) => p.originalId === productToReview.originalId
+                )?.review
               : null
           }
         />
       </div>
     </TooltipProvider>
-  )
+  );
 }
