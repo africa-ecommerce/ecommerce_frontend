@@ -150,8 +150,8 @@ const OrderCard = ({ order }: { order: Order }) => {
     switch (status) {
       case "active":
         return <Badge variant="default">Active</Badge>
-      case "processing":
-        return <Badge variant="secondary">Processing</Badge>
+      case "shipped":
+        return <Badge variant="secondary">Shipped</Badge>
       case "delivered":
         return <Badge variant="outline">Delivered</Badge>
       case "cancelled":
@@ -183,7 +183,7 @@ const OrderCard = ({ order }: { order: Order }) => {
           <>
             <Progress value={order.progress} className="h-1 mt-2 sm:mt-3" />
             <div className="flex justify-between text-[10px] xs:text-xs mt-1">
-              <span>Processing</span>
+              <span>Pending</span>
               <span>Shipped</span>
               <span>Delivered</span>
             </div>
@@ -244,9 +244,9 @@ const EmptyOrdersState = ({ status }: { status: string }) => {
       title: "No Active Orders",
       description: "You don't have any active orders at the moment.",
     },
-    processing: {
+    pending: {
       icon: <PackageCheck className="h-12 w-12 text-muted-foreground" />,
-      title: "No Processing Orders",
+      title: "No Pending Orders",
       description: "All your orders are either active or completed.",
     },
     delivered: {
@@ -285,162 +285,235 @@ interface Order {
   id: string
   orderNumber: string
   date: string
-  status: "active" | "processing" | "delivered" | "cancelled"
+  status: "pending" | "shipped" | "delivered" | "cancelled"
   items: number
   amount: number
   progress: number
-  progressStage: "Processing" | "Shipped" | "Delivered"
+  progressStage: "Pending" | "Shipped" | "Delivered"
 }
 
 export default function Products() {
   // State management
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [selectedFilter, setSelectedFilter] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   // Add state for delete confirmation
-  const [productToDelete, setProductToDelete] = useState<string>("")
-  const { userData } = useUser()
-  const { user } = userData || { user: null }
+  const [productToDelete, setProductToDelete] = useState<string>("");
+  const [activeOrderTab, setActiveOrderTab] = useState("active"); // Add this state
+  const { userData } = useUser();
+  const { user } = userData || { user: null };
 
-  console.log("user", user)
+  console.log("user", user);
 
-  const { setIsMutate } = useShoppingCart()
+  const { setIsMutate } = useShoppingCart();
 
-  const [priceModalOpen, setPriceModalOpen] = useState(false)
-  const [productToEdit, setProductToEdit] = useState("")
-  const [currentItemData, setCurrentItemData] = useState(null)
+  const [priceModalOpen, setPriceModalOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState("");
+  const [currentItemData, setCurrentItemData] = useState(null);
 
   // Add these state variables inside the Products component, near the other state variables
-  const [shareModalOpen, setShareModalOpen] = useState(false)
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [productToShare, setProductToShare] = useState<{
-    id: string
-    name: string
-  } | null>(null)
+    id: string;
+    name: string;
+  } | null>(null);
 
-  const [reviewModalOpen, setReviewModalOpen] = useState(false)
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [productToReview, setProductToReview] = useState<{
-    originalId: string
-    name: string
-  } | null>(null)
+    originalId: string;
+    name: string;
+  } | null>(null);
 
-  const { data, error, isLoading, mutate } = useSWR("/api/plug/products/")
-  const products = Array.isArray(data?.data) ? data?.data : []
+  const { data, error, isLoading, mutate } = useSWR("/api/plug/products/");
+  const products = Array.isArray(data?.data) ? data?.data : [];
 
   // Pagination state
-  const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(6)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(6);
 
   const deleteProductFn = async (productId: string) => {
     const response = await fetch(`/api/plug/products/${productId}`, {
       method: "DELETE",
       credentials: "include",
-    })
-    const result = await response.json()
+    });
+    const result = await response.json();
 
     if (!response.ok) {
-      errorToast(result.error)
-      return null
+      errorToast(result.error);
+      return null;
     }
-    setIsMutate(true)
-    successToast(result.message)
-    return result
-  }
-  const { data: ordersData, error: ordersError, isLoading: ordersLoading, mutate: ordersMutate } = useSWR("/api/orders")
+    setIsMutate(true);
+    successToast(result.message);
+    return result;
+  };
+  // const { data: ordersData, error: ordersError, isLoading: ordersLoading, mutate: ordersMutate } = useSWR("/api/orders/plug")
+
+  // // Process orders data
+  // const orders = Array.isArray(ordersData?.data) ? ordersData?.data : []
+
+  // const orderCounts = useMemo(() => {
+  //   return {
+  //     active: orders.filter((order: Order) => order.status === "pending").length,
+  //     shipped: orders.filter((order: Order) => order.status === "shipped").length,
+  //     delivered: orders.filter((order: Order) => order.status === "delivered").length,
+  //     cancelled: orders.filter((order: Order) => order.status === "cancelled").length,
+  //   }
+  // }, [orders])
+
+  const getOrdersUrl = (status: string) => {
+    if (status === "active") status = "pending"; // Map active to pending for API
+    return `/api/orders/plug?orderStatus=${status}`;
+  };
+
+  const {
+    data: ordersData,
+    error: ordersError,
+    isLoading: ordersLoading,
+    mutate: ordersMutate,
+  } = useSWR(getOrdersUrl(activeOrderTab), {
+    refreshInterval: 30000, // Poll every 30 seconds
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    dedupingInterval: 10000, // Prevent duplicate requests within 10 seconds
+    errorRetryCount: 3,
+    errorRetryInterval: 5000,
+  });
+
+  console.log("ordersData", ordersData)
+
+  // Also fetch all orders for counts (with less frequent polling)
+  const { data: allOrdersData } = useSWR(
+    "/api/orders/plug", // Without status param to get all orders
+    {
+      refreshInterval: 60000, // Poll every minute for counts
+      revalidateOnFocus: false, // Don't refetch on focus for counts
+      dedupingInterval: 30000,
+    }
+  );
 
   // Process orders data
-  const orders = Array.isArray(ordersData?.data) ? ordersData?.data : []
+  const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];
+  const allOrders = Array.isArray(allOrdersData?.data)
+    ? allOrdersData?.data
+    : [];
 
   const orderCounts = useMemo(() => {
     return {
-      active: orders.filter((order: Order) => order.status === "active").length,
-      processing: orders.filter((order: Order) => order.status === "processing").length,
-      delivered: orders.filter((order: Order) => order.status === "delivered").length,
-      cancelled: orders.filter((order: Order) => order.status === "cancelled").length,
-    }
-  }, [orders])
+      active: allOrders.filter((order: Order) => order.status === "pending")
+        .length,
+      shipped: allOrders.filter((order: Order) => order.status === "shipped")
+        .length,
+      delivered: allOrders.filter(
+        (order: Order) => order.status === "delivered"
+      ).length,
+      cancelled: allOrders.filter(
+        (order: Order) => order.status === "cancelled"
+      ).length,
+    };
+  }, [allOrders]);
 
   const { deleteResource } = useDeleteResource(
     "/api/plug/products/",
     async () => {
       const res = await fetch("/api/plug/products/", {
         credentials: "include",
-      })
-      if (!res.ok) throw new Error("Failed to fetch products")
-      return res.json()
+      });
+      if (!res.ok) throw new Error("Failed to fetch products");
+      return res.json();
     },
-    deleteProductFn,
-  )
+    deleteProductFn
+  );
 
   // Fetch data
 
-  console.log("products", products)
+  console.log("products", products);
 
   // Filter items based on selected category, filter, and search query
   const filteredItems = products?.filter((item: any) => {
-    const totalStock = getTotalStocks(item)
-    const hasStock = totalStock !== undefined && totalStock !== null
+    const totalStock = getTotalStocks(item);
+    const hasStock = totalStock !== undefined && totalStock !== null;
 
     // Category filter
-    if (selectedCategory !== "all" && item.category !== selectedCategory) return false
+    if (selectedCategory !== "all" && item.category !== selectedCategory)
+      return false;
 
     // Stock-based filters
-    if (selectedFilter === "out-of-stock" && hasStock && totalStock > 0) return false
-    if (selectedFilter === "low-stock" && (!hasStock || totalStock === 0 || totalStock > 5)) return false
-    if (selectedFilter === "optimal" && (!hasStock || totalStock === 0 || totalStock <= 10)) return false
+    if (selectedFilter === "out-of-stock" && hasStock && totalStock > 0)
+      return false;
+    if (
+      selectedFilter === "low-stock" &&
+      (!hasStock || totalStock === 0 || totalStock > 5)
+    )
+      return false;
+    if (
+      selectedFilter === "optimal" &&
+      (!hasStock || totalStock === 0 || totalStock <= 10)
+    )
+      return false;
 
     // Search filter
-    if (searchQuery && !item.name?.toLowerCase().includes(searchQuery.toLowerCase())) return false
+    if (
+      searchQuery &&
+      !item.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+      return false;
 
-    return true
-  })
+    return true;
+  });
 
   // Get current items for pagination
-  const indexOfLastItem = currentPage * itemsPerPage
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage
-  const currentItems = filteredItems?.slice(indexOfFirstItem, indexOfLastItem)
-  const totalPages = Math.ceil((filteredItems?.length || 0) / itemsPerPage)
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredItems?.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil((filteredItems?.length || 0) / itemsPerPage);
 
   // Helper functions
   const getStockStatus = (item: any) => {
     // If item has variations, calculate total stock across all variations
     if (item.variations && item.variations.length > 0) {
-      const totalStock = item.variations.reduce((sum: number, variation: any) => sum + (variation.stocks || 0), 0)
+      const totalStock = item.variations.reduce(
+        (sum: number, variation: any) => sum + (variation.stocks || 0),
+        0
+      );
 
       // Check total stock across all variations
-      if (totalStock === 0) return "out-of-stock"
-      if (totalStock <= 5) return "low-stock"
-      return "optimal"
+      if (totalStock === 0) return "out-of-stock";
+      if (totalStock <= 5) return "low-stock";
+      return "optimal";
     }
 
     // If no variations, use item stock directly
-    if (item.stocks === undefined || item.stocks === null) return "unknown"
-    if (item.stocks === 0) return "out-of-stock"
-    if (item.stocks <= 5) return "low-stock"
-    return "optimal"
-  }
+    if (item.stocks === undefined || item.stocks === null) return "unknown";
+    if (item.stocks === 0) return "out-of-stock";
+    if (item.stocks <= 5) return "low-stock";
+    return "optimal";
+  };
 
   const getStockStatusColor = (status: any) => {
     switch (status) {
       case "out-of-stock":
-        return "text-destructive"
+        return "text-destructive";
       case "low-stock":
-        return "text-amber-500"
+        return "text-amber-500";
       case "optimal":
-        return "text-green-500"
+        return "text-green-500";
       default:
-        return "text-muted-foreground"
+        return "text-muted-foreground";
     }
-  }
+  };
 
   const getStockStatusBadge = (status: any) => {
     switch (status) {
       case "out-of-stock":
         return (
-          <Badge variant="destructive" className="text-xs py-0 px-2 whitespace-nowrap">
+          <Badge
+            variant="destructive"
+            className="text-xs py-0 px-2 whitespace-nowrap"
+          >
             Out of Stock
           </Badge>
-        )
+        );
       case "low-stock":
         return (
           <Badge
@@ -449,7 +522,7 @@ export default function Products() {
           >
             Low Stock
           </Badge>
-        )
+        );
       case "optimal":
         return (
           <Badge
@@ -458,7 +531,7 @@ export default function Products() {
           >
             In Stock
           </Badge>
-        )
+        );
       default:
         return (
           <Badge
@@ -467,31 +540,31 @@ export default function Products() {
           >
             Unknown
           </Badge>
-        )
+        );
     }
-  }
+  };
 
   const clearSearch = () => {
-    setSearchQuery("")
-  }
+    setSearchQuery("");
+  };
 
   // Pagination controls
   const nextPage = () => {
     if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1)
+      setCurrentPage(currentPage + 1);
     }
-  }
+  };
 
   const prevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(currentPage - 1)
+      setCurrentPage(currentPage - 1);
     }
-  }
+  };
 
   // Display value helper
   const displayValue = (value: any) => {
-    return value !== undefined && value !== null ? value : "-"
-  }
+    return value !== undefined && value !== null ? value : "-";
+  };
 
   const stats = useMemo(() => {
     if (!products.length)
@@ -500,43 +573,54 @@ export default function Products() {
         lowStockItems: 0,
         outOfStock: 0,
         totalProfit: 0,
-      }
+      };
 
     return {
       totalProducts: products.length,
       lowStockItems: products.filter((item: any) => {
         if (item.variations && item.variations.length > 0) {
           // Get total stock across all variations
-          const totalStock = item.variations.reduce((sum: number, variation: any) => sum + (variation.stocks || 0), 0)
-          return totalStock > 0 && totalStock <= 5
+          const totalStock = item.variations.reduce(
+            (sum: number, variation: any) => sum + (variation.stocks || 0),
+            0
+          );
+          return totalStock > 0 && totalStock <= 5;
         }
         // If no variations, use item stock directly
-        return item.stocks !== undefined && item.stocks > 0 && item.stocks <= 5
+        return item.stocks !== undefined && item.stocks > 0 && item.stocks <= 5;
       }).length,
       outOfStock: products.filter((item: any) => {
         if (item.variations && item.variations.length > 0) {
           // Check if all variations have zero stock
-          const totalStock = item.variations.reduce((sum: number, variation: any) => sum + (variation.stocks || 0), 0)
-          return totalStock === 0
+          const totalStock = item.variations.reduce(
+            (sum: number, variation: any) => sum + (variation.stocks || 0),
+            0
+          );
+          return totalStock === 0;
         }
         // If no variations, check item stock directly
-        return item.stocks === 0
+        return item.stocks === 0;
       }).length,
       totalProfit: products.reduce((total: any, item: any) => {
         if (item.variations && item.variations.length > 0) {
           // Calculate profit across all variations
           const variationProfit = item.variations.reduce(
             (sum: number, variation: any) =>
-              sum + ((item.price || 0) - (item.originalPrice || 0)) * (variation.stocks || 0),
-            0,
-          )
-          return total + variationProfit
+              sum +
+              ((item.price || 0) - (item.originalPrice || 0)) *
+                (variation.stocks || 0),
+            0
+          );
+          return total + variationProfit;
         }
         // If no variations, calculate profit using item stock directly
-        return total + ((item.price || 0) - (item.originalPrice || 0)) * (item.stocks || 0)
+        return (
+          total +
+          ((item.price || 0) - (item.originalPrice || 0)) * (item.stocks || 0)
+        );
       }, 0),
-    }
-  }, [products])
+    };
+  }, [products]);
 
   return (
     <TooltipProvider>
@@ -544,14 +628,20 @@ export default function Products() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
           <div>
-            <h1 className="text-base sm:text-lg md:text-xl font-bold">Products</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground">View products that you have plugged into</p>
+            <h1 className="text-base sm:text-lg md:text-xl font-bold">
+              Products
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              View products that you have plugged into
+            </p>
           </div>
         </div>
 
         {/* Products Stats */}
         <section className="space-y-3">
-          <h2 className="text-sm sm:text-base font-semibold">Products Command Center</h2>
+          <h2 className="text-sm sm:text-base font-semibold">
+            Products Command Center
+          </h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {/* Total Products Card */}
@@ -602,7 +692,9 @@ export default function Products() {
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-lg font-bold text-amber-500">{stats.lowStockItems}</div>
+                    <div className="text-lg font-bold text-amber-500">
+                      {stats.lowStockItems}
+                    </div>
                   </>
                 )}
               </CardContent>
@@ -630,7 +722,9 @@ export default function Products() {
                   <Skeleton className="h-6 w-16" />
                 ) : (
                   <>
-                    <div className="text-lg font-bold text-destructive">{stats.outOfStock}</div>
+                    <div className="text-lg font-bold text-destructive">
+                      {stats.outOfStock}
+                    </div>
                   </>
                 )}
               </CardContent>
@@ -673,9 +767,12 @@ export default function Products() {
                 <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-xs sm:text-sm">Important Notice</h3>
+                <h3 className="font-medium text-xs sm:text-sm">
+                  Important Notice
+                </h3>
                 <p className="text-[10px] sm:text-xs text-muted-foreground">
-                  Unable to find a product, Note suppliers can sometimes discontinue a product
+                  Unable to find a product, Note suppliers can sometimes
+                  discontinue a product
                 </p>
               </div>
             </CardContent>
@@ -715,30 +812,34 @@ export default function Products() {
                   variant={selectedFilter === "all" ? "default" : "outline"}
                   size="sm"
                   onClick={() => {
-                    setSelectedFilter("all")
-                    setCurrentPage(1)
+                    setSelectedFilter("all");
+                    setCurrentPage(1);
                   }}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
                 >
                   All
                 </Button>
                 <Button
-                  variant={selectedFilter === "out-of-stock" ? "default" : "outline"}
+                  variant={
+                    selectedFilter === "out-of-stock" ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => {
-                    setSelectedFilter("out-of-stock")
-                    setCurrentPage(1)
+                    setSelectedFilter("out-of-stock");
+                    setCurrentPage(1);
                   }}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
                 >
                   Out of Stock
                 </Button>
                 <Button
-                  variant={selectedFilter === "low-stock" ? "default" : "outline"}
+                  variant={
+                    selectedFilter === "low-stock" ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => {
-                    setSelectedFilter("low-stock")
-                    setCurrentPage(1)
+                    setSelectedFilter("low-stock");
+                    setCurrentPage(1);
                   }}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
                 >
@@ -748,8 +849,8 @@ export default function Products() {
                   variant={selectedFilter === "optimal" ? "default" : "outline"}
                   size="sm"
                   onClick={() => {
-                    setSelectedFilter("optimal")
-                    setCurrentPage(1)
+                    setSelectedFilter("optimal");
+                    setCurrentPage(1);
                   }}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
                 >
@@ -760,8 +861,8 @@ export default function Products() {
                 <Select
                   value={selectedCategory}
                   onValueChange={(value) => {
-                    setSelectedCategory(value)
-                    setCurrentPage(1)
+                    setSelectedCategory(value);
+                    setCurrentPage(1);
                   }}
                 >
                   <SelectTrigger className="w-[120px] md:w-[150px] text-xs md:text-sm h-8 sm:h-9">
@@ -769,7 +870,11 @@ export default function Products() {
                   </SelectTrigger>
                   <SelectContent>
                     {PRODUCT_CATEGORIES.map((category) => (
-                      <SelectItem key={category.value} value={category.value} className="text-xs md:text-sm">
+                      <SelectItem
+                        key={category.value}
+                        value={category.value}
+                        className="text-xs md:text-sm"
+                      >
                         {category.label}
                       </SelectItem>
                     ))}
@@ -791,10 +896,14 @@ export default function Products() {
                         <th className="p-2 sm:p-3  text-left">Selling Price</th>
                         <th className="p-2 sm:p-3  text-left">Cost Price</th>
                         <th className="p-2 sm:p-3  text-left">Stock</th>
-                        <th className="p-2 sm:p-3  w-[70px] text-left">Status</th>
+                        <th className="p-2 sm:p-3  w-[70px] text-left">
+                          Status
+                        </th>
                         <th className="p-2 sm:p-3  text-left">Plugs</th>
                         <th className="p-2 sm:p-3  text-left">Sales</th>
-                        <th className="p-2 sm:p-3  w-[70px] text-left">Actions</th>
+                        <th className="p-2 sm:p-3  w-[70px] text-left">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -818,9 +927,9 @@ export default function Products() {
                             ) : (
                               <EmptyFilterState
                                 onResetFilters={() => {
-                                  setSelectedCategory("all")
-                                  setSelectedFilter("all")
-                                  setSearchQuery("")
+                                  setSelectedCategory("all");
+                                  setSelectedFilter("all");
+                                  setSearchQuery("");
                                 }}
                               />
                             )}
@@ -828,9 +937,12 @@ export default function Products() {
                         </tr>
                       ) : (
                         currentItems.map((item: any) => {
-                          const stockStatus = getStockStatus(item)
+                          const stockStatus = getStockStatus(item);
                           return (
-                            <tr key={item.id} className="border-b hover:bg-muted/30">
+                            <tr
+                              key={item.id}
+                              className="border-b hover:bg-muted/30"
+                            >
                               <td className="p-2 sm:p-3">
                                 <div className="flex items-center gap-2 sm:gap-3">
                                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
@@ -842,7 +954,9 @@ export default function Products() {
                                       className="w-full h-full object-cover"
                                     />
                                   </div>
-                                  <Link href={`/marketplace/product/${item.originalId}`}>
+                                  <Link
+                                    href={`/marketplace/product/${item.originalId}`}
+                                  >
                                     <span className="font-medium text-xs sm:text-sm whitespace-nowrap max-w-[250px] capitalize underline text-blue-700">
                                       {truncateText(item.name, 15) || "-"}
                                     </span>
@@ -850,17 +964,27 @@ export default function Products() {
                                 </div>
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                {item.price ? `₦${item.price.toLocaleString()}` : "-"}
+                                {item.price
+                                  ? `₦${item.price.toLocaleString()}`
+                                  : "-"}
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                {item.originalPrice ? `₦${item.originalPrice.toLocaleString()}` : "-"}
+                                {item.originalPrice
+                                  ? `₦${item.originalPrice.toLocaleString()}`
+                                  : "-"}
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm">
                                 <div className="flex items-center gap-1">
-                                  <span className={getStockStatusColor(stockStatus)}>{getTotalStocks(item)}</span>
+                                  <span
+                                    className={getStockStatusColor(stockStatus)}
+                                  >
+                                    {getTotalStocks(item)}
+                                  </span>
                                 </div>
                               </td>
-                              <td className="p-2 sm:p-3">{getStockStatusBadge(stockStatus)}</td>
+                              <td className="p-2 sm:p-3">
+                                {getStockStatusBadge(stockStatus)}
+                              </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
                                 <div className="flex items-center gap-1">
                                   <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground" />
@@ -873,22 +997,29 @@ export default function Products() {
                               <td className="p-2 sm:p-3">
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 sm:h-8 sm:w-8"
+                                    >
                                       <MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                       <span className="sr-only">Open menu</span>
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel className="text-xs sm:text-sm">Actions</DropdownMenuLabel>
+                                    <DropdownMenuLabel className="text-xs sm:text-sm">
+                                      Actions
+                                    </DropdownMenuLabel>
                                     <DropdownMenuItem
                                       className="text-xs sm:text-sm"
                                       onClick={() => {
-                                        setProductToEdit(item.id)
-                                        setCurrentItemData(item)
-                                        setPriceModalOpen(true)
+                                        setProductToEdit(item.id);
+                                        setCurrentItemData(item);
+                                        setPriceModalOpen(true);
                                       }}
                                     >
-                                      <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Manage
+                                      <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Manage
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       className="text-xs sm:text-sm"
@@ -896,11 +1027,12 @@ export default function Products() {
                                         setProductToShare({
                                           id: item.id,
                                           name: item.name,
-                                        })
-                                        setShareModalOpen(true)
+                                        });
+                                        setShareModalOpen(true);
                                       }}
                                     >
-                                      <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Share
+                                      <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Share
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                       className="text-xs sm:text-sm"
@@ -908,24 +1040,28 @@ export default function Products() {
                                         setProductToReview({
                                           originalId: item.originalId,
                                           name: item.name,
-                                        })
-                                        setReviewModalOpen(true)
+                                        });
+                                        setReviewModalOpen(true);
                                       }}
                                     >
-                                      <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Review
+                                      <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Review
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                       className="text-destructive text-xs sm:text-sm"
-                                      onClick={() => setProductToDelete(item.id)}
+                                      onClick={() =>
+                                        setProductToDelete(item.id)
+                                      }
                                     >
-                                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" /> Remove
+                                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Remove
                                     </DropdownMenuItem>
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </td>
                             </tr>
-                          )
+                          );
                         })
                       )}
                     </tbody>
@@ -934,8 +1070,10 @@ export default function Products() {
               </CardContent>
               <CardFooter className="flex items-center justify-between p-3 sm:p-4 border-t">
                 <div className="text-xs sm:text-sm text-muted-foreground">
-                  Showing {Math.min(indexOfFirstItem + 1, filteredItems?.length || 0)}-
-                  {Math.min(indexOfLastItem, filteredItems?.length || 0)} of {filteredItems?.length || 0} products
+                  Showing{" "}
+                  {Math.min(indexOfFirstItem + 1, filteredItems?.length || 0)}-
+                  {Math.min(indexOfLastItem, filteredItems?.length || 0)} of{" "}
+                  {filteredItems?.length || 0} products
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -965,21 +1103,35 @@ export default function Products() {
         {/* Order Management Hub - Better mobile tabs */}
         <section className="space-y-3 sm:space-y-4">
           <div>
-            <h2 className="text-base sm:text-lg font-semibold">Order Management</h2>
+            <h2 className="text-base sm:text-lg font-semibold">
+              Order Management
+            </h2>
           </div>
 
-          <Tabs defaultValue="active">
+          <Tabs value={activeOrderTab} onValueChange={setActiveOrderTab}>
             <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10 overflow-x-auto">
-              <TabsTrigger value="active" className="text-xs sm:text-sm whitespace-nowrap">
+              <TabsTrigger
+                value="active"
+                className="text-xs sm:text-sm whitespace-nowrap"
+              >
                 Pending ({orderCounts.active})
               </TabsTrigger>
-              <TabsTrigger value="processing" className="text-xs sm:text-sm whitespace-nowrap">
-                Processing ({orderCounts.processing})
+              <TabsTrigger
+                value="shipped"
+                className="text-xs sm:text-sm whitespace-nowrap"
+              >
+                Shipped ({orderCounts.shipped})
               </TabsTrigger>
-              <TabsTrigger value="delivered" className="text-xs sm:text-sm whitespace-nowrap">
+              <TabsTrigger
+                value="delivered"
+                className="text-xs sm:text-sm whitespace-nowrap"
+              >
                 Delivered ({orderCounts.delivered})
               </TabsTrigger>
-              <TabsTrigger value="cancelled" className="text-xs sm:text-sm whitespace-nowrap">
+              <TabsTrigger
+                value="cancelled"
+                className="text-xs sm:text-sm whitespace-nowrap"
+              >
                 Cancelled ({orderCounts.cancelled})
               </TabsTrigger>
             </TabsList>
@@ -994,7 +1146,7 @@ export default function Products() {
               ) : (
                 <div className={scrollableClasses}>
                   {orders
-                    .filter((order: Order) => order.status === "active")
+                    .filter((order: Order) => order.status === "pending")
                     .map((order: Order) => (
                       <OrderCard key={order.id} order={order} />
                     ))}
@@ -1002,17 +1154,17 @@ export default function Products() {
               )}
             </TabsContent>
 
-            <TabsContent value="processing" className="mt-3 sm:mt-4">
+            <TabsContent value="shipped" className="mt-3 sm:mt-4">
               {ordersLoading ? (
                 <LoadingOrdersSkeleton />
               ) : ordersError ? (
                 <ErrorOrdersState onRetry={() => ordersMutate()} />
-              ) : orderCounts.processing === 0 ? (
-                <EmptyOrdersState status="processing" />
+              ) : orderCounts.shipped === 0 ? (
+                <EmptyOrdersState status="shipped" />
               ) : (
                 <div className={scrollableClasses}>
                   {orders
-                    .filter((order: Order) => order.status === "processing")
+                    .filter((order: Order) => order.status === "shipped")
                     .map((order: Order) => (
                       <OrderCard key={order.id} order={order} />
                     ))}
@@ -1083,9 +1235,15 @@ export default function Products() {
           onOpenChange={setReviewModalOpen}
           productId={productToReview?.originalId || ""}
           productName={productToReview?.name || ""}
-          existingReview={productToReview?.originalId ? products.find((p: any) => p.originalId === productToReview.originalId)?.review : null}
+          existingReview={
+            productToReview?.originalId
+              ? products.find(
+                  (p: any) => p.originalId === productToReview.originalId
+                )?.review
+              : null
+          }
         />
       </div>
     </TooltipProvider>
-  )
+  );
 }
