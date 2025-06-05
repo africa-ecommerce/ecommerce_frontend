@@ -298,7 +298,7 @@ export default function Products() {
     refreshInterval: 30000, // Poll every 30 seconds
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
-    dedupingInterval: 10000, // Prevent duplicate requests within 10 seconds
+    dedupingInterval: 10000, // Prevent duplicate requests within  10 seconds
     errorRetryCount: 3,
     errorRetryInterval: 5000,
   });

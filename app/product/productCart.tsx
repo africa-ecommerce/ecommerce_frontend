@@ -58,7 +58,6 @@ interface ProductData {
   stocks: number;
   variations: ProductVariation[];
   features?: string[];
-  seller?: string;
   inStock?: boolean;
   pickupLocation?: PickupLocation;
   supplierId?: string; // Added
@@ -103,7 +102,7 @@ export const SingleProduct = ({
 
   const { data, error, isLoading, mutate } = useSWR(
     currentProductId
-      ? `/public/products/${currentProductId}${
+      ? `/public/products/${currentProductId} ${
           currentReferralId ? `/${currentReferralId}` : ""
         }`
       : null,
@@ -903,65 +902,7 @@ const handleCheckout = () => {
                       </div>
                     )}
 
-                    {/* Out of Stock WhatsApp Signup */}
-                    {isOutOfStock && (
-                      <div className="bg-muted/50 rounded-lg p-4 mb-4">
-                        <h3 className="font-medium mb-2">
-                          Good news travels fast!
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          {isOutOfStock
-                            ? "This popular item is temporarily sold out."
-                            : "Select your preferred options above and"}{" "}
-                          Drop your WhatsApp number and we'll ping you with
-                          updates!
-                        </p>
-
-                        {!notificationSignedUp ? (
-                          <div className="flex gap-2">
-                            <div className="flex-1">
-                              <Input
-                                type="tel"
-                                placeholder="Your WhatsApp number"
-                                value={whatsappNumber}
-                                onChange={(e) =>
-                                  setWhatsappNumber(e.target.value)
-                                }
-                                className="text-sm"
-                              />
-                            </div>
-                            <Button
-                              size="sm"
-                              onClick={handleWhatsAppSignup}
-                              disabled={!whatsappNumber.trim()}
-                              className="flex items-center gap-1"
-                            >
-                              <Phone className="w-3 h-3" />
-                              Notify Me
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="text-sm text-green-600 font-medium">
-                            ✓ You'll be notified with updates!
-                          </div>
-                        )}
-
-                        <p className="text-xs text-muted-foreground mt-2">
-                          We'll only use your number for notifications. No spam,
-                          promise!
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Seller Info */}
-                    {productData.seller && (
-                      <div className="text-sm text-muted-foreground">
-                        Sold by:{" "}
-                        <span className="font-medium">
-                          {productData.seller}
-                        </span>
-                      </div>
-                    )}
+                   
                   </div>
                 </div>
               </CardContent>
@@ -1006,7 +947,7 @@ const handleCheckout = () => {
                     ) : (
                       <div className="text-center text-muted-foreground py-4">
                         {hasVariations
-                          ? "Select options above to see pricing"
+                          ? "Select options to see pricing"
                           : !isOutOfStock
                           ? "Ready to order"
                           : "Product unavailable"}
@@ -1030,14 +971,14 @@ const handleCheckout = () => {
                       ? "Some Items Out of Stock"
                       : !canCheckout
                       ? hasVariations
-                        ? "Select Options Above"
+                        ? "Select Options"
                         : "Out of Stock"
                       : "Proceed to Checkout"}
                   </Button>
 
                   {hasVariations && selectedVariations.length === 0 && (
                     <p className="text-sm text-muted-foreground text-center mt-2">
-                      Please select your preferred options above
+                      Please select your preferred options
                     </p>
                   )}
 

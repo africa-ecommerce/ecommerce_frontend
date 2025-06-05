@@ -11,7 +11,7 @@ import {
   Loader2,
   Info,
 } from "lucide-react";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -355,9 +355,13 @@ export default function CheckoutPage() {
       if (!response.ok) {
         const errorData = await response.json();
         errorToast(errorData.error || "Failed to place order");
+
+        clearCheckoutData();
+        useProductStore.getState().clearOrderSummary();
+        router.replace("/order-error")
         return;
       }
-
+ 
       const result = await response.json();
       successToast(result.message || "Order placed successfully");
 
@@ -371,7 +375,7 @@ export default function CheckoutPage() {
       useProductStore.getState().clearOrderSummary();
 
       // Navigate to thank you page
-      router.push("/thank-you");
+      router.replace("/thank-you");
 
       return result;
     } catch (error) {
@@ -540,6 +544,12 @@ export default function CheckoutPage() {
       validateField("customerAddress.lga", watchedCustomerAddress.lga);
     }
   }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors]);
+
+  const continueToReview = () => {
+    goToNextStep()
+    mutate(`/public/products/${orderSummary?.productId}${
+      orderSummary?.referralId}`)
+  }
 
   const paystackConfig = {
     email: watchedCustomerInfo?.email || "",
@@ -1068,7 +1078,7 @@ export default function CheckoutPage() {
                   </div>
 
                   <div className="mt-6">
-                    <Button className="w-full" onClick={goToNextStep}>
+                    <Button className="w-full" onClick={continueToReview}>
                       Continue to Review
                     </Button>
                   </div>
