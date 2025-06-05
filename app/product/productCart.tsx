@@ -102,7 +102,7 @@ export const SingleProduct = ({
 
   const { data, error, isLoading, mutate } = useSWR(
     currentProductId
-      ? `/public/products/${currentProductId} ${
+      ? `/public/products/${currentProductId}${
           currentReferralId ? `/${currentReferralId}` : ""
         }`
       : null,
