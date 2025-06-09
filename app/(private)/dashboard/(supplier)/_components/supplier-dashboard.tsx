@@ -33,6 +33,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/app/_components/provider/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Phone } from "lucide-react";
 import useSWR from "swr";
 import {
   Dialog,
@@ -42,6 +43,161 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { formatPrice, formatQuantity, formatTimeAgo, getTotalStock, truncateText } from "@/lib/utils";
+
+
+const OrderCard = ({ order }: { order: any }) => {
+  const [delayModalOpen, setDelayModalOpen] = useState(false);
+  const { userData } = useUser();
+  const { user } = userData || { user: null };
+
+  const handleDelaySelect = (minutes: number) => {
+    console.log(`Delaying order ${order.id} by ${minutes} minutes`);
+    // Add your delay logic here
+  };
+
+  const handleAccept = () => {
+    console.log(`Accepting order ${order.id}`);
+    // Add your accept logic here
+  };
+
+  const handleDecline = () => {
+    console.log(`Declining order ${order.id}`);
+    // Add your decline logic here
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const capitalizeWords = (str: string) => {
+    return (
+      str
+        ?.split(" ")
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join(" ") || ""
+    );
+  };
+
+  // Calculate total amount
+  const totalAmount =
+    order.orderItems?.reduce((total: number, item: any) => {
+      return total + (order.supplierPrice || 0) * item.quantity;
+    }, 0) || 0;
+
+  return (
+    <Card className="border rounded-lg">
+      <CardHeader className="p-3 sm:p-4 pb-1">
+        <div className="flex justify-between items-start gap-2">
+          <div className="min-w-0">
+            <CardTitle className="text-xs sm:text-sm font-medium truncate">
+              {order.orderId}
+            </CardTitle>
+            <CardDescription className="text-[10px] sm:text-xs">
+              {formatDate(order.createdAt)}
+            </CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="p-3 sm:p-4 pt-0 pb-1">
+        <div className="space-y-2">
+          {/* Customer Info */}
+          <div className="flex items-center gap-2 text-sm">
+            <Users className="h-4 w-4 text-muted-foreground" />
+            <span className="font-medium">
+              {capitalizeWords(order.buyerName)}
+            </span>
+            <span className="text-muted-foreground">•</span>
+            <span className="text-muted-foreground">
+              {capitalizeWords(order.buyerLga)},{" "}
+              {capitalizeWords(order.buyerState)}
+            </span>
+          </div>
+
+          {/* Phone Number */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Phone className="h-4 w-4" />
+            <span>{order.buyerPhone}</span>
+          </div>
+
+          {/* Products */}
+          <div className="space-y-1">
+            {order.orderItems?.map((item: any, index: number) => (
+              <div
+                key={item.id}
+                className="flex justify-between text-xs sm:text-sm"
+              >
+                <span className="truncate max-w-[120px] capitalize sm:max-w-[180px]">
+                  {item.productName} x {item.quantity}
+                </span>
+                <span className="whitespace-nowrap">
+                  ₦
+                  {(
+                    (order.supplierPrice || 0) * item.quantity
+                  ).toLocaleString()}
+                </span>
+              </div>
+            ))}
+            <div className="flex justify-between text-xs sm:text-sm font-medium pt-1 sm:pt-2 border-t">
+              <span>Total</span>
+              <span>₦{totalAmount.toLocaleString()}</span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+
+      {/* Action Buttons - Only show if user is verified */}
+      {user?.supplier?.verified && (
+        <CardFooter className="p-3 sm:p-4 pt-1 flex gap-1 sm:gap-2">
+          <Dialog open={delayModalOpen} onOpenChange={setDelayModalOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 h-7 sm:h-8 text-xs"
+              >
+                <Clock className="h-3 w-3 mr-1" />
+                Delay
+              </Button>
+            </DialogTrigger>
+            <DelayOrderModal
+              open={delayModalOpen}
+              onOpenChange={setDelayModalOpen}
+              onDelaySelect={handleDelaySelect}
+            />
+          </Dialog>
+
+          <Button
+            variant="destructive"
+            size="sm"
+            className="flex-1 h-7 sm:h-8 text-xs"
+            onClick={handleDecline}
+          >
+            <X className="h-3 w-3 mr-1" />
+            Decline
+          </Button>
+
+          <Button
+            size="sm"
+            className="flex-1 h-7 sm:h-8 text-xs"
+            onClick={handleAccept}
+          >
+            <PackageCheck className="h-3 w-3 mr-1" />
+            Accept
+          </Button>
+        </CardFooter>
+      )}
+    </Card>
+  );
+};
+
 
 
 
@@ -216,11 +372,11 @@ const EducationalTipSkeleton = () => (
 );
 
 export default function SupplierDashboard() {
-  const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState("pending");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [delayModalOpen, setDelayModalOpen] = useState(false);
+  // const [refreshing, setRefreshing] = useState(false);
+  // const [activeTab, setActiveTab] = useState("pending");
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState(false);
+  // const [delayModalOpen, setDelayModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   const {
@@ -234,7 +390,6 @@ export default function SupplierDashboard() {
     mutate,
   } = useSWR("/api/products/supplier/");
 
-  const [orders, setOrders] = useState<any[]>([]);
   const products = Array.isArray(data?.data) ? data?.data : [];
 
   const stockAlerts = useMemo(() => {
@@ -267,137 +422,155 @@ export default function SupplierDashboard() {
     return [...outOfStockItems, ...lowStockItems].slice(0, 3);
   }, [products]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       setLoading(true);
+  //       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        setOrders([
-          {
-            id: "SUP-4582",
-            status: "pending",
-            received: "3600",
-            customer: "Ade Johnson (Plug)",
-            location: "Lagos, Nigeria",
-            items: [
-              { name: "Shea Butter (250g) x 10", price: "₦25,000" },
-              { name: "African Black Soap x 5", price: "₦7,500" },
-            ],
-            total: "₦32,500",
-          },
-          {
-            id: "SUP-4581",
-            status: "pending",
-            received: "7200",
-            customer: "Ade Johnson (Plug)",
-            location: "Lagos, Nigeria",
-            items: [
-              { name: "Shea Butter (250g) x 10", price: "₦25,000" },
-              { name: "African Black Soap x 5", price: "₦7,500" },
-            ],
-            total: "₦32,500",
-          },
-          {
-            id: "SUP-4583",
-            status: "processing",
-            received: "10800",
-            customer: "Ade Johnson (Plug)",
-            location: "Lagos, Nigeria",
-            items: [
-              { name: "Shea Butter (250g) x 10", price: "₦25,000" },
-              { name: "African Black Soap x 5", price: "₦7,500" },
-            ],
-            total: "₦32,500",
-          },
-          {
-            id: "SUP-4584",
-            status: "processing",
-            received: "14400",
-            customer: "Ade Johnson (Plug)",
-            location: "Lagos, Nigeria",
-            items: [
-              { name: "Shea Butter (250g) x 10", price: "₦25,000" },
-              { name: "African Black Soap x 5", price: "₦7,500" },
-            ],
-            total: "₦32,500",
-          },
-          {
-            id: "SUP-4585",
-            status: "shipped",
-            received: "18000",
-            customer: "Ade Johnson (Plug)",
-            location: "Lagos, Nigeria",
-            items: [
-              { name: "Shea Butter (250g) x 10", price: "₦25,000" },
-              { name: "African Black Soap x 5", price: "₦7,500" },
-            ],
-            total: "₦32,500",
-          },
-          {
-            id: "SUP-4586",
-            status: "shipped",
-            received: "86400",
-            customer: "Ade Johnson (Plug)",
-            location: "Lagos, Nigeria",
-            items: [
-              { name: "Shea Butter (250g) x 10", price: "₦25,000" },
-              { name: "African Black Soap x 5", price: "₦7,500" },
-            ],
-            total: "₦32,500",
-          },
-          {
-            id: "SUP-4587",
-            status: "delivered",
-            received: "172800",
-            customer: "Ade Johnson (Plug)",
-            location: "Lagos, Nigeria",
-            items: [
-              { name: "Shea Butter (250g) x 10", price: "₦25,000" },
-              { name: "African Black Soap x 5", price: "₦7,500" },
-            ],
-            total: "₦32,500",
-          },
-          {
-            id: "SUP-4589",
-            status: "delivered",
-            received: "259200",
-            customer: "Ade Johnson (Plug)",
-            location: "Lagos, Nigeria",
-            items: [
-              { name: "Shea Butter (250g) x 10", price: "₦25,000" },
-              { name: "African Black Soap x 5", price: "₦7,500" },
-            ],
-            total: "₦32,500",
-          },
-        ]);
+  //       setOrders([
+  //         {
+  //           id: "SUP-4582",
+  //           status: "pending",
+  //           received: "3600",
+  //           customer: "Ade Johnson (Plug)",
+  //           location: "Lagos, Nigeria",
+  //           items: [
+  //             { name: "Shea Butter (250g) x 10", price: "₦25,000" },
+  //             { name: "African Black Soap x 5", price: "₦7,500" },
+  //           ],
+  //           total: "₦32,500",
+  //         },
+  //         {
+  //           id: "SUP-4581",
+  //           status: "pending",
+  //           received: "7200",
+  //           customer: "Ade Johnson (Plug)",
+  //           location: "Lagos, Nigeria",
+  //           items: [
+  //             { name: "Shea Butter (250g) x 10", price: "₦25,000" },
+  //             { name: "African Black Soap x 5", price: "₦7,500" },
+  //           ],
+  //           total: "₦32,500",
+  //         },
+  //         {
+  //           id: "SUP-4583",
+  //           status: "processing",
+  //           received: "10800",
+  //           customer: "Ade Johnson (Plug)",
+  //           location: "Lagos, Nigeria",
+  //           items: [
+  //             { name: "Shea Butter (250g) x 10", price: "₦25,000" },
+  //             { name: "African Black Soap x 5", price: "₦7,500" },
+  //           ],
+  //           total: "₦32,500",
+  //         },
+  //         {
+  //           id: "SUP-4584",
+  //           status: "processing",
+  //           received: "14400",
+  //           customer: "Ade Johnson (Plug)",
+  //           location: "Lagos, Nigeria",
+  //           items: [
+  //             { name: "Shea Butter (250g) x 10", price: "₦25,000" },
+  //             { name: "African Black Soap x 5", price: "₦7,500" },
+  //           ],
+  //           total: "₦32,500",
+  //         },
+  //         {
+  //           id: "SUP-4585",
+  //           status: "shipped",
+  //           received: "18000",
+  //           customer: "Ade Johnson (Plug)",
+  //           location: "Lagos, Nigeria",
+  //           items: [
+  //             { name: "Shea Butter (250g) x 10", price: "₦25,000" },
+  //             { name: "African Black Soap x 5", price: "₦7,500" },
+  //           ],
+  //           total: "₦32,500",
+  //         },
+  //         {
+  //           id: "SUP-4586",
+  //           status: "shipped",
+  //           received: "86400",
+  //           customer: "Ade Johnson (Plug)",
+  //           location: "Lagos, Nigeria",
+  //           items: [
+  //             { name: "Shea Butter (250g) x 10", price: "₦25,000" },
+  //             { name: "African Black Soap x 5", price: "₦7,500" },
+  //           ],
+  //           total: "₦32,500",
+  //         },
+  //         {
+  //           id: "SUP-4587",
+  //           status: "delivered",
+  //           received: "172800",
+  //           customer: "Ade Johnson (Plug)",
+  //           location: "Lagos, Nigeria",
+  //           items: [
+  //             { name: "Shea Butter (250g) x 10", price: "₦25,000" },
+  //             { name: "African Black Soap x 5", price: "₦7,500" },
+  //           ],
+  //           total: "₦32,500",
+  //         },
+  //         {
+  //           id: "SUP-4589",
+  //           status: "delivered",
+  //           received: "259200",
+  //           customer: "Ade Johnson (Plug)",
+  //           location: "Lagos, Nigeria",
+  //           items: [
+  //             { name: "Shea Butter (250g) x 10", price: "₦25,000" },
+  //             { name: "African Black Soap x 5", price: "₦7,500" },
+  //           ],
+  //           total: "₦32,500",
+  //         },
+  //       ]);
 
-        setError(false);
-      } catch (err) {
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       setError(false);
+  //     } catch (err) {
+  //       setError(true);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchData();
-  }, [refreshing]);
+  //   fetchData();
+  // }, [refreshing]);
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1500);
-  };
 
-  const filteredOrders = orders.filter((order) => order.status === activeTab);
+  const {
+    data: ordersData,
+    error: ordersError,
+    isLoading: ordersLoading,
+    mutate: ordersMutate,
+  } = useSWR("/api/orders/supplier?orderStatus=PENDING", {
+    refreshInterval: 30000, // Poll every 30 seconds
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    dedupingInterval: 10000, // Prevent duplicate requests within 10 seconds
+    errorRetryCount: 3,
+    errorRetryInterval: 5000,
+  });
 
-  const handleDelayClick = (orderId: string) => {
-    setSelectedOrderId(orderId);
-    setDelayModalOpen(true);
-  };
+  // Process orders data
+  const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];
 
-  const handleDelaySelect = (minutes: number) => {
-    console.log(`Delaying order ${selectedOrderId} by ${minutes} minutes`);
-  };
+  // const handleRefresh = () => {
+  //   setRefreshing(true);
+  //   setTimeout(() => setRefreshing(false), 1500);
+  // };
+
+  // const filteredOrders = orders.filter((order) => order.status === activeTab);
+
+  // const handleDelayClick = (orderId: string) => {
+  //   setSelectedOrderId(orderId);
+  //   setDelayModalOpen(true);
+  // };
+
+  // const handleDelaySelect = (minutes: number) => {
+  //   console.log(`Delaying order ${selectedOrderId} by ${minutes} minutes`);
+  // };
 
   return (
     <TooltipProvider>
@@ -407,8 +580,7 @@ export default function SupplierDashboard() {
           {isLoading && !user?.supplier.businessName ? (
             <WelcomeSkeleton />
           ) : (
-           
-                <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0">
               <h1 className="text-muted-foreground font-semibold text-sm truncate capitalize">
                 Welcome back, {user?.supplier.businessName}!
               </h1>
@@ -416,8 +588,6 @@ export default function SupplierDashboard() {
                 Here's your business at a glance.
               </h1>
             </div>
-           
-            
           )}
         </div>
 
@@ -452,7 +622,6 @@ export default function SupplierDashboard() {
                     <div className="text-base sm:text-lg font-bold">
                       ₦45,500
                     </div>
-                    
                   </>
                 )}
               </CardContent>
@@ -589,9 +758,7 @@ export default function SupplierDashboard() {
                           <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
                             <p>{alert.units}</p>
                           </div>
-                          
                         </div>
-                       
                       </div>
                     ))}
                   </div>
@@ -601,7 +768,7 @@ export default function SupplierDashboard() {
           </div>
         </section>
 
-        {!user?.supplier.verified ? (
+        {/* {!user?.supplier.verified ? (
           <>
             {isLoading ? (
               <TipSkeleton />
@@ -826,6 +993,107 @@ export default function SupplierDashboard() {
               </>
             )}
           </section>
+        )} */}
+
+        {!user?.supplier?.verified ? (
+          <>
+            {isLoading ? (
+              <TipSkeleton />
+            ) : (
+              <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
+                <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+                  <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
+                    <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-xs sm:text-sm">
+                      Action Required
+                    </h3>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">
+                      Please verify your account to start accepting payments and
+                      processing orders. Verified accounts are more likely to
+                      receive orders.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto text-xs h-7 sm:h-8"
+                  >
+                    <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Verify
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            <section className="space-y-3 sm:space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                <h2 className="text-sm sm:text-base font-semibold">
+                  Order Fulfillment
+                </h2>
+                <Button variant="outline" size="sm" asChild className="text-xs">
+                  <Link href="/dashboard/order">View All Orders</Link>
+                </Button>
+              </div>
+
+              {ordersError ? (
+                <ErrorState onRetry={() => ordersMutate()} />
+              ) : ordersLoading ? (
+                <LoadingSkeleton />
+              ) : (
+                <>
+                  {orders.length === 0 ? (
+                    <EmptyState
+                      message="No orders found"
+                      icon={PackageCheck}
+                      actionText="View All Orders"
+                      onAction={() => console.log("View all orders clicked")}
+                    />
+                  ) : (
+                    <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
+                      {orders.slice(0, 3).map((order: any) => (
+                        <OrderCard key={order.id} order={order} />
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
+          </>
+        ) : (
+          <section className="space-y-3 sm:space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <h2 className="text-sm sm:text-base font-semibold">
+                Order Fulfillment
+              </h2>
+              <Button variant="outline" size="sm" asChild className="text-xs">
+                <Link href="/dashboard/order">View All Orders</Link>
+              </Button>
+            </div>
+
+            {ordersError ? (
+              <ErrorState onRetry={() => ordersMutate()} />
+            ) : ordersLoading ? (
+              <LoadingSkeleton />
+            ) : (
+              <>
+                {orders.length === 0 ? (
+                  <EmptyState
+                    message="No orders found"
+                    icon={PackageCheck}
+                    actionText="View All Orders"
+                    onAction={() => console.log("View all orders clicked")}
+                  />
+                ) : (
+                  <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
+                    {orders.slice(0, 3).map((order: any) => (
+                      <OrderCard key={order.id} order={order} />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </section>
         )}
 
         {/* Educational Tip */}
@@ -846,7 +1114,6 @@ export default function SupplierDashboard() {
                   maintain sales volume during economic downturns.
                 </p>
               </div>
-             
             </CardContent>
           </Card>
         )}
