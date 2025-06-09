@@ -22,16 +22,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUser } from "@/app/_components/provider/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import useSWR from "swr";
@@ -205,45 +198,64 @@ const SupplierOrder = () => {
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   const { userData: {user} } = useUser();
-  const {
-    data,
-    error: errorData,
-    isLoading,
-    mutate,
-  } = useSWR("/api/products/supplier/");
+ 
+
+
+    const getOrdersUrl = () => {
+      return "/api/orders/supplier?orderStatus=PENDING";
+    };
+  
+    const {
+      data: ordersData,
+      error: ordersError,
+      isLoading: ordersLoading,
+      mutate: ordersMutate,
+    } = useSWR(getOrdersUrl(), {
+      refreshInterval: 30000, // Poll every 30 seconds
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 10000, // Prevent duplicate requests within  10 seconds
+      errorRetryCount: 3,
+      errorRetryInterval: 5000,
+    });
+  
+    console.log("ordersData", ordersData);
+  
+    // Process orders data
+    const order = Array.isArray(ordersData?.data) ? ordersData?.data : [];
 
   const [orders, setOrders] = useState<any[]>([]);
-  const products = Array.isArray(data?.data) ? data?.data : [];
+  // const products = Array.isArray(data?.data) ? data?.data : [];
 
-  const stockAlerts = useMemo(() => {
-    if (!products.length) return [];
+  // const stockAlerts = useMemo(() => {
+  //   if (!products.length) return [];
 
-    const outOfStockItems = products
-      .filter((item: any) => item.stock === 0)
-      .map((item: any) => ({
-        id: item.id,
-        product: item.name,
-        status: "Out of Stock",
-        units: "0 units left",
-        salesRate: "Urgent attention needed",
-        progress: 0,
-      }));
+  //   const outOfStockItems = products
+  //     .filter((item: any) => item.stock === 0)
+  //     .map((item: any) => ({
+  //       id: item.id,
+  //       product: item.name,
+  //       status: "Out of Stock",
+  //       units: "0 units left",
+  //       salesRate: "Urgent attention needed",
+  //       progress: 0,
+  //     }));
 
-    const lowStockItems = products
-      .filter(
-        (item: any) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
-      )
-      .map((item: any) => ({
-        id: item.id,
-        product: item.name,
-        status: "Low Stock",
-        units: `Only ${formatQuantity(item.stock)} units left`,
-        salesRate: "Restock recommended",
-        progress: (item.stock / 5) * 100,
-      }));
+  //   const lowStockItems = products
+  //     .filter(
+  //       (item: any) => item.stock !== undefined && item.stock > 0 && item.stock <= 5
+  //     )
+  //     .map((item: any) => ({
+  //       id: item.id,
+  //       product: item.name,
+  //       status: "Low Stock",
+  //       units: `Only ${formatQuantity(item.stock)} units left`,
+  //       salesRate: "Restock recommended",
+  //       progress: (item.stock / 5) * 100,
+  //     }));
 
-    return [...outOfStockItems, ...lowStockItems].slice(0, 3);
-  }, [products]);
+  //   return [...outOfStockItems, ...lowStockItems].slice(0, 3);
+  // }, [products]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -384,7 +396,7 @@ const SupplierOrder = () => {
 
       {!user?.supplier.verified ? (
         <>
-        {isLoading ? (
+        {ordersLoading ? (
           <TipSkeleton/>
         ) : (
           <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">

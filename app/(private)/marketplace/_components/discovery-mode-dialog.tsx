@@ -266,58 +266,7 @@ export function DiscoveryModeDialog({
     }, 0);
   }, [currentIndex, products, hasNextPage, isLoadingMore]);
 
-  // const handleNext = () => {
-  //   if (currentIndex >= products.length - 1 && !hasNextPage) {
-  //     onOpenChange(false);
-  //     return;
-  //   }
-
-  //   setDirection("left");
-  //   setExitX(-300);
-
-  //   // Move to next product after animation
-  //   setTimeout(() => {
-  //     if (currentIndex < products.length - 1) {
-  //       setCurrentIndex(currentIndex + 1);
-
-  //       // If we're approaching the end of loaded products, trigger loading more
-  //       if (
-  //         currentIndex >= products.length - 3 &&
-  //         hasNextPage &&
-  //         !isLoadingMore
-  //       ) {
-  //         loadMore();
-  //       }
-  //     } else if (hasNextPage) {
-  //       // If we're at the end but more products can be loaded, show loading state
-  //       loadMore();
-  //     } else {
-  //       onOpenChange(false);
-  //     }
-  //     setDirection(null);
-  //   }, 200);
-  // };
-
-  // const handlePrev = () => {
-  //   if (currentIndex <= 0) {
-  //     onOpenChange(false);
-  //     return;
-  //   }
-
-  //   setDirection("right");
-  //   setExitX(300);
-
-  //   // Move to previous product after animation
-  //   // setTimeout(() => {
-  //   if (currentIndex > 0) {
-  //     setCurrentIndex(currentIndex - 1);
-  //   } else {
-  //     onOpenChange(false);
-  //   }
-  //   setDirection(null);
-  //   // }, 200);
-  // };
-
+ 
        const handlePrev = useCallback(() => {
          const newIndex = currentIndex - 1;
          if (newIndex < 0) {
