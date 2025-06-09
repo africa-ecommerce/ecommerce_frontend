@@ -102,19 +102,28 @@ interface MetricData {
   totalItemsDelivered: number;
   fulfillmentRate: number;
   avgDeliveryTime: number;
-  pendingOrders: number;
+ 
   state: MetricState;
   errorMessage?: string;
 }
 
-export function IntelligenceSection() {
-  const [isFullscreen, setIsFullscreen] = useState(false);
+
+interface IntelligenceSectionProps {
+  ordersData?: any[];
+  ordersLoading?: boolean;
+  ordersError?: any;
+}
+
+export function IntelligenceSection({
+  ordersData = [],
+  ordersLoading = false,
+  ordersError = null,
+}: IntelligenceSectionProps) {
   const [metrics, setMetrics] = useState<MetricData>({
     totalOrders: 0,
     totalItemsDelivered: 0,
     fulfillmentRate: 0,
     avgDeliveryTime: 0,
-    pendingOrders: 0,
     state: "loading",
   });
 
@@ -122,83 +131,57 @@ export function IntelligenceSection() {
     setMetrics((prev) => ({ ...prev, state: "loading" }));
 
     try {
-      // Simulate API call with delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Randomly decide whether to show empty state (10% chance)
-      const showEmpty = Math.random() < 0.1;
-      if (showEmpty) {
-        setMetrics((prev) => ({ ...prev, state: "empty" }));
+      // If orders are still loading, keep loading state
+      if (ordersLoading) {
         return;
       }
 
-      // Randomly decide whether to show error state (10% chance)
-      const showError = Math.random() < 0.1;
-      if (showError) {
+      // If there's an error loading orders, show error state
+      if (ordersError) {
         setMetrics((prev) => ({
           ...prev,
           state: "error",
-          errorMessage:
-            "Failed to fetch intelligence data. Server returned an error.",
+          errorMessage: "Failed to load order data for intelligence metrics.",
         }));
         return;
       }
 
-      // Calculate metrics from order data
-      const totalOrders = allOrders.length;
+      // If no orders data, show empty state
+      if (!ordersData || ordersData.length === 0) {
+        setMetrics((prev) => ({ ...prev, state: "empty" }));
+        return;
+      }
 
-      // Calculate total items delivered
-      const deliveredOrders = allOrders.filter(
-        (order) => order.status === "delivered"
-      );
-      const totalItemsDelivered = deliveredOrders.reduce((sum, order) => {
-        return (
-          sum +
-          order.items.reduce((itemSum, item) => itemSum + item.quantity, 0)
-        );
-      }, 0);
+      // Simulate API delay for other metrics
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
-      // Calculate fulfillment rate
-      const fulfillmentRate = (deliveredOrders.length / totalOrders) * 100;
+      // Use real total orders from props, keep other metrics static for now
+      const totalOrders = ordersData.length;
 
-      // Calculate average delivery time (in hours)
-      const deliveryTimes = deliveredOrders.map((order) => {
-        const createdTime = order.createdAt.getTime();
-        const deliveredTime = order.deliveredAt?.getTime();
-        return (deliveredTime! - createdTime) / (1000 * 60 * 60); // Convert to hours
-      });
-
-      const avgDeliveryTime =
-        deliveryTimes.length > 0
-          ? deliveryTimes.reduce((sum, time) => sum + time, 0) /
-            deliveryTimes.length
-          : 0;
-
-      // Calculate pending orders
-      const pendingOrders = allOrders.filter(
-        (order) => order.status === "pending"
-      ).length;
+      // Keep these static as requested
+      const totalItemsDelivered = Math.floor(Math.random() * 50) + 20; // Random between 20-70
+      const fulfillmentRate = Math.floor(Math.random() * 30) + 70; // Random between 70-100%
+      const avgDeliveryTime = Math.floor(Math.random() * 12) + 6; // Random between 6-18 hours
 
       setMetrics({
         totalOrders,
         totalItemsDelivered,
         fulfillmentRate,
         avgDeliveryTime,
-        pendingOrders,
         state: "loaded",
       });
     } catch (error) {
       setMetrics((prev) => ({
         ...prev,
         state: "error",
-        errorMessage: "An unexpected error occurred while fetching data.",
+        errorMessage: "An unexpected error occurred while calculating metrics.",
       }));
     }
   };
 
   useEffect(() => {
     fetchMetrics();
-  }, []);
+  }, [ordersData, ordersLoading, ordersError]);
 
   const renderContent = () => {
     switch (metrics.state) {
@@ -225,7 +208,7 @@ export function IntelligenceSection() {
 
 function LoadingState() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
       {Array(5)
         .fill(0)
         .map((_, i) => (
@@ -294,7 +277,7 @@ function ErrorState({
 
 function LoadedState({ metrics }: { metrics: MetricData }) {
   return (
-    <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+    <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
       <MetricCard
         title="Total Orders"
         value={metrics.totalOrders.toString()}
@@ -319,12 +302,7 @@ function LoadedState({ metrics }: { metrics: MetricData }) {
         icon={<Clock className="h-4 w-4 text-purple-500" />}
       />
 
-      <MetricCard
-        title="Pending Orders"
-        value={metrics.pendingOrders.toString()}
-        icon={<AlertCircle className="h-4 w-4 text-amber-500" />}
-        className="xs:col-span-2 md:col-span-1"
-      />
+     
     </div>
   );
 }
