@@ -557,10 +557,7 @@ export default function PlugDashboard() {
     loadSocialAnalytics();
   }, []);
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1500);
-  };
+
 
   return (
     <TooltipProvider>
@@ -587,9 +584,7 @@ export default function PlugDashboard() {
             <h2 className="text-sm sm:text-base font-semibold">
               Revenue Snapshot
             </h2>
-            <Button variant="outline" size="sm" asChild className="text-xs">
-              <Link href="/dashboard/finance">View Finances</Link>
-            </Button>
+          
           </div>
 
           {isLoading ? (
