@@ -492,9 +492,9 @@ function StoreView({
               <h4 className="font-medium text-sm mb-3 text-blue-800">Example Bio:</h4>
               <div className="space-y-2 text-sm">
                 <p className="bg-white rounded p-3 border">
-                  🎨 Digital Artist & Designer<br/>
+                  🎨 Fashion Designer<br/>
                   📍 Lagos, Nigeria<br/>
-                  🛍️ Shop my artwork: {storeSubdomain}.pluggn.store<br/>
+                  🛍️ Shop my discovery: {storeSubdomain}.pluggn.store<br/>
                   ✨ Custom designs available
                 </p>
               </div>
