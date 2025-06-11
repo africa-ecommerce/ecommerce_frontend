@@ -23,6 +23,16 @@ export async function middleware(request: NextRequest) {
   const { nextUrl } = request;
   const pathname = nextUrl.pathname;
 
+  const hostname = request.headers.get("host") || "";
+
+  // ✅ Subdomain Rewrite Support
+  const isStoreSubdomain =
+    hostname.endsWith(".pluggn.store") && hostname.split(".").length > 2;
+  if (isStoreSubdomain) {
+    // Let Next.js rewrites (from next.config.mjs) handle this request
+    return NextResponse.next();
+  }
+
   // Skip middleware for API routes and public assets
   if (pathname.startsWith("/api") || pathname.includes(".")) {
     // Special handling for OG routes
