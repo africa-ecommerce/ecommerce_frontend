@@ -471,6 +471,45 @@ function StoreView({
         </Card>
       </div>
 
+      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+        <CardHeader>
+          <CardTitle className="text-lg sm:text-xl flex items-center">
+            <Globe className="h-5 w-5 mr-2 text-blue-600" />
+            Boost Your Reach
+          </CardTitle>
+          <CardDescription>
+            Add your store link to your social media bios and watch your sales grow
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Just like professionals add their LinkedIn profiles to their bios, 
+              add your Pluggn store to drive traffic and sales from your social media followers.
+            </p>
+            
+            <div className="bg-white/50 rounded-lg p-4 border border-blue-100">
+              <h4 className="font-medium text-sm mb-3 text-blue-800">Example Bio:</h4>
+              <div className="space-y-2 text-sm">
+                <p className="bg-white rounded p-3 border">
+                  🎨 Digital Artist & Designer<br/>
+                  📍 Lagos, Nigeria<br/>
+                  🛍️ Shop my artwork: {storeSubdomain}.pluggn.store<br/>
+                  ✨ Custom designs available
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap gap-2 text-xs text-blue-600">
+              <span className="bg-blue-100 px-2 py-1 rounded">Instagram</span>
+              <span className="bg-blue-100 px-2 py-1 rounded">Twitter/X</span>
+              <span className="bg-blue-100 px-2 py-1 rounded">Facebook</span>
+              <span className="bg-blue-100 px-2 py-1 rounded">WhatsApp</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Activity and Actions - full width on mobile, columns on desktop */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
         <Card className="lg:col-span-2">
