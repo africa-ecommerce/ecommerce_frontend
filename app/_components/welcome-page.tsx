@@ -160,14 +160,14 @@ export default function Home() {
             {/* <ShoppingBag className="h-6 w-6 text-[#FF7A21]" />
             <span className="text-xl font-bold">Pluggn</span> */}
 
-<Image
-                src="/pluggn_logo.png"
-                alt="Pluggn Logo"
-                width={120}
-                height={30}
-                priority // Add this for above-the-fold logos
-                className="h-auto" // Maintains aspect ratio
-              />
+            <Image
+              src="/pluggn_logo.png"
+              alt="Pluggn Logo"
+              width={120}
+              height={30}
+              priority // Add this for above-the-fold logos
+              className="h-auto" // Maintains aspect ratio
+            />
           </div>
           <button
             onClick={() => setMobileMenuOpen(false)}
@@ -938,10 +938,14 @@ export default function Home() {
         <div className="container px-4 md:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 lg:gap-12">
             <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <ShoppingBag className="h-5 w-5 md:h-6 md:w-6 text-[#FF7A21]" />
-                <span className="text-lg md:text-xl font-bold">Pluggn</span>
-              </div>
+              <Image
+                src="/pluggn_logo.png"
+                alt="Pluggn Logo"
+                width={120}
+                height={30}
+                priority // Add this for above-the-fold logos
+                className="h-auto" // Maintains aspect ratio
+              />
               <p className="text-gray-400 mb-4 max-w-xs text-sm md:text-base">
                 Empowering entrepreneurs across Africa to build successful
                 digital businesses without inventory.
