@@ -86,7 +86,7 @@ export default function Home() {
               <span className="text-xl font-bold">Pluggn</span> */}
 
               <Image
-                src="/pluggn.png"
+                src="/pluggn_logo.png"
                 alt="Pluggn Logo"
                 width={150}
                 height={50}
