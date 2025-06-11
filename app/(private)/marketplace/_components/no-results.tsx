@@ -12,7 +12,7 @@ export const NoResults = ({ onReset }: NoResultsProps) => {
       <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-muted mb-4">
         <Search className="h-8 w-8 text-muted-foreground" />
       </div>
-      <h3 className="text-lg font-medium mb-2">No products found</h3>
+      <h3 className="text-lg font-medium mb-2">No products found or you have added all products within this criteria</h3>
       <p className="text-muted-foreground mb-4">
         Try adjusting your search or filter criteria
       </p>
