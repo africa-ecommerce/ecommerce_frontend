@@ -50,12 +50,13 @@ export function ShareModal({
 
   // Generate share URL with query parameters for product ID, referral (plug ID), and platform
   const generateShareUrl = (platform: string) => {
-    const baseUrl = "https://pluggn.vercel.app/product";
+    const baseUrl = "https://pluggn.store/product";
     return `${baseUrl}?pid=${productId}&ref=${plugId}&platform=${platform}`;
   };
 
   // Default share URL (used for copy link button)
   const shareUrl = generateShareUrl("direct");
+  
 
   // Share handlers
   const handleCopyLink = () => {

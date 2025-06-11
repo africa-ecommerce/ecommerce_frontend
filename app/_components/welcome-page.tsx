@@ -157,8 +157,17 @@ export default function Home() {
       >
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
-            <ShoppingBag className="h-6 w-6 text-[#FF7A21]" />
-            <span className="text-xl font-bold">Pluggn</span>
+            {/* <ShoppingBag className="h-6 w-6 text-[#FF7A21]" />
+            <span className="text-xl font-bold">Pluggn</span> */}
+
+<Image
+                src="/pluggn_logo.png"
+                alt="Pluggn Logo"
+                width={120}
+                height={30}
+                priority // Add this for above-the-fold logos
+                className="h-auto" // Maintains aspect ratio
+              />
           </div>
           <button
             onClick={() => setMobileMenuOpen(false)}
