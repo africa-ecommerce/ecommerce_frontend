@@ -448,7 +448,7 @@ export default function PlugDashboard() {
           </div>
 
           {/* Total */}
-          <div className="flex justify-between items-center pt-2 border-t">
+          <div className="flex justify-between items-center pt-2 text-xs sm:text-sm border-t">
             <span className="font-medium">Total</span>
             <span className="font-bold">₦{totalAmount.toLocaleString()}</span>
           </div>
