@@ -82,8 +82,10 @@ export default function Home() {
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
-              <ShoppingBag className="h-6 w-6 text-[#FF7A21]" />
-              <span className="text-xl font-bold">Pluggn</span>
+              {/* <ShoppingBag className="h-6 w-6 text-[#FF7A21]" />
+              <span className="text-xl font-bold">Pluggn</span> */}
+
+              <Image src="/pluggn.png" alt="Pluggn Logo" />
             </Link>
           </div>
           <nav className="hidden md:flex gap-6">
@@ -213,8 +215,8 @@ export default function Home() {
                   </h1>
                   <p className="max-w-[600px] text-gray-700 text-lg md:text-xl">
                     Build your digital business across Nigeria with zero upfront
-                    costs. Sell on social media, or your own online
-                    store for free.
+                    costs. Sell on social media, or your own online store for
+                    free.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 mt-3">
@@ -609,7 +611,6 @@ export default function Home() {
                     </span>
                   </li>
                 </ul>
-               
               </div>
               <div className="flex items-center justify-center mt-6 lg:mt-0">
                 <div className="relative w-full max-w-[500px] aspect-[4/3] rounded-xl overflow-hidden shadow-xl">
@@ -864,8 +865,8 @@ export default function Home() {
                 <p className="text-gray-700 text-sm md:text-base">
                   Simply sign up for a free account, browse products from our
                   suppliers, select items you want to sell, set your prices, and
-                  start sharing with your audience through social
-                  media, or your free Pluggn store.
+                  start sharing with your audience through social media, or your
+                  free Pluggn store.
                 </p>
               </div>
               <div className="bg-white rounded-xl p-5 md:p-6 shadow-sm">
