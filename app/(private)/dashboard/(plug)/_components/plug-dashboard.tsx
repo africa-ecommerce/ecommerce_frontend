@@ -1,6 +1,3 @@
-
-
-
 "use client";
 
 import type React from "react";
@@ -50,39 +47,84 @@ import {
   truncateText,
 } from "@/lib/utils";
 
-function getTopAndBottomSales(productsArray: any, count = 5) {
-  // Create a copy of the array to avoid modifying the original
-  const productsCopy = [...productsArray];
+// function getTopAndBottomSales(productsArray: any, count = 5) {
+//   // Create a copy of the array to avoid modifying the original
+//   const productsCopy = [...productsArray];
 
-  // Filter out products with zero sales and sort by sales in descending order
-  const productsWithSales = productsCopy
-    .filter((product) => product.sales > 0)
-    .sort((a, b) => b.sales - a.sales);
+//   // Filter out products with zero sales and sort by sales in descending order
+//   const productsWithSales = productsCopy
+//     .filter((product) => product.sold > 0)
+//     .sort((a, b) => b.sold - a.sold);
 
-  // Get top products (limited to count)
-  const topProducts = productsWithSales.slice(0, count);
+//   // Get top products (limited to count)
+//   const topProducts = productsWithSales.slice(0, count);
 
-  // Find the minimum sales value from top products
-  const minTopSales =
-    topProducts.length > 0
-      ? topProducts[topProducts.length - 1].sales
-      : Number.POSITIVE_INFINITY;
+//   // Find the minimum sales value from top products
+//   const minTopSales =
+//     topProducts.length > 0
+//       ? topProducts[topProducts.length - 1].sold
+//       : Number.POSITIVE_INFINITY;
 
-  // Get bottom products: those with sales > 0 but less than the minimum top sales
-  const bottomCandidates = productsCopy
-    .filter((product) => product.sales > 0 && product.sales < minTopSales)
-    .sort((a, b) => a.sales - b.sales);
+//   // Get bottom products: those with sales > 0 but less than the minimum top sales
+//   const bottomCandidates = productsCopy
+//     .filter((product) => product.sold > 0 && product.sold < minTopSales)
+//     .sort((a, b) => a.sold - b.sold);
 
-  // Take only up to 'count' bottom products
-  const bottomProducts = bottomCandidates.slice(0, count);
+//   // Take only up to 'count' bottom products
+//   const bottomProducts = bottomCandidates.slice(0, count);
+
+//   return {
+//     topProducts,
+//     bottomProducts,
+//   };
+// }
+
+// Error State
+
+function getProductPerformanceByAverage(productsArray: any) {
+  const productsWithSales = productsArray.filter((product: any) => product.sold > 0);
+
+  if (productsWithSales.length === 0) {
+    return {
+      topProducts: [],
+      bottomProducts: [],
+      averageProducts: [],
+      averageSales: 0,
+    };
+  }
+
+  const totalSales = productsWithSales.reduce(
+    (sum: any, product: any) => sum + product.sold,
+    0
+  );
+  const averageSales = totalSales / productsWithSales.length;
+  const threshold = averageSales * 0.5; // 50% below average = low performing
+
+  const topProducts = productsWithSales
+    .filter((product: any) => product.sold >= averageSales)
+    .sort((a: any, b: any) => b.sold - a.sold)
+    .slice(0, 5);
+
+  const bottomProducts = productsWithSales
+    .filter((product: any) => product.sold < threshold)
+    .sort((a: any, b: any) => a.sold - b.sold)
+    .slice(0, 5);
+
+  const averageProducts = productsWithSales
+    .filter(
+      (product: any) => product.sold >= threshold && product.sold < averageSales
+    )
+    .sort((a: any, b: any) => b.sold - a.sold)
+    .slice(0, 5);
 
   return {
     topProducts,
     bottomProducts,
+    averageProducts,
+    averageSales: Math.round(averageSales),
   };
 }
 
-// Error State
 const ErrorState = ({ onRetry }: { onRetry?: () => void }) => (
   <Card className="border rounded-lg">
     <CardContent className="p-4 text-center">
@@ -313,7 +355,8 @@ export default function PlugDashboard() {
   // Process orders data - following the exact pattern from products component
   const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];
 
-  const { topProducts, bottomProducts } = getTopAndBottomSales(products);
+  const { topProducts, bottomProducts, averageProducts, averageSales } =
+    getProductPerformanceByAverage(products);
 
   // OrderCard component - following the exact pattern from products component
   const OrderCard = ({ order }: { order: any }) => {
@@ -432,9 +475,7 @@ export default function PlugDashboard() {
                     )}
                 </div>
                 <div className="text-sm font-medium">
-                  ₦ {(
-                    (order.plugPrice || 0) * item.quantity
-                  ).toLocaleString()}
+                  ₦ {((order.plugPrice || 0) * item.quantity).toLocaleString()}
                 </div>
               </div>
             ))}
@@ -559,8 +600,6 @@ export default function PlugDashboard() {
     loadSocialAnalytics();
   }, []);
 
-
-
   return (
     <TooltipProvider>
       <div className="flex flex-col min-h-screen bg-background p-3 sm:p-4 gap-3 sm:gap-4">
@@ -586,7 +625,6 @@ export default function PlugDashboard() {
             <h2 className="text-sm sm:text-base font-semibold">
               Revenue Snapshot
             </h2>
-          
           </div>
 
           {isLoading ? (
@@ -782,11 +820,19 @@ export default function PlugDashboard() {
         </section>
 
         {/* Product Performance */}
+
         <section className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h2 className="text-sm sm:text-base font-semibold">
-              Product Performance
-            </h2>
+            <div>
+              <h2 className="text-sm sm:text-base font-semibold">
+                Product Performance
+              </h2>
+              {!isLoading && !errorData && averageSales > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Average sales: {averageSales} units per product
+                </p>
+              )}
+            </div>
             <Button variant="outline" size="sm" asChild className="text-xs">
               <Link href="/dashboard/product">View All Products</Link>
             </Button>
@@ -801,30 +847,34 @@ export default function PlugDashboard() {
               }}
             />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-              {/* Top Selling Products with Scroll Area */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+              {/* Top Performing Products */}
               <Card>
                 <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
-                  <CardTitle className="text-sm sm:text-base font-medium">
-                    Top Perfoming Products
+                  <CardTitle className="text-sm sm:text-base font-medium flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    High Performers
                   </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {averageSales}+ units (above average)
+                  </p>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
                   <ScrollArea className="max-h-[250px]">
                     <div className="space-y-3 sm:space-y-4 pr-3">
                       {topProducts.length === 0 ? (
                         <EmptyState
-                          message="No top performing products"
+                          message="No high performing products"
                           icon={ShoppingBag}
                         />
                       ) : (
-                        topProducts.map((product) => (
+                        topProducts.map((product: any) => (
                           <div
                             key={product.id}
                             className="flex items-center gap-2 sm:gap-3"
                           >
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
-                              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-green-50 flex items-center justify-center flex-shrink-0">
+                              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex justify-between gap-1">
@@ -836,7 +886,13 @@ export default function PlugDashboard() {
                                 </p>
                               </div>
                               <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
-                                <p>{product.sales || 0} units sold</p>
+                                <p>{product.sold || 0} units sold</p>
+                                <p className="text-green-600 font-medium">
+                                  {Math.round(
+                                    (product.sold / averageSales) * 100
+                                  )}
+                                  % of avg
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -847,12 +903,72 @@ export default function PlugDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Recommended Products with Scroll Area */}
+              {/* Average Performing Products */}
               <Card>
                 <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
-                  <CardTitle className="text-sm sm:text-base font-medium">
-                    Low Performing Products
+                  <CardTitle className="text-sm sm:text-base font-medium flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    Average Performers
                   </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {Math.round(averageSales * 0.5)}-{averageSales - 1} units
+                  </p>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <ScrollArea className="max-h-[250px]">
+                    <div className="space-y-3 sm:space-y-4 pr-3">
+                      {averageProducts.length === 0 ? (
+                        <EmptyState
+                          message="No average performing products"
+                          icon={ShoppingBag}
+                        />
+                      ) : (
+                        averageProducts.map((product: any) => (
+                          <div
+                            key={product.id}
+                            className="flex items-center gap-2 sm:gap-3"
+                          >
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-blue-50 flex items-center justify-center flex-shrink-0">
+                              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between gap-1">
+                                <p className="text-xs sm:text-sm font-medium capitalize">
+                                  {truncateText(product.name, 30)}
+                                </p>
+                                <p className="text-xs sm:text-sm font-medium whitespace-nowrap">
+                                  {formatPrice(product.price)}
+                                </p>
+                              </div>
+                              <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
+                                <p>{product.sold || 0} units sold</p>
+                                <p className="text-blue-600 font-medium">
+                                  {Math.round(
+                                    (product.sold / averageSales) * 100
+                                  )}
+                                  % of avg
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Low Performing Products */}
+              <Card>
+                <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+                  <CardTitle className="text-sm sm:text-base font-medium flex items-center gap-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    Low Performers
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    Under {Math.round(averageSales * 0.5)} units (needs
+                    attention)
+                  </p>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
                   <ScrollArea className="max-h-[250px]">
@@ -863,13 +979,13 @@ export default function PlugDashboard() {
                           icon={ShoppingBag}
                         />
                       ) : (
-                        bottomProducts.map((product) => (
+                        bottomProducts.map((product: any) => (
                           <div
                             key={product.id}
                             className="flex items-center gap-2 sm:gap-3"
                           >
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
-                              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-red-50 flex items-center justify-center flex-shrink-0">
+                              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex justify-between gap-1">
@@ -882,8 +998,13 @@ export default function PlugDashboard() {
                               </div>
                               <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
                                 <p>
-                                  {formatQuantity(product.sales) || 0} units
-                                  sold
+                                  {formatQuantity(product.sold) || 0} units sold
+                                </p>
+                                <p className="text-red-600 font-medium">
+                                  {Math.round(
+                                    (product.sold / averageSales) * 100
+                                  )}
+                                  % of avg
                                 </p>
                               </div>
                             </div>
@@ -904,9 +1025,6 @@ export default function PlugDashboard() {
             <h2 className="text-sm sm:text-base font-semibold">
               Social Analytics
             </h2>
-            <Button variant="outline" size="sm" asChild className="text-xs">
-              <Link href="#">Detailed Reports</Link>
-            </Button>
           </div>
 
           {socialLoading ? (
