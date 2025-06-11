@@ -418,8 +418,8 @@ export default function Products() {
     // Calculate total amount from order items
     const totalAmount =
       order.orderItems?.reduce((total: number, item: any) => {
-        return total + order.plugPrice || 0 * item.quantity;
-      }, 0) || 0;
+        total + (order.plugPrice || 0) * item.quantity;
+    }, 0) || 0;
 
     const formatDate = (dateString: string) => {
       const date = new Date(dateString);
@@ -519,7 +519,9 @@ export default function Products() {
                     )}
                 </div>
                 <div className="text-sm font-medium">
-                  ₦{(order.plugPrice || 0 * item.quantity).toLocaleString()}
+                  ₦ {(
+                    (order.plugPrice || 0) * item.quantity
+                  ).toLocaleString()}
                 </div>
               </div>
             ))}
