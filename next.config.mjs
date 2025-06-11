@@ -92,28 +92,7 @@ const nextConfig = {
     console.log(`Using BACKEND_URL: ${backendUrl}`);
     
     return [
-      // ✅ Handle specific subdomain routes for *.pluggn.store - pages
-      {
-        source: "/:page*", // captures `/blogs`, `/about`, etc.
-        has: [
-          {
-            type: "host",
-            value: "*.pluggn.store",
-          },
-        ],
-        destination: `${backendUrl}/template/primary/:page*.html`, // e.g., /blogs.html
-      },
-      // ✅ Default to index.html for root (i.e., /) on *.pluggn.store
-      {
-        source: "/",
-        has: [
-          {
-            type: "host",
-            value: "*.pluggn.store",
-          },
-        ],
-        destination: `${backendUrl}/template/primary/index.html`,
-      },
+     
       // ✅ Handle slug-based link redirects (alphanumeric only)
       { 
         source: '/:slug([A-Za-z0-9]+)', 

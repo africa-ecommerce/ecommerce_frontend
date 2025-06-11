@@ -1,5 +1,6 @@
-
 import { NextResponse, NextRequest } from "next/server";
+import { jwtVerify } from "jose";
+
 import {
   authRoutes,
   publicRoutes,
@@ -8,29 +9,31 @@ import {
   DEFAULT_LOGIN_REDIRECT,
   pathnameStartsWith,
 } from "@/routes";
-import { jwtVerify } from "jose";
 
-// This should match the secret from your backend
+// Setup constants
 const JWT_SECRET = process.env.JWT_SECRET || "defaultsecret";
-// Convert to proper format for jose
 const JWT_SECRET_KEY = new TextEncoder().encode(JWT_SECRET);
-
-// Token expiration times (matching backend)
-const ACCESS_TOKEN_EXPIRY = 15 * 60 * 60 * 1000; // 15 mins (in milliseconds)
-const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000; // 7 days (in milliseconds)
+const ACCESS_TOKEN_EXPIRY = 15 * 60 * 1000;
+const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000;
 
 export async function middleware(request: NextRequest) {
   const { nextUrl } = request;
   const pathname = nextUrl.pathname;
-
   const hostname = request.headers.get("host") || "";
 
-  // ✅ Subdomain Rewrite Support
-  const isStoreSubdomain =
-    hostname.endsWith(".pluggn.store") && hostname.split(".").length > 2;
-  if (isStoreSubdomain) {
-    // Let Next.js rewrites (from next.config.mjs) handle this request
-    return NextResponse.next();
+
+  if (hostname.endsWith(".pluggn.store")) {
+    const subdomain = hostname.replace(".pluggn.store", "");
+    if (pathname === "/") {
+      return NextResponse.rewrite(
+        new URL(`https://ecommerce-backend-peach-sigma.vercel.app/template/primary/index.html`)
+      );
+    }
+
+    const cleaned = pathname.replace(/^\/+/, "");
+    return NextResponse.rewrite(
+      new URL(`https://ecommerce-backend-peach-sigma.vercel.app/template/primary/${cleaned}.html`)
+    );
   }
 
   // Skip middleware for API routes and public assets
