@@ -85,7 +85,14 @@ export default function Home() {
               {/* <ShoppingBag className="h-6 w-6 text-[#FF7A21]" />
               <span className="text-xl font-bold">Pluggn</span> */}
 
-              <Image src="/pluggn.png" alt="Pluggn Logo" />
+              <Image
+                src="/pluggn.png"
+                alt="Pluggn Logo"
+                width={150}
+                height={50}
+                priority // Add this for above-the-fold logos
+                className="h-auto" // Maintains aspect ratio
+              />
             </Link>
           </div>
           <nav className="hidden md:flex gap-6">
