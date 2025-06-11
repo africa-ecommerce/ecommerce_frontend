@@ -923,7 +923,7 @@ const handleCheckout = () => {
                         {pricing.items.map((item, index) => (
                           <div key={index} className="space-y-2">
                             <div className="flex justify-between">
-                              <span className="text-sm font-medium">
+                              <span className="text-sm font-medium capitalize">
                                 {item.name}
                               </span>
                               <span className="text-sm">

@@ -47,40 +47,6 @@ import {
   truncateText,
 } from "@/lib/utils";
 
-// function getTopAndBottomSales(productsArray: any, count = 5) {
-//   // Create a copy of the array to avoid modifying the original
-//   const productsCopy = [...productsArray];
-
-//   // Filter out products with zero sales and sort by sales in descending order
-//   const productsWithSales = productsCopy
-//     .filter((product) => product.sold > 0)
-//     .sort((a, b) => b.sold - a.sold);
-
-//   // Get top products (limited to count)
-//   const topProducts = productsWithSales.slice(0, count);
-
-//   // Find the minimum sales value from top products
-//   const minTopSales =
-//     topProducts.length > 0
-//       ? topProducts[topProducts.length - 1].sold
-//       : Number.POSITIVE_INFINITY;
-
-//   // Get bottom products: those with sales > 0 but less than the minimum top sales
-//   const bottomCandidates = productsCopy
-//     .filter((product) => product.sold > 0 && product.sold < minTopSales)
-//     .sort((a, b) => a.sold - b.sold);
-
-//   // Take only up to 'count' bottom products
-//   const bottomProducts = bottomCandidates.slice(0, count);
-
-//   return {
-//     topProducts,
-//     bottomProducts,
-//   };
-// }
-
-// Error State
-
 function getProductPerformanceByAverage(productsArray: any) {
   const productsWithSales = productsArray.filter((product: any) => product.sold > 0);
 
@@ -475,7 +441,7 @@ export default function PlugDashboard() {
                     )}
                 </div>
                 <div className="text-sm font-medium">
-                  ₦ {((order.plugPrice || 0) * item.quantity).toLocaleString()}
+                  ₦{((order.plugPrice || 0) * item.quantity).toLocaleString()}
                 </div>
               </div>
             ))}

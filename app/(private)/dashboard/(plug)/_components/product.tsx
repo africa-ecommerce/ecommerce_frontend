@@ -519,7 +519,7 @@ export default function Products() {
                     )}
                 </div>
                 <div className="text-sm font-medium">
-                  ₦ {(
+                  ₦{(
                     (order.plugPrice || 0) * item.quantity
                   ).toLocaleString()}
                 </div>
