@@ -1,9 +1,3 @@
-
-
-
-
-
-
 "use client"
 
 import { useState } from "react"
@@ -64,7 +58,8 @@ export function WriteReviewModal({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [isDeleting, setIsDeleting] = useState<boolean>(false)
 
- 
+  // Check if submit should be disabled
+  const isSubmitDisabled = isSubmitting || reviewText.trim() === ""
 
   const handleTemplateSelect = (templateId: string) => {
     const template = reviewTemplates.find((t) => t.id === templateId)
@@ -77,6 +72,11 @@ export function WriteReviewModal({
   const handleSubmit = async () => {
     if (rating === 0) {
       errorToast("Please provide a rating before submitting.")
+      return
+    }
+
+    if (reviewText.trim() === "") {
+      errorToast("Please write a review before submitting.")
       return
     }
 
@@ -274,12 +274,15 @@ export function WriteReviewModal({
             <Button
               variant="destructive"
               onClick={handleDelete}
-              disabled={isDeleting}
+              disabled={isDeleting || isSubmitting}
             >
               {isDeleting ? "Deleting..." : "Delete Review"}
             </Button>
           ) : (
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
+            <Button 
+              onClick={handleSubmit} 
+              disabled={isSubmitDisabled}
+            >
               {isSubmitting ? "Submitting..." : "Submit Review"}
             </Button>
           )}
