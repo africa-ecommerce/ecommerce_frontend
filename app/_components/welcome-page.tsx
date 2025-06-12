@@ -88,8 +88,8 @@ export default function Home() {
               <Image
                 src="/pluggn_logo.png"
                 alt="Pluggn Logo"
-                width={150}
-                height={50}
+                width={140}
+                height={35}
                 priority // Add this for above-the-fold logos
                 className="h-auto" // Maintains aspect ratio
               />
