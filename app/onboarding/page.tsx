@@ -162,7 +162,7 @@ const Page = () => {
       };
 
 
-        formData.append("professionalPhoto", profileData.professionalPhoto);
+        // formData.append("professionalPhoto", profileData.professionalPhoto);
 
 
       // Send optimized data to backend
