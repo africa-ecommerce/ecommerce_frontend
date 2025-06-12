@@ -54,7 +54,7 @@ export async function middleware(request: NextRequest) {
       const data = await resp.json();
 
       if (!data.exists) {
-        return NextResponse.rewrite(
+        return NextResponse.redirect(
           new URL(`https://pluggn.vercel.app/error/?error=SUBDOMAIN_ERROR`)
         );
       }
