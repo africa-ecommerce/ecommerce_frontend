@@ -372,33 +372,7 @@ export default function PreviewFrame({
     }
   }, [isLoaded, viewMode, autoScale]);
 
-  // Process HTML to prevent external resource loading
-  // const processHtmlContent = (htmlContent: string) => {
-  //   // Create a DOM parser to work with the HTML
-  //   const parser = new DOMParser();
-  //   const doc = parser.parseFromString(htmlContent, "text/html");
-
-  //   // Find and remove all link tags that try to fetch external CSS files
-  //   const externalStylesheets = doc.querySelectorAll('link[rel="stylesheet"]');
-  //   externalStylesheets.forEach((link) => {
-  //     // We could fetch and inline these, but for now we'll just remove them
-  //     link.parentNode?.removeChild(link);
-  //   });
-
-  //   // Find and inline all script sources
-  //   const scripts = doc.querySelectorAll("script[src]");
-  //   scripts.forEach((script) => {
-  //     // Replace src attribute with a comment so we know what was referenced
-  //     const src = script.getAttribute("src");
-  //     script.removeAttribute("src");
-  //     script.textContent = `// External script reference: ${src} was removed\n${
-  //       script.textContent || ""
-  //     }`;
-  //   });
-
-  //   // Get the processed HTML string
-  //   return doc.documentElement.outerHTML;
-  // };
+  
 
 
   const processHtmlContent = (htmlContent: string) => {

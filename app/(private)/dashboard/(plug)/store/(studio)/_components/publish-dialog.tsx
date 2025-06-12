@@ -125,6 +125,7 @@ export default function PublishDialog({
 
   // SWR subdomain check
   const { data, error, isValidating } = useSWR(
+    isOpen &&
     debouncedSubdomain &&
       isValidFormat &&
       !isOriginalSubdomain(debouncedSubdomain)
