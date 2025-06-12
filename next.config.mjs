@@ -11,21 +11,21 @@ const nextConfig = {
     // Use redirects() for permanent redirects with status codes
     return [
       {
-        source: "/",
+        source: "/:path*",
         has: [{
           type: "host",
           value: "pluggn.store",
         }],
-        destination: "https://pluggn.vercel.app",
+        destination: "https://pluggn.vercel.app/:path*",
         permanent: true,
       },
       {
-        source: "/",
+        source: "/:path*",
         has: [{
           type: "host",
           value: "www.pluggn.store",
         }],
-        destination: "https://pluggn.vercel.app",
+        destination: "https://pluggn.vercel.app/:path*",
         permanent: true,
       },
     ];
