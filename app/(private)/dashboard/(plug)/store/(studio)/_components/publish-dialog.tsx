@@ -369,7 +369,7 @@ export default function PublishDialog({
                   <p className="text-slate-500 text-sm sm:text-base px-2">
                     We're {isEditing ? "updating" : "preparing"}{" "}
                     <span className="font-medium break-all">
-                      www.{subdomain}.pluggn.store
+                      https://{subdomain}.pluggn.store
                     </span>{" "}
                     {isEditing
                       ? "with your latest changes."
@@ -624,7 +624,7 @@ export default function PublishDialog({
                     <div className="relative mt-1">
                       <div className="flex min-w-0">
                         <span className="inline-flex items-center px-2 sm:px-3 rounded-l-md border border-r-0 border-slate-300 bg-slate-50 text-slate-500 text-xs sm:text-sm flex-shrink-0">
-                          www.
+                          https://
                         </span>
                         <div className="relative flex-1 min-w-0">
                           <input
