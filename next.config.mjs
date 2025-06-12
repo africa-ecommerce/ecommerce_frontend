@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 let userConfig = undefined
 try {
   userConfig = await import('./v0-user-next.config')
@@ -16,31 +7,35 @@ try {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    // Use redirects() for permanent redirects with status codes
+    return [
+      {
+        source: "/",
+        has: [{
+          type: "host",
+          value: "pluggn.store",
+        }],
+        destination: "https://pluggn.vercel.app",
+        permanent: true,
+      },
+      {
+        source: "/",
+        has: [{
+          type: "host",
+          value: "www.pluggn.store",
+        }],
+        destination: "https://pluggn.vercel.app",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ecommerce-backend-peach-sigma.vercel.app';
     console.log(`Using BACKEND_URL: ${backendUrl}`);
     
     return [
-     
       // ✅ Handle slug-based link redirects (alphanumeric only)
-       {
-        source: "/",
-        has: [{
-          type: "host",
-          value: "pluggn.store",
-        }, ],
-        destination: "https://pluggn.vercel.app",
-        permanent: true,
-       },
-       {
-        source: "/",
-        has: [{
-          type: "host",
-          value: "www.pluggn.store",
-        }, ],
-        destination: "https://pluggn.vercel.app",
-        permanent: true,
-       },
       { 
         source: '/:slug([A-Za-z0-9]+)', 
         destination: `${backendUrl}/links/:slug` 
