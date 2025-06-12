@@ -54,8 +54,11 @@ export async function middleware(request: NextRequest) {
       const data = await resp.json();
 
       if (!data.exists) {
-        return NextResponse.rewrite(
-          new URL("https://ecommerce-backend-peach-sigma.vercel.app/template/primary/subdomain-error.html")
+        return NextResponse.redirect(
+          new URL(
+            `/error/?error=SUBDOMAIN_ERROR`,
+            nextUrl.origin
+          )
         );
       }
     } catch (e) {
