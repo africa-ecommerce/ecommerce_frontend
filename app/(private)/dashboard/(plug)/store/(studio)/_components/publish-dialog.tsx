@@ -83,7 +83,7 @@ export default function PublishDialog({
   };
 
   const getDisplayUrl = (url: string) => {
-    return url || `https://www.${subdomain}.pluggn.store`;
+    return url || `https://${subdomain}.pluggn.store`;
   };
 
   const validateSubdomainFormat = (name: string) => {
