@@ -65,7 +65,6 @@ interface SupplierInfoProps {
   update: (p: FormData) => void;
   initialData?: {
     businessType?: BusinessType;
-    // pickupLocation?: string;
     businessName?: string;
     avatar?: File;
   };
