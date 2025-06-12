@@ -22,8 +22,50 @@ export async function middleware(request: NextRequest) {
   const hostname = request.headers.get("host") || "";
 
 
-  if (hostname.endsWith(".pluggn.store") && hostname !== "www.pluggn.store" && hostname !== "pluggn.store") {
+  // if (hostname.endsWith(".pluggn.store") && hostname !== "www.pluggn.store" && hostname !== "pluggn.store") {
+  //   const subdomain = hostname.replace(".pluggn.store", "");
+  //   if (pathname === "/") {
+  //     return NextResponse.rewrite(
+  //       new URL(`https://ecommerce-backend-peach-sigma.vercel.app/template/primary/index.html`)
+  //     );
+  //   }
+
+  //   const page = pathname.replace(/^\/+/, "");
+  //   return NextResponse.rewrite(
+  //     new URL(
+  //       `https://ecommerce-backend-peach-sigma.vercel.app/template/primary/${page}.html`
+  //     )
+  //   );
+  // }
+
+
+  if (
+    hostname.endsWith(".pluggn.store") &&
+    hostname !== "www.pluggn.store" &&
+    hostname !== "pluggn.store"
+  ) {
     const subdomain = hostname.replace(".pluggn.store", "");
+
+    // ✅ Check if subdomain exists using internal API
+    const checkUrl = `https://ecommerce-backend-peach-sigma.vercel.app/public/store-config/subdomain?subdomain=${subdomain}`;
+
+    try {
+      const resp = await fetch(checkUrl);
+      const data = await resp.json();
+
+      if (!data.exists) {
+        return NextResponse.rewrite(
+          new URL("https://ecommerce-backend-peach-sigma.vercel.app/template/primary/subdomain-error.html")
+        );
+      }
+    } catch (e) {
+      console.error("Failed to check subdomain", e);
+      return NextResponse.rewrite(
+        new URL("https://ecommerce-backend-peach-sigma.vercel.app/template/primary/error.html")
+      );
+    }
+
+    // If the subdomain is valid, render the static page
     if (pathname === "/") {
       return NextResponse.rewrite(
         new URL(`https://ecommerce-backend-peach-sigma.vercel.app/template/primary/index.html`)
@@ -32,11 +74,11 @@ export async function middleware(request: NextRequest) {
 
     const page = pathname.replace(/^\/+/, "");
     return NextResponse.rewrite(
-      new URL(
-        `https://ecommerce-backend-peach-sigma.vercel.app/template/primary/${page}.html`
-      )
+      new URL(`https://ecommerce-backend-peach-sigma.vercel.app/template/primary/${page}.html`)
     );
   }
+
+  
 
   // Skip middleware for API routes and public assets
   if (pathname.startsWith("/api") || pathname.includes(".")) {
