@@ -22,22 +22,6 @@ export async function middleware(request: NextRequest) {
   const hostname = request.headers.get("host") || "";
 
 
-  // if (hostname.endsWith(".pluggn.store") && hostname !== "www.pluggn.store" && hostname !== "pluggn.store") {
-  //   const subdomain = hostname.replace(".pluggn.store", "");
-  //   if (pathname === "/") {
-  //     return NextResponse.rewrite(
-  //       new URL(`https://ecommerce-backend-peach-sigma.vercel.app/template/primary/index.html`)
-  //     );
-  //   }
-
-  //   const page = pathname.replace(/^\/+/, "");
-  //   return NextResponse.rewrite(
-  //     new URL(
-  //       `https://ecommerce-backend-peach-sigma.vercel.app/template/primary/${page}.html`
-  //     )
-  //   );
-  // }
-
 
   if (
     hostname.endsWith(".pluggn.store") &&
