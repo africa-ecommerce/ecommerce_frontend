@@ -161,8 +161,14 @@ const Page = () => {
         },
       };
 
+
+        formData.append("professionalPhoto", profileData.professionalPhoto);
+
+
       // Send optimized data to backend
       formData.append("userData", JSON.stringify(processedData));
+
+      console.log("formDATA", formData)
       try {
         const response = await fetch("/api/onboarding", {
           method: "POST",
