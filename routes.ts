@@ -1,7 +1,7 @@
 
 
 /**@type {string[]}*/
-export const publicRoutes = ["/", "/product", "/checkout", "/order-error", "/thank-you"];
+export const publicRoutes = ["/", "/product", "/checkout", "/order-error", "/thank-you", "/subdomain-error", "/help"];
 
 /**@type {string[]}*/
 export const authRoutes = [
