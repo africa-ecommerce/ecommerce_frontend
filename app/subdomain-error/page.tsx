@@ -145,7 +145,7 @@ export default function SubdomainErrorPage() {
       <main className="flex-1 flex flex-col items-center justify-center relative z-10 px-3 py-4 sm:px-4 sm:py-6 lg:py-12">
         <div className="w-full max-w-4xl mx-auto">
           {/* Illustration container with optimal mobile sizing */}
-          <div className="w-full max-w-xs mx-auto mb-4 sm:max-w-sm sm:mb-6 md:max-w-md md:mb-8 lg:max-w-2xl lg:mb-10">
+          <div className="w-full max-w-xs mx-auto mb-4 sm:max-w-sm sm:mb-6 md:max-w-md lg:max-w-2xl">
             <div className="relative w-full aspect-square">
               <Image
                 src="/World-rafiki.svg"
@@ -179,9 +179,7 @@ export default function SubdomainErrorPage() {
                 The subdomain you're trying to access either doesn't exist, has
                 been removed, or is temporarily unavailable.
               </p>
-              <p className="text-xs sm:text-sm md:text-base text-gray-500 px-1 sm:px-2">
-                Don't worry though, we're here to help you get back on track!
-              </p>
+             
             </div>
 
             {/* Action buttons with improved mobile layout */}
