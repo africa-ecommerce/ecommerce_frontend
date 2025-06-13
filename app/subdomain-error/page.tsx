@@ -152,14 +152,14 @@ export default function SubdomainErrorPage() {
                 alt="Subdomain Not Found Illustration"
                 fill
                 className="object-contain"
-                sizes="(max-width: 640px) 300px, (max-width: 768px) 384px, (max-width: 1024px) 448px, 512px"
+                sizes="(max-width: 640px) 280px, (max-width: 768px) 360px, (max-width: 1024px) 420px, 480px"
                 priority
               />
             </div>
           </div>
 
           {/* Content section */}
-          <div className="text-center space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-6 px-3 sm:px-2">
+          <div className="text-center space-y-2 sm:space-y-3  px-3 sm:px-2">
             {/* Error code badge */}
             <div className="inline-flex items-center px-2.5 py-1 sm:px-3 rounded-full bg-purple-100 text-purple-700 text-xs sm:text-sm font-medium mb-1 sm:mb-2">
               404 Error
