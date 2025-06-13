@@ -21,7 +21,7 @@ export default function SubdomainErrorPage() {
           {/* Illustration container with better responsive sizing and safe margins */}
           <div className="w-full max-w-2xl lg:max-w-3xl mx-auto mb-6 sm:mb-8 md:mb-10 px-4 sm:px-0">
            <Image
-           src="/World-rafki.svg"
+           src="/World-rafiki.svg"
             alt="Subdomain Not Found Illustration"
            />
           </div>
