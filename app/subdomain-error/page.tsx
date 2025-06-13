@@ -179,11 +179,11 @@ export default function SubdomainErrorPage() {
         <div className="absolute top-1/2 left-1/4 w-12 h-12 sm:w-16 sm:h-16 lg:w-24 lg:h-24 bg-pink-200/25 rounded-full blur-lg"></div>
       </div>
 
-      <main className="flex-1 flex flex-col items-center justify-center relative z-10 px-3 py-4 sm:px-4 sm:py-6 lg:py-12 max-h-[110vh] overflow-y-auto">
+      <main className="flex-1 flex flex-col items-center justify-center relative z-10 px-3 py-4 sm:px-4 sm:py-6 lg:py-12 max-h-[110vh] ">
         <div className="w-full max-w-4xl mx-auto">
           {/* Illustration container with controlled sizing for large screens */}
           <div className="w-full max-w-xs mx-auto mb-4 sm:max-w-sm sm:mb-6 md:max-w-md lg:max-w-lg xl:max-w-xl">
-            <div className="relative w-full aspect-square max-h-48 sm:max-h-64 md:max-h-72 lg:max-h-80 xl:max-h-96">
+            <div className="relative w-full aspect-square max-h-64 sm:max-h-80 md:max-h-96 lg:max-h-112 xl:max-h-120">
               <Image
                 src="/World-rafiki.svg"
                 alt="Subdomain Not Found Illustration"
