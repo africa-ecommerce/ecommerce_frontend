@@ -54,48 +54,7 @@ export default function SubdomainErrorPage() {
               </p>
             </div>
 
-            {/* Action buttons with improved mobile layout */}
-            {/* <div className="flex flex-col gap-3 justify-center items-center mt-4 sm:mt-6 md:mt-8 lg:mt-10 px-3 sm:px-2 sm:flex-row sm:gap-4">
-              <Link
-                href="https://pluggn.vercel.app"
-                className="w-full max-w-xs sm:w-auto sm:min-w-[180px] inline-flex items-center justify-center px-4 py-2.5 sm:px-5 sm:py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm sm:text-base font-semibold rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:transform-none"
-              >
-                <svg
-                  className="w-4 h-4 mr-2 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                  />
-                </svg>
-                Go to Homepage
-              </Link>
-
-              <Link
-                href="https://pluggn.vercel.app/help"
-                className="w-full max-w-xs sm:w-auto sm:min-w-[180px] inline-flex items-center justify-center px-4 py-2.5 sm:px-5 sm:py-3 bg-white text-purple-600 text-sm sm:text-base font-semibold rounded-lg border border-purple-200 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 shadow hover:shadow-md active:bg-purple-50"
-              >
-                <svg
-                  className="w-4 h-4 mr-2 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                Contact Support
-              </Link>
-            </div> */}
+           
 
             {/* Helpful suggestions with mobile-first design */}
             <div className="mt-6 sm:mt-8 md:mt-10 lg:mt-12 p-3 sm:p-4 md:p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-white/20 shadow-sm max-w-xs mx-auto sm:max-w-sm md:max-w-lg">
