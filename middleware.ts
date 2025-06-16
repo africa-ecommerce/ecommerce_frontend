@@ -20,8 +20,7 @@ export async function middleware(request: NextRequest) {
   const { nextUrl } = request;
   const pathname = nextUrl.pathname;
   const hostname = request.headers.get("host") || "";
-
-
+  const isPublicRoute = publicRoutes.some((pattern) => pattern.test(pathname));
 
   if (
     hostname.endsWith(".pluggn.store") &&
@@ -31,7 +30,7 @@ export async function middleware(request: NextRequest) {
     const subdomain = hostname.replace(".pluggn.store", "");
 
     // ✅ Check if subdomain exists using internal API
-    const checkUrl = `https://ecommerce-backend-peach-sigma.vercel.app/public/store-config/subdomain?subdomain=${subdomain}`;
+    const checkUrl = `${process.env.BACKEND_URL}/public/store/verifySubdomain?subdomain=${subdomain}`;
 
     try {
       const resp = await fetch(checkUrl);
@@ -44,25 +43,23 @@ export async function middleware(request: NextRequest) {
       }
     } catch (e) {
       console.error("Failed to check subdomain", e);
-      return NextResponse.rewrite(
-        new URL("https://ecommerce-backend-peach-sigma.vercel.app/template/primary/error.html")
+      return NextResponse.redirect(
+        new URL(`https://pluggn.vercel.app/subdomain-error`)
       );
     }
 
     // If the subdomain is valid, render the static page
     if (pathname === "/") {
       return NextResponse.rewrite(
-        new URL(`https://ecommerce-backend-peach-sigma.vercel.app/template/primary/index.html`)
+        new URL(`${process.env.BACKEND_URL}/template/primary/index.html`)
       );
     }
 
     const page = pathname.replace(/^\/+/, "");
     return NextResponse.rewrite(
-      new URL(`https://ecommerce-backend-peach-sigma.vercel.app/template/primary/${page}.html`)
+      new URL(`${process.env.BACKEND_URL}/template/primary/${page}.html`)
     );
   }
-
-  
 
   // Skip middleware for API routes and public assets
   if (pathname.startsWith("/api") || pathname.includes(".")) {
@@ -95,7 +92,7 @@ export async function middleware(request: NextRequest) {
 
   // Handle public routes or product detail pages
   if (
-    publicRoutes.includes(pathname) ||
+    isPublicRoute ||
     (pathname.startsWith("/products/") && pathname.split("/").length === 3)
   ) {
     return NextResponse.next();
@@ -198,7 +195,7 @@ export async function middleware(request: NextRequest) {
         if (
           !isOnboarded &&
           !isOnboardingRoute &&
-          !publicRoutes.includes(pathname) &&
+          !isPublicRoute &&
           !(
             pathname.startsWith("/products/") &&
             pathname.split("/").length === 3
@@ -351,7 +348,7 @@ export async function middleware(request: NextRequest) {
               if (
                 !isOnboarded &&
                 !isOnboardingRoute &&
-                !publicRoutes.includes(pathname) &&
+                !isPublicRoute &&
                 !(
                   pathname.startsWith("/products/") &&
                   pathname.split("/").length === 3

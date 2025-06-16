@@ -1,3 +1,4 @@
+
 let userConfig = undefined
 try {
   userConfig = await import('./v0-user-next.config')
@@ -35,10 +36,16 @@ const nextConfig = {
     console.log(`Using BACKEND_URL: ${backendUrl}`);
     
     return [
-      // ✅ Handle slug-based link redirects (alphanumeric only)
-      { 
-        source: '/:slug([A-Za-z0-9]+)', 
-        destination: `${backendUrl}/links/:slug` 
+      // ✅ Handle share link redirects
+      {
+        source: "/:slug([A-Za-z0-9]{7})",
+        has: [
+          {
+            type: "query",
+            key: "m",
+          },
+        ],
+        destination: `${backendUrl}/links/:slug?m=:m`,
       },
       // Handle routes that don't start with /api/og
       {
@@ -98,3 +105,13 @@ function mergeConfig(nextConfig, userConfig) {
 }
 
 export default nextConfig
+
+
+
+
+
+
+
+
+
+

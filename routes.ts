@@ -1,8 +1,17 @@
 
 
 /**@type {string[]}*/
-export const publicRoutes = ["/", "/product", "/checkout", "/order-error", "/thank-you", "/subdomain-error", "/help"];
-
+//USE REGEX PATTERN INSTEAD OF STATIC ARRAY
+export const publicRoutes = [
+  /^\/$/, // root
+  /^\/product$/, // /product
+  /^\/checkout$/, // /checkout
+  /^\/order-error$/, // /order-error
+  /^\/thank-you$/, // /thank-you
+  /^\/subdomain-error$/, // /subdomain-error
+  /^\/help$/, // /help
+  /^\/[A-Za-z0-9]{7}$/, // link slug like /abc1234 (7 char nanoid)
+];
 /**@type {string[]}*/
 export const authRoutes = [
   "/auth/login",
@@ -37,3 +46,4 @@ export function pathnameStartsWith(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 }
+
