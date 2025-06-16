@@ -454,56 +454,229 @@ export default function PreviewFrame({
 //   };
 
 
+// const processHtmlContent = (htmlContent: string) => {
+//   const parser = new DOMParser();
+//   const doc = parser.parseFromString(htmlContent, "text/html");
+
+//   // Define trusted domains that should be allowed
+//   const trustedDomains = [
+//     'ecommerce-backend-peach-sigma.vercel.app',
+//     'fonts.googleapis.com',
+//     'fonts.gstatic.com',
+//   ];
+
+//   // Define the specific URL to block (takes precedence over trusted domains)
+//   const blockedUrl = 'https://ecommerce-backend-peach-sigma.vercel.app/public/store/config?subdomain=null';
+
+//   // Remove blocked stylesheets - check blocked URL first, then trusted domains
+//   const externalStylesheets = doc.querySelectorAll('link[rel="stylesheet"]');
+//   externalStylesheets.forEach((link) => {
+//     const href = link.getAttribute('href');
+//     if (href) {
+//       // Check if it's specifically blocked first
+//       const isSpecificallyBlocked = href === blockedUrl;
+//       // Only check trusted domains if it's not specifically blocked
+//       const isUntrusted = !isSpecificallyBlocked && !trustedDomains.some(domain => href.includes(domain));
+      
+//       if (isSpecificallyBlocked || isUntrusted) {
+//         console.log('Removing stylesheet:', href);
+//         link.parentNode?.removeChild(link);
+//       }
+//     }
+//   });
+
+//   // Handle scripts with same logic - blocked URL takes precedence
+//   const scripts = doc.querySelectorAll("script[src]");
+//   scripts.forEach((script) => {
+//     const src = script.getAttribute("src");
+//     if (src) {
+//       // Check if it's specifically blocked first
+//       const isSpecificallyBlocked = src === blockedUrl;
+//       // Only check trusted domains if it's not specifically blocked
+//       const isUntrusted = !isSpecificallyBlocked && !trustedDomains.some(domain => src.includes(domain));
+      
+//       if (isSpecificallyBlocked || isUntrusted) {
+//         console.log('Removing script:', src);
+//         script.removeAttribute("src");
+//         script.textContent = `// External script reference: ${src} was removed\n${
+//           script.textContent || ""
+//         }`;
+//       }
+//     }
+//   });
+
+//   return doc.documentElement.outerHTML;
+// };
+
+
+
 const processHtmlContent = (htmlContent: string) => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlContent, "text/html");
 
   // Define trusted domains that should be allowed
   const trustedDomains = [
-    'ecommerce-backend-peach-sigma.vercel.app',
-    'fonts.googleapis.com',
-    'fonts.gstatic.com',
+    "ecommerce-backend-peach-sigma.vercel.app",
+    "fonts.googleapis.com",
+    "fonts.gstatic.com",
   ];
 
-  // Define the specific URL to block (takes precedence over trusted domains)
-  const blockedUrl = 'https://ecommerce-backend-peach-sigma.vercel.app/public/store/config?subdomain=null';
+  // Define blocked URLs/patterns - more comprehensive blocking
+  const blockedUrls = [
+    "https://ecommerce-backend-peach-sigma.vercel.app/public/store/config?subdomain=null",
+    "/public/store/config?subdomain=null", // relative URL version
+    "public/store/config?subdomain=null", // without leading slash
+  ];
 
-  // Remove blocked stylesheets - check blocked URL first, then trusted domains
+  // Helper function to check if URL should be blocked
+  const isUrlBlocked = (url) => {
+    if (!url) return false;
+    return blockedUrls.some((blockedUrl) => {
+      // Exact match
+      if (url === blockedUrl) return true;
+      // Check if URL ends with the blocked pattern (for relative URLs)
+      if (url.endsWith(blockedUrl)) return true;
+      // Check if URL contains the blocked pattern
+      if (url.includes("/public/store/config?subdomain=null")) return true;
+      return false;
+    });
+  };
+
+  // Remove blocked stylesheets
   const externalStylesheets = doc.querySelectorAll('link[rel="stylesheet"]');
   externalStylesheets.forEach((link) => {
-    const href = link.getAttribute('href');
-    if (href) {
-      // Check if it's specifically blocked first
-      const isSpecificallyBlocked = href === blockedUrl;
-      // Only check trusted domains if it's not specifically blocked
-      const isUntrusted = !isSpecificallyBlocked && !trustedDomains.some(domain => href.includes(domain));
-      
-      if (isSpecificallyBlocked || isUntrusted) {
-        console.log('Removing stylesheet:', href);
-        link.parentNode?.removeChild(link);
-      }
+    const href = link.getAttribute("href");
+    if (href && isUrlBlocked(href)) {
+      console.log("Removing blocked stylesheet:", href);
+      link.parentNode?.removeChild(link);
+      return;
+    }
+
+    // Check untrusted domains (only if not blocked)
+    if (href && !trustedDomains.some((domain) => href.includes(domain))) {
+      console.log("Removing untrusted stylesheet:", href);
+      link.parentNode?.removeChild(link);
     }
   });
 
-  // Handle scripts with same logic - blocked URL takes precedence
+  // Handle blocked scripts - modify rather than remove to preserve functionality
   const scripts = doc.querySelectorAll("script[src]");
   scripts.forEach((script) => {
     const src = script.getAttribute("src");
-    if (src) {
-      // Check if it's specifically blocked first
-      const isSpecificallyBlocked = src === blockedUrl;
-      // Only check trusted domains if it's not specifically blocked
-      const isUntrusted = !isSpecificallyBlocked && !trustedDomains.some(domain => src.includes(domain));
-      
-      if (isSpecificallyBlocked || isUntrusted) {
-        console.log('Removing script:', src);
-        script.removeAttribute("src");
-        script.textContent = `// External script reference: ${src} was removed\n${
-          script.textContent || ""
-        }`;
-      }
+    if (src && isUrlBlocked(src)) {
+      console.log("Blocking script:", src);
+      script.removeAttribute("src");
+      script.textContent = `// Blocked script: ${src}\nconsole.warn('Script blocked by preview security policy: ${src}');`;
+      return;
+    }
+
+    // Check untrusted domains (only if not blocked)
+    if (src && !trustedDomains.some((domain) => src.includes(domain))) {
+      console.log("Removing untrusted script:", src);
+      script.removeAttribute("src");
+      script.textContent = `// External script reference: ${src} was removed\n${
+        script.textContent || ""
+      }`;
     }
   });
+
+  // Also remove any fetch/XMLHttpRequest calls in inline scripts that might be making the request
+  const inlineScripts = doc.querySelectorAll("script:not([src])");
+  inlineScripts.forEach((script) => {
+    if (script.textContent) {
+      let content = script.textContent;
+
+      // Replace fetch calls to blocked URLs
+      blockedUrls.forEach((blockedUrl) => {
+        const fetchPattern = new RegExp(
+          `fetch\\s*\\(\\s*['"]\s*[^'"]*${blockedUrl.replace(
+            /[.*+?^${}()|[\]\\]/g,
+            "\\$&"
+          )}[^'"]*['"]`,
+          "gi"
+        );
+        content = content.replace(
+          fetchPattern,
+          `console.log('Blocked fetch to: ${blockedUrl}')`
+        );
+
+        // Replace XMLHttpRequest calls
+        const xhrPattern = new RegExp(
+          `\\.open\\s*\\(\\s*[^,]*,\\s*['"]\s*[^'"]*${blockedUrl.replace(
+            /[.*+?^${}()|[\]\\]/g,
+            "\\$&"
+          )}[^'"]*['"]`,
+          "gi"
+        );
+        content = content.replace(
+          xhrPattern,
+          `.open('GET', 'about:blank' /* Blocked: ${blockedUrl} */`
+        );
+      });
+
+      script.textContent = content;
+    }
+  });
+
+  // Add a more permissive CSP that allows the trusted domain but relies on runtime blocking for specific URLs
+  const cspMeta = doc.createElement("meta");
+  cspMeta.setAttribute("http-equiv", "Content-Security-Policy");
+  cspMeta.setAttribute(
+    "content",
+    `connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://ecommerce-backend-peach-sigma.vercel.app; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com https://fonts.gstatic.com https://ecommerce-backend-peach-sigma.vercel.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;`
+  );
+  doc.head.appendChild(cspMeta);
+
+  // Add a script to intercept and block network requests at runtime
+  const blockingScript = doc.createElement("script");
+  blockingScript.textContent = `
+    (function() {
+      const blockedUrls = [
+        'https://ecommerce-backend-peach-sigma.vercel.app/public/store/config?subdomain=null',
+        '/public/store/config?subdomain=null',
+        'public/store/config?subdomain=null'
+      ];
+      
+      const isBlocked = (url) => {
+        return blockedUrls.some(blocked => 
+          url === blocked || 
+          url.endsWith(blocked) || 
+          url.includes('/public/store/config?subdomain=null')
+        );
+      };
+      
+      // Override fetch
+      const originalFetch = window.fetch;
+      window.fetch = function(url, options) {
+        if (typeof url === 'string' && isBlocked(url)) {
+          console.log('Blocked fetch request to:', url);
+          return Promise.reject(new Error('Request blocked by preview security policy'));
+        }
+        if (url && url.url && isBlocked(url.url)) {
+          console.log('Blocked fetch request to:', url.url);
+          return Promise.reject(new Error('Request blocked by preview security policy'));
+        }
+        return originalFetch.apply(this, arguments);
+      };
+      
+      // Override XMLHttpRequest
+      const originalOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function(method, url) {
+        if (typeof url === 'string' && isBlocked(url)) {
+          console.log('Blocked XMLHttpRequest to:', url);
+          this.addEventListener('readystatechange', () => {
+            if (this.readyState === 4) {
+              Object.defineProperty(this, 'status', { value: 0 });
+              Object.defineProperty(this, 'responseText', { value: '' });
+            }
+          });
+          return originalOpen.call(this, method, 'about:blank');
+        }
+        return originalOpen.apply(this, arguments);
+      };
+    })();
+  `;
+  doc.head.appendChild(blockingScript);
 
   return doc.documentElement.outerHTML;
 };
