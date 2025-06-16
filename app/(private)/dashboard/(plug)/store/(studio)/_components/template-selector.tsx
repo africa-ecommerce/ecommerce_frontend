@@ -71,18 +71,7 @@ const pages = [
     description: "Browse all products",
     image: "/placeholder.svg?height=200&width=300",
   },
-  {
-    id: "product-details",
-    name: "Product Details",
-    description: "Individual product page",
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    id: "blog",
-    name: "Blog",
-    description: "Articles and news",
-    image: "/placeholder.svg?height=200&width=300",
-  },
+  
 ]
 
 interface TemplateCardProps {
