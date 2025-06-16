@@ -40,8 +40,114 @@ const fontFamilies = [
   { value: "Work Sans, sans-serif", label: "Work Sans" },
 ];
 
-// Premium color palettes with sophisticated combinations
+// Premium color palettes with sophisticated light and dark combinations
 const colorPalettes = [
+  // Light Themes (Premium Light Combinations)
+  {
+    name: "Arctic Elegance",
+    colors: {
+      PRIMARY_COLOR: "#2c3e50",
+      SECONDARY_COLOR: "#ecf0f1",
+      ACCENT_COLOR: "#e74c3c",
+      TEXT_COLOR: "#2c3e50",
+      BACKGROUND_COLOR: "#ffffff",
+      FOOTER_BACKGROUND: "#f8f9fa",
+      FOOTER_TEXT_COLOR: "#34495e",
+      FONT_FAMILY: "Inter, sans-serif",
+    },
+  },
+  {
+    name: "Soft Coral",
+    colors: {
+      PRIMARY_COLOR: "#ff6b6b",
+      SECONDARY_COLOR: "#fff5f5",
+      ACCENT_COLOR: "#4ecdc4",
+      TEXT_COLOR: "#2d3436",
+      BACKGROUND_COLOR: "#ffffff",
+      FOOTER_BACKGROUND: "#fff5f5",
+      FOOTER_TEXT_COLOR: "#636e72",
+      FONT_FAMILY: "Poppins, sans-serif",
+    },
+  },
+  {
+    name: "Ocean Breeze",
+    colors: {
+      PRIMARY_COLOR: "#0984e3",
+      SECONDARY_COLOR: "#f1f8ff",
+      ACCENT_COLOR: "#fd79a8",
+      TEXT_COLOR: "#2d3436",
+      BACKGROUND_COLOR: "#ffffff",
+      FOOTER_BACKGROUND: "#f1f8ff",
+      FOOTER_TEXT_COLOR: "#636e72",
+      FONT_FAMILY: "Roboto, sans-serif",
+    },
+  },
+  {
+    name: "Sage & Stone",
+    colors: {
+      PRIMARY_COLOR: "#6c7b7f",
+      SECONDARY_COLOR: "#f4f6f7",
+      ACCENT_COLOR: "#a29bfe",
+      TEXT_COLOR: "#2d3436",
+      BACKGROUND_COLOR: "#ffffff",
+      FOOTER_BACKGROUND: "#f4f6f7",
+      FOOTER_TEXT_COLOR: "#636e72",
+      FONT_FAMILY: "Source Sans Pro, sans-serif",
+    },
+  },
+  {
+    name: "Warm Cream",
+    colors: {
+      PRIMARY_COLOR: "#d63031",
+      SECONDARY_COLOR: "#fef7f0",
+      ACCENT_COLOR: "#fdcb6e",
+      TEXT_COLOR: "#2d3436",
+      BACKGROUND_COLOR: "#fffef7",
+      FOOTER_BACKGROUND: "#fef7f0",
+      FOOTER_TEXT_COLOR: "#636e72",
+      FONT_FAMILY: "Lato, sans-serif",
+    },
+  },
+  {
+    name: "Lavender Mist",
+    colors: {
+      PRIMARY_COLOR: "#6c5ce7",
+      SECONDARY_COLOR: "#f8f7ff",
+      ACCENT_COLOR: "#fd79a8",
+      TEXT_COLOR: "#2d3436",
+      BACKGROUND_COLOR: "#ffffff",
+      FOOTER_BACKGROUND: "#f8f7ff",
+      FOOTER_TEXT_COLOR: "#636e72",
+      FONT_FAMILY: "Raleway, sans-serif",
+    },
+  },
+  {
+    name: "Forest Whisper",
+    colors: {
+      PRIMARY_COLOR: "#00b894",
+      SECONDARY_COLOR: "#f0fff4",
+      ACCENT_COLOR: "#e17055",
+      TEXT_COLOR: "#2d3436",
+      BACKGROUND_COLOR: "#ffffff",
+      FOOTER_BACKGROUND: "#f0fff4",
+      FOOTER_TEXT_COLOR: "#636e72",
+      FONT_FAMILY: "Open Sans, sans-serif",
+    },
+  },
+  {
+    name: "Rose Quartz",
+    colors: {
+      PRIMARY_COLOR: "#e84393",
+      SECONDARY_COLOR: "#fdf2f8",
+      ACCENT_COLOR: "#00cec9",
+      TEXT_COLOR: "#2d3436",
+      BACKGROUND_COLOR: "#ffffff",
+      FOOTER_BACKGROUND: "#fdf2f8",
+      FOOTER_TEXT_COLOR: "#636e72",
+      FONT_FAMILY: "Nunito, sans-serif",
+    },
+  },
+  // Dark Themes (Premium Dark Combinations)
   {
     name: "Dark Elegance",
     colors: {
@@ -69,19 +175,6 @@ const colorPalettes = [
     },
   },
   {
-    name: "Cyberpunk",
-    colors: {
-      PRIMARY_COLOR: "#0a0a0a",
-      SECONDARY_COLOR: "#1a1a2e",
-      ACCENT_COLOR: "#00ff88",
-      TEXT_COLOR: "#ffffff",
-      BACKGROUND_COLOR: "#000000",
-      FOOTER_BACKGROUND: "#1a1a2e",
-      FOOTER_TEXT_COLOR: "#00ff88",
-      FONT_FAMILY: "Montserrat, sans-serif",
-    },
-  },
-  {
     name: "Deep Ocean",
     colors: {
       PRIMARY_COLOR: "#001f3f",
@@ -95,19 +188,6 @@ const colorPalettes = [
     },
   },
   {
-    name: "Carbon Black",
-    colors: {
-      PRIMARY_COLOR: "#1c1c1c",
-      SECONDARY_COLOR: "#333333",
-      ACCENT_COLOR: "#ff4757",
-      TEXT_COLOR: "#ffffff",
-      BACKGROUND_COLOR: "#0a0a0a",
-      FOOTER_BACKGROUND: "#1c1c1c",
-      FOOTER_TEXT_COLOR: "#cccccc",
-      FONT_FAMILY: "Source Sans Pro, sans-serif",
-    },
-  },
-  {
     name: "Purple Haze",
     colors: {
       PRIMARY_COLOR: "#2d1b69",
@@ -118,84 +198,6 @@ const colorPalettes = [
       FOOTER_BACKGROUND: "#2d1b69",
       FOOTER_TEXT_COLOR: "#c8b5db",
       FONT_FAMILY: "Raleway, sans-serif",
-    },
-  },
-  {
-    name: "Crimson Shadow",
-    colors: {
-      PRIMARY_COLOR: "#2c0703",
-      SECONDARY_COLOR: "#800e13",
-      ACCENT_COLOR: "#ff6b6b",
-      TEXT_COLOR: "#ffffff",
-      BACKGROUND_COLOR: "#0d0404",
-      FOOTER_BACKGROUND: "#2c0703",
-      FOOTER_TEXT_COLOR: "#ffb3b3",
-      FONT_FAMILY: "Lato, sans-serif",
-    },
-  },
-  {
-    name: "Forest Night",
-    colors: {
-      PRIMARY_COLOR: "#0f2027",
-      SECONDARY_COLOR: "#203a43",
-      ACCENT_COLOR: "#2c5530",
-      TEXT_COLOR: "#ffffff",
-      BACKGROUND_COLOR: "#000000",
-      FOOTER_BACKGROUND: "#0f2027",
-      FOOTER_TEXT_COLOR: "#a8d8a8",
-      FONT_FAMILY: "Open Sans, sans-serif",
-    },
-  },
-  {
-    name: "Electric Blue",
-    colors: {
-      PRIMARY_COLOR: "#0f3460",
-      SECONDARY_COLOR: "#16537e",
-      ACCENT_COLOR: "#00d4ff",
-      TEXT_COLOR: "#ffffff",
-      BACKGROUND_COLOR: "#041e42",
-      FOOTER_BACKGROUND: "#0f3460",
-      FOOTER_TEXT_COLOR: "#87ceeb",
-      FONT_FAMILY: "Nunito, sans-serif",
-    },
-  },
-  {
-    name: "Rose Gold Dark",
-    colors: {
-      PRIMARY_COLOR: "#2c1810",
-      SECONDARY_COLOR: "#5d4037",
-      ACCENT_COLOR: "#ff9a8b",
-      TEXT_COLOR: "#ffffff",
-      BACKGROUND_COLOR: "#1a0f0a",
-      FOOTER_BACKGROUND: "#2c1810",
-      FOOTER_TEXT_COLOR: "#ddbea9",
-      FONT_FAMILY: "Playfair Display, serif",
-    },
-  },
-  {
-    name: "Neon Noir",
-    colors: {
-      PRIMARY_COLOR: "#0c0c0c",
-      SECONDARY_COLOR: "#1a1a1a",
-      ACCENT_COLOR: "#ff00ff",
-      TEXT_COLOR: "#ffffff",
-      BACKGROUND_COLOR: "#000000",
-      FOOTER_BACKGROUND: "#0c0c0c",
-      FOOTER_TEXT_COLOR: "#ff00ff",
-      FONT_FAMILY: "Work Sans, sans-serif",
-    },
-  },
-  {
-    name: "Emerald Night",
-    colors: {
-      PRIMARY_COLOR: "#0d4f3c",
-      SECONDARY_COLOR: "#146b56",
-      ACCENT_COLOR: "#50c878",
-      TEXT_COLOR: "#ffffff",
-      BACKGROUND_COLOR: "#041f1a",
-      FOOTER_BACKGROUND: "#0d4f3c",
-      FOOTER_TEXT_COLOR: "#90ee90",
-      FONT_FAMILY: "Merriweather, serif",
     },
   },
 ];
