@@ -171,20 +171,7 @@ export default function TemplateSelector({
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          {/* Categories for templates */}
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                variant={activeCategory === category.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveCategory(category.id)}
-                className="text-xs h-8"
-              >
-                {category.name}
-              </Button>
-            ))}
-          </div>
+         
 
           {/* Templates Grid */}
           <div className="grid grid-cols-2 gap-4 pt-2">

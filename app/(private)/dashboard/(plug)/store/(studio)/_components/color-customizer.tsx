@@ -1,7 +1,3 @@
-
-
-
-
 "use client";
 
 import { useState } from "react";
@@ -44,141 +40,165 @@ const fontFamilies = [
   { value: "Work Sans, sans-serif", label: "Work Sans" },
 ];
 
-// Expanded color palettes (10 total)
+// Premium color palettes with sophisticated combinations
 const colorPalettes = [
   {
-    name: "Monochrome",
+    name: "Dark Elegance",
     colors: {
-      PRIMARY_COLOR: "#000000",
-      SECONDARY_COLOR: "#f5f5f5",
-      ACCENT_COLOR: "#666666",
-      TEXT_COLOR: "#333333",
-      BACKGROUND_COLOR: "#ffffff",
-      FOOTER_BACKGROUND: "#f0f0f0",
-      FOOTER_TEXT_COLOR: "#333333",
+      PRIMARY_COLOR: "#1a1a1a",
+      SECONDARY_COLOR: "#2d2d2d",
+      ACCENT_COLOR: "#ff6b35",
+      TEXT_COLOR: "#f5f5f5",
+      BACKGROUND_COLOR: "#0f0f0f",
+      FOOTER_BACKGROUND: "#1a1a1a",
+      FOOTER_TEXT_COLOR: "#cccccc",
       FONT_FAMILY: "Inter, sans-serif",
     },
   },
   {
-    name: "Bold & Vibrant",
+    name: "Midnight Blue",
     colors: {
-      PRIMARY_COLOR: "#ff4081",
-      SECONDARY_COLOR: "#f8bbd0",
-      ACCENT_COLOR: "#c51162",
-      TEXT_COLOR: "#212121",
-      BACKGROUND_COLOR: "#ffffff",
-      FOOTER_BACKGROUND: "#f8bbd0",
-      FOOTER_TEXT_COLOR: "#c51162",
+      PRIMARY_COLOR: "#0d1b2a",
+      SECONDARY_COLOR: "#415a77",
+      ACCENT_COLOR: "#ffd60a",
+      TEXT_COLOR: "#e0e1dd",
+      BACKGROUND_COLOR: "#000814",
+      FOOTER_BACKGROUND: "#0d1b2a",
+      FOOTER_TEXT_COLOR: "#778da9",
       FONT_FAMILY: "Poppins, sans-serif",
     },
   },
   {
-    name: "Earth Tones",
+    name: "Cyberpunk",
     colors: {
-      PRIMARY_COLOR: "#795548",
-      SECONDARY_COLOR: "#d7ccc8",
-      ACCENT_COLOR: "#4e342e",
-      TEXT_COLOR: "#5d4037",
-      BACKGROUND_COLOR: "#efebe9",
-      FOOTER_BACKGROUND: "#d7ccc8",
-      FOOTER_TEXT_COLOR: "#3e2723",
-      FONT_FAMILY: "Merriweather, serif",
-    },
-  },
-  {
-    name: "Ocean Blues",
-    colors: {
-      PRIMARY_COLOR: "#0288d1",
-      SECONDARY_COLOR: "#b3e5fc",
-      ACCENT_COLOR: "#01579b",
-      TEXT_COLOR: "#01579b",
-      BACKGROUND_COLOR: "#e1f5fe",
-      FOOTER_BACKGROUND: "#b3e5fc",
-      FOOTER_TEXT_COLOR: "#01579b",
-      FONT_FAMILY: "Open Sans, sans-serif",
-    },
-  },
-  // New palettes below
-  {
-    name: "Forest Green",
-    colors: {
-      PRIMARY_COLOR: "#2e7d32",
-      SECONDARY_COLOR: "#c8e6c9",
-      ACCENT_COLOR: "#1b5e20",
-      TEXT_COLOR: "#33691e",
-      BACKGROUND_COLOR: "#f1f8e9",
-      FOOTER_BACKGROUND: "#c8e6c9",
-      FOOTER_TEXT_COLOR: "#1b5e20",
+      PRIMARY_COLOR: "#0a0a0a",
+      SECONDARY_COLOR: "#1a1a2e",
+      ACCENT_COLOR: "#00ff88",
+      TEXT_COLOR: "#ffffff",
+      BACKGROUND_COLOR: "#000000",
+      FOOTER_BACKGROUND: "#1a1a2e",
+      FOOTER_TEXT_COLOR: "#00ff88",
       FONT_FAMILY: "Montserrat, sans-serif",
     },
   },
   {
-    name: "Sunset Orange",
+    name: "Deep Ocean",
     colors: {
-      PRIMARY_COLOR: "#ff5722",
-      SECONDARY_COLOR: "#ffccbc",
-      ACCENT_COLOR: "#e64a19",
-      TEXT_COLOR: "#bf360c",
-      BACKGROUND_COLOR: "#fbe9e7",
-      FOOTER_BACKGROUND: "#ffccbc",
-      FOOTER_TEXT_COLOR: "#bf360c",
+      PRIMARY_COLOR: "#001f3f",
+      SECONDARY_COLOR: "#003366",
+      ACCENT_COLOR: "#ff851b",
+      TEXT_COLOR: "#ffffff",
+      BACKGROUND_COLOR: "#000d1a",
+      FOOTER_BACKGROUND: "#001f3f",
+      FOOTER_TEXT_COLOR: "#b3d9ff",
       FONT_FAMILY: "Roboto, sans-serif",
     },
   },
   {
-    name: "Lavender Dreams",
+    name: "Carbon Black",
     colors: {
-      PRIMARY_COLOR: "#7b1fa2",
-      SECONDARY_COLOR: "#e1bee7",
-      ACCENT_COLOR: "#4a148c",
-      TEXT_COLOR: "#4a148c",
-      BACKGROUND_COLOR: "#f3e5f5",
-      FOOTER_BACKGROUND: "#e1bee7",
-      FOOTER_TEXT_COLOR: "#4a148c",
-      FONT_FAMILY: "Raleway, sans-serif",
-    },
-  },
-  {
-    name: "Modern Grayscale",
-    colors: {
-      PRIMARY_COLOR: "#455a64",
-      SECONDARY_COLOR: "#cfd8dc",
-      ACCENT_COLOR: "#263238",
-      TEXT_COLOR: "#263238",
-      BACKGROUND_COLOR: "#eceff1",
-      FOOTER_BACKGROUND: "#cfd8dc",
-      FOOTER_TEXT_COLOR: "#263238",
+      PRIMARY_COLOR: "#1c1c1c",
+      SECONDARY_COLOR: "#333333",
+      ACCENT_COLOR: "#ff4757",
+      TEXT_COLOR: "#ffffff",
+      BACKGROUND_COLOR: "#0a0a0a",
+      FOOTER_BACKGROUND: "#1c1c1c",
+      FOOTER_TEXT_COLOR: "#cccccc",
       FONT_FAMILY: "Source Sans Pro, sans-serif",
     },
   },
   {
-    name: "Sunny Yellow",
+    name: "Purple Haze",
     colors: {
-      PRIMARY_COLOR: "#fbc02d",
-      SECONDARY_COLOR: "#fff9c4",
-      ACCENT_COLOR: "#f57f17",
-      TEXT_COLOR: "#f57f17",
-      BACKGROUND_COLOR: "#fffde7",
-      FOOTER_BACKGROUND: "#fff9c4",
-      FOOTER_TEXT_COLOR: "#f57f17",
+      PRIMARY_COLOR: "#2d1b69",
+      SECONDARY_COLOR: "#8367c7",
+      ACCENT_COLOR: "#ffc107",
+      TEXT_COLOR: "#ffffff",
+      BACKGROUND_COLOR: "#1a0933",
+      FOOTER_BACKGROUND: "#2d1b69",
+      FOOTER_TEXT_COLOR: "#c8b5db",
+      FONT_FAMILY: "Raleway, sans-serif",
+    },
+  },
+  {
+    name: "Crimson Shadow",
+    colors: {
+      PRIMARY_COLOR: "#2c0703",
+      SECONDARY_COLOR: "#800e13",
+      ACCENT_COLOR: "#ff6b6b",
+      TEXT_COLOR: "#ffffff",
+      BACKGROUND_COLOR: "#0d0404",
+      FOOTER_BACKGROUND: "#2c0703",
+      FOOTER_TEXT_COLOR: "#ffb3b3",
       FONT_FAMILY: "Lato, sans-serif",
     },
   },
   {
-    name: "Berry Smoothie",
+    name: "Forest Night",
     colors: {
-      PRIMARY_COLOR: "#9c27b0",
-      SECONDARY_COLOR: "#e1bee7",
-      ACCENT_COLOR: "#6a1b9a",
-      TEXT_COLOR: "#6a1b9a",
-      BACKGROUND_COLOR: "#f3e5f5",
-      FOOTER_BACKGROUND: "#e1bee7",
-      FOOTER_TEXT_COLOR: "#6a1b9a",
+      PRIMARY_COLOR: "#0f2027",
+      SECONDARY_COLOR: "#203a43",
+      ACCENT_COLOR: "#2c5530",
+      TEXT_COLOR: "#ffffff",
+      BACKGROUND_COLOR: "#000000",
+      FOOTER_BACKGROUND: "#0f2027",
+      FOOTER_TEXT_COLOR: "#a8d8a8",
+      FONT_FAMILY: "Open Sans, sans-serif",
+    },
+  },
+  {
+    name: "Electric Blue",
+    colors: {
+      PRIMARY_COLOR: "#0f3460",
+      SECONDARY_COLOR: "#16537e",
+      ACCENT_COLOR: "#00d4ff",
+      TEXT_COLOR: "#ffffff",
+      BACKGROUND_COLOR: "#041e42",
+      FOOTER_BACKGROUND: "#0f3460",
+      FOOTER_TEXT_COLOR: "#87ceeb",
+      FONT_FAMILY: "Nunito, sans-serif",
+    },
+  },
+  {
+    name: "Rose Gold Dark",
+    colors: {
+      PRIMARY_COLOR: "#2c1810",
+      SECONDARY_COLOR: "#5d4037",
+      ACCENT_COLOR: "#ff9a8b",
+      TEXT_COLOR: "#ffffff",
+      BACKGROUND_COLOR: "#1a0f0a",
+      FOOTER_BACKGROUND: "#2c1810",
+      FOOTER_TEXT_COLOR: "#ddbea9",
       FONT_FAMILY: "Playfair Display, serif",
     },
   },
+  {
+    name: "Neon Noir",
+    colors: {
+      PRIMARY_COLOR: "#0c0c0c",
+      SECONDARY_COLOR: "#1a1a1a",
+      ACCENT_COLOR: "#ff00ff",
+      TEXT_COLOR: "#ffffff",
+      BACKGROUND_COLOR: "#000000",
+      FOOTER_BACKGROUND: "#0c0c0c",
+      FOOTER_TEXT_COLOR: "#ff00ff",
+      FONT_FAMILY: "Work Sans, sans-serif",
+    },
+  },
+  {
+    name: "Emerald Night",
+    colors: {
+      PRIMARY_COLOR: "#0d4f3c",
+      SECONDARY_COLOR: "#146b56",
+      ACCENT_COLOR: "#50c878",
+      TEXT_COLOR: "#ffffff",
+      BACKGROUND_COLOR: "#041f1a",
+      FOOTER_BACKGROUND: "#0d4f3c",
+      FOOTER_TEXT_COLOR: "#90ee90",
+      FONT_FAMILY: "Merriweather, serif",
+    },
+  },
 ];
-
 
 function areColorsEqual(
   paletteColors: Record<string, string>,
@@ -271,8 +291,6 @@ function FontSelector({ value, onChange }: FontSelectorProps) {
   );
 }
 
-
-
 interface PaletteCardProps {
   palette: (typeof colorPalettes)[0];
   isSelected: boolean;
@@ -289,26 +307,37 @@ function PaletteCard({ palette, isSelected, onSelect }: PaletteCardProps) {
           : "cursor-pointer hover:border-primary hover:shadow-sm"
       )}
       onClick={isSelected ? undefined : onSelect}
+      style={{ backgroundColor: palette.colors.BACKGROUND_COLOR }}
     >
       {isSelected && (
         <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full p-0.5">
           <Check className="h-3 w-3" />
         </div>
       )}
-      <h3 className="font-medium text-xs sm:text-sm mb-1 sm:mb-2 truncate">
+      <h3
+        className="font-medium text-xs sm:text-sm mb-1 sm:mb-2 truncate"
+        style={{ color: palette.colors.TEXT_COLOR }}
+      >
         {palette.name}
       </h3>
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-1 mb-2">
         {Object.entries(palette.colors)
           .filter(([key]) => key !== "FONT_FAMILY")
-          .slice(0, 3)
+          .slice(0, 5)
           .map(([key, color], i) => (
             <div
               key={i}
-              className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border shadow-sm"
+              className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border shadow-sm"
               style={{ backgroundColor: color }}
+              title={key.replace("_", " ").toLowerCase()}
             />
           ))}
+      </div>
+      <div
+        className="text-xs opacity-60"
+        style={{ color: palette.colors.TEXT_COLOR }}
+      >
+        {palette.colors.FONT_FAMILY.split(",")[0]}
       </div>
     </div>
   );
@@ -338,13 +367,11 @@ export default function ColorCustomizer({
     colorPalettes.find((palette) => areColorsEqual(palette.colors, colors))
       ?.name || null;
 
-  
-
   return (
     <div className="flex flex-col h-full">
       <div className="px-1 sm:px-2 pb-2 sm:pb-4">
         <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
-          Color & Font Customization
+          Premium Color & Font Customization
         </h2>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -354,13 +381,13 @@ export default function ColorCustomizer({
               className="text-xs sm:text-sm py-1 sm:py-2"
             >
               <Palette className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-              <span className="hidden xs:inline">Color</span> Palettes
+              <span className="hidden xs:inline">Premium</span> Palettes
             </TabsTrigger>
             <TabsTrigger
               value="custom"
               className="text-xs sm:text-sm py-1 sm:py-2"
             >
-              Colors & Fonts
+              Custom Colors
             </TabsTrigger>
           </TabsList>
 
@@ -369,7 +396,7 @@ export default function ColorCustomizer({
               value="palettes"
               className="space-y-3 sm:space-y-4 pt-2 sm:pt-3"
             >
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 {colorPalettes.map((palette, index) => (
                   <PaletteCard
                     key={index}
@@ -401,19 +428,19 @@ export default function ColorCustomizer({
                   <AccordionContent className="space-y-3 pt-1 sm:pt-2 pb-2">
                     <ColorPicker
                       label="Primary Color"
-                      value={colors.PRIMARY_COLOR || "#000000"}
+                      value={colors.PRIMARY_COLOR || "#1a1a1a"}
                       onChange={(value) => updateColor("PRIMARY_COLOR", value)}
                     />
                     <ColorPicker
                       label="Secondary Color"
-                      value={colors.SECONDARY_COLOR || "#f5f5f5"}
+                      value={colors.SECONDARY_COLOR || "#2d2d2d"}
                       onChange={(value) =>
                         updateColor("SECONDARY_COLOR", value)
                       }
                     />
                     <ColorPicker
                       label="Accent Color"
-                      value={colors.ACCENT_COLOR || "#666666"}
+                      value={colors.ACCENT_COLOR || "#ff6b35"}
                       onChange={(value) => updateColor("ACCENT_COLOR", value)}
                     />
                   </AccordionContent>
@@ -421,17 +448,17 @@ export default function ColorCustomizer({
 
                 <AccordionItem value="text">
                   <AccordionTrigger className="py-2 sm:py-3 text-xs sm:text-sm">
-                    Text Colors
+                    Text & Background
                   </AccordionTrigger>
                   <AccordionContent className="space-y-3 pt-1 sm:pt-2 pb-2">
                     <ColorPicker
                       label="Text Color"
-                      value={colors.TEXT_COLOR || "#333333"}
+                      value={colors.TEXT_COLOR || "#ffffff"}
                       onChange={(value) => updateColor("TEXT_COLOR", value)}
                     />
                     <ColorPicker
                       label="Background Color"
-                      value={colors.BACKGROUND_COLOR || "#ffffff"}
+                      value={colors.BACKGROUND_COLOR || "#0f0f0f"}
                       onChange={(value) =>
                         updateColor("BACKGROUND_COLOR", value)
                       }
@@ -446,14 +473,14 @@ export default function ColorCustomizer({
                   <AccordionContent className="space-y-3 pt-1 sm:pt-2 pb-2">
                     <ColorPicker
                       label="Footer Background"
-                      value={colors.FOOTER_BACKGROUND || "#f0f0f0"}
+                      value={colors.FOOTER_BACKGROUND || "#1a1a1a"}
                       onChange={(value) =>
                         updateColor("FOOTER_BACKGROUND", value)
                       }
                     />
                     <ColorPicker
                       label="Footer Text Color"
-                      value={colors.FOOTER_TEXT_COLOR || "#333333"}
+                      value={colors.FOOTER_TEXT_COLOR || "#cccccc"}
                       onChange={(value) =>
                         updateColor("FOOTER_TEXT_COLOR", value)
                       }
