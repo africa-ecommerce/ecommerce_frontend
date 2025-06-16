@@ -147,59 +147,8 @@ const colorPalettes = [
       FONT_FAMILY: "Nunito, sans-serif",
     },
   },
-  // Dark Themes (Premium Dark Combinations)
-  {
-    name: "Dark Elegance",
-    colors: {
-      PRIMARY_COLOR: "#1a1a1a",
-      SECONDARY_COLOR: "#2d2d2d",
-      ACCENT_COLOR: "#ff6b35",
-      TEXT_COLOR: "#f5f5f5",
-      BACKGROUND_COLOR: "#0f0f0f",
-      FOOTER_BACKGROUND: "#1a1a1a",
-      FOOTER_TEXT_COLOR: "#cccccc",
-      FONT_FAMILY: "Inter, sans-serif",
-    },
-  },
-  {
-    name: "Midnight Blue",
-    colors: {
-      PRIMARY_COLOR: "#0d1b2a",
-      SECONDARY_COLOR: "#415a77",
-      ACCENT_COLOR: "#ffd60a",
-      TEXT_COLOR: "#e0e1dd",
-      BACKGROUND_COLOR: "#000814",
-      FOOTER_BACKGROUND: "#0d1b2a",
-      FOOTER_TEXT_COLOR: "#778da9",
-      FONT_FAMILY: "Poppins, sans-serif",
-    },
-  },
-  {
-    name: "Deep Ocean",
-    colors: {
-      PRIMARY_COLOR: "#001f3f",
-      SECONDARY_COLOR: "#003366",
-      ACCENT_COLOR: "#ff851b",
-      TEXT_COLOR: "#ffffff",
-      BACKGROUND_COLOR: "#000d1a",
-      FOOTER_BACKGROUND: "#001f3f",
-      FOOTER_TEXT_COLOR: "#b3d9ff",
-      FONT_FAMILY: "Roboto, sans-serif",
-    },
-  },
-  {
-    name: "Purple Haze",
-    colors: {
-      PRIMARY_COLOR: "#2d1b69",
-      SECONDARY_COLOR: "#8367c7",
-      ACCENT_COLOR: "#ffc107",
-      TEXT_COLOR: "#ffffff",
-      BACKGROUND_COLOR: "#1a0933",
-      FOOTER_BACKGROUND: "#2d1b69",
-      FOOTER_TEXT_COLOR: "#c8b5db",
-      FONT_FAMILY: "Raleway, sans-serif",
-    },
-  },
+ 
+ 
 ];
 
 function areColorsEqual(
