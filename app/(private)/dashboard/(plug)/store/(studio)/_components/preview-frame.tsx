@@ -186,39 +186,156 @@ export default function PreviewFrame({
   }, [viewMode]);
 
   // When HTML is loaded, inject it into the iframe with special handling
+  // useEffect(() => {
+  //   if (!html || !iframeRef.current) return;
+
+  //   const iframe = iframeRef.current;
+  //   const doc = iframe.contentDocument || iframe.contentWindow?.document;
+
+  //   if (!doc) return;
+
+  //   // Extract and process content to prevent external resource loading
+  //   const processedHtml = processHtmlContent(html);
+
+  //   // Inject HTML
+  //   doc.open();
+  //   doc.write(processedHtml);
+  //   doc.close();
+
+  //   // Give the iframe content a hint that we're in edit/preview mode
+  //   if (doc.body) {
+  //     doc.body.setAttribute("data-editor", "true");
+  //   }
+
+  //   // Add special styling for edit mode and proper viewport settings
+  //   const style = doc.createElement("style");
+  //   style.textContent = `
+  //     [data-editor="true"] {
+  //       /* Styles for edit mode */
+  //     }
+  //     /* Make iframe content unselectable to prevent accidental editing */
+  //     .unselectable-content {
+  //       user-select: none;
+  //       -webkit-user-select: none;
+  //     }
+  //     /* Ensure content fills the viewport */
+  //     html, body {
+  //       margin: 0;
+  //       padding: 0;
+  //       width: 100%;
+  //       height: 100%;
+  //       overflow: auto;
+  //     }
+  //   `;
+  //   doc.head.appendChild(style);
+
+  //   // Add viewport meta tag for proper scaling
+  //   const metaViewport = doc.createElement("meta");
+  //   metaViewport.setAttribute("name", "viewport");
+  //   metaViewport.setAttribute(
+  //     "content",
+  //     `width=${viewportDimensions[viewMode].width}, initial-scale=1.0`
+  //   );
+  //   doc.head.appendChild(metaViewport);
+
+  //   // Communicate with the iframe content if needed
+  //   if (iframe.contentWindow) {
+  //     iframe.contentWindow.postMessage(
+  //       {
+  //         type: "EDITOR_MODE",
+  //         enabled: true,
+  //         viewMode: viewMode,
+  //         viewport: viewportDimensions[viewMode],
+  //       },
+  //       "*"
+  //     );
+  //   }
+
+  //   // Add event listener to prevent link navigation
+  //   const disableLinks = () => {
+  //     const links = doc.querySelectorAll("a");
+  //     links.forEach((link) => {
+  //       link.addEventListener("click", (e) => {
+  //         e.preventDefault();
+  //         console.log("Link navigation prevented:", link.href);
+  //       });
+  //       // Visual indication that links are disabled
+  //       link.style.cursor = "default";
+  //     });
+  //   };
+
+  //   // Set up iframe onload
+  //   iframe.onload = () => {
+  //     disableLinks();
+
+  //     // Apply config once iframe is loaded
+  //     try {
+  //       const contentWindow = iframe.contentWindow;
+  //       if (contentWindow && typeof contentWindow.updateConfig === "function") {
+  //         console.log("Applying config to iframe on load:", config);
+  //         contentWindow.updateConfig(config);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error applying config on load:", error);
+  //     }
+
+  //     // Force an immediate recalculation of scale when iframe content is loaded
+  //     if (autoScale && containerRef.current) {
+  //       const containerWidth =
+  //         containerRef.current.clientWidth - PREVIEW_PADDING * 2;
+  //       const containerHeight =
+  //         containerRef.current.clientHeight - PREVIEW_PADDING * 2;
+
+  //       const targetWidth = viewportDimensions[viewMode].width;
+  //       const targetHeight = viewportDimensions[viewMode].height;
+
+  //       const widthScale = containerWidth / targetWidth;
+  //       const heightScale = containerHeight / targetHeight;
+
+  //       const newScale = Math.min(widthScale, heightScale, 1);
+  //       console.log("Initial scale calculation after iframe load:", newScale);
+  //       setScale(newScale);
+  //     }
+
+  //     // Set loaded state after everything is done
+  //     setIsLoaded(true);
+  //   };
+
+  //   // Also run disableLinks after a small delay to ensure DOM is fully loaded
+  //   setTimeout(disableLinks, 100);
+  // }, [html, config, viewMode, autoScale]);
+
   useEffect(() => {
     if (!html || !iframeRef.current) return;
-
+  
     const iframe = iframeRef.current;
     const doc = iframe.contentDocument || iframe.contentWindow?.document;
-
+  
     if (!doc) return;
-
-    // Extract and process content to prevent external resource loading
+  
+    // Only reload iframe when HTML content actually changes
     const processedHtml = processHtmlContent(html);
-
+  
     // Inject HTML
     doc.open();
     doc.write(processedHtml);
     doc.close();
-
+  
     // Give the iframe content a hint that we're in edit/preview mode
     if (doc.body) {
       doc.body.setAttribute("data-editor", "true");
     }
-
+  
     // Add special styling for edit mode and proper viewport settings
     const style = doc.createElement("style");
     style.textContent = `
       [data-editor="true"] {
         /* Styles for edit mode */
       }
-      /* Make iframe content unselectable to prevent accidental editing */
       .unselectable-content {
         user-select: none;
         -webkit-user-select: none;
       }
-      /* Ensure content fills the viewport */
       html, body {
         margin: 0;
         padding: 0;
@@ -228,29 +345,7 @@ export default function PreviewFrame({
       }
     `;
     doc.head.appendChild(style);
-
-    // Add viewport meta tag for proper scaling
-    const metaViewport = doc.createElement("meta");
-    metaViewport.setAttribute("name", "viewport");
-    metaViewport.setAttribute(
-      "content",
-      `width=${viewportDimensions[viewMode].width}, initial-scale=1.0`
-    );
-    doc.head.appendChild(metaViewport);
-
-    // Communicate with the iframe content if needed
-    if (iframe.contentWindow) {
-      iframe.contentWindow.postMessage(
-        {
-          type: "EDITOR_MODE",
-          enabled: true,
-          viewMode: viewMode,
-          viewport: viewportDimensions[viewMode],
-        },
-        "*"
-      );
-    }
-
+  
     // Add event listener to prevent link navigation
     const disableLinks = () => {
       const links = doc.querySelectorAll("a");
@@ -259,66 +354,87 @@ export default function PreviewFrame({
           e.preventDefault();
           console.log("Link navigation prevented:", link.href);
         });
-        // Visual indication that links are disabled
         link.style.cursor = "default";
       });
     };
-
+  
     // Set up iframe onload
     iframe.onload = () => {
       disableLinks();
-
-      // Apply config once iframe is loaded
-      try {
-        const contentWindow = iframe.contentWindow;
-        if (contentWindow && typeof contentWindow.updateConfig === "function") {
-          console.log("Applying config to iframe on load:", config);
-          contentWindow.updateConfig(config);
-        }
-      } catch (error) {
-        console.error("Error applying config on load:", error);
-      }
-
-      // Force an immediate recalculation of scale when iframe content is loaded
-      if (autoScale && containerRef.current) {
-        const containerWidth =
-          containerRef.current.clientWidth - PREVIEW_PADDING * 2;
-        const containerHeight =
-          containerRef.current.clientHeight - PREVIEW_PADDING * 2;
-
-        const targetWidth = viewportDimensions[viewMode].width;
-        const targetHeight = viewportDimensions[viewMode].height;
-
-        const widthScale = containerWidth / targetWidth;
-        const heightScale = containerHeight / targetHeight;
-
-        const newScale = Math.min(widthScale, heightScale, 1);
-        console.log("Initial scale calculation after iframe load:", newScale);
-        setScale(newScale);
-      }
-
-      // Set loaded state after everything is done
       setIsLoaded(true);
     };
-
-    // Also run disableLinks after a small delay to ensure DOM is fully loaded
+  
     setTimeout(disableLinks, 100);
-  }, [html, config, viewMode, autoScale]);
+    
+    // Remove viewMode from dependencies - handle it separately
+  }, [html, config]); // ← Removed viewMode and autoScale
+  
+  // Separate effect for handling viewMode changes without reloading iframe
+  useEffect(() => {
+    if (!iframeRef.current || !isLoaded) return;
+  
+    const iframe = iframeRef.current;
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    
+    if (!doc) return;
+  
+    // Update viewport meta tag without reloading entire iframe
+    let metaViewport = doc.querySelector('meta[name="viewport"]');
+    if (!metaViewport) {
+      metaViewport = doc.createElement("meta");
+      metaViewport.setAttribute("name", "viewport");
+      doc.head.appendChild(metaViewport);
+    }
+    
+    metaViewport.setAttribute(
+      "content",
+      `width=${viewportDimensions[viewMode].width}, initial-scale=1.0`
+    );
+  
+    // Send updated viewMode to iframe content
+    if (iframe.contentWindow) {
+      iframe.contentWindow.postMessage(
+        {
+          type: "VIEWPORT_CHANGE",
+          viewMode: viewMode,
+          viewport: viewportDimensions[viewMode],
+        },
+        "*"
+      );
+    }
+  
+  }, [viewMode, isLoaded]);
 
   // Apply config whenever it changes, even if iframe was already loaded
-  useEffect(() => {
-    if (!iframeRef.current) return;
+  // useEffect(() => {
+  //   if (!iframeRef.current) return;
 
+  //   try {
+  //     // Call the updateConfig function inside the iframe
+  //     const contentWindow = iframeRef.current.contentWindow;
+  //     if (contentWindow && typeof contentWindow.updateConfig === "function") {
+  //       console.log(
+  //         "Applying config to iframe:",
+  //         config,
+  //         "isLoaded:",
+  //         isLoaded
+  //       );
+  //       contentWindow.updateConfig(config);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error applying config:", error);
+  //   }
+  // }, [config, isLoaded]);
+
+
+
+  useEffect(() => {
+    if (!iframeRef.current || !isLoaded) return;
+  
     try {
-      // Call the updateConfig function inside the iframe
       const contentWindow = iframeRef.current.contentWindow;
       if (contentWindow && typeof contentWindow.updateConfig === "function") {
-        console.log(
-          "Applying config to iframe:",
-          config,
-          "isLoaded:",
-          isLoaded
-        );
+        console.log("Applying config to iframe:", config);
         contentWindow.updateConfig(config);
       }
     } catch (error) {
