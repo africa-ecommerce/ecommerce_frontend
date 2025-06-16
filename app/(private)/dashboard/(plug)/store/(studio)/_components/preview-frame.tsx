@@ -387,33 +387,68 @@ export default function PreviewFrame({
     ];
   
     // Only remove external stylesheets from untrusted domains
-    const externalStylesheets = doc.querySelectorAll('link[rel="stylesheet"]');
-    externalStylesheets.forEach((link) => {
-      const href = link.getAttribute('href');
-      if (href) {
-        const isUntrusted = !trustedDomains.some(domain => href.includes(domain));
-        if (isUntrusted) {
-          console.log('Removing untrusted stylesheet:', href);
-          link.parentNode?.removeChild(link);
-        }
-      }
-    });
+    // const externalStylesheets = doc.querySelectorAll('link[rel="stylesheet"]');
+    // externalStylesheets.forEach((link) => {
+    //   const href = link.getAttribute('href');
+    //   if (href) {
+    //     const isUntrusted = !trustedDomains.some(domain => href.includes(domain));
+    //     if (isUntrusted) {
+    //       console.log('Removing untrusted stylesheet:', href);
+    //       link.parentNode?.removeChild(link);
+    //     }
+    //   }
+    // });
   
-    // Handle scripts similarly - allow trusted domains
-    const scripts = doc.querySelectorAll("script[src]");
-    scripts.forEach((script) => {
-      const src = script.getAttribute("src");
-      if (src) {
-        const isUntrusted = !trustedDomains.some(domain => src.includes(domain));
-        if (isUntrusted) {
-          console.log('Removing untrusted script:', src);
-          script.removeAttribute("src");
-          script.textContent = `// External script reference: ${src} was removed\n${
-            script.textContent || ""
-          }`;
-        }
-      }
-    });
+    // // Handle scripts similarly - allow trusted domains
+    // const scripts = doc.querySelectorAll("script[src]");
+    // scripts.forEach((script) => {
+    //   const src = script.getAttribute("src");
+    //   if (src) {
+    //     const isUntrusted = !trustedDomains.some(domain => src.includes(domain));
+    //     if (isUntrusted) {
+    //       console.log('Removing untrusted script:', src);
+    //       script.removeAttribute("src");
+    //       script.textContent = `// External script reference: ${src} was removed\n${
+    //         script.textContent || ""
+    //       }`;
+    //     }
+    //   }
+    // });
+
+
+    // Define the specific URL to block
+const blockedUrl = 'https://ecommerce-backend-peach-sigma.vercel.app/public/store/config?subdomain=null';
+
+// Only remove external stylesheets from untrusted domains or specific blocked URLs
+const externalStylesheets = doc.querySelectorAll('link[rel="stylesheet"]');
+externalStylesheets.forEach((link) => {
+  const href = link.getAttribute('href');
+  if (href) {
+    const isSpecificallyBlocked = href === blockedUrl;
+    const isUntrusted = !trustedDomains.some(domain => href.includes(domain));
+    if (isUntrusted || isSpecificallyBlocked) {
+      console.log('Removing stylesheet:', href);
+      link.parentNode?.removeChild(link);
+    }
+  }
+});
+
+// Handle scripts similarly - allow trusted domains but block specific URL
+const scripts = doc.querySelectorAll("script[src]");
+scripts.forEach((script) => {
+  const src = script.getAttribute("src");
+  if (src) {
+    const isSpecificallyBlocked = src === blockedUrl;
+    const isUntrusted = !trustedDomains.some(domain => src.includes(domain));
+    if (isUntrusted || isSpecificallyBlocked) {
+      console.log('Removing script:', src);
+      script.removeAttribute("src");
+      script.textContent = `// External script reference: ${src} was removed\n${
+        script.textContent || ""
+      }`;
+    }
+  }
+});
   
     return doc.documentElement.outerHTML;
   };
