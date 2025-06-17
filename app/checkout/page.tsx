@@ -3618,7 +3618,7 @@ export default function CheckoutPage() {
   }
 
   // Don't render if we don't have order data for store platform
-  if (platform === "store" && (!orderSummaries.length || !orderSummary)) {
+  if (platform === "store" && orderSummaries.length == 0) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
