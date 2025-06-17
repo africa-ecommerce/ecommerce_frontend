@@ -78,7 +78,7 @@ export default function CheckoutForm({
   const searchParams = useSearchParams();
   const platform = searchParams.get("platform");
 
-  const { orderSummaries, updateDeliveryFeeForOrder } = useProductStore();
+  const { orderSummaries  } = useProductStore();
   const {
     checkoutData,
     setCustomerInfo,
@@ -187,11 +187,7 @@ export default function CheckoutForm({
   }, [buyerInfoData, buyerInfoError, setValue, setCustomerAddress]);
 
   // Function to update delivery fee for all orders
-  const updateDeliveryFee = (price: number) => {
-    orderSummaries.forEach((_, index) => {
-      updateDeliveryFeeForOrder(index, price);
-    });
-  };
+ 
 
   // Effect to handle logistics pricing updates
   useEffect(() => {
@@ -199,7 +195,7 @@ export default function CheckoutForm({
       const price = logisticsPricingData.data.price;
 
       if (price !== undefined) {
-        updateDeliveryFee(price);
+    console.log("yes")
 
         if (
           logisticsPricingData.data.buyerLatitude &&
@@ -218,7 +214,6 @@ export default function CheckoutForm({
       }
     } else if (logisticsPricingError) {
       console.error("Logistics pricing error:", logisticsPricingError);
-      updateDeliveryFee(1500);
       onBuyerCoordinatesChange({
         latitude: 6.5244 + (Math.random() - 0.5) * 0.1,
         longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
