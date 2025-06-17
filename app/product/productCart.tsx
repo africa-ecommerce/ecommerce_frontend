@@ -1386,6 +1386,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     }
 
     // Set the order summaries
+    console.log("newOrderSummaries", newOrderSummaries)
     setOrderSummaries(newOrderSummaries)
 
     // Navigate to checkout
