@@ -216,7 +216,6 @@
 
 
 
-
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -251,8 +250,8 @@ interface OrderSummary {
 }
 
 interface ProductStore {
-  orderSummaries: OrderSummary[]; // Changed to array to handle multiple orders
-  currentOrderIndex: number; // Track which order is currently being viewed
+  orderSummaries: OrderSummary[];
+  currentOrderIndex: number;
   setOrderSummaries: (summaries: OrderSummary[]) => void;
   addOrderSummary: (summary: OrderSummary) => void;
   setCurrentOrderIndex: (index: number) => void;
@@ -277,25 +276,39 @@ export const useProductStore = create<ProductStore>()(
     (set, get) => ({
       orderSummaries: [],
       currentOrderIndex: 0,
+      orderSummary: null, // Initialize as null
 
       // New methods for multiple orders
       setOrderSummaries: (summaries) =>
         set({
           orderSummaries: summaries,
           currentOrderIndex: 0,
+          orderSummary: summaries[0] || null, // Update orderSummary when setting summaries
         }),
 
       addOrderSummary: (summary) =>
-        set((state) => ({
-          orderSummaries: [...state.orderSummaries, summary],
-        })),
+        set((state) => {
+          const newSummaries = [...state.orderSummaries, summary];
+          return {
+            orderSummaries: newSummaries,
+            orderSummary:
+              state.currentOrderIndex === 0 && state.orderSummaries.length === 0
+                ? summary
+                : state.orderSummary,
+          };
+        }),
 
-      setCurrentOrderIndex: (index) => set({ currentOrderIndex: index }),
+      setCurrentOrderIndex: (index) =>
+        set((state) => ({
+          currentOrderIndex: index,
+          orderSummary: state.orderSummaries[index] || null, // Update orderSummary when index changes
+        })),
 
       clearOrderSummaries: () =>
         set({
           orderSummaries: [],
           currentOrderIndex: 0,
+          orderSummary: null,
         }),
 
       updateDeliveryFee: (fee, orderIndex) => {
@@ -306,27 +319,33 @@ export const useProductStore = create<ProductStore>()(
           const updatedSummaries = [...state.orderSummaries];
           const currentSummary = updatedSummaries[targetIndex];
 
-          updatedSummaries[targetIndex] = {
+          const updatedSummary = {
             ...currentSummary,
             deliveryFee: fee,
             total: currentSummary.subtotal + fee,
           };
 
-          set({ orderSummaries: updatedSummaries });
+          updatedSummaries[targetIndex] = updatedSummary;
+
+          set({
+            orderSummaries: updatedSummaries,
+            orderSummary:
+              targetIndex === state.currentOrderIndex
+                ? updatedSummary
+                : state.orderSummary,
+          });
         }
       },
 
-      // Legacy support - computed properties and methods
-      get orderSummary() {
-        const state = get();
-        return state.orderSummaries[state.currentOrderIndex] || null;
-      },
-
+      // Legacy support methods
       setOrderSummary: (summary) => {
         const state = get();
         const updatedSummaries = [...state.orderSummaries];
         updatedSummaries[state.currentOrderIndex] = summary;
-        set({ orderSummaries: updatedSummaries });
+        set({
+          orderSummaries: updatedSummaries,
+          orderSummary: summary,
+        });
       },
 
       clearOrderSummary: () => {
@@ -334,9 +353,11 @@ export const useProductStore = create<ProductStore>()(
         const updatedSummaries = state.orderSummaries.filter(
           (_, index) => index !== state.currentOrderIndex
         );
+        const newCurrentIndex = Math.max(0, state.currentOrderIndex - 1);
         set({
           orderSummaries: updatedSummaries,
-          currentOrderIndex: Math.max(0, state.currentOrderIndex - 1),
+          currentOrderIndex: newCurrentIndex,
+          orderSummary: updatedSummaries[newCurrentIndex] || null,
         });
       },
 
@@ -365,7 +386,10 @@ export const useProductStore = create<ProductStore>()(
         const state = get();
         const updatedSummaries = [...state.orderSummaries];
         updatedSummaries[state.currentOrderIndex] = orderSummary;
-        set({ orderSummaries: updatedSummaries });
+        set({
+          orderSummaries: updatedSummaries,
+          orderSummary: orderSummary,
+        });
       },
     }),
     {
