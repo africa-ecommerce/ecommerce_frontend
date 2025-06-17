@@ -26,17 +26,31 @@ export function useProductFetcher() {
   // Only fetch if platform is "store" and we have items
   const shouldFetch = platform === "store" && items.length > 0;
 
-  // Create SWR keys for all products
-  const productKeys = shouldFetch
-    ? items.map((item) => `/api/public/products/${item.pid}?subdomain=${ref}`)
-    : [];
+  // Create a single SWR key that includes all product IDs
+  // This ensures we always call the same number of hooks
+  const allProductIds = items.map(item => item.pid).join(',');
+  const singleKey = shouldFetch && allProductIds 
+    ? `/api/public/products/batch?ids=${allProductIds}&subdomain=${ref}` 
+    : null;
 
-  // Use SWR to fetch all products
-  const productQueries = productKeys.map((key) => useSWR(key, fetcher));
+  // Use a single SWR call instead of multiple conditional ones
+  const { data: batchData, error: batchError } = useSWR(singleKey, fetcher);
 
-  // Check if all queries are loaded
-  const allLoaded = productQueries.every((query) => query.data || query.error);
-  const hasErrors = productQueries.some((query) => query.error);
+  // Alternative approach if you don't have a batch endpoint:
+  // Use individual hooks but always call the same number
+  const maxItems = 10; // Set a reasonable maximum
+  const productQueries = Array.from({ length: maxItems }, (_, index) => {
+    const item = items[index];
+    const key = shouldFetch && item 
+      ? `/api/public/products/${item.pid}?subdomain=${ref}` 
+      : null;
+    return useSWR(key, fetcher);
+  });
+
+  // Only consider queries for actual items
+  const activeQueries = productQueries.slice(0, items.length);
+  const allLoaded = activeQueries.every((query) => query.data || query.error);
+  const hasErrors = activeQueries.some((query) => query.error);
 
   useLayoutEffect(() => {
     if (!shouldFetch) return;
@@ -44,7 +58,7 @@ export function useProductFetcher() {
     if (allLoaded && !hasErrors) {
       const orderSummaries = items
         .map((item, index) => {
-          const productData = productQueries[index]?.data?.data;
+          const productData = activeQueries[index]?.data?.data;
 
           if (!productData) return null;
 
@@ -113,7 +127,7 @@ export function useProductFetcher() {
     if (hasErrors) {
       console.error(
         "Error fetching products:",
-        productQueries.map((q) => q.error)
+        activeQueries.map((q) => q.error).filter(Boolean)
       );
       clearOrderSummaries();
     }
@@ -131,6 +145,6 @@ export function useProductFetcher() {
   return {
     isLoading: shouldFetch && !allLoaded,
     hasErrors,
-    errors: productQueries.map((q) => q.error).filter(Boolean),
+    errors: activeQueries.map((q) => q.error).filter(Boolean),
   };
 }
