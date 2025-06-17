@@ -447,11 +447,7 @@ const handleCheckout = () => {
 };
 
 
-  const handleWhatsAppSignup = () => {
-    console.log("WhatsApp signup:", whatsappNumber);
-    setNotificationSignedUp(true);
-    setWhatsappNumber("");
-  };
+
 
   const formatPrice = (price: number) => {
     return `₦${price?.toLocaleString()}`;
