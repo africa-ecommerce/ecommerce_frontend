@@ -62,6 +62,8 @@ export function useProductFetcher() {
         (result) => result.status === "rejected"
       );
 
+      console.log("data", data)
+
       setFetchedData(data);
       setHasErrors(hasAnyErrors);
 
@@ -92,6 +94,8 @@ export function useProductFetcher() {
       .map((item, index) => {
         const productResponse = fetchedData[index];
         const productData = productResponse?.data;
+
+        console.log("productData", productData)
 
         if (!productData) return null;
 
