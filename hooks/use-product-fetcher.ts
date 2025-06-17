@@ -90,7 +90,12 @@ export function useProductFetcher() {
     console.log("isLoading", isLoading)
     console.log("hasErrors", hasErrors)
     console.log("fetchedData", fetchedData.length)
-    if (!shouldFetch || isLoading || hasErrors || fetchedData.length === 0) {
+    if (isLoading || hasErrors || fetchedData.length === 0) {
+      return;
+    }
+
+    // Only process if we have valid data and platform is store
+    if (platform !== "store" || items.length === 0) {
       return;
     }
 
