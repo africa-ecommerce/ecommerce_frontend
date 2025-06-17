@@ -213,7 +213,7 @@
 
 "use client"
 
-import { useLayoutEffect, useState, useCallback, useMemo } from "react"
+import { useLayoutEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useSearchParams } from "next/navigation"
 import { useProductStore } from "./product-store"
 import { parseCheckoutUrl, getVariationDisplayName } from "@/lib/url-parser"
@@ -233,6 +233,8 @@ export function useProductFetcher() {
   const [isLoading, setIsLoading] = useState(false)
   const [hasErrors, setHasErrors] = useState(false)
   const [fetchedData, setFetchedData] = useState<any[]>([])
+  const isMountedRef = useRef(true);
+
 
   // Parse URL parameters
   const parsedUrl = useMemo(() => parseCheckoutUrl(searchParams), [searchParams])
@@ -379,6 +381,12 @@ export function useProductFetcher() {
     fetchProducts()
   }, [fetchProducts])
 
+  useLayoutEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   // Process order summaries when data is ready
   useLayoutEffect(() => {
     processOrderSummaries()
@@ -386,10 +394,10 @@ export function useProductFetcher() {
 
   // Clear summaries when component unmounts or shouldFetch becomes false
   useLayoutEffect(() => {
-    if (shouldFetch) {
-      clearOrderSummaries()
+    if (shouldFetch && isMountedRef.current) {
+      clearOrderSummaries();
     }
-  }, [shouldFetch, clearOrderSummaries])
+  }, [shouldFetch, clearOrderSummaries]);
 
   return {
     isLoading,
