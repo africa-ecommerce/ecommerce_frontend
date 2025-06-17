@@ -2168,11 +2168,11 @@ export default function CheckoutPageWithProductFetching() {
       ? `/api/public/products/${storeParams.items[0].productId}?subdomain=${storeParams.subdomain}`
       : null;
 
-  const { data: productData, error: productError } = useSWR(
-    productFetchKey,
-    fetcher,
-    productFetchOptions
-  );
+      const { data: { data: productData } = {}, error: productError } = useSWR(
+        productFetchKey,
+        fetcher,
+        productFetchOptions
+      );
 
   // useLayoutEffect to add products to store before page loads
   useLayoutEffect(() => {
