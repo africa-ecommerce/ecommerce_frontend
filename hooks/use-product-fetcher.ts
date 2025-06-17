@@ -86,6 +86,10 @@ export function useProductFetcher() {
 
   // Process fetched data into order summaries
   const processOrderSummaries = useCallback(() => {
+    console.log("shouldFetch", !shouldFetch)
+    console.log("isLoading", isLoading)
+    console.log("hasErrors", hasErrors)
+    console.log("fetchedData", fetchedData.length)
     if (!shouldFetch || isLoading || hasErrors || fetchedData.length === 0) {
       return;
     }
@@ -94,6 +98,7 @@ export function useProductFetcher() {
       .map((item, index) => {
         const productResponse = fetchedData[index];
         const productData = productResponse?.data;
+        console.log("productResponse", productResponse)
 
         console.log("productData", productData)
 
