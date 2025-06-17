@@ -386,7 +386,7 @@ export function useProductFetcher() {
 
   // Clear summaries when component unmounts or shouldFetch becomes false
   useLayoutEffect(() => {
-    if (!shouldFetch) {
+    if (shouldFetch) {
       clearOrderSummaries()
     }
   }, [shouldFetch, clearOrderSummaries])

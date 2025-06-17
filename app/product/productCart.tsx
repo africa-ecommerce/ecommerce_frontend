@@ -1313,100 +1313,8 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     return { subtotal, total, items }
   }, [currentPrice, quantity, selectedVariations, hasVariations, productData])
 
-  // const handleCheckout = () => {
-  //   if (!productData) return
-
-  //   // Extract pickup location from product data
-  //   const pickupLocation = productData.pickupLocation
-  //     ? {
-  //         latitude: productData.pickupLocation.latitude,
-  //         longitude: productData.pickupLocation.longitude,
-  //       }
-  //     : undefined
-
-  //   // Create order products array
-  //   const newOrderSummaries = []
-
-  //   if (hasVariations && selectedVariations.length > 0) {
-  //     // Handle multiple variations - create separate order for each variation
-  //     for (const sv of selectedVariations) {
-  //       const productItem = {
-  //         id: productData.originalId,
-  //         name: productData.name,
-  //         price: productData.price,
-  //         originalPrice: productData.originalPrice,
-  //         quantity: sv.quantity,
-  //         size: sv.variation.size,
-  //         color: sv.variation.color,
-  //         image: productData.images?.[0] || "/placeholder.svg",
-  //         variationId: sv.variation.id,
-  //         variationName: getVariationDisplayName(sv.variation),
-  //         supplierId: productData.supplierId,
-  //       }
-
-  //       const subtotal = productItem.price * productItem.quantity
-
-  //       newOrderSummaries.push({
-  //         item: productItem, // Single item instead of array
-  //         subtotal,
-  //         total: subtotal,
-  //         productId: productData.originalId,
-  //         referralId: currentReferralId,
-  //         platform: currentPlatform,
-  //         pickupLocation,
-  //         deliveryFee: 0,
-  //       })
-  //     }
-  //   } else if (!hasVariations) {
-  //     // Handle simple product
-  //     const productItem = {
-  //       id: productData.originalId,
-  //       name: productData.name,
-  //       price: currentPrice,
-  //       size: productData.size,
-  //       color: productData.color,
-  //       originalPrice: productData.originalPrice,
-  //       quantity,
-  //       image: productData.images?.[0] || "/placeholder.svg",
-  //       supplierId: productData.supplierId,
-  //     }
-
-  //     const subtotal = currentPrice * quantity
-
-  //     newOrderSummaries.push({
-  //       item: productItem, // Single item instead of array
-  //       subtotal,
-  //       total: subtotal,
-  //       productId: productData.originalId,
-  //       referralId: currentReferralId,
-  //       platform: currentPlatform,
-  //       pickupLocation,
-  //       deliveryFee: 0,
-  //     })
-  //   }
-
-  //   // Set the order summaries
-  //   console.log("newOrderSummaries", newOrderSummaries)
-  //   setOrderSummaries(newOrderSummaries)
-
-  //   // Navigate to checkout
-  //   let checkoutUrl = `/checkout?pid=${currentProductId}`
-
-  //   if (currentReferralId) {
-  //     checkoutUrl += `&ref=${currentReferralId}`
-  //   }
-
-  //   if (currentPlatform) {
-  //     checkoutUrl += `&platform=${currentPlatform}`
-  //   }
-
-  //   router.push(checkoutUrl)
-  // }
-
-
-
   const handleCheckout = () => {
-    if (!productData) return;
+    if (!productData) return
 
     // Extract pickup location from product data
     const pickupLocation = productData.pickupLocation
@@ -1414,15 +1322,10 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
           latitude: productData.pickupLocation.latitude,
           longitude: productData.pickupLocation.longitude,
         }
-      : undefined;
-
-    // Get existing order summaries
-    const existingOrders = orderSummaries.filter(
-      (order) => order.productId !== currentProductId
-    );
+      : undefined
 
     // Create order products array
-    const newOrderSummaries = [];
+    const newOrderSummaries = []
 
     if (hasVariations && selectedVariations.length > 0) {
       // Handle multiple variations - create separate order for each variation
@@ -1439,12 +1342,12 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
           variationId: sv.variation.id,
           variationName: getVariationDisplayName(sv.variation),
           supplierId: productData.supplierId,
-        };
+        }
 
-        const subtotal = productItem.price * productItem.quantity;
+        const subtotal = productItem.price * productItem.quantity
 
         newOrderSummaries.push({
-          item: productItem,
+          item: productItem, // Single item instead of array
           subtotal,
           total: subtotal,
           productId: productData.originalId,
@@ -1452,7 +1355,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
           platform: currentPlatform,
           pickupLocation,
           deliveryFee: 0,
-        });
+        })
       }
     } else if (!hasVariations) {
       // Handle simple product
@@ -1466,12 +1369,12 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
         quantity,
         image: productData.images?.[0] || "/placeholder.svg",
         supplierId: productData.supplierId,
-      };
+      }
 
-      const subtotal = currentPrice * quantity;
+      const subtotal = currentPrice * quantity
 
       newOrderSummaries.push({
-        item: productItem,
+        item: productItem, // Single item instead of array
         subtotal,
         total: subtotal,
         productId: productData.originalId,
@@ -1479,29 +1382,26 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
         platform: currentPlatform,
         pickupLocation,
         deliveryFee: 0,
-      });
+      })
     }
 
-    // Combine existing orders with new orders
-    const allOrderSummaries = [...existingOrders, ...newOrderSummaries];
-
-    // Set the combined order summaries
-    console.log("allOrderSummaries", allOrderSummaries);
-    setOrderSummaries(allOrderSummaries);
+    // Set the order summaries
+    console.log("newOrderSummaries", newOrderSummaries)
+    setOrderSummaries(newOrderSummaries)
 
     // Navigate to checkout
-    let checkoutUrl = `/checkout?pid=${currentProductId}`;
+    let checkoutUrl = `/checkout?pid=${currentProductId}`
 
     if (currentReferralId) {
-      checkoutUrl += `&ref=${currentReferralId}`;
+      checkoutUrl += `&ref=${currentReferralId}`
     }
 
     if (currentPlatform) {
-      checkoutUrl += `&platform=${currentPlatform}`;
+      checkoutUrl += `&platform=${currentPlatform}`
     }
 
-    router.push(checkoutUrl);
-  };
+    router.push(checkoutUrl)
+  }
 
   const formatPrice = (price: number) => {
     return `₦${price?.toLocaleString()}`
