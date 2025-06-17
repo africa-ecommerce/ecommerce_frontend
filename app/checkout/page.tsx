@@ -1966,8 +1966,6 @@
 
 
 
-
-
 "use client";
 import { useState, useEffect, useLayoutEffect } from "react";
 import dynamic from "next/dynamic";
@@ -2104,6 +2102,23 @@ const getVariationDisplayName = (variation: any) => {
   return parts.join(" - ");
 };
 
+// Helper function to group items by product ID
+const groupItemsByProductId = (items: any[]) => {
+  const groups = new Map();
+  
+  items.forEach(item => {
+    if (!groups.has(item.productId)) {
+      groups.set(item.productId, []);
+    }
+    groups.get(item.productId).push(item);
+  });
+  
+  return Array.from(groups.entries()).map(([productId, items]) => ({
+    productId,
+    items
+  }));
+};
+
 export default function CheckoutPageWithProductFetching() {
   const [buyerCoordinates, setBuyerCoordinates] = useState<{
     latitude: number | null;
@@ -2111,7 +2126,7 @@ export default function CheckoutPageWithProductFetching() {
   }>({ latitude: null, longitude: null });
 
   // Replace local state with Zustand store
-  const { orderSummary, setOrderSummary, updateDeliveryFee } =
+  const { orderSummaries, setOrderSummaries, updateDeliveryFeeForOrder } =
     useProductStore();
   const {
     checkoutData,
@@ -2130,6 +2145,7 @@ export default function CheckoutPageWithProductFetching() {
   const [states, setStates] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [productsFetched, setProductsFetched] = useState(false);
+  const [fetchedProducts, setFetchedProducts] = useState<Map<string, any>>(new Map());
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -2137,6 +2153,10 @@ export default function CheckoutPageWithProductFetching() {
   // Parse URL parameters for store platform
   const storeParams = parseStoreUrlParams(searchParams);
   const platform = searchParams.get("platform");
+
+  // Get unique product IDs for fetching
+  const uniqueProductIds = storeParams ? 
+    [...new Set(storeParams.items.map(item => item.productId))] : [];
 
   // Get values from store
   const currentStep = checkoutData.currentStep;
@@ -2162,122 +2182,160 @@ export default function CheckoutPageWithProductFetching() {
     return data;
   }, deliveryFormSchema);
 
-  // SWR for product fetching (only for store platform)
-  const productFetchKey =
-    storeParams && !productsFetched
-      ? `/api/public/products/${storeParams.items[0].productId}?subdomain=${storeParams.subdomain}`
+  // Multiple SWR hooks for fetching different products
+  const productQueries = uniqueProductIds.map(productId => {
+    const key = storeParams && !fetchedProducts.has(productId)
+      ? `/api/public/products/${productId}?subdomain=${storeParams.subdomain}`
       : null;
-
-      const { data: { data: productData } = {}, error: productError } = useSWR(
-        productFetchKey,
-        fetcher,
-        productFetchOptions
-      );
+    
+    return useSWR(key, fetcher, productFetchOptions);
+  });
 
   // useLayoutEffect to add products to store before page loads
   useLayoutEffect(() => {
     if (
       platform === "store" &&
       storeParams &&
-      productData &&
-      !productsFetched
+      !productsFetched &&
+      uniqueProductIds.length > 0
     ) {
-      console.log("Fetched product data:", productData);
+      // Check if all products have been fetched
+      const allProductsLoaded = uniqueProductIds.every(productId => {
+        const query = productQueries.find((_, index) => 
+          uniqueProductIds[index] === productId
+        );
+        return query?.data?.data && !query.error;
+      });
 
-      try {
-        // Extract pickup location from product data
-        const pickupLocation = productData.pickupLocation
-          ? {
-              latitude: productData.pickupLocation.latitude,
-              longitude: productData.pickupLocation.longitude,
+      if (allProductsLoaded) {
+        console.log("All products fetched, processing...");
+
+        try {
+          // Store fetched products
+          const newFetchedProducts = new Map();
+          uniqueProductIds.forEach((productId, index) => {
+            const productData = productQueries[index]?.data?.data;
+            if (productData) {
+              newFetchedProducts.set(productId, productData);
             }
-          : undefined;
+          });
+          setFetchedProducts(newFetchedProducts);
 
-        const items = [];
-        let totalSubtotal = 0;
+          // Group items by product ID
+          const productGroups = groupItemsByProductId(storeParams.items);
+          const orderSummaries = [];
 
-        // Process each item from URL parameters
-        for (const urlItem of storeParams.items) {
-          if (urlItem.variationId) {
-            // Handle product with variation
-            const variation = productData.variations?.find(
-              (v: any) => v.id === urlItem.variationId
-            );
+          // Process each product group
+          for (const group of productGroups) {
+            const productData = newFetchedProducts.get(group.productId);
+            if (!productData) continue;
 
-            if (variation) {
-              const item = {
-                id: productData.originalId || productData.id,
-                name: productData.name,
-                price: productData.price,
-                originalPrice: productData.originalPrice || productData.price,
-                quantity: urlItem.quantity,
-                size: variation.size,
-                color: variation.color,
-                image: productData.images?.[0] || "/placeholder.svg",
-                variationId: variation.id,
-                variationName: getVariationDisplayName(variation),
-                supplierId: productData.supplierId,
-              };
+            // Extract pickup location from product data
+            const pickupLocation = productData.pickupLocation
+              ? {
+                  latitude: productData.pickupLocation.latitude,
+                  longitude: productData.pickupLocation.longitude,
+                }
+              : undefined;
 
-              items.push(item);
-              totalSubtotal += item.price * item.quantity;
+            const items = [];
+            let totalSubtotal = 0;
+
+            // Process each item in this product group
+            for (const urlItem of group.items) {
+              if (urlItem.variationId) {
+                // Handle product with variation
+                const variation = productData.variations?.find(
+                  (v: any) => v.id === urlItem.variationId
+                );
+
+                if (variation) {
+                  const item = {
+                    id: productData.originalId || productData.id,
+                    name: productData.name,
+                    price: productData.price,
+                    originalPrice: productData.originalPrice || productData.price,
+                    quantity: urlItem.quantity,
+                    size: variation.size,
+                    color: variation.color,
+                    image: productData.images?.[0] || "/placeholder.svg",
+                    variationId: variation.id,
+                    variationName: getVariationDisplayName(variation),
+                    supplierId: productData.supplierId,
+                  };
+
+                  items.push(item);
+                  totalSubtotal += item.price * item.quantity;
+                }
+              } else {
+                // Handle simple product without variation
+                const item = {
+                  id: productData.originalId || productData.id,
+                  name: productData.name,
+                  price: productData.price,
+                  originalPrice: productData.originalPrice || productData.price,
+                  quantity: urlItem.quantity,
+                  size: productData.size,
+                  color: productData.color,
+                  image: productData.images?.[0] || "/placeholder.svg",
+                  supplierId: productData.supplierId,
+                };
+
+                items.push(item);
+                totalSubtotal += item.price * item.quantity;
+              }
             }
-          } else {
-            // Handle simple product without variation
-            const item = {
-              id: productData.originalId || productData.id,
-              name: productData.name,
-              price: productData.price,
-              originalPrice: productData.originalPrice || productData.price,
-              quantity: urlItem.quantity,
-              size: productData.size,
-              color: productData.color,
-              image: productData.images?.[0] || "/placeholder.svg",
-              supplierId: productData.supplierId,
+
+            // Create order summary for this product group
+            const orderSummary = {
+              items,
+              subtotal: totalSubtotal,
+              total: totalSubtotal, // Will be updated when delivery fee is calculated
+              productId: productData.originalId || productData.id,
+              referralId: storeParams.subdomain,
+              platform: "store",
+              pickupLocation,
+              deliveryFee: 0,
             };
 
-            items.push(item);
-            totalSubtotal += item.price * item.quantity;
+            orderSummaries.push(orderSummary);
           }
+
+          // Set all order summaries in store
+          setOrderSummaries(orderSummaries);
+          setProductsFetched(true);
+          
+          console.log("Multiple order summaries created:", orderSummaries);
+        } catch (error) {
+          console.error("Error processing product data:", error);
+          errorToast("Failed to load product information");
         }
-
-        // Set order summary in store
-        setOrderSummary({
-          items,
-          subtotal: totalSubtotal,
-          total: totalSubtotal, // Will be updated when delivery fee is calculated
-          productId: productData.originalId || productData.id,
-          referralId: storeParams.subdomain,
-          platform: "store",
-          pickupLocation,
-        });
-
-        setProductsFetched(true);
-        console.log("Products added to store:", {
-          items,
-          subtotal: totalSubtotal,
-        });
-      } catch (error) {
-        console.error("Error processing product data:", error);
-        errorToast("Failed to load product information");
       }
     }
-  }, [platform, storeParams, productData, productsFetched, setOrderSummary]);
+  }, [
+    platform, 
+    storeParams, 
+    productsFetched, 
+    uniqueProductIds.length,
+    productQueries.map(q => q.data).join(','), // Dependency on all product data
+    setOrderSummaries
+  ]);
 
-  // Handle product fetch error
+  // Handle product fetch errors
   useEffect(() => {
-    if (productError && platform === "store") {
-      console.error("Product fetch error:", productError);
-      errorToast("Failed to load product information");
+    if (platform === "store" && productQueries.some(q => q.error)) {
+      console.error("Product fetch errors:", productQueries.filter(q => q.error));
+      errorToast("Failed to load some product information");
     }
-  }, [productError, platform]);
+  }, [productQueries.map(q => q.error).join(','), platform]);
 
-  const cartItems = orderSummary?.items;
+  // Calculate total across all order summaries
+  const grandSubtotal = orderSummaries.reduce((total, order) => total + order.subtotal, 0);
+  const grandDeliveryFee = orderSummaries.reduce((total, order) => total + (order.deliveryFee || 0), 0);
+  const grandTotal = grandSubtotal + grandDeliveryFee;
 
-  // Calculate subtotal from Zustand or fallback calculation
-  const subtotal =
-    orderSummary?.subtotal ||
-    cartItems?.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // Get all cart items from all order summaries
+  const allCartItems = orderSummaries.flatMap(order => order.items);
 
   // Watch address fields for SWR key generation
   const watchedState = checkoutData.customerAddress.state;
@@ -2308,21 +2366,25 @@ export default function CheckoutPageWithProductFetching() {
     buyerInfoOptions
   );
 
-  // SWR for logistics pricing
+  // SWR for logistics pricing - we'll use the first order's pickup location
+  const firstOrderWithPickup = orderSummaries.find(order => 
+    order.pickupLocation?.latitude && order.pickupLocation?.longitude
+  );
+
   const logisticsPricingKey =
     watchedState &&
     watchedLga &&
     watchedStreetAddress &&
-    orderSummary?.pickupLocation?.latitude &&
-    orderSummary?.pickupLocation?.longitude
+    firstOrderWithPickup?.pickupLocation?.latitude &&
+    firstOrderWithPickup?.pickupLocation?.longitude
       ? `/api/logistics/pricing?state=${encodeURIComponent(
           watchedState
         )}&lga=${encodeURIComponent(
           watchedLga
         )}&streetAddress=${encodeURIComponent(
           watchedStreetAddress
-        )}&supplierLat=${orderSummary.pickupLocation.latitude}&supplierLng=${
-          orderSummary.pickupLocation.longitude
+        )}&supplierLat=${firstOrderWithPickup.pickupLocation.latitude}&supplierLng=${
+          firstOrderWithPickup.pickupLocation.longitude
         }`
       : null;
 
@@ -2360,13 +2422,16 @@ export default function CheckoutPageWithProductFetching() {
     }
   }, [buyerInfoData, buyerInfoError, setValue, setCustomerAddress]);
 
-  // Effect to handle logistics pricing updates
+  // Effect to handle logistics pricing updates for all orders
   useEffect(() => {
     if (logisticsPricingData?.data && !logisticsPricingError) {
       const price = logisticsPricingData.data.price;
 
       if (price !== undefined) {
-        updateDeliveryFee(price);
+        // Update delivery fee for all orders
+        orderSummaries.forEach((_, index) => {
+          updateDeliveryFeeForOrder(index, price);
+        });
 
         if (
           logisticsPricingData.data.buyerLatitude &&
@@ -2385,50 +2450,57 @@ export default function CheckoutPageWithProductFetching() {
       }
     } else if (logisticsPricingError) {
       console.error("Logistics pricing error:", logisticsPricingError);
-      updateDeliveryFee(1500);
+      
+      // Update delivery fee for all orders with fallback
+      orderSummaries.forEach((_, index) => {
+        updateDeliveryFeeForOrder(index, 1500);
+      });
 
       setBuyerCoordinates({
         latitude: 6.5244 + (Math.random() - 0.5) * 0.1,
         longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
       });
     }
-  }, [logisticsPricingData, logisticsPricingError, updateDeliveryFee]);
+  }, [logisticsPricingData, logisticsPricingError, orderSummaries.length, updateDeliveryFeeForOrder]);
 
-  // Helper function to calculate supplier amount
-  const calculateSupplierAmount = () => {
-    if (!orderSummary?.items) return 0;
-
-    return orderSummary.items.reduce((total, item) => {
-      const originalPrice = item.price;
-      return total + originalPrice * item.quantity;
+  // Helper function to calculate supplier amount for all orders
+  const calculateTotalSupplierAmount = () => {
+    return orderSummaries.reduce((total, order) => {
+      return total + order.items.reduce((orderTotal, item) => {
+        const originalPrice = item.originalPrice || item.price;
+        return orderTotal + originalPrice * item.quantity;
+      }, 0);
     }, 0);
   };
 
-  const formatOrderItems = () => {
-    if (!orderSummary?.items) return [];
-
-    return orderSummary.items.map((item) => ({
-      productId: orderSummary.productId,
-      quantity: item.quantity,
-
-      ...(item.variationId && {
-        variantId: item.variationId,
-        variantColor: item.color,
-        variantSize: item.size,
-      }),
-      ...(!item.variationId && {
-        productColor: item.color,
-        productSize: item.size,
-      }),
-    }));
+  // Helper function to format order items for all orders
+  const formatAllOrderItems = () => {
+    return orderSummaries.flatMap(order => 
+      order.items.map((item) => ({
+        productId: order.productId,
+        quantity: item.quantity,
+        ...(item.variationId && {
+          variantId: item.variationId,
+          variantColor: item.color,
+          variantSize: item.size,
+        }),
+        ...(!item.variationId && {
+          productColor: item.color,
+          productSize: item.size,
+        }),
+      }))
+    );
   };
 
   const prepareOrderData = (
     paymentMethod: string,
     paymentReference?: string
   ) => {
-    const supplierAmount = calculateSupplierAmount();
-    const plugAmount = subtotal! - supplierAmount;
+    const supplierAmount = calculateTotalSupplierAmount();
+    const plugAmount = grandSubtotal - supplierAmount;
+
+    // Get the first supplier ID (assuming all items are from the same supplier for now)
+    const firstSupplierId = orderSummaries[0]?.items?.[0]?.supplierId || "";
 
     const orderData = {
       buyerName: checkoutData.customerInfo.name,
@@ -2442,17 +2514,33 @@ export default function CheckoutPageWithProductFetching() {
       buyerLatitude: buyerCoordinates.latitude || 6.5244,
       buyerLongitude: buyerCoordinates.longitude || 3.3792,
 
-      supplierId: orderSummary?.items?.[0]?.supplierId || "",
+      supplierId: firstSupplierId,
 
       paymentMethod: paymentMethod,
-      totalAmount: total,
-      deliveryFee: deliveryFee,
+      totalAmount: grandTotal,
+      deliveryFee: grandDeliveryFee,
       supplierAmount: supplierAmount,
       plugAmount: plugAmount,
-      plugPrice: orderSummary?.items?.[0]?.price,
-      supplierPrice: orderSummary?.items?.[0]?.originalPrice,
-      plugId: orderSummary?.referralId || "",
-      orderItems: formatOrderItems(),
+      plugPrice: orderSummaries[0]?.items?.[0]?.price || 0,
+      supplierPrice: orderSummaries[0]?.items?.[0]?.originalPrice || 0,
+      plugId: orderSummaries[0]?.referralId || "",
+      orderItems: formatAllOrderItems(),
+
+      // Add order summaries information
+      orderSummaries: orderSummaries.map(order => ({
+        productId: order.productId,
+        items: order.items.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          variationId: item.variationId,
+          variationName: item.variationName,
+        })),
+        subtotal: order.subtotal,
+        deliveryFee: order.deliveryFee,
+        total: order.total,
+      })),
 
       ...(paymentReference && { paymentReference }),
     };
@@ -2483,7 +2571,7 @@ export default function CheckoutPageWithProductFetching() {
         errorToast(errorData.error || "Failed to place order");
 
         clearCheckoutData();
-        useProductStore.getState().clearOrderSummary();
+        useProductStore.getState().clearOrderSummaries();
         router.replace("/order-error");
         return;
       }
@@ -2496,7 +2584,7 @@ export default function CheckoutPageWithProductFetching() {
       }
 
       clearCheckoutData();
-      useProductStore.getState().clearOrderSummary();
+      useProductStore.getState().clearOrderSummaries();
 
       router.replace("/thank-you");
 
@@ -2543,7 +2631,6 @@ export default function CheckoutPageWithProductFetching() {
   };
 
   const deliveryFee = getDeliveryFee();
-  const total = subtotal + (deliveryFee || 0);
 
   // Initialize states and form data
   useEffect(() => {
@@ -2645,14 +2732,15 @@ export default function CheckoutPageWithProductFetching() {
 
   const continueToReview = () => {
     goToNextStep();
-    mutate(
-      `/public/products/${orderSummary?.productId}${orderSummary?.referralId}`
-    );
+    // Mutate all product caches
+    orderSummaries.forEach(order => {
+      mutate(`/public/products/${order.productId}${order.referralId}`);
+    });
   };
 
   const paystackConfig = {
     email: watchedCustomerInfo?.email || "",
-    amount: total * 100,
+    amount: grandTotal * 100,
     metadata: {
       name: watchedCustomerInfo?.name || "",
       phone: watchedCustomerInfo?.phone || "",
@@ -2663,7 +2751,7 @@ export default function CheckoutPageWithProductFetching() {
         {
           display_name: "Order Items",
           variable_name: "order_items",
-          value: cartItems
+          value: allCartItems
             ?.map((item) => `${item.name} x${item.quantity}`)
             .join(", "),
         },
@@ -2752,7 +2840,7 @@ export default function CheckoutPageWithProductFetching() {
     platform === "store" &&
     storeParams &&
     !productsFetched &&
-    !productError
+    !productQueries.some(q => q.error)
   ) {
     return (
       <div className="flex justify-center items-center min-h-screen">

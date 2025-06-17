@@ -1,34 +1,38 @@
-"use client"
-import { useState, useEffect } from "react"
-import dynamic from "next/dynamic"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { Loader2 } from "lucide-react"
+"use client";
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { useProductStore } from "@/hooks/product-store"
-import { useCheckoutStore } from "@/hooks/checkout-store"
-import { errorToast, successToast } from "@/components/ui/use-toast-advanced"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { useProductStore } from "@/hooks/product-store";
+import { useCheckoutStore } from "@/hooks/checkout-store";
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 
 // Dynamic import of PaystackButton to prevent SSR issues
-const PaystackButton = dynamic(() => import("react-paystack").then((mod) => mod.PaystackButton), {
-  ssr: false,
-  loading: () => <Button className="flex-1">Loading Payment...</Button>,
-})
+const PaystackButton = dynamic(
+  () => import("react-paystack").then((mod) => mod.PaystackButton),
+  {
+    ssr: false,
+    loading: () => <Button className="flex-1">Loading Payment...</Button>,
+  }
+);
 
 interface OrderSummaryProps {
   buyerCoordinates: {
-    latitude: number | null
-    longitude: number | null
-  }
-  logisticsPricingData?: any
-  logisticsPricingError?: any
-  isLogisticsPricingLoading?: boolean
-  watchedState?: string
-  watchedLga?: string
-  watchedStreetAddress?: string
+    latitude: number | null;
+    longitude: number | null;
+  };
+  logisticsPricingData?: any;
+  logisticsPricingError?: any;
+  isLogisticsPricingLoading?: boolean;
+  watchedState?: string;
+  watchedLga?: string;
+  watchedStreetAddress?: string;
+  orderIndex: number; // Add orderIndex to identify which order we're working with
 }
 
 export default function OrderSummary({
@@ -39,41 +43,48 @@ export default function OrderSummary({
   watchedState,
   watchedLga,
   watchedStreetAddress,
+  orderIndex = 0, // Default to first order if not specified
 }: OrderSummaryProps) {
-  const [isClient, setIsClient] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isClient, setIsClient] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const router = useRouter()
-  const { orderSummary } = useProductStore()
-  const { checkoutData, clearCheckoutData, setCurrentStep } = useCheckoutStore()
+  const router = useRouter();
+  const { orderSummaries, updateDeliveryFeeForOrder, clearOrderSummaries } =
+    useProductStore();
+  const { checkoutData, clearCheckoutData, setCurrentStep } =
+    useCheckoutStore();
 
-  const cartItems = orderSummary?.items
-  const subtotal = orderSummary?.subtotal || cartItems?.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  // Get the specific order summary we're working with
+  const orderSummary = orderSummaries[orderIndex];
 
-  const paymentMethod = checkoutData.paymentMethod
-  const currentStep = checkoutData.currentStep
+  const cartItems = orderSummary?.items;
+  const subtotal =
+    orderSummary?.subtotal ||
+    cartItems?.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const paymentMethod = checkoutData.paymentMethod;
+  const currentStep = checkoutData.currentStep;
 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
   // Helper function to calculate supplier amount
   const calculateSupplierAmount = () => {
-    if (!orderSummary?.items) return 0
+    if (!orderSummary?.items) return 0;
 
     return orderSummary.items.reduce((total, item) => {
-      const originalPrice = item.price
-      return total + originalPrice * item.quantity
-    }, 0)
-  }
+      const originalPrice = item.originalPrice || item.price;
+      return total + originalPrice * item.quantity;
+    }, 0);
+  };
 
   const formatOrderItems = () => {
-    if (!orderSummary?.items) return []
+    if (!orderSummary?.items) return [];
 
     return orderSummary.items.map((item) => ({
       productId: orderSummary.productId,
       quantity: item.quantity,
-
       ...(item.variationId && {
         variantId: item.variationId,
         variantColor: item.color,
@@ -83,12 +94,15 @@ export default function OrderSummary({
         productColor: item.color,
         productSize: item.size,
       }),
-    }))
-  }
+    }));
+  };
 
-  const prepareOrderData = (paymentMethod: string, paymentReference?: string) => {
-    const supplierAmount = calculateSupplierAmount()
-    const plugAmount = subtotal! - supplierAmount
+  const prepareOrderData = (
+    paymentMethod: string,
+    paymentReference?: string
+  ) => {
+    const supplierAmount = calculateSupplierAmount();
+    const plugAmount = subtotal! - supplierAmount;
 
     const orderData = {
       // Buyer information
@@ -119,17 +133,20 @@ export default function OrderSummary({
 
       // Payment reference for online payments
       ...(paymentReference && { paymentReference }),
-    }
+    };
 
-    return orderData
-  }
+    return orderData;
+  };
 
-  const placeOrder = async (paymentMethod: string, paymentReference?: string) => {
+  const placeOrder = async (
+    paymentMethod: string,
+    paymentReference?: string
+  ) => {
     try {
-      setIsLoading(true)
-      const orderData = prepareOrderData(paymentMethod, paymentReference)
+      setIsLoading(true);
+      const orderData = prepareOrderData(paymentMethod, paymentReference);
 
-      console.log("Placing order with data:", orderData)
+      console.log("Placing order with data:", orderData);
 
       const response = await fetch("/api/orders/place-order", {
         method: "POST",
@@ -137,79 +154,90 @@ export default function OrderSummary({
           "Content-Type": "application/json",
         },
         body: JSON.stringify(orderData),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        errorToast(errorData.error || "Failed to place order")
+        const errorData = await response.json();
+        errorToast(errorData.error || "Failed to place order");
 
-        clearCheckoutData()
-        useProductStore.getState().clearOrderSummary()
-        router.replace("/order-error")
-        return
+        clearCheckoutData();
+        clearOrderSummaries();
+        router.replace("/order-error");
+        return;
       }
 
-      const result = await response.json()
-      successToast(result.message || "Order placed successfully")
+      const result = await response.json();
+      successToast(result.message || "Order placed successfully");
 
       // Store order success data for thank you page
       if (result.data) {
-        sessionStorage.setItem("orderSuccess", JSON.stringify(result.data))
+        sessionStorage.setItem("orderSuccess", JSON.stringify(result.data));
       }
 
       // Clear all checkout data and order summary
-      clearCheckoutData()
-      useProductStore.getState().clearOrderSummary()
+      clearCheckoutData();
+      clearOrderSummaries();
 
       // Navigate to thank you page
-      router.replace("/thank-you")
+      router.replace("/thank-you");
 
-      return result
+      return result;
     } catch (error) {
-      console.error("Error placing order:", error)
-      errorToast("An error occurred while placing the order")
+      console.error("Error placing order:", error);
+      errorToast("An error occurred while placing the order");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   // Calculate delivery fee based on method and logistics pricing
   const getDeliveryFee = () => {
-    const hasRequiredAddressData = watchedState && watchedLga && watchedStreetAddress
+    const hasRequiredAddressData =
+      watchedState && watchedLga && watchedStreetAddress;
 
     if (!hasRequiredAddressData) {
-      return null
+      return null;
     }
 
     if (isLogisticsPricingLoading) {
-      return null
+      return null;
     }
 
-    if (logisticsPricingData?.data?.price !== undefined && !logisticsPricingError) {
-      return logisticsPricingData.data.price
+    if (
+      logisticsPricingData?.data?.price !== undefined &&
+      !logisticsPricingError
+    ) {
+      return logisticsPricingData.data.price;
     }
 
     if (logisticsPricingError) {
-      return 1500
+      return 1500;
     }
 
-    return null
-  }
+    return null;
+  };
 
-  const deliveryFee = getDeliveryFee()
-  const total = subtotal! + (deliveryFee || 0)
+  const deliveryFee = getDeliveryFee();
+  const total = subtotal! + (deliveryFee || 0);
+
+  // Update delivery fee in the store whenever it changes
+  useEffect(() => {
+    if (deliveryFee !== null && deliveryFee !== undefined) {
+      updateDeliveryFeeForOrder(orderIndex, deliveryFee);
+    }
+  }, [deliveryFee, orderIndex, updateDeliveryFeeForOrder]);
 
   const goToPreviousStep = () => {
-    if (currentStep === "review") setCurrentStep("delivery")
-  }
+    if (currentStep === "review") setCurrentStep("delivery");
+  };
 
   const handleCashOnDeliveryOrder = async () => {
     try {
-      await placeOrder("cash")
+      await placeOrder("cash");
     } catch (error) {
-      console.error("Error placing cash order:", error)
+      console.error("Error placing cash order:", error);
     }
-  }
+  };
 
   const paystackConfig = {
     email: checkoutData.customerInfo.email || "",
@@ -224,7 +252,9 @@ export default function OrderSummary({
         {
           display_name: "Order Items",
           variable_name: "order_items",
-          value: cartItems?.map((item) => `${item.name} x${item.quantity}`).join(", "),
+          value: cartItems
+            ?.map((item) => `${item.name} x${item.quantity}`)
+            .join(", "),
         },
       ],
     },
@@ -232,20 +262,20 @@ export default function OrderSummary({
     text: isLoading ? "Processing..." : "Place Order",
     onSuccess: async (reference: any) => {
       try {
-        await placeOrder("online", reference.reference)
-        console.log("Payment successful:", reference)
+        await placeOrder("online", reference.reference);
+        console.log("Payment successful:", reference);
       } catch (error) {
-        console.error("Error placing order after successful payment:", error)
+        console.error("Error placing order after successful payment:", error);
       }
     },
     onClose: () => {
-      alert("Payment cancelled")
+      alert("Payment cancelled");
     },
-  }
+  };
 
   const formatPrice = (price?: string | number) => {
-    return `₦${price?.toLocaleString()}`
-  }
+    return `₦${price?.toLocaleString()}`;
+  };
 
   const renderPlaceOrderButton = () => {
     if (paymentMethod === "cash") {
@@ -253,10 +283,10 @@ export default function OrderSummary({
         <Button className="flex-1" onClick={handleCashOnDeliveryOrder}>
           {isLoading ? "Processing..." : "Place Order (Pay on Delivery)"}
         </Button>
-      )
+      );
     } else {
       if (!isClient) {
-        return <Button className="flex-1">Loading Payment...</Button>
+        return <Button className="flex-1">Loading Payment...</Button>;
       }
 
       return (
@@ -264,8 +294,12 @@ export default function OrderSummary({
           {...paystackConfig}
           className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
         />
-      )
+      );
     }
+  };
+
+  if (!orderSummary) {
+    return <div>No order found</div>;
   }
 
   return (
@@ -282,20 +316,29 @@ export default function OrderSummary({
                 {cartItems?.map((item) => (
                   <div key={item.id} className="flex items-start space-x-3">
                     <div className="w-16 h-16 relative rounded-md overflow-hidden flex-shrink-0 bg-muted">
-                      <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+                      <Image
+                        src={item.image || "/placeholder.svg"}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h5 className="font-medium text-sm">
                         <span className="capitalize">{item.name}</span>
                         {item.variationName && (
-                          <span className="text-muted-foreground ml-2">({item.variationName})</span>
+                          <span className="text-muted-foreground ml-2">
+                            ({item.variationName})
+                          </span>
                         )}
                       </h5>
                       <div className="flex justify-between mt-1">
                         <span className="text-sm">
                           {item.quantity} x {formatPrice(item.price)}
                         </span>
-                        <span className="text-sm font-medium">{formatPrice(item.price * item.quantity)}</span>
+                        <span className="text-sm font-medium">
+                          {formatPrice(item.price * item.quantity)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -307,28 +350,34 @@ export default function OrderSummary({
 
           <div className="space-y-3 mb-6">
             <div className="flex justify-between">
-              <span className="text-muted-foreground text-sm">Subtotal ({cartItems?.length} items)</span>
+              <span className="text-muted-foreground text-sm">
+                Subtotal ({cartItems?.length} items)
+              </span>
               <span className="text-sm">{formatPrice(subtotal!)}</span>
             </div>
 
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground text-sm">
                 Delivery Fee
-                {isLogisticsPricingLoading && <Loader2 className="h-3 w-3 animate-spin ml-1 inline" />}
+                {isLogisticsPricingLoading && (
+                  <Loader2 className="h-3 w-3 animate-spin ml-1 inline" />
+                )}
               </span>
               <span className="text-sm">
                 {!watchedState || !watchedLga || !watchedStreetAddress
                   ? "Enter address to calculate"
                   : deliveryFee === null
-                    ? "Calculating..."
-                    : deliveryFee === 0
-                      ? "Free"
-                      : formatPrice(deliveryFee)}
+                  ? "Calculating..."
+                  : deliveryFee === 0
+                  ? "Free"
+                  : formatPrice(deliveryFee)}
               </span>
             </div>
 
             {logisticsPricingError && (
-              <div className="text-xs text-red-600 mt-1">Unable to calculate delivery fee - using standard rate</div>
+              <div className="text-xs text-red-600 mt-1">
+                Unable to calculate delivery fee - using standard rate
+              </div>
             )}
 
             <Separator className="my-4" />
@@ -340,7 +389,11 @@ export default function OrderSummary({
 
           {currentStep === "review" && (
             <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 mb-6">
-              <Button variant="outline" className="flex-1" onClick={goToPreviousStep}>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={goToPreviousStep}
+              >
                 Back
               </Button>
               {renderPlaceOrderButton()}
@@ -393,5 +446,5 @@ export default function OrderSummary({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

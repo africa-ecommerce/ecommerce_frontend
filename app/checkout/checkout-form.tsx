@@ -1,34 +1,40 @@
-"use client"
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { CreditCard, MapPin, Banknote, ArrowLeft, Info } from "lucide-react"
-import useSWR, { mutate } from "swr"
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { CreditCard, MapPin, Banknote, ArrowLeft, Info } from "lucide-react";
+import useSWR, { mutate } from "swr";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useProductStore } from "@/hooks/product-store"
-import { useFormResolver } from "@/hooks/useFormResolver"
-import { Controller } from "react-hook-form"
-import NaijaStates from "naija-state-local-government"
-import { getLgasForState } from "@/lib/utils"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { deliveryFormSchema } from "@/zod/schema"
-import { useCheckoutStore } from "@/hooks/checkout-store"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useProductStore } from "@/hooks/product-store";
+import { useFormResolver } from "@/hooks/useFormResolver";
+import { Controller } from "react-hook-form";
+import NaijaStates from "naija-state-local-government";
+import { getLgasForState } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { deliveryFormSchema } from "@/zod/schema";
+import { useCheckoutStore } from "@/hooks/checkout-store";
 
 // SWR fetcher function
 const fetcher = async (url: string) => {
-  const response = await fetch(url)
+  const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
-  return response.json()
-}
+  return response.json();
+};
 
 // SWR configuration options
 const swrOptions = {
@@ -37,36 +43,42 @@ const swrOptions = {
   refreshInterval: 0,
   dedupingInterval: 5000,
   errorRetryCount: 0,
-}
+};
 
 const logisticsPricingOptions = {
   ...swrOptions,
   refreshInterval: 30000,
   revalidateOnFocus: false,
   dedupingInterval: 2000,
-}
+};
 
 const buyerInfoOptions = {
   ...swrOptions,
   dedupingInterval: 10000,
   refreshInterval: 0,
-}
+};
 
 interface CheckoutFormProps {
-  onContinueToReview: () => void
-  onBuyerCoordinatesChange: (coordinates: { latitude: number | null; longitude: number | null }) => void
+  onContinueToReview: () => void;
+  onBuyerCoordinatesChange: (coordinates: {
+    latitude: number | null;
+    longitude: number | null;
+  }) => void;
 }
 
-export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesChange }: CheckoutFormProps) {
-  const [selectedState, setSelectedState] = useState<string>("")
-  const [availableLgas, setAvailableLgas] = useState<string[]>([])
-  const [states, setStates] = useState<string[]>([])
+export default function CheckoutForm({
+  onContinueToReview,
+  onBuyerCoordinatesChange,
+}: CheckoutFormProps) {
+  const [selectedState, setSelectedState] = useState<string>("");
+  const [availableLgas, setAvailableLgas] = useState<string[]>([]);
+  const [states, setStates] = useState<string[]>([]);
 
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const platform = searchParams.get("platform")
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const platform = searchParams.get("platform");
 
-  const { orderSummary, updateDeliveryFee } = useProductStore()
+  const { orderSummaries, updateDeliveryFeeForOrder } = useProductStore();
   const {
     checkoutData,
     setCustomerInfo,
@@ -74,28 +86,28 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
     setPaymentMethod,
     setDeliveryInstructions,
     setCurrentStep,
-  } = useCheckoutStore()
+  } = useCheckoutStore();
 
-  const currentStep = checkoutData.currentStep
-  const paymentMethod = checkoutData.paymentMethod
+  const currentStep = checkoutData.currentStep;
+  const paymentMethod = checkoutData.paymentMethod;
 
   // Form resolver for customer info and address
   const {
     form: { register, control, errors, watch, setValue, trigger, clearErrors },
   } = useFormResolver(async (data) => {
-    console.log("Customer delivery data:", data)
-    setCustomerInfo(data.customerInfo)
-    setCustomerAddress(data.customerAddress)
-    return data
-  }, deliveryFormSchema)
+    console.log("Customer delivery data:", data);
+    setCustomerInfo(data.customerInfo);
+    setCustomerAddress(data.customerAddress);
+    return data;
+  }, deliveryFormSchema);
 
   // Watch address fields for SWR key generation
-  const watchedState = watch("customerAddress.state")
-  const watchedLga = watch("customerAddress.lga")
-  const watchedStreetAddress = watch("customerAddress.streetAddress")
-  const watchedName = watch("customerInfo.name")
-  const watchedEmail = watch("customerInfo.email")
-  const watchedPhone = watch("customerInfo.phone")
+  const watchedState = watch("customerAddress.state");
+  const watchedLga = watch("customerAddress.lga");
+  const watchedStreetAddress = watch("customerAddress.streetAddress");
+  const watchedName = watch("customerInfo.name");
+  const watchedEmail = watch("customerInfo.email");
+  const watchedPhone = watch("customerInfo.phone");
 
   // SWR for buyer info fetching
   const buyerInfoKey =
@@ -105,45 +117,59 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
     watchedName.trim().length >= 2 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedEmail) &&
     /^(\+?234|0)[\d]{10}$/.test(watchedPhone)
-      ? `/api/orders/buyer-info?buyerName=${encodeURIComponent(watchedName.trim())}&buyerEmail=${encodeURIComponent(
-          watchedEmail.trim(),
+      ? `/api/orders/buyer-info?buyerName=${encodeURIComponent(
+          watchedName.trim()
+        )}&buyerEmail=${encodeURIComponent(
+          watchedEmail.trim()
         )}&buyerPhone=${encodeURIComponent(watchedPhone.trim())}`
-      : null
+      : null;
 
-  const { data: buyerInfoData, error: buyerInfoError } = useSWR(buyerInfoKey, fetcher, buyerInfoOptions)
+  const { data: buyerInfoData, error: buyerInfoError } = useSWR(
+    buyerInfoKey,
+    fetcher,
+    buyerInfoOptions
+  );
 
-  // SWR for logistics pricing
+  // Get the first order's pickup location for logistics pricing (you might want to handle multiple orders differently)
+  const firstOrderPickupLocation =
+    orderSummaries.length > 0 ? orderSummaries[0].pickupLocation : null;
+
+  // SWR for logistics pricing - using first order's pickup location
   const logisticsPricingKey =
     watchedState &&
     watchedLga &&
     watchedStreetAddress &&
-    orderSummary?.pickupLocation?.latitude &&
-    orderSummary?.pickupLocation?.longitude
-      ? `/api/logistics/pricing?state=${encodeURIComponent(watchedState)}&lga=${encodeURIComponent(
-          watchedLga,
+    firstOrderPickupLocation?.latitude &&
+    firstOrderPickupLocation?.longitude
+      ? `/api/logistics/pricing?state=${encodeURIComponent(
+          watchedState
+        )}&lga=${encodeURIComponent(
+          watchedLga
         )}&streetAddress=${encodeURIComponent(
-          watchedStreetAddress,
-        )}&supplierLat=${orderSummary.pickupLocation.latitude}&supplierLng=${orderSummary.pickupLocation.longitude}`
-      : null
+          watchedStreetAddress
+        )}&supplierLat=${firstOrderPickupLocation.latitude}&supplierLng=${
+          firstOrderPickupLocation.longitude
+        }`
+      : null;
 
   const {
     data: logisticsPricingData,
     error: logisticsPricingError,
     isLoading: isLogisticsPricingLoading,
-  } = useSWR(logisticsPricingKey, fetcher, logisticsPricingOptions)
+  } = useSWR(logisticsPricingKey, fetcher, logisticsPricingOptions);
 
   // Effect to handle buyer info auto-fill
   useEffect(() => {
     if (buyerInfoData?.data && !buyerInfoError) {
-      const data = buyerInfoData.data
+      const data = buyerInfoData.data;
 
       if (data.streetAddress && data.state && data.lga) {
-        setValue("customerAddress.streetAddress", data.streetAddress)
-        setValue("customerAddress.state", data.state)
-        setValue("customerAddress.lga", data.lga)
+        setValue("customerAddress.streetAddress", data.streetAddress);
+        setValue("customerAddress.state", data.state);
+        setValue("customerAddress.lga", data.lga);
 
         if (data.directions) {
-          setValue("customerAddress.directions", data.directions)
+          setValue("customerAddress.directions", data.directions);
         }
 
         setCustomerAddress({
@@ -151,173 +177,206 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
           state: data.state,
           lga: data.lga,
           directions: data.directions || "",
-        })
+        });
 
-        setSelectedState(data.state)
-        const lgas = getLgasForState(data.state)
-        setAvailableLgas(lgas)
+        setSelectedState(data.state);
+        const lgas = getLgasForState(data.state);
+        setAvailableLgas(lgas);
       }
     }
-  }, [buyerInfoData, buyerInfoError, setValue, setCustomerAddress])
+  }, [buyerInfoData, buyerInfoError, setValue, setCustomerAddress]);
+
+  // Function to update delivery fee for all orders
+  const updateDeliveryFee = (price: number) => {
+    orderSummaries.forEach((_, index) => {
+      updateDeliveryFeeForOrder(index, price);
+    });
+  };
 
   // Effect to handle logistics pricing updates
   useEffect(() => {
     if (logisticsPricingData?.data && !logisticsPricingError) {
-      const price = logisticsPricingData.data.price
+      const price = logisticsPricingData.data.price;
 
       if (price !== undefined) {
-        updateDeliveryFee(price)
+        updateDeliveryFee(price);
 
-        if (logisticsPricingData.data.buyerLatitude && logisticsPricingData.data.buyerLongitude) {
+        if (
+          logisticsPricingData.data.buyerLatitude &&
+          logisticsPricingData.data.buyerLongitude
+        ) {
           onBuyerCoordinatesChange({
             latitude: logisticsPricingData.data.buyerLatitude,
             longitude: logisticsPricingData.data.buyerLongitude,
-          })
+          });
         } else {
           onBuyerCoordinatesChange({
             latitude: 6.5244 + (Math.random() - 0.5) * 0.1,
             longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
-          })
+          });
         }
       }
     } else if (logisticsPricingError) {
-      console.error("Logistics pricing error:", logisticsPricingError)
-      updateDeliveryFee(1500)
+      console.error("Logistics pricing error:", logisticsPricingError);
+      updateDeliveryFee(1500);
       onBuyerCoordinatesChange({
         latitude: 6.5244 + (Math.random() - 0.5) * 0.1,
         longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
-      })
+      });
     }
-  }, [logisticsPricingData, logisticsPricingError, updateDeliveryFee, onBuyerCoordinatesChange])
+  }, [logisticsPricingData, logisticsPricingError, onBuyerCoordinatesChange]);
 
   const handleBackNavigation = () => {
     if (platform !== "store") {
-      router.back()
+      router.back();
     }
-  }
+  };
 
   // Initialize states and form data
   useEffect(() => {
     try {
-      const statesData = NaijaStates.states()
+      const statesData = NaijaStates.states();
       if (Array.isArray(statesData)) {
         const stateNames = statesData
           .map((state: any) => {
-            return typeof state === "string" ? state : state.state || state.name
+            return typeof state === "string"
+              ? state
+              : state.state || state.name;
           })
-          .filter(Boolean)
-        setStates(stateNames)
+          .filter(Boolean);
+        setStates(stateNames);
       }
     } catch (error) {
-      console.error("Error fetching states:", error)
-      setStates([])
+      console.error("Error fetching states:", error);
+      setStates([]);
     }
 
     // Initialize form with stored data
-    setValue("customerInfo.name", checkoutData.customerInfo.name || "")
-    setValue("customerInfo.email", checkoutData.customerInfo.email || "")
-    setValue("customerInfo.phone", checkoutData.customerInfo.phone || "")
-    setValue("customerAddress.streetAddress", checkoutData.customerAddress.streetAddress || "")
-    setValue("customerAddress.state", checkoutData.customerAddress.state || "")
-    setValue("customerAddress.lga", checkoutData.customerAddress.lga || "")
-    setValue("customerAddress.directions", checkoutData.customerAddress.directions || "")
-  }, [setValue, checkoutData])
+    setValue("customerInfo.name", checkoutData.customerInfo.name || "");
+    setValue("customerInfo.email", checkoutData.customerInfo.email || "");
+    setValue("customerInfo.phone", checkoutData.customerInfo.phone || "");
+    setValue(
+      "customerAddress.streetAddress",
+      checkoutData.customerAddress.streetAddress || ""
+    );
+    setValue("customerAddress.state", checkoutData.customerAddress.state || "");
+    setValue("customerAddress.lga", checkoutData.customerAddress.lga || "");
+    setValue(
+      "customerAddress.directions",
+      checkoutData.customerAddress.directions || ""
+    );
+  }, [setValue, checkoutData]);
 
   // Watch state changes to update LGAs
   useEffect(() => {
     if (watchedState && watchedState !== selectedState) {
-      setSelectedState(watchedState)
-      const lgas = getLgasForState(watchedState)
-      setAvailableLgas(lgas)
-      setCustomerAddress({ state: watchedState })
+      setSelectedState(watchedState);
+      const lgas = getLgasForState(watchedState);
+      setAvailableLgas(lgas);
+      setCustomerAddress({ state: watchedState });
     }
-  }, [watchedState, selectedState, setValue, setCustomerAddress])
+  }, [watchedState, selectedState, setValue, setCustomerAddress]);
 
   // Watch form values for real-time validation and store updates
-  const watchedCustomerInfo = watch("customerInfo")
-  const watchedCustomerAddress = watch("customerAddress")
+  const watchedCustomerInfo = watch("customerInfo");
+  const watchedCustomerAddress = watch("customerAddress");
 
   useEffect(() => {
     if (watchedCustomerInfo) {
-      setCustomerInfo(watchedCustomerInfo)
+      setCustomerInfo(watchedCustomerInfo);
     }
-  }, [watchedCustomerInfo, setCustomerInfo])
+  }, [watchedCustomerInfo, setCustomerInfo]);
 
   useEffect(() => {
     if (watchedCustomerAddress) {
-      setCustomerAddress(watchedCustomerAddress)
+      setCustomerAddress(watchedCustomerAddress);
     }
-  }, [watchedCustomerAddress, setCustomerAddress])
+  }, [watchedCustomerAddress, setCustomerAddress]);
 
   // Clear errors when fields become valid
   useEffect(() => {
     const validateField = async (fieldName: any, value: string) => {
       if (value && value.trim() !== "") {
-        const isFieldValid = await trigger(fieldName)
+        const isFieldValid = await trigger(fieldName);
         if (isFieldValid) {
-          clearErrors(fieldName)
+          clearErrors(fieldName);
         }
       }
-    }
+    };
 
     if (watchedCustomerInfo?.name) {
-      validateField("customerInfo.name", watchedCustomerInfo.name)
+      validateField("customerInfo.name", watchedCustomerInfo.name);
     }
     if (watchedCustomerInfo?.email) {
-      validateField("customerInfo.email", watchedCustomerInfo.email)
+      validateField("customerInfo.email", watchedCustomerInfo.email);
     }
     if (watchedCustomerInfo?.phone) {
-      validateField("customerInfo.phone", watchedCustomerInfo.phone)
+      validateField("customerInfo.phone", watchedCustomerInfo.phone);
     }
 
     if (watchedCustomerAddress?.streetAddress) {
-      validateField("customerAddress.streetAddress", watchedCustomerAddress.streetAddress)
+      validateField(
+        "customerAddress.streetAddress",
+        watchedCustomerAddress.streetAddress
+      );
     }
     if (watchedCustomerAddress?.state) {
-      validateField("customerAddress.state", watchedCustomerAddress.state)
+      validateField("customerAddress.state", watchedCustomerAddress.state);
     }
     if (watchedCustomerAddress?.lga) {
-      validateField("customerAddress.lga", watchedCustomerAddress.lga)
+      validateField("customerAddress.lga", watchedCustomerAddress.lga);
     }
-  }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors])
+  }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors]);
 
   const continueToReview = () => {
-    onContinueToReview()
-    mutate(`/public/products/${orderSummary?.productId}${orderSummary?.referralId}`)
-  }
+    onContinueToReview();
+    // Mutate all product URLs for the orders
+    orderSummaries.forEach((orderSummary) => {
+      mutate(
+        `/public/products/${orderSummary?.productId}${
+          orderSummary?.referralId || ""
+        }`
+      );
+    });
+  };
 
   const goToNextStep = async () => {
     if (currentStep === "delivery") {
-      const isFormValid = await trigger()
+      const isFormValid = await trigger();
 
       if (isFormValid) {
-        setCurrentStep("review")
+        setCurrentStep("review");
       } else {
-        const firstError = document.querySelector(".border-red-500")
+        const firstError = document.querySelector(".border-red-500");
         if (firstError) {
-          firstError.scrollIntoView({ behavior: "smooth", block: "center" })
+          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       }
     }
-  }
+  };
 
   const handlePaymentMethodChange = (method: "online" | "cash") => {
-    setPaymentMethod(method)
-  }
+    setPaymentMethod(method);
+  };
 
   const handleDeliveryInstructionsChange = (instructions: string) => {
-    setDeliveryInstructions(instructions)
-  }
+    setDeliveryInstructions(instructions);
+  };
 
   const formatPrice = (price?: string | number) => {
-    return `₦${price?.toLocaleString()}`
-  }
+    return `₦${price?.toLocaleString()}`;
+  };
 
   return (
     <div className="flex flex-col min-h-screen pb-16 md:pb-0">
       {platform !== "store" && (
         <div className="sticky top-0 z-20 flex items-center p-4 bg-background/80 backdrop-blur-md border-b">
-          <Button variant="ghost" size="sm" onClick={handleBackNavigation} className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBackNavigation}
+            className="flex items-center gap-2"
+          >
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
@@ -328,7 +387,9 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
         {currentStep === "delivery" && (
           <Card>
             <CardContent className="p-4 md:p-6">
-              <h2 className="text-xl font-semibold mb-4">Delivery Information</h2>
+              <h2 className="text-xl font-semibold mb-4">
+                Delivery Information
+              </h2>
 
               <div className="space-y-6">
                 {/* Customer Information */}
@@ -345,19 +406,25 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                         id="customerName"
                         {...register("customerInfo.name", {
                           onChange: async (e) => {
-                            const value = e.target.value
-                            setCustomerInfo({ name: value })
+                            const value = e.target.value;
+                            setCustomerInfo({ name: value });
                             if (value && errors.customerInfo?.name) {
-                              const isValid = await trigger("customerInfo.name")
-                              if (isValid) clearErrors("customerInfo.name")
+                              const isValid = await trigger(
+                                "customerInfo.name"
+                              );
+                              if (isValid) clearErrors("customerInfo.name");
                             }
                           },
                         })}
                         placeholder="Enter your full name"
-                        className={errors.customerInfo?.name ? "border-red-500" : ""}
+                        className={
+                          errors.customerInfo?.name ? "border-red-500" : ""
+                        }
                       />
                       {errors.customerInfo?.name && (
-                        <p className="text-sm text-red-600">{errors.customerInfo.name.message}</p>
+                        <p className="text-sm text-red-600">
+                          {errors.customerInfo.name.message}
+                        </p>
                       )}
                     </div>
                     <div className="space-y-2">
@@ -369,19 +436,25 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                         type="email"
                         {...register("customerInfo.email", {
                           onChange: async (e) => {
-                            const value = e.target.value
-                            setCustomerInfo({ email: value })
+                            const value = e.target.value;
+                            setCustomerInfo({ email: value });
                             if (value && errors.customerInfo?.email) {
-                              const isValid = await trigger("customerInfo.email")
-                              if (isValid) clearErrors("customerInfo.email")
+                              const isValid = await trigger(
+                                "customerInfo.email"
+                              );
+                              if (isValid) clearErrors("customerInfo.email");
                             }
                           },
                         })}
                         placeholder="Enter your email address"
-                        className={errors.customerInfo?.email ? "border-red-500" : ""}
+                        className={
+                          errors.customerInfo?.email ? "border-red-500" : ""
+                        }
                       />
                       {errors.customerInfo?.email && (
-                        <p className="text-sm text-red-600">{errors.customerInfo.email.message}</p>
+                        <p className="text-sm text-red-600">
+                          {errors.customerInfo.email.message}
+                        </p>
                       )}
                     </div>
                     <div className="space-y-2 md:col-span-2">
@@ -392,19 +465,25 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                         id="customerPhone"
                         {...register("customerInfo.phone", {
                           onChange: async (e) => {
-                            const value = e.target.value
-                            setCustomerInfo({ phone: value })
+                            const value = e.target.value;
+                            setCustomerInfo({ phone: value });
                             if (value && errors.customerInfo?.phone) {
-                              const isValid = await trigger("customerInfo.phone")
-                              if (isValid) clearErrors("customerInfo.phone")
+                              const isValid = await trigger(
+                                "customerInfo.phone"
+                              );
+                              if (isValid) clearErrors("customerInfo.phone");
                             }
                           },
                         })}
                         placeholder="Enter your phone number"
-                        className={errors.customerInfo?.phone ? "border-red-500" : ""}
+                        className={
+                          errors.customerInfo?.phone ? "border-red-500" : ""
+                        }
                       />
                       {errors.customerInfo?.phone && (
-                        <p className="text-sm text-red-600">{errors.customerInfo.phone.message}</p>
+                        <p className="text-sm text-red-600">
+                          {errors.customerInfo.phone.message}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -419,9 +498,11 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                   <Alert className="mb-4">
                     <Info className="h-4 w-4" />
                     <AlertDescription>
-                      <strong>💡 Pro Tip:</strong> Providing a very specific and detailed address helps our logistics
-                      partners optimize delivery routes, which can potentially reduce your delivery costs. Include
-                      landmarks, building descriptions, and clear directions.
+                      <strong>💡 Pro Tip:</strong> Providing a very specific and
+                      detailed address helps our logistics partners optimize
+                      delivery routes, which can potentially reduce your
+                      delivery costs. Include landmarks, building descriptions,
+                      and clear directions.
                     </AlertDescription>
                   </Alert>
 
@@ -434,20 +515,32 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                         id="streetAddress"
                         {...register("customerAddress.streetAddress", {
                           onChange: async (e) => {
-                            const value = e.target.value
-                            setCustomerAddress({ streetAddress: value })
-                            if (value && errors.customerAddress?.streetAddress) {
-                              const isValid = await trigger("customerAddress.streetAddress")
-                              if (isValid) clearErrors("customerAddress.streetAddress")
+                            const value = e.target.value;
+                            setCustomerAddress({ streetAddress: value });
+                            if (
+                              value &&
+                              errors.customerAddress?.streetAddress
+                            ) {
+                              const isValid = await trigger(
+                                "customerAddress.streetAddress"
+                              );
+                              if (isValid)
+                                clearErrors("customerAddress.streetAddress");
                             }
                           },
                         })}
                         rows={3}
-                        className={errors.customerAddress?.streetAddress ? "border-red-500" : ""}
+                        className={
+                          errors.customerAddress?.streetAddress
+                            ? "border-red-500"
+                            : ""
+                        }
                         placeholder="Enter your full street address including house number, street name, area, and nearby landmarks for accurate delivery"
                       />
                       {errors.customerAddress?.streetAddress && (
-                        <p className="text-sm text-red-600">{errors.customerAddress.streetAddress.message}</p>
+                        <p className="text-sm text-red-600">
+                          {errors.customerAddress.streetAddress.message}
+                        </p>
                       )}
                     </div>
 
@@ -462,15 +555,25 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                           <Select
                             value={field.value}
                             onValueChange={async (value) => {
-                              field.onChange(value)
-                              setCustomerAddress({ state: value })
+                              field.onChange(value);
+                              setCustomerAddress({ state: value });
                               if (value && errors.customerAddress?.state) {
-                                const isValid = await trigger("customerAddress.state")
-                                if (isValid) clearErrors("customerAddress.state")
+                                const isValid = await trigger(
+                                  "customerAddress.state"
+                                );
+                                if (isValid)
+                                  clearErrors("customerAddress.state");
                               }
                             }}
                           >
-                            <SelectTrigger id="state" className={errors.customerAddress?.state ? "border-red-500" : ""}>
+                            <SelectTrigger
+                              id="state"
+                              className={
+                                errors.customerAddress?.state
+                                  ? "border-red-500"
+                                  : ""
+                              }
+                            >
                               <SelectValue placeholder="Select a state" />
                             </SelectTrigger>
                             <SelectContent>
@@ -484,13 +587,16 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                         )}
                       />
                       {errors.customerAddress?.state && (
-                        <p className="text-sm text-red-600">{errors.customerAddress.state.message}</p>
+                        <p className="text-sm text-red-600">
+                          {errors.customerAddress.state.message}
+                        </p>
                       )}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="lga">
-                        Local Government Area <span className="text-red-500">*</span>
+                        Local Government Area{" "}
+                        <span className="text-red-500">*</span>
                       </Label>
                       <Controller
                         name="customerAddress.lga"
@@ -499,19 +605,32 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                           <Select
                             value={field.value}
                             onValueChange={async (value) => {
-                              field.onChange(value)
-                              setCustomerAddress({ lga: value })
+                              field.onChange(value);
+                              setCustomerAddress({ lga: value });
                               if (value && errors.customerAddress?.lga) {
-                                const isValid = await trigger("customerAddress.lga")
-                                if (isValid) clearErrors("customerAddress.lga")
+                                const isValid = await trigger(
+                                  "customerAddress.lga"
+                                );
+                                if (isValid) clearErrors("customerAddress.lga");
                               }
                             }}
-                            disabled={!selectedState || availableLgas.length === 0}
+                            disabled={
+                              !selectedState || availableLgas.length === 0
+                            }
                           >
-                            <SelectTrigger id="lga" className={errors.customerAddress?.lga ? "border-red-500" : ""}>
+                            <SelectTrigger
+                              id="lga"
+                              className={
+                                errors.customerAddress?.lga
+                                  ? "border-red-500"
+                                  : ""
+                              }
+                            >
                               <SelectValue
                                 placeholder={
-                                  selectedState ? "Select a Local Government Area" : "Please select a state first"
+                                  selectedState
+                                    ? "Select a Local Government Area"
+                                    : "Please select a state first"
                                 }
                               />
                             </SelectTrigger>
@@ -526,28 +645,37 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                         )}
                       />
                       {errors.customerAddress?.lga && (
-                        <p className="text-sm text-red-600">{errors.customerAddress.lga.message}</p>
+                        <p className="text-sm text-red-600">
+                          {errors.customerAddress.lga.message}
+                        </p>
                       )}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="directions">
-                        Additional Directions <span className="text-gray-500">(Optional)</span>
+                        Additional Directions{" "}
+                        <span className="text-gray-500">(Optional)</span>
                       </Label>
                       <Textarea
                         id="directions"
                         {...register("customerAddress.directions", {
                           onChange: (e) => {
-                            const value = e.target.value
-                            setCustomerAddress({ directions: value })
+                            const value = e.target.value;
+                            setCustomerAddress({ directions: value });
                           },
                         })}
                         rows={3}
-                        className={errors.customerAddress?.directions ? "border-red-500" : ""}
+                        className={
+                          errors.customerAddress?.directions
+                            ? "border-red-500"
+                            : ""
+                        }
                         placeholder="Additional directions to help locate your address (e.g., 'Opposite First Bank', 'Blue gate with security post', 'Third floor, Apartment 3B')"
                       />
                       {errors.customerAddress?.directions && (
-                        <p className="text-sm text-red-600">{errors.customerAddress.directions.message}</p>
+                        <p className="text-sm text-red-600">
+                          {errors.customerAddress.directions.message}
+                        </p>
                       )}
                     </div>
 
@@ -559,14 +687,17 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                         <div className="flex items-center gap-2">
                           {logisticsPricingError && (
                             <span className="text-sm text-red-600">
-                              Unable to calculate delivery fee - using standard rate
+                              Unable to calculate delivery fee - using standard
+                              rate (₦1,500)
                             </span>
                           )}
-                          {logisticsPricingData?.data?.price !== undefined && !isLogisticsPricingLoading && (
-                            <span className="text-sm text-green-600">
-                              Delivery fee calculated: {formatPrice(logisticsPricingData.data.price)}
-                            </span>
-                          )}
+                          {logisticsPricingData?.data?.price !== undefined &&
+                            !isLogisticsPricingLoading && (
+                              <span className="text-sm text-green-600">
+                                Delivery fee calculated:{" "}
+                                {formatPrice(logisticsPricingData.data.price)}
+                              </span>
+                            )}
                         </div>
                       </div>
                     )}
@@ -578,25 +709,49 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                 <div>
                   <h3 className="font-medium mb-3">Payment Method</h3>
 
-                  <RadioGroup value={paymentMethod} onValueChange={handlePaymentMethodChange} className="space-y-3">
+                  <RadioGroup
+                    value={paymentMethod}
+                    onValueChange={handlePaymentMethodChange}
+                    className="space-y-3"
+                  >
                     <div className="flex items-center space-x-2 p-3 border rounded-md">
-                      <RadioGroupItem value="online" id="online" className="flex-shrink-0" />
-                      <Label htmlFor="online" className="flex items-center flex-1 min-w-0">
+                      <RadioGroupItem
+                        value="online"
+                        id="online"
+                        className="flex-shrink-0"
+                      />
+                      <Label
+                        htmlFor="online"
+                        className="flex items-center flex-1 min-w-0"
+                      >
                         <CreditCard className="h-4 w-4 mr-2 text-muted-foreground flex-shrink-0" />
                         <div className="min-w-0">
                           <span className="font-medium block">Pay Online</span>
-                          <p className="text-xs text-muted-foreground">Card, Bank Transfer, Mobile Money</p>
+                          <p className="text-xs text-muted-foreground">
+                            Card, Bank Transfer, Mobile Money
+                          </p>
                         </div>
                       </Label>
                     </div>
 
                     <div className="flex items-center space-x-2 p-3 border rounded-md">
-                      <RadioGroupItem value="cash" id="cash" className="flex-shrink-0" />
-                      <Label htmlFor="cash" className="flex items-center flex-1 min-w-0">
+                      <RadioGroupItem
+                        value="cash"
+                        id="cash"
+                        className="flex-shrink-0"
+                      />
+                      <Label
+                        htmlFor="cash"
+                        className="flex items-center flex-1 min-w-0"
+                      >
                         <Banknote className="h-4 w-4 mr-2 text-muted-foreground flex-shrink-0" />
                         <div className="min-w-0">
-                          <span className="font-medium block">Pay on Delivery</span>
-                          <p className="text-xs text-muted-foreground">Pay when your order arrives</p>
+                          <span className="font-medium block">
+                            Pay on Delivery
+                          </span>
+                          <p className="text-xs text-muted-foreground">
+                            Pay when your order arrives
+                          </p>
                         </div>
                       </Label>
                     </div>
@@ -606,12 +761,16 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                 <Separator />
 
                 <div>
-                  <h3 className="font-medium mb-3">Delivery Instructions (Optional)</h3>
+                  <h3 className="font-medium mb-3">
+                    Delivery Instructions (Optional)
+                  </h3>
                   <Textarea
                     placeholder="Add any special instructions for delivery..."
                     className="resize-none"
                     value={checkoutData.deliveryInstructions}
-                    onChange={(e) => handleDeliveryInstructionsChange(e.target.value)}
+                    onChange={(e) =>
+                      handleDeliveryInstructionsChange(e.target.value)
+                    }
                   />
                 </div>
               </div>
@@ -640,17 +799,20 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                       <p className="text-sm">
                         {checkoutData.customerInfo.name || "Customer Name"}
                         <br />
-                        {checkoutData.customerAddress.streetAddress || "Street Address"}
+                        {checkoutData.customerAddress.streetAddress ||
+                          "Street Address"}
                         {checkoutData.customerAddress.directions && (
                           <>
                             <br />
                             <span className="text-muted-foreground">
-                              Directions: {checkoutData.customerAddress.directions}
+                              Directions:{" "}
+                              {checkoutData.customerAddress.directions}
                             </span>
                           </>
                         )}
                         <br />
-                        {checkoutData.customerAddress.lga}, {checkoutData.customerAddress.state}
+                        {checkoutData.customerAddress.lga},{" "}
+                        {checkoutData.customerAddress.state}
                         <br />
                         {checkoutData.customerInfo.phone || "Phone Number"}
                       </p>
@@ -667,7 +829,9 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
                     {paymentMethod === "online" ? (
                       <>
                         <CreditCard className="h-5 w-5 text-muted-foreground mr-2 flex-shrink-0" />
-                        <span className="text-sm">Online Payment (Card, Bank Transfer, Mobile Money)</span>
+                        <span className="text-sm">
+                          Online Payment (Card, Bank Transfer, Mobile Money)
+                        </span>
                       </>
                     ) : (
                       <>
@@ -683,5 +847,5 @@ export default function CheckoutForm({ onContinueToReview, onBuyerCoordinatesCha
         )}
       </div>
     </div>
-  )
+  );
 }
