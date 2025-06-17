@@ -245,7 +245,7 @@ export function useProductFetcher() {
 
   // Fetch all products manually (not using SWR to avoid conditional hooks)
   const fetchProducts = useCallback(async () => {
-    if (!shouldFetch || items.length === 0) {
+    if (shouldFetch) {
       setFetchedData([])
       setIsLoading(false)
       setHasErrors(false)
