@@ -26,24 +26,15 @@ export function useProductFetcher() {
   // Only fetch if platform is "store" and we have items
   const shouldFetch = platform === "store" && items.length > 0;
 
-  // Create a single SWR key that includes all product IDs
-  // This ensures we always call the same number of hooks
-  const allProductIds = items.map(item => item.pid).join(',');
-  const singleKey = shouldFetch && allProductIds 
-    ? `/api/public/products/batch?ids=${allProductIds}&subdomain=${ref}` 
-    : null;
-
-  // Use a single SWR call instead of multiple conditional ones
-  const { data: batchData, error: batchError } = useSWR(singleKey, fetcher);
-
-  // Alternative approach if you don't have a batch endpoint:
   // Use individual hooks but always call the same number
+  // This ensures we follow React's rules of hooks
   const maxItems = 10; // Set a reasonable maximum
   const productQueries = Array.from({ length: maxItems }, (_, index) => {
     const item = items[index];
-    const key = shouldFetch && item 
-      ? `/api/public/products/${item.pid}?subdomain=${ref}` 
-      : null;
+    const key =
+      shouldFetch && item
+        ? `/api/public/products/${item.pid}?subdomain=${ref}`
+        : null;
     return useSWR(key, fetcher);
   });
 
