@@ -32,7 +32,7 @@ interface OrderSummaryProps {
   watchedState?: string;
   watchedLga?: string;
   watchedStreetAddress?: string;
-  orderIndex?: number; // Add orderIndex to identify which order we're working with
+  orderIndex?: number;
 }
 
 export default function OrderSummary({
@@ -43,7 +43,7 @@ export default function OrderSummary({
   watchedState,
   watchedLga,
   watchedStreetAddress,
-  orderIndex = 0, // Default to first order if not specified
+  orderIndex = 0,
 }: OrderSummaryProps) {
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,9 +54,7 @@ export default function OrderSummary({
   const { checkoutData, clearCheckoutData, setCurrentStep } =
     useCheckoutStore();
 
-  // Get the specific order summary we're working with
   const orderSummary = orderSummaries[orderIndex];
-
   const cartItems = orderSummary?.items;
   const subtotal =
     orderSummary?.subtotal ||
@@ -83,7 +81,7 @@ export default function OrderSummary({
     if (!orderSummary?.items) return [];
 
     return orderSummary.items.map((item) => ({
-      productId: orderSummary.productId,
+      productId: item.id, // Changed from orderSummary.productId to item.productId
       quantity: item.quantity,
       ...(item.variationId && {
         variantId: item.variationId,
@@ -104,6 +102,22 @@ export default function OrderSummary({
     const supplierAmount = calculateSupplierAmount();
     const plugAmount = subtotal! - supplierAmount;
 
+    // Get all unique supplier IDs from items
+    const supplierIds = Array.from(
+      new Set(orderSummary?.items?.map((item) => item.supplierId))
+    );
+
+    // Calculate average plug price and supplier price
+    const totalItems = orderSummary?.items?.length || 1;
+    const avgPlugPrice =
+      orderSummary?.items?.reduce((sum, item) => sum + item.price, 0) /
+      totalItems;
+    const avgSupplierPrice =
+      orderSummary?.items?.reduce(
+        (sum, item) => sum + (item.originalPrice || item.price),
+        0
+      ) / totalItems;
+
     const orderData = {
       // Buyer information
       buyerName: checkoutData.customerInfo.name,
@@ -117,8 +131,8 @@ export default function OrderSummary({
       buyerLatitude: buyerCoordinates.latitude || 6.5244,
       buyerLongitude: buyerCoordinates.longitude || 3.3792,
 
-      // Supplier information
-      supplierId: orderSummary?.items?.[0]?.supplierId || "",
+      // Supplier information - now includes all supplier IDs
+      supplierId: supplierIds.join(","), // Combine multiple supplier IDs if needed
 
       // Order details
       paymentMethod: paymentMethod,
@@ -126,8 +140,8 @@ export default function OrderSummary({
       deliveryFee: deliveryFee,
       supplierAmount: supplierAmount,
       plugAmount: plugAmount,
-      plugPrice: orderSummary?.items?.[0]?.price,
-      supplierPrice: orderSummary?.items?.[0]?.originalPrice,
+      plugPrice: avgPlugPrice, // Average price instead of first item
+      supplierPrice: avgSupplierPrice, // Average price instead of first item
       plugId: orderSummary?.referralId || "",
       orderItems: formatOrderItems(),
 
