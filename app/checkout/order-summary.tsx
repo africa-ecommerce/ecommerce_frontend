@@ -32,7 +32,7 @@ interface OrderSummaryProps {
   watchedState?: string;
   watchedLga?: string;
   watchedStreetAddress?: string;
-  orderIndex: number; // Add orderIndex to identify which order we're working with
+  orderIndex?: number; // Add orderIndex to identify which order we're working with
 }
 
 export default function OrderSummary({
