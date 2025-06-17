@@ -99,6 +99,9 @@ export function useProductFetcher() {
       return;
     }
 
+    console.log("platform", platform)
+    console.log("items", items.length)
+
     const orderSummaries = items
       .map((item, index) => {
         const productResponse = fetchedData[index];
@@ -164,6 +167,7 @@ export function useProductFetcher() {
       .filter(
         (summary): summary is NonNullable<typeof summary> => summary !== null
       );
+      console.log("orderSummary", orderSummaries)
 
     if (orderSummaries.length > 0) {
       setOrderSummaries(orderSummaries);
