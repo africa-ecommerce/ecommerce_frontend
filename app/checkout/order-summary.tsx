@@ -49,7 +49,7 @@ export default function OrderSummary({
   const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
-  const { orderSummaries, updateDeliveryFeeForOrder, clearOrderSummaries } =
+  const { orderSummaries , clearOrderSummaries } =
     useProductStore();
   const { checkoutData, clearCheckoutData, setCurrentStep } =
     useCheckoutStore();
@@ -76,6 +76,12 @@ export default function OrderSummary({
       return total + originalPrice * item.quantity;
     }, 0);
   };
+
+
+
+
+
+
 
   const formatOrderItems = () => {
     if (!orderSummary?.items) return [];
@@ -234,12 +240,12 @@ export default function OrderSummary({
   const deliveryFee = getDeliveryFee();
   const total = subtotal! + (deliveryFee || 0);
 
-  // Update delivery fee in the store whenever it changes
-  useEffect(() => {
-    if (deliveryFee !== null && deliveryFee !== undefined) {
-      updateDeliveryFeeForOrder(orderIndex, deliveryFee);
-    }
-  }, [deliveryFee, orderIndex, updateDeliveryFeeForOrder]);
+//   // Update delivery fee in the store whenever it changes
+//   useEffect(() => {
+//     if (deliveryFee !== null && deliveryFee !== undefined) {
+//      (orderIndex, deliveryFee);
+//     }
+//   }, [deliveryFee, orderIndex ]);
 
   const goToPreviousStep = () => {
     if (currentStep === "review") setCurrentStep("delivery");
