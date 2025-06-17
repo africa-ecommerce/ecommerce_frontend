@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useState, useCallback } from "react";
 import useSWR from "swr";
 import { useSearchParams } from "next/navigation";
 import { useProductStore } from "./product-store";
@@ -18,6 +18,9 @@ const fetcher = async (url: string) => {
 export function useProductFetcher() {
   const searchParams = useSearchParams();
   const { setOrderSummaries, clearOrderSummaries } = useProductStore();
+  const [fetchedData, setFetchedData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasErrors, setHasErrors] = useState(false);
 
   // Parse URL parameters
   const parsedUrl = parseCheckoutUrl(searchParams);
@@ -26,30 +29,68 @@ export function useProductFetcher() {
   // Only fetch if platform is "store" and we have items
   const shouldFetch = platform === "store" && items.length > 0;
 
-  // Use individual hooks but always call the same number
-  // This ensures we follow React's rules of hooks
-  const maxItems = 10; // Set a reasonable maximum
-  const productQueries = Array.from({ length: maxItems }, (_, index) => {
-    const item = items[index];
-    const key =
-      shouldFetch && item
-        ? `/api/public/products/${item.pid}?subdomain=${ref}`
-        : null;
-    return useSWR(key, fetcher);
-  });
+  // Create URLs for all products
+  const productUrls = shouldFetch 
+    ? items.map(item => `/api/public/products/${item.pid}?subdomain=${ref}`)
+    : [];
 
-  // Only consider queries for actual items
-  const activeQueries = productQueries.slice(0, items.length);
-  const allLoaded = activeQueries.every((query) => query.data || query.error);
-  const hasErrors = activeQueries.some((query) => query.error);
+  // Fetch all products sequentially to avoid hook violations
+  const fetchProducts = useCallback(async () => {
+    if (!shouldFetch || productUrls.length === 0) {
+      setFetchedData([]);
+      setIsLoading(false);
+      setHasErrors(false);
+      return;
+    }
 
+    setIsLoading(true);
+    setHasErrors(false);
+
+    try {
+      const promises = productUrls.map(url => fetcher(url));
+      const results = await Promise.allSettled(promises);
+      
+      const data = results.map(result => 
+        result.status === 'fulfilled' ? result.value : null
+      );
+      
+      const hasAnyErrors = results.some(result => result.status === 'rejected');
+      
+      setFetchedData(data);
+      setHasErrors(hasAnyErrors);
+      
+      if (hasAnyErrors) {
+        console.error("Some product fetches failed:", results
+          .filter(result => result.status === 'rejected')
+          .map(result => result.reason)
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setHasErrors(true);
+      setFetchedData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [shouldFetch, JSON.stringify(productUrls)]);
+
+  // Fetch products when dependencies change
   useLayoutEffect(() => {
-    if (!shouldFetch) return;
+    fetchProducts();
+  }, [fetchProducts]);
 
-    if (allLoaded && !hasErrors) {
+  // Process fetched data into order summaries
+  useLayoutEffect(() => {
+    if (!shouldFetch) {
+      clearOrderSummaries();
+      return;
+    }
+
+    if (!isLoading && !hasErrors && fetchedData.length > 0) {
       const orderSummaries = items
         .map((item, index) => {
-          const productData = activeQueries[index]?.data?.data;
+          const productResponse = fetchedData[index];
+          const productData = productResponse?.data;
 
           if (!productData) return null;
 
@@ -116,16 +157,13 @@ export function useProductFetcher() {
 
     // Clear summaries if there are errors
     if (hasErrors) {
-      console.error(
-        "Error fetching products:",
-        activeQueries.map((q) => q.error).filter(Boolean)
-      );
       clearOrderSummaries();
     }
   }, [
     shouldFetch,
-    allLoaded,
+    isLoading,
     hasErrors,
+    fetchedData,
     items,
     ref,
     platform,
@@ -134,8 +172,9 @@ export function useProductFetcher() {
   ]);
 
   return {
-    isLoading: shouldFetch && !allLoaded,
+    isLoading,
     hasErrors,
-    errors: activeQueries.map((q) => q.error).filter(Boolean),
+    errors: hasErrors ? ["Failed to fetch product data"] : [],
+    refetch: fetchProducts,
   };
 }

@@ -2896,9 +2896,8 @@
 
 
 
-
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -2911,6 +2910,7 @@ import {
   Info,
   ChevronLeft,
   ChevronRight,
+  RefreshCw,
 } from "lucide-react";
 import useSWR, { mutate } from "swr";
 
@@ -2944,7 +2944,11 @@ const PaystackButton = dynamic(
   () => import("react-paystack").then((mod) => mod.PaystackButton),
   {
     ssr: false,
-    loading: () => <Button className="flex-1">Loading Payment...</Button>,
+    loading: () => (
+      <Button className="flex-1" disabled>
+        Loading Payment...
+      </Button>
+    ),
   }
 );
 
@@ -2986,8 +2990,11 @@ export default function CheckoutPage() {
   }>({ latitude: null, longitude: null });
 
   // Use the product fetcher hook
-  const { isLoading: isProductLoading, hasErrors: hasProductErrors } =
-    useProductFetcher();
+  const {
+    isLoading: isProductLoading,
+    hasErrors: hasProductErrors,
+    refetch: refetchProducts,
+  } = useProductFetcher();
 
   // Replace local state with Zustand store
   const {
@@ -3027,9 +3034,13 @@ export default function CheckoutPage() {
   const cartItems = orderSummary?.items;
 
   // Calculate subtotal from current order
-  const subtotal =
-    orderSummary?.subtotal ||
-    cartItems?.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = useMemo(() => {
+    return (
+      orderSummary?.subtotal ||
+      cartItems?.reduce((sum, item) => sum + item.price * item.quantity, 0) ||
+      0
+    );
+  }, [orderSummary?.subtotal, cartItems]);
 
   // Form resolver for customer info and address
   const {
@@ -3059,20 +3070,22 @@ export default function CheckoutPage() {
   const watchedEmail = watch("customerInfo.email");
   const watchedPhone = watch("customerInfo.phone");
 
-  // SWR for buyer info fetching
-  const buyerInfoKey =
-    watchedName &&
-    watchedEmail &&
-    watchedPhone &&
-    watchedName.trim().length >= 2 &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedEmail) &&
-    /^(\+?234|0)[\d]{10}$/.test(watchedPhone)
-      ? `/api/orders/buyer-info?buyerName=${encodeURIComponent(
-          watchedName.trim()
-        )}&buyerEmail=${encodeURIComponent(
-          watchedEmail.trim()
-        )}&buyerPhone=${encodeURIComponent(watchedPhone.trim())}`
-      : null;
+  // Memoize buyer info key to prevent unnecessary re-renders
+  const buyerInfoKey = useMemo(() => {
+    if (!watchedName || !watchedEmail || !watchedPhone) return null;
+
+    const nameValid = watchedName.trim().length >= 2;
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedEmail);
+    const phoneValid = /^(\+?234|0)[\d]{10}$/.test(watchedPhone);
+
+    if (!nameValid || !emailValid || !phoneValid) return null;
+
+    return `/api/orders/buyer-info?buyerName=${encodeURIComponent(
+      watchedName.trim()
+    )}&buyerEmail=${encodeURIComponent(
+      watchedEmail.trim()
+    )}&buyerPhone=${encodeURIComponent(watchedPhone.trim())}`;
+  }, [watchedName, watchedEmail, watchedPhone]);
 
   const { data: buyerInfoData, error: buyerInfoError } = useSWR(
     buyerInfoKey,
@@ -3080,23 +3093,28 @@ export default function CheckoutPage() {
     buyerInfoOptions
   );
 
-  // SWR for logistics pricing
-  const logisticsPricingKey =
-    watchedState &&
-    watchedLga &&
-    watchedStreetAddress &&
-    orderSummary?.pickupLocation?.latitude &&
-    orderSummary?.pickupLocation?.longitude
-      ? `/api/logistics/pricing?state=${encodeURIComponent(
-          watchedState
-        )}&lga=${encodeURIComponent(
-          watchedLga
-        )}&streetAddress=${encodeURIComponent(
-          watchedStreetAddress
-        )}&supplierLat=${orderSummary.pickupLocation.latitude}&supplierLng=${
-          orderSummary.pickupLocation.longitude
-        }`
-      : null;
+  // Memoize logistics pricing key
+  const logisticsPricingKey = useMemo(() => {
+    if (!watchedState || !watchedLga || !watchedStreetAddress) return null;
+    if (
+      !orderSummary?.pickupLocation?.latitude ||
+      !orderSummary?.pickupLocation?.longitude
+    )
+      return null;
+
+    return `/api/logistics/pricing?state=${encodeURIComponent(
+      watchedState
+    )}&lga=${encodeURIComponent(watchedLga)}&streetAddress=${encodeURIComponent(
+      watchedStreetAddress
+    )}&supplierLat=${orderSummary.pickupLocation.latitude}&supplierLng=${
+      orderSummary.pickupLocation.longitude
+    }`;
+  }, [
+    watchedState,
+    watchedLga,
+    watchedStreetAddress,
+    orderSummary?.pickupLocation,
+  ]);
 
   const {
     data: logisticsPricingData,
@@ -3125,20 +3143,35 @@ export default function CheckoutPage() {
       setStates([]);
     }
 
-    setValue("customerInfo.name", checkoutData.customerInfo.name || "");
-    setValue("customerInfo.email", checkoutData.customerInfo.email || "");
-    setValue("customerInfo.phone", checkoutData.customerInfo.phone || "");
-    setValue(
-      "customerAddress.streetAddress",
-      checkoutData.customerAddress.streetAddress || ""
-    );
-    setValue("customerAddress.state", checkoutData.customerAddress.state || "");
-    setValue("customerAddress.lga", checkoutData.customerAddress.lga || "");
-    setValue(
-      "customerAddress.directions",
-      checkoutData.customerAddress.directions || ""
-    );
-  }, [setValue, checkoutData]);
+    // Initialize form with existing data
+    if (checkoutData.customerInfo.name) {
+      setValue("customerInfo.name", checkoutData.customerInfo.name);
+    }
+    if (checkoutData.customerInfo.email) {
+      setValue("customerInfo.email", checkoutData.customerInfo.email);
+    }
+    if (checkoutData.customerInfo.phone) {
+      setValue("customerInfo.phone", checkoutData.customerInfo.phone);
+    }
+    if (checkoutData.customerAddress.streetAddress) {
+      setValue(
+        "customerAddress.streetAddress",
+        checkoutData.customerAddress.streetAddress
+      );
+    }
+    if (checkoutData.customerAddress.state) {
+      setValue("customerAddress.state", checkoutData.customerAddress.state);
+    }
+    if (checkoutData.customerAddress.lga) {
+      setValue("customerAddress.lga", checkoutData.customerAddress.lga);
+    }
+    if (checkoutData.customerAddress.directions) {
+      setValue(
+        "customerAddress.directions",
+        checkoutData.customerAddress.directions
+      );
+    }
+  }, [setValue]); // Only depend on setValue to avoid infinite loops
 
   // Watch state changes to update LGAs
   useEffect(() => {
@@ -3146,26 +3179,40 @@ export default function CheckoutPage() {
       setSelectedState(watchedState);
       const lgas = getLgasForState(watchedState);
       setAvailableLgas(lgas);
-
       setCustomerAddress({ state: watchedState });
     }
-  }, [watchedState, selectedState, setValue, setCustomerAddress]);
+  }, [watchedState, selectedState, setCustomerAddress]);
 
   // Watch form values for real-time validation and store updates
-  const watchedCustomerInfo = watch("customerInfo");
-  const watchedCustomerAddress = watch("customerAddress");
+  useEffect(() => {
+    const customerInfo = watch("customerInfo");
+    if (
+      customerInfo &&
+      (customerInfo.name !== checkoutData.customerInfo.name ||
+        customerInfo.email !== checkoutData.customerInfo.email ||
+        customerInfo.phone !== checkoutData.customerInfo.phone)
+    ) {
+      setCustomerInfo(customerInfo);
+    }
+  }, [watch("customerInfo"), setCustomerInfo, checkoutData.customerInfo]);
 
   useEffect(() => {
-    if (watchedCustomerInfo) {
-      setCustomerInfo(watchedCustomerInfo);
+    const customerAddress = watch("customerAddress");
+    if (
+      customerAddress &&
+      (customerAddress.streetAddress !==
+        checkoutData.customerAddress.streetAddress ||
+        customerAddress.state !== checkoutData.customerAddress.state ||
+        customerAddress.lga !== checkoutData.customerAddress.lga ||
+        customerAddress.directions !== checkoutData.customerAddress.directions)
+    ) {
+      setCustomerAddress(customerAddress);
     }
-  }, [watchedCustomerInfo, setCustomerInfo]);
-
-  useEffect(() => {
-    if (watchedCustomerAddress) {
-      setCustomerAddress(watchedCustomerAddress);
-    }
-  }, [watchedCustomerAddress, setCustomerAddress]);
+  }, [
+    watch("customerAddress"),
+    setCustomerAddress,
+    checkoutData.customerAddress,
+  ]);
 
   // Effect to handle buyer info auto-fill
   useEffect(() => {
@@ -3234,41 +3281,6 @@ export default function CheckoutPage() {
     currentOrderIndex,
   ]);
 
-  // Clear errors when fields become valid
-  useEffect(() => {
-    const validateField = async (fieldName, value) => {
-      if (value && value.trim() !== "") {
-        const isFieldValid = await trigger(fieldName);
-        if (isFieldValid) {
-          clearErrors(fieldName);
-        }
-      }
-    };
-
-    if (watchedCustomerInfo?.name) {
-      validateField("customerInfo.name", watchedCustomerInfo.name);
-    }
-    if (watchedCustomerInfo?.email) {
-      validateField("customerInfo.email", watchedCustomerInfo.email);
-    }
-    if (watchedCustomerInfo?.phone) {
-      validateField("customerInfo.phone", watchedCustomerInfo.phone);
-    }
-
-    if (watchedCustomerAddress?.streetAddress) {
-      validateField(
-        "customerAddress.streetAddress",
-        watchedCustomerAddress.streetAddress
-      );
-    }
-    if (watchedCustomerAddress?.state) {
-      validateField("customerAddress.state", watchedCustomerAddress.state);
-    }
-    if (watchedCustomerAddress?.lga) {
-      validateField("customerAddress.lga", watchedCustomerAddress.lga);
-    }
-  }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors]);
-
   // Helper function to calculate supplier amount
   const calculateSupplierAmount = () => {
     if (!orderSummary?.items) return 0;
@@ -3303,7 +3315,8 @@ export default function CheckoutPage() {
     paymentReference?: string
   ) => {
     const supplierAmount = calculateSupplierAmount();
-    const plugAmount = subtotal! - supplierAmount;
+    const plugAmount = subtotal - supplierAmount;
+    const deliveryFee = getDeliveryFee() || 0;
 
     const orderData = {
       buyerName: checkoutData.customerInfo.name,
@@ -3320,7 +3333,7 @@ export default function CheckoutPage() {
       supplierId: orderSummary?.items?.[0]?.supplierId || "",
 
       paymentMethod: paymentMethod,
-      totalAmount: subtotal + (deliveryFee || 0),
+      totalAmount: subtotal + deliveryFee,
       deliveryFee: deliveryFee,
       supplierAmount: supplierAmount,
       plugAmount: plugAmount,
@@ -3422,47 +3435,66 @@ export default function CheckoutPage() {
 
   const continueToReview = () => {
     setCurrentStep("review");
-    mutate(
-      `/public/products/${orderSummary?.productId}${orderSummary?.referralId}`
-    );
+    if (orderSummary?.productId && orderSummary?.referralId) {
+      mutate(
+        `/public/products/${orderSummary.productId}${orderSummary.referralId}`
+      );
+    }
   };
 
-  const paystackConfig = {
-    email: watchedCustomerInfo?.email || "",
-    amount: total * 100,
-    metadata: {
-      name: watchedCustomerInfo?.name || "",
-      phone: watchedCustomerInfo?.phone || "",
-      address: watchedCustomerAddress
-        ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
-        : "",
-      custom_fields: [
-        {
-          display_name: "Order Items",
-          variable_name: "order_items",
-          value: cartItems
-            ?.map((item) => `${item.name} x${item.quantity}`)
-            .join(", "),
-        },
-      ],
-    },
-    publicKey: "pk_test_eff9334b69c4057bd0b89b293824020426f0d011",
-    text: isLoading ? "Processing..." : "Place Order",
-    onSuccess: async (reference) => {
-      try {
-        await placeOrder("online", reference.reference);
-        console.log("Payment successful:", reference);
-      } catch (error) {
-        console.error("Error placing order after successful payment:", error);
-      }
-    },
-    onClose: () => {
-      alert("Payment cancelled");
-    },
-  };
+  // Memoize Paystack config to prevent unnecessary re-renders
+  const paystackConfig = useMemo(
+    () => ({
+      email: watchedEmail || "",
+      amount: total * 100,
+      metadata: {
+        name: watchedName || "",
+        phone: watchedPhone || "",
+        address:
+          watchedState && watchedLga && watchedStreetAddress
+            ? `${watchedStreetAddress}, ${watchedLga}, ${watchedState}`
+            : "",
+        custom_fields: [
+          {
+            display_name: "Order Items",
+            variable_name: "order_items",
+            value:
+              cartItems
+                ?.map((item) => `${item.name} x${item.quantity}`)
+                .join(", ") || "",
+          },
+        ],
+      },
+      publicKey: "pk_test_eff9334b69c4057bd0b89b293824020426f0d011",
+      text: isLoading ? "Processing..." : "Place Order",
+      onSuccess: async (reference: any) => {
+        try {
+          await placeOrder("online", reference.reference);
+          console.log("Payment successful:", reference);
+        } catch (error) {
+          console.error("Error placing order after successful payment:", error);
+        }
+      },
+      onClose: () => {
+        alert("Payment cancelled");
+      },
+    }),
+    [
+      watchedEmail,
+      total,
+      watchedName,
+      watchedPhone,
+      watchedState,
+      watchedLga,
+      watchedStreetAddress,
+      cartItems,
+      isLoading,
+    ]
+  );
 
   const formatPrice = (price?: string | number) => {
-    return `₦${price?.toLocaleString()}`;
+    if (typeof price === "undefined" || price === null) return "₦0";
+    return `₦${Number(price).toLocaleString()}`;
   };
 
   const goToPreviousStep = () => {
@@ -3488,19 +3520,35 @@ export default function CheckoutPage() {
   const renderPlaceOrderButton = () => {
     if (paymentMethod === "cash") {
       return (
-        <Button className="flex-1" onClick={handleCashOnDeliveryOrder}>
-          {isLoading ? "Processing..." : "Place Order (Pay on Delivery)"}
+        <Button
+          className="flex-1"
+          onClick={handleCashOnDeliveryOrder}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Processing...
+            </>
+          ) : (
+            "Place Order (Pay on Delivery)"
+          )}
         </Button>
       );
     } else {
       if (!isClient) {
-        return <Button className="flex-1">Loading Payment...</Button>;
+        return (
+          <Button className="flex-1" disabled>
+            Loading Payment...
+          </Button>
+        );
       }
 
       return (
         <PaystackButton
           {...paystackConfig}
-          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
+          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isLoading}
         />
       );
     }
