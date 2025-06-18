@@ -134,7 +134,12 @@ export const useCheckoutStore = create<CheckoutStore>()(
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
-     
+      // Add partialize to control what gets persisted
+      partialize: (state) => ({
+        checkoutData: state.checkoutData,
+      }),
+      // Add version for migration if needed
+      version: 1,
     }
   )
 );

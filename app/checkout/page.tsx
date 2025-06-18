@@ -199,60 +199,81 @@ useEffect(() => {
   } = useSWR(logisticsPricingKey, fetcher, logisticsPricingOptions)
 
  // Update form initialization effect
-useEffect(() => {
-  // Wait for both mounting and hydration
-  if (!mounted || _hasHydrated) return;
+ useEffect(() => {
+   // Initialize states data
+   if (mounted) {
+     try {
+       const statesData = NaijaStates.states();
+       if (Array.isArray(statesData)) {
+         const stateNames = statesData
+           .map((state: any) => {
+             return typeof state === "string"
+               ? state
+               : state.state || state.name;
+           })
+           .filter(Boolean);
+         setStates(stateNames);
+       }
+     } catch (error) {
+       console.error("Error fetching states:", error);
+       setStates([]);
+     }
+   }
+ }, [mounted]);
 
-  try {
-    const statesData = NaijaStates.states();
-    if (Array.isArray(statesData)) {
-      const stateNames = statesData
-        .map((state: any) => {
-          return typeof state === "string"
-            ? state
-            : state.state || state.name;
-        })
-        .filter(Boolean);
-      setStates(stateNames);
-    }
-  } catch (error) {
-    console.error("Error fetching states:", error);
-    setStates([]);
-  }
 
-  // Initialize form with persisted data only after hydration
-  if (isInitialMount.current && _hasHydrated) {
-    console.log("Hydrating form with persisted data:", checkoutData);
-    
-    // Set form values from persisted store
-    if (checkoutData.customerInfo.name) {
-      setValue("customerInfo.name", checkoutData.customerInfo.name);
-    }
-    if (checkoutData.customerInfo.email) {
-      setValue("customerInfo.email", checkoutData.customerInfo.email);
-    }
-    if (checkoutData.customerInfo.phone) {
-      setValue("customerInfo.phone", checkoutData.customerInfo.phone);
-    }
-    if (checkoutData.customerAddress.streetAddress) {
-      setValue("customerAddress.streetAddress", checkoutData.customerAddress.streetAddress);
-    }
-    if (checkoutData.customerAddress.state) {
-      setValue("customerAddress.state", checkoutData.customerAddress.state);
-      setSelectedState(checkoutData.customerAddress.state);
-      const lgas = getLgasForState(checkoutData.customerAddress.state);
-      setAvailableLgas(lgas);
-    }
-    if (checkoutData.customerAddress.lga) {
-      setValue("customerAddress.lga", checkoutData.customerAddress.lga);
-    }
-    if (checkoutData.customerAddress.directions) {
-      setValue("customerAddress.directions", checkoutData.customerAddress.directions);
-    }
-    
-    isInitialMount.current = false;
-  }
-}, [mounted, _hasHydrated, setValue, checkoutData]);
+
+
+ useEffect(() => {
+   // Only run after both mounting and hydration are complete
+   if (!mounted || !_hasHydrated || !isInitialMount.current) return;
+
+   console.log("Hydrating form with persisted data:", checkoutData);
+
+   // Set form values from persisted store
+   if (checkoutData.customerInfo.name) {
+     setValue("customerInfo.name", checkoutData.customerInfo.name);
+   }
+   if (checkoutData.customerInfo.email) {
+     setValue("customerInfo.email", checkoutData.customerInfo.email);
+   }
+   if (checkoutData.customerInfo.phone) {
+     setValue("customerInfo.phone", checkoutData.customerInfo.phone);
+   }
+   if (checkoutData.customerAddress.streetAddress) {
+     setValue(
+       "customerAddress.streetAddress",
+       checkoutData.customerAddress.streetAddress
+     );
+   }
+   if (checkoutData.customerAddress.state) {
+     setValue("customerAddress.state", checkoutData.customerAddress.state);
+     setSelectedState(checkoutData.customerAddress.state);
+     const lgas = getLgasForState(checkoutData.customerAddress.state);
+     setAvailableLgas(lgas);
+   }
+   if (checkoutData.customerAddress.lga) {
+     setValue("customerAddress.lga", checkoutData.customerAddress.lga);
+   }
+   if (checkoutData.customerAddress.directions) {
+     setValue(
+       "customerAddress.directions",
+       checkoutData.customerAddress.directions
+     );
+   }
+
+   isInitialMount.current = false;
+ }, [mounted, _hasHydrated, setValue, checkoutData]);
+
+ // Add a debug effect to monitor hydration
+ useEffect(() => {
+   console.log("Hydration state:", {
+     mounted,
+     _hasHydrated,
+     isInitialMount: isInitialMount.current,
+   });
+   console.log("Checkout data:", checkoutData);
+ }, [mounted, _hasHydrated, checkoutData]);
 
   // Watch state changes to update LGAs
   useEffect(() => {
@@ -1126,7 +1147,7 @@ useEffect(() => {
 
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground text-sm">Subtotal ({totals.totalItems} items)</span>
+                      <span className="text-muted-foreground text-sm">Subtotal</span>
                       <span className="text-sm">{formatPrice(totals.subtotal)}</span>
                     </div>
 
