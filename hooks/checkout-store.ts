@@ -1,5 +1,5 @@
 import { create } from "zustand"
-import { persist } from "zustand/middleware"
+import { persist, createJSONStorage } from "zustand/middleware"
 
 interface CustomerInfo {
   name: string
@@ -118,6 +118,7 @@ export const useCheckoutStore = create<CheckoutStore>()(
     }),
     {
       name: "checkout-store",
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 )
