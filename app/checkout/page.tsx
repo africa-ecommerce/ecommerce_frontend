@@ -269,6 +269,14 @@ export default function Page() {
     }
   }, [watch("customerAddress"), setCustomerAddress, checkoutData.customerAddress])
 
+
+  useEffect(() => {
+    return () => {
+      // Reset to delivery step when leaving checkout
+      setCurrentStep("delivery");
+    };
+  }, [setCurrentStep]);
+
   // Effect to handle buyer info auto-fill
   useEffect(() => {
     if (buyerInfoData?.data && !buyerInfoError) {
@@ -975,7 +983,7 @@ export default function Page() {
                       <h3 className="font-medium mb-3">Items in Your Orders</h3>
 
                       <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
-                        {orderSummaries.map((order, orderIndex) => (
+                        {/* {orderSummaries.map((order, orderIndex) => (
                           <div key={orderIndex} className="flex items-start space-x-3 p-3 border rounded-lg">
                             <div className="w-16 h-16 relative rounded-md overflow-hidden flex-shrink-0 bg-muted">
                               <Image
@@ -1002,7 +1010,40 @@ export default function Page() {
                               </div>
                             </div>
                           </div>
-                        ))}
+                        ))} */}
+
+
+{orderSummaries.map((order, orderIndex) => {
+  const item = order.item;
+  return (
+    <div key={orderIndex} className="flex items-start space-x-3 p-3 border rounded-lg">
+      <div className="w-16 h-16 relative rounded-md overflow-hidden flex-shrink-0 bg-muted">
+        <Image
+          src={item.image || "/placeholder.svg"}
+          alt={item.name}
+          fill
+          className="object-cover"
+        />
+      </div>
+      <div className="flex-1 min-w-0">
+        <h4 className="font-medium text-sm">
+          <span className="capitalize">{item.name}</span>
+          {item.variationName && (
+            <span className="text-muted-foreground ml-2">({item.variationName})</span>
+          )}
+        </h4>
+        <div className="flex justify-between mt-1">
+          <span className="text-sm">
+            {item.quantity} x {formatPrice(item.price)}
+          </span>
+          <span className="text-sm font-medium">
+            {formatPrice(item.price * item.quantity)}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+})}
                       </div>
                     </div>
 

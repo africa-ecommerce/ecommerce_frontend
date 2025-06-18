@@ -73,8 +73,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
   const [quantityInput, setQuantityInput] = useState("1")
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [selectedVariations, setSelectedVariations] = useState<SelectedVariation[]>([])
-  const [whatsappNumber, setWhatsappNumber] = useState("")
-  const [notificationSignedUp, setNotificationSignedUp] = useState(false)
+
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
 
   const router = useRouter()
@@ -189,31 +188,65 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
 
 
 
-  useEffect(() => {
-    // Restore state from persisted order summaries when component mounts
-    if (orderSummaries.length > 0 && productData) {
-      const existingOrder = orderSummaries.find((order) => order.productId === currentProductId)
+  // useEffect(() => {
+  //   // Restore state from persisted order summaries when component mounts
+  //   if (orderSummaries.length > 0 && productData) {
+  //     const existingOrder = orderSummaries.find((order) => order.productId === currentProductId)
 
-      if (existingOrder) {
-        if (hasVariations && existingOrder.item.variationId) {
-          // Restore selected variations from order summary
-          const variation = productData.variations?.find((v) => v.id === existingOrder.item.variationId)
-          if (variation) {
-            setSelectedVariations([
-              {
-                variation,
-                quantity: existingOrder.item.quantity,
-              },
-            ])
-          }
-        } else if (!hasVariations) {
-          // Restore quantity for simple products
-          setQuantity(existingOrder.item.quantity)
-          setQuantityInput(existingOrder.item.quantity.toString())
+  //     if (existingOrder) {
+  //       if (hasVariations && existingOrder.item.variationId) {
+  //         // Restore selected variations from order summary
+  //         const variation = productData.variations?.find((v) => v.id === existingOrder.item.variationId)
+  //         if (variation) {
+  //           setSelectedVariations([
+  //             {
+  //               variation,
+  //               quantity: existingOrder.item.quantity,
+  //             },
+  //           ])
+  //         }
+  //       } else if (!hasVariations) {
+  //         // Restore quantity for simple products
+  //         setQuantity(existingOrder.item.quantity)
+  //         setQuantityInput(existingOrder.item.quantity.toString())
+  //       }
+  //     }
+  //   }
+  // }, [orderSummaries, currentProductId, productData, hasVariations])
+
+
+
+
+  useEffect(() => {
+    if (orderSummaries.length > 0 && productData) {
+      const existingOrders = orderSummaries.filter(
+        (order) => order.productId === currentProductId
+      );
+
+      if (existingOrders.length > 0) {
+        if (hasVariations) {
+          // Restore multiple variations
+          const restoredVariations = existingOrders
+            .map((order) => {
+              const variation = productData.variations?.find(
+                (v) => v.id === order.item.variationId
+              );
+              return variation
+                ? { variation, quantity: order.item.quantity }
+                : null;
+            })
+            .filter(Boolean) as SelectedVariation[];
+
+          setSelectedVariations(restoredVariations);
+        } else {
+          // Restore simple product quantity
+          const mainOrder = existingOrders[0];
+          setQuantity(mainOrder.item.quantity);
+          setQuantityInput(mainOrder.item.quantity.toString());
         }
       }
     }
-  }, [orderSummaries, currentProductId, productData, hasVariations])
+  }, [orderSummaries, currentProductId, productData, hasVariations]);
 
   const formatDescription = (text: string) => {
     if (!text) return ""
