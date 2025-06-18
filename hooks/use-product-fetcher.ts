@@ -233,7 +233,6 @@ export function useProductFetcher() {
   const [isLoading, setIsLoading] = useState(false)
   const [hasErrors, setHasErrors] = useState(false)
   const [fetchedData, setFetchedData] = useState<any[]>([])
-  const isMountedRef = useRef(true);
 
 
   // Parse URL parameters
@@ -246,9 +245,7 @@ export function useProductFetcher() {
   // Fetch all products manually (not using SWR to avoid conditional hooks)
   const fetchProducts = useCallback(async () => {
     if (platform !== "store") {
-      setFetchedData([]);
-      setIsLoading(false);
-      setHasErrors(false);
+     
       return;
     }
 
@@ -390,11 +387,7 @@ export function useProductFetcher() {
     fetchProducts()
   }, [fetchProducts])
 
-  useLayoutEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+  
 
   // Process order summaries when data is ready
   useLayoutEffect(() => {

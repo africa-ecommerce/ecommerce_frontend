@@ -4436,6 +4436,14 @@ export default function Page() {
   const watchedEmail = watch("customerInfo.email")
   const watchedPhone = watch("customerInfo.phone")
 
+  useEffect(() => {
+    // Add tab ID to isolate data
+    if (typeof window !== "undefined" && !sessionStorage.getItem("tabId")) {
+      sessionStorage.setItem("tabId", Date.now().toString());
+    }
+  }, []);
+
+
   // Memoize buyer info key to prevent unnecessary re-renders
   const buyerInfoKey = useMemo(() => {
     if (!watchedName || !watchedEmail || !watchedPhone) return null
@@ -4643,6 +4651,8 @@ export default function Page() {
     const supplierAmount = calculateSupplierAmount()
     const plugAmount = totals.subtotal - supplierAmount
 
+   
+
     // Create array of order data
     const ordersData = orderSummaries.map((order) => ({
       buyerName: checkoutData.customerInfo.name,
@@ -4684,6 +4694,9 @@ export default function Page() {
 
       ...(paymentReference && { paymentReference }),
     }))
+
+    
+    
 
     return ordersData
   }

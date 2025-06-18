@@ -1184,6 +1184,15 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
   }, [quantity])
 
   useEffect(() => {
+    return () => {
+      // Clear session storage when leaving product page
+      if (platform !== "store") {
+        sessionStorage.removeItem("product-store");
+      }
+    };
+  }, [platform]);
+
+  useEffect(() => {
     // Restore state from persisted order summaries when component mounts
     if (orderSummaries.length > 0 && productData) {
       const existingOrder = orderSummaries.find((order) => order.productId === currentProductId)
