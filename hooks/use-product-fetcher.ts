@@ -245,13 +245,22 @@ export function useProductFetcher() {
 
   // Fetch all products manually (not using SWR to avoid conditional hooks)
   const fetchProducts = useCallback(async () => {
-    if (shouldFetch) {
-      setFetchedData([])
-      setIsLoading(false)
-      setHasErrors(false)
-      clearOrderSummaries()
-      return
+    if (platform !== "store") {
+      setFetchedData([]);
+      setIsLoading(false);
+      setHasErrors(false);
+      return;
     }
+
+    // Clear summaries only for store platform with no items
+    if (items.length === 0) {
+      setFetchedData([]);
+      setIsLoading(false);
+      setHasErrors(false);
+      clearOrderSummaries();
+      return;
+    }
+  
 
     setIsLoading(true)
     setHasErrors(false)
@@ -392,14 +401,7 @@ export function useProductFetcher() {
     processOrderSummaries()
   }, [processOrderSummaries])
 
-  // Clear summaries when component unmounts or shouldFetch becomes false
-  useLayoutEffect(() => {
-    if (shouldFetch && isMountedRef.current) {
-      console.log("shouldFetch", shouldFetch)
-      console.log("isMountedRef.current", isMountedRef.current)
-      clearOrderSummaries();
-    }
-  }, [shouldFetch, clearOrderSummaries]);
+
 
   return {
     isLoading,
