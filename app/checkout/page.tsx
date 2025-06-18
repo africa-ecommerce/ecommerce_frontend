@@ -89,6 +89,7 @@ export default function Page() {
     setDeliveryInstructions,
     setCurrentStep,
     clearCheckoutData,
+    _hasHydrated
   } = useCheckoutStore()
 
   // Local state for UI-specific needs
@@ -150,15 +151,13 @@ export default function Page() {
   const watchedEmail = watch("customerInfo.email")
   const watchedPhone = watch("customerInfo.phone")
 
-  useEffect(() => {
-    setMounted(true);
-    isInitialMount.current = false;
+ 
+useEffect(() => {
+  setMounted(true);
+  isInitialMount.current = false;
 
-    // Add tab ID to isolate data
-    if (typeof window !== "undefined" && !sessionStorage.getItem("tabId")) {
-      sessionStorage.setItem("tabId", Date.now().toString());
-    }
-  }, []);
+  
+}, []);
 
 
   // Memoize buyer info key to prevent unnecessary re-renders
@@ -199,58 +198,61 @@ export default function Page() {
     isLoading: isLogisticsPricingLoading,
   } = useSWR(logisticsPricingKey, fetcher, logisticsPricingOptions)
 
-  // Initialize states and form data
-  useEffect(() => {
-    if (!mounted) return;
+ // Update form initialization effect
+useEffect(() => {
+  // Wait for both mounting and hydration
+  if (!mounted || _hasHydrated) return;
 
-    try {
-      const statesData = NaijaStates.states();
-      if (Array.isArray(statesData)) {
-        const stateNames = statesData
-          .map((state: any) => {
-            return typeof state === "string"
-              ? state
-              : state.state || state.name;
-          })
-          .filter(Boolean);
-        setStates(stateNames);
-      }
-    } catch (error) {
-      console.error("Error fetching states:", error);
-      setStates([]);
+  try {
+    const statesData = NaijaStates.states();
+    if (Array.isArray(statesData)) {
+      const stateNames = statesData
+        .map((state: any) => {
+          return typeof state === "string"
+            ? state
+            : state.state || state.name;
+        })
+        .filter(Boolean);
+      setStates(stateNames);
     }
+  } catch (error) {
+    console.error("Error fetching states:", error);
+    setStates([]);
+  }
 
-    // Initialize form with existing data - only on first mount
-    if (isInitialMount.current) {
-      if (checkoutData.customerInfo.name) {
-        setValue("customerInfo.name", checkoutData.customerInfo.name);
-      }
-      if (checkoutData.customerInfo.email) {
-        setValue("customerInfo.email", checkoutData.customerInfo.email);
-      }
-      if (checkoutData.customerInfo.phone) {
-        setValue("customerInfo.phone", checkoutData.customerInfo.phone);
-      }
-      if (checkoutData.customerAddress.streetAddress) {
-        setValue(
-          "customerAddress.streetAddress",
-          checkoutData.customerAddress.streetAddress
-        );
-      }
-      if (checkoutData.customerAddress.state) {
-        setValue("customerAddress.state", checkoutData.customerAddress.state);
-      }
-      if (checkoutData.customerAddress.lga) {
-        setValue("customerAddress.lga", checkoutData.customerAddress.lga);
-      }
-      if (checkoutData.customerAddress.directions) {
-        setValue(
-          "customerAddress.directions",
-          checkoutData.customerAddress.directions
-        );
-      }
+  // Initialize form with persisted data only after hydration
+  if (isInitialMount.current && _hasHydrated) {
+    console.log("Hydrating form with persisted data:", checkoutData);
+    
+    // Set form values from persisted store
+    if (checkoutData.customerInfo.name) {
+      setValue("customerInfo.name", checkoutData.customerInfo.name);
     }
-  }, [mounted, setValue, checkoutData]);
+    if (checkoutData.customerInfo.email) {
+      setValue("customerInfo.email", checkoutData.customerInfo.email);
+    }
+    if (checkoutData.customerInfo.phone) {
+      setValue("customerInfo.phone", checkoutData.customerInfo.phone);
+    }
+    if (checkoutData.customerAddress.streetAddress) {
+      setValue("customerAddress.streetAddress", checkoutData.customerAddress.streetAddress);
+    }
+    if (checkoutData.customerAddress.state) {
+      setValue("customerAddress.state", checkoutData.customerAddress.state);
+      setSelectedState(checkoutData.customerAddress.state);
+      const lgas = getLgasForState(checkoutData.customerAddress.state);
+      setAvailableLgas(lgas);
+    }
+    if (checkoutData.customerAddress.lga) {
+      setValue("customerAddress.lga", checkoutData.customerAddress.lga);
+    }
+    if (checkoutData.customerAddress.directions) {
+      setValue("customerAddress.directions", checkoutData.customerAddress.directions);
+    }
+    
+    isInitialMount.current = false;
+  }
+}, [mounted, _hasHydrated, setValue, checkoutData]);
 
   // Watch state changes to update LGAs
   useEffect(() => {

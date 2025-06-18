@@ -1,39 +1,42 @@
-import { create } from "zustand"
-import { persist, createJSONStorage } from "zustand/middleware"
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 interface CustomerInfo {
-  name: string
-  email: string
-  phone: string
+  name: string;
+  email: string;
+  phone: string;
 }
 
 interface CustomerAddress {
-  streetAddress: string
-  state: string
-  lga: string
-  directions?: string
+  streetAddress: string;
+  state: string;
+  lga: string;
+  directions?: string;
 }
 
 interface CheckoutData {
-  customerInfo: CustomerInfo
-  customerAddress: CustomerAddress
-  deliveryMethod: "standard" | "express" | "pickup"
-  paymentMethod: "online" | "cash"
-  deliveryInstructions?: string
-  currentStep: "delivery" | "review"
+  customerInfo: CustomerInfo;
+  customerAddress: CustomerAddress;
+  deliveryMethod: "standard" | "express" | "pickup";
+  paymentMethod: "online" | "cash";
+  deliveryInstructions?: string;
+  currentStep: "delivery" | "review";
 }
 
 interface CheckoutStore {
-  checkoutData: CheckoutData
-  setCustomerInfo: (info: Partial<CustomerInfo>) => void
-  setCustomerAddress: (address: Partial<CustomerAddress>) => void
-  setDeliveryMethod: (method: "standard" | "express" | "pickup") => void
-  setPaymentMethod: (method: "online" | "cash") => void
-  setDeliveryInstructions: (instructions: string) => void
-  setCurrentStep: (step: "delivery" | "review") => void
-  updateCheckoutData: (data: Partial<CheckoutData>) => void
-  clearCheckoutData: () => void
-  getCheckoutData: () => CheckoutData
+  checkoutData: CheckoutData;
+  setCustomerInfo: (info: Partial<CustomerInfo>) => void;
+  setCustomerAddress: (address: Partial<CustomerAddress>) => void;
+  setDeliveryMethod: (method: "standard" | "express" | "pickup") => void;
+  setPaymentMethod: (method: "online" | "cash") => void;
+  setDeliveryInstructions: (instructions: string) => void;
+  setCurrentStep: (step: "delivery" | "review") => void;
+  updateCheckoutData: (data: Partial<CheckoutData>) => void;
+  clearCheckoutData: () => void;
+  getCheckoutData: () => CheckoutData;
+  // Add hydration helpers
+  _hasHydrated: boolean;
+  setHasHydrated: (hasHydrated: boolean) => void;
 }
 
 const defaultCheckoutData: CheckoutData = {
@@ -52,12 +55,17 @@ const defaultCheckoutData: CheckoutData = {
   paymentMethod: "online",
   deliveryInstructions: "",
   currentStep: "delivery",
-}
+};
 
 export const useCheckoutStore = create<CheckoutStore>()(
   persist(
     (set, get) => ({
       checkoutData: defaultCheckoutData,
+      _hasHydrated: false,
+
+      setHasHydrated: (hasHydrated) => {
+        set({ _hasHydrated: hasHydrated });
+      },
 
       setCustomerInfo: (info) =>
         set((state) => ({
@@ -71,7 +79,10 @@ export const useCheckoutStore = create<CheckoutStore>()(
         set((state) => ({
           checkoutData: {
             ...state.checkoutData,
-            customerAddress: { ...state.checkoutData.customerAddress, ...address },
+            customerAddress: {
+              ...state.checkoutData.customerAddress,
+              ...address,
+            },
           },
         })),
 
@@ -118,7 +129,12 @@ export const useCheckoutStore = create<CheckoutStore>()(
     }),
     {
       name: "checkout-store",
-      storage: createJSONStorage(() => localStorage), // Changed from sessionStorage to localStorage
+      storage: createJSONStorage(() => localStorage),
+      // Add hydration callback
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+     
     }
   )
-)
+);
