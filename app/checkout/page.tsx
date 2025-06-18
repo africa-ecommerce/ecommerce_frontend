@@ -1,7 +1,7 @@
 
 
 "use client"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react";
 import dynamic from "next/dynamic"
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -75,8 +75,11 @@ export default function Page() {
   }>({ latitude: null, longitude: null })
 
   // Use the product fetcher hook
-  const { isLoading: isProductLoading, hasErrors: hasProductErrors, refetch: refetchProducts } = useProductFetcher()
-
+  const {
+    isLoading: isProductLoading,
+    hasErrors: hasProductErrors,
+    refetch: refetchProducts,
+  } = useProductFetcher();
   // Replace local state with Zustand store
   const {
     checkoutData,
@@ -89,7 +92,8 @@ export default function Page() {
   } = useCheckoutStore()
 
   // Local state for UI-specific needs
-  const [isClient, setIsClient] = useState(false)
+  // const [isClient, setIsClient] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [selectedState, setSelectedState] = useState<string>("")
   const [availableLgas, setAvailableLgas] = useState<string[]>([])
   const [states, setStates] = useState<string[]>([])
@@ -98,6 +102,8 @@ export default function Page() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const platform = searchParams.get("platform")
+
+  const isInitialMount = useRef(true)
 
   // Get values from store
   const currentStep = checkoutData.currentStep
@@ -145,6 +151,9 @@ export default function Page() {
   const watchedPhone = watch("customerInfo.phone")
 
   useEffect(() => {
+    setMounted(true);
+    isInitialMount.current = false;
+
     // Add tab ID to isolate data
     if (typeof window !== "undefined" && !sessionStorage.getItem("tabId")) {
       sessionStorage.setItem("tabId", Date.now().toString());
@@ -192,46 +201,56 @@ export default function Page() {
 
   // Initialize states and form data
   useEffect(() => {
-    setIsClient(true)
+    if (!mounted) return;
 
     try {
-      const statesData = NaijaStates.states()
+      const statesData = NaijaStates.states();
       if (Array.isArray(statesData)) {
         const stateNames = statesData
           .map((state: any) => {
-            return typeof state === "string" ? state : state.state || state.name
+            return typeof state === "string"
+              ? state
+              : state.state || state.name;
           })
-          .filter(Boolean)
-        setStates(stateNames)
+          .filter(Boolean);
+        setStates(stateNames);
       }
     } catch (error) {
-      console.error("Error fetching states:", error)
-      setStates([])
+      console.error("Error fetching states:", error);
+      setStates([]);
     }
 
-    // Initialize form with existing data
-    if (checkoutData.customerInfo.name) {
-      setValue("customerInfo.name", checkoutData.customerInfo.name)
+    // Initialize form with existing data - only on first mount
+    if (isInitialMount.current) {
+      if (checkoutData.customerInfo.name) {
+        setValue("customerInfo.name", checkoutData.customerInfo.name);
+      }
+      if (checkoutData.customerInfo.email) {
+        setValue("customerInfo.email", checkoutData.customerInfo.email);
+      }
+      if (checkoutData.customerInfo.phone) {
+        setValue("customerInfo.phone", checkoutData.customerInfo.phone);
+      }
+      if (checkoutData.customerAddress.streetAddress) {
+        setValue(
+          "customerAddress.streetAddress",
+          checkoutData.customerAddress.streetAddress
+        );
+      }
+      if (checkoutData.customerAddress.state) {
+        setValue("customerAddress.state", checkoutData.customerAddress.state);
+      }
+      if (checkoutData.customerAddress.lga) {
+        setValue("customerAddress.lga", checkoutData.customerAddress.lga);
+      }
+      if (checkoutData.customerAddress.directions) {
+        setValue(
+          "customerAddress.directions",
+          checkoutData.customerAddress.directions
+        );
+      }
     }
-    if (checkoutData.customerInfo.email) {
-      setValue("customerInfo.email", checkoutData.customerInfo.email)
-    }
-    if (checkoutData.customerInfo.phone) {
-      setValue("customerInfo.phone", checkoutData.customerInfo.phone)
-    }
-    if (checkoutData.customerAddress.streetAddress) {
-      setValue("customerAddress.streetAddress", checkoutData.customerAddress.streetAddress)
-    }
-    if (checkoutData.customerAddress.state) {
-      setValue("customerAddress.state", checkoutData.customerAddress.state)
-    }
-    if (checkoutData.customerAddress.lga) {
-      setValue("customerAddress.lga", checkoutData.customerAddress.lga)
-    }
-    if (checkoutData.customerAddress.directions) {
-      setValue("customerAddress.directions", checkoutData.customerAddress.directions)
-    }
-  }, [setValue])
+  }, [mounted, setValue, checkoutData]);
 
   // Watch state changes to update LGAs
   useEffect(() => {
@@ -270,12 +289,6 @@ export default function Page() {
   }, [watch("customerAddress"), setCustomerAddress, checkoutData.customerAddress])
 
 
-  useEffect(() => {
-    return () => {
-      // Reset to delivery step when leaving checkout
-      setCurrentStep("delivery");
-    };
-  }, [setCurrentStep]);
 
   // Effect to handle buyer info auto-fill
   useEffect(() => {
@@ -517,8 +530,10 @@ export default function Page() {
     }
   };
   // Memoize Paystack config to prevent unnecessary re-renders
-  const paystackConfig = useMemo(
-    () => ({
+  const paystackConfig = useMemo(() => {
+    if (!mounted) return null;
+
+    return {
       email: watchedEmail || "",
       amount: totals.total * 100,
       metadata: {
@@ -532,7 +547,9 @@ export default function Page() {
           {
             display_name: "Order Items",
             variable_name: "order_items",
-            value: orderSummaries.map((order) => `${order.item.name} x${order.item.quantity}`).join(", "),
+            value: orderSummaries
+              .map((order) => `${order.item.name} x${order.item.quantity}`)
+              .join(", "),
           },
         ],
       },
@@ -540,28 +557,31 @@ export default function Page() {
       text: isLoading ? "Processing..." : "Place Order",
       onSuccess: async (reference: any) => {
         try {
-          await placeOrder("online", reference.reference)
-          console.log("Payment successful:", reference)
+          await placeOrder("online", reference.reference);
+          console.log("Payment successful:", reference);
         } catch (error) {
-          console.error("Error placing orders after successful payment:", error)
+          console.error(
+            "Error placing orders after successful payment:",
+            error
+          );
         }
       },
       onClose: () => {
-        alert("Payment cancelled")
+        alert("Payment cancelled");
       },
-    }),
-    [
-      watchedEmail,
-      totals.total,
-      watchedName,
-      watchedPhone,
-      watchedState,
-      watchedLga,
-      watchedStreetAddress,
-      orderSummaries,
-      isLoading,
-    ],
-  )
+    };
+  }, [
+    mounted,
+    watchedEmail,
+    totals.total,
+    watchedName,
+    watchedPhone,
+    watchedState,
+    watchedLga,
+    watchedStreetAddress,
+    orderSummaries,
+    isLoading,
+  ]);
 
   const formatPrice = (price?: string | number) => {
     if (typeof price === "undefined" || price === null) return "₦0"
@@ -591,7 +611,11 @@ export default function Page() {
   const renderPlaceOrderButton = () => {
     if (paymentMethod === "cash") {
       return (
-        <Button className="flex-1" onClick={handleCashOnDeliveryOrder} disabled={isLoading}>
+        <Button
+          className="flex-1"
+          onClick={handleCashOnDeliveryOrder}
+          disabled={isLoading}
+        >
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -601,14 +625,15 @@ export default function Page() {
             "Place Order (Pay on Delivery)"
           )}
         </Button>
-      )
+      );
     } else {
-      if (!isClient) {
+      // Always render a button, but conditionally render Paystack
+      if (!mounted || !paystackConfig) {
         return (
           <Button className="flex-1" disabled>
             Loading Payment...
           </Button>
-        )
+        );
       }
 
       return (
@@ -617,9 +642,22 @@ export default function Page() {
           className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isLoading}
         />
-      )
+      );
     }
+  };
+
+
+  if (!mounted) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
   }
+
 
   // Show loading state while products are being fetched
   if (platform === "store" && isProductLoading) {
@@ -983,7 +1021,7 @@ export default function Page() {
                       <h3 className="font-medium mb-3">Items in Your Orders</h3>
 
                       <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
-                        {/* {orderSummaries.map((order, orderIndex) => (
+                        {orderSummaries.map((order, orderIndex) => (
                           <div key={orderIndex} className="flex items-start space-x-3 p-3 border rounded-lg">
                             <div className="w-16 h-16 relative rounded-md overflow-hidden flex-shrink-0 bg-muted">
                               <Image
@@ -1010,40 +1048,10 @@ export default function Page() {
                               </div>
                             </div>
                           </div>
-                        ))} */}
+                        ))}
 
 
-{orderSummaries.map((order, orderIndex) => {
-  const item = order.item;
-  return (
-    <div key={orderIndex} className="flex items-start space-x-3 p-3 border rounded-lg">
-      <div className="w-16 h-16 relative rounded-md overflow-hidden flex-shrink-0 bg-muted">
-        <Image
-          src={item.image || "/placeholder.svg"}
-          alt={item.name}
-          fill
-          className="object-cover"
-        />
-      </div>
-      <div className="flex-1 min-w-0">
-        <h4 className="font-medium text-sm">
-          <span className="capitalize">{item.name}</span>
-          {item.variationName && (
-            <span className="text-muted-foreground ml-2">({item.variationName})</span>
-          )}
-        </h4>
-        <div className="flex justify-between mt-1">
-          <span className="text-sm">
-            {item.quantity} x {formatPrice(item.price)}
-          </span>
-          <span className="text-sm font-medium">
-            {formatPrice(item.price * item.quantity)}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-})}
+
                       </div>
                     </div>
 
