@@ -93,7 +93,7 @@ export default function Page() {
   } = useCheckoutStore()
 
   // Local state for UI-specific needs
-  // const [isClient, setIsClient] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [selectedState, setSelectedState] = useState<string>("")
   const [availableLgas, setAvailableLgas] = useState<string[]>([])
@@ -152,11 +152,11 @@ export default function Page() {
   const watchedPhone = watch("customerInfo.phone")
 
  
-useEffect(() => {
-  setMounted(true);
-  isInitialMount.current = false;
 
-  
+
+useEffect(() => {
+  setIsClient(true);
+  setMounted(true);
 }, []);
 
 
@@ -198,56 +198,55 @@ useEffect(() => {
     isLoading: isLogisticsPricingLoading,
   } = useSWR(logisticsPricingKey, fetcher, logisticsPricingOptions)
 
- // Update form initialization effect
- useEffect(() => {
-   // Initialize states data
-   if (mounted) {
-     try {
-       const statesData = NaijaStates.states();
-       if (Array.isArray(statesData)) {
-         const stateNames = statesData
-           .map((state: any) => {
-             return typeof state === "string"
-               ? state
-               : state.state || state.name;
-           })
-           .filter(Boolean);
-         setStates(stateNames);
-       }
-     } catch (error) {
-       console.error("Error fetching states:", error);
-       setStates([]);
-     }
-   }
- }, [mounted]);
+  useEffect(() => {
+    // Don't initialize until we're on client and store is hydrated
+    if (!isClient || !_hasHydrated) return;
 
+    console.log("Hydrating form with persisted data:", checkoutData);
 
+    // Initialize states data
+    try {
+      const statesData = NaijaStates.states();
+      if (Array.isArray(statesData)) {
+        const stateNames = statesData
+          .map((state: any) => {
+            return typeof state === "string"
+              ? state
+              : state.state || state.name;
+          })
+          .filter(Boolean);
+        setStates(stateNames);
+      }
+    } catch (error) {
+      console.error("Error fetching states:", error);
+      setStates([]);
+    }
 
-// Add this useEffect to initialize form after hydration
-useEffect(() => {
-  if (!_hasHydrated || !mounted) return;
+    // Set form values from persisted store
+    setValue("customerInfo.name", checkoutData.customerInfo.name);
+    setValue("customerInfo.email", checkoutData.customerInfo.email);
+    setValue("customerInfo.phone", checkoutData.customerInfo.phone);
+    setValue(
+      "customerAddress.streetAddress",
+      checkoutData.customerAddress.streetAddress
+    );
 
-  console.log("Hydrating form with persisted data:", checkoutData);
+    if (checkoutData.customerAddress.state) {
+      setValue("customerAddress.state", checkoutData.customerAddress.state);
+      setSelectedState(checkoutData.customerAddress.state);
+      const lgas = getLgasForState(checkoutData.customerAddress.state);
+      setAvailableLgas(lgas);
+    }
 
-  // Set form values from persisted store
-  setValue("customerInfo.name", checkoutData.customerInfo.name);
-  setValue("customerInfo.email", checkoutData.customerInfo.email);
-  setValue("customerInfo.phone", checkoutData.customerInfo.phone);
-  setValue("customerAddress.streetAddress", checkoutData.customerAddress.streetAddress);
-  
-  if (checkoutData.customerAddress.state) {
-    setValue("customerAddress.state", checkoutData.customerAddress.state);
-    setSelectedState(checkoutData.customerAddress.state);
-    const lgas = getLgasForState(checkoutData.customerAddress.state);
-    setAvailableLgas(lgas);
-  }
-  
-  if (checkoutData.customerAddress.lga) {
-    setValue("customerAddress.lga", checkoutData.customerAddress.lga);
-  }
-  
-  setValue("customerAddress.directions", checkoutData.customerAddress.directions || "");
-}, [_hasHydrated, mounted, setValue, checkoutData]);
+    if (checkoutData.customerAddress.lga) {
+      setValue("customerAddress.lga", checkoutData.customerAddress.lga);
+    }
+
+    setValue(
+      "customerAddress.directions",
+      checkoutData.customerAddress.directions || ""
+    );
+  }, [isClient, _hasHydrated, setValue, checkoutData]);
 
  // Add a debug effect to monitor hydration
  useEffect(() => {
@@ -665,8 +664,7 @@ useEffect(() => {
     );
   }
 
-
-  if (!mounted || !_hasHydrated) {
+  if (!isClient || !mounted || !_hasHydrated) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
@@ -676,7 +674,6 @@ useEffect(() => {
       </div>
     );
   }
-
 
   // Show loading state while products are being fetched
   if (platform === "store" && isProductLoading) {

@@ -1,3 +1,155 @@
+// import { create } from "zustand";
+// import { persist, createJSONStorage } from "zustand/middleware";
+
+// interface CustomerInfo {
+//   name: string;
+//   email: string;
+//   phone: string;
+// }
+
+// interface CustomerAddress {
+//   streetAddress: string;
+//   state: string;
+//   lga: string;
+//   directions?: string;
+// }
+
+// interface CheckoutData {
+//   customerInfo: CustomerInfo;
+//   customerAddress: CustomerAddress;
+//   deliveryMethod: "standard" | "express" | "pickup";
+//   paymentMethod: "online" | "cash";
+//   deliveryInstructions?: string;
+//   currentStep: "delivery" | "review";
+// }
+
+// interface CheckoutStore {
+//   checkoutData: CheckoutData;
+//   setCustomerInfo: (info: Partial<CustomerInfo>) => void;
+//   setCustomerAddress: (address: Partial<CustomerAddress>) => void;
+//   setDeliveryMethod: (method: "standard" | "express" | "pickup") => void;
+//   setPaymentMethod: (method: "online" | "cash") => void;
+//   setDeliveryInstructions: (instructions: string) => void;
+//   setCurrentStep: (step: "delivery" | "review") => void;
+//   updateCheckoutData: (data: Partial<CheckoutData>) => void;
+//   clearCheckoutData: () => void;
+//   getCheckoutData: () => CheckoutData;
+//   // Add hydration helpers
+//   _hasHydrated: boolean;
+//   setHasHydrated: (hasHydrated: boolean) => void;
+// }
+
+// const defaultCheckoutData: CheckoutData = {
+//   customerInfo: {
+//     name: "",
+//     email: "",
+//     phone: "",
+//   },
+//   customerAddress: {
+//     streetAddress: "",
+//     state: "",
+//     lga: "",
+//     directions: "",
+//   },
+//   deliveryMethod: "standard",
+//   paymentMethod: "online",
+//   deliveryInstructions: "",
+//   currentStep: "delivery",
+// };
+
+// export const useCheckoutStore = create<CheckoutStore>()(
+//   persist(
+//     (set, get) => ({
+//       checkoutData: defaultCheckoutData,
+//       _hasHydrated: false,
+
+//       setHasHydrated: (hasHydrated) => {
+//         set({ _hasHydrated: hasHydrated });
+//       },
+
+//       setCustomerInfo: (info) =>
+//         set((state) => ({
+//           checkoutData: {
+//             ...state.checkoutData,
+//             customerInfo: { ...state.checkoutData.customerInfo, ...info },
+//           },
+//         })),
+
+//       setCustomerAddress: (address) =>
+//         set((state) => ({
+//           checkoutData: {
+//             ...state.checkoutData,
+//             customerAddress: {
+//               ...state.checkoutData.customerAddress,
+//               ...address,
+//             },
+//           },
+//         })),
+
+//       setDeliveryMethod: (method) =>
+//         set((state) => ({
+//           checkoutData: {
+//             ...state.checkoutData,
+//             deliveryMethod: method,
+//           },
+//         })),
+
+//       setPaymentMethod: (method) =>
+//         set((state) => ({
+//           checkoutData: {
+//             ...state.checkoutData,
+//             paymentMethod: method,
+//           },
+//         })),
+
+//       setDeliveryInstructions: (instructions) =>
+//         set((state) => ({
+//           checkoutData: {
+//             ...state.checkoutData,
+//             deliveryInstructions: instructions,
+//           },
+//         })),
+
+//       setCurrentStep: (step) =>
+//         set((state) => ({
+//           checkoutData: {
+//             ...state.checkoutData,
+//             currentStep: step,
+//           },
+//         })),
+
+//       updateCheckoutData: (data) =>
+//         set((state) => ({
+//           checkoutData: { ...state.checkoutData, ...data },
+//         })),
+
+//       clearCheckoutData: () => set({ checkoutData: defaultCheckoutData }),
+
+//       getCheckoutData: () => get().checkoutData,
+//     }),
+//     {
+//       name: "checkout-store",
+//       storage: createJSONStorage(() => localStorage),
+//       onRehydrateStorage: (state) => {
+//         // Return a function that will be called after rehydration is complete
+//         return (state, error) => {
+//           if (error) {
+//             console.error("Error during rehydration:", error);
+//           } else {
+//             // Set hydration status after rehydration completes
+//             state?.setHasHydrated(true);
+//           }
+//         };
+//       },
+//     }
+//   )
+// );
+
+
+
+
+
+
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -129,18 +281,36 @@ export const useCheckoutStore = create<CheckoutStore>()(
     }),
     {
       name: "checkout-store",
-      storage: createJSONStorage(() => localStorage),
-      onRehydrateStorage: (state) => {
+      storage: createJSONStorage(() => {
+        // Add safety check for localStorage
+        if (typeof window !== "undefined" && window.localStorage) {
+          return localStorage;
+        }
+        // Return a mock storage for SSR
+        return {
+          getItem: () => null,
+          setItem: () => {},
+          removeItem: () => {},
+        };
+      }),
+      onRehydrateStorage: () => {
         // Return a function that will be called after rehydration is complete
         return (state, error) => {
           if (error) {
             console.error("Error during rehydration:", error);
-          } else {
-            // Set hydration status after rehydration completes
-            state?.setHasHydrated(true);
+            // Reset to default state on error
+            state?.clearCheckoutData();
           }
+          // Always set hydration status after rehydration attempt
+          state?.setHasHydrated(true);
         };
       },
+      // Add these options to improve hydration reliability
+      skipHydration: false,
+      partialize: (state) => ({
+        checkoutData: state.checkoutData,
+        // Don't persist hydration state
+      }),
     }
   )
 );
