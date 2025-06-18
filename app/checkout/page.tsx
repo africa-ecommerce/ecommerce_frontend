@@ -1,50 +1,64 @@
-
-
-"use client"
+"use client";
 import { useState, useEffect, useMemo, useRef } from "react";
-import dynamic from "next/dynamic"
-import Image from "next/image"
-import { useRouter, useSearchParams } from "next/navigation"
-import { CreditCard, MapPin, Banknote, ArrowLeft, Loader2, Info } from "lucide-react"
-import useSWR, { mutate } from "swr"
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  CreditCard,
+  MapPin,
+  Banknote,
+  ArrowLeft,
+  Loader2,
+  Info,
+} from "lucide-react";
+import useSWR, { mutate } from "swr";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useProductStore } from "@/hooks/product-store"
-import { useFormResolver } from "@/hooks/useFormResolver"
-import { Controller } from "react-hook-form"
-import NaijaStates from "naija-state-local-government"
-import { getLgasForState } from "@/lib/utils"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { deliveryFormSchema } from "@/zod/schema"
-import { useCheckoutStore } from "@/hooks/checkout-store"
-import { errorToast, successToast } from "@/components/ui/use-toast-advanced"
-import { useProductFetcher } from "@/hooks/use-product-fetcher"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useProductStore } from "@/hooks/product-store";
+import { useFormResolver } from "@/hooks/useFormResolver";
+import { Controller } from "react-hook-form";
+import NaijaStates from "naija-state-local-government";
+import { getLgasForState } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { deliveryFormSchema } from "@/zod/schema";
+import { useCheckoutStore } from "@/hooks/checkout-store";
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
+import { useProductFetcher } from "@/hooks/use-product-fetcher";
 
 // Dynamic import of PaystackButton to prevent SSR issues
-const PaystackButton = dynamic(() => import("react-paystack").then((mod) => mod.PaystackButton), {
-  ssr: false,
-  loading: () => (
-    <Button className="flex-1" disabled>
-      Loading Payment...
-    </Button>
-  ),
-})
+const PaystackButton = dynamic(
+  () => import("react-paystack").then((mod) => mod.PaystackButton),
+  {
+    ssr: false,
+    loading: () => (
+      <Button className="flex-1" disabled>
+        Loading Payment...
+      </Button>
+    ),
+  }
+);
 
 // SWR fetcher function
 const fetcher = async (url: string) => {
-  const response = await fetch(url)
+  const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
-  return response.json()
-}
+  return response.json();
+};
 
 // SWR configuration options
 const swrOptions = {
@@ -53,26 +67,26 @@ const swrOptions = {
   refreshInterval: 0,
   dedupingInterval: 5000,
   errorRetryCount: 0,
-}
+};
 
 const logisticsPricingOptions = {
   ...swrOptions,
   refreshInterval: 30000,
   revalidateOnFocus: false,
   dedupingInterval: 2000,
-}
+};
 
 const buyerInfoOptions = {
   ...swrOptions,
   dedupingInterval: 10000,
   refreshInterval: 0,
-}
+};
 
 export default function Page() {
   const [buyerCoordinates, setBuyerCoordinates] = useState<{
-    latitude: number | null
-    longitude: number | null
-  }>({ latitude: null, longitude: null })
+    latitude: number | null;
+    longitude: number | null;
+  }>({ latitude: null, longitude: null });
 
   // Use the product fetcher hook
   const {
@@ -89,39 +103,49 @@ export default function Page() {
     setDeliveryInstructions,
     setCurrentStep,
     clearCheckoutData,
-    _hasHydrated
-  } = useCheckoutStore()
+    _hasHydrated,
+  } = useCheckoutStore();
 
   // Local state for UI-specific needs
-  const [isClient, setIsClient] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const [selectedState, setSelectedState] = useState<string>("")
-  const [availableLgas, setAvailableLgas] = useState<string[]>([])
-  const [states, setStates] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  // const [isClient, setIsClient] = useState(false)
+  const [mounted, setMounted] = useState(false);
+  const [selectedState, setSelectedState] = useState<string>("");
+  const [availableLgas, setAvailableLgas] = useState<string[]>([]);
+  const [states, setStates] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const platform = searchParams.get("platform")
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const platform = searchParams.get("platform");
 
-  const isInitialMount = useRef(true)
+  const isInitialMount = useRef(true);
 
   // Get values from store
-  const currentStep = checkoutData.currentStep
-  const paymentMethod = checkoutData.paymentMethod
+  const currentStep = checkoutData.currentStep;
+  const paymentMethod = checkoutData.paymentMethod;
 
   // Product store - now working with array of order products
-  const { orderSummaries, updateDeliveryFee } = useProductStore()
+  const { orderSummaries, updateDeliveryFee } = useProductStore();
 
   // Calculate totals from all order summaries
   const totals = useMemo(() => {
-    const subtotal = orderSummaries.reduce((sum, order) => sum + order.subtotal, 0)
-    const deliveryFee = orderSummaries.reduce((sum, order) => sum + (order.deliveryFee || 0), 0)
-    const total = subtotal + deliveryFee
-    const totalItems = orderSummaries.reduce((sum, order) => sum + order.item.quantity, 0)
+    const subtotal = orderSummaries.reduce(
+      (sum, order) => sum + order.subtotal,
+      0
+    );
+    const deliveryFee = orderSummaries.reduce(
+      (sum, order) => sum + (order.deliveryFee || 0),
+      0
+    );
+    const total = subtotal + deliveryFee;
+    const totalItems = orderSummaries.reduce(
+      (sum, order) => sum + order.item.quantity,
+      0
+    );
 
-    return { subtotal, deliveryFee, total, totalItems }
-  }, [orderSummaries])
+    return { subtotal, deliveryFee, total, totalItems };
+  }, [orderSummaries]);
 
   // Form resolver for customer info and address
   const {
@@ -137,90 +161,112 @@ export default function Page() {
       formState: { isValid },
     },
   } = useFormResolver(async (data) => {
-    console.log("Customer delivery data:", data)
-    setCustomerInfo(data.customerInfo)
-    setCustomerAddress(data.customerAddress)
-    return data
-  }, deliveryFormSchema)
+    console.log("Customer delivery data:", data);
+    setCustomerInfo(data.customerInfo);
+    setCustomerAddress(data.customerAddress);
+    return data;
+  }, deliveryFormSchema);
 
   // Watch address fields for SWR key generation
-  const watchedState = watch("customerAddress.state")
-  const watchedLga = watch("customerAddress.lga")
-  const watchedStreetAddress = watch("customerAddress.streetAddress")
-  const watchedName = watch("customerInfo.name")
-  const watchedEmail = watch("customerInfo.email")
-  const watchedPhone = watch("customerInfo.phone")
+  const watchedState = watch("customerAddress.state");
+  const watchedLga = watch("customerAddress.lga");
+  const watchedStreetAddress = watch("customerAddress.streetAddress");
+  const watchedName = watch("customerInfo.name");
+  const watchedEmail = watch("customerInfo.email");
+  const watchedPhone = watch("customerInfo.phone");
 
- 
+  useEffect(() => {
+    setMounted(true);
+    isInitialMount.current = false;
+  }, []);
 
-
-useEffect(() => {
-  setIsClient(true);
-  setMounted(true);
-}, []);
-
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // Memoize buyer info key to prevent unnecessary re-renders
   const buyerInfoKey = useMemo(() => {
-    if (!watchedName || !watchedEmail || !watchedPhone) return null
+    if (!watchedName || !watchedEmail || !watchedPhone) return null;
 
-    const nameValid = watchedName.trim().length >= 2
-    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedEmail)
-    const phoneValid = /^(\+?234|0)[\d]{10}$/.test(watchedPhone)
+    const nameValid = watchedName.trim().length >= 2;
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedEmail);
+    const phoneValid = /^(\+?234|0)[\d]{10}$/.test(watchedPhone);
 
-    if (!nameValid || !emailValid || !phoneValid) return null
+    if (!nameValid || !emailValid || !phoneValid) return null;
 
-    return `/api/orders/buyer-info?buyerName=${encodeURIComponent(watchedName.trim())}&buyerEmail=${encodeURIComponent(
-      watchedEmail.trim(),
-    )}&buyerPhone=${encodeURIComponent(watchedPhone.trim())}`
-  }, [watchedName, watchedEmail, watchedPhone])
+    return `/api/orders/buyer-info?buyerName=${encodeURIComponent(
+      watchedName.trim()
+    )}&buyerEmail=${encodeURIComponent(
+      watchedEmail.trim()
+    )}&buyerPhone=${encodeURIComponent(watchedPhone.trim())}`;
+  }, [watchedName, watchedEmail, watchedPhone]);
 
-  const { data: buyerInfoData, error: buyerInfoError } = useSWR(buyerInfoKey, fetcher, buyerInfoOptions)
+  const { data: buyerInfoData, error: buyerInfoError } = useSWR(
+    buyerInfoKey,
+    fetcher,
+    buyerInfoOptions
+  );
 
   // Use first order's pickup location for delivery fee calculation
-  const firstOrderPickupLocation = orderSummaries[0]?.pickupLocation
+  const firstOrderPickupLocation = orderSummaries[0]?.pickupLocation;
 
   // Memoize logistics pricing key
   const logisticsPricingKey = useMemo(() => {
-    if (!watchedState || !watchedLga || !watchedStreetAddress) return null
-    if (!firstOrderPickupLocation?.latitude || !firstOrderPickupLocation?.longitude) return null
+    if (!watchedState || !watchedLga || !watchedStreetAddress) return null;
+    if (
+      !firstOrderPickupLocation?.latitude ||
+      !firstOrderPickupLocation?.longitude
+    )
+      return null;
 
     return `/api/logistics/pricing?state=${encodeURIComponent(
-      watchedState,
+      watchedState
     )}&lga=${encodeURIComponent(watchedLga)}&streetAddress=${encodeURIComponent(
-      watchedStreetAddress,
-    )}&supplierLat=${firstOrderPickupLocation.latitude}&supplierLng=${firstOrderPickupLocation.longitude}`
-  }, [watchedState, watchedLga, watchedStreetAddress, firstOrderPickupLocation])
+      watchedStreetAddress
+    )}&supplierLat=${firstOrderPickupLocation.latitude}&supplierLng=${
+      firstOrderPickupLocation.longitude
+    }`;
+  }, [
+    watchedState,
+    watchedLga,
+    watchedStreetAddress,
+    firstOrderPickupLocation,
+  ]);
 
   const {
     data: logisticsPricingData,
     error: logisticsPricingError,
     isLoading: isLogisticsPricingLoading,
-  } = useSWR(logisticsPricingKey, fetcher, logisticsPricingOptions)
+  } = useSWR(logisticsPricingKey, fetcher, logisticsPricingOptions);
 
+  // Update form initialization effect
   useEffect(() => {
-    // Don't initialize until we're on client and store is hydrated
-    if (!isClient || !_hasHydrated) return;
+    // Initialize states data
+    if (mounted) {
+      try {
+        const statesData = NaijaStates.states();
+        if (Array.isArray(statesData)) {
+          const stateNames = statesData
+            .map((state: any) => {
+              return typeof state === "string"
+                ? state
+                : state.state || state.name;
+            })
+            .filter(Boolean);
+          setStates(stateNames);
+        }
+      } catch (error) {
+        console.error("Error fetching states:", error);
+        setStates([]);
+      }
+    }
+  }, [mounted]);
+
+  // Add this useEffect to initialize form after hydration
+  useEffect(() => {
+    if (!_hasHydrated || !mounted) return;
 
     console.log("Hydrating form with persisted data:", checkoutData);
-
-    // Initialize states data
-    try {
-      const statesData = NaijaStates.states();
-      if (Array.isArray(statesData)) {
-        const stateNames = statesData
-          .map((state: any) => {
-            return typeof state === "string"
-              ? state
-              : state.state || state.name;
-          })
-          .filter(Boolean);
-        setStates(stateNames);
-      }
-    } catch (error) {
-      console.error("Error fetching states:", error);
-      setStates([]);
-    }
 
     // Set form values from persisted store
     setValue("customerInfo.name", checkoutData.customerInfo.name);
@@ -246,68 +292,71 @@ useEffect(() => {
       "customerAddress.directions",
       checkoutData.customerAddress.directions || ""
     );
-  }, [isClient, _hasHydrated, setValue, checkoutData]);
+  }, [_hasHydrated, mounted, setValue, checkoutData]);
 
- // Add a debug effect to monitor hydration
- useEffect(() => {
-   console.log("Hydration state:", {
-     mounted,
-     _hasHydrated,
-     isInitialMount: isInitialMount.current,
-   });
-   console.log("Checkout data:", checkoutData);
- }, [mounted, _hasHydrated, checkoutData]);
+  // Add a debug effect to monitor hydration
+  useEffect(() => {
+    console.log("Hydration state:", {
+      mounted,
+      _hasHydrated,
+      isInitialMount: isInitialMount.current,
+    });
+    console.log("Checkout data:", checkoutData);
+  }, [mounted, _hasHydrated, checkoutData]);
 
   // Watch state changes to update LGAs
   useEffect(() => {
     if (watchedState && watchedState !== selectedState) {
-      setSelectedState(watchedState)
-      const lgas = getLgasForState(watchedState)
-      setAvailableLgas(lgas)
-      setCustomerAddress({ state: watchedState })
+      setSelectedState(watchedState);
+      const lgas = getLgasForState(watchedState);
+      setAvailableLgas(lgas);
+      setCustomerAddress({ state: watchedState });
     }
-  }, [watchedState, selectedState, setCustomerAddress])
+  }, [watchedState, selectedState, setCustomerAddress]);
 
   // Watch form values for real-time validation and store updates
   useEffect(() => {
-    const customerInfo = watch("customerInfo")
+    const customerInfo = watch("customerInfo");
     if (
       customerInfo &&
       (customerInfo.name !== checkoutData.customerInfo.name ||
         customerInfo.email !== checkoutData.customerInfo.email ||
         customerInfo.phone !== checkoutData.customerInfo.phone)
     ) {
-      setCustomerInfo(customerInfo)
+      setCustomerInfo(customerInfo);
     }
-  }, [watch("customerInfo"), setCustomerInfo, checkoutData.customerInfo])
+  }, [watch("customerInfo"), setCustomerInfo, checkoutData.customerInfo]);
 
   useEffect(() => {
-    const customerAddress = watch("customerAddress")
+    const customerAddress = watch("customerAddress");
     if (
       customerAddress &&
-      (customerAddress.streetAddress !== checkoutData.customerAddress.streetAddress ||
+      (customerAddress.streetAddress !==
+        checkoutData.customerAddress.streetAddress ||
         customerAddress.state !== checkoutData.customerAddress.state ||
         customerAddress.lga !== checkoutData.customerAddress.lga ||
         customerAddress.directions !== checkoutData.customerAddress.directions)
     ) {
-      setCustomerAddress(customerAddress)
+      setCustomerAddress(customerAddress);
     }
-  }, [watch("customerAddress"), setCustomerAddress, checkoutData.customerAddress])
-
-
+  }, [
+    watch("customerAddress"),
+    setCustomerAddress,
+    checkoutData.customerAddress,
+  ]);
 
   // Effect to handle buyer info auto-fill
   useEffect(() => {
     if (buyerInfoData?.data && !buyerInfoError) {
-      const data = buyerInfoData.data
+      const data = buyerInfoData.data;
 
       if (data.streetAddress && data.state && data.lga) {
-        setValue("customerAddress.streetAddress", data.streetAddress)
-        setValue("customerAddress.state", data.state)
-        setValue("customerAddress.lga", data.lga)
+        setValue("customerAddress.streetAddress", data.streetAddress);
+        setValue("customerAddress.state", data.state);
+        setValue("customerAddress.lga", data.lga);
 
         if (data.directions) {
-          setValue("customerAddress.directions", data.directions)
+          setValue("customerAddress.directions", data.directions);
         }
 
         setCustomerAddress({
@@ -315,54 +364,57 @@ useEffect(() => {
           state: data.state,
           lga: data.lga,
           directions: data.directions || "",
-        })
+        });
 
-        setSelectedState(data.state)
-        const lgas = getLgasForState(data.state)
-        setAvailableLgas(lgas)
+        setSelectedState(data.state);
+        const lgas = getLgasForState(data.state);
+        setAvailableLgas(lgas);
       }
     }
-  }, [buyerInfoData, buyerInfoError, setValue, setCustomerAddress])
+  }, [buyerInfoData, buyerInfoError, setValue, setCustomerAddress]);
 
   // Effect to handle logistics pricing updates - apply to first order only
   useEffect(() => {
     if (logisticsPricingData?.data && !logisticsPricingError) {
-      const price = logisticsPricingData.data.price
+      const price = logisticsPricingData.data.price;
 
       if (price !== undefined) {
         // Apply delivery fee to first order only
-        updateDeliveryFee(price, 0)
+        updateDeliveryFee(price, 0);
 
-        if (logisticsPricingData.data.buyerLatitude && logisticsPricingData.data.buyerLongitude) {
+        if (
+          logisticsPricingData.data.buyerLatitude &&
+          logisticsPricingData.data.buyerLongitude
+        ) {
           setBuyerCoordinates({
             latitude: logisticsPricingData.data.buyerLatitude,
             longitude: logisticsPricingData.data.buyerLongitude,
-          })
+          });
         } else {
           setBuyerCoordinates({
             latitude: 6.5244 + (Math.random() - 0.5) * 0.1,
             longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
-          })
+          });
         }
       }
     } else if (logisticsPricingError) {
-      console.error("Logistics pricing error:", logisticsPricingError)
-      updateDeliveryFee(1500, 0)
+      console.error("Logistics pricing error:", logisticsPricingError);
+      updateDeliveryFee(1500, 0);
 
       setBuyerCoordinates({
         latitude: 6.5244 + (Math.random() - 0.5) * 0.1,
         longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
-      })
+      });
     }
-  }, [logisticsPricingData, logisticsPricingError, updateDeliveryFee])
+  }, [logisticsPricingData, logisticsPricingError, updateDeliveryFee]);
 
   // Helper function to calculate supplier amount for all orders
   const calculateSupplierAmount = () => {
     return orderSummaries.reduce((total, order) => {
-      const originalPrice = order.item.originalPrice || order.item.price
-      return total + originalPrice * order.item.quantity
-    }, 0)
-  }
+      const originalPrice = order.item.originalPrice || order.item.price;
+      return total + originalPrice * order.item.quantity;
+    }, 0);
+  };
 
   // Format order items for all orders
   const formatOrderItems = () => {
@@ -379,14 +431,15 @@ useEffect(() => {
         productColor: order.item.color,
         productSize: order.item.size,
       }),
-    }))
-  }
+    }));
+  };
 
-  const prepareOrderData = (paymentMethod: string, paymentReference?: string) => {
-    const supplierAmount = calculateSupplierAmount()
-    const plugAmount = totals.subtotal - supplierAmount
-
-   
+  const prepareOrderData = (
+    paymentMethod: string,
+    paymentReference?: string
+  ) => {
+    const supplierAmount = calculateSupplierAmount();
+    const plugAmount = totals.subtotal - supplierAmount;
 
     // Create array of order data
     const ordersData = orderSummaries.map((order) => ({
@@ -406,8 +459,11 @@ useEffect(() => {
       paymentMethod: paymentMethod,
       totalAmount: order.subtotal + (order.deliveryFee || 0),
       deliveryFee: order.deliveryFee || 0,
-      supplierAmount: (order.item.originalPrice || order.item.price) * order.item.quantity,
-      plugAmount: (order.item.price - (order.item.originalPrice || order.item.price)) * order.item.quantity,
+      supplierAmount:
+        (order.item.originalPrice || order.item.price) * order.item.quantity,
+      plugAmount:
+        (order.item.price - (order.item.originalPrice || order.item.price)) *
+        order.item.quantity,
       plugPrice: order.item.price,
       supplierPrice: order.item.originalPrice || order.item.price,
       plugId: order.referralId || "",
@@ -428,20 +484,20 @@ useEffect(() => {
       ],
 
       ...(paymentReference && { paymentReference }),
-    }))
+    }));
 
-    
-    
+    return ordersData;
+  };
 
-    return ordersData
-  }
-
-  const placeOrder = async (paymentMethod: string, paymentReference?: string) => {
+  const placeOrder = async (
+    paymentMethod: string,
+    paymentReference?: string
+  ) => {
     try {
-      setIsLoading(true)
-      const ordersData = prepareOrderData(paymentMethod, paymentReference)
+      setIsLoading(true);
+      const ordersData = prepareOrderData(paymentMethod, paymentReference);
 
-      console.log("Placing orders with data:", ordersData)
+      console.log("Placing orders with data:", ordersData);
 
       const response = await fetch("/api/orders/place-orders", {
         method: "POST",
@@ -449,69 +505,73 @@ useEffect(() => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ orders: ordersData }),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        errorToast(errorData.error || "Failed to place orders")
+        const errorData = await response.json();
+        errorToast(errorData.error || "Failed to place orders");
 
-        clearCheckoutData()
-        useProductStore.getState().clearOrderSummaries()
-        router.replace("/order-error")
-        return
+        clearCheckoutData();
+        useProductStore.getState().clearOrderSummaries();
+        router.replace("/order-error");
+        return;
       }
 
-      const result = await response.json()
-      successToast(result.message || "Orders placed successfully")
+      const result = await response.json();
+      successToast(result.message || "Orders placed successfully");
 
       if (result.data) {
-        sessionStorage.setItem("orderSuccess", JSON.stringify(result.data))
+        sessionStorage.setItem("orderSuccess", JSON.stringify(result.data));
       }
 
-      clearCheckoutData()
-      useProductStore.getState().clearOrderSummaries()
+      clearCheckoutData();
+      useProductStore.getState().clearOrderSummaries();
 
-      router.replace("/thank-you")
+      router.replace("/thank-you");
 
-      return result
+      return result;
     } catch (error) {
-      console.error("Error placing orders:", error)
-      errorToast("An error occurred while placing the orders")
+      console.error("Error placing orders:", error);
+      errorToast("An error occurred while placing the orders");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleBackNavigation = () => {
     if (platform !== "store") {
-      router.back()
+      router.back();
     }
-  }
+  };
 
   // Calculate delivery fee based on method and logistics pricing
   const getDeliveryFee = () => {
-    const hasRequiredAddressData = watchedState && watchedLga && watchedStreetAddress
+    const hasRequiredAddressData =
+      watchedState && watchedLga && watchedStreetAddress;
 
     if (!hasRequiredAddressData) {
-      return null
+      return null;
     }
 
     if (isLogisticsPricingLoading) {
-      return null
+      return null;
     }
 
-    if (logisticsPricingData?.data?.price !== undefined && !logisticsPricingError) {
-      return logisticsPricingData.data.price
+    if (
+      logisticsPricingData?.data?.price !== undefined &&
+      !logisticsPricingError
+    ) {
+      return logisticsPricingData.data.price;
     }
 
     if (logisticsPricingError) {
-      return 1500
+      return 1500;
     }
 
-    return null
-  }
+    return null;
+  };
 
-  const deliveryFee = getDeliveryFee()
+  const deliveryFee = getDeliveryFee();
 
   const continueToReview = async () => {
     if (currentStep === "delivery") {
@@ -590,29 +650,29 @@ useEffect(() => {
   ]);
 
   const formatPrice = (price?: string | number) => {
-    if (typeof price === "undefined" || price === null) return "₦0"
-    return `₦${Number(price).toLocaleString()}`
-  }
+    if (typeof price === "undefined" || price === null) return "₦0";
+    return `₦${Number(price).toLocaleString()}`;
+  };
 
   const goToPreviousStep = () => {
-    if (currentStep === "review") setCurrentStep("delivery")
-  }
+    if (currentStep === "review") setCurrentStep("delivery");
+  };
 
   const handleCashOnDeliveryOrder = async () => {
     try {
-      await placeOrder("cash")
+      await placeOrder("cash");
     } catch (error) {
-      console.error("Error placing cash orders:", error)
+      console.error("Error placing cash orders:", error);
     }
-  }
+  };
 
   const handlePaymentMethodChange = (method: "online" | "cash") => {
-    setPaymentMethod(method)
-  }
+    setPaymentMethod(method);
+  };
 
   const handleDeliveryInstructionsChange = (instructions: string) => {
-    setDeliveryInstructions(instructions)
-  }
+    setDeliveryInstructions(instructions);
+  };
 
   const renderPlaceOrderButton = () => {
     if (paymentMethod === "cash") {
@@ -652,7 +712,6 @@ useEffect(() => {
     }
   };
 
-
   if (!mounted) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -664,7 +723,7 @@ useEffect(() => {
     );
   }
 
-  if (!isClient || !mounted || !_hasHydrated) {
+  if (!isHydrated) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
@@ -684,7 +743,7 @@ useEffect(() => {
           <p>Loading your orders...</p>
         </div>
       </div>
-    )
+    );
   }
 
   // Show error state if product fetching failed
@@ -692,11 +751,13 @@ useEffect(() => {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
-          <p className="text-red-600 mb-4">Failed to load product information</p>
+          <p className="text-red-600 mb-4">
+            Failed to load product information
+          </p>
           <Button onClick={() => router.back()}>Go Back</Button>
         </div>
       </div>
-    )
+    );
   }
 
   // Don't render if we don't have order data for store platform
@@ -708,14 +769,19 @@ useEffect(() => {
           <Button onClick={() => router.back()}>Go Back</Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="flex flex-col min-h-screen pb-16 md:pb-0">
       {platform !== "store" && (
         <div className="sticky top-0 z-20 flex items-center p-4 bg-background/80 backdrop-blur-md border-b">
-          <Button variant="ghost" size="sm" onClick={handleBackNavigation} className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBackNavigation}
+            className="flex items-center gap-2"
+          >
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
@@ -728,7 +794,9 @@ useEffect(() => {
             {currentStep === "delivery" && (
               <Card>
                 <CardContent className="p-4 md:p-6">
-                  <h2 className="text-xl font-semibold mb-4">Delivery Information</h2>
+                  <h2 className="text-xl font-semibold mb-4">
+                    Delivery Information
+                  </h2>
 
                   <div className="space-y-6">
                     {/* Customer Information */}
@@ -745,43 +813,57 @@ useEffect(() => {
                             id="customerName"
                             {...register("customerInfo.name", {
                               onChange: async (e) => {
-                                const value = e.target.value
-                                setCustomerInfo({ name: value })
+                                const value = e.target.value;
+                                setCustomerInfo({ name: value });
                                 if (value && errors.customerInfo?.name) {
-                                  const isValid = await trigger("customerInfo.name")
-                                  if (isValid) clearErrors("customerInfo.name")
+                                  const isValid = await trigger(
+                                    "customerInfo.name"
+                                  );
+                                  if (isValid) clearErrors("customerInfo.name");
                                 }
                               },
                             })}
                             placeholder="Enter your full name"
-                            className={errors.customerInfo?.name ? "border-red-500" : ""}
+                            className={
+                              errors.customerInfo?.name ? "border-red-500" : ""
+                            }
                           />
                           {errors.customerInfo?.name && (
-                            <p className="text-sm text-red-600">{errors.customerInfo.name.message}</p>
+                            <p className="text-sm text-red-600">
+                              {errors.customerInfo.name.message}
+                            </p>
                           )}
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="customerEmail">
-                            Email Address <span className="text-red-500">*</span>
+                            Email Address{" "}
+                            <span className="text-red-500">*</span>
                           </Label>
                           <Input
                             id="customerEmail"
                             type="email"
                             {...register("customerInfo.email", {
                               onChange: async (e) => {
-                                const value = e.target.value
-                                setCustomerInfo({ email: value })
+                                const value = e.target.value;
+                                setCustomerInfo({ email: value });
                                 if (value && errors.customerInfo?.email) {
-                                  const isValid = await trigger("customerInfo.email")
-                                  if (isValid) clearErrors("customerInfo.email")
+                                  const isValid = await trigger(
+                                    "customerInfo.email"
+                                  );
+                                  if (isValid)
+                                    clearErrors("customerInfo.email");
                                 }
                               },
                             })}
                             placeholder="Enter your email address"
-                            className={errors.customerInfo?.email ? "border-red-500" : ""}
+                            className={
+                              errors.customerInfo?.email ? "border-red-500" : ""
+                            }
                           />
                           {errors.customerInfo?.email && (
-                            <p className="text-sm text-red-600">{errors.customerInfo.email.message}</p>
+                            <p className="text-sm text-red-600">
+                              {errors.customerInfo.email.message}
+                            </p>
                           )}
                         </div>
                         <div className="space-y-2 md:col-span-2">
@@ -792,19 +874,26 @@ useEffect(() => {
                             id="customerPhone"
                             {...register("customerInfo.phone", {
                               onChange: async (e) => {
-                                const value = e.target.value
-                                setCustomerInfo({ phone: value })
+                                const value = e.target.value;
+                                setCustomerInfo({ phone: value });
                                 if (value && errors.customerInfo?.phone) {
-                                  const isValid = await trigger("customerInfo.phone")
-                                  if (isValid) clearErrors("customerInfo.phone")
+                                  const isValid = await trigger(
+                                    "customerInfo.phone"
+                                  );
+                                  if (isValid)
+                                    clearErrors("customerInfo.phone");
                                 }
                               },
                             })}
                             placeholder="Enter your phone number"
-                            className={errors.customerInfo?.phone ? "border-red-500" : ""}
+                            className={
+                              errors.customerInfo?.phone ? "border-red-500" : ""
+                            }
                           />
                           {errors.customerInfo?.phone && (
-                            <p className="text-sm text-red-600">{errors.customerInfo.phone.message}</p>
+                            <p className="text-sm text-red-600">
+                              {errors.customerInfo.phone.message}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -819,35 +908,52 @@ useEffect(() => {
                       <Alert className="mb-4">
                         <Info className="h-4 w-4" />
                         <AlertDescription>
-                          <strong>💡 Pro Tip:</strong> Providing a very specific and detailed address helps our
-                          logistics partners optimize delivery routes, which can potentially reduce your delivery costs.
-                          Include landmarks, building descriptions, and clear directions.
+                          <strong>💡 Pro Tip:</strong> Providing a very specific
+                          and detailed address helps our logistics partners
+                          optimize delivery routes, which can potentially reduce
+                          your delivery costs. Include landmarks, building
+                          descriptions, and clear directions.
                         </AlertDescription>
                       </Alert>
 
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="streetAddress">
-                            Street Address <span className="text-red-500">*</span>
+                            Street Address{" "}
+                            <span className="text-red-500">*</span>
                           </Label>
                           <Textarea
                             id="streetAddress"
                             {...register("customerAddress.streetAddress", {
                               onChange: async (e) => {
-                                const value = e.target.value
-                                setCustomerAddress({ streetAddress: value })
-                                if (value && errors.customerAddress?.streetAddress) {
-                                  const isValid = await trigger("customerAddress.streetAddress")
-                                  if (isValid) clearErrors("customerAddress.streetAddress")
+                                const value = e.target.value;
+                                setCustomerAddress({ streetAddress: value });
+                                if (
+                                  value &&
+                                  errors.customerAddress?.streetAddress
+                                ) {
+                                  const isValid = await trigger(
+                                    "customerAddress.streetAddress"
+                                  );
+                                  if (isValid)
+                                    clearErrors(
+                                      "customerAddress.streetAddress"
+                                    );
                                 }
                               },
                             })}
                             rows={3}
-                            className={errors.customerAddress?.streetAddress ? "border-red-500" : ""}
+                            className={
+                              errors.customerAddress?.streetAddress
+                                ? "border-red-500"
+                                : ""
+                            }
                             placeholder="Enter your full street address including house number, street name, area, and nearby landmarks for accurate delivery"
                           />
                           {errors.customerAddress?.streetAddress && (
-                            <p className="text-sm text-red-600">{errors.customerAddress.streetAddress.message}</p>
+                            <p className="text-sm text-red-600">
+                              {errors.customerAddress.streetAddress.message}
+                            </p>
                           )}
                         </div>
 
@@ -862,17 +968,24 @@ useEffect(() => {
                               <Select
                                 value={field.value}
                                 onValueChange={async (value) => {
-                                  field.onChange(value)
-                                  setCustomerAddress({ state: value })
+                                  field.onChange(value);
+                                  setCustomerAddress({ state: value });
                                   if (value && errors.customerAddress?.state) {
-                                    const isValid = await trigger("customerAddress.state")
-                                    if (isValid) clearErrors("customerAddress.state")
+                                    const isValid = await trigger(
+                                      "customerAddress.state"
+                                    );
+                                    if (isValid)
+                                      clearErrors("customerAddress.state");
                                   }
                                 }}
                               >
                                 <SelectTrigger
                                   id="state"
-                                  className={errors.customerAddress?.state ? "border-red-500" : ""}
+                                  className={
+                                    errors.customerAddress?.state
+                                      ? "border-red-500"
+                                      : ""
+                                  }
                                 >
                                   <SelectValue placeholder="Select a state" />
                                 </SelectTrigger>
@@ -887,13 +1000,16 @@ useEffect(() => {
                             )}
                           />
                           {errors.customerAddress?.state && (
-                            <p className="text-sm text-red-600">{errors.customerAddress.state.message}</p>
+                            <p className="text-sm text-red-600">
+                              {errors.customerAddress.state.message}
+                            </p>
                           )}
                         </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="lga">
-                            Local Government Area <span className="text-red-500">*</span>
+                            Local Government Area{" "}
+                            <span className="text-red-500">*</span>
                           </Label>
                           <Controller
                             name="customerAddress.lga"
@@ -902,19 +1018,33 @@ useEffect(() => {
                               <Select
                                 value={field.value}
                                 onValueChange={async (value) => {
-                                  field.onChange(value)
-                                  setCustomerAddress({ lga: value })
+                                  field.onChange(value);
+                                  setCustomerAddress({ lga: value });
                                   if (value && errors.customerAddress?.lga) {
-                                    const isValid = await trigger("customerAddress.lga")
-                                    if (isValid) clearErrors("customerAddress.lga")
+                                    const isValid = await trigger(
+                                      "customerAddress.lga"
+                                    );
+                                    if (isValid)
+                                      clearErrors("customerAddress.lga");
                                   }
                                 }}
-                                disabled={!selectedState || availableLgas.length === 0}
+                                disabled={
+                                  !selectedState || availableLgas.length === 0
+                                }
                               >
-                                <SelectTrigger id="lga" className={errors.customerAddress?.lga ? "border-red-500" : ""}>
+                                <SelectTrigger
+                                  id="lga"
+                                  className={
+                                    errors.customerAddress?.lga
+                                      ? "border-red-500"
+                                      : ""
+                                  }
+                                >
                                   <SelectValue
                                     placeholder={
-                                      selectedState ? "Select a Local Government Area" : "Please select a state first"
+                                      selectedState
+                                        ? "Select a Local Government Area"
+                                        : "Please select a state first"
                                     }
                                   />
                                 </SelectTrigger>
@@ -929,28 +1059,37 @@ useEffect(() => {
                             )}
                           />
                           {errors.customerAddress?.lga && (
-                            <p className="text-sm text-red-600">{errors.customerAddress.lga.message}</p>
+                            <p className="text-sm text-red-600">
+                              {errors.customerAddress.lga.message}
+                            </p>
                           )}
                         </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="directions">
-                            Additional Directions <span className="text-gray-500">(Optional)</span>
+                            Additional Directions{" "}
+                            <span className="text-gray-500">(Optional)</span>
                           </Label>
                           <Textarea
                             id="directions"
                             {...register("customerAddress.directions", {
                               onChange: (e) => {
-                                const value = e.target.value
-                                setCustomerAddress({ directions: value })
+                                const value = e.target.value;
+                                setCustomerAddress({ directions: value });
                               },
                             })}
                             rows={3}
-                            className={errors.customerAddress?.directions ? "border-red-500" : ""}
+                            className={
+                              errors.customerAddress?.directions
+                                ? "border-red-500"
+                                : ""
+                            }
                             placeholder="Additional directions to help locate your address (e.g., 'Opposite First Bank', 'Blue gate with security post', 'Third floor, Apartment 3B')"
                           />
                           {errors.customerAddress?.directions && (
-                            <p className="text-sm text-red-600">{errors.customerAddress.directions.message}</p>
+                            <p className="text-sm text-red-600">
+                              {errors.customerAddress.directions.message}
+                            </p>
                           )}
                         </div>
 
@@ -961,14 +1100,20 @@ useEffect(() => {
                             <div className="flex items-center gap-2">
                               {logisticsPricingError && (
                                 <span className="text-sm text-red-600">
-                                  Unable to calculate delivery fee - using standard rate
+                                  Unable to calculate delivery fee - using
+                                  standard rate
                                 </span>
                               )}
-                              {logisticsPricingData?.data?.price !== undefined && !isLogisticsPricingLoading && (
-                                <span className="text-sm text-green-600">
-                                  Delivery fee calculated: {formatPrice(logisticsPricingData.data.price)}
-                                </span>
-                              )}
+                              {logisticsPricingData?.data?.price !==
+                                undefined &&
+                                !isLogisticsPricingLoading && (
+                                  <span className="text-sm text-green-600">
+                                    Delivery fee calculated:{" "}
+                                    {formatPrice(
+                                      logisticsPricingData.data.price
+                                    )}
+                                  </span>
+                                )}
                             </div>
                           </div>
                         )}
@@ -980,25 +1125,51 @@ useEffect(() => {
                     <div>
                       <h3 className="font-medium mb-3">Payment Method</h3>
 
-                      <RadioGroup value={paymentMethod} onValueChange={handlePaymentMethodChange} className="space-y-3">
+                      <RadioGroup
+                        value={paymentMethod}
+                        onValueChange={handlePaymentMethodChange}
+                        className="space-y-3"
+                      >
                         <div className="flex items-center space-x-2 p-3 border rounded-md">
-                          <RadioGroupItem value="online" id="online" className="flex-shrink-0" />
-                          <Label htmlFor="online" className="flex items-center flex-1 min-w-0">
+                          <RadioGroupItem
+                            value="online"
+                            id="online"
+                            className="flex-shrink-0"
+                          />
+                          <Label
+                            htmlFor="online"
+                            className="flex items-center flex-1 min-w-0"
+                          >
                             <CreditCard className="h-4 w-4 mr-2 text-muted-foreground flex-shrink-0" />
                             <div className="min-w-0">
-                              <span className="font-medium block">Pay Online</span>
-                              <p className="text-xs text-muted-foreground">Card, Bank Transfer, Mobile Money</p>
+                              <span className="font-medium block">
+                                Pay Online
+                              </span>
+                              <p className="text-xs text-muted-foreground">
+                                Card, Bank Transfer, Mobile Money
+                              </p>
                             </div>
                           </Label>
                         </div>
 
                         <div className="flex items-center space-x-2 p-3 border rounded-md">
-                          <RadioGroupItem value="cash" id="cash" className="flex-shrink-0" />
-                          <Label htmlFor="cash" className="flex items-center flex-1 min-w-0">
+                          <RadioGroupItem
+                            value="cash"
+                            id="cash"
+                            className="flex-shrink-0"
+                          />
+                          <Label
+                            htmlFor="cash"
+                            className="flex items-center flex-1 min-w-0"
+                          >
                             <Banknote className="h-4 w-4 mr-2 text-muted-foreground flex-shrink-0" />
                             <div className="min-w-0">
-                              <span className="font-medium block">Pay on Delivery</span>
-                              <p className="text-xs text-muted-foreground">Pay when your orders arrive</p>
+                              <span className="font-medium block">
+                                Pay on Delivery
+                              </span>
+                              <p className="text-xs text-muted-foreground">
+                                Pay when your orders arrive
+                              </p>
                             </div>
                           </Label>
                         </div>
@@ -1008,12 +1179,16 @@ useEffect(() => {
                     <Separator />
 
                     <div>
-                      <h3 className="font-medium mb-3">Delivery Instructions (Optional)</h3>
+                      <h3 className="font-medium mb-3">
+                        Delivery Instructions (Optional)
+                      </h3>
                       <Textarea
                         placeholder="Add any special instructions for delivery..."
                         className="resize-none"
                         value={checkoutData.deliveryInstructions}
-                        onChange={(e) => handleDeliveryInstructionsChange(e.target.value)}
+                        onChange={(e) =>
+                          handleDeliveryInstructionsChange(e.target.value)
+                        }
                       />
                     </div>
                   </div>
@@ -1030,7 +1205,9 @@ useEffect(() => {
             {currentStep === "review" && (
               <Card>
                 <CardContent className="p-4 md:p-6">
-                  <h2 className="text-xl font-semibold mb-4">Review Your Orders</h2>
+                  <h2 className="text-xl font-semibold mb-4">
+                    Review Your Orders
+                  </h2>
 
                   <div className="space-y-6">
                     <div>
@@ -1038,7 +1215,10 @@ useEffect(() => {
 
                       <div className="max-h-[400px] overflow-y-auto space-y-4 pr-2">
                         {orderSummaries.map((order, orderIndex) => (
-                          <div key={orderIndex} className="flex items-start space-x-3 p-3 border rounded-lg">
+                          <div
+                            key={orderIndex}
+                            className="flex items-start space-x-3 p-3 border rounded-lg"
+                          >
                             <div className="w-16 h-16 relative rounded-md overflow-hidden flex-shrink-0 bg-muted">
                               <Image
                                 src={order.item.image || "/placeholder.svg"}
@@ -1049,25 +1229,29 @@ useEffect(() => {
                             </div>
                             <div className="flex-1 min-w-0">
                               <h4 className="font-medium text-sm">
-                                <span className="capitalize">{order.item.name}</span>
+                                <span className="capitalize">
+                                  {order.item.name}
+                                </span>
                                 {order.item.variationName && (
-                                  <span className="text-muted-foreground ml-2">({order.item.variationName})</span>
+                                  <span className="text-muted-foreground ml-2">
+                                    ({order.item.variationName})
+                                  </span>
                                 )}
                               </h4>
                               <div className="flex justify-between mt-1">
                                 <span className="text-sm">
-                                  {order.item.quantity} x {formatPrice(order.item.price)}
+                                  {order.item.quantity} x{" "}
+                                  {formatPrice(order.item.price)}
                                 </span>
                                 <span className="text-sm font-medium">
-                                  {formatPrice(order.item.price * order.item.quantity)}
+                                  {formatPrice(
+                                    order.item.price * order.item.quantity
+                                  )}
                                 </span>
                               </div>
                             </div>
                           </div>
                         ))}
-
-
-
                       </div>
                     </div>
 
@@ -1082,17 +1266,20 @@ useEffect(() => {
                           <p className="text-sm">
                             {checkoutData.customerInfo.name || "Customer Name"}
                             <br />
-                            {checkoutData.customerAddress.streetAddress || "Street Address"}
+                            {checkoutData.customerAddress.streetAddress ||
+                              "Street Address"}
                             {checkoutData.customerAddress.directions && (
                               <>
                                 <br />
                                 <span className="text-muted-foreground">
-                                  Directions: {checkoutData.customerAddress.directions}
+                                  Directions:{" "}
+                                  {checkoutData.customerAddress.directions}
                                 </span>
                               </>
                             )}
                             <br />
-                            {checkoutData.customerAddress.lga}, {checkoutData.customerAddress.state}
+                            {checkoutData.customerAddress.lga},{" "}
+                            {checkoutData.customerAddress.state}
                             <br />
                             {checkoutData.customerInfo.phone || "Phone Number"}
                           </p>
@@ -1109,7 +1296,9 @@ useEffect(() => {
                         {paymentMethod === "online" ? (
                           <>
                             <CreditCard className="h-5 w-5 text-muted-foreground mr-2 flex-shrink-0" />
-                            <span className="text-sm">Online Payment (Card, Bank Transfer, Mobile Money)</span>
+                            <span className="text-sm">
+                              Online Payment (Card, Bank Transfer, Mobile Money)
+                            </span>
                           </>
                         ) : (
                           <>
@@ -1122,7 +1311,11 @@ useEffect(() => {
                   </div>
 
                   <div className="mt-6 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-                    <Button variant="outline" className="flex-1" onClick={goToPreviousStep}>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={goToPreviousStep}
+                    >
                       Back
                     </Button>
                     {renderPlaceOrderButton()}
@@ -1140,23 +1333,29 @@ useEffect(() => {
 
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground text-sm">Subtotal</span>
-                      <span className="text-sm">{formatPrice(totals.subtotal)}</span>
+                      <span className="text-muted-foreground text-sm">
+                        Subtotal
+                      </span>
+                      <span className="text-sm">
+                        {formatPrice(totals.subtotal)}
+                      </span>
                     </div>
 
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground text-sm">
                         Delivery Fee
-                        {isLogisticsPricingLoading && <Loader2 className="h-3 w-3 animate-spin ml-1 inline" />}
+                        {isLogisticsPricingLoading && (
+                          <Loader2 className="h-3 w-3 animate-spin ml-1 inline" />
+                        )}
                       </span>
                       <span className="text-sm">
                         {!watchedState || !watchedLga || !watchedStreetAddress
                           ? "Enter address to calculate"
                           : deliveryFee === null
-                            ? "Calculating..."
-                            : deliveryFee === 0
-                              ? "Free"
-                              : formatPrice(deliveryFee)}
+                          ? "Calculating..."
+                          : deliveryFee === 0
+                          ? "Free"
+                          : formatPrice(deliveryFee)}
                       </span>
                     </div>
 
@@ -1176,11 +1375,17 @@ useEffect(() => {
                     <div className="flex items-start space-x-2">
                       <p className="text-xs text-muted-foreground">
                         By continuing I agree to the{" "}
-                        <a href="/terms" className="text-primary hover:underline">
+                        <a
+                          href="/terms"
+                          className="text-primary hover:underline"
+                        >
                           Terms of Service
                         </a>{" "}
                         and{" "}
-                        <a href="/privacy" className="text-primary hover:underline">
+                        <a
+                          href="/privacy"
+                          className="text-primary hover:underline"
+                        >
                           Privacy Policy
                         </a>
                       </p>
@@ -1203,7 +1408,9 @@ useEffect(() => {
                   <div className="space-y-4 text-sm">
                     <div className="flex items-start">
                       <span className="mr-2 text-primary">•</span>
-                      <p>Orders are typically delivered within 2-4 business days</p>
+                      <p>
+                        Orders are typically delivered within 2-4 business days
+                      </p>
                     </div>
                     <div className="flex items-start">
                       <span className="mr-2 text-primary">•</span>
@@ -1221,5 +1428,5 @@ useEffect(() => {
         </div>
       </div>
     </div>
-  )
+  );
 }
