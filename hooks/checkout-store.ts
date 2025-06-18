@@ -130,16 +130,17 @@ export const useCheckoutStore = create<CheckoutStore>()(
     {
       name: "checkout-store",
       storage: createJSONStorage(() => localStorage),
-      // Add hydration callback
-      onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true);
+      onRehydrateStorage: (state) => {
+        // Return a function that will be called after rehydration is complete
+        return (state, error) => {
+          if (error) {
+            console.error("Error during rehydration:", error);
+          } else {
+            // Set hydration status after rehydration completes
+            state?.setHasHydrated(true);
+          }
+        };
       },
-      // Add partialize to control what gets persisted
-      partialize: (state) => ({
-        checkoutData: state.checkoutData,
-      }),
-      // Add version for migration if needed
-      version: 1,
     }
   )
 );

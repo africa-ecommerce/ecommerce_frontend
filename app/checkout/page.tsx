@@ -223,47 +223,31 @@ useEffect(() => {
 
 
 
+// Add this useEffect to initialize form after hydration
+useEffect(() => {
+  if (!_hasHydrated || !mounted) return;
 
- useEffect(() => {
-   // Only run after both mounting and hydration are complete
-   if (!mounted || !_hasHydrated || !isInitialMount.current) return;
+  console.log("Hydrating form with persisted data:", checkoutData);
 
-   console.log("Hydrating form with persisted data:", checkoutData);
-
-   // Set form values from persisted store
-   if (checkoutData.customerInfo.name) {
-     setValue("customerInfo.name", checkoutData.customerInfo.name);
-   }
-   if (checkoutData.customerInfo.email) {
-     setValue("customerInfo.email", checkoutData.customerInfo.email);
-   }
-   if (checkoutData.customerInfo.phone) {
-     setValue("customerInfo.phone", checkoutData.customerInfo.phone);
-   }
-   if (checkoutData.customerAddress.streetAddress) {
-     setValue(
-       "customerAddress.streetAddress",
-       checkoutData.customerAddress.streetAddress
-     );
-   }
-   if (checkoutData.customerAddress.state) {
-     setValue("customerAddress.state", checkoutData.customerAddress.state);
-     setSelectedState(checkoutData.customerAddress.state);
-     const lgas = getLgasForState(checkoutData.customerAddress.state);
-     setAvailableLgas(lgas);
-   }
-   if (checkoutData.customerAddress.lga) {
-     setValue("customerAddress.lga", checkoutData.customerAddress.lga);
-   }
-   if (checkoutData.customerAddress.directions) {
-     setValue(
-       "customerAddress.directions",
-       checkoutData.customerAddress.directions
-     );
-   }
-
-   isInitialMount.current = false;
- }, [mounted, _hasHydrated, setValue, checkoutData]);
+  // Set form values from persisted store
+  setValue("customerInfo.name", checkoutData.customerInfo.name);
+  setValue("customerInfo.email", checkoutData.customerInfo.email);
+  setValue("customerInfo.phone", checkoutData.customerInfo.phone);
+  setValue("customerAddress.streetAddress", checkoutData.customerAddress.streetAddress);
+  
+  if (checkoutData.customerAddress.state) {
+    setValue("customerAddress.state", checkoutData.customerAddress.state);
+    setSelectedState(checkoutData.customerAddress.state);
+    const lgas = getLgasForState(checkoutData.customerAddress.state);
+    setAvailableLgas(lgas);
+  }
+  
+  if (checkoutData.customerAddress.lga) {
+    setValue("customerAddress.lga", checkoutData.customerAddress.lga);
+  }
+  
+  setValue("customerAddress.directions", checkoutData.customerAddress.directions || "");
+}, [_hasHydrated, mounted, setValue, checkoutData]);
 
  // Add a debug effect to monitor hydration
  useEffect(() => {
@@ -676,6 +660,18 @@ useEffect(() => {
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
           <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+
+  if (!mounted || !_hasHydrated) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Loading your checkout information...</p>
         </div>
       </div>
     );
