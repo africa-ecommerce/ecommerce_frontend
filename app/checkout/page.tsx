@@ -529,7 +529,7 @@ export default function Page() {
         ],
       },
       publicKey: "pk_test_eff9334b69c4057bd0b89b293824020426f0d011",
-      text: isLoading ? "Processing..." : "Place Orders",
+      text: isLoading ? "Processing..." : "Place Order",
       onSuccess: async (reference: any) => {
         try {
           await placeOrder("online", reference.reference)
@@ -590,7 +590,7 @@ export default function Page() {
               Processing...
             </>
           ) : (
-            "Place Orders (Pay on Delivery)"
+            "Place Order (Pay on Delivery)"
           )}
         </Button>
       )

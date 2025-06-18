@@ -131,7 +131,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     if (variation.size) parts.push(variation.size.toUpperCase())
     if (variation.color) parts.push(variation.color.charAt(0).toUpperCase() + variation.color.slice(1))
 
-    return parts.join(" - ") || `Variation ${variation.id}`
+    return parts.join(" - ") || "Variation"
   }
 
   // Get current stock for simple products (no variations)
