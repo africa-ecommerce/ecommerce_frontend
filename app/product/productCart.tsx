@@ -1183,14 +1183,14 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     setQuantityInput(quantity.toString())
   }, [quantity])
 
-  useEffect(() => {
-    return () => {
-      // Clear session storage when leaving product page
-      if (platform !== "store") {
-        sessionStorage.removeItem("product-store");
-      }
-    };
-  }, [platform]);
+  // useEffect(() => {
+  //   return () => {
+  //     // Clear session storage when leaving product page
+  //     if (platform !== "store") {
+  //       sessionStorage.removeItem("product-store");
+  //     }
+  //   };
+  // }, [platform]);
 
   useEffect(() => {
     // Restore state from persisted order summaries when component mounts
