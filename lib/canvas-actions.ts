@@ -318,14 +318,16 @@ import { createCanvas, loadImage, CanvasRenderingContext2D as NodeCanvasRenderin
 import { registerFont } from "canvas";
 import path from "path";
 
-// Register the Inter font from the public directory
-registerFont(path.join(process.cwd(), "public", "font", "Inter-Regular.ttf"), {
+
+
+registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Regular.ttf"), {
   family: "Inter",
   weight: 'normal'
+
 });
 
 
-registerFont(path.join(process.cwd(), "public", "font", "Inter-Bold.ttf"), {
+registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Regular.ttf"), {
   family: "Inter",
   weight: 'bold'
 });
