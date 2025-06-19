@@ -27,8 +27,7 @@ interface ProductVariation {
   size: string
   color: string
   stock: number
-  // productId: string
-  // name?: string
+ 
   price?: number
 }
 
@@ -40,10 +39,7 @@ interface SelectedVariation {
 interface PickupLocation {
   latitude: number
   longitude: number
-  direction?: string
-  state?: string
-  lga?: string
-  streetAddress?: string
+ 
 }
 
 interface ProductData {
@@ -199,16 +195,13 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
       !hasRestoredState
     ) {
 
-      console.log("orderSummaries", orderSummaries);
-      console.log("currentProductId", currentProductId);
-      console.log("productData", productData);
+     
     
      
       const existingOrders = orderSummaries.filter(
         (order) => order.item.id === currentProductId
       );
 
-      console.log("existingOrders", existingOrders);
 
       if (existingOrders.length > 0) {
         if (hasVariations) {

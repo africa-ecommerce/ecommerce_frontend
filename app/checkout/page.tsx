@@ -318,7 +318,7 @@ export default function CheckoutPage() {
     if (!orderSummaries.length) return [];
 
     return orderSummaries.flatMap((summary) => ({
-      productId: summary.productId,
+      productId: summary.item.id,
       quantity: summary.item.quantity,
 
       ...(summary.item.variationId && {
@@ -665,7 +665,7 @@ export default function CheckoutPage() {
     goToNextStep();
     if (orderSummaries.length > 0) {
       mutate(
-        `/public/products/${orderSummaries[0].productId}${orderSummaries[0].referralId}`
+        `/public/products/${orderSummaries[0].item.id}${orderSummaries[0].referralId}`
       );
     }
   };

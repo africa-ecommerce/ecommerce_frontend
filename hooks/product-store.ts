@@ -41,7 +41,7 @@ interface ProductStore {
   updateDeliveryFee: (fee: number, orderIndex?: number) => void
   addProductToOrder: (
     product: ProductItem,
-    productId: string,
+   
     referralId: string | null,
     platform: string | null,
     pickupLocation?: PickupLocation,
@@ -92,7 +92,7 @@ export const useProductStore = create<ProductStore>()(
 
       addProductToOrder: (
         product,
-        productId,
+       
         referralId,
         platform,
         pickupLocation
