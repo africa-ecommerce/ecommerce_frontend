@@ -250,18 +250,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     hasVariations,
     hasRestoredState,
   ]);
-// useEffect(() => {
-//   // Clear order summaries when product ID changes (before fetch)
-//   if (currentProductId !== orderSummaries[0]?.item.id) {
-//     console.log("currentProductId", currentProductId);
-//     console.log("orderSummaries", orderSummaries[0]?.item.id);
-//     console.log("cleared")
-//     clearOrderSummaries();
-//   }
-  
-//   // Reset restoration flag when product changes
-//   setHasRestoredState(false);
-// }, [currentProductId, clearOrderSummaries]);
+
 
 
 useEffect(() => {

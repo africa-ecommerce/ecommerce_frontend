@@ -21,7 +21,7 @@ const productFetchingOptions = {
   revalidateOnReconnect: true,
   refreshInterval: 0,
   dedupingInterval: 5000,
-  errorRetryCount: 2,
+  errorRetryCount: 1,
   errorRetryInterval: 1000,
 };
 

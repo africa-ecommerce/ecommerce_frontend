@@ -659,9 +659,11 @@ export default function CheckoutPage() {
   const continueToReview = () => {
     goToNextStep();
     if (orderSummaries.length > 0) {
-      mutate(
-        `/public/products/${orderSummaries[0].item.id}${orderSummaries[0].referralId}`
-      );
+      orderSummaries.forEach((orderSummary) => {
+        mutate(
+          `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
+        );
+      });
     }
   };
 
