@@ -27,8 +27,8 @@ interface ProductVariation {
   size: string
   color: string
   stock: number
-  productId: string
-  name?: string
+  // productId: string
+  // name?: string
   price?: number
 }
 
@@ -48,6 +48,7 @@ interface PickupLocation {
 
 interface ProductData {
   originalId: string
+  id: string
   name: string
   description: string
   price: number
@@ -57,7 +58,6 @@ interface ProductData {
   color: string
   stocks: number
   variations: ProductVariation[]
-  features?: string[]
   inStock?: boolean
   pickupLocation?: PickupLocation
   supplierId?: string
@@ -352,7 +352,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     if (hasVariations && selectedVariations.length > 0) {
       // Calculate for selected variations
       for (const sv of selectedVariations) {
-        const price = sv.variation.price || productData.price;
+        const price =  productData.price;
         const itemTotal = price * sv.quantity;
         subtotal += itemTotal;
         items.push({
@@ -378,96 +378,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     return { subtotal, total, items };
   }, [currentPrice, quantity, selectedVariations, hasVariations, productData]);
 
-  // const handleCheckout = () => {
-  //   if (!productData) return
-
-  //   // Extract pickup location from product data
-  //   const pickupLocation = productData.pickupLocation
-  //     ? {
-  //         latitude: productData.pickupLocation.latitude,
-  //         longitude: productData.pickupLocation.longitude,
-  //       }
-  //     : undefined
-
-  //   // Create order products array
-  //   const newOrderSummaries = []
-
-  //   if (hasVariations && selectedVariations.length > 0) {
-  //     // Handle multiple variations - create separate order for each variation
-  //     for (const sv of selectedVariations) {
-  //       const productItem = {
-  //         id: productData.originalId,
-  //         name: productData.name,
-  //         price: productData.price,
-  //         originalPrice: productData.originalPrice,
-  //         quantity: sv.quantity,
-  //         size: sv.variation.size,
-  //         color: sv.variation.color,
-  //         image: productData.images?.[0] || "/placeholder.svg",
-  //         variationId: sv.variation.id,
-  //         variationName: getVariationDisplayName(sv.variation),
-  //         supplierId: productData.supplierId,
-  //       }
-
-  //       const subtotal = productItem.price * productItem.quantity
-
-  //       newOrderSummaries.push({
-  //         item: productItem, // Single item instead of array
-  //         subtotal,
-  //         total: subtotal,
-  //         productId: productData.originalId,
-  //         referralId: currentReferralId,
-  //         platform: currentPlatform,
-  //         pickupLocation,
-  //         deliveryFee: 0,
-  //       })
-  //     }
-  //   } else if (!hasVariations) {
-  //     // Handle simple product
-  //     const productItem = {
-  //       id: productData.originalId,
-  //       name: productData.name,
-  //       price: currentPrice,
-  //       size: productData.size,
-  //       color: productData.color,
-  //       originalPrice: productData.originalPrice,
-  //       quantity,
-  //       image: productData.images?.[0] || "/placeholder.svg",
-  //       supplierId: productData.supplierId,
-  //     }
-
-  //     const subtotal = currentPrice * quantity
-
-  //     newOrderSummaries.push({
-  //       item: productItem, // Single item instead of array
-  //       subtotal,
-  //       total: subtotal,
-  //       productId: productData.originalId,
-  //       referralId: currentReferralId,
-  //       platform: currentPlatform,
-  //       pickupLocation,
-  //       deliveryFee: 0,
-  //     })
-  //   }
-
-  //   // Set the order summaries
-  //   console.log("newOrderSummaries", newOrderSummaries)
-  //   setOrderSummaries(newOrderSummaries)
-
-  //   // Navigate to checkout
-  //   let checkoutUrl = `/checkout?pid=${currentProductId}`
-
-  //   if (currentReferralId) {
-  //     checkoutUrl += `&ref=${currentReferralId}`
-  //   }
-
-  //   if (currentPlatform) {
-  //     checkoutUrl += `&platform=${currentPlatform}`
-  //   }
-
-  //   router.push(checkoutUrl)
-  // }
-
+  
   const handleCheckout = () => {
     if (!productData) return;
 
@@ -481,7 +392,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
 
     // Remove existing orders for this product first
     const filteredOrders = orderSummaries.filter(
-      (order) => order.productId !== productData.originalId
+      (order) => order.item.id !== productData.id
     );
 
     // Create new order products array
@@ -491,7 +402,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
       // Handle multiple variations - create separate order for each variation
       for (const sv of selectedVariations) {
         const productItem = {
-          id: productData.originalId,
+          id: productData.id,
           name: productData.name,
           price: productData.price,
           originalPrice: productData.originalPrice,
@@ -510,7 +421,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
           item: productItem, // Single item instead of array
           subtotal,
           total: subtotal,
-          productId: productData.originalId,
+          
           referralId: currentReferralId,
           platform: currentPlatform,
           pickupLocation,
@@ -520,7 +431,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     } else if (!hasVariations) {
       // Handle simple product
       const productItem = {
-        id: productData.originalId,
+        id: productData.id,
         name: productData.name,
         price: currentPrice,
         size: productData.size,
@@ -537,7 +448,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
         item: productItem, // Single item instead of array
         subtotal,
         total: subtotal,
-        productId: productData.originalId,
+       
         referralId: currentReferralId,
         platform: currentPlatform,
         pickupLocation,

@@ -26,7 +26,7 @@ interface OrderProduct {
   item: ProductItem // Changed from items array to single item
   subtotal: number
   total: number
-  productId: string
+ 
   referralId: string | null
   platform: string | null
   pickupLocation?: PickupLocation
@@ -105,7 +105,7 @@ export const useProductStore = create<ProductStore>()(
           item: product, // Single item instead of array
           subtotal,
           total,
-          productId,
+         
           referralId,
           platform,
           pickupLocation,
