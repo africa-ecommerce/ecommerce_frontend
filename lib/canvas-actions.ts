@@ -503,12 +503,92 @@ async function applyDarkTemplate(
   }
 }
 
-// Background removal server action
+// // Background removal server action
+// export async function removeImageBackground(options: {
+//   imageUrl: string
+//   method?: 'color' | 'edges' | 'ai'
+//   targetColor?: [number, number, number]
+//   tolerance?: number
+//   newBackground?: string
+//   width?: number
+//   height?: number
+// }) {
+//   try {
+//     const {
+//       imageUrl,
+//       method = 'color',
+//       targetColor = [255, 255, 255],
+//       tolerance = 30,
+//       newBackground = 'red',
+//       width = 400,
+//       height = 400
+//     } = options
+
+//     const canvas = createCanvas(width, height)
+//     const ctx = canvas.getContext('2d') as unknown as NodeCanvasRenderingContext2D
+
+//     // Load original image
+//     const img = await loadImage(imageUrl)
+//     ctx.drawImage(img, 0, 0, width, height)
+
+//     if (method === 'color') {
+//       // Get image data for pixel manipulation
+//       const imageData = ctx.getImageData(0, 0, width, height)
+//       const data = imageData.data
+
+//       // Remove background by color
+//       for (let i = 0; i < data.length; i += 4) {
+//         const r = data[i]
+//         const g = data[i + 1]
+//         const b = data[i + 2]
+
+//         // Calculate color difference
+//         const diff = Math.sqrt(
+//           Math.pow(r - targetColor[0], 2) +
+//           Math.pow(g - targetColor[1], 2) +
+//           Math.pow(b - targetColor[2], 2)
+//         )
+
+//         // Make similar colors transparent
+//         if (diff < tolerance) {
+//           data[i + 3] = 0 // Set alpha to 0
+//         }
+//       }
+
+//       // Clear canvas and add new background if specified
+//       ctx.clearRect(0, 0, width, height)
+      
+//       if (newBackground !== 'transparent') {
+//         ctx.fillStyle = newBackground
+//         ctx.fillRect(0, 0, width, height)
+//       }
+
+//       // Put processed image back
+//       ctx.putImageData(imageData, 0, 0)
+//     }
+
+//     const processedImageBuffer = canvas.toBuffer('image/png')
+
+//     return {
+//       success: true,
+//       processedImage: processedImageBuffer,
+//       method,
+//       dimensions: { width, height },
+//     };
+
+//   } catch (error) {
+//     console.error('Background removal error:', error)
+//     return {
+//       success: false,
+//       error: 'Background removal failed',
+//       details: error instanceof Error ? error.message : 'Unknown error'
+//     }
+//   }
+// }
+
+
 export async function removeImageBackground(options: {
   imageUrl: string
-  method?: 'color' | 'edges' | 'ai'
-  targetColor?: [number, number, number]
-  tolerance?: number
   newBackground?: string
   width?: number
   height?: number
@@ -516,75 +596,41 @@ export async function removeImageBackground(options: {
   try {
     const {
       imageUrl,
-      method = 'color',
-      targetColor = [255, 255, 255],
-      tolerance = 30,
-      newBackground = 'red',
+      newBackground = 'red', // default to red
       width = 400,
       height = 400
     } = options
 
     const canvas = createCanvas(width, height)
-    const ctx = canvas.getContext('2d') as unknown as NodeCanvasRenderingContext2D
+    const ctx = canvas.getContext('2d') as NodeCanvasRenderingContext2D
 
-    // Load original image
     const img = await loadImage(imageUrl)
+
+    // Fill background
+    ctx.fillStyle = newBackground
+    ctx.fillRect(0, 0, width, height)
+
+    // Draw image over the background
     ctx.drawImage(img, 0, 0, width, height)
-
-    if (method === 'color') {
-      // Get image data for pixel manipulation
-      const imageData = ctx.getImageData(0, 0, width, height)
-      const data = imageData.data
-
-      // Remove background by color
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i]
-        const g = data[i + 1]
-        const b = data[i + 2]
-
-        // Calculate color difference
-        const diff = Math.sqrt(
-          Math.pow(r - targetColor[0], 2) +
-          Math.pow(g - targetColor[1], 2) +
-          Math.pow(b - targetColor[2], 2)
-        )
-
-        // Make similar colors transparent
-        if (diff < tolerance) {
-          data[i + 3] = 0 // Set alpha to 0
-        }
-      }
-
-      // Clear canvas and add new background if specified
-      ctx.clearRect(0, 0, width, height)
-      
-      if (newBackground !== 'transparent') {
-        ctx.fillStyle = newBackground
-        ctx.fillRect(0, 0, width, height)
-      }
-
-      // Put processed image back
-      ctx.putImageData(imageData, 0, 0)
-    }
 
     const processedImageBuffer = canvas.toBuffer('image/png')
 
     return {
       success: true,
       processedImage: processedImageBuffer,
-      method,
-      dimensions: { width, height },
-    };
+      dimensions: { width, height }
+    }
 
   } catch (error) {
-    console.error('Background removal error:', error)
+    console.error('Background fill error:', error)
     return {
       success: false,
-      error: 'Background removal failed',
+      error: 'Background processing failed',
       details: error instanceof Error ? error.message : 'Unknown error'
     }
   }
 }
+
 
 // Combined action for complete image processing
 export async function createProductCard(options: {
