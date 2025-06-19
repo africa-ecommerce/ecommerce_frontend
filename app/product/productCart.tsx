@@ -124,7 +124,6 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
 
   const productData: ProductData = data?.data || null;
 
-  console.log("productData", productData);
 
   // Handle variations logic
   const hasVariations =
@@ -236,8 +235,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
         setHasRestoredState(true);
       }
     } else if (orderSummaries.length === 0 && hasRestoredState) {
-     console.log("restoredState", hasRestoredState)
-     console.log("orderSummaries", orderSummaries.length)
+  
       if (hasVariations) {
         setSelectedVariations([]);
       } else {
@@ -453,7 +451,6 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     const finalOrderSummaries = [...filteredOrders, ...newOrderSummaries];
 
     // Set the order summaries
-    console.log("finalOrderSummaries", finalOrderSummaries);
     setOrderSummaries(finalOrderSummaries);
 
     // Navigate to checkout

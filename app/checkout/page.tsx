@@ -127,7 +127,6 @@ export default function CheckoutPage() {
       formState: { isValid },
     },
   } = useFormResolver(async (data) => {
-    console.log("Customer delivery data:", data);
     // Update store with form data
     setCustomerInfo(data.customerInfo);
     setCustomerAddress(data.customerAddress);
@@ -383,7 +382,6 @@ export default function CheckoutPage() {
       setIsLoading(true);
       const orderData = prepareOrderData(paymentMethod, paymentReference);
 
-      console.log("Placing order with data:", orderData);
 
       const response = await fetch("/api/orders/place-order", {
         method: "POST",
@@ -497,10 +495,7 @@ export default function CheckoutPage() {
   // Effect to log data for debugging
   useEffect(() => {
     if (platform === "store") {
-      console.log("Store platform - Parsed URL:", parsedUrl);
-      console.log("Store platform - Products Data:", productsData);
-      console.log("Store platform - Order Summaries:", orderSummaries);
-      console.log("Store platform - Cart Items:", cartItems);
+     
 
       if (productFetchError) {
         console.error(
@@ -694,7 +689,6 @@ export default function CheckoutPage() {
     onSuccess: async (reference) => {
       try {
         await placeOrder("online", reference.reference);
-        console.log("Payment successful:", reference);
       } catch (error) {
         console.error("Error placing order after successful payment:", error);
       }
