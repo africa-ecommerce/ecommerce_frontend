@@ -253,6 +253,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
 useEffect(() => {
   // Clear order summaries when product ID changes (before fetch)
   if (currentProductId !== orderSummaries[0]?.item.id) {
+    console.log("cleared")
     clearOrderSummaries();
   }
   
