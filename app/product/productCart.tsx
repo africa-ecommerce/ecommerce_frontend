@@ -264,7 +264,6 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
 // }, [currentProductId, clearOrderSummaries]);
 
 
-
 useEffect(() => {
   // Only clear if we have order summaries AND the product ID is different
   // This prevents clearing on initial load when orderSummaries[0] is undefined
@@ -281,7 +280,7 @@ useEffect(() => {
 
   // Reset restoration flag when product changes
   setHasRestoredState(false);
-}, [currentProductId, clearOrderSummaries]);
+}, [currentProductId, orderSummaries]);
 
   const formatDescription = (text: string) => {
     if (!text) return "";
