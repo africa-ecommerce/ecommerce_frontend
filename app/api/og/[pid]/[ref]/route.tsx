@@ -139,7 +139,6 @@
 
 
 
-
 // File: app/api/og/[pid]/[ref].png/route.tsx
 import { ImageResponse } from 'next/og'
 import { getProductServer } from '@/lib/products'
@@ -340,14 +339,11 @@ export async function GET(
             display: 'flex',
             gap: 8,
           }}>
-            {[...Array(5)].map((_, i) => (
-              <div key={i} style={{
-                fontSize: 32,
-                color: '#FFD700',
-              }}>
-                ⭐
-              </div>
-            ))}
+            <div style={{ fontSize: 32, color: '#FFD700' }}>⭐</div>
+            <div style={{ fontSize: 32, color: '#FFD700' }}>⭐</div>
+            <div style={{ fontSize: 32, color: '#FFD700' }}>⭐</div>
+            <div style={{ fontSize: 32, color: '#FFD700' }}>⭐</div>
+            <div style={{ fontSize: 32, color: '#FFD700' }}>⭐</div>
           </div>
 
           {/* User profile circle */}
