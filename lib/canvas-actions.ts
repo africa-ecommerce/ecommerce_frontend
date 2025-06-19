@@ -105,7 +105,7 @@
 
 //   // Product name
 //   ctx.fillStyle = colors.primaryText
-//   ctx.font = 'bold 18px Arial'
+//   ctx.font = 'bold 18px Inter'
 //   ctx.fillText(productName.substring(0, 20), 10, height - 70)
 
 //   // Price
@@ -315,6 +315,20 @@
 'use server'
 
 import { createCanvas, loadImage, CanvasRenderingContext2D as NodeCanvasRenderingContext2D } from 'canvas'
+import { registerFont } from "canvas";
+import path from "path";
+
+// Register the Inter font from the public directory
+registerFont(path.join(process.cwd(), "public", "font", "Inter-Regular.ttf"), {
+  family: "Inter",
+  weight: 'normal'
+});
+
+
+registerFont(path.join(process.cwd(), "public", "font", "Inter-Bold.ttf"), {
+  family: "Inter",
+  weight: 'bold'
+});
 
 export interface ProcessImageOptions {
   imageUrl: string
@@ -419,16 +433,16 @@ async function applyInspireTemplate(
 
   // Product name
   ctx.fillStyle = colors.primaryText
-  ctx.font = 'bold 18px Arial'
+  ctx.font = 'bold 18px Inter'
   ctx.fillText(productName.substring(0, 20), 10, height - 70)
 
   // Price
-  ctx.font = '16px Arial'
+  ctx.font = '16px Inter'
   ctx.fillText(`$${price.toFixed(2)}`, 10, height - 45)
 
   // Referral info
   if (ref) {
-    ctx.font = '12px Arial'
+    ctx.font = '12px Inter'
     ctx.fillText(`Shared by: ${ref}`, 10, height - 20)
   }
 }
@@ -447,15 +461,15 @@ async function applyMinimalTemplate(
 
   // Clean typography
   ctx.fillStyle = '#1A202C'
-  ctx.font = 'bold 16px Arial'
+  ctx.font = 'bold 16px Inter'
   ctx.fillText(productName, 15, height - 60)
 
-  ctx.font = '14px Arial'
+  ctx.font = '14px Inter'
   ctx.fillText(`$${price.toFixed(2)}`, 15, height - 40)
 
   if (ref) {
     ctx.fillStyle = '#4299E1'
-    ctx.font = '12px Arial'
+    ctx.font = '12px Inter'
     ctx.fillText(`By ${ref}`, 15, height - 20)
   }
 }
@@ -474,15 +488,15 @@ async function applyDarkTemplate(
 
   // Light text
   ctx.fillStyle = '#F7FAFC'
-  ctx.font = 'bold 18px Arial'
+  ctx.font = 'bold 18px Inter'
   ctx.fillText(productName, 15, height - 75)
 
-  ctx.font = '16px Arial'
+  ctx.font = '16px Inter'
   ctx.fillText(`$${price.toFixed(2)}`, 15, height - 50)
 
   if (ref) {
     ctx.fillStyle = '#63B3ED'
-    ctx.font = '12px Arial'
+    ctx.font = '12px Inter'
     ctx.fillText(`Recommended by ${ref}`, 15, height - 25)
   }
 }
