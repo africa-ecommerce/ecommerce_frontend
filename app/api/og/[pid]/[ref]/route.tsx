@@ -478,7 +478,7 @@
 
 
 
-import { createProductCard } from "@/lib/canvas-actions";
+import { createMagazineStyleCard } from "@/lib/canvas-actions";
 import { getProductServer } from "@/lib/products";
 import { NextResponse } from "next/server";
 
@@ -495,18 +495,18 @@ export async function GET(
     return new NextResponse("Product not found", { status: 404 });
   }
 
-  const result = await createProductCard({
+  const result = await createMagazineStyleCard({
     imageUrl: product.data.images?.[0] || "https://via.placeholder.com/400",
     productName: product.data.name || "Product",
     price: product.data.price || 0,
     ref: actualRef,
     template: "inspire",
-    removeBackground: true,
-    backgroundOptions: {
-      targetColor: [255, 255, 255],
-      tolerance: 40,
-      newBackground: "transparent",
-    },
+    removeBackground: false,
+    // backgroundOptions: {
+    //   targetColor: [255, 255, 255],
+    //   tolerance: 40,
+    //   // newBackground: "transparent",
+    // },
     dimensions: { width: 1200, height: 630 },
   });
 
