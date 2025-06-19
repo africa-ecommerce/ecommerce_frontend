@@ -138,7 +138,6 @@
 
 
 
-
 // File: app/api/og/[pid]/[ref].png/route.tsx
 import { ImageResponse } from 'next/og'
 import { getProductServer } from '@/lib/products'
@@ -184,26 +183,30 @@ export async function GET(
             flexDirection: 'column',
             alignItems: 'flex-start',
           }}>
-            <h1 style={{
-              fontSize: 120,
-              fontWeight: 700,
-              color: '#F5F5DC',
-              margin: 0,
-              letterSpacing: '0.05em',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
-            }}>
-              INSPIRE
-            </h1>
-            <p style={{
-              fontSize: 28,
-              color: '#F5F5DC',
-              margin: 0,
-              opacity: 0.9,
-              letterSpacing: '0.2em',
-              marginTop: -10,
-            }}>
-              BY PLUGGN
-            </p>
+            <div style={{ display: 'flex' }}>
+              <h1 style={{
+                fontSize: 120,
+                fontWeight: 700,
+                color: '#F5F5DC',
+                margin: 0,
+                letterSpacing: '0.05em',
+                textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
+              }}>
+                INSPIRE
+              </h1>
+            </div>
+            <div style={{ display: 'flex' }}>
+              <p style={{
+                fontSize: 28,
+                color: '#F5F5DC',
+                margin: 0,
+                opacity: 0.9,
+                letterSpacing: '0.2em',
+                marginTop: -10,
+              }}>
+                BY PLUGGN
+              </p>
+            </div>
           </div>
 
           {/* NEW badge */}
@@ -217,6 +220,7 @@ export async function GET(
             fontSize: 32,
             fontWeight: 700,
             borderRadius: 4,
+            display: 'flex',
           }}>
             NEW
           </div>
@@ -255,6 +259,7 @@ export async function GET(
                 borderRadius: 8,
                 overflow: 'hidden',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                display: 'flex',
               }}>
                 <img
                   width="120"
@@ -268,6 +273,7 @@ export async function GET(
                 borderRadius: 8,
                 overflow: 'hidden',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                display: 'flex',
               }}>
                 <img
                   width="120"
@@ -288,47 +294,55 @@ export async function GET(
             display: 'flex',
             flexDirection: 'column',
           }}>
-            <h2 style={{
-              fontSize: 96,
-              fontWeight: 800,
-              color: '#FFFFFF',
-              margin: 0,
-              lineHeight: 0.9,
-              textShadow: '3px 3px 6px rgba(0,0,0,0.3)',
-            }}>
-              STYLE
-            </h2>
-            <h2 style={{
-              fontSize: 96,
-              fontWeight: 800,
-              color: '#FFFFFF',
-              margin: 0,
-              lineHeight: 0.9,
-              textShadow: '3px 3px 6px rgba(0,0,0,0.3)',
-            }}>
-              THAT
-            </h2>
-            <h2 style={{
-              fontSize: 96,
-              fontWeight: 800,
-              color: '#FFFFFF',
-              margin: 0,
-              lineHeight: 0.9,
-              textShadow: '3px 3px 6px rgba(0,0,0,0.3)',
-            }}>
-              STANDS
-            </h2>
-            <h2 style={{
-              fontSize: 96,
-              fontWeight: 800,
-              color: '#F5F5DC',
-              margin: 0,
-              lineHeight: 0.9,
-              textShadow: '3px 3px 6px rgba(0,0,0,0.3)',
-              opacity: 0.8,
-            }}>
-              OUT
-            </h2>
+            <div style={{ display: 'flex' }}>
+              <h2 style={{
+                fontSize: 96,
+                fontWeight: 800,
+                color: '#FFFFFF',
+                margin: 0,
+                lineHeight: 0.9,
+                textShadow: '3px 3px 6px rgba(0,0,0,0.3)',
+              }}>
+                STYLE
+              </h2>
+            </div>
+            <div style={{ display: 'flex' }}>
+              <h2 style={{
+                fontSize: 96,
+                fontWeight: 800,
+                color: '#FFFFFF',
+                margin: 0,
+                lineHeight: 0.9,
+                textShadow: '3px 3px 6px rgba(0,0,0,0.3)',
+              }}>
+                THAT
+              </h2>
+            </div>
+            <div style={{ display: 'flex' }}>
+              <h2 style={{
+                fontSize: 96,
+                fontWeight: 800,
+                color: '#FFFFFF',
+                margin: 0,
+                lineHeight: 0.9,
+                textShadow: '3px 3px 6px rgba(0,0,0,0.3)',
+              }}>
+                STANDS
+              </h2>
+            </div>
+            <div style={{ display: 'flex' }}>
+              <h2 style={{
+                fontSize: 96,
+                fontWeight: 800,
+                color: '#F5F5DC',
+                margin: 0,
+                lineHeight: 0.9,
+                textShadow: '3px 3px 6px rgba(0,0,0,0.3)',
+                opacity: 0.8,
+              }}>
+                OUT
+              </h2>
+            </div>
           </div>
 
           {/* Star rating */}
@@ -338,12 +352,13 @@ export async function GET(
             left: 60,
             display: 'flex',
             gap: 8,
+            alignItems: 'center',
           }}>
-            <div style={{ fontSize: 32, color: '#FFD700' }}>⭐</div>
-            <div style={{ fontSize: 32, color: '#FFD700' }}>⭐</div>
-            <div style={{ fontSize: 32, color: '#FFD700' }}>⭐</div>
-            <div style={{ fontSize: 32, color: '#FFD700' }}>⭐</div>
-            <div style={{ fontSize: 32, color: '#FFD700' }}>⭐</div>
+            <div style={{ fontSize: 32, color: '#FFD700', display: 'flex' }}>⭐</div>
+            <div style={{ fontSize: 32, color: '#FFD700', display: 'flex' }}>⭐</div>
+            <div style={{ fontSize: 32, color: '#FFD700', display: 'flex' }}>⭐</div>
+            <div style={{ fontSize: 32, color: '#FFD700', display: 'flex' }}>⭐</div>
+            <div style={{ fontSize: 32, color: '#FFD700', display: 'flex' }}>⭐</div>
           </div>
 
           {/* User profile circle */}
@@ -375,22 +390,26 @@ export async function GET(
                 display: 'flex',
                 flexDirection: 'column',
               }}>
-                <p style={{
-                  fontSize: 28,
-                  fontWeight: 600,
-                  color: '#FFFFFF',
-                  margin: 0,
-                }}>
-                  {actualRef}
-                </p>
-                <p style={{
-                  fontSize: 20,
-                  color: '#F5F5DC',
-                  margin: 0,
-                  opacity: 0.8,
-                }}>
-                  Curator
-                </p>
+                <div style={{ display: 'flex' }}>
+                  <p style={{
+                    fontSize: 28,
+                    fontWeight: 600,
+                    color: '#FFFFFF',
+                    margin: 0,
+                  }}>
+                    {actualRef}
+                  </p>
+                </div>
+                <div style={{ display: 'flex' }}>
+                  <p style={{
+                    fontSize: 20,
+                    color: '#F5F5DC',
+                    margin: 0,
+                    opacity: 0.8,
+                  }}>
+                    Curator
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -407,6 +426,7 @@ export async function GET(
             fontSize: 32,
             fontWeight: 700,
             boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            display: 'flex',
           }}>
             ${product?.data?.price?.toFixed(2) || '0.00'}
           </div>
@@ -420,6 +440,7 @@ export async function GET(
             color: '#F5F5DC',
             opacity: 0.7,
             letterSpacing: '0.1em',
+            display: 'flex',
           }}>
             VERSION 1.0
           </div>
