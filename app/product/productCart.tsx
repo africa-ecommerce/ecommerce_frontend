@@ -191,21 +191,28 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
 
 
   useEffect(() => {
-    // Only restore state when we have both orderSummaries and productData, and haven't restored yet
+   
     if (
       orderSummaries.length > 0 &&
       productData &&
       currentProductId &&
       !hasRestoredState
     ) {
-      // Find all orders for this product
+
+      console.log("orderSummaries", orderSummaries);
+      console.log("currentProductId", currentProductId);
+      console.log("productData", productData);
+    
+     
       const existingOrders = orderSummaries.filter(
         (order) => order.productId === currentProductId
       );
 
+      console.log("existingOrders", existingOrders);
+
       if (existingOrders.length > 0) {
         if (hasVariations) {
-          // Restore selected variations from all order summaries for this product
+        
           const restoredVariations: SelectedVariation[] = [];
 
           existingOrders.forEach((order) => {
@@ -222,7 +229,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
             }
           });
 
-          // Always update selected variations if we found any in order summaries
+          
           if (restoredVariations.length > 0) {
             setSelectedVariations(restoredVariations);
           }
@@ -236,7 +243,8 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
         setHasRestoredState(true);
       }
     } else if (orderSummaries.length === 0 && hasRestoredState) {
-      // Reset state when no orders exist and we had previously restored state
+     console.log("restoredState", hasRestoredState)
+     console.log("orderSummaries", orderSummaries.length)
       if (hasVariations) {
         setSelectedVariations([]);
       } else {
