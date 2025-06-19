@@ -179,34 +179,68 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
 
 
 
+  // useEffect(() => {
+  //   // Restore state from persisted order summaries when component mounts
+  //   if (orderSummaries.length > 0 && productData) {
+  //     const existingOrder = orderSummaries.find((order) => order.productId === currentProductId)
+
+  //     if (existingOrder) {
+  //       if (hasVariations && existingOrder.item.variationId) {
+  //         // Restore selected variations from order summary
+  //         const variation = productData.variations?.find((v) => v.id === existingOrder.item.variationId)
+  //         if (variation) {
+  //           setSelectedVariations([
+  //             {
+  //               variation,
+  //               quantity: existingOrder.item.quantity,
+  //             },
+  //           ])
+  //         }
+  //       } else if (!hasVariations) {
+  //         // Restore quantity for simple products
+  //         setQuantity(existingOrder.item.quantity)
+  //         setQuantityInput(existingOrder.item.quantity.toString())
+  //       }
+  //     }
+  //   }
+  // }, [orderSummaries, currentProductId, productData, hasVariations])
+
+
   useEffect(() => {
     // Restore state from persisted order summaries when component mounts
     if (orderSummaries.length > 0 && productData) {
-      const existingOrder = orderSummaries.find((order) => order.productId === currentProductId)
-
-      if (existingOrder) {
-        if (hasVariations && existingOrder.item.variationId) {
-          // Restore selected variations from order summary
-          const variation = productData.variations?.find((v) => v.id === existingOrder.item.variationId)
-          if (variation) {
-            setSelectedVariations([
-              {
-                variation,
-                quantity: existingOrder.item.quantity,
-              },
-            ])
+      // Find all orders for this product
+      const existingOrders = orderSummaries.filter((order) => order.productId === currentProductId)
+  
+      if (existingOrders.length > 0) {
+        if (hasVariations) {
+          // Restore selected variations from all order summaries for this product
+          const restoredVariations: SelectedVariation[] = []
+          
+          existingOrders.forEach((order) => {
+            if (order.item.variationId) {
+              const variation = productData.variations?.find((v) => v.id === order.item.variationId)
+              if (variation) {
+                restoredVariations.push({
+                  variation,
+                  quantity: order.item.quantity,
+                })
+              }
+            }
+          })
+          
+          if (restoredVariations.length > 0) {
+            setSelectedVariations(restoredVariations)
           }
-        } else if (!hasVariations) {
-          // Restore quantity for simple products
-          setQuantity(existingOrder.item.quantity)
-          setQuantityInput(existingOrder.item.quantity.toString())
+        } else if (!hasVariations && existingOrders.length === 1) {
+          // Restore quantity for simple products (should only be one order)
+          const order = existingOrders[0]
+          setQuantity(order.item.quantity)
+          setQuantityInput(order.item.quantity.toString())
         }
       }
     }
   }, [orderSummaries, currentProductId, productData, hasVariations])
-
-
-
 
 
   const formatDescription = (text: string) => {
