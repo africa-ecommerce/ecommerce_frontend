@@ -205,7 +205,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     
      
       const existingOrders = orderSummaries.filter(
-        (order) => order.productId === currentProductId
+        (order) => order.item.id === currentProductId
       );
 
       console.log("existingOrders", existingOrders);
