@@ -506,105 +506,366 @@ export async function processProductImage(options: ProcessImageOptions) {
 
 
 
+// async function applyInspireTemplate(
+//   ctx: NodeCanvasRenderingContext2D,
+//   width: number,
+//   height: number,
+//   data: { productName: string; price: number; ref?: string; customColors?: any }
+// ) {
+//   const { productName, price, ref, customColors } = data;
+
+//   // Premium color palette - warm, sophisticated
+//   const colors = {
+//     background: customColors?.background || "#D4B896", // Warm beige
+//     primaryText: customColors?.primaryText || "#FFFFFF",
+//     secondaryText: customColors?.secondaryText || "#2D3748",
+//     accent: customColors?.accentColor || "#C8956D",
+//     overlay: "rgba(0,0,0,0.4)",
+//   };
+
+//   // Fill background with specified color
+//   ctx.fillStyle = colors.background;
+//   ctx.fillRect(0, 0, width, height);
+
+//   // Create sophisticated gradient overlay for text readability
+//   const gradientHeight = height * 0.45;
+//   const gradient = ctx.createLinearGradient(
+//     0,
+//     height - gradientHeight,
+//     0,
+//     height
+//   );
+//   gradient.addColorStop(0, "rgba(0,0,0,0)");
+//   gradient.addColorStop(0.3, "rgba(0,0,0,0.2)");
+//   gradient.addColorStop(1, colors.overlay);
+
+//   ctx.fillStyle = gradient;
+//   ctx.fillRect(0, height - gradientHeight, width, gradientHeight);
+
+//   // Main brand text (large, impactful)
+//   ctx.fillStyle = colors.primaryText;
+//   ctx.font = `bold ${Math.floor(width * 0.12)}px Inter`;
+//   ctx.textAlign = "left";
+
+//   // Split long product names intelligently
+//   const maxCharsPerLine = 20;
+//   const lines =
+//     productName.length > maxCharsPerLine
+//       ? [
+//           productName.substring(0, maxCharsPerLine),
+//           productName.substring(maxCharsPerLine, 40),
+//         ]
+//       : [productName];
+
+//   lines.forEach((line, index) => {
+//     ctx.fillText(
+//       line,
+//       width * 0.05,
+//       height - gradientHeight * 0.8 + index * width * 0.08
+//     );
+//   });
+
+//   // Premium price styling
+//   ctx.font = `${Math.floor(width * 0.08)}px Inter`;
+//   ctx.fillStyle = colors.primaryText;
+//   ctx.fillText(
+//     `$${price.toFixed(2)}`,
+//     width * 0.05,
+//     height - gradientHeight * 0.4
+//   );
+
+//   // "NEW" badge if applicable
+//   if (Math.random() > 0.5) {
+//     // You can make this conditional based on your logic
+//     ctx.fillStyle = "#FFD700";
+//     ctx.fillRect(width * 0.05, width * 0.05, width * 0.15, width * 0.08);
+//     ctx.fillStyle = "#000000";
+//     ctx.font = `bold ${Math.floor(width * 0.04)}px Inter`;
+//     ctx.textAlign = "center";
+//     ctx.fillText("NEW", width * 0.125, width * 0.065);
+//     ctx.textAlign = "left";
+//   }
+
+//   // Referral attribution (elegant positioning)
+//   if (ref) {
+//     ctx.fillStyle = colors.primaryText;
+//     ctx.font = `${Math.floor(width * 0.035)}px Inter`;
+//     ctx.fillText(
+//       `Shared by ${ref}`,
+//       width * 0.05,
+//       height - gradientHeight * 0.15
+//     );
+//   }
+
+//   // Add subtle brand watermark
+//   ctx.fillStyle = "rgba(255,255,255,0.3)";
+//   ctx.font = `${Math.floor(width * 0.03)}px Inter`;
+//   ctx.textAlign = "right";
+//   ctx.fillText("BY PLUGGN", width * 0.95, height * 0.1);
+
+//   // Version indicator
+//   ctx.fillText("VERSION 1.0", width * 0.95, height * 0.95);
+// }
+
+// async function applyMinimalTemplate(
+//   ctx: NodeCanvasRenderingContext2D,
+//   width: number,
+//   height: number,
+//   data: { productName: string; price: number; ref?: string; customColors?: any }
+// ) {
+//   const { productName, price, ref, customColors } = data;
+
+//   // Clean, modern color palette
+//   const colors = {
+//     background: customColors?.background || "#F7FAFC",
+//     primaryText: "#1A202C",
+//     secondaryText: "#4A5568",
+//     accent: customColors?.accentColor || "#4299E1",
+//     overlay: "rgba(255,255,255,0.95)",
+//   };
+
+//   // Fill background
+//   ctx.fillStyle = colors.background;
+//   ctx.fillRect(0, 0, width, height);
+
+//   // Clean bottom panel for text
+//   const panelHeight = height * 0.25;
+//   ctx.fillStyle = colors.overlay;
+//   ctx.fillRect(0, height - panelHeight, width, panelHeight);
+
+//   // Subtle shadow for depth
+//   const shadowGradient = ctx.createLinearGradient(
+//     0,
+//     height - panelHeight - 10,
+//     0,
+//     height - panelHeight
+//   );
+//   shadowGradient.addColorStop(0, "rgba(0,0,0,0)");
+//   shadowGradient.addColorStop(1, "rgba(0,0,0,0.1)");
+//   ctx.fillStyle = shadowGradient;
+//   ctx.fillRect(0, height - panelHeight - 10, width, 10);
+
+//   // Product name - clean typography
+//   ctx.fillStyle = colors.primaryText;
+//   ctx.font = `bold ${Math.floor(width * 0.055)}px Inter`;
+//   ctx.textAlign = "left";
+
+//   const maxWidth = width * 0.9;
+//   let fontSize = Math.floor(width * 0.055);
+//   ctx.font = `bold ${fontSize}px Inter`;
+
+//   while (ctx.measureText(productName).width > maxWidth && fontSize > 12) {
+//     fontSize -= 2;
+//     ctx.font = `bold ${fontSize}px Inter`;
+//   }
+
+//   ctx.fillText(
+//     productName,
+//     width * 0.05,
+//     height - panelHeight + panelHeight * 0.25
+//   );
+
+//   // Price with emphasis
+//   ctx.font = `${Math.floor(width * 0.045)}px Inter`;
+//   ctx.fillStyle = colors.primaryText;
+//   ctx.fillText(
+//     `$${price.toFixed(2)}`,
+//     width * 0.05,
+//     height - panelHeight + panelHeight * 0.55
+//   );
+
+//   // Referral with accent color
+//   if (ref) {
+//     ctx.fillStyle = colors.accent;
+//     ctx.font = `${Math.floor(width * 0.035)}px Inter`;
+//     ctx.fillText(
+//       `By ${ref}`,
+//       width * 0.05,
+//       height - panelHeight + panelHeight * 0.8
+//     );
+//   }
+
+//   // Minimal brand mark
+//   ctx.fillStyle = "rgba(0,0,0,0.2)";
+//   ctx.font = `${Math.floor(width * 0.025)}px Inter`;
+//   ctx.textAlign = "right";
+//   ctx.fillText("PLUGGN", width * 0.95, height * 0.95);
+// }
+
+// async function applyDarkTemplate(
+//   ctx: NodeCanvasRenderingContext2D,
+//   width: number,
+//   height: number,
+//   data: { productName: string; price: number; ref?: string; customColors?: any }
+// ) {
+//   const { productName, price, ref, customColors } = data;
+
+//   // Bold, dramatic color palette
+//   const colors = {
+//     background: customColors?.background || "#1A202C",
+//     primaryText: "#F7FAFC",
+//     secondaryText: "#CBD5E0",
+//     accent: customColors?.accentColor || "#63B3ED",
+//     overlay: "rgba(26, 32, 44, 0.9)",
+//   };
+
+//   // Fill background
+//   ctx.fillStyle = colors.background;
+//   ctx.fillRect(0, 0, width, height);
+
+//   // Dramatic bottom overlay
+//   const overlayHeight = height * 0.4;
+//   const darkGradient = ctx.createLinearGradient(
+//     0,
+//     height - overlayHeight,
+//     0,
+//     height
+//   );
+//   darkGradient.addColorStop(0, "rgba(26, 32, 44, 0)");
+//   darkGradient.addColorStop(0.5, "rgba(26, 32, 44, 0.7)");
+//   darkGradient.addColorStop(1, colors.overlay);
+
+//   ctx.fillStyle = darkGradient;
+//   ctx.fillRect(0, height - overlayHeight, width, overlayHeight);
+
+//   // Bold product name
+//   ctx.fillStyle = colors.primaryText;
+//   ctx.font = `bold ${Math.floor(width * 0.065)}px Inter`;
+//   ctx.textAlign = "left";
+
+//   // Handle long product names
+//   const words = productName.split(" ");
+//   let line1 = "",
+//     line2 = "";
+//   let currentLine = 1;
+
+//   for (const word of words) {
+//     const testLine = line1 + (line1 ? " " : "") + word;
+//     if (ctx.measureText(testLine).width > width * 0.9 && line1) {
+//       line2 = (line2 ? line2 + " " : "") + word;
+//     } else {
+//       line1 = testLine;
+//     }
+//   }
+
+//   ctx.fillText(line1, width * 0.05, height - overlayHeight * 0.75);
+//   if (line2) {
+//     ctx.fillText(line2, width * 0.05, height - overlayHeight * 0.6);
+//   }
+
+//   // Prominent price
+//   ctx.font = `bold ${Math.floor(width * 0.055)}px Inter`;
+//   ctx.fillStyle = colors.primaryText;
+//   ctx.fillText(
+//     `$${price.toFixed(2)}`,
+//     width * 0.05,
+//     height - overlayHeight * 0.4
+//   );
+
+//   // Referral with accent
+//   if (ref) {
+//     ctx.fillStyle = colors.accent;
+//     ctx.font = `${Math.floor(width * 0.04)}px Inter`;
+//     ctx.fillText(
+//       `Recommended by ${ref}`,
+//       width * 0.05,
+//       height - overlayHeight * 0.2
+//     );
+//   }
+
+//   // Premium brand mark
+//   ctx.fillStyle = "rgba(99, 179, 237, 0.6)";
+//   ctx.font = `${Math.floor(width * 0.03)}px Inter`;
+//   ctx.textAlign = "right";
+//   ctx.fillText("PLUGGN PREMIUM", width * 0.95, height * 0.1);
+// }
+
+
+
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 async function applyInspireTemplate(
-  ctx: NodeCanvasRenderingContext2D,
-  width: number,
-  height: number,
+  ctx: NodeCanvasRenderingContext2D, 
+  width: number, 
+  height: number, 
   data: { productName: string; price: number; ref?: string; customColors?: any }
 ) {
-  const { productName, price, ref, customColors } = data;
-
+  const { productName, price, ref, customColors } = data
+  
   // Premium color palette - warm, sophisticated
   const colors = {
-    background: customColors?.background || "#D4B896", // Warm beige
-    primaryText: customColors?.primaryText || "#FFFFFF",
-    secondaryText: customColors?.secondaryText || "#2D3748",
-    accent: customColors?.accentColor || "#C8956D",
-    overlay: "rgba(0,0,0,0.4)",
-  };
+    background: customColors?.background || '#D4B896',
+    primaryText: customColors?.primaryText || '#FFFFFF',
+    secondaryText: customColors?.secondaryText || '#2D3748',
+    accent: customColors?.accentColor || '#C8956D',
+    overlay: 'rgba(0,0,0,0.4)'
+  }
 
-  // Fill background with specified color
-  ctx.fillStyle = colors.background;
-  ctx.fillRect(0, 0, width, height);
+  // Apply background as a subtle overlay instead of covering the image
+  ctx.fillStyle = hexToRgba(colors.background, 0.25) // 25% opacity overlay
+  ctx.fillRect(0, 0, width, height)
 
   // Create sophisticated gradient overlay for text readability
-  const gradientHeight = height * 0.45;
-  const gradient = ctx.createLinearGradient(
-    0,
-    height - gradientHeight,
-    0,
-    height
-  );
-  gradient.addColorStop(0, "rgba(0,0,0,0)");
-  gradient.addColorStop(0.3, "rgba(0,0,0,0.2)");
-  gradient.addColorStop(1, colors.overlay);
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, height - gradientHeight, width, gradientHeight);
+  const gradientHeight = height * 0.45
+  const gradient = ctx.createLinearGradient(0, height - gradientHeight, 0, height)
+  gradient.addColorStop(0, 'rgba(0,0,0,0)')
+  gradient.addColorStop(0.3, 'rgba(0,0,0,0.2)')
+  gradient.addColorStop(1, colors.overlay)
+  
+  ctx.fillStyle = gradient
+  ctx.fillRect(0, height - gradientHeight, width, gradientHeight)
 
   // Main brand text (large, impactful)
-  ctx.fillStyle = colors.primaryText;
-  ctx.font = `bold ${Math.floor(width * 0.12)}px Inter`;
-  ctx.textAlign = "left";
-
+  ctx.fillStyle = colors.primaryText
+  ctx.font = `bold ${Math.floor(width * 0.12)}px Inter`
+  ctx.textAlign = 'left'
+  
   // Split long product names intelligently
-  const maxCharsPerLine = 20;
-  const lines =
-    productName.length > maxCharsPerLine
-      ? [
-          productName.substring(0, maxCharsPerLine),
-          productName.substring(maxCharsPerLine, 40),
-        ]
-      : [productName];
-
+  const maxCharsPerLine = 20
+  const lines = productName.length > maxCharsPerLine 
+    ? [productName.substring(0, maxCharsPerLine), productName.substring(maxCharsPerLine, 40)]
+    : [productName]
+  
   lines.forEach((line, index) => {
-    ctx.fillText(
-      line,
-      width * 0.05,
-      height - gradientHeight * 0.8 + index * width * 0.08
-    );
-  });
+    ctx.fillText(line, width * 0.05, height - (gradientHeight * 0.8) + (index * width * 0.08))
+  })
 
   // Premium price styling
-  ctx.font = `${Math.floor(width * 0.08)}px Inter`;
-  ctx.fillStyle = colors.primaryText;
-  ctx.fillText(
-    `$${price.toFixed(2)}`,
-    width * 0.05,
-    height - gradientHeight * 0.4
-  );
+  ctx.font = `${Math.floor(width * 0.08)}px Inter`
+  ctx.fillStyle = colors.primaryText
+  ctx.fillText(`$${price.toFixed(2)}`, width * 0.05, height - (gradientHeight * 0.4))
 
   // "NEW" badge if applicable
-  if (Math.random() > 0.5) {
-    // You can make this conditional based on your logic
-    ctx.fillStyle = "#FFD700";
-    ctx.fillRect(width * 0.05, width * 0.05, width * 0.15, width * 0.08);
-    ctx.fillStyle = "#000000";
-    ctx.font = `bold ${Math.floor(width * 0.04)}px Inter`;
-    ctx.textAlign = "center";
-    ctx.fillText("NEW", width * 0.125, width * 0.065);
-    ctx.textAlign = "left";
+  if (Math.random() > 0.5) { // You can make this conditional based on your logic
+    ctx.fillStyle = '#FFD700'
+    ctx.fillRect(width * 0.05, width * 0.05, width * 0.15, width * 0.08)
+    ctx.fillStyle = '#000000'
+    ctx.font = `bold ${Math.floor(width * 0.04)}px Inter`
+    ctx.textAlign = 'center'
+    ctx.fillText('NEW', width * 0.125, width * 0.065)
+    ctx.textAlign = 'left'
   }
 
   // Referral attribution (elegant positioning)
   if (ref) {
-    ctx.fillStyle = colors.primaryText;
-    ctx.font = `${Math.floor(width * 0.035)}px Inter`;
-    ctx.fillText(
-      `Shared by ${ref}`,
-      width * 0.05,
-      height - gradientHeight * 0.15
-    );
+    ctx.fillStyle = colors.primaryText
+    ctx.font = `${Math.floor(width * 0.035)}px Inter`
+    ctx.fillText(`Shared by kemi`, width * 0.05, height - (gradientHeight * 0.15))
   }
 
   // Add subtle brand watermark
-  ctx.fillStyle = "rgba(255,255,255,0.3)";
-  ctx.font = `${Math.floor(width * 0.03)}px Inter`;
-  ctx.textAlign = "right";
-  ctx.fillText("BY PLUGGN", width * 0.95, height * 0.1);
-
+  ctx.fillStyle = 'rgba(255,255,255,0.3)'
+  ctx.font = `${Math.floor(width * 0.03)}px Inter`
+  ctx.textAlign = 'right'
+  ctx.fillText('BY PLUGGN', width * 0.95, height * 0.1)
+  
   // Version indicator
-  ctx.fillText("VERSION 1.0", width * 0.95, height * 0.95);
+  ctx.fillText('VERSION 1.0', width * 0.95, height * 0.95)
 }
 
 async function applyMinimalTemplate(
@@ -613,83 +874,66 @@ async function applyMinimalTemplate(
   height: number,
   data: { productName: string; price: number; ref?: string; customColors?: any }
 ) {
-  const { productName, price, ref, customColors } = data;
+  const { productName, price, ref, customColors } = data
 
   // Clean, modern color palette
   const colors = {
-    background: customColors?.background || "#F7FAFC",
-    primaryText: "#1A202C",
-    secondaryText: "#4A5568",
-    accent: customColors?.accentColor || "#4299E1",
-    overlay: "rgba(255,255,255,0.95)",
-  };
-
-  // Fill background
-  ctx.fillStyle = colors.background;
-  ctx.fillRect(0, 0, width, height);
-
-  // Clean bottom panel for text
-  const panelHeight = height * 0.25;
-  ctx.fillStyle = colors.overlay;
-  ctx.fillRect(0, height - panelHeight, width, panelHeight);
-
-  // Subtle shadow for depth
-  const shadowGradient = ctx.createLinearGradient(
-    0,
-    height - panelHeight - 10,
-    0,
-    height - panelHeight
-  );
-  shadowGradient.addColorStop(0, "rgba(0,0,0,0)");
-  shadowGradient.addColorStop(1, "rgba(0,0,0,0.1)");
-  ctx.fillStyle = shadowGradient;
-  ctx.fillRect(0, height - panelHeight - 10, width, 10);
-
-  // Product name - clean typography
-  ctx.fillStyle = colors.primaryText;
-  ctx.font = `bold ${Math.floor(width * 0.055)}px Inter`;
-  ctx.textAlign = "left";
-
-  const maxWidth = width * 0.9;
-  let fontSize = Math.floor(width * 0.055);
-  ctx.font = `bold ${fontSize}px Inter`;
-
-  while (ctx.measureText(productName).width > maxWidth && fontSize > 12) {
-    fontSize -= 2;
-    ctx.font = `bold ${fontSize}px Inter`;
+    background: customColors?.background || '#F7FAFC',
+    primaryText: '#1A202C',
+    secondaryText: '#4A5568',
+    accent: customColors?.accentColor || '#4299E1',
+    overlay: 'rgba(255,255,255,0.95)'
   }
 
-  ctx.fillText(
-    productName,
-    width * 0.05,
-    height - panelHeight + panelHeight * 0.25
-  );
+  // Apply subtle background tint instead of solid fill
+  ctx.fillStyle = hexToRgba(colors.background, 0.2) // 20% opacity overlay
+  ctx.fillRect(0, 0, width, height)
+
+  // Clean bottom panel for text
+  const panelHeight = height * 0.25
+  ctx.fillStyle = colors.overlay
+  ctx.fillRect(0, height - panelHeight, width, panelHeight)
+
+  // Subtle shadow for depth
+  const shadowGradient = ctx.createLinearGradient(0, height - panelHeight - 10, 0, height - panelHeight)
+  shadowGradient.addColorStop(0, 'rgba(0,0,0,0)')
+  shadowGradient.addColorStop(1, 'rgba(0,0,0,0.1)')
+  ctx.fillStyle = shadowGradient
+  ctx.fillRect(0, height - panelHeight - 10, width, 10)
+
+  // Product name - clean typography
+  ctx.fillStyle = colors.primaryText
+  ctx.font = `bold ${Math.floor(width * 0.055)}px Inter`
+  ctx.textAlign = 'left'
+  
+  const maxWidth = width * 0.9
+  let fontSize = Math.floor(width * 0.055)
+  ctx.font = `bold ${fontSize}px Inter`
+  
+  while (ctx.measureText(productName).width > maxWidth && fontSize > 12) {
+    fontSize -= 2
+    ctx.font = `bold ${fontSize}px Inter`
+  }
+  
+  ctx.fillText(productName, width * 0.05, height - panelHeight + (panelHeight * 0.25))
 
   // Price with emphasis
-  ctx.font = `${Math.floor(width * 0.045)}px Inter`;
-  ctx.fillStyle = colors.primaryText;
-  ctx.fillText(
-    `$${price.toFixed(2)}`,
-    width * 0.05,
-    height - panelHeight + panelHeight * 0.55
-  );
+  ctx.font = `${Math.floor(width * 0.045)}px Inter`
+  ctx.fillStyle = colors.primaryText
+  ctx.fillText(`$${price.toFixed(2)}`, width * 0.05, height - panelHeight + (panelHeight * 0.55))
 
   // Referral with accent color
   if (ref) {
-    ctx.fillStyle = colors.accent;
-    ctx.font = `${Math.floor(width * 0.035)}px Inter`;
-    ctx.fillText(
-      `By ${ref}`,
-      width * 0.05,
-      height - panelHeight + panelHeight * 0.8
-    );
+    ctx.fillStyle = colors.accent
+    ctx.font = `${Math.floor(width * 0.035)}px Inter`
+    ctx.fillText(`By kemi`, width * 0.05, height - panelHeight + (panelHeight * 0.8))
   }
 
   // Minimal brand mark
-  ctx.fillStyle = "rgba(0,0,0,0.2)";
-  ctx.font = `${Math.floor(width * 0.025)}px Inter`;
-  ctx.textAlign = "right";
-  ctx.fillText("PLUGGN", width * 0.95, height * 0.95);
+  ctx.fillStyle = 'rgba(0,0,0,0.2)'
+  ctx.font = `${Math.floor(width * 0.025)}px Inter`
+  ctx.textAlign = 'right'
+  ctx.fillText('PLUGGN', width * 0.95, height * 0.95)
 }
 
 async function applyDarkTemplate(
@@ -698,86 +942,72 @@ async function applyDarkTemplate(
   height: number,
   data: { productName: string; price: number; ref?: string; customColors?: any }
 ) {
-  const { productName, price, ref, customColors } = data;
+  const { productName, price, ref, customColors } = data
 
   // Bold, dramatic color palette
   const colors = {
-    background: customColors?.background || "#1A202C",
-    primaryText: "#F7FAFC",
-    secondaryText: "#CBD5E0",
-    accent: customColors?.accentColor || "#63B3ED",
-    overlay: "rgba(26, 32, 44, 0.9)",
-  };
-
-  // Fill background
-  ctx.fillStyle = colors.background;
-  ctx.fillRect(0, 0, width, height);
-
-  // Dramatic bottom overlay
-  const overlayHeight = height * 0.4;
-  const darkGradient = ctx.createLinearGradient(
-    0,
-    height - overlayHeight,
-    0,
-    height
-  );
-  darkGradient.addColorStop(0, "rgba(26, 32, 44, 0)");
-  darkGradient.addColorStop(0.5, "rgba(26, 32, 44, 0.7)");
-  darkGradient.addColorStop(1, colors.overlay);
-
-  ctx.fillStyle = darkGradient;
-  ctx.fillRect(0, height - overlayHeight, width, overlayHeight);
-
-  // Bold product name
-  ctx.fillStyle = colors.primaryText;
-  ctx.font = `bold ${Math.floor(width * 0.065)}px Inter`;
-  ctx.textAlign = "left";
-
-  // Handle long product names
-  const words = productName.split(" ");
-  let line1 = "",
-    line2 = "";
-  let currentLine = 1;
-
-  for (const word of words) {
-    const testLine = line1 + (line1 ? " " : "") + word;
-    if (ctx.measureText(testLine).width > width * 0.9 && line1) {
-      line2 = (line2 ? line2 + " " : "") + word;
-    } else {
-      line1 = testLine;
-    }
+    background: customColors?.background || '#1A202C',
+    primaryText: '#F7FAFC',
+    secondaryText: '#CBD5E0',
+    accent: customColors?.accentColor || '#63B3ED',
+    overlay: 'rgba(26, 32, 44, 0.9)'
   }
 
-  ctx.fillText(line1, width * 0.05, height - overlayHeight * 0.75);
+  // Apply background as overlay to maintain image visibility
+  ctx.fillStyle = hexToRgba(colors.background, 0.3) // 30% opacity overlay
+  ctx.fillRect(0, 0, width, height)
+
+  // Dramatic bottom overlay
+  const overlayHeight = height * 0.4
+  const darkGradient = ctx.createLinearGradient(0, height - overlayHeight, 0, height)
+  darkGradient.addColorStop(0, 'rgba(26, 32, 44, 0)')
+  darkGradient.addColorStop(0.5, 'rgba(26, 32, 44, 0.7)')
+  darkGradient.addColorStop(1, colors.overlay)
+  
+  ctx.fillStyle = darkGradient
+  ctx.fillRect(0, height - overlayHeight, width, overlayHeight)
+
+  // Bold product name
+  ctx.fillStyle = colors.primaryText
+  ctx.font = `bold ${Math.floor(width * 0.065)}px Inter`
+  ctx.textAlign = 'left'
+  
+  // Handle long product names
+  const words = productName.split(' ')
+  let line1 = '', line2 = ''
+  let currentLine = 1
+  
+  for (const word of words) {
+    const testLine = line1 + (line1 ? ' ' : '') + word
+    if (ctx.measureText(testLine).width > width * 0.9 && line1) {
+      line2 = (line2 ? line2 + ' ' : '') + word
+    } else {
+      line1 = testLine
+    }
+  }
+  
+  ctx.fillText(line1, width * 0.05, height - (overlayHeight * 0.75))
   if (line2) {
-    ctx.fillText(line2, width * 0.05, height - overlayHeight * 0.6);
+    ctx.fillText(line2, width * 0.05, height - (overlayHeight * 0.6))
   }
 
   // Prominent price
-  ctx.font = `bold ${Math.floor(width * 0.055)}px Inter`;
-  ctx.fillStyle = colors.primaryText;
-  ctx.fillText(
-    `$${price.toFixed(2)}`,
-    width * 0.05,
-    height - overlayHeight * 0.4
-  );
+  ctx.font = `bold ${Math.floor(width * 0.055)}px Inter`
+  ctx.fillStyle = colors.primaryText
+  ctx.fillText(`$${price.toFixed(2)}`, width * 0.05, height - (overlayHeight * 0.4))
 
   // Referral with accent
   if (ref) {
-    ctx.fillStyle = colors.accent;
-    ctx.font = `${Math.floor(width * 0.04)}px Inter`;
-    ctx.fillText(
-      `Recommended by ${ref}`,
-      width * 0.05,
-      height - overlayHeight * 0.2
-    );
+    ctx.fillStyle = colors.accent
+    ctx.font = `${Math.floor(width * 0.04)}px Inter`
+    ctx.fillText(`Recommended by kemi`, width * 0.05, height - (overlayHeight * 0.2))
   }
 
   // Premium brand mark
-  ctx.fillStyle = "rgba(99, 179, 237, 0.6)";
-  ctx.font = `${Math.floor(width * 0.03)}px Inter`;
-  ctx.textAlign = "right";
-  ctx.fillText("PLUGGN PREMIUM", width * 0.95, height * 0.1);
+  ctx.fillStyle = 'rgba(99, 179, 237, 0.6)'
+  ctx.font = `${Math.floor(width * 0.03)}px Inter`
+  ctx.textAlign = 'right'
+  ctx.fillText('PLUGGN PREMIUM', width * 0.95, height * 0.1)
 }
 // Background removal server action
 export async function removeImageBackground(options: {
@@ -914,6 +1144,142 @@ export async function removeImageBackground(options: {
 
 
 
+// export async function createMagazineStyleCard(options: {
+//   imageUrl: any
+//   productName: string
+//   price: number
+//   ref?: string
+//   template?: 'inspire' | 'minimal' | 'dark'
+//   backgroundColor?: string
+//   removeBackground?: boolean
+//   backgroundOptions?: {
+//     targetColor?: [number, number, number]
+//     tolerance?: number
+//   }
+//   dimensions?: { width: number; height: number }
+//   customColors?: {
+//     background?: string
+//     primaryText?: string
+//     secondaryText?: string
+//     accentColor?: string
+//   }
+// }) {
+//   try {
+//     const {
+//       imageUrl,
+//       productName,
+//       price,
+//       ref,
+//       template = 'inspire',
+//       backgroundColor = '#D4B896',
+//       removeBackground = false,
+//       dimensions = { width: 400, height: 400 },
+//       customColors
+//     } = options
+
+//     const { width, height } = dimensions
+//     const canvas = createCanvas(width, height)
+//     const ctx = canvas.getContext('2d') as unknown as NodeCanvasRenderingContext2D
+
+//     // Enable premium rendering quality
+//     ctx.imageSmoothingEnabled = true
+//     ctx.imageSmoothingQuality = 'high'
+//     ctx.textBaseline = 'top'
+
+//     // Handle background color override
+//     if (backgroundColor) {
+//       if (!customColors) options.customColors = {}
+//       options.customColors!.background = backgroundColor
+//     }
+
+//     // Load and process the product image
+//     let processedImageUrl = imageUrl
+
+//     if (removeBackground) {
+//       const bgRemovalResult = await removeImageBackground({
+//         imageUrl,
+//         method: 'color',
+//         targetColor: [255, 255, 255],
+//         tolerance: 30,
+//         newBackground: backgroundColor || '#FFFFFF',
+//         width,
+//         height
+//       })
+
+//       if (bgRemovalResult.success) {
+//         processedImageUrl = bgRemovalResult.processedImage
+//       }
+//     }
+
+//     // Load and draw the base image
+//     const image = await loadImage(processedImageUrl)
+    
+//     // Calculate optimal image positioning (maintain aspect ratio)
+//     const imageAspect = image.width / image.height
+//     const canvasAspect = width / height
+    
+//     let drawWidth, drawHeight, drawX, drawY
+    
+//     if (imageAspect > canvasAspect) {
+//       // Image is wider than canvas
+//       drawHeight = height
+//       drawWidth = height * imageAspect
+//       drawX = (width - drawWidth) / 2
+//       drawY = 0
+//     } else {
+//       // Image is taller than canvas
+//       drawWidth = width
+//       drawHeight = width / imageAspect
+//       drawX = 0
+//       drawY = (height - drawHeight) / 2
+//     }
+    
+//     ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight)
+
+//     // Apply the selected template with enhanced styling
+//     const templateData = {
+//       productName,
+//       price,
+//       ref,
+//       customColors: options.customColors
+//     }
+
+//     switch (template) {
+//       case 'inspire':
+//         await applyInspireTemplate(ctx, width, height, templateData)
+//         break
+//       case 'minimal':
+//         await applyMinimalTemplate(ctx, width, height, templateData)
+//         break
+//       case 'dark':
+//         await applyDarkTemplate(ctx, width, height, templateData)
+//         break
+//       default:
+//         await applyInspireTemplate(ctx, width, height, templateData)
+//     }
+
+//     const processedImageBuffer = canvas.toBuffer('image/png')
+
+//     return {
+//       success: true,
+//       processedImage: processedImageBuffer,
+//       template,
+//       dimensions: { width, height },
+//       quality: 'magazine-premium'
+//     }
+
+//   } catch (error) {
+//     console.error('Magazine-style card creation error:', error)
+//     return {
+//       success: false,
+//       error: 'Magazine-style card creation failed',
+//       details: error instanceof Error ? error.message : 'Unknown error'
+//     }
+//   }
+// }
+
+
+
 export async function createMagazineStyleCard(options: {
   imageUrl: any
   productName: string
@@ -941,7 +1307,7 @@ export async function createMagazineStyleCard(options: {
       price,
       ref,
       template = 'inspire',
-      backgroundColor = '#D4B896',
+      backgroundColor,
       removeBackground = false,
       dimensions = { width: 400, height: 400 },
       customColors
@@ -956,13 +1322,13 @@ export async function createMagazineStyleCard(options: {
     ctx.imageSmoothingQuality = 'high'
     ctx.textBaseline = 'top'
 
-    // Handle background color override
+    // STEP 1: Fill canvas with background color if specified
     if (backgroundColor) {
-      if (!customColors) options.customColors = {}
-      options.customColors!.background = backgroundColor
+      ctx.fillStyle = backgroundColor
+      ctx.fillRect(0, 0, width, height)
     }
 
-    // Load and process the product image
+    // STEP 2: Handle background removal if requested
     let processedImageUrl = imageUrl
 
     if (removeBackground) {
@@ -971,7 +1337,7 @@ export async function createMagazineStyleCard(options: {
         method: 'color',
         targetColor: [255, 255, 255],
         tolerance: 30,
-        newBackground: backgroundColor || '#FFFFFF',
+        newBackground: backgroundColor || 'transparent',
         width,
         height
       })
@@ -981,7 +1347,7 @@ export async function createMagazineStyleCard(options: {
       }
     }
 
-    // Load and draw the base image
+    // STEP 3: Load and draw the product image
     const image = await loadImage(processedImageUrl)
     
     // Calculate optimal image positioning (maintain aspect ratio)
@@ -1006,12 +1372,15 @@ export async function createMagazineStyleCard(options: {
     
     ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight)
 
-    // Apply the selected template with enhanced styling
+    // STEP 4: Apply template styling OVER the image
     const templateData = {
       productName,
       price,
       ref,
-      customColors: options.customColors
+      customColors: {
+        ...customColors,
+        background: backgroundColor || customColors?.background
+      }
     }
 
     switch (template) {
