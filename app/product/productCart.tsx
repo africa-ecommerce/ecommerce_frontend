@@ -123,7 +123,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
   const hasVariations = productData?.variations && productData.variations.length > 0
 
   // Format variation display name
-  const getVariationDisplayName = (variation: ProductVariation) => {
+   const getVariationDisplayName = (variation: ProductVariation) => {
     if (variation.name) return variation.name
 
     const parts = []

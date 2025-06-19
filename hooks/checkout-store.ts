@@ -34,9 +34,7 @@ interface CheckoutStore {
   updateCheckoutData: (data: Partial<CheckoutData>) => void;
   clearCheckoutData: () => void;
   getCheckoutData: () => CheckoutData;
-  // Add hydration helpers
-  _hasHydrated: boolean;
-  setHasHydrated: (hasHydrated: boolean) => void;
+  
 }
 
 const defaultCheckoutData: CheckoutData = {
@@ -63,9 +61,7 @@ export const useCheckoutStore = create<CheckoutStore>()(
       checkoutData: defaultCheckoutData,
       _hasHydrated: false,
 
-      setHasHydrated: (hasHydrated) => {
-        set({ _hasHydrated: hasHydrated });
-      },
+     
 
       setCustomerInfo: (info) =>
         set((state) => ({
@@ -130,17 +126,7 @@ export const useCheckoutStore = create<CheckoutStore>()(
     {
       name: "checkout-store",
       storage: createJSONStorage(() => localStorage),
-      onRehydrateStorage: (state) => {
-        // Return a function that will be called after rehydration is complete
-        return (state, error) => {
-          if (error) {
-            console.error("Error during rehydration:", error);
-          } else {
-            // Set hydration status after rehydration completes
-            state?.setHasHydrated(true);
-          }
-        };
-      },
+     
     }
   )
 );
