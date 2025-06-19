@@ -519,7 +519,7 @@ export async function removeImageBackground(options: {
       method = 'color',
       targetColor = [255, 255, 255],
       tolerance = 30,
-      newBackground = 'transparent',
+      newBackground = 'red',
       width = 400,
       height = 400
     } = options
