@@ -1249,7 +1249,7 @@ export default function CheckoutPage() {
                           Items in Your Order
                         </h3>
 
-                        <div className="space-y-4">
+                        <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
                           {cartItems?.map((item) => (
                             <div
                               key={item.id}
@@ -1471,7 +1471,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       )}
-     
     </div>
   );
 }
