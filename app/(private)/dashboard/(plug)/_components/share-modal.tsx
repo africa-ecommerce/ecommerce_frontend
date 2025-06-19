@@ -257,7 +257,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Copy, Loader2 } from "lucide-react";
-import { toast } from "@/components/ui/use-toast-advanced";
+import { errorToast, successToast, toast } from "@/components/ui/use-toast-advanced";
 import Image from "next/image";
 
 interface ShareModalProps {
@@ -330,11 +330,8 @@ export function ShareModal({
     },
     onError: (error: any) => {
       console.error("Link generation failed:", error);
-      toast({
-        title: "Link generation failed",
-        description: "Please try again or use the direct link",
-        variant: "destructive",
-      });
+     
+      errorToast("Please try again or use the direct link");
     },
   };
 
@@ -378,22 +375,16 @@ export function ShareModal({
 
     navigator.clipboard.writeText(directLink);
     setCopied(true);
-    toast({
-      title: "Link copied!",
-      description: "Product link has been copied to clipboard",
-      variant: "success",
-    });
+    
+    successToast("Link copied successfully!");
     setTimeout(() => setCopied(false), 2000);
   };
 
   // Share handlers
   const handleShare = (platform: string) => {
     if (isGeneratingLink) {
-      toast({
-        title: "Please wait",
-        description: "Link is being generated...",
-        variant: "default",
-      });
+     
+      successToast("Link is being generated...");
       return;
     }
 
@@ -423,6 +414,7 @@ export function ShareModal({
             "Your message and link have been copied. Open Instagram and paste in your story or message",
           variant: "success",
         });
+        
         return;
     }
 
