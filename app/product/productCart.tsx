@@ -78,7 +78,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setOrderSummaries, orderSummaries } = useProductStore();
+  const { setOrderSummaries, orderSummaries, clearOrderSummaries } = useProductStore();
 
   // Get URL parameters for back navigation
   const urlProductId = searchParams.get("pid");
@@ -92,13 +92,12 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
 
   const { data, error, isLoading, mutate } = useSWR(
     currentProductId
-      ? `/public/products/${currentProductId}${
+      ? `/api/public/products/${currentProductId}${
           currentReferralId ? `/${currentReferralId}` : ""
         }`
       : null,
     async (url) => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`,
+      const response = await fetch(url,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -251,12 +250,15 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     hasVariations,
     hasRestoredState,
   ]);
-
-
   useEffect(() => {
+    // Clear order summaries when product ID changes (before fetch)
+    if (currentProductId) {
+      clearOrderSummaries();
+    }
+    
     // Reset restoration flag when product changes
     setHasRestoredState(false);
-  }, [currentProductId]);
+  }, [currentProductId, clearOrderSummaries]);
 
   const formatDescription = (text: string) => {
     if (!text) return "";
