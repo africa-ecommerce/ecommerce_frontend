@@ -250,15 +250,15 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     hasVariations,
     hasRestoredState,
   ]);
-  useEffect(() => {
-    // Clear order summaries when product ID changes (before fetch)
-    if (currentProductId) {
-      clearOrderSummaries();
-    }
-    
-    // Reset restoration flag when product changes
-    setHasRestoredState(false);
-  }, [currentProductId, clearOrderSummaries]);
+useEffect(() => {
+  // Clear order summaries when product ID changes (before fetch)
+  if (currentProductId !== orderSummaries[0]?.item.id) {
+    clearOrderSummaries();
+  }
+  
+  // Reset restoration flag when product changes
+  setHasRestoredState(false);
+}, [currentProductId, clearOrderSummaries]);
 
   const formatDescription = (text: string) => {
     if (!text) return "";
