@@ -478,81 +478,47 @@
 
 
 
-
-
-// File: app/api/og/[pid]/[ref].png/route.tsx
-import { ImageResponse } from 'next/og'
-import { getProductServer } from '@/lib/products'
-import { createProductCard } from '@/lib/canvas-actions'
-
-export const runtime = 'nodejs' // Server actions need nodejs runtime for canvas
+import { createProductCard } from "@/lib/canvas-actions";
+import { getProductServer } from "@/lib/products";
+import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { pid: string, ref: string } }
+  { params }: { params: { pid: string; ref: string } }
 ) {
-  try {
-    const productId = params.pid
-    const ref = params.ref
-   
-    
-    // Get template and other options from query params
-    const template = "inspire"
-    const removeBackground = true
-    
-    const actualRef = (ref === 'null' || ref === 'undefined') ? undefined : ref
-    const product = await getProductServer(productId, actualRef)
+  const { pid, ref } = params;
 
-    if (!product?.data) {
-      return new Response('Product not found', { status: 404 })
-    }
+  const actualRef = ref === "null" || ref === "undefined" ? undefined : ref;
+  const product = await getProductServer(pid, actualRef);
 
-    // Use server action to create processed image
-    const result = await createProductCard({
-      imageUrl: product.data.images?.[0] || 'https://via.placeholder.com/400',
-      productName: product.data.name || 'Product',
-      price: product.data.price || 0,
-      ref: actualRef,
-      template,
-      removeBackground,
-      backgroundOptions: {
-        targetColor: [255, 255, 255], // Remove white backgrounds
-        tolerance: 40,
-        newBackground: 'transparent'
-      },
-      dimensions: { width: 1200, height: 630 }
-    })
-
-    if (!result.success) {
-      console.error('Canvas processing failed:', result.error)
-      return new Response('Error generating image', { status: 500 })
-    }
-
-    // Return the processed image directly
-    return new ImageResponse(
-      (
-        <div style={{ 
-          display: 'flex', 
-          width: '100%', 
-          height: '100%',
-          position: 'relative'
-        }}>
-          <img
-            src={result.processedImage}
-            alt={product.data.name}
-            style={{ 
-              width: '100%', 
-              height: '100%', 
-              objectFit: 'cover' 
-            }}
-          />
-        </div>
-      ),
-      { width: 1200, height: 630 }
-    )
-
-  } catch (error) {
-    console.error('Error generating OG image:', error)
-    return new Response('Error generating image', { status: 500 })
+  if (!product?.data) {
+    return new NextResponse("Product not found", { status: 404 });
   }
+
+  const result = await createProductCard({
+    imageUrl: product.data.images?.[0] || "https://via.placeholder.com/400",
+    productName: product.data.name || "Product",
+    price: product.data.price || 0,
+    ref: actualRef,
+    template: "inspire",
+    removeBackground: true,
+    backgroundOptions: {
+      targetColor: [255, 255, 255],
+      tolerance: 40,
+      newBackground: "transparent",
+    },
+    dimensions: { width: 1200, height: 630 },
+  });
+
+  if (!result.success || !result.processedImage) {
+    return new NextResponse("Failed to generate image", { status: 500 });
+  }
+
+  return new NextResponse(result.processedImage, {
+    status: 200,
+    headers: {
+      "Content-Type": "image/png",
+      "Cache-Control": "public, max-age=86400, immutable",
+    },
+  });
 }

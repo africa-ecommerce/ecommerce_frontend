@@ -374,14 +374,14 @@ export async function processProductImage(options: ProcessImageOptions) {
     }
 
     // Convert to base64 PNG (default)
-    const processedImage = canvas.toDataURL()
+    const processedImageBuffer = canvas.toBuffer("image/png");
 
     return {
       success: true,
-      processedImage,
+      processedImage: processedImageBuffer,
       template,
-      dimensions: { width, height }
-    }
+      dimensions: { width, height },
+    };
 
   } catch (error) {
     console.error('Canvas processing error:', error)
@@ -551,14 +551,14 @@ export async function removeImageBackground(options: {
       ctx.putImageData(imageData, 0, 0)
     }
 
-    const processedImage = canvas.toDataURL()
+    const processedImageBuffer = canvas.toBuffer('image/png')
 
     return {
       success: true,
-      processedImage,
+      processedImage: processedImageBuffer,
       method,
-      dimensions: { width, height }
-    }
+      dimensions: { width, height },
+    };
 
   } catch (error) {
     console.error('Background removal error:', error)
@@ -572,7 +572,7 @@ export async function removeImageBackground(options: {
 
 // Combined action for complete image processing
 export async function createProductCard(options: {
-  imageUrl: string
+  imageUrl: any
   productName: string
   price: number
   ref?: string
