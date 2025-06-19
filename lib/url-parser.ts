@@ -62,9 +62,13 @@ export function parseCheckoutUrl(
   };
 }
 
-export function getVariationDisplayName(variation: any): string {
-  const parts = [];
-  if (variation.color) parts.push(variation.color);
-  if (variation.size) parts.push(variation.size);
-  return parts.join(", ");
-}
+ export  const getVariationDisplayName = (variation: any) => {
+   
+
+    const parts = []
+    if (variation.size) parts.push(variation.size.toUpperCase())
+    if (variation.color) parts.push(variation.color.charAt(0).toUpperCase() + variation.color.slice(1))
+
+    return parts.join(" - ") || "Variation"
+  }
+
