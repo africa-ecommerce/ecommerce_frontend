@@ -70,114 +70,122 @@ interface SingleProductCartProps {
 }
 
 export const SingleProduct = ({ productId, referralId, platform }: SingleProductCartProps) => {
-  const [quantity, setQuantity] = useState(1)
-  const [quantityInput, setQuantityInput] = useState("1")
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-  const [selectedVariations, setSelectedVariations] = useState<SelectedVariation[]>([])
+  const [quantity, setQuantity] = useState(1);
+  const [quantityInput, setQuantityInput] = useState("1");
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedVariations, setSelectedVariations] = useState<
+    SelectedVariation[]
+  >([]);
 
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const { setOrderSummaries, orderSummaries } = useProductStore()
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { setOrderSummaries, orderSummaries } = useProductStore();
 
   // Get URL parameters for back navigation
-  const urlProductId = searchParams.get("pid")
-  const urlReferralId = searchParams.get("ref")
-  const urlPlatform = searchParams.get("platform")
+  const urlProductId = searchParams.get("pid");
+  const urlReferralId = searchParams.get("ref");
+  const urlPlatform = searchParams.get("platform");
 
   // Use URL params if props are not provided
-  const currentProductId = productId || urlProductId
-  const currentReferralId = referralId || urlReferralId
-  const currentPlatform = platform || urlPlatform
+  const currentProductId = productId || urlProductId;
+  const currentReferralId = referralId || urlReferralId;
+  const currentPlatform = platform || urlPlatform;
 
   const { data, error, isLoading, mutate } = useSWR(
-    currentProductId ? `/public/products/${currentProductId}${currentReferralId ? `/${currentReferralId}` : ""}` : null,
+    currentProductId
+      ? `/public/products/${currentProductId}${
+          currentReferralId ? `/${currentReferralId}` : ""
+        }`
+      : null,
     async (url) => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      })
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}${url}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       if (response.status === 404) {
-        return { data: null }
+        return { data: null };
       }
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`)
+        throw new Error(`API error: ${response.status}`);
       }
 
-      return response.json()
+      return response.json();
     },
     {
       revalidateOnFocus: false,
       revalidateIfStale: false,
       dedupingInterval: 60000,
-    },
-  )
+    }
+  );
 
-  const productData: ProductData = data?.data || null
+  const productData: ProductData = data?.data || null;
 
-  console.log("productData", productData)
+  console.log("productData", productData);
 
   // Handle variations logic
-  const hasVariations = productData?.variations && productData.variations.length > 0
- // Format variation display name
+  const hasVariations =
+    productData?.variations && productData.variations.length > 0;
+  // Format variation display name
 
   // Get current stock for simple products (no variations)
   const currentStock = useMemo(() => {
     if (!hasVariations) {
-      return productData?.stocks || 0
+      return productData?.stocks || 0;
     }
-    return 0 // For products with variations, stock is managed per variation
-  }, [hasVariations, productData?.stocks])
+    return 0; // For products with variations, stock is managed per variation
+  }, [hasVariations, productData?.stocks]);
 
   // Get current price for simple products
   const currentPrice = useMemo(() => {
-    return productData?.price || 0
-  }, [productData?.price])
+    return productData?.price || 0;
+  }, [productData?.price]);
 
   // Handle quantity input changes for simple products
   const handleQuantityInputChange = (value: string) => {
-    if (!/^\d*$/.test(value)) return
+    if (!/^\d*$/.test(value)) return;
 
-    setQuantityInput(value)
+    setQuantityInput(value);
 
-    const numValue = Number.parseInt(value)
+    const numValue = Number.parseInt(value);
     if (!isNaN(numValue) && numValue > 0) {
-      const validQuantity = Math.min(numValue, currentStock)
-      setQuantity(validQuantity)
+      const validQuantity = Math.min(numValue, currentStock);
+      setQuantity(validQuantity);
     } else if (value === "") {
-      return
+      return;
     }
-  }
+  };
 
   // Handle quantity input blur for simple products
   const handleQuantityInputBlur = () => {
-    const numValue = Number.parseInt(quantityInput)
+    const numValue = Number.parseInt(quantityInput);
     if (isNaN(numValue) || numValue < 1) {
-      setQuantity(1)
-      setQuantityInput("1")
+      setQuantity(1);
+      setQuantityInput("1");
     } else {
-      const validQuantity = Math.min(numValue, currentStock)
-      setQuantity(validQuantity)
-      setQuantityInput(validQuantity.toString())
+      const validQuantity = Math.min(numValue, currentStock);
+      setQuantity(validQuantity);
+      setQuantityInput(validQuantity.toString());
     }
-  }
+  };
 
   // Handle Enter key in quantity input for simple products
   const handleQuantityInputKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      handleQuantityInputBlur()
+      handleQuantityInputBlur();
     }
-  }
+  };
 
   // Sync quantity input with quantity state for simple products
   useEffect(() => {
-    setQuantityInput(quantity.toString())
-  }, [quantity])
-
-
+    setQuantityInput(quantity.toString());
+  }, [quantity]);
 
   // useEffect(() => {
   //   // Restore state from persisted order summaries when component mounts
@@ -205,147 +213,163 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
   //   }
   // }, [orderSummaries, currentProductId, productData, hasVariations])
 
-
   useEffect(() => {
     // Restore state from persisted order summaries when component mounts
-    if (orderSummaries.length > 0 && productData) {
+    if (orderSummaries.length > 0 && productData && currentProductId) {
       // Find all orders for this product
-      const existingOrders = orderSummaries.filter((order) => order.productId === currentProductId)
-  
+      const existingOrders = orderSummaries.filter(
+        (order) => order.productId === currentProductId
+      );
+
       if (existingOrders.length > 0) {
         if (hasVariations) {
           // Restore selected variations from all order summaries for this product
-          const restoredVariations: SelectedVariation[] = []
-          
+          const restoredVariations: SelectedVariation[] = [];
+
           existingOrders.forEach((order) => {
             if (order.item.variationId) {
-              const variation = productData.variations?.find((v) => v.id === order.item.variationId)
+              const variation = productData.variations?.find(
+                (v) => v.id === order.item.variationId
+              );
               if (variation) {
                 restoredVariations.push({
                   variation,
                   quantity: order.item.quantity,
-                })
+                });
               }
             }
-          })
-          
-          if (restoredVariations.length > 0) {
-            setSelectedVariations(restoredVariations)
+          });
+
+          // Only update if we found variations and current state is empty
+          if (
+            restoredVariations.length > 0 &&
+            selectedVariations.length === 0
+          ) {
+            setSelectedVariations(restoredVariations);
           }
         } else if (!hasVariations && existingOrders.length === 1) {
           // Restore quantity for simple products (should only be one order)
-          const order = existingOrders[0]
-          setQuantity(order.item.quantity)
-          setQuantityInput(order.item.quantity.toString())
+          const order = existingOrders[0];
+          // Only restore if current quantity is still at default (1)
+          if (quantity === 1) {
+            setQuantity(order.item.quantity);
+            setQuantityInput(order.item.quantity.toString());
+          }
         }
       }
     }
-  }, [orderSummaries, currentProductId, productData, hasVariations])
-
+  }, [orderSummaries, currentProductId, productData, hasVariations]); // Removed selectedVariations and quantity from dependencies
 
   const formatDescription = (text: string) => {
-    if (!text) return ""
-    return text.charAt(0).toUpperCase() + text.slice(1)
-  }
+    if (!text) return "";
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  };
 
   // Handle variation selection/deselection
   const handleVariationToggle = (variation: ProductVariation) => {
     setSelectedVariations((prev) => {
-      const existingIndex = prev.findIndex((sv) => sv.variation.id === variation.id)
+      const existingIndex = prev.findIndex(
+        (sv) => sv.variation.id === variation.id
+      );
 
       if (existingIndex >= 0) {
         // Remove variation if already selected
-        return prev.filter((sv) => sv.variation.id !== variation.id)
+        return prev.filter((sv) => sv.variation.id !== variation.id);
       } else {
         // Add variation with quantity 1
-        return [...prev, { variation, quantity: 1 }]
+        return [...prev, { variation, quantity: 1 }];
       }
-    })
-  }
+    });
+  };
 
   // Update quantity for a specific variation
-  const updateVariationQuantity = (variationId: string, newQuantity: number) => {
+  const updateVariationQuantity = (
+    variationId: string,
+    newQuantity: number
+  ) => {
     setSelectedVariations((prev) =>
       prev.map((sv) => {
         if (sv.variation.id === variationId) {
-          const maxQuantity = sv.variation.stock
-          const validQuantity = Math.max(1, Math.min(newQuantity, maxQuantity))
-          return { ...sv, quantity: validQuantity }
+          const maxQuantity = sv.variation.stock;
+          const validQuantity = Math.max(1, Math.min(newQuantity, maxQuantity));
+          return { ...sv, quantity: validQuantity };
         }
-        return sv
-      }),
-    )
-  }
+        return sv;
+      })
+    );
+  };
 
   // Handle quantity input for variations
   const handleVariationQuantityInput = (variationId: string, value: string) => {
-    if (!/^\d*$/.test(value)) return
+    if (!/^\d*$/.test(value)) return;
 
-    const numValue = Number.parseInt(value)
+    const numValue = Number.parseInt(value);
     if (!isNaN(numValue) && numValue > 0) {
-      updateVariationQuantity(variationId, numValue)
+      updateVariationQuantity(variationId, numValue);
     } else if (value === "") {
       // Allow empty but don't update yet
-      return
+      return;
     }
-  }
+  };
 
   // Check if a variation is selected
   const isVariationSelected = (variationId: string) => {
-    return selectedVariations.some((sv) => sv.variation.id === variationId)
-  }
+    return selectedVariations.some((sv) => sv.variation.id === variationId);
+  };
 
   // Get quantity for a variation
   const getVariationQuantity = (variationId: string) => {
-    const selectedVar = selectedVariations.find((sv) => sv.variation.id === variationId)
-    return selectedVar?.quantity || 1
-  }
+    const selectedVar = selectedVariations.find(
+      (sv) => sv.variation.id === variationId
+    );
+    return selectedVar?.quantity || 1;
+  };
 
   const updateQuantity = (change: number) => {
-    const newQuantity = Math.max(1, quantity + change)
-    const maxQuantity = currentStock
-    const validQuantity = Math.min(newQuantity, maxQuantity)
-    setQuantity(validQuantity)
-    setQuantityInput(validQuantity.toString())
-  }
+    const newQuantity = Math.max(1, quantity + change);
+    const maxQuantity = currentStock;
+    const validQuantity = Math.min(newQuantity, maxQuantity);
+    setQuantity(validQuantity);
+    setQuantityInput(validQuantity.toString());
+  };
 
   // Calculate pricing information
   const pricing = useMemo(() => {
     if (!productData) {
-      return { subtotal: 0, total: 0, items: [] }
+      return { subtotal: 0, total: 0, items: [] };
     }
 
-    let subtotal = 0
-    const items = []
+    let subtotal = 0;
+    const items = [];
 
     if (hasVariations && selectedVariations.length > 0) {
       // Calculate for selected variations
       for (const sv of selectedVariations) {
-        const price = sv.variation.price || productData.price
-        const itemTotal = price * sv.quantity
-        subtotal += itemTotal
+        const price = sv.variation.price || productData.price;
+        const itemTotal = price * sv.quantity;
+        subtotal += itemTotal;
         items.push({
           name: getVariationDisplayName(sv.variation),
           price,
           quantity: sv.quantity,
           total: itemTotal,
-        })
+        });
       }
     } else if (!hasVariations) {
       // Calculate for simple product
-      subtotal = currentPrice * quantity
+      subtotal = currentPrice * quantity;
       items.push({
         name: productData.name,
         price: currentPrice,
         quantity,
         total: subtotal,
-      })
+      });
     }
 
-    const total = subtotal
+    const total = subtotal;
 
-    return { subtotal, total, items }
-  }, [currentPrice, quantity, selectedVariations, hasVariations, productData])
+    return { subtotal, total, items };
+  }, [currentPrice, quantity, selectedVariations, hasVariations, productData]);
 
   // const handleCheckout = () => {
   //   if (!productData) return
@@ -436,7 +460,6 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
 
   //   router.push(checkoutUrl)
   // }
-
 
   const handleCheckout = () => {
     if (!productData) return;
@@ -537,24 +560,24 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
   };
 
   const formatPrice = (price: number) => {
-    return `₦${price?.toLocaleString()}`
-  }
+    return `₦${price?.toLocaleString()}`;
+  };
 
   // Check if any items are out of stock
   const hasOutOfStockItems = useMemo(() => {
     if (hasVariations) {
-      return selectedVariations.some((sv) => sv.variation.stock === 0)
+      return selectedVariations.some((sv) => sv.variation.stock === 0);
     }
-    return currentStock === 0
-  }, [hasVariations, selectedVariations, currentStock])
+    return currentStock === 0;
+  }, [hasVariations, selectedVariations, currentStock]);
 
   // Check if we can proceed to checkout
   const canCheckout = useMemo(() => {
     if (hasVariations) {
-      return selectedVariations.length > 0 && !hasOutOfStockItems
+      return selectedVariations.length > 0 && !hasOutOfStockItems;
     }
-    return currentStock > 0
-  }, [hasVariations, selectedVariations, hasOutOfStockItems, currentStock])
+    return currentStock > 0;
+  }, [hasVariations, selectedVariations, hasOutOfStockItems, currentStock]);
 
   // Loading state
   if (isLoading) {
@@ -569,7 +592,10 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                     <div className="aspect-square rounded-lg bg-muted animate-pulse mb-4"></div>
                     <div className="flex gap-2">
                       {[1, 2, 3].map((i) => (
-                        <div key={i} className="w-16 h-16 rounded-md bg-muted animate-pulse"></div>
+                        <div
+                          key={i}
+                          className="w-16 h-16 rounded-md bg-muted animate-pulse"
+                        ></div>
                       ))}
                     </div>
                   </div>
@@ -605,7 +631,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   // Technical Error state
@@ -616,12 +642,18 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
           <div className="mb-6 text-muted-foreground">
             <RefreshCw className="w-16 h-16 mx-auto" />
           </div>
-          <h2 className="text-2xl font-bold mb-3">Something went wrong on our end</h2>
+          <h2 className="text-2xl font-bold mb-3">
+            Something went wrong on our end
+          </h2>
           <p className="text-muted-foreground mb-6">
-            We're having trouble loading this product. Please refresh the page or try again in a moment.
+            We're having trouble loading this product. Please refresh the page
+            or try again in a moment.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button onClick={() => mutate()} className="flex items-center gap-2">
+            <Button
+              onClick={() => mutate()}
+              className="flex items-center gap-2"
+            >
               <RefreshCw className="w-4 h-4" />
               Try Again
             </Button>
@@ -632,7 +664,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   // Product not found state
@@ -645,9 +677,12 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
               <span className="text-2xl">🌟</span>
             </div>
           </div>
-          <h2 className="text-2xl font-bold mb-3">This amazing product has been retired</h2>
+          <h2 className="text-2xl font-bold mb-3">
+            This amazing product has been retired
+          </h2>
           <p className="text-muted-foreground mb-6">
-            We've moved on to even better versions of this product. Check out our latest collection!
+            We've moved on to even better versions of this product. Check out
+            our latest collection!
           </p>
           <div className="flex flex-col gap-4">
             <Button onClick={() => router.push("/")} className="mx-auto">
@@ -662,11 +697,11 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   // Check if product is out of stock (for simple products)
-  const isOutOfStock = !hasVariations && currentStock === 0
+  const isOutOfStock = !hasVariations && currentStock === 0;
 
   return (
     <div className="flex flex-col min-h-screen pb-16 md:pb-0">
@@ -687,7 +722,9 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                           "/placeholder.svg" ||
                           "/placeholder.svg"
                         }
-                        alt={`${productData.name} - Image ${selectedImageIndex + 1}`}
+                        alt={`${productData.name} - Image ${
+                          selectedImageIndex + 1
+                        }`}
                         fill
                         className="object-cover transition-opacity duration-300"
                         priority
@@ -722,24 +759,36 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                   {/* Product Details */}
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-2">
-                      <h1 className="text-xl md:text-2xl font-bold capitalize">{productData.name}</h1>
-                      {!hasVariations && currentStock > 0 && currentStock <= 5 && (
-                        <Badge variant="destructive" className="ml-2">
-                          Only {currentStock} left!
-                        </Badge>
-                      )}
+                      <h1 className="text-xl md:text-2xl font-bold capitalize">
+                        {productData.name}
+                      </h1>
+                      {!hasVariations &&
+                        currentStock > 0 &&
+                        currentStock <= 5 && (
+                          <Badge variant="destructive" className="ml-2">
+                            Only {currentStock} left!
+                          </Badge>
+                        )}
                     </div>
-                    <p className="text-2xl font-bold text-primary mb-4">{formatPrice(currentPrice)}</p>
+                    <p className="text-2xl font-bold text-primary mb-4">
+                      {formatPrice(currentPrice)}
+                    </p>
 
                     {/* Variations Selection - Multiple selection with quantities */}
                     {hasVariations && (
                       <div className="space-y-4 mb-6">
                         <div>
-                          <Label className="text-sm font-medium mb-3 block">Available Options (Select multiple)</Label>
+                          <Label className="text-sm font-medium mb-3 block">
+                            Available Options (Select multiple)
+                          </Label>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[320px] md:max-h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
                             {productData.variations.map((variation) => {
-                              const isSelected = isVariationSelected(variation.id)
-                              const variationQuantity = getVariationQuantity(variation.id)
+                              const isSelected = isVariationSelected(
+                                variation.id
+                              );
+                              const variationQuantity = getVariationQuantity(
+                                variation.id
+                              );
 
                               return (
                                 <div
@@ -750,27 +799,45 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                                       : "border-muted hover:border-muted-foreground"
                                   }`}
                                 >
-                                  <div className="p-4 cursor-pointer" onClick={() => handleVariationToggle(variation)}>
+                                  <div
+                                    className="p-4 cursor-pointer"
+                                    onClick={() =>
+                                      handleVariationToggle(variation)
+                                    }
+                                  >
                                     <div className="flex items-center justify-between mb-2">
                                       <div className="flex-1">
-                                        <div className="font-medium">{getVariationDisplayName(variation)}</div>
+                                        <div className="font-medium">
+                                          {getVariationDisplayName(variation)}
+                                        </div>
                                         <div className="text-sm text-muted-foreground mt-1">
                                           Stock: {variation.stock} available
-                                          {variation.price && variation.price !== productData.price && (
-                                            <span className="ml-2 font-medium text-primary">
-                                              {formatPrice(variation.price)}
-                                            </span>
-                                          )}
+                                          {variation.price &&
+                                            variation.price !==
+                                              productData.price && (
+                                              <span className="ml-2 font-medium text-primary">
+                                                {formatPrice(variation.price)}
+                                              </span>
+                                            )}
                                         </div>
                                       </div>
                                       <div className="flex items-center gap-2">
-                                        {variation.stock === 0 && <Badge variant="destructive">Out of Stock</Badge>}
-                                        {variation.stock > 0 && variation.stock <= 5 && (
-                                          <Badge variant="secondary">Low Stock</Badge>
+                                        {variation.stock === 0 && (
+                                          <Badge variant="destructive">
+                                            Out of Stock
+                                          </Badge>
                                         )}
+                                        {variation.stock > 0 &&
+                                          variation.stock <= 5 && (
+                                            <Badge variant="secondary">
+                                              Low Stock
+                                            </Badge>
+                                          )}
                                         <div
                                           className={`w-4 h-4 rounded border-2 transition-all ${
-                                            isSelected ? "bg-primary border-primary" : "border-muted-foreground"
+                                            isSelected
+                                              ? "bg-primary border-primary"
+                                              : "border-muted-foreground"
                                           }`}
                                         >
                                           {isSelected && (
@@ -791,8 +858,11 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                                             size="icon"
                                             className="h-7 w-7 rounded-md"
                                             onClick={(e) => {
-                                              e.stopPropagation()
-                                              updateVariationQuantity(variation.id, variationQuantity - 1)
+                                              e.stopPropagation();
+                                              updateVariationQuantity(
+                                                variation.id,
+                                                variationQuantity - 1
+                                              );
                                             }}
                                             disabled={variationQuantity <= 1}
                                           >
@@ -802,8 +872,11 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                                             type="text"
                                             value={variationQuantity}
                                             onChange={(e) => {
-                                              e.stopPropagation()
-                                              handleVariationQuantityInput(variation.id, e.target.value)
+                                              e.stopPropagation();
+                                              handleVariationQuantityInput(
+                                                variation.id,
+                                                e.target.value
+                                              );
                                             }}
                                             onClick={(e) => e.stopPropagation()}
                                             className="w-14 h-7 text-center text-sm"
@@ -815,10 +888,16 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                                             size="icon"
                                             className="h-7 w-7 rounded-md"
                                             onClick={(e) => {
-                                              e.stopPropagation()
-                                              updateVariationQuantity(variation.id, variationQuantity + 1)
+                                              e.stopPropagation();
+                                              updateVariationQuantity(
+                                                variation.id,
+                                                variationQuantity + 1
+                                              );
                                             }}
-                                            disabled={variationQuantity >= variation.stock}
+                                            disabled={
+                                              variationQuantity >=
+                                              variation.stock
+                                            }
                                           >
                                             <Plus className="h-3 w-3" />
                                           </Button>
@@ -827,7 +906,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                                     )}
                                   </div>
                                 </div>
-                              )
+                              );
                             })}
                           </div>
                         </div>
@@ -838,10 +917,14 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                     {productData.description && (
                       <div className="mb-6">
                         <button
-                          onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                          onClick={() =>
+                            setIsDescriptionExpanded(!isDescriptionExpanded)
+                          }
                           className="flex items-center justify-between w-full p-3 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors"
                         >
-                          <span className="font-medium text-left">Description</span>
+                          <span className="font-medium text-left">
+                            Description
+                          </span>
                           {isDescriptionExpanded ? (
                             <ChevronUp className="h-4 w-4 text-muted-foreground" />
                           ) : (
@@ -878,7 +961,9 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                           <Input
                             type="text"
                             value={quantityInput}
-                            onChange={(e) => handleQuantityInputChange(e.target.value)}
+                            onChange={(e) =>
+                              handleQuantityInputChange(e.target.value)
+                            }
                             onBlur={handleQuantityInputBlur}
                             onKeyDown={handleQuantityInputKeyDown}
                             className="w-16 h-8 text-center text-sm"
@@ -895,7 +980,9 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                             <Plus className="h-3 w-3" />
                           </Button>
                         </div>
-                        <span className="text-sm text-muted-foreground">{currentStock} available</span>
+                        <span className="text-sm text-muted-foreground">
+                          {currentStock} available
+                        </span>
                       </div>
                     )}
 
@@ -907,15 +994,15 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                             isOutOfStock
                               ? "text-red-600 font-medium"
                               : currentStock <= 5
-                                ? "text-orange-600 font-medium"
-                                : "text-green-600"
+                              ? "text-orange-600 font-medium"
+                              : "text-green-600"
                           }
                         >
                           {isOutOfStock
                             ? "Currently Out of Stock"
                             : currentStock <= 5
-                              ? `Only ${currentStock} left in stock`
-                              : ""}
+                            ? `Only ${currentStock} left in stock`
+                            : ""}
                         </span>
                       </div>
                     )}
@@ -939,8 +1026,12 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                         {pricing.items.map((item, index) => (
                           <div key={index} className="space-y-2">
                             <div className="flex justify-between">
-                              <span className="text-sm font-medium capitalize">{item.name}</span>
-                              <span className="text-sm">{formatPrice(item.price)}</span>
+                              <span className="text-sm font-medium capitalize">
+                                {item.name}
+                              </span>
+                              <span className="text-sm">
+                                {formatPrice(item.price)}
+                              </span>
                             </div>
                             <div className="flex justify-between text-sm text-muted-foreground">
                               <span>Quantity: {item.quantity}</span>
@@ -950,7 +1041,9 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                         ))}
                         <Separator className="my-3" />
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Subtotal</span>
+                          <span className="text-muted-foreground">
+                            Subtotal
+                          </span>
                           <span>{formatPrice(pricing.subtotal)}</span>
                         </div>
                       </>
@@ -959,8 +1052,8 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                         {hasVariations
                           ? "Select options to see pricing"
                           : !isOutOfStock
-                            ? "Ready to order"
-                            : "Product unavailable"}
+                          ? "Ready to order"
+                          : "Product unavailable"}
                       </div>
                     )}
 
@@ -971,14 +1064,19 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
                     </div>
                   </div>
 
-                  <Button size="lg" className="w-full" onClick={handleCheckout} disabled={!canCheckout}>
+                  <Button
+                    size="lg"
+                    className="w-full"
+                    onClick={handleCheckout}
+                    disabled={!canCheckout}
+                  >
                     {hasOutOfStockItems
                       ? "Some Items Out of Stock"
                       : !canCheckout
-                        ? hasVariations
-                          ? "Select Options"
-                          : "Out of Stock"
-                        : "Proceed to Checkout"}
+                      ? hasVariations
+                        ? "Select Options"
+                        : "Out of Stock"
+                      : "Proceed to Checkout"}
                   </Button>
 
                   {hasVariations && selectedVariations.length === 0 && (
@@ -999,7 +1097,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default SingleProduct
