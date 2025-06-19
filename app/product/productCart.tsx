@@ -76,6 +76,7 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
   const [selectedVariations, setSelectedVariations] = useState<
     SelectedVariation[]
   >([]);
+  const [hasRestoredState, setHasRestoredState] = useState(false);
 
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
@@ -187,35 +188,16 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
     setQuantityInput(quantity.toString());
   }, [quantity]);
 
-  // useEffect(() => {
-  //   // Restore state from persisted order summaries when component mounts
-  //   if (orderSummaries.length > 0 && productData) {
-  //     const existingOrder = orderSummaries.find((order) => order.productId === currentProductId)
 
-  //     if (existingOrder) {
-  //       if (hasVariations && existingOrder.item.variationId) {
-  //         // Restore selected variations from order summary
-  //         const variation = productData.variations?.find((v) => v.id === existingOrder.item.variationId)
-  //         if (variation) {
-  //           setSelectedVariations([
-  //             {
-  //               variation,
-  //               quantity: existingOrder.item.quantity,
-  //             },
-  //           ])
-  //         }
-  //       } else if (!hasVariations) {
-  //         // Restore quantity for simple products
-  //         setQuantity(existingOrder.item.quantity)
-  //         setQuantityInput(existingOrder.item.quantity.toString())
-  //       }
-  //     }
-  //   }
-  // }, [orderSummaries, currentProductId, productData, hasVariations])
 
   useEffect(() => {
-    // Restore state from persisted order summaries when component mounts
-    if (orderSummaries.length > 0 && productData && currentProductId) {
+    // Only restore state when we have both orderSummaries and productData, and haven't restored yet
+    if (
+      orderSummaries.length > 0 &&
+      productData &&
+      currentProductId &&
+      !hasRestoredState
+    ) {
       // Find all orders for this product
       const existingOrders = orderSummaries.filter(
         (order) => order.productId === currentProductId
@@ -240,25 +222,42 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
             }
           });
 
-          // Only update if we found variations and current state is empty
-          if (
-            restoredVariations.length > 0 &&
-            selectedVariations.length === 0
-          ) {
+          // Always update selected variations if we found any in order summaries
+          if (restoredVariations.length > 0) {
             setSelectedVariations(restoredVariations);
           }
         } else if (!hasVariations && existingOrders.length === 1) {
           // Restore quantity for simple products (should only be one order)
           const order = existingOrders[0];
-          // Only restore if current quantity is still at default (1)
-          if (quantity === 1) {
-            setQuantity(order.item.quantity);
-            setQuantityInput(order.item.quantity.toString());
-          }
+          setQuantity(order.item.quantity);
+          setQuantityInput(order.item.quantity.toString());
         }
+
+        setHasRestoredState(true);
       }
+    } else if (orderSummaries.length === 0 && hasRestoredState) {
+      // Reset state when no orders exist and we had previously restored state
+      if (hasVariations) {
+        setSelectedVariations([]);
+      } else {
+        setQuantity(1);
+        setQuantityInput("1");
+      }
+      setHasRestoredState(false);
     }
-  }, [orderSummaries, currentProductId, productData, hasVariations]); // Removed selectedVariations and quantity from dependencies
+  }, [
+    orderSummaries,
+    currentProductId,
+    productData,
+    hasVariations,
+    hasRestoredState,
+  ]);
+
+
+  useEffect(() => {
+    // Reset restoration flag when product changes
+    setHasRestoredState(false);
+  }, [currentProductId]);
 
   const formatDescription = (text: string) => {
     if (!text) return "";
