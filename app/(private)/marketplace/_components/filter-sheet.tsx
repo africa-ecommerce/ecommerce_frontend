@@ -190,39 +190,7 @@ export const FilterSheet = ({
             </div>
           </div>
 
-          <Separator />
-
-          {/* Ratings Filter
-          <div>
-            <h3 className="text-sm font-medium mb-3">Minimum Rating</h3>
-            <div className="space-y-2">
-              {[5, 4, 3].map((rating) => (
-                <div key={rating} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`rating-${rating}`}
-                    checked={filters.selectedRatings.includes(rating)}
-                    onCheckedChange={() => onToggleRating(rating)}
-                  />
-                  <Label
-                    htmlFor={`rating-${rating}`}
-                    className="text-sm flex items-center"
-                  >
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < rating
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-muted-foreground"
-                        }`}
-                      />
-                    ))}
-                    {rating === 5 ? "" : " & up"}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </div> */}
+          
 
           <Separator />
 
