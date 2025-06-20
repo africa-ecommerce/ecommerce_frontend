@@ -309,7 +309,7 @@ export default function CheckoutPage() {
     if (!orderSummaries.length) return [];
 
     return orderSummaries.flatMap((summary) => ({
-      productId: summary.item.id,
+      productId: summary.item.productId,
       quantity: summary.item.quantity,
       supplierPrice: summary.item.originalPrice, 
       plugPrice: summary.item.price,
@@ -435,6 +435,7 @@ export default function CheckoutPage() {
             name: product.name || product.title || "Unknown Product",
             price: product.price || 0,
             originalPrice: product.originalPrice || product.price || 0,
+            productId: product.originalId,
             quantity: item.qty,
             image: product.image || product.images?.[0] || "/placeholder.svg",
             color: item.variation
@@ -461,7 +462,7 @@ export default function CheckoutPage() {
             item: productItem,
             subtotal,
             total,
-            productId: item.pid,
+           
             referralId: ref,
             platform: platform,
             pickupLocation: product.pickupLocation

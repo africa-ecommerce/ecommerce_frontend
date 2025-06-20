@@ -408,6 +408,7 @@ useEffect(() => {
         const productItem = {
           id: productData.id,
           name: productData.name,
+          productId: productData.originalId,
           price: productData.price,
           originalPrice: productData.originalPrice,
           quantity: sv.quantity,
@@ -437,6 +438,8 @@ useEffect(() => {
       const productItem = {
         id: productData.id,
         name: productData.name,
+        productId: productData.originalId,
+
         price: currentPrice,
         size: productData.size,
         color: productData.color,

@@ -6,6 +6,7 @@ import { createJSONStorage, persist } from "zustand/middleware"
 interface ProductItem {
   id: string
   name: string
+  productId: string
   price: number
   color?: string
   size?: string
