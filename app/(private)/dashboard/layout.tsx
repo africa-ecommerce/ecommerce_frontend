@@ -32,6 +32,7 @@ export default function DashboardLayout({
        preload("/api/products/supplier/", globalFetcher);
     } else if(userData?.userType === "PLUG") {
       preload("/api/plug/products/", globalFetcher);
+      preload("/api/analytics/links", globalFetcher)
     }
     }, []);
 

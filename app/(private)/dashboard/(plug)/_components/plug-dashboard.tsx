@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect, useMemo } from "react";
+import {  useMemo } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -280,10 +280,7 @@ const WelcomeSkeleton = () => (
 );
 
 export default function PlugDashboard() {
-  const [refreshing, setRefreshing] = useState(false);
-  const [socialLoading, setSocialLoading] = useState(true);
-  const [socialError, setSocialError] = useState(false);
-  const [socialAnalytics, setSocialAnalytics] = useState<any[]>([]);
+  
 
   const {
     userData: { user },
@@ -296,6 +293,21 @@ export default function PlugDashboard() {
     isLoading,
     mutate,
   } = useSWR("/api/plug/products/");
+
+
+  const {
+    data: analyticsData,
+    error: analyticsError,
+    isLoading: analyticsLoading,
+    mutate: analyticsMutate,
+  } = useSWR("/api/analytics/links", {
+    refreshInterval: 300000, // Refresh every 5 minutes
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    dedupingInterval: 60000, // Prevent duplicate requests within 1 minute
+    errorRetryCount: 3,
+    errorRetryInterval: 5000,
+  });
 
   // Fetch shipped orders data - following the exact pattern from products component
   const getOrdersUrl = (status: string) => {
@@ -320,6 +332,70 @@ export default function PlugDashboard() {
 
   // Process orders data - following the exact pattern from products component
   const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];
+
+
+  const processAnalyticsData = useMemo(() => {
+    if (!analyticsData?.data || !Array.isArray(analyticsData.data)) {
+      return [];
+    }
+
+    const data = analyticsData.data;
+
+    // Calculate total orders to determine sales percentage
+    const totalOrders = data.reduce(
+      (sum: number, item: any) => sum + (item.orders || 0),
+      0
+    );
+
+    // Platform image mapping
+    const platformImages: { [key: string]: string } = {
+      WhatsApp: "/whatsapp.png",
+      Instagram: "/instagram_logo.png",
+      Twitter: "/twitter.png",
+      Facebook: "/facebook.png",
+      facebook: "/facebook.png", // Handle both cases
+    };
+
+    // Platform color mapping
+    const platformColors: { [key: string]: string } = {
+      WhatsApp: "text-green-600",
+      Instagram: "text-pink-600",
+      Twitter: "text-blue-500",
+      Facebook: "text-blue-600",
+      facebook: "text-blue-600", // Handle both cases
+    };
+
+    return data.map((item: any) => {
+      const platformName = item.platform;
+      const salesPercentage =
+        totalOrders > 0 ? Math.round((item.orders / totalOrders) * 100) : 0;
+
+      return {
+        platform: platformName,
+        percentage: `${salesPercentage}%`,
+        description: `Of your sales come from ${platformName}`,
+        color: platformColors[platformName] || "text-gray-600",
+        imageSrc: platformImages[platformName] || "/placeholder.png",
+        stats: [
+          {
+            label: "Visits",
+            value: item.clicks.toString(),
+            progress:
+              Math.min(
+                (item.clicks / Math.max(...data.map((d: any) => d.clicks))) *
+                  100,
+                100
+              ) || 0,
+          },
+          {
+            label: "Conversions",
+            value: `${item.orders} (${item.conversionRate}%)`,
+            progress: item.conversionRate || 0,
+          },
+        ],
+      };
+    });
+  }, [analyticsData]);
 
   const { topProducts, bottomProducts, averageProducts, averageSales } =
     getProductPerformanceByAverage(products);
@@ -448,7 +524,7 @@ export default function PlugDashboard() {
           </div>
 
           {/* Total */}
-          <div className="flex justify-between items-center pt-2 text-xs sm:text-sm border-t">
+          <div className="flex justify-between items-center pt-2 text-sm border-t">
             <span className="font-medium">Total</span>
             <span className="font-bold">₦{totalAmount.toLocaleString()}</span>
           </div>
@@ -500,71 +576,6 @@ export default function PlugDashboard() {
 
     return [...outOfStockItems, ...lowStockItems].slice(0, 3);
   }, [products]);
-
-  useEffect(() => {
-    // Simulate loading social analytics
-    const loadSocialAnalytics = async () => {
-      try {
-        setSocialLoading(true);
-        await new Promise((resolve) => setTimeout(resolve, 1200));
-
-        setSocialAnalytics([
-          {
-            platform: "Instagram",
-            percentage: "65%",
-            description: "Of your sales come from Instagram",
-            color: "text-pink-600",
-            imageSrc: "/instagram_logo.png",
-            stats: [
-              { label: "Link clicks", value: "245", progress: 65 },
-              { label: "Conversions", value: "32 (13%)", progress: 13 },
-            ],
-          },
-          {
-            platform: "Twitter",
-            percentage: "25%",
-            description: "Of your sales come from Twitter",
-            color: "text-blue-500",
-            imageSrc: "/twitter.png",
-            stats: [
-              { label: "Link clicks", value: "120", progress: 35 },
-              { label: "Conversions", value: "18 (15%)", progress: 15 },
-            ],
-          },
-          {
-            platform: "Facebook",
-            percentage: "10%",
-            description: "Of your sales come from Facebook",
-            color: "text-red-600",
-            imageSrc: "/facebook.png",
-            stats: [
-              { label: "Link clicks", value: "85", progress: 25 },
-              { label: "Conversions", value: "8 (9%)", progress: 9 },
-            ],
-          },
-          {
-            platform: "Whatsapp",
-            percentage: "15%",
-            description: "Of your sales come from your Whatsapp",
-            color: "text-purple-600",
-            imageSrc: "/whatsapp.png",
-            stats: [
-              { label: "Visits", value: "320", progress: 45 },
-              { label: "Conversions", value: "48 (15%)", progress: 15 },
-            ],
-          },
-        ]);
-
-        setSocialError(false);
-      } catch (err) {
-        setSocialError(true);
-      } finally {
-        setSocialLoading(false);
-      }
-    };
-
-    loadSocialAnalytics();
-  }, []);
 
   return (
     <TooltipProvider>
@@ -932,8 +943,7 @@ export default function PlugDashboard() {
                     Low Performers
                   </CardTitle>
                   <p className="text-xs text-muted-foreground">
-                    Under {Math.round(averageSales * 0.5)} units (needs
-                    attention)
+                    Under {Math.round(averageSales * 0.5)} units
                   </p>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
@@ -985,7 +995,6 @@ export default function PlugDashboard() {
           )}
         </section>
 
-        {/* Social Analytics */}
         <section className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <h2 className="text-sm sm:text-base font-semibold">
@@ -993,17 +1002,11 @@ export default function PlugDashboard() {
             </h2>
           </div>
 
-          {socialLoading ? (
+          {analyticsLoading ? (
             <SocialLoadingSkeleton />
-          ) : socialError ? (
-            <ErrorState
-              onRetry={() => {
-                setSocialError(false);
-                setSocialLoading(true);
-                setTimeout(() => setSocialLoading(false), 1000);
-              }}
-            />
-          ) : socialAnalytics.length === 0 ? (
+          ) : analyticsError ? (
+            <ErrorState onRetry={() => analyticsMutate()} />
+          ) : processAnalyticsData.length === 0 ? (
             <EmptyState
               message="No social analytics data"
               icon={Users}
@@ -1011,7 +1014,7 @@ export default function PlugDashboard() {
             />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              {socialAnalytics.map((platform) => {
+              {processAnalyticsData.map((platform) => {
                 return (
                   <Card key={platform.platform}>
                     <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
@@ -1029,7 +1032,9 @@ export default function PlugDashboard() {
                       </div>
                     </CardHeader>
                     <CardContent className="p-3 sm:p-4 pt-0">
-                      <div className="2xl font-bold">{platform.percentage}</div>
+                      <div className="text-xl font-bold">
+                        {platform.percentage}
+                      </div>
                       <p className="text-[10px] xs:text-xs text-muted-foreground">
                         {platform.description}
                       </p>
