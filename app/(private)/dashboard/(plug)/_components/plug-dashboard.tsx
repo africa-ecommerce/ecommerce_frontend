@@ -346,11 +346,8 @@ export default function PlugDashboard() {
 
     console.log("Processed analytics data:", data);
 
-    // Calculate total orders to determine sales percentage
-    const totalOrders = data.reduce(
-      (sum: number, item: any) => sum + (item.orders || 0),
-      0
-    );
+    const totalOrdersObj = analyticsData.find((item) => 'totalOrders' in item);
+    const totalOrders = totalOrdersObj?.totalOrders;
 
     // Filter out "store" platform from display
     const socialPlatforms = data.filter(
@@ -359,18 +356,18 @@ export default function PlugDashboard() {
 
     // Platform image mapping
     const platformImages: { [key: string]: string } = {
-      WhatsApp: "/whatsapp.png",
-      Instagram: "/instagram_logo.png",
-      Twitter: "/twitter.png",
-      Facebook: "/facebook.png",
+      whatsapp: "/whatsapp.png",
+      instagram: "/instagram_logo.png",
+      twitter: "/twitter.png",
+      facebook: "/facebook.png",
     };
 
     // Platform color mapping
     const platformColors: { [key: string]: string } = {
-      WhatsApp: "text-green-600",
-      Instagram: "text-pink-600",
-      Twitter: "text-blue-500",
-      Facebook: "text-blue-600",
+      whatsapp: "text-green-600",
+      instagram: "text-pink-600",
+      twitter: "text-blue-500",
+      facebook: "text-blue-600",
     };
 
     return socialPlatforms.map((item: any) => {
@@ -382,8 +379,8 @@ export default function PlugDashboard() {
         platform: platformName,
         percentage: `${salesPercentage}%`,
         description: `Of your sales come from ${platformName}`,
-        color: platformColors[platformName] || "text-gray-600",
-        imageSrc: platformImages[platformName] || "/placeholder.png",
+        color: platformColors[platformName.toLowerCase()] || "text-gray-600",
+        imageSrc: platformImages[platformName.toLowerCase()] || "/placeholder.png",
         stats: [
           {
             label: "Visits",

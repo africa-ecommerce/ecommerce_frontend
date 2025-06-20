@@ -109,7 +109,8 @@ export default function StorePage() {
     const storeData = analyticsData.find((item) => item.platform === "store");
 
     // Get total orders from the array property or fallback to 100
-    const totalOrders = analyticsData.totalOrders ?? 100;
+    const totalOrdersObj = analyticsData.find((item) => 'totalOrders' in item);
+    const totalOrders = totalOrdersObj?.totalOrders ?? 100;
 
     // Calculate store traffic percentage
     const storeOrders = storeData?.orders ?? 0;
