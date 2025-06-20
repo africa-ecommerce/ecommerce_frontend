@@ -512,7 +512,7 @@ function StoreView({
 
       {/* Activity and Actions - full width on mobile, columns on desktop */}
       <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+        {/* <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-lg sm:text-xl">
               Recent Activity
@@ -579,7 +579,7 @@ function StoreView({
               View all activity
             </Link>
           </CardFooter>
-        </Card>
+        </Card> */}
 
         <Card>
           <CardHeader>

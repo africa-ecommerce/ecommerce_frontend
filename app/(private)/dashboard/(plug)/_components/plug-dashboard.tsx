@@ -335,13 +335,13 @@ export default function PlugDashboard() {
 
 
   const processAnalyticsData = useMemo(() => {
-    if (!analyticsData?.data || !Array.isArray(analyticsData.data)) {
+    if (!analyticsData || !Array.isArray(analyticsData)) {
       return [];
     }
 
     console.log("analyticsData", analyticsData);
 
-    const data = analyticsData.data;
+    const data = analyticsData;
 
     console.log("Processed analytics data:", data);
 
