@@ -60,16 +60,7 @@ import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import { useSwrUser } from "@/hooks/use-current-user";
 import { clearThemeCustomizerData } from "@/lib/storage-helpers";
 
-interface AnalyticsData {
-  platform: string;
-  clicks: number;
-  orders: number;
-  conversionRate: number;
-}
 
-interface AnalyticsResponse extends Array<AnalyticsData> {
-  totalOrders?: number;
-}
 
 export default function StorePage() {
   const {
@@ -84,7 +75,7 @@ export default function StorePage() {
     error: analyticsError,
     isLoading: analyticsLoading,
     mutate: analyticsMutate,
-  } = useSWR<AnalyticsResponse>("/api/analytics/links", {
+  } = useSWR("/api/analytics/store", {
     refreshInterval: 300000, // Refresh every 5 minutes
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
@@ -95,7 +86,7 @@ export default function StorePage() {
 
   // Process analytics data
   const processedAnalytics = useMemo(() => {
-    if (!analyticsData || !Array.isArray(analyticsData)) {
+    if (!analyticsData ) {
       return {
         visits: 0,
         orders: 0,
@@ -105,27 +96,22 @@ export default function StorePage() {
       };
     }
 
-    // Find store platform data
-    const storeData = analyticsData.find((item) => item.platform === "store");
-
-    // Get total orders from the array property or fallback to 100
-    const totalOrdersObj = analyticsData.find((item) => 'totalOrders' in item);
-    const totalOrders: any = totalOrdersObj?.totalOrders ?? 100;
+   
 
     // Calculate store traffic percentage
-    const storeOrders = storeData?.orders ?? 0;
+    const storeOrders = analyticsData?.storeOrders ?? 0;
     const storeTrafficPercentage =
-      totalOrders > 0
-        ? `${Math.round((storeOrders / totalOrders) * 100)}%`
+      analyticsData.totalOrders > 0
+        ? `${Math.round((storeOrders / analyticsData.totalOrders) * 100)}%`
         : "0%";
 
 
     return {
-      visits: storeData?.clicks ?? 0,
-      orders: storeData?.orders ?? 0,
-      conversionRate: storeData?.conversionRate ?? 0,
+      visits: analyticsData?.visits ?? 0,
+      orders: storeOrders,
+      conversionRate: analyticsData?.conversionRate ?? 0,
       storeTrafficPercentage,
-      totalOrders,
+      totalOrders: analyticsData.totalOrders,
     };
   }, [analyticsData]);
 
