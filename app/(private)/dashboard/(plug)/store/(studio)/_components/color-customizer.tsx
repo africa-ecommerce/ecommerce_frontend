@@ -347,7 +347,7 @@ export default function ColorCustomizer({
               value="palettes"
               className="space-y-3 sm:space-y-4 pt-2 sm:pt-3"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {colorPalettes.map((palette, index) => (
                   <PaletteCard
                     key={index}
