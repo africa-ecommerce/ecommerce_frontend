@@ -46,8 +46,14 @@ import {
   getTotalStocks,
   truncateText,
 } from "@/lib/utils";
-import WithdrawalModal from "../../_components/withdrawal-modal";
+import dynamic from "next/dynamic";
 
+
+
+const WithdrawalModal = dynamic(() => import("../../_components/withdrawal-modal"), {
+  ssr: false,
+  loading: () => <div>Loading...</div>, // Optional loading component
+});
 function getProductPerformanceByAverage(productsArray: any) {
   const productsWithSales = productsArray.filter((product: any) => product.sold > 0);
 
