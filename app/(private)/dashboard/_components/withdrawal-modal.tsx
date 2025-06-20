@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import useSWR from "swr";
 import {
   Dialog,
   DialogContent,
@@ -44,48 +43,12 @@ interface WithdrawalModalProps {
   onClose: () => void;
 }
 
-// SWR fetcher function
-const fetcher = async (url: string) => {
-  const response = await fetch(url);
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to fetch");
-  }
-
-  if (url.includes("paystack.co/bank")) {
-    if (data.status && data.data) {
-      return data.data.filter((bank: Bank) => bank.active);
-    }
-    throw new Error("Failed to fetch banks");
-  }
-
-  return data;
-};
-
-// SWR configuration
-const swrOptions = {
-  revalidateOnFocus: false,
-  revalidateOnReconnect: true,
-  revalidateOnMount: true,
-  refreshInterval: 0,
-  dedupingInterval: 300000, // 5 minutes
-  errorRetryCount: 3,
-  errorRetryInterval: 1000,
-  shouldRetryOnError: (error: any) => {
-    return error.status !== 404 && error.status !== 403;
-  },
-  onError: (error: any) => {
-    console.error("SWR Error:", error);
-  },
-};
-
 export default function WithdrawalModal({
   isOpen,
   onClose,
 }: WithdrawalModalProps) {
-  const [mounted, setMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState<ModalStep>("banks");
+  const [banks, setBanks] = useState<Bank[]>([]);
   const [filteredBanks, setFilteredBanks] = useState<Bank[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
@@ -93,76 +56,58 @@ export default function WithdrawalModal({
   const [accountDetails, setAccountDetails] = useState<AccountDetails | null>(
     null
   );
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [loadingText, setLoadingText] = useState("");
-  const [shouldFetch, setShouldFetch] = useState(false);
 
-
-
+  // Fetch banks on modal open
   useEffect(() => {
-    if (mounted && isOpen) {
-      setShouldFetch(true);
+    if (isOpen && banks.length === 0) {
+      fetchBanks();
     }
-  }, [mounted, isOpen]);
-  
-
-  // Handle client-side mounting to prevent hydration issues
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Fetch banks using SWR - only when mounted and modal is open
-//   const {
-//     data: banks = [],
-//     error: banksError,
-//     isLoading: isBanksLoading,
-//     mutate: mutateBanks,
-//   } = useSWR(
-//     mounted && isOpen ? "https://api.paystack.co/bank" : null,
-//     fetcher,
-//     swrOptions
-//   );
-
-
-const {
-  data: banks = [],
-  error: banksError,
-  isLoading: isBanksLoading,
-  mutate: mutateBanks,
-} = useSWR(
-  shouldFetch ? "https://api.paystack.co/bank" : null,
-  fetcher,
-  swrOptions
-);
-
-
-useEffect(() => {
-  if (!isOpen) setShouldFetch(false);
-}, [isOpen]);
-  
+  }, [isOpen, banks.length]);
 
   // Filter banks based on search
   useEffect(() => {
-    if (!mounted || !banks.length) {
-      setFilteredBanks([]);
-      return;
-    }
-
     if (searchTerm.trim() === "") {
       setFilteredBanks(banks);
     } else {
-      const filtered = banks.filter((bank: Bank) =>
+      const filtered = banks.filter((bank) =>
         bank.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredBanks(filtered);
     }
-  }, [searchTerm, banks, mounted]);
+  }, [searchTerm, banks]);
+
+  const fetchBanks = async () => {
+    setIsLoading(true);
+    setLoadingText("Loading banks...");
+    setError("");
+
+    try {
+      const response = await fetch("https://api.paystack.co/bank");
+      const data = await response.json();
+
+      if (data.status && data.data) {
+        const activeBanks = data.data.filter((bank: Bank) => bank.active);
+        setBanks(activeBanks);
+        setFilteredBanks(activeBanks);
+      } else {
+        throw new Error("Failed to fetch banks");
+      }
+    } catch (err) {
+      setError("Failed to load banks. Please try again.");
+      console.error("Error fetching banks:", err);
+    } finally {
+      setIsLoading(false);
+      setLoadingText("");
+    }
+  };
 
   const resolveAccount = async () => {
     if (!selectedBank || !accountNumber.trim()) return;
 
-    setIsProcessing(true);
+    setIsLoading(true);
     setLoadingText("Verifying account...");
     setError("");
 
@@ -195,7 +140,7 @@ useEffect(() => {
         err.message || "Failed to verify account. Please check your details."
       );
     } finally {
-      setIsProcessing(false);
+      setIsLoading(false);
       setLoadingText("");
     }
   };
@@ -203,7 +148,7 @@ useEffect(() => {
   const processWithdrawal = async () => {
     if (!accountDetails) return;
 
-    setIsProcessing(true);
+    setIsLoading(true);
     setLoadingText("Processing withdrawal...");
     setError("");
 
@@ -231,7 +176,7 @@ useEffect(() => {
       setError(err.message || "Withdrawal failed. Please try again.");
       setCurrentStep("error");
     } finally {
-      setIsProcessing(false);
+      setIsLoading(false);
       setLoadingText("");
     }
   };
@@ -243,7 +188,7 @@ useEffect(() => {
     setAccountDetails(null);
     setSearchTerm("");
     setError("");
-    setIsProcessing(false);
+    setIsLoading(false);
     setLoadingText("");
   };
 
@@ -288,10 +233,6 @@ useEffect(() => {
     }
   };
 
-  const retryFetchBanks = () => {
-    mutateBanks();
-  };
-
   const renderBanksList = () => (
     <div className="space-y-3 sm:space-y-4">
       <div className="relative">
@@ -304,39 +245,22 @@ useEffect(() => {
         />
       </div>
 
-      {isBanksLoading ? (
+      {isLoading ? (
         <div className="flex items-center justify-center py-6 sm:py-8">
           <div className="text-center space-y-3">
             <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin mx-auto text-primary" />
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Loading banks...
+              {loadingText}
             </p>
-          </div>
-        </div>
-      ) : banksError ? (
-        <div className="text-center py-6 sm:py-8 space-y-4">
-          <AlertCircle className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto" />
-          <div className="space-y-2">
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Failed to load banks
-            </p>
-            <Button
-              onClick={retryFetchBanks}
-              variant="outline"
-              size="sm"
-              className="text-xs sm:text-sm"
-            >
-              Try Again
-            </Button>
           </div>
         </div>
       ) : (
-        <div className="max-h-64 sm:max-h-80 overflow-y-auto space-y-2 no-scrollbar">
+        <div className="max-h-[250px] sm:max-h-[320px] overflow-y-auto space-y-2 no-scrollbar">
           {filteredBanks.map((bank) => (
             <button
               key={bank.id}
               onClick={() => handleBankSelect(bank)}
-              className="w-full p-3 sm:p-4 text-left border rounded-lg hover:bg-accent hover:border-primary transition-all duration-200 group touch-manipulation"
+              className="w-full p-3 sm:p-4 text-left border rounded-lg hover:bg-accent hover:border-primary transition-all duration-200 group active:scale-[0.98]"
             >
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors flex-shrink-0">
@@ -346,7 +270,7 @@ useEffect(() => {
                   <p className="font-medium text-xs sm:text-sm truncate">
                     {bank.name}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
                     Code: {bank.code}
                   </p>
                 </div>
@@ -354,7 +278,7 @@ useEffect(() => {
             </button>
           ))}
 
-          {filteredBanks.length === 0 && !isBanksLoading && (
+          {filteredBanks.length === 0 && !isLoading && (
             <div className="text-center py-6 sm:py-8">
               <Building2 className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3" />
               <p className="text-sm sm:text-base text-muted-foreground">
@@ -381,7 +305,7 @@ useEffect(() => {
             <p className="font-medium text-xs sm:text-sm truncate">
               {selectedBank?.name}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               Code: {selectedBank?.code}
             </p>
           </div>
@@ -389,7 +313,7 @@ useEffect(() => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="account-number" className="text-sm sm:text-base">
+        <Label htmlFor="account-number" className="text-sm">
           Account Number
         </Label>
         <Input
@@ -402,24 +326,25 @@ useEffect(() => {
           maxLength={10}
           className="text-center text-base sm:text-lg tracking-wider h-11 sm:h-12"
           inputMode="numeric"
+          pattern="[0-9]*"
         />
-        <p className="text-xs text-muted-foreground text-center">
+        <p className="text-[10px] sm:text-xs text-muted-foreground text-center">
           Enter your 10-digit account number
         </p>
       </div>
 
       <Button
         onClick={resolveAccount}
-        disabled={accountNumber.length !== 10 || isProcessing}
-        className="w-full h-10 sm:h-11 text-sm sm:text-base"
+        disabled={accountNumber.length !== 10 || isLoading}
+        className="w-full h-10 sm:h-11"
       >
-        {isProcessing ? (
+        {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            {loadingText}
+            <span className="text-sm">{loadingText}</span>
           </>
         ) : (
-          "Verify Account"
+          <span className="text-sm">Verify Account</span>
         )}
       </Button>
     </div>
@@ -434,7 +359,7 @@ useEffect(() => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-medium text-xs sm:text-sm">Account Verified</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               Ready for withdrawal
             </p>
           </div>
@@ -467,17 +392,17 @@ useEffect(() => {
 
       <Button
         onClick={processWithdrawal}
-        disabled={isProcessing}
-        className="w-full h-10 sm:h-12 text-sm sm:text-base"
+        disabled={isLoading}
+        className="w-full h-11 sm:h-12"
         size="lg"
       >
-        {isProcessing ? (
+        {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            {loadingText}
+            <span className="text-sm">{loadingText}</span>
           </>
         ) : (
-          "Withdraw Funds"
+          <span className="text-sm">Withdraw Funds</span>
         )}
       </Button>
     </div>
@@ -517,12 +442,8 @@ useEffect(() => {
         </div>
       </div>
 
-      <Button
-        onClick={handleClose}
-        className="w-full h-10 sm:h-12 text-sm sm:text-base"
-        size="lg"
-      >
-        Done
+      <Button onClick={handleClose} className="w-full h-10 sm:h-11" size="lg">
+        <span className="text-sm">Done</span>
       </Button>
     </div>
   );
@@ -546,39 +467,36 @@ useEffect(() => {
         <Button
           onClick={handleBack}
           variant="outline"
-          className="w-full h-10 sm:h-11 text-sm sm:text-base"
+          className="w-full h-10 sm:h-11"
         >
-          Try Again
+          <span className="text-sm">Try Again</span>
         </Button>
-        <Button
-          onClick={handleClose}
-          className="w-full h-10 sm:h-11 text-sm sm:text-base"
-        >
-          Close
+        <Button onClick={handleClose} className="w-full h-10 sm:h-11">
+          <span className="text-sm">Close</span>
         </Button>
       </div>
     </div>
   );
 
-  // Don't render anything until mounted to prevent hydration issues
-  if (!mounted || !isOpen) return null;
-
-
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent
         className="
-        fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]
-        w-[calc(100vw-2rem)] max-w-md
-        max-h-[calc(100vh-2rem)] 
-        mx-4 my-4 
+        w-[calc(100vw-2rem)] max-w-[420px] 
+        mx-auto my-0
+        h-auto max-h-[90vh] min-h-[400px]
+        p-0
+        fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+        flex flex-col
         overflow-hidden
-        sm:w-full sm:mx-0 sm:my-0
-        rounded-lg
+        rounded-lg sm:rounded-xl
+        shadow-2xl
+        border
+        bg-background
       "
       >
-        <DialogHeader className="space-y-2 sm:space-y-3 px-1">
-          <div className="flex items-center space-x-2 sm:space-x-3">
+        <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 border-b flex-shrink-0">
+          <div className="flex items-center space-x-3">
             {(currentStep === "account" ||
               currentStep === "confirm" ||
               currentStep === "error") && (
@@ -586,19 +504,19 @@ useEffect(() => {
                 variant="ghost"
                 size="sm"
                 onClick={handleBack}
-                className="p-1 h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 touch-manipulation"
+                className="p-1 h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0"
               >
                 <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               </Button>
             )}
-            <DialogTitle className="text-base sm:text-lg font-semibold truncate">
+            <DialogTitle className="text-sm sm:text-lg font-semibold truncate">
               {getStepTitle()}
             </DialogTitle>
           </div>
 
           {/* Progress indicator */}
           {currentStep !== "success" && currentStep !== "error" && (
-            <div className="flex space-x-1 sm:space-x-2">
+            <div className="flex space-x-2 mt-3">
               <div
                 className={`h-1 flex-1 rounded-full transition-colors ${
                   currentStep === "banks" ? "bg-primary" : "bg-primary/30"
@@ -618,9 +536,9 @@ useEffect(() => {
           )}
         </DialogHeader>
 
-        <div className="overflow-y-auto max-h-[calc(100vh-8rem)] sm:max-h-[60vh] no-scrollbar px-1">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 min-h-0">
           {error && (
-            <Alert className="mb-3 sm:mb-4 animate-slide-up">
+            <Alert className="mb-4 animate-slide-up">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="text-xs sm:text-sm">
                 {error}
