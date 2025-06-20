@@ -110,7 +110,7 @@ export default function StorePage() {
 
     // Get total orders from the array property or fallback to 100
     const totalOrdersObj = analyticsData.find((item) => 'totalOrders' in item);
-    const totalOrders = totalOrdersObj?.totalOrders ?? 100;
+    const totalOrders: any = totalOrdersObj?.totalOrders ?? 100;
 
     // Calculate store traffic percentage
     const storeOrders = storeData?.orders ?? 0;
@@ -118,6 +118,7 @@ export default function StorePage() {
       totalOrders > 0
         ? `${Math.round((storeOrders / totalOrders) * 100)}%`
         : "0%";
+
 
     return {
       visits: storeData?.clicks ?? 0,
