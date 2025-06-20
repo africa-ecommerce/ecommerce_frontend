@@ -84,6 +84,7 @@ export default function WithdrawalModal({
   isOpen,
   onClose,
 }: WithdrawalModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState<ModalStep>("banks");
   const [filteredBanks, setFilteredBanks] = useState<Bank[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -96,21 +97,26 @@ export default function WithdrawalModal({
   const [error, setError] = useState("");
   const [loadingText, setLoadingText] = useState("");
 
-  // Fetch banks using SWR
+  // Handle client-side mounting to prevent hydration issues
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Fetch banks using SWR - only when mounted and modal is open
   const {
     data: banks = [],
     error: banksError,
     isLoading: isBanksLoading,
     mutate: mutateBanks,
   } = useSWR(
-    isOpen ? "https://api.paystack.co/bank" : null,
+    mounted && isOpen ? "https://api.paystack.co/bank" : null,
     fetcher,
     swrOptions
   );
 
   // Filter banks based on search
   useEffect(() => {
-    if (!banks.length) {
+    if (!mounted || !banks.length) {
       setFilteredBanks([]);
       return;
     }
@@ -123,7 +129,7 @@ export default function WithdrawalModal({
       );
       setFilteredBanks(filtered);
     }
-  }, [searchTerm, banks]);
+  }, [searchTerm, banks, mounted]);
 
   const resolveAccount = async () => {
     if (!selectedBank || !accountNumber.trim()) return;
@@ -525,6 +531,11 @@ export default function WithdrawalModal({
       </div>
     </div>
   );
+
+  // Don't render anything until mounted to prevent hydration issues
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
