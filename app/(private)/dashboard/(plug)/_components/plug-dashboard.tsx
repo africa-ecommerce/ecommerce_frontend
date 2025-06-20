@@ -339,7 +339,11 @@ export default function PlugDashboard() {
       return [];
     }
 
+    console.log("analyticsData", analyticsData);
+
     const data = analyticsData.data;
+
+    console.log("Processed analytics data:", data);
 
     // Calculate total orders to determine sales percentage
     const totalOrders = data.reduce(
