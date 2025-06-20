@@ -303,15 +303,7 @@ export default function CheckoutPage() {
     }
   }, [logisticsPricingData, logisticsPricingError, updateDeliveryFee]);
 
-  // Helper function to calculate supplier amount
-  const calculateSupplierAmount = () => {
-    if (!orderSummaries.length) return 0;
 
-    return orderSummaries.reduce((total, summary) => {
-      const originalPrice = summary.item.originalPrice || summary.item.price;
-      return total + originalPrice * summary.item.quantity;
-    }, 0);
-  };
 
   const formatOrderItems = () => {
     if (!orderSummaries.length) return [];
@@ -319,6 +311,11 @@ export default function CheckoutPage() {
     return orderSummaries.flatMap((summary) => ({
       productId: summary.item.id,
       quantity: summary.item.quantity,
+      supplierPrice: summary.item.originalPrice, 
+      plugPrice: summary.item.price,
+      productName: summary.item.name,
+      supplierId: summary.item.supplierId,
+
 
       ...(summary.item.variationId && {
         variantId: summary.item.variationId,
@@ -337,8 +334,7 @@ export default function CheckoutPage() {
     paymentMethod: string,
     paymentReference?: string
   ) => {
-    const supplierAmount = calculateSupplierAmount();
-    const plugAmount = subtotal! - supplierAmount;
+   
 
     const orderData = {
       // Buyer information
@@ -352,19 +348,12 @@ export default function CheckoutPage() {
       buyerInstructions: checkoutData.deliveryInstructions || "",
       buyerLatitude: buyerCoordinates.latitude,
       buyerLongitude: buyerCoordinates.longitude,
-
-      // Supplier information
-      supplierId: orderSummaries[0]?.item?.supplierId || "",
-
-      // Order details
       paymentMethod: paymentMethod,
       totalAmount: total,
       deliveryFee: deliveryFee,
-      supplierAmount: supplierAmount,
-      plugAmount: plugAmount,
-      plugPrice: orderSummaries[0]?.item?.price, 
-      supplierPrice: orderSummaries[0]?.item?.originalPrice, 
-      plugId: orderSummaries[0]?.referralId || "",
+      platform: orderSummaries[0]?.platform || platform,
+      subdomain: orderSummaries[0].platform === "store" && orderSummaries[0].referralId || "",
+      plugId: orderSummaries[0]?.platform !== "store" && orderSummaries[0]?.referralId || "",
       orderItems: formatOrderItems(),
 
       // Payment reference for online payments
