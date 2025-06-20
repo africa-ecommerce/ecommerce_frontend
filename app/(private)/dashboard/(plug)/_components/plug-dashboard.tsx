@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import {  useMemo } from "react";
+import {  useMemo, useState } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -46,6 +46,7 @@ import {
   getTotalStocks,
   truncateText,
 } from "@/lib/utils";
+import WithdrawalModal from "../../_components/withdrawal-modal";
 
 function getProductPerformanceByAverage(productsArray: any) {
   const productsWithSales = productsArray.filter((product: any) => product.sold > 0);
@@ -280,6 +281,8 @@ const WelcomeSkeleton = () => (
 );
 
 export default function PlugDashboard() {
+
+  const [isModalOpen, setIsModalOpen] = useState(false)
   
 
   const {
@@ -689,6 +692,7 @@ export default function PlugDashboard() {
                     variant="outline"
                     size="sm"
                     className="w-full mt-1 h-6 text-xs"
+                    onClick={() => setIsModalOpen(true)}
                   >
                     <Wallet className="h-2.5 w-2.5 mr-1" /> Withdraw
                   </Button>
@@ -1045,7 +1049,6 @@ export default function PlugDashboard() {
                               <span>{stat.label}</span>
                               <span className="font-medium">{stat.value}</span>
                             </div>
-                            
                           </div>
                         ))}
                       </div>
@@ -1075,6 +1078,8 @@ export default function PlugDashboard() {
             </CardContent>
           </Card>
         )}
+
+<WithdrawalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       </div>
     </TooltipProvider>
   );
