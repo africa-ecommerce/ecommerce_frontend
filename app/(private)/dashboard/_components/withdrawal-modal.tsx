@@ -96,6 +96,16 @@ export default function WithdrawalModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
   const [loadingText, setLoadingText] = useState("");
+  const [shouldFetch, setShouldFetch] = useState(false);
+
+
+
+  useEffect(() => {
+    if (mounted && isOpen) {
+      setShouldFetch(true);
+    }
+  }, [mounted, isOpen]);
+  
 
   // Handle client-side mounting to prevent hydration issues
   useEffect(() => {
@@ -103,16 +113,34 @@ export default function WithdrawalModal({
   }, []);
 
   // Fetch banks using SWR - only when mounted and modal is open
-  const {
-    data: banks = [],
-    error: banksError,
-    isLoading: isBanksLoading,
-    mutate: mutateBanks,
-  } = useSWR(
-    mounted && isOpen ? "https://api.paystack.co/bank" : null,
-    fetcher,
-    swrOptions
-  );
+//   const {
+//     data: banks = [],
+//     error: banksError,
+//     isLoading: isBanksLoading,
+//     mutate: mutateBanks,
+//   } = useSWR(
+//     mounted && isOpen ? "https://api.paystack.co/bank" : null,
+//     fetcher,
+//     swrOptions
+//   );
+
+
+const {
+  data: banks = [],
+  error: banksError,
+  isLoading: isBanksLoading,
+  mutate: mutateBanks,
+} = useSWR(
+  shouldFetch ? "https://api.paystack.co/bank" : null,
+  fetcher,
+  swrOptions
+);
+
+
+useEffect(() => {
+  if (!isOpen) setShouldFetch(false);
+}, [isOpen]);
+  
 
   // Filter banks based on search
   useEffect(() => {
