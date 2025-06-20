@@ -399,6 +399,7 @@ export default function CheckoutPage() {
       if (result.data) {
         sessionStorage.setItem("orderSuccess", JSON.stringify(result.data));
       }
+      console.log("data", result.data)
 
       // Clear all checkout data and order summary
       clearCheckoutData();
