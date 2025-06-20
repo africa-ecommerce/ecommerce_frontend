@@ -481,31 +481,7 @@ export default function CheckoutPage() {
     }
   }, [platform, productsData, isProductsLoading, ref, setOrderSummaries]);
 
-  // Effect to log data for debugging
-  useEffect(() => {
-    if (platform === "store") {
-     
-
-      if (productFetchError) {
-        console.error(
-          "Store platform - Product fetch error:",
-          productFetchError
-        );
-      }
-    } else {
-      // For non-store platforms, data is already fetched from Zustand
-      if (orderSummaries) {
-        console.log("Non-store platform - Using Zustand data:", orderSummaries);
-      }
-    }
-  }, [
-    platform,
-    parsedUrl,
-    productsData,
-    orderSummaries,
-    cartItems,
-    productFetchError,
-  ]);
+ 
 
   // Calculate delivery fee based on method and logistics pricing
   const getDeliveryFee = () => {

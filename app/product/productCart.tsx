@@ -123,6 +123,8 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
 
   const productData: ProductData = data?.data || null;
 
+  console.log("productData", productData)
+
 
   // Handle variations logic
   const hasVariations =
@@ -261,9 +263,7 @@ useEffect(() => {
     currentProductId &&
     orderSummaries.some((order) => order.item.id !== currentProductId)
   ) {
-    console.log("currentProductId", currentProductId);
-    console.log("orderSummaries first item id", orderSummaries[0]?.item.id);
-    console.log("cleared - product changed");
+    
     clearOrderSummaries();
   }
 
