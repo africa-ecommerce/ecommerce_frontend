@@ -561,9 +561,8 @@ useEffect(() => {
   );
 
   // Don't render anything until mounted to prevent hydration issues
-  if (!mounted) {
-    return null;
-  }
+  if (!mounted || !isOpen) return null;
+
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
