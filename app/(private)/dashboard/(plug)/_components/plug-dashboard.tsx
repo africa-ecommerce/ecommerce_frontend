@@ -334,6 +334,73 @@ export default function PlugDashboard() {
   const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];
 
 
+  // const processAnalyticsData = useMemo(() => {
+  //   if (!analyticsData || !Array.isArray(analyticsData)) {
+  //     return [];
+  //   }
+
+  //   console.log("analyticsData", analyticsData);
+
+  //   const data = analyticsData;
+
+  //   console.log("Processed analytics data:", data);
+
+  //   // Calculate total orders to determine sales percentage
+  //   const totalOrders = data.reduce(
+  //     (sum: number, item: any) => sum + (item.orders || 0),
+  //     0
+  //   );
+
+  //   // Platform image mapping
+  //   const platformImages: { [key: string]: string } = {
+  //     WhatsApp: "/whatsapp.png",
+  //     Instagram: "/instagram_logo.png",
+  //     Twitter: "/twitter.png",
+  //     Facebook: "/facebook.png",
+     
+  //   };
+
+  //   // Platform color mapping
+  //   const platformColors: { [key: string]: string } = {
+  //     WhatsApp: "text-green-600",
+  //     Instagram: "text-pink-600",
+  //     Twitter: "text-blue-500",
+  //     Facebook: "text-blue-600",
+      
+  //   };
+
+  //   return data.map((item: any) => {
+  //     const platformName = item.platform;
+  //     const salesPercentage =
+  //       totalOrders > 0 ? Math.round((item.orders / totalOrders) * 100) : 0;
+
+  //     return {
+  //       platform: platformName,
+  //       percentage: `${salesPercentage}%`,
+  //       description: `Of your sales come from ${platformName}`,
+  //       color: platformColors[platformName] || "text-gray-600",
+  //       imageSrc: platformImages[platformName] || "/placeholder.png",
+  //       stats: [
+  //         {
+  //           label: "Visits",
+  //           value: item.clicks.toString(),
+  //           progress:
+  //             Math.min(
+  //               (item.clicks / Math.max(...data.map((d: any) => d.clicks))) *
+  //                 100,
+  //               100
+  //             ) || 0,
+  //         },
+  //         {
+  //           label: "Conversions",
+  //           value: `${item.orders} (${item.conversionRate}%)`,
+  //           progress: item.conversionRate || 0,
+  //         },
+  //       ],
+  //     };
+  //   });
+  // }, [analyticsData]);
+
   const processAnalyticsData = useMemo(() => {
     if (!analyticsData || !Array.isArray(analyticsData)) {
       return [];
@@ -351,13 +418,17 @@ export default function PlugDashboard() {
       0
     );
 
+    // Filter out "store" platform from display
+    const socialPlatforms = data.filter(
+      (item: any) => item.platform && item.platform.toLowerCase() !== "store"
+    );
+
     // Platform image mapping
     const platformImages: { [key: string]: string } = {
       WhatsApp: "/whatsapp.png",
       Instagram: "/instagram_logo.png",
       Twitter: "/twitter.png",
       Facebook: "/facebook.png",
-      facebook: "/facebook.png", // Handle both cases
     };
 
     // Platform color mapping
@@ -366,10 +437,9 @@ export default function PlugDashboard() {
       Instagram: "text-pink-600",
       Twitter: "text-blue-500",
       Facebook: "text-blue-600",
-      facebook: "text-blue-600", // Handle both cases
     };
 
-    return data.map((item: any) => {
+    return socialPlatforms.map((item: any) => {
       const platformName = item.platform;
       const salesPercentage =
         totalOrders > 0 ? Math.round((item.orders / totalOrders) * 100) : 0;
@@ -386,7 +456,8 @@ export default function PlugDashboard() {
             value: item.clicks.toString(),
             progress:
               Math.min(
-                (item.clicks / Math.max(...data.map((d: any) => d.clicks))) *
+                (item.clicks /
+                  Math.max(...socialPlatforms.map((d: any) => d.clicks))) *
                   100,
                 100
               ) || 0,
@@ -400,7 +471,7 @@ export default function PlugDashboard() {
       };
     });
   }, [analyticsData]);
-
+  
   const { topProducts, bottomProducts, averageProducts, averageSales } =
     getProductPerformanceByAverage(products);
 
@@ -1027,7 +1098,7 @@ export default function PlugDashboard() {
                           Platform Traffic
                         </CardTitle>
                         <Image
-                          src={platform.imageSrc || "/placeholder.svg"}
+                          src={platform.imageSrc}
                           alt={`${platform.platform} logo`}
                           width={16}
                           height={16}
