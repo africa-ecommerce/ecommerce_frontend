@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { PRODUCT_CATEGORIES } from "@/app/constant";
-import { Filter, Star } from "lucide-react";
+import { Filter } from "lucide-react";
 import { ProductsFilter } from "@/hooks/use-products";
 import { useState, useEffect } from "react";
 
@@ -22,7 +22,6 @@ interface FilterSheetProps {
   filters: ProductsFilter;
   onPriceChange: (value: [number, number]) => void;
   onToggleCategory: (category: string) => void;
-  onToggleRating: (rating: number) => void;
   onResetFilters: () => void;
   onApplyFilters: () => void;
 }
@@ -33,7 +32,6 @@ export const FilterSheet = ({
   filters,
   onPriceChange,
   onToggleCategory,
-  onToggleRating,
   onResetFilters,
   onApplyFilters,
 }: FilterSheetProps) => {
@@ -194,7 +192,7 @@ export const FilterSheet = ({
 
           <Separator />
 
-          {/* Ratings Filter */}
+          {/* Ratings Filter
           <div>
             <h3 className="text-sm font-medium mb-3">Minimum Rating</h3>
             <div className="space-y-2">
@@ -224,7 +222,7 @@ export const FilterSheet = ({
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
 
           <Separator />
 

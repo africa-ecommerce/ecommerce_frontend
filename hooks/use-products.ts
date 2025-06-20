@@ -19,13 +19,10 @@ export interface ProductsFilter {
   search: string;
   priceRange: [number, number];
   selectedCategories: string[];
-  selectedRatings: number[];
-  // sortBy?: string;
   order?: "asc" | "desc";
-  // businessType?: string;
   createdAfter?: Date;
   createdBefore?: Date;
-  // tags?: string;
+  
 }
 
 export function useProducts(filters: ProductsFilter, limit: number = 4) {
@@ -38,7 +35,6 @@ export function useProducts(filters: ProductsFilter, limit: number = 4) {
       search: debouncedSearch,
       priceRange: filters.priceRange,
       selectedCategories: [...filters.selectedCategories].sort(),
-      selectedRatings: [...filters.selectedRatings].sort(),
 
       order: filters.order,
 
@@ -49,7 +45,6 @@ export function useProducts(filters: ProductsFilter, limit: number = 4) {
     debouncedSearch,
     filters.priceRange,
     filters.selectedCategories,
-    filters.selectedRatings,
 
     filters.order,
 
@@ -106,11 +101,7 @@ export function useProducts(filters: ProductsFilter, limit: number = 4) {
       params.category = filters.selectedCategories.join(",");
     }
 
-    // Add rating filter (lowest selected rating)
-    if (filters.selectedRatings.length > 0) {
-      params.rating = Math.min(...filters.selectedRatings);
-    }
-
+   
     // Build the URL with query parameters
     const queryString = Object.entries(params)
       .filter(
