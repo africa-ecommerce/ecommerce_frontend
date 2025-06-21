@@ -1611,6 +1611,193 @@
 //   }
 // }
 
+
+
+
+
+
+// import {
+//   createCanvas,
+//   loadImage,
+//   CanvasRenderingContext2D as NodeCanvasRenderingContext2D,
+// } from "canvas";
+// import { registerFont } from "canvas";
+// import path from "path";
+
+// // Register Inter font
+// registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Regular.ttf"), {
+//   family: "Inter",
+//   weight: "normal",
+// });
+
+// registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Bold.ttf"), {
+//   family: "Inter",
+//   weight: "bold",
+// });
+
+// export async function createMagazineStyleCard({
+//   primaryImageUrl,
+//   secondaryImageUrl,
+//   productName,
+//   productPrice,
+//   name,
+//   dimensions = { width: 1200, height: 630 },
+// }: any) {
+//   // Canvas dimensions
+//   const width = dimensions.width;
+//   const height = dimensions.height;
+
+//   // Create canvas
+//   const canvas = createCanvas(width, height);
+//   const ctx = canvas.getContext("2d");
+
+//   try {
+//     // Load images
+//     const [primaryImage, secondaryImage] = await Promise.all([
+//       loadImage(primaryImageUrl),
+//       loadImage(secondaryImageUrl),
+//     ]);
+
+//     // Draw primary image as full background
+//     // Scale to cover entire canvas while maintaining aspect ratio
+//     const scaleX = width / primaryImage.width;
+//     const scaleY = height / primaryImage.height;
+//     const scale = Math.max(scaleX, scaleY); // Use max to cover entire canvas
+
+//     const scaledWidth = primaryImage.width * scale;
+//     const scaledHeight = primaryImage.height * scale;
+
+//     // Center the image
+//     const offsetX = (width - scaledWidth) / 2;
+//     const offsetY = (height - scaledHeight) / 2;
+
+//     ctx.drawImage(primaryImage, offsetX, offsetY, scaledWidth, scaledHeight);
+
+//     // Add golden overlay with opacity to match the text color
+//     ctx.fillStyle = "rgba(212, 175, 55, 0.3)"; // Golden overlay with 30% opacity
+//     ctx.fillRect(0, 0, width, height);
+
+//     // Draw "INSPIRE" text (large, top) - scaled for OG dimensions
+//     const titleFontSize = Math.min(height * 0.15, 90); // Responsive font size
+//     ctx.font = `bold ${titleFontSize}px Inter`;
+//     ctx.fillStyle = "#D4AF37"; // Golden color
+//     ctx.textAlign = "left";
+//     ctx.fillText("INSPIRE", 50, titleFontSize + 20);
+
+//     // Draw "BY PLUGGN" text (smaller, right aligned)
+//     const subtitleFontSize = Math.min(height * 0.04, 24);
+//     ctx.font = `${subtitleFontSize}px Inter`;
+//     ctx.fillStyle = "#D4AF37";
+//     ctx.textAlign = "right";
+//     ctx.fillText("BY PLUGGN", width - 60, titleFontSize + 40);
+
+//     // Draw "NEW" badge - scaled
+//     const badgeWidth = 80;
+//     const badgeHeight = 30;
+//     ctx.fillStyle = "#D4AF37";
+//     ctx.fillRect(50, titleFontSize + 50, badgeWidth, badgeHeight);
+//     ctx.font = `bold ${Math.min(height * 0.03, 16)}px Inter`;
+//     ctx.fillStyle = "#000000";
+//     ctx.textAlign = "center";
+//     ctx.fillText("NEW", 50 + badgeWidth / 2, titleFontSize + 70);
+
+//     // Draw "ELEVAT YOUR LOOK" text (left side, outlined) - positioned for OG layout
+//     const elevateFontSize = Math.min(height * 0.12, 54); // Responsive font size
+//     ctx.font = `bold ${elevateFontSize}px Inter`;
+//     ctx.textAlign = "left";
+
+//     // Create outlined text effect
+//     const elevateTexts = ["ELEVAT", "YOUR", "LOOK"];
+//     let yOffset = height * 0.45; // Start at 45% of height
+
+//     elevateTexts.forEach((text, index) => {
+//       // Text outline
+//       ctx.strokeStyle = "#D4AF37";
+//       ctx.lineWidth = 2;
+//       ctx.strokeText(text, 50, yOffset + index * elevateFontSize * 1.1);
+
+//       // Text fill (semi-transparent)
+//       ctx.fillStyle = "rgba(212, 175, 55, 0.1)";
+//       ctx.fillText(text, 50, yOffset + index * elevateFontSize * 1.1);
+//     });
+
+//     // Draw product name - positioned at bottom
+//     const productNameY = height - 120;
+//     ctx.font = `bold ${Math.min(height * 0.045, 24)}px Inter`;
+//     ctx.fillStyle = "#D4AF37";
+//     ctx.textAlign = "left";
+//     ctx.fillText(productName.toUpperCase(), 50, productNameY);
+
+//     // Draw product price
+//     ctx.font = `${Math.min(height * 0.035, 20)}px Inter`;
+//     ctx.fillStyle = "#FFFFFF";
+//     ctx.fillText(`₦${productPrice.toLocaleString()}`, 50, productNameY + 30);
+
+//     // Draw secondary image (profile picture) - circular, positioned for OG layout
+//     const profileSize = Math.min(height * 0.12, 60); // Responsive profile size
+//     const profileX = width - 80;
+//     const profileY = height - 80;
+
+//     // Create circular clipping path
+//     ctx.save();
+//     ctx.beginPath();
+//     ctx.arc(profileX, profileY, profileSize / 2, 0, Math.PI * 2);
+//     ctx.clip();
+
+//     // Draw secondary image
+//     ctx.drawImage(
+//       secondaryImage,
+//       profileX - profileSize / 2,
+//       profileY - profileSize / 2,
+//       profileSize,
+//       profileSize
+//     );
+//     ctx.restore();
+
+//     // Add border around profile image
+//     ctx.beginPath();
+//     ctx.arc(profileX, profileY, profileSize / 2 + 2, 0, Math.PI * 2);
+//     ctx.strokeStyle = "#D4AF37";
+//     ctx.lineWidth = 2;
+//     ctx.stroke();
+
+//     // Draw name under profile image
+//     ctx.font = `${Math.min(height * 0.025, 14)}px Inter`;
+//     ctx.fillStyle = "#FFFFFF";
+//     ctx.textAlign = "center";
+//     ctx.fillText(name, profileX, profileY + profileSize / 2 + 20);
+
+//     // Draw "VERSION 1.0" text
+//     ctx.font = `${Math.min(height * 0.02, 12)}px Inter`;
+//     ctx.fillStyle = "#888888";
+//     ctx.fillText("VERSION 1.0", profileX, height - 20);
+
+//     // Add some decorative elements
+//     ctx.strokeStyle = "#D4AF37";
+//     ctx.lineWidth = 2;
+//     ctx.beginPath();
+//     ctx.moveTo(50, titleFontSize + 100);
+//     ctx.lineTo(200, titleFontSize + 100);
+//     ctx.stroke();
+
+//     // Remove grid pattern overlay since we have the product image as background
+
+//     // Return processed image buffer
+//     const processedImageBuffer = canvas.toBuffer("image/png");
+//     return {
+//       success: true,
+//       processedImage: processedImageBuffer,
+//     };
+//   } catch (error) {
+//     console.error("Error creating magazine style card:", error);
+//     throw error;
+//   }
+// }
+
+
+
+
+
 import {
   createCanvas,
   loadImage,
@@ -1630,6 +1817,11 @@ registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Bold.ttf"), {
   weight: "bold",
 });
 
+registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Medium.ttf"), {
+  family: "Inter",
+  weight: "500",
+});
+
 export async function createMagazineStyleCard({
   primaryImageUrl,
   secondaryImageUrl,
@@ -1638,13 +1830,23 @@ export async function createMagazineStyleCard({
   name,
   dimensions = { width: 1200, height: 630 },
 }: any) {
-  // Canvas dimensions
+  // Use 2x scale for high DPI rendering
+  const scale = 2;
   const width = dimensions.width;
   const height = dimensions.height;
 
-  // Create canvas
-  const canvas = createCanvas(width, height);
+  // Create high-resolution canvas
+  const canvas = createCanvas(width * scale, height * scale);
   const ctx = canvas.getContext("2d");
+
+  // Scale context for high DPI
+  ctx.scale(scale, scale);
+
+  // Enable high-quality rendering
+  ctx.imageSmoothingEnabled = true;
+  ctx.quality = "best";
+  ctx.patternQuality = "best";
+  ctx.textDrawingMode = "path";
 
   try {
     // Load images
@@ -1653,87 +1855,253 @@ export async function createMagazineStyleCard({
       loadImage(secondaryImageUrl),
     ]);
 
-    // Draw primary image as full background
-    // Scale to cover entire canvas while maintaining aspect ratio
-    const scaleX = width / primaryImage.width;
-    const scaleY = height / primaryImage.height;
-    const scale = Math.max(scaleX, scaleY); // Use max to cover entire canvas
+    // Calculate optimal image placement to avoid cropping
+    const imageAspectRatio = primaryImage.width / primaryImage.height;
+    const canvasAspectRatio = width / height;
 
-    const scaledWidth = primaryImage.width * scale;
-    const scaledHeight = primaryImage.height * scale;
+    let imageWidth, imageHeight, imageX, imageY;
 
-    // Center the image
-    const offsetX = (width - scaledWidth) / 2;
-    const offsetY = (height - scaledHeight) / 2;
+    if (imageAspectRatio > canvasAspectRatio) {
+      // Image is wider - fit to height
+      imageHeight = height * 0.85; // Leave space for text overlay
+      imageWidth = imageHeight * imageAspectRatio;
+      imageX = (width - imageWidth) / 2;
+      imageY = height * 0.075; // Top margin
+    } else {
+      // Image is taller - fit to width
+      imageWidth = width * 0.75; // Leave space for side content
+      imageHeight = imageWidth / imageAspectRatio;
+      imageX = width * 0.25; // Left margin for text
+      imageY = (height - imageHeight) / 2;
+    }
 
-    ctx.drawImage(primaryImage, offsetX, offsetY, scaledWidth, scaledHeight);
-
-    // Add golden overlay with opacity to match the text color
-    ctx.fillStyle = "rgba(212, 175, 55, 0.3)"; // Golden overlay with 30% opacity
+    // Create gradient background
+    const bgGradient = ctx.createLinearGradient(0, 0, width, height);
+    bgGradient.addColorStop(0, "#1a1a1a");
+    bgGradient.addColorStop(0.5, "#2d2d2d");
+    bgGradient.addColorStop(1, "#1a1a1a");
+    ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, width, height);
 
-    // Draw "INSPIRE" text (large, top) - scaled for OG dimensions
-    const titleFontSize = Math.min(height * 0.15, 90); // Responsive font size
-    ctx.font = `bold ${titleFontSize}px Inter`;
-    ctx.fillStyle = "#D4AF37"; // Golden color
+    // Add subtle texture overlay
+    ctx.fillStyle = "rgba(255, 255, 255, 0.02)";
+    for (let i = 0; i < width; i += 4) {
+      for (let j = 0; j < height; j += 4) {
+        if (Math.random() > 0.5) {
+          ctx.fillRect(i, j, 2, 2);
+        }
+      }
+    }
+
+    // Draw primary image with rounded corners and shadow
+    ctx.save();
+
+    // Add drop shadow
+    ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetX = 8;
+    ctx.shadowOffsetY = 8;
+
+    // Create rounded rectangle path for modern browsers/Node canvas
+    const cornerRadius = 15;
+    const roundRect = (
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+      radius: number
+    ) => {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(
+        x + width,
+        y + height,
+        x + width - radius,
+        y + height
+      );
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    };
+
+    roundRect(imageX, imageY, imageWidth, imageHeight, cornerRadius);
+    ctx.clip();
+
+    // Draw the primary image
+    ctx.drawImage(primaryImage, imageX, imageY, imageWidth, imageHeight);
+    ctx.restore();
+
+    // Add subtle golden overlay frame
+    ctx.save();
+    roundRect(imageX, imageY, imageWidth, imageHeight, cornerRadius);
+    ctx.strokeStyle = "rgba(212, 175, 55, 0.6)";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.restore();
+
+    // Enhanced typography with better spacing and hierarchy
+    // Draw "INSPIRE" text with enhanced styling
+    const titleFontSize = Math.min(height * 0.12, 75);
+    ctx.font = `900 ${titleFontSize}px Inter`; // Extra bold
+
+    // Create text gradient
+    const titleGradient = ctx.createLinearGradient(50, 0, 350, 0);
+    titleGradient.addColorStop(0, "#FFD700");
+    titleGradient.addColorStop(0.5, "#D4AF37");
+    titleGradient.addColorStop(1, "#B8860B");
+
+    ctx.fillStyle = titleGradient;
     ctx.textAlign = "left";
-    ctx.fillText("INSPIRE", 50, titleFontSize + 20);
+    ctx.textBaseline = "top";
 
-    // Draw "BY PLUGGN" text (smaller, right aligned)
-    const subtitleFontSize = Math.min(height * 0.04, 24);
-    ctx.font = `${subtitleFontSize}px Inter`;
-    ctx.fillStyle = "#D4AF37";
+    // Add text shadow for depth
+    ctx.shadowColor = "rgba(0, 0, 0, 0.7)";
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 3;
+
+    ctx.fillText("INSPIRE", 50, 40);
+
+    // Reset shadow
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Draw "BY PLUGGN" text with enhanced styling
+    const subtitleFontSize = Math.min(height * 0.035, 22);
+    ctx.font = `500 ${subtitleFontSize}px Inter`;
+    ctx.fillStyle = "#C0C0C0";
     ctx.textAlign = "right";
-    ctx.fillText("BY PLUGGN", width - 60, titleFontSize + 40);
+    ctx.fillText("BY PLUGGN", width - 50, 50);
 
-    // Draw "NEW" badge - scaled
-    const badgeWidth = 80;
-    const badgeHeight = 30;
-    ctx.fillStyle = "#D4AF37";
-    ctx.fillRect(50, titleFontSize + 50, badgeWidth, badgeHeight);
-    ctx.font = `bold ${Math.min(height * 0.03, 16)}px Inter`;
+    // Enhanced "NEW" badge with gradient and shadow
+    const badgeWidth = 90;
+    const badgeHeight = 35;
+    const badgeX = 50;
+    const badgeY = titleFontSize + 60;
+
+    // Badge shadow
+    ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+
+    // Badge gradient
+    const badgeGradient = ctx.createLinearGradient(
+      badgeX,
+      badgeY,
+      badgeX,
+      badgeY + badgeHeight
+    );
+    badgeGradient.addColorStop(0, "#FFD700");
+    badgeGradient.addColorStop(1, "#D4AF37");
+
+    ctx.fillStyle = badgeGradient;
+    roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 8);
+    ctx.fill();
+
+    // Badge border
+    ctx.strokeStyle = "#B8860B";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Reset shadow
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Badge text
+    ctx.font = `bold ${Math.min(height * 0.025, 16)}px Inter`;
     ctx.fillStyle = "#000000";
     ctx.textAlign = "center";
-    ctx.fillText("NEW", 50 + badgeWidth / 2, titleFontSize + 70);
+    ctx.textBaseline = "middle";
+    ctx.fillText("NEW", badgeX + badgeWidth / 2, badgeY + badgeHeight / 2);
 
-    // Draw "ELEVAT YOUR LOOK" text (left side, outlined) - positioned for OG layout
-    const elevateFontSize = Math.min(height * 0.12, 54); // Responsive font size
-    ctx.font = `bold ${elevateFontSize}px Inter`;
+    // Enhanced "ELEVATE YOUR LOOK" text with better positioning
+    const elevateFontSize = Math.min(height * 0.08, 48);
+    ctx.font = `900 ${elevateFontSize}px Inter`;
     ctx.textAlign = "left";
+    ctx.textBaseline = "top";
 
-    // Create outlined text effect
-    const elevateTexts = ["ELEVAT", "YOUR", "LOOK"];
-    let yOffset = height * 0.45; // Start at 45% of height
+    const elevateTexts = ["ELEVATE", "YOUR", "LOOK"];
+    let yOffset = height * 0.35;
 
     elevateTexts.forEach((text, index) => {
-      // Text outline
-      ctx.strokeStyle = "#D4AF37";
-      ctx.lineWidth = 2;
-      ctx.strokeText(text, 50, yOffset + index * elevateFontSize * 1.1);
+      const textY = yOffset + index * elevateFontSize * 1.2;
 
-      // Text fill (semi-transparent)
-      ctx.fillStyle = "rgba(212, 175, 55, 0.1)";
-      ctx.fillText(text, 50, yOffset + index * elevateFontSize * 1.1);
+      // Outline effect
+      ctx.strokeStyle = "#D4AF37";
+      ctx.lineWidth = 3;
+      ctx.strokeText(text, 50, textY);
+
+      // Main text with gradient
+      const textGradient = ctx.createLinearGradient(
+        50,
+        textY,
+        50 + ctx.measureText(text).width,
+        textY
+      );
+      textGradient.addColorStop(0, "rgba(212, 175, 55, 0.3)");
+      textGradient.addColorStop(1, "rgba(212, 175, 55, 0.1)");
+
+      ctx.fillStyle = textGradient;
+      ctx.fillText(text, 50, textY);
     });
 
-    // Draw product name - positioned at bottom
-    const productNameY = height - 120;
-    ctx.font = `bold ${Math.min(height * 0.045, 24)}px Inter`;
-    ctx.fillStyle = "#D4AF37";
+    // Enhanced product information section
+    const productSectionY = height - 140;
+
+    // Product name with better typography
+    ctx.font = `bold ${Math.min(height * 0.04, 26)}px Inter`;
+    const productGradient = ctx.createLinearGradient(
+      0,
+      productSectionY,
+      200,
+      productSectionY
+    );
+    productGradient.addColorStop(0, "#FFD700");
+    productGradient.addColorStop(1, "#D4AF37");
+    ctx.fillStyle = productGradient;
     ctx.textAlign = "left";
-    ctx.fillText(productName.toUpperCase(), 50, productNameY);
+    ctx.textBaseline = "top";
+    ctx.fillText(productName.toUpperCase(), 50, productSectionY);
 
-    // Draw product price
-    ctx.font = `${Math.min(height * 0.035, 20)}px Inter`;
+    // Product price with currency styling
+    const priceY = productSectionY + 35;
+    ctx.font = `600 ${Math.min(height * 0.032, 18)}px Inter`;
     ctx.fillStyle = "#FFFFFF";
-    ctx.fillText(`₦${productPrice.toLocaleString()}`, 50, productNameY + 30);
+    ctx.fillText(`₦${productPrice.toLocaleString()}`, 50, priceY);
 
-    // Draw secondary image (profile picture) - circular, positioned for OG layout
-    const profileSize = Math.min(height * 0.12, 60); // Responsive profile size
-    const profileX = width - 80;
-    const profileY = height - 80;
+    // Price underline
+    const priceWidth = ctx.measureText(
+      `₦${productPrice.toLocaleString()}`
+    ).width;
+    ctx.strokeStyle = "#D4AF37";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(50, priceY + 25);
+    ctx.lineTo(50 + priceWidth, priceY + 25);
+    ctx.stroke();
 
-    // Create circular clipping path
+    // Enhanced profile section
+    const profileSize = Math.min(height * 0.1, 65);
+    const profileX = width - 90;
+    const profileY = height - 90;
+
+    // Profile shadow
+    ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+    ctx.shadowBlur = 15;
+    ctx.shadowOffsetX = 5;
+    ctx.shadowOffsetY = 5;
+
+    // Create circular clipping path for profile
     ctx.save();
     ctx.beginPath();
     ctx.arc(profileX, profileY, profileSize / 2, 0, Math.PI * 2);
@@ -1749,36 +2117,74 @@ export async function createMagazineStyleCard({
     );
     ctx.restore();
 
-    // Add border around profile image
+    // Reset shadow
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+
+    // Enhanced profile border with gradient
+    const profileBorderGradient = ctx.createRadialGradient(
+      profileX,
+      profileY,
+      profileSize / 2 - 2,
+      profileX,
+      profileY,
+      profileSize / 2 + 4
+    );
+    profileBorderGradient.addColorStop(0, "#FFD700");
+    profileBorderGradient.addColorStop(1, "#D4AF37");
+
     ctx.beginPath();
-    ctx.arc(profileX, profileY, profileSize / 2 + 2, 0, Math.PI * 2);
-    ctx.strokeStyle = "#D4AF37";
-    ctx.lineWidth = 2;
+    ctx.arc(profileX, profileY, profileSize / 2 + 3, 0, Math.PI * 2);
+    ctx.strokeStyle = profileBorderGradient;
+    ctx.lineWidth = 4;
     ctx.stroke();
 
-    // Draw name under profile image
-    ctx.font = `${Math.min(height * 0.025, 14)}px Inter`;
+    // Enhanced name styling
+    ctx.font = `500 ${Math.min(height * 0.022, 14)}px Inter`;
     ctx.fillStyle = "#FFFFFF";
     ctx.textAlign = "center";
-    ctx.fillText(name, profileX, profileY + profileSize / 2 + 20);
+    ctx.textBaseline = "top";
+    ctx.fillText(name, profileX, profileY + profileSize / 2 + 15);
 
-    // Draw "VERSION 1.0" text
-    ctx.font = `${Math.min(height * 0.02, 12)}px Inter`;
-    ctx.fillStyle = "#888888";
-    ctx.fillText("VERSION 1.0", profileX, height - 20);
+    // Version text with better styling
+    ctx.font = `400 ${Math.min(height * 0.018, 11)}px Inter`;
+    ctx.fillStyle = "#999999";
+    ctx.fillText("VERSION 1.0", profileX, height - 25);
 
-    // Add some decorative elements
-    ctx.strokeStyle = "#D4AF37";
-    ctx.lineWidth = 2;
+    // Enhanced decorative elements
+    const decorativeGradient = ctx.createLinearGradient(
+      50,
+      titleFontSize + 120,
+      250,
+      titleFontSize + 120
+    );
+    decorativeGradient.addColorStop(0, "#FFD700");
+    decorativeGradient.addColorStop(0.5, "#D4AF37");
+    decorativeGradient.addColorStop(1, "rgba(212, 175, 55, 0.2)");
+
+    ctx.strokeStyle = decorativeGradient;
+    ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.moveTo(50, titleFontSize + 100);
-    ctx.lineTo(200, titleFontSize + 100);
+    ctx.moveTo(50, titleFontSize + 120);
+    ctx.lineTo(250, titleFontSize + 120);
     ctx.stroke();
 
-    // Remove grid pattern overlay since we have the product image as background
+    // Add small decorative dots
+    ctx.fillStyle = "#D4AF37";
+    for (let i = 0; i < 5; i++) {
+      ctx.beginPath();
+      ctx.arc(260 + i * 15, titleFontSize + 120, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
 
-    // Return processed image buffer
-    const processedImageBuffer = canvas.toBuffer("image/png");
+    // Return high-quality processed image buffer
+    const processedImageBuffer = canvas.toBuffer("image/png", {
+      compressionLevel: 3, // Lower compression for better quality
+      resolution: 300, // High DPI
+    });
+
     return {
       success: true,
       processedImage: processedImageBuffer,
