@@ -209,7 +209,7 @@ export function IntelligenceSection({
 function LoadingState() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-      {Array(5)
+      {Array(4)
         .fill(0)
         .map((_, i) => (
           <Card key={i} className="overflow-hidden">
@@ -222,6 +222,7 @@ function LoadingState() {
     </div>
   );
 }
+
 
 function EmptyState({ onRetry }: { onRetry: () => void }) {
   return (
