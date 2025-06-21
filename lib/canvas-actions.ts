@@ -1653,50 +1653,24 @@ export async function createMagazineStyleCard({
       loadImage(secondaryImageUrl),
     ]);
 
-    // Fill background with dark marble-like color
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, "#1a1a1a");
-    gradient.addColorStop(0.5, "#2d2d2d");
-    gradient.addColorStop(1, "#1a1a1a");
-    ctx.fillStyle = gradient;
+    // Draw primary image as full background
+    // Scale to cover entire canvas while maintaining aspect ratio
+    const scaleX = width / primaryImage.width;
+    const scaleY = height / primaryImage.height;
+    const scale = Math.max(scaleX, scaleY); // Use max to cover entire canvas
+
+    const scaledWidth = primaryImage.width * scale;
+    const scaledHeight = primaryImage.height * scale;
+
+    // Center the image
+    const offsetX = (width - scaledWidth) / 2;
+    const offsetY = (height - scaledHeight) / 2;
+
+    ctx.drawImage(primaryImage, offsetX, offsetY, scaledWidth, scaledHeight);
+
+    // Add golden overlay with opacity to match the text color
+    ctx.fillStyle = "rgba(212, 175, 55, 0.3)"; // Golden overlay with 30% opacity
     ctx.fillRect(0, 0, width, height);
-
-    // Add marble texture overlay
-    ctx.globalAlpha = 0.3;
-    ctx.fillStyle = "#000000";
-
-    // Create marble-like patterns
-    for (let i = 0; i < 50; i++) {
-      ctx.beginPath();
-      ctx.moveTo(Math.random() * width, Math.random() * height);
-      ctx.lineTo(Math.random() * width, Math.random() * height);
-      ctx.strokeStyle = `rgba(255, 255, 255, ${Math.random() * 0.1})`;
-      ctx.lineWidth = Math.random() * 2;
-      ctx.stroke();
-    }
-
-    ctx.globalAlpha = 1;
-
-    // Draw primary image (sneaker) - positioned in center-right
-    // Scale for OG dimensions (wider layout)
-    const maxImgWidth = width * 0.4; // 40% of canvas width
-    const maxImgHeight = height * 0.6; // 60% of canvas height
-    const imgScale = Math.min(
-      maxImgWidth / primaryImage.width,
-      maxImgHeight / primaryImage.height
-    );
-    const imgWidth = primaryImage.width * imgScale;
-    const imgHeight = primaryImage.height * imgScale;
-    const imgX = width - imgWidth - 60;
-    const imgY = (height - imgHeight) / 2;
-
-    ctx.drawImage(primaryImage, imgX, imgY, imgWidth, imgHeight);
-
-    // Add subtle shadow behind the sneaker
-    ctx.globalAlpha = 0.3;
-    ctx.fillStyle = "#000000";
-    ctx.fillRect(imgX + 10, imgY + 10, imgWidth, imgHeight);
-    ctx.globalAlpha = 1;
 
     // Draw "INSPIRE" text (large, top) - scaled for OG dimensions
     const titleFontSize = Math.min(height * 0.15, 90); // Responsive font size
@@ -1801,32 +1775,10 @@ export async function createMagazineStyleCard({
     ctx.lineTo(200, titleFontSize + 100);
     ctx.stroke();
 
-    // Add subtle grid pattern overlay
-    ctx.globalAlpha = 0.05;
-    ctx.strokeStyle = "#FFFFFF";
-    ctx.lineWidth = 1;
-
-    // Vertical lines
-    for (let x = 0; x < width; x += 40) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
-      ctx.stroke();
-    }
-
-    // Horizontal lines
-    for (let y = 0; y < height; y += 40) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-
-    ctx.globalAlpha = 1;
+    // Remove grid pattern overlay since we have the product image as background
 
     // Return processed image buffer
     const processedImageBuffer = canvas.toBuffer("image/png");
-
     return {
       success: true,
       processedImage: processedImageBuffer,
