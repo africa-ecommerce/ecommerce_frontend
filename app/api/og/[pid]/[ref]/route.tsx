@@ -495,18 +495,29 @@ export async function GET(
     return new NextResponse("Product not found", { status: 404 });
   }
 
+  // const result = await createMagazineStyleCard({
+  //   imageUrl: product.data.images?.[0] || "https://via.placeholder.com/400",
+  //   productName: product.data.name || "Product",
+  //   price: product.data.price || 0,
+  //   ref: actualRef,
+  //   template: "inspire",
+  //   removeBackground: false,
+  //   // backgroundOptions: {
+  //   //   targetColor: [255, 255, 255],
+  //   //   tolerance: 40,
+  //   //   // newBackground: "transparent",
+  //   // },
+  //   dimensions: { width: 1200, height: 630 },
+  // });
+
   const result = await createMagazineStyleCard({
-    imageUrl: product.data.images?.[0] || "https://via.placeholder.com/400",
-    productName: product.data.name || "Product",
-    price: product.data.price || 0,
-    ref: actualRef,
-    template: "inspire",
-    removeBackground: false,
-    // backgroundOptions: {
-    //   targetColor: [255, 255, 255],
-    //   tolerance: 40,
-    //   // newBackground: "transparent",
-    // },
+    primaryImageUrl:
+      product.data.images?.[0] || "https://via.placeholder.com/400",
+    secondaryImageUrl:
+      product.data.images?.[0] || "https://via.placeholder.com/400",
+    productName: "MAINSTREAM SNEAKER",
+    productPrice: product.data.price || 0,
+    name: "Chinwe O.",
     dimensions: { width: 1200, height: 630 },
   });
 
