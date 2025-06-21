@@ -50,156 +50,8 @@ import {
   getTotalStock,
   truncateText,
 } from "@/lib/utils";
+import WithdrawalModal from "../../_components/withdrawal-modal";
 
-// const OrderCard = ({ order }: { order: any }) => {
-//   const [delayModalOpen, setDelayModalOpen] = useState(false);
-//   const { userData } = useUser();
-//   const { user } = userData || { user: null };
-
-//   const handleDelaySelect = (minutes: number) => {
-//     console.log(`Delaying order ${order.id} by ${minutes} minutes`);
-//     // Add your delay logic here
-//   };
-
-//   const handleAccept = () => {
-//     console.log(`Accepting order ${order.id}`);
-//     // Add your accept logic here
-//   };
-
-//   const handleDecline = () => {
-//     console.log(`Declining order ${order.id}`);
-//     // Add your decline logic here
-//   };
-
-//   const formatDate = (dateString: string) => {
-//     const date = new Date(dateString);
-//     return date.toLocaleDateString("en-US", {
-//       year: "numeric",
-//       month: "short",
-//       day: "numeric",
-//     });
-//   };
-
-//   const capitalizeWords = (str: string) => {
-//     return (
-//       str
-//         ?.split(" ")
-//         .map(
-//           (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-//         )
-//         .join(" ") || ""
-//     );
-//   };
-
-//   // Calculate total amount
-//   const totalAmount =
-//     order.orderItems?.reduce((total: number, item: any) => {
-//       return total + (order.supplierPrice || 0) * item.quantity;
-//     }, 0) || 0;
-
-//   return (
-//     <Card className="border rounded-lg">
-//       <CardHeader className="p-3 sm:p-4 pb-1">
-//         <div className="flex justify-between items-start gap-2">
-//           <div className="min-w-0">
-//             <CardTitle className="text-xs sm:text-sm font-medium truncate">
-//               {order.orderId}
-//             </CardTitle>
-//             <CardDescription className="text-[10px] sm:text-xs">
-//               {formatDate(order.createdAt)}
-//             </CardDescription>
-//           </div>
-//         </div>
-//       </CardHeader>
-
-//       <CardContent className="p-3 sm:p-4 pt-0 pb-1">
-//         <div className="space-y-2">
-//           {/* Customer Info */}
-//           <div className="flex items-center gap-2 text-sm">
-//             <Users className="h-4 w-4 text-muted-foreground" />
-//             <span className="font-medium">
-//               {capitalizeWords(order.buyerName)}
-//             </span>
-//             <span className="text-muted-foreground">•</span>
-//             <span className="text-muted-foreground">
-//               {capitalizeWords(order.buyerLga)},{" "}
-//               {capitalizeWords(order.buyerState)}
-//             </span>
-//           </div>
-
-//           {/* Products */}
-//           <div className="space-y-1">
-//             {order.orderItems?.map((item: any, index: number) => (
-//               <div
-//                 key={item.id}
-//                 className="flex justify-between text-xs sm:text-sm"
-//               >
-//                 <span className="truncate max-w-[120px] capitalize sm:max-w-[180px]">
-//                   {item.productName} x {item.quantity}
-//                 </span>
-//                 <span className="whitespace-nowrap">
-//                   ₦
-//                   {(
-//                     (order.supplierPrice || 0) * item.quantity
-//                   ).toLocaleString()}
-//                 </span>
-//               </div>
-//             ))}
-//             <div className="flex justify-between text-xs sm:text-sm font-medium pt-1 sm:pt-2 border-t">
-//               <span>Total</span>
-//               <span>₦{totalAmount.toLocaleString()}</span>
-//             </div>
-//           </div>
-//         </div>
-//       </CardContent>
-
-//       {/* Action Buttons - Only show if user is verified */}
-//       {user?.supplier?.verified && (
-//         <CardFooter className="p-3 sm:p-4 pt-1 flex gap-1 sm:gap-2">
-//           <Dialog open={delayModalOpen} onOpenChange={setDelayModalOpen}>
-//             <DialogTrigger asChild>
-//               <Button
-//                 variant="outline"
-//                 size="sm"
-//                 className="flex-1 h-7 sm:h-8 text-xs"
-//               >
-//                 <Clock className="h-3 w-3 mr-1" />
-//                 Delay
-//               </Button>
-//             </DialogTrigger>
-//             <DelayOrderModal
-//               open={delayModalOpen}
-//               onOpenChange={setDelayModalOpen}
-//               onDelaySelect={handleDelaySelect}
-//             />
-//           </Dialog>
-
-//           <Button
-//             variant="destructive"
-//             size="sm"
-//             className="flex-1 h-7 sm:h-8 text-xs"
-//             onClick={handleDecline}
-//           >
-//             <X className="h-3 w-3 mr-1" />
-//             Decline
-//           </Button>
-
-//           <Button
-//             size="sm"
-//             className="flex-1 h-7 sm:h-8 text-xs"
-//             onClick={handleAccept}
-//           >
-//             <PackageCheck className="h-3 w-3 mr-1" />
-//             Accept
-//           </Button>
-//         </CardFooter>
-//       )}
-//     </Card>
-//   );
-// };
-
-
-// Updated Supplier Order Card Component
 const OrderCard = ({ order }: { order: any }) => {
   const [delayModalOpen, setDelayModalOpen] = useState(false);
   const { userData } = useUser();
@@ -549,12 +401,8 @@ const EducationalTipSkeleton = () => (
 );
 
 export default function SupplierDashboard() {
-  // const [refreshing, setRefreshing] = useState(false);
-  // const [activeTab, setActiveTab] = useState("pending");
-  // const [loading, setLoading] = useState(true);
-  // const [error, setError] = useState(false);
-  // const [delayModalOpen, setDelayModalOpen] = useState(false);
-  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const {
     userData: { user },
@@ -568,6 +416,48 @@ export default function SupplierDashboard() {
   } = useSWR("/api/products/supplier/");
 
   const products = Array.isArray(data?.data) ? data?.data : [];
+
+
+    const stats = useMemo(() => {
+      if (!products.length)
+        return {
+        
+          inventoryValue: 0,
+        };
+  
+      return {
+       
+        inventoryValue: products.reduce((total: number, item: any) => {
+          if (item.variations && item.variations.length > 0) {
+            // Calculate value across all variations
+            const variationValue = item.variations.reduce(
+              (sum: number, variation: any) =>
+                sum + item.price * (variation.stock || 0),
+              0
+            );
+            return total + variationValue;
+          }
+          // If no variations, calculate value using item stock directly
+          return total + item.price * (item.stock || 0);
+        }, 0),
+      };
+    }, [products]);
+
+
+
+    const {
+      data: paymentData,
+      error: paymentError,
+      isLoading: paymentLoading
+    } = useSWR("/api/payments/supplier/earnings", {
+      refreshInterval: 300000, // Refresh every 5 minutes
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 60000, // Prevent duplicate requests within 1 minute
+      errorRetryCount: 2,
+      errorRetryInterval: 5000,
+    }
+    )
 
   const stockAlerts = useMemo(() => {
     if (!products.length) return [];
@@ -645,7 +535,7 @@ export default function SupplierDashboard() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          {/* <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <Card className="h-full border rounded-lg">
               <CardHeader className="p-2 sm:p-3 pb-0">
                 <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
@@ -755,7 +645,102 @@ export default function SupplierDashboard() {
                 )}
               </CardContent>
             </Card>
-          </div>
+          </div> */}
+
+
+<div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <Card className="h-full border rounded-lg">
+                <CardHeader className="p-2 sm:p-3 pb-0">
+                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                    Total Earnings
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">
+                        <p>Total amount earned from sales</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 sm:p-3 pt-0">
+                  <div className="text-base sm:text-lg font-bold">
+                    {formatPrice(String(paymentData?.data.totalEarnings))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="h-full border rounded-lg">
+                <CardHeader className="p-2 sm:p-3 pb-0">
+                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                  Inventory Value
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">
+                        <p>Total inventory value</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 sm:p-3 pt-0">
+                  <div className="text-base sm:text-lg font-bold text-green-500">
+                    {`₦${stats.inventoryValue.toLocaleString()}`}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="h-full border rounded-lg">
+                <CardHeader className="p-2 sm:p-3 pb-0">
+                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                    Pending Payments
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">
+                        <p>Money in escrow to be released</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 sm:p-3 pt-0">
+                  <div className="text-base sm:text-lg font-bold">
+                    {formatPrice(String(paymentData?.data.lockedAmount))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="h-full border rounded-lg">
+                <CardHeader className="p-2 sm:p-3 pb-0">
+                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                    Available Balance
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">
+                        <p>Money ready for withdrawal</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 sm:p-3 pt-0">
+                  <div className="text-base sm:text-lg font-bold">
+                    {formatPrice(String(paymentData?.data.unlockedAmount))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-1 h-6 text-xs"
+                    onClick={() => setIsModalOpen(true)}
+                  >
+                    <Wallet className="h-2.5 w-2.5 mr-1" /> Withdraw
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
 
           {/* Stock Alerts Section */}
           <div className="space-y-3 sm:space-y-4">
@@ -948,6 +933,12 @@ export default function SupplierDashboard() {
             </CardContent>
           </Card>
         )}
+
+        <WithdrawalModal
+                  isOpen={isModalOpen}
+                  onClose={() => setIsModalOpen(false)}
+                  unlockedPayment={paymentData?.data.unlockedAmount}
+                />
       </div>
     </TooltipProvider>
   );

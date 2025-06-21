@@ -330,7 +330,7 @@ export default function PlugDashboard() {
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
     dedupingInterval: 10000, // Prevent duplicate requests within 10 seconds
-    errorRetryCount: 3,
+    errorRetryCount: 2,
     errorRetryInterval: 5000,
   });
 
@@ -344,7 +344,7 @@ export default function PlugDashboard() {
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
     dedupingInterval: 60000, // Prevent duplicate requests within 1 minute
-    errorRetryCount: 3,
+    errorRetryCount: 2,
     errorRetryInterval: 5000,
   }
   )
