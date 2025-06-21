@@ -338,7 +338,8 @@ export default function PlugDashboard() {
   const {
     data: paymentData,
     error: paymentError,
-    isLoading: paymentLoading
+    isLoading: paymentLoading,
+    mutate: paymentMutate,
   } = useSWR("/api/payments/plug/earnings", {
     refreshInterval: 300000, // Refresh every 5 minutes
     revalidateOnFocus: true,
@@ -652,10 +653,13 @@ export default function PlugDashboard() {
             </h2>
           </div>
 
-          {isLoading ? (
+          {isLoading || paymentLoading ? (
             <RevenueLoadingSkeleton />
-          ) : errorData ? (
-            <ErrorState onRetry={() => mutate()} />
+          ) : errorData || paymentError ? (
+            <ErrorState onRetry={() => {
+              mutate(); 
+              paymentMutate()
+            }} />
           ) : (
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <Card className="h-full border rounded-lg">
@@ -1133,7 +1137,7 @@ export default function PlugDashboard() {
         <WithdrawalModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          unlockedPayment={paymentData?.data.unlockedAmount}
+          unlockedPayment={paymentData?.data.unlockedAmount || 0}
         />
       </div>
     </TooltipProvider>

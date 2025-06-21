@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -34,7 +34,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/app/_components/provider/UserContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Phone } from "lucide-react";
 import useSWR from "swr";
 import {
   Dialog,
@@ -46,7 +45,6 @@ import {
 import {
   formatPrice,
   formatQuantity,
-  formatTimeAgo,
   getTotalStock,
   truncateText,
 } from "@/lib/utils";
@@ -127,52 +125,40 @@ const OrderCard = ({ order }: { order: any }) => {
           </span>
         </div>
 
-        
         {/* Products */}
         <div className="space-y-2">
           {order.orderItems?.map((item: any, index: number) => (
             <div key={item.id} className="flex justify-between items-center">
               <div className="flex-1">
                 <div className="text-sm font-medium capitalize">
-                  {item.productName} <span className="lowercase">x</span> {item.quantity}
+                  {item.productName} <span className="lowercase">x</span>{" "}
+                  {item.quantity}
                 </div>
                 {/* Show variant details if available */}
-                {item.variantId &&
-                  (item.variantColor || item.variantSize) && (
-                    <div className="flex gap-2 text-xs text-muted-foreground mt-1">
-                      {item.variantColor && (
-                        <span className="capitalize">
-                          {item.variantColor}
-                        </span>
-                      )}
-                      {item.variantSize && (
-                        <span className="capitalize">
-                          ({item.variantSize})
-                        </span>
-                      )}
-                    </div>
-                  )}
+                {item.variantId && (item.variantColor || item.variantSize) && (
+                  <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+                    {item.variantColor && (
+                      <span className="capitalize">{item.variantColor}</span>
+                    )}
+                    {item.variantSize && (
+                      <span className="capitalize">({item.variantSize})</span>
+                    )}
+                  </div>
+                )}
                 {/* Show product color/size if no variant but has product color/size */}
-                {!item.variantId &&
-                  (item.productColor || item.productSize) && (
-                    <div className="flex gap-2 text-xs text-muted-foreground mt-1">
-                      {item.productColor && (
-                        <span className="capitalize">
-                          {item.productColor}
-                        </span>
-                      )}
-                      {item.productSize && (
-                        <span className="capitalize">
-                          ({item.productSize})
-                        </span>
-                      )}
-                    </div>
-                  )}
+                {!item.variantId && (item.productColor || item.productSize) && (
+                  <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+                    {item.productColor && (
+                      <span className="capitalize">{item.productColor}</span>
+                    )}
+                    {item.productSize && (
+                      <span className="capitalize">({item.productSize})</span>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="text-sm font-medium">
-                ₦{(
-                  (item.supplierPrice || 0) * item.quantity
-                ).toLocaleString()}
+                ₦{((item.supplierPrice || 0) * item.quantity).toLocaleString()}
               </div>
             </div>
           ))}
@@ -401,8 +387,7 @@ const EducationalTipSkeleton = () => (
 );
 
 export default function SupplierDashboard() {
-
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const {
     userData: { user },
@@ -417,47 +402,42 @@ export default function SupplierDashboard() {
 
   const products = Array.isArray(data?.data) ? data?.data : [];
 
-
-    const stats = useMemo(() => {
-      if (!products.length)
-        return {
-        
-          inventoryValue: 0,
-        };
-  
+  const stats = useMemo(() => {
+    if (!products.length)
       return {
-       
-        inventoryValue: products.reduce((total: number, item: any) => {
-          if (item.variations && item.variations.length > 0) {
-            // Calculate value across all variations
-            const variationValue = item.variations.reduce(
-              (sum: number, variation: any) =>
-                sum + item.price * (variation.stock || 0),
-              0
-            );
-            return total + variationValue;
-          }
-          // If no variations, calculate value using item stock directly
-          return total + item.price * (item.stock || 0);
-        }, 0),
+        inventoryValue: 0,
       };
-    }, [products]);
 
+    return {
+      inventoryValue: products.reduce((total: number, item: any) => {
+        if (item.variations && item.variations.length > 0) {
+          // Calculate value across all variations
+          const variationValue = item.variations.reduce(
+            (sum: number, variation: any) =>
+              sum + item.price * (variation.stock || 0),
+            0
+          );
+          return total + variationValue;
+        }
+        // If no variations, calculate value using item stock directly
+        return total + item.price * (item.stock || 0);
+      }, 0),
+    };
+  }, [products]);
 
-
-    const {
-      data: paymentData,
-      error: paymentError,
-      isLoading: paymentLoading
-    } = useSWR("/api/payments/supplier/earnings", {
-      refreshInterval: 300000, // Refresh every 5 minutes
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true,
-      dedupingInterval: 60000, // Prevent duplicate requests within 1 minute
-      errorRetryCount: 2,
-      errorRetryInterval: 5000,
-    }
-    )
+  const {
+    data: paymentData,
+    error: paymentError,
+    isLoading: paymentLoading,
+    mutate: paymentMutate
+  } = useSWR("/api/payments/supplier/earnings", {
+    refreshInterval: 300000, // Refresh every 5 minutes
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    dedupingInterval: 60000, // Prevent duplicate requests within 1 minute
+    errorRetryCount: 2,
+    errorRetryInterval: 5000,
+  });
 
   const stockAlerts = useMemo(() => {
     if (!products.length) return [];
@@ -534,8 +514,67 @@ export default function SupplierDashboard() {
               Financial Overview
             </h2>
           </div>
+          { paymentError || errorData ?
+          <ErrorState onRetry={
+            () => {
+            mutate();
+            paymentMutate()
+          }
+        } />
+          :
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <Card className="h-full border rounded-lg">
+              <CardHeader className="p-2 sm:p-3 pb-0">
+                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                  Total Earnings
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs">
+                      <p>Total amount earned from sales</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 sm:p-3 pt-0">
+                {paymentLoading || isLoading ? (
+                  <Skeleton className="h-6 w-16" />
+                ) : (
+                  <div className="text-base sm:text-lg font-bold">
+                    {paymentData
+                      ? formatPrice(String(paymentData.data.totalEarnings))
+                      : "₦0"}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-          {/* <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <Card className="h-full border rounded-lg">
+              <CardHeader className="p-2 sm:p-3 pb-0">
+                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                  Inventory Value
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs">
+                      <p>Total inventory value</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 sm:p-3 pt-0">
+                {paymentLoading || isLoading ? (
+                  <Skeleton className="h-6 w-16" />
+                ) : (
+                  <div className="text-base sm:text-lg font-bold text-green-500">
+                    {`₦${stats.inventoryValue.toLocaleString()}`}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             <Card className="h-full border rounded-lg">
               <CardHeader className="p-2 sm:p-3 pb-0">
                 <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
@@ -545,44 +584,19 @@ export default function SupplierDashboard() {
                       <HelpCircle className="h-3 w-3 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent className="text-xs">
-                      <p>Total amount of pending payments</p>
+                      <p>Money in escrow to be released</p>
                     </TooltipContent>
                   </Tooltip>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2 sm:p-3 pt-0">
-                {isLoading ? (
-                  <Skeleton className="h-5 w-12" />
+                {paymentLoading || isLoading ? (
+                  <Skeleton className="h-6 w-16" />
                 ) : (
-                  <>
-                    <div className="text-base sm:text-lg font-bold">
-                      ₦45,500
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="h-full border rounded-lg">
-              <CardHeader className="p-2 sm:p-3 pb-0">
-                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Revenue (This Month)
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent className="text-xs">
-                      <p>Total revenue this month</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 sm:p-3 pt-0">
-                {isLoading ? (
-                  <Skeleton className="h-5 w-12" />
-                ) : (
-                  <div className="text-base sm:text-lg font-bold text-green-500">
-                    ₦127,800
+                  <div className="text-base sm:text-lg font-bold">
+                    {paymentData
+                      ? formatPrice(String(paymentData.data.lockedAmount))
+                      : "₦0"}
                   </div>
                 )}
               </CardContent>
@@ -591,156 +605,40 @@ export default function SupplierDashboard() {
             <Card className="h-full border rounded-lg">
               <CardHeader className="p-2 sm:p-3 pb-0">
                 <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Total Paid
+                  Available Balance
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <HelpCircle className="h-3 w-3 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent className="text-xs">
-                      <p>Total amount paid to date</p>
+                      <p>Money ready for withdrawal</p>
                     </TooltipContent>
                   </Tooltip>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-2 sm:p-3 pt-0">
-                {isLoading ? (
-                  <Skeleton className="h-5 w-12" />
+                {paymentLoading || isLoading ? (
+                  <Skeleton className="h-6 w-16" />
                 ) : (
-                  <div className="text-base sm:text-lg font-bold">₦845,200</div>
+                  <div className="text-base sm:text-lg font-bold">
+                    {paymentData
+                      ? formatPrice(String(paymentData.data.unlockedAmount))
+                      : "₦0"}
+                  </div>
                 )}
+              
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full mt-1 h-6 text-xs"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  <Wallet className="h-2.5 w-2.5 mr-1" /> Withdraw
+                </Button>
               </CardContent>
             </Card>
-
-            <Card className="h-full border rounded-lg">
-              <CardHeader className="p-2 sm:p-3 pb-0">
-                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Avg. Order Value
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent className="text-xs">
-                      <p>Average value per order</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 sm:p-3 pt-0">
-                {isLoading ? (
-                  <Skeleton className="h-5 w-12" />
-                ) : (
-                  <>
-                    <div className="text-base sm:text-lg font-bold">
-                      ₦18,700
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full mt-1 h-6 text-xs"
-                    >
-                      <Wallet className="h-2.5 w-2.5 mr-1" /> Withdraw
-                    </Button>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </div> */}
-
-
-<div className="grid grid-cols-2 gap-2 sm:gap-3">
-              <Card className="h-full border rounded-lg">
-                <CardHeader className="p-2 sm:p-3 pb-0">
-                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                    Total Earnings
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs">
-                        <p>Total amount earned from sales</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-2 sm:p-3 pt-0">
-                  <div className="text-base sm:text-lg font-bold">
-                    {formatPrice(String(paymentData?.data.totalEarnings))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="h-full border rounded-lg">
-                <CardHeader className="p-2 sm:p-3 pb-0">
-                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Inventory Value
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs">
-                        <p>Total inventory value</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-2 sm:p-3 pt-0">
-                  <div className="text-base sm:text-lg font-bold text-green-500">
-                    {`₦${stats.inventoryValue.toLocaleString()}`}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="h-full border rounded-lg">
-                <CardHeader className="p-2 sm:p-3 pb-0">
-                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                    Pending Payments
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs">
-                        <p>Money in escrow to be released</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-2 sm:p-3 pt-0">
-                  <div className="text-base sm:text-lg font-bold">
-                    {formatPrice(String(paymentData?.data.lockedAmount))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="h-full border rounded-lg">
-                <CardHeader className="p-2 sm:p-3 pb-0">
-                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                    Available Balance
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                      </TooltipTrigger>
-                      <TooltipContent className="text-xs">
-                        <p>Money ready for withdrawal</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-2 sm:p-3 pt-0">
-                  <div className="text-base sm:text-lg font-bold">
-                    {formatPrice(String(paymentData?.data.unlockedAmount))}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full mt-1 h-6 text-xs"
-                    onClick={() => setIsModalOpen(true)}
-                  >
-                    <Wallet className="h-2.5 w-2.5 mr-1" /> Withdraw
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+          </div>
+}
 
           {/* Stock Alerts Section */}
           <div className="space-y-3 sm:space-y-4">
@@ -935,10 +833,10 @@ export default function SupplierDashboard() {
         )}
 
         <WithdrawalModal
-                  isOpen={isModalOpen}
-                  onClose={() => setIsModalOpen(false)}
-                  unlockedPayment={paymentData?.data.unlockedAmount}
-                />
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          unlockedPayment={paymentData?.data.unlockedAmount || 0}
+        />
       </div>
     </TooltipProvider>
   );

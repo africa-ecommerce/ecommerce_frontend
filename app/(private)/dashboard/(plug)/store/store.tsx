@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -32,6 +23,8 @@ import {
   Copy,
   Package,
   TrendingUp,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -60,8 +53,6 @@ import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import { useSwrUser } from "@/hooks/use-current-user";
 import { clearThemeCustomizerData } from "@/lib/storage-helpers";
 
-
-
 export default function StorePage() {
   const {
     userData: { user },
@@ -86,7 +77,7 @@ export default function StorePage() {
 
   // Process analytics data
   const processedAnalytics = useMemo(() => {
-    if (!analyticsData ) {
+    if (!analyticsData) {
       return {
         visits: 0,
         orders: 0,
@@ -96,15 +87,12 @@ export default function StorePage() {
       };
     }
 
-   
-
     // Calculate store traffic percentage
     const storeOrders = analyticsData?.storeOrders ?? 0;
     const storeTrafficPercentage =
       analyticsData.totalOrders > 0
         ? `${Math.round((storeOrders / analyticsData.totalOrders) * 100)}%`
         : "0%";
-
 
     return {
       visits: analyticsData?.visits ?? 0,
@@ -186,6 +174,8 @@ export default function StorePage() {
           copyStoreUrl={copyStoreUrl}
           copied={copied}
           isLoading={analyticsLoading}
+          error={analyticsError}
+          dataMutate={analyticsMutate}
         />
       )}
     </div>
@@ -374,6 +364,8 @@ function StoreView({
   copyStoreUrl,
   copied,
   isLoading,
+  error,
+  dataMutate,
 }: {
   analyticsData: {
     visits: number;
@@ -386,6 +378,8 @@ function StoreView({
   copyStoreUrl: () => void;
   copied: boolean;
   isLoading: boolean;
+  error: boolean;
+  dataMutate: () => void;
 }) {
   const { mutate } = useSwrUser();
 
@@ -411,6 +405,31 @@ function StoreView({
     successToast(result.message);
     return result;
   };
+
+  const ErrorState = ({ onRetry }: { onRetry?: () => void }) => (
+    <Card className="border rounded-lg">
+      <CardContent className="p-4 text-center">
+        <div className="flex flex-col items-center justify-center space-y-2">
+          <AlertCircle className="h-6 w-6 text-destructive" />
+          <h3 className="text-sm font-medium">Failed to load data</h3>
+          <p className="text-muted-foreground text-xs">
+            Something went wrong while loading the data
+          </p>
+          {onRetry && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onRetry}
+              className="mt-1"
+            >
+              <RefreshCw className="mr-1 h-3 w-3" />
+              Retry
+            </Button>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="space-y-6">
@@ -462,85 +481,91 @@ function StoreView({
       </Card>
 
       {/* Analytics cards - progressive grid from 1 to 4 columns */}
-      <div className="grid gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Visits</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-6 w-12" />
-            ) : (
-              <div className="text-base md:text-lg font-bold">
-                {analyticsData.visits}
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground mt-1">
-              Store views
-            </p>
-          </CardContent>
-        </Card>
+      {error ? (
+        <ErrorState onRetry={() => dataMutate()} />
+      ) : (
+        <div className="grid gap-4 grid-cols-1 xs:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Visits
+              </CardTitle>
+              <Eye className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <Skeleton className="h-6 w-12" />
+              ) : (
+                <div className="text-base md:text-lg font-bold">
+                  {analyticsData.visits}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Store views</p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Conversion Rate
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-6 w-12" />
-            ) : (
-              <div className="text-base md:text-lg font-bold">
-                {analyticsData.conversionRate}%
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground mt-1">
-              Visits to orders
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Conversion Rate
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <Skeleton className="h-6 w-12" />
+              ) : (
+                <div className="text-base md:text-lg font-bold">
+                  {analyticsData.conversionRate}%
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                Visits to orders
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Orders</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-6 w-12" />
-            ) : (
-              <div className="text-base md:text-lg font-bold">
-                {analyticsData.orders}
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground mt-1">
-              From store visits
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Orders</CardTitle>
+              <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <Skeleton className="h-6 w-12" />
+              ) : (
+                <div className="text-base md:text-lg font-bold">
+                  {analyticsData.orders}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                From store visits
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Store Traffic</CardTitle>
-            <Globe className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <Skeleton className="h-6 w-16" />
-            ) : (
-              <div className="text-base md:text-lg font-bold">
-                {analyticsData.storeTrafficPercentage}
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground mt-1">
-              Of your sales come from Store
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Store Traffic
+              </CardTitle>
+              <Globe className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <Skeleton className="h-6 w-16" />
+              ) : (
+                <div className="text-base md:text-lg font-bold">
+                  {analyticsData.storeTrafficPercentage}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                Of your sales come from Store
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
         <CardHeader>
