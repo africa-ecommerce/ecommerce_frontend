@@ -334,12 +334,54 @@ export default function PlugDashboard() {
     errorRetryInterval: 5000,
   });
 
+
+  const {
+    data: paymentData,
+    error: paymentError,
+    isLoading: paymentLoading
+  } = useSWR("/api/payments/plug", {
+    refreshInterval: 300000, // Refresh every 5 minutes
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    dedupingInterval: 60000, // Prevent duplicate requests within 1 minute
+    errorRetryCount: 3,
+    errorRetryInterval: 5000,
+  }
+  )
+
   const products = Array.isArray(data?.data) ? data?.data : [];
 
   // Process orders data - following the exact pattern from products component
   const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];
 
+  const stats = useMemo(() => {
+    if (!products.length)
+      return {
+       
+        totalProfit: 0,
+      };
 
+    return {
+      totalProfit: products.reduce((total: any, item: any) => {
+        if (item.variations && item.variations.length > 0) {
+          // Calculate profit across all variations
+          const variationProfit = item.variations.reduce(
+            (sum: number, variation: any) =>
+              sum +
+              ((item.price || 0) - (item.originalPrice || 0)) *
+                (variation.stocks || 0),
+            0
+          );
+          return total + variationProfit;
+        }
+        // If no variations, calculate profit using item stock directly
+        return (
+          total +
+          ((item.price || 0) - (item.originalPrice || 0)) * (item.stocks || 0)
+        );
+      }, 0),
+    };
+  }, [products]);
   
   const processAnalyticsData = useMemo(() => {
     if (!analyticsData || !Array.isArray(analyticsData)) {
@@ -631,7 +673,9 @@ export default function PlugDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-2 sm:p-3 pt-0">
-                  <div className="text-base sm:text-lg font-bold">₦45,500</div>
+                  <div className="text-base sm:text-lg font-bold">
+                    {formatPrice(String(paymentData.data.totalEarnings))}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -644,14 +688,14 @@ export default function PlugDashboard() {
                         <HelpCircle className="h-3 w-3 text-muted-foreground" />
                       </TooltipTrigger>
                       <TooltipContent className="text-xs">
-                        <p>Your earnings after platform fees</p>
+                        <p>Total profit from plugged products</p>
                       </TooltipContent>
                     </Tooltip>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-2 sm:p-3 pt-0">
                   <div className="text-base sm:text-lg font-bold text-green-500">
-                    ₦18,080
+                    {`₦${stats.totalProfit.toLocaleString()}`}
                   </div>
                 </CardContent>
               </Card>
@@ -671,7 +715,9 @@ export default function PlugDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-2 sm:p-3 pt-0">
-                  <div className="text-base sm:text-lg font-bold">₦12,500</div>
+                  <div className="text-base sm:text-lg font-bold">
+                    {formatPrice(String(paymentData.data.lockedAmount))}
+                  </div>
                 </CardContent>
               </Card>
 
@@ -690,7 +736,9 @@ export default function PlugDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-2 sm:p-3 pt-0">
-                  <div className="text-base sm:text-lg font-bold">₦5,580</div>
+                  <div className="text-base sm:text-lg font-bold">
+                    {formatPrice(String(paymentData.data.unlockedAmount))}
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"
@@ -1082,7 +1130,11 @@ export default function PlugDashboard() {
           </Card>
         )}
 
-<WithdrawalModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+        <WithdrawalModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          unlockedPayment={paymentData.data.unlockedAmount}
+        />
       </div>
     </TooltipProvider>
   );
