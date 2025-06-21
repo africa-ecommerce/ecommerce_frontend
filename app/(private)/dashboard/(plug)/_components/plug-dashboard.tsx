@@ -674,7 +674,7 @@ export default function PlugDashboard() {
                 </CardHeader>
                 <CardContent className="p-2 sm:p-3 pt-0">
                   <div className="text-base sm:text-lg font-bold">
-                    {formatPrice(String(paymentData.data.totalEarnings))}
+                    {formatPrice(String(paymentData?.data.totalEarnings))}
                   </div>
                 </CardContent>
               </Card>
@@ -716,7 +716,7 @@ export default function PlugDashboard() {
                 </CardHeader>
                 <CardContent className="p-2 sm:p-3 pt-0">
                   <div className="text-base sm:text-lg font-bold">
-                    {formatPrice(String(paymentData.data.lockedAmount))}
+                    {formatPrice(String(paymentData?.data.lockedAmount))}
                   </div>
                 </CardContent>
               </Card>
@@ -737,7 +737,7 @@ export default function PlugDashboard() {
                 </CardHeader>
                 <CardContent className="p-2 sm:p-3 pt-0">
                   <div className="text-base sm:text-lg font-bold">
-                    {formatPrice(String(paymentData.data.unlockedAmount))}
+                    {formatPrice(String(paymentData?.data.unlockedAmount))}
                   </div>
                   <Button
                     variant="outline"
@@ -1133,7 +1133,7 @@ export default function PlugDashboard() {
         <WithdrawalModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          unlockedPayment={paymentData.data.unlockedAmount}
+          unlockedPayment={paymentData?.data.unlockedAmount}
         />
       </div>
     </TooltipProvider>
