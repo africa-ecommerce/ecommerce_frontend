@@ -339,7 +339,7 @@ export default function PlugDashboard() {
     data: paymentData,
     error: paymentError,
     isLoading: paymentLoading
-  } = useSWR("/api/payments/plug", {
+  } = useSWR("/api/payments/plug/earnings", {
     refreshInterval: 300000, // Refresh every 5 minutes
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
