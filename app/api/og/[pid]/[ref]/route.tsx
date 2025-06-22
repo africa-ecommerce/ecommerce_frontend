@@ -478,7 +478,7 @@
 
 
 
-import { createMagazineStyleCard } from "@/lib/canvas-actions";
+import { createEnhancedMagazineCard } from "@/lib/canvas-actions";
 import { getProductServer } from "@/lib/products";
 import { NextResponse } from "next/server";
 
@@ -510,7 +510,7 @@ export async function GET(
   //   dimensions: { width: 1200, height: 630 },
   // });
 
-  const result = await createMagazineStyleCard({
+  const result = await createEnhancedMagazineCard({
     primaryImageUrl:
       product.data.images?.[0] || "https://via.placeholder.com/400",
     secondaryImageUrl:

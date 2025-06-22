@@ -2872,8 +2872,6 @@
 
 
 
-
-
 import {
   createCanvas,
   loadImage,
@@ -2882,7 +2880,7 @@ import {
 import { registerFont } from "canvas";
 import path from "path";
 
-// Register fonts
+// Register fonts (make sure these font files exist in your project)
 registerFont(
   path.join(process.cwd(), "lib/assets/fonts/PlayfairDisplay-Black.ttf"),
   {
@@ -2896,32 +2894,43 @@ registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Regular.ttf"), {
   weight: "normal",
 });
 
-registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Medium.ttf"), {
-  family: "Inter",
-  weight: "500",
-});
-
 registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Bold.ttf"), {
   family: "Inter",
   weight: "bold",
 });
 
+registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Black.ttf"), {
+  family: "Inter",
+  weight: "900",
+});
+
+interface CardData {
+  primaryImageUrl: string;
+  secondaryImageUrl: string;
+  productName: string;
+  productPrice: string;
+  creatorName: string;
+  dimensions?: { width: number; height: number };
+}
+
 /**
- * Creates a premium magazine-style advertisement card for a luxury shoe.
- * - Boosts image contrast and saturation for popping colors
- * - Applies a subtle gold-toned overlay
- * - Uses metallic-gold text and dynamic shadows
- * - Enlarges secondary profile image and related text
- * - Replaces duplicate price tag with a "CLICK TO BUY" gold button
+ * Creates an enhanced magazine-style card with bold, impactful design
+ * Features:
+ * - Much larger and bolder text for maximum impact
+ * - Significantly enlarged secondary profile image
+ * - Product information optimally positioned
+ * - Enhanced "NEW" badge size and visibility
+ * - Thicker borders and shadows for premium feel
+ * - High-converting layout optimized for engagement
  */
-export async function createMagazineStyleCard({
+export async function createEnhancedMagazineCard({
   primaryImageUrl,
   secondaryImageUrl,
   productName,
   productPrice,
   creatorName,
   dimensions = { width: 1200, height: 1200 },
-}: any) {
+}: CardData) {
   const scale = 2;
   const width = dimensions.width;
   const height = dimensions.height;
@@ -2929,6 +2938,7 @@ export async function createMagazineStyleCard({
   const canvas = createCanvas(width * scale, height * scale);
   const ctx = canvas.getContext("2d");
 
+  // Set high-quality rendering
   ctx.scale(scale, scale);
   ctx.imageSmoothingEnabled = true;
   ctx.quality = "best";
@@ -2942,191 +2952,230 @@ export async function createMagazineStyleCard({
       loadImage(secondaryImageUrl),
     ]);
 
-    // Draw background
-    ctx.fillStyle = "#F8F6F0";
-    ctx.fillRect(0, 0, width, height);
+    const bookWidth = width;
+    const bookHeight = height;
+    const bookX = 0;
+    const bookY = 0;
 
-    // Calculate book dimensions for a 3D cover effect
-    const bookWidth = width * 0.85;
-    const bookHeight = height * 0.9;
-    const bookX = (width - bookWidth) / 2;
-    const bookY = (height - bookHeight) / 2;
-
-    // Draw spine shadow
-    const spineWidth = 20;
-    const spineGradient = ctx.createLinearGradient(
-      bookX + bookWidth,
-      bookY,
-      bookX + bookWidth + spineWidth,
-      bookY
-    );
-    spineGradient.addColorStop(0, "rgba(160, 140, 120, 0.8)");
-    spineGradient.addColorStop(1, "rgba(100, 80, 60, 0.9)");
-    ctx.fillStyle = spineGradient;
-    ctx.fillRect(bookX + bookWidth, bookY + 8, spineWidth, bookHeight - 8);
-
-    // Draw bottom shadow
-    const bottomShadowHeight = 12;
-    const bottomGradient = ctx.createLinearGradient(
-      bookX,
-      bookY + bookHeight,
-      bookX,
-      bookY + bookHeight + bottomShadowHeight
-    );
-    bottomGradient.addColorStop(0, "rgba(0, 0, 0, 0.25)");
-    bottomGradient.addColorStop(1, "rgba(0, 0, 0, 0)");
-    ctx.fillStyle = bottomGradient;
-    ctx.fillRect(
-      bookX + 3,
-      bookY + bookHeight,
-      bookWidth + spineWidth - 3,
-      bottomShadowHeight
-    );
-
-    // Enhance primary image: boost contrast & saturation
-    (ctx as any).filter = "contrast(1.2) saturate(1.2)";
-
-    // Fit the primary image to the book cover
+    // Draw primary image (full canvas)
     const imgRatio = primaryImage.width / primaryImage.height;
-    const bookRatio = bookWidth / bookHeight;
+    const canvasRatio = width / height;
     let imgW, imgH, imgX, imgY;
-    if (imgRatio > bookRatio) {
-      imgH = bookHeight;
+
+    if (imgRatio > canvasRatio) {
+      imgH = height;
       imgW = imgH * imgRatio;
-      imgX = bookX - (imgW - bookWidth) / 2;
-      imgY = bookY;
+      imgX = -(imgW - width) / 2;
+      imgY = 0;
     } else {
-      imgW = bookWidth;
+      imgW = width;
       imgH = imgW / imgRatio;
-      imgX = bookX;
-      imgY = bookY - (imgH - bookHeight) / 2;
+      imgX = 0;
+      imgY = -(imgH - height) / 2;
     }
 
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(bookX, bookY, bookWidth, bookHeight);
-    ctx.clip();
     ctx.drawImage(primaryImage, imgX, imgY, imgW, imgH);
 
-    // Apply gold-toned overlay gradient for depth
-    const overlay = ctx.createLinearGradient(
-      bookX,
-      bookY,
-      bookX,
-      bookY + bookHeight
-    );
+    // Apply gold-toned overlay for depth
+    const overlay = ctx.createLinearGradient(bookX, bookY, bookX, bookY + bookHeight);
     overlay.addColorStop(0, "rgba(255,215,0,0.15)");
     overlay.addColorStop(0.5, "rgba(255,215,0,0.1)");
     overlay.addColorStop(1, "rgba(255,215,0,0.15)");
     ctx.fillStyle = overlay;
     ctx.fillRect(bookX, bookY, bookWidth, bookHeight);
-    ctx.restore();
-    (ctx as any).filter = "none";
 
-    // Render "INSPIRE" in metallic gold with 3D shadow
-    const titleSize = Math.min(bookWidth * 0.13, 120);
+    // Draw "INSPIRE" title with 3D shadow (BIGGER AND BOLDER)
+    const titleSize = Math.min(bookWidth * 0.18, 120);
     ctx.font = `900 ${titleSize}px Playfair Display`;
     ctx.textBaseline = "top";
     ctx.textAlign = "left";
-    ctx.fillStyle = "#D4AF37";
-    ctx.shadowColor = "rgba(0,0,0,0.4)";
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
-    ctx.fillText("INSPIRE", bookX + 30, bookY + 25);
-    ctx.shadowColor = "transparent";
 
-    // By PLUGGN (fine font)
-    const bySize = Math.min(bookWidth * 0.025, 22);
-    ctx.font = `400 ${bySize}px Inter`;
+    // Shadow (thicker)
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    ctx.fillText("INSPIRE", bookX + 34, bookY + 29);
+
+    // Main text
+    ctx.fillStyle = "#D4AF37";
+    ctx.fillText("INSPIRE", bookX + 30, bookY + 25);
+
+    // "By PLUGGN" text (BIGGER AND MORE PROMINENT)
+    const bySize = Math.min(bookWidth * 0.055, 35);
+    ctx.font = `900 ${bySize}px Inter`;
     ctx.fillStyle = "#8B4513";
     ctx.textAlign = "right";
-    ctx.fillText("By PLUGGN", bookX + bookWidth - 30, bookY + 30);
+    ctx.fillText("By PLUGGN", bookX + bookWidth - 30, bookY + 40);
 
-    // NEW badge
-    const badgeW = 70;
-    const badgeH = 30;
+    // "NEW" badge (MUCH LARGER)
+    const badgeW = 130;
+    const badgeH = 55;
     const badgeX = bookX + 30;
-    const badgeY = bookY + 25 + titleSize + 15;
+    const badgeY = bookY + 25 + titleSize + 25;
+
+    // Gold border ring (thicker)
+    ctx.strokeStyle = "#D4AF37";
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.roundRect(badgeX - 4, badgeY - 4, badgeW + 8, badgeH + 8, 28);
+    ctx.stroke();
+
+    // Black badge background
     ctx.fillStyle = "#000";
     ctx.beginPath();
-    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 15);
+    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 24);
     ctx.fill();
+
     ctx.fillStyle = "#FFF";
-    ctx.font = `bold ${Math.min(bookWidth * 0.022, 14)}px Inter`;
+    ctx.font = `900 ${Math.min(bookWidth * 0.05, 28)}px Inter`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("NEW", badgeX + badgeW / 2, badgeY + badgeH / 2);
 
-    // ELEVATE YOUR LOOK (gold stroke & neon effect)
-    const elevateSize = Math.min(bookWidth * 0.075, 65);
+    // "ELEVATE YOUR LOOK" text (MUCH BIGGER AND BOLDER)
+    const elevateSize = Math.min(bookWidth * 0.12, 85);
     ctx.font = `900 ${elevateSize}px Inter`;
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
-    ["ELEVATE", "YOUR", "LOOK"].forEach((line, i) => {
-      const y = badgeY + badgeH + 30 + i * elevateSize * 0.9;
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = "#D4AF37";
+
+    const elevateLines = ["ELEVATE", "YOUR", "LOOK"];
+    elevateLines.forEach((line, i) => {
+      const y = badgeY + badgeH + 35 + i * (elevateSize * 1.15);
+
+      // Black outline (much thicker for better visibility)
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = "#000000";
       ctx.strokeText(line, bookX + 30, y);
-      ctx.fillStyle = "rgba(255,255,255,0.2)";
+
+      // Gold fill
+      ctx.fillStyle = "#D4AF37";
       ctx.fillText(line, bookX + 30, y);
     });
 
-    // Product name
-    const nameY = bookY + bookHeight - 170;
-    ctx.font = `bold ${Math.min(bookWidth * 0.04, 28)}px Inter`;
+    // Product name (MOVED UP MUCH MORE AND BIGGER)
+    const nameY = bookY + bookHeight - 350;
+    ctx.font = `900 ${Math.min(bookWidth * 0.075, 48)}px Inter`;
     ctx.fillStyle = "#8B4513";
     ctx.textAlign = "left";
-    ctx.fillText(productName.toUpperCase(), bookX + 30, nameY);
+    ctx.textBaseline = "top";
 
-    // "CLICK TO BUY" gold button replacing duplicate price
-    const btnW = 180;
-    const btnH = 45;
-    const btnX = bookX + 30;
-    const btnY = nameY + 45;
+    // Break product name into two lines if it contains "SNEAKER"
+    const productLines = productName.includes("SNEAKER") 
+      ? ["MAINSTREAM", "SNEAKER"] 
+      : [productName];
+    
+    productLines.forEach((line, i) => {
+      ctx.fillText(line, bookX + 30, nameY + i * 55);
+    });
+
+    // Product price (REDESIGNED - NO BACKGROUND BOX)
+    const priceY = nameY + (productLines.length * 55) + 50;
+    ctx.font = `900 ${Math.min(bookWidth * 0.08, 52)}px Inter`;
+
+    // Price with bold black outline and gold fill
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = "#000000";
     ctx.fillStyle = "#D4AF37";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+
+    // Draw outline first, then fill
+    ctx.strokeText(productPrice, bookX + 30, priceY);
+    ctx.fillText(productPrice, bookX + 30, priceY);
+
+    // "CLICK TO BUY" button (REDESIGNED - PREMIUM LOOK)
+    const btnW = 280;
+    const btnH = 70;
+    const btnX = bookX + 30;
+    const btnY = priceY + 70;
+
+    // Button with gold gradient
+    const btnGradient = ctx.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
+    btnGradient.addColorStop(0, "#F4D03F");
+    btnGradient.addColorStop(0.5, "#D4AF37");
+    btnGradient.addColorStop(1, "#B7950B");
+
+    // Button shadow
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.4)";
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 4;
+
+    ctx.fillStyle = btnGradient;
     ctx.beginPath();
-    ctx.roundRect(btnX, btnY, btnW, btnH, btnH / 2);
+    ctx.roundRect(btnX, btnY, btnW, btnH, 35);
     ctx.fill();
-    ctx.font = `bold ${Math.min(bookWidth * 0.03, 20)}px Inter`;
-    ctx.fillStyle = "#FFF";
+    ctx.restore();
+
+    // Button border
+    ctx.strokeStyle = "#B7950B";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.roundRect(btnX, btnY, btnW, btnH, 35);
+    ctx.stroke();
+
+    // Button text with shadow effect
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.3)";
+    ctx.shadowBlur = 2;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 2;
+
+    ctx.font = `900 ${Math.min(width * 0.04, 28)}px Inter`;
+    ctx.fillStyle = "#FFFFFF";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("CLICK TO BUY", btnX + btnW / 2, btnY + btnH / 2);
+    ctx.restore();
 
-    // Secondary profile image (enlarged)
-    const profSize = Math.min(bookWidth * 0.15, 120);
-    const profX = bookX + bookWidth - 80;
-    const profY = bookY + bookHeight - 120;
+    // Secondary profile image (MUCH LARGER AND BETTER POSITIONED)
+    const profSize = Math.min(bookWidth * 0.28, 180);
+    const profX = bookX + bookWidth - 120;
+    const profY = bookY + bookHeight - 160;
+
+    // Enhanced shadow for profile image
     ctx.save();
-    ctx.shadowColor = "rgba(0,0,0,0.3)";
-    ctx.shadowBlur = 10;
-    ctx.shadowOffsetX = 4;
-    ctx.shadowOffsetY = 4;
+    ctx.shadowColor = "rgba(0,0,0,0.6)";
+    ctx.shadowBlur = 15;
+    ctx.shadowOffsetX = 5;
+    ctx.shadowOffsetY = 5;
+
+    // Clip to circle
     ctx.beginPath();
     ctx.arc(profX, profY, profSize / 2, 0, Math.PI * 2);
     ctx.clip();
-    ctx.drawImage(
-      secondaryImage,
-      profX - profSize / 2,
-      profY - profSize / 2,
-      profSize,
-      profSize
-    );
+    ctx.drawImage(secondaryImage, profX - profSize / 2, profY - profSize / 2, profSize, profSize);
     ctx.restore();
+
+    // Premium gold border around profile image (double border effect)
+    // Outer gold ring
     ctx.beginPath();
-    ctx.arc(profX, profY, profSize / 2 + 3, 0, Math.PI * 2);
+    ctx.arc(profX, profY, profSize / 2 + 8, 0, Math.PI * 2);
     ctx.strokeStyle = "#D4AF37";
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 4;
     ctx.stroke();
 
-    // Creator name and version text
-    ctx.font = `600 ${Math.min(bookWidth * 0.025, 16)}px Inter`;
-    ctx.fillStyle = "#8B4513";
+    // Inner gold ring
+    ctx.beginPath();
+    ctx.arc(profX, profY, profSize / 2 + 2, 0, Math.PI * 2);
+    ctx.strokeStyle = "#FFD700";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Creator name (BETTER POSITIONED AND STYLED)
+    const creatorY = profY + profSize / 2 + 25;
+    ctx.font = `900 ${Math.min(bookWidth * 0.065, 42)}px Playfair Display`;
+    ctx.fillStyle = "#2C1810";
     ctx.textAlign = "center";
-    ctx.fillText(creatorName, profX, profY + profSize / 2 + 10);
-    ctx.font = `400 ${Math.min(bookWidth * 0.02, 12)}px Inter`;
-    ctx.fillStyle = "#666";
-    ctx.fillText("VERSION 1.0", profX, profY + profSize / 2 + 30);
+    ctx.textBaseline = "top";
+
+    // Text shadow for creator name
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.3)";
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 2;
+    ctx.fillText(creatorName, profX, creatorY);
+    ctx.restore();
 
     // Return buffer
     return {
@@ -3137,21 +3186,7 @@ export async function createMagazineStyleCard({
       }),
     };
   } catch (error) {
-    console.error("Error creating magazine style card:", error);
+    console.error("Error creating enhanced magazine card:", error);
     throw error;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
