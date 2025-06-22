@@ -3157,9 +3157,6 @@
 
 
 
-
-
-
 import {
   createCanvas,
   loadImage,
@@ -3194,11 +3191,7 @@ registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Bold.ttf"), {
 });
 
 /**
- * Creates a premium magazine-style advertisement card for a luxury shoe with 3D book effect.
- * - Enhanced with Three.js for realistic 3D appearance
- * - Proper shadows and depth just like reference image
- * - Book spine with curve and realistic shadows
- * - Maintains all existing styling and layout
+ * Creates a premium magazine-style advertisement card with Three.js 3D book effect
  */
 export async function createMagazineStyleCard({
   primaryImageUrl,
@@ -3212,44 +3205,176 @@ export async function createMagazineStyleCard({
   const width = dimensions.width;
   const height = dimensions.height;
 
-  // First, create the 2D canvas content as before
-  const canvas = createCanvas(width * scale, height * scale);
-  const ctx = canvas.getContext("2d");
-
-  ctx.scale(scale, scale);
-  ctx.imageSmoothingEnabled = true;
-  ctx.quality = "best";
-  ctx.patternQuality = "best";
-  ctx.textDrawingMode = "path";
-
   try {
-    // Load images
+    // Load images first
     const [primaryImage, secondaryImage] = await Promise.all([
       loadImage(primaryImageUrl),
       loadImage(secondaryImageUrl),
     ]);
 
-    // Create the flat magazine content (without 3D effects)
-    await createFlatMagazineContent(ctx, primaryImage, secondaryImage, {
-      width,
-      height,
+    // Create Three.js scene for 3D book effect
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+
+    // Create WebGL renderer with transparent background
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true,
+    });
+    renderer.setSize(width * scale, height * scale);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setClearColor(0x000000, 0);
+
+    // Create book cover canvas texture
+    const bookCanvas = createCanvas(800, 1000);
+    const bookCtx = bookCanvas.getContext("2d");
+
+    // Draw the book cover content
+    await drawBookCover(
+      bookCtx,
+      primaryImage,
+      secondaryImage,
       productName,
       productPrice,
-      creatorName,
-    });
+      creatorName
+    );
 
-    // Convert canvas to texture for Three.js
-    const canvasTexture = canvas.toBuffer("image/png");
+    // Create texture from book cover - convert Node canvas to ImageData
+    const bookImageData = bookCtx.getImageData(0, 0, 800, 1000);
+    const bookTexture = new THREE.DataTexture(
+      bookImageData.data,
+      800,
+      1000,
+      THREE.RGBAFormat,
+      THREE.UnsignedByteType
+    );
+    bookTexture.flipY = true;
+    bookTexture.needsUpdate = true;
 
-    // Create 3D book effect with Three.js
-    const threeDBuffer = await create3DBookEffect(canvasTexture, {
-      width,
-      height,
-    });
+    // Create book geometry
+    const bookGeometry = new THREE.BoxGeometry(4, 5, 0.3);
+
+    // Create materials
+    const bookMaterial = [
+      new THREE.MeshLambertMaterial({ color: 0x8b4513 }), // right side
+      new THREE.MeshLambertMaterial({ color: 0x654321 }), // left side
+      new THREE.MeshLambertMaterial({ color: 0x8b4513 }), // top
+      new THREE.MeshLambertMaterial({ color: 0x654321 }), // bottom
+      new THREE.MeshLambertMaterial({ map: bookTexture }), // front (our cover)
+      new THREE.MeshLambertMaterial({ color: 0x8b4513 }), // back
+    ];
+
+    // Create book mesh
+    const book = new THREE.Mesh(bookGeometry, bookMaterial);
+    book.castShadow = true;
+    book.receiveShadow = false;
+    book.rotation.x = -0.1;
+    book.rotation.y = 0.15;
+    scene.add(book);
+
+    // Create ground plane for shadow
+    const groundGeometry = new THREE.PlaneGeometry(20, 20);
+    const groundMaterial = new THREE.ShadowMaterial({ opacity: 0.3 });
+    const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = -2.8;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // Add ambient light
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    // Add directional light for shadows
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(5, 10, 5);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 50;
+    directionalLight.shadow.camera.left = -10;
+    directionalLight.shadow.camera.right = 10;
+    directionalLight.shadow.camera.top = 10;
+    directionalLight.shadow.camera.bottom = -10;
+    scene.add(directionalLight);
+
+    // Position camera
+    camera.position.set(0, 0, 8);
+    camera.lookAt(0, 0, 0);
+
+    // Render the scene
+    renderer.render(scene, camera);
+
+    // Get the rendered image data
+    const gl = renderer.getContext();
+    const pixels = new Uint8Array(width * scale * height * scale * 4);
+    gl.readPixels(
+      0,
+      0,
+      width * scale,
+      height * scale,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      pixels
+    );
+
+    // Create final canvas
+    const canvas = createCanvas(width * scale, height * scale);
+    const ctx = canvas.getContext("2d");
+
+    // Draw background
+    ctx.fillStyle = "#F8F6F0";
+    ctx.fillRect(0, 0, width * scale, height * scale);
+
+    // Convert Three.js render to ImageData and draw it
+    const imageData = ctx.createImageData(width * scale, height * scale);
+
+    // Flip the image vertically (WebGL renders upside down)
+    for (let y = 0; y < height * scale; y++) {
+      for (let x = 0; x < width * scale; x++) {
+        const srcIndex = ((height * scale - 1 - y) * width * scale + x) * 4;
+        const dstIndex = (y * width * scale + x) * 4;
+
+        const r = pixels[srcIndex];
+        const g = pixels[srcIndex + 1];
+        const b = pixels[srcIndex + 2];
+        const a = pixels[srcIndex + 3];
+
+        // Only draw non-transparent pixels
+        if (a > 0) {
+          imageData.data[dstIndex] = r;
+          imageData.data[dstIndex + 1] = g;
+          imageData.data[dstIndex + 2] = b;
+          imageData.data[dstIndex + 3] = a;
+        } else {
+          // Keep background color for transparent areas
+          imageData.data[dstIndex] = 248;
+          imageData.data[dstIndex + 1] = 246;
+          imageData.data[dstIndex + 2] = 240;
+          imageData.data[dstIndex + 3] = 255;
+        }
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+
+    // Clean up Three.js resources
+    renderer.dispose();
+    bookGeometry.dispose();
+    bookTexture.dispose();
+    bookMaterial.forEach((material) => material.dispose());
+    groundGeometry.dispose();
+    groundMaterial.dispose();
 
     return {
       success: true,
-      processedImage: threeDBuffer,
+      processedImage: canvas.toBuffer("image/png", {
+        compressionLevel: 3,
+        resolution: 300,
+      }),
     };
   } catch (error) {
     console.error("Error creating magazine style card:", error);
@@ -3258,66 +3383,56 @@ export async function createMagazineStyleCard({
 }
 
 /**
- * Creates the flat magazine content without 3D effects
+ * Draw the book cover content on a canvas
  */
-async function createFlatMagazineContent(
+async function drawBookCover(
   ctx,
   primaryImage,
   secondaryImage,
-  { width, height, productName, productPrice, creatorName }
+  productName,
+  productPrice,
+  creatorName
 ) {
-  // Draw clean background
+  const width = ctx.canvas.width;
+  const height = ctx.canvas.height;
+
+  // Draw background
   ctx.fillStyle = "#F8F6F0";
   ctx.fillRect(0, 0, width, height);
-
-  // Calculate book dimensions for content area
-  const bookWidth = width * 0.85;
-  const bookHeight = height * 0.9;
-  const bookX = (width - bookWidth) / 2;
-  const bookY = (height - bookHeight) / 2;
 
   // Enhance primary image: boost contrast & saturation
   ctx.filter = "contrast(1.2) saturate(1.2)";
 
-  // Fit the primary image to the book cover
+  // Fit the primary image to cover
   const imgRatio = primaryImage.width / primaryImage.height;
-  const bookRatio = bookWidth / bookHeight;
+  const canvasRatio = width / height;
   let imgW, imgH, imgX, imgY;
-  if (imgRatio > bookRatio) {
-    imgH = bookHeight;
+
+  if (imgRatio > canvasRatio) {
+    imgH = height;
     imgW = imgH * imgRatio;
-    imgX = bookX - (imgW - bookWidth) / 2;
-    imgY = bookY;
+    imgX = -(imgW - width) / 2;
+    imgY = 0;
   } else {
-    imgW = bookWidth;
+    imgW = width;
     imgH = imgW / imgRatio;
-    imgX = bookX;
-    imgY = bookY - (imgH - bookHeight) / 2;
+    imgX = 0;
+    imgY = -(imgH - height) / 2;
   }
 
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(bookX, bookY, bookWidth, bookHeight);
-  ctx.clip();
   ctx.drawImage(primaryImage, imgX, imgY, imgW, imgH);
 
-  // Apply gold-toned overlay gradient for depth
-  const overlay = ctx.createLinearGradient(
-    bookX,
-    bookY,
-    bookX,
-    bookY + bookHeight
-  );
+  // Apply gold-toned overlay
+  const overlay = ctx.createLinearGradient(0, 0, 0, height);
   overlay.addColorStop(0, "rgba(255,215,0,0.15)");
   overlay.addColorStop(0.5, "rgba(255,215,0,0.1)");
   overlay.addColorStop(1, "rgba(255,215,0,0.15)");
   ctx.fillStyle = overlay;
-  ctx.fillRect(bookX, bookY, bookWidth, bookHeight);
-  ctx.restore();
+  ctx.fillRect(0, 0, width, height);
   ctx.filter = "none";
 
-  // Render "INSPIRE" in metallic gold with 3D shadow
-  const titleSize = Math.min(bookWidth * 0.13, 120);
+  // Render "INSPIRE" in metallic gold
+  const titleSize = width * 0.13;
   ctx.font = `900 ${titleSize}px Playfair Display`;
   ctx.textBaseline = "top";
   ctx.textAlign = "left";
@@ -3325,33 +3440,33 @@ async function createFlatMagazineContent(
   ctx.shadowColor = "rgba(0,0,0,0.4)";
   ctx.shadowOffsetX = 2;
   ctx.shadowOffsetY = 2;
-  ctx.fillText("INSPIRE", bookX + 30, bookY + 25);
+  ctx.fillText("INSPIRE", 30, 25);
   ctx.shadowColor = "transparent";
 
-  // By PLUGGN (fine font)
-  const bySize = Math.min(bookWidth * 0.025, 22);
+  // By PLUGGN
+  const bySize = width * 0.025;
   ctx.font = `400 ${bySize}px Inter`;
   ctx.fillStyle = "#8B4513";
   ctx.textAlign = "right";
-  ctx.fillText("By PLUGGN", bookX + bookWidth - 30, bookY + 30);
+  ctx.fillText("By PLUGGN", width - 30, 30);
 
   // NEW badge
   const badgeW = 70;
   const badgeH = 30;
-  const badgeX = bookX + 30;
-  const badgeY = bookY + 25 + titleSize + 15;
+  const badgeX = 30;
+  const badgeY = 25 + titleSize + 15;
   ctx.fillStyle = "#000";
   ctx.beginPath();
   ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 15);
   ctx.fill();
   ctx.fillStyle = "#FFF";
-  ctx.font = `bold ${Math.min(bookWidth * 0.022, 14)}px Inter`;
+  ctx.font = `bold ${width * 0.022}px Inter`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("NEW", badgeX + badgeW / 2, badgeY + badgeH / 2);
 
-  // ELEVATE YOUR LOOK (gold stroke & neon effect)
-  const elevateSize = Math.min(bookWidth * 0.075, 65);
+  // ELEVATE YOUR LOOK
+  const elevateSize = width * 0.075;
   ctx.font = `900 ${elevateSize}px Inter`;
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
@@ -3359,37 +3474,37 @@ async function createFlatMagazineContent(
     const y = badgeY + badgeH + 30 + i * elevateSize * 0.9;
     ctx.lineWidth = 3;
     ctx.strokeStyle = "#D4AF37";
-    ctx.strokeText(line, bookX + 30, y);
+    ctx.strokeText(line, 30, y);
     ctx.fillStyle = "rgba(255,255,255,0.2)";
-    ctx.fillText(line, bookX + 30, y);
+    ctx.fillText(line, 30, y);
   });
 
   // Product name
-  const nameY = bookY + bookHeight - 170;
-  ctx.font = `bold ${Math.min(bookWidth * 0.04, 28)}px Inter`;
+  const nameY = height - 170;
+  ctx.font = `bold ${width * 0.04}px Inter`;
   ctx.fillStyle = "#8B4513";
   ctx.textAlign = "left";
-  ctx.fillText(productName.toUpperCase(), bookX + 30, nameY);
+  ctx.fillText(productName.toUpperCase(), 30, nameY);
 
-  // "CLICK TO BUY" gold button replacing duplicate price
+  // "CLICK TO BUY" button
   const btnW = 180;
   const btnH = 45;
-  const btnX = bookX + 30;
+  const btnX = 30;
   const btnY = nameY + 45;
   ctx.fillStyle = "#D4AF37";
   ctx.beginPath();
   ctx.roundRect(btnX, btnY, btnW, btnH, btnH / 2);
   ctx.fill();
-  ctx.font = `bold ${Math.min(bookWidth * 0.03, 20)}px Inter`;
+  ctx.font = `bold ${width * 0.03}px Inter`;
   ctx.fillStyle = "#FFF";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText("CLICK TO BUY", btnX + btnW / 2, btnY + btnH / 2);
 
-  // Secondary profile image (enlarged)
-  const profSize = Math.min(bookWidth * 0.15, 120);
-  const profX = bookX + bookWidth - 80;
-  const profY = bookY + bookHeight - 120;
+  // Secondary profile image
+  const profSize = width * 0.15;
+  const profX = width - 80;
+  const profY = height - 120;
   ctx.save();
   ctx.shadowColor = "rgba(0,0,0,0.3)";
   ctx.shadowBlur = 10;
@@ -3412,160 +3527,12 @@ async function createFlatMagazineContent(
   ctx.lineWidth = 3;
   ctx.stroke();
 
-  // Creator name and version text
-  ctx.font = `600 ${Math.min(bookWidth * 0.025, 16)}px Inter`;
+  // Creator name and version
+  ctx.font = `600 ${width * 0.025}px Inter`;
   ctx.fillStyle = "#8B4513";
   ctx.textAlign = "center";
   ctx.fillText(creatorName, profX, profY + profSize / 2 + 10);
-  ctx.font = `400 ${Math.min(bookWidth * 0.02, 12)}px Inter`;
+  ctx.font = `400 ${width * 0.02}px Inter`;
   ctx.fillStyle = "#666";
   ctx.fillText("VERSION 1.0", profX, profY + profSize / 2 + 30);
-}
-
-/**
- * Creates a 3D book effect using Three.js with realistic shadows and spine
- */
-async function create3DBookEffect(canvasTexture: any, { width , height }) {
-  // Create Three.js scene
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf8f6f0);
-
-  // Camera setup for perspective view
-  const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
-  camera.position.set(2, 3, 8);
-  camera.lookAt(0, 0, 0);
-
-  // Renderer setup
-  const renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: true,
-    preserveDrawingBuffer: true,
-  });
-  renderer.setSize(width, height);
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.setClearColor(0xf8f6f0, 1);
-
-  // Create texture from canvas
-  const loader = new THREE.TextureLoader();
-  const texture = new THREE.DataTexture(
-    canvasTexture,
-    width,
-    height,
-    THREE.RGBAFormat
-  );
-  texture.needsUpdate = true;
-
-  // Create book geometry with proper proportions
-  const bookGroup = new THREE.Group();
-
-  // Main book cover
-  const coverGeometry = new THREE.BoxGeometry(4, 5.5, 0.1);
-  const coverMaterial = new THREE.MeshPhongMaterial({
-    map: texture,
-    transparent: true,
-  });
-  const cover = new THREE.Mesh(coverGeometry, coverMaterial);
-  cover.castShadow = true;
-  cover.receiveShadow = true;
-  bookGroup.add(cover);
-
-  // Book spine with curve effect
-  const spineGeometry = new THREE.CylinderGeometry(0.05, 0.08, 5.5, 8);
-  const spineMaterial = new THREE.MeshPhongMaterial({
-    color: 0x8b4513,
-    shininess: 30,
-  });
-  const spine = new THREE.Mesh(spineGeometry, spineMaterial);
-  spine.position.set(-2.05, 0, 0);
-  spine.rotation.z = Math.PI / 2;
-  spine.castShadow = true;
-  bookGroup.add(spine);
-
-  // Book back cover (slightly darker)
-  const backGeometry = new THREE.BoxGeometry(4, 5.5, 0.05);
-  const backMaterial = new THREE.MeshPhongMaterial({
-    color: 0xe8e6e0,
-  });
-  const back = new THREE.Mesh(backGeometry, backMaterial);
-  back.position.z = -0.075;
-  back.receiveShadow = true;
-  bookGroup.add(back);
-
-  // Add book pages effect
-  const pagesGeometry = new THREE.BoxGeometry(3.9, 5.4, 0.05);
-  const pagesMaterial = new THREE.MeshPhongMaterial({
-    color: 0xffffff,
-  });
-  const pages = new THREE.Mesh(pagesGeometry, pagesMaterial);
-  pages.position.set(0.02, 0, -0.05);
-  pages.receiveShadow = true;
-  bookGroup.add(pages);
-
-  // Position and rotate book for realistic view
-  bookGroup.rotation.x = -0.1;
-  bookGroup.rotation.y = 0.2;
-  bookGroup.position.y = -0.5;
-
-  scene.add(bookGroup);
-
-  // Enhanced lighting setup for realistic shadows
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-  scene.add(ambientLight);
-
-  // Main directional light (simulates sun/main light source)
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-  directionalLight.position.set(5, 10, 5);
-  directionalLight.castShadow = true;
-  directionalLight.shadow.mapSize.width = 2048;
-  directionalLight.shadow.mapSize.height = 2048;
-  directionalLight.shadow.camera.near = 0.5;
-  directionalLight.shadow.camera.far = 50;
-  directionalLight.shadow.camera.left = -10;
-  directionalLight.shadow.camera.right = 10;
-  directionalLight.shadow.camera.top = 10;
-  directionalLight.shadow.camera.bottom = -10;
-  directionalLight.shadow.bias = -0.0001;
-  scene.add(directionalLight);
-
-  // Fill light from the left
-  const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
-  fillLight.position.set(-5, 5, 3);
-  scene.add(fillLight);
-
-  // Rim light for edge definition
-  const rimLight = new THREE.DirectionalLight(0xfff5dc, 0.2);
-  rimLight.position.set(-2, 2, -5);
-  scene.add(rimLight);
-
-  // Ground plane for shadows
-  const groundGeometry = new THREE.PlaneGeometry(20, 20);
-  const groundMaterial = new THREE.MeshPhongMaterial({
-    color: 0xf8f6f0,
-    transparent: true,
-    opacity: 0.8,
-  });
-  const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = -3;
-  ground.receiveShadow = true;
-  scene.add(ground);
-
-  // Render the scene
-  renderer.render(scene, camera);
-
-  // Convert to buffer
-  const canvas = renderer.domElement;
-  const context = canvas.getContext("2d");
-  const imageData = context!.getImageData(0, 0, width, height);
-
-  // Convert ImageData to PNG buffer (simplified version)
-  // In a real Node.js environment, you'd use a library like 'canvas' to convert this
-  // For now, we'll return the rendered data
-  const buffer = Buffer.from(imageData.data.buffer);
-
-  // Cleanup
-  renderer.dispose();
-
-  return buffer;
 }
