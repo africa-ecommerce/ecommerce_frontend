@@ -2199,6 +2199,366 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import {
+//   createCanvas,
+//   loadImage,
+//   CanvasRenderingContext2D as NodeCanvasRenderingContext2D,
+// } from "canvas";
+// import { registerFont } from "canvas";
+// import path from "path";
+
+// // Register fonts - You'll need these specific fonts for exact match
+// // Primary: Playfair Display or similar serif for "INSPIRE"
+// // Secondary: Inter or Helvetica Neue for body text
+// registerFont(
+//   path.join(process.cwd(), "lib/assets/fonts/PlayfairDisplay-Black.ttf"),
+//   {
+//     family: "Playfair Display",
+//     weight: "900",
+//   }
+// );
+
+// registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Regular.ttf"), {
+//   family: "Inter",
+//   weight: "normal",
+// });
+
+// registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Medium.ttf"), {
+//   family: "Inter",
+//   weight: "500",
+// });
+
+// registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Bold.ttf"), {
+//   family: "Inter",
+//   weight: "bold",
+// });
+
+// export async function createMagazineStyleCard({
+//   primaryImageUrl,
+//   secondaryImageUrl,
+//   productName,
+//   productPrice,
+//   name,
+//   dimensions = { width: 1200, height: 1200 }, // Square format like your image
+// }: any) {
+//   const scale = 2;
+//   const width = dimensions.width;
+//   const height = dimensions.height;
+
+//   const canvas = createCanvas(width * scale, height * scale);
+//   const ctx = canvas.getContext("2d");
+
+//   ctx.scale(scale, scale);
+//   ctx.imageSmoothingEnabled = true;
+//   ctx.quality = "best";
+//   ctx.patternQuality = "best";
+//   ctx.textDrawingMode = "path";
+
+//   try {
+//     const [primaryImage, secondaryImage] = await Promise.all([
+//       loadImage(primaryImageUrl),
+//       loadImage(secondaryImageUrl),
+//     ]);
+
+//     // Create the magazine/book background with 3D effect
+//     const bookWidth = width * 0.85;
+//     const bookHeight = height * 0.95;
+//     const bookX = (width - bookWidth) / 2;
+//     const bookY = (height - bookHeight) / 2;
+
+//     // 3D Book spine shadow (right side)
+//     const spineWidth = 25;
+//     const spineGradient = ctx.createLinearGradient(
+//       bookX + bookWidth,
+//       bookY,
+//       bookX + bookWidth + spineWidth,
+//       bookY
+//     );
+//     spineGradient.addColorStop(0, "rgba(180, 160, 140, 0.8)");
+//     spineGradient.addColorStop(1, "rgba(120, 100, 80, 0.9)");
+
+//     ctx.fillStyle = spineGradient;
+//     ctx.fillRect(bookX + bookWidth, bookY + 10, spineWidth, bookHeight - 10);
+
+//     // Bottom shadow for 3D effect
+//     const bottomShadowHeight = 15;
+//     const bottomGradient = ctx.createLinearGradient(
+//       bookX,
+//       bookY + bookHeight,
+//       bookX,
+//       bookY + bookHeight + bottomShadowHeight
+//     );
+//     bottomGradient.addColorStop(0, "rgba(0, 0, 0, 0.3)");
+//     bottomGradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+//     ctx.fillStyle = bottomGradient;
+//     ctx.fillRect(
+//       bookX + 5,
+//       bookY + bookHeight,
+//       bookWidth + spineWidth - 5,
+//       bottomShadowHeight
+//     );
+
+//     // Main book/magazine surface - light beige/cream color like your image
+//     ctx.fillStyle = "#F5F1EB"; // Cream/beige background
+//     ctx.fillRect(bookX, bookY, bookWidth, bookHeight);
+
+//     // Subtle book binding line
+//     ctx.strokeStyle = "rgba(200, 180, 160, 0.4)";
+//     ctx.lineWidth = 1;
+//     ctx.beginPath();
+//     ctx.moveTo(bookX + bookWidth - 2, bookY);
+//     ctx.lineTo(bookX + bookWidth - 2, bookY + bookHeight);
+//     ctx.stroke();
+
+//     // "INSPIRE" title - large serif font (exact match)
+//     const titleFontSize = Math.min(width * 0.12, 140);
+//     ctx.font = `900 ${titleFontSize}px Playfair Display, serif`;
+//     ctx.fillStyle = "#8B4513"; // Dark brown color like your image
+//     ctx.textAlign = "left";
+//     ctx.textBaseline = "top";
+
+//     const titleX = bookX + 40;
+//     const titleY = bookY + 30;
+//     ctx.fillText("INSPIRE", titleX, titleY);
+
+//     // "By PLUGGN" - smaller, positioned top right
+//     const byFontSize = Math.min(width * 0.022, 26);
+//     ctx.font = `400 ${byFontSize}px Inter`;
+//     ctx.fillStyle = "#8B4513";
+//     ctx.textAlign = "right";
+//     ctx.fillText("By PLUGGN", bookX + bookWidth - 40, titleY + 10);
+
+//     // "NEW" badge - black rounded rectangle
+//     const badgeWidth = 80;
+//     const badgeHeight = 35;
+//     const badgeX = titleX;
+//     const badgeY = titleY + titleFontSize + 20;
+
+//     // Badge background
+//     ctx.fillStyle = "#000000";
+//     ctx.beginPath();
+//     ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 20);
+//     ctx.fill();
+
+//     // Badge text
+//     ctx.font = `bold ${Math.min(width * 0.02, 16)}px Inter`;
+//     ctx.fillStyle = "#FFFFFF";
+//     ctx.textAlign = "center";
+//     ctx.textBaseline = "middle";
+//     ctx.fillText("NEW", badgeX + badgeWidth / 2, badgeY + badgeHeight / 2);
+
+//     // Main product image - positioned in center-right area
+//     const imageSize = Math.min(bookWidth * 0.55, bookHeight * 0.6);
+//     const imageX = bookX + bookWidth * 0.4;
+//     const imageY = bookY + bookHeight * 0.25;
+
+//     // Image shadow
+//     ctx.save();
+//     ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+//     ctx.shadowBlur = 20;
+//     ctx.shadowOffsetX = 10;
+//     ctx.shadowOffsetY = 10;
+
+//     // Calculate aspect ratio and draw image
+//     const imgAspectRatio = primaryImage.width / primaryImage.height;
+//     let drawWidth = imageSize;
+//     let drawHeight = imageSize / imgAspectRatio;
+
+//     if (drawHeight > imageSize) {
+//       drawHeight = imageSize;
+//       drawWidth = imageSize * imgAspectRatio;
+//     }
+
+//     ctx.drawImage(primaryImage, imageX, imageY, drawWidth, drawHeight);
+//     ctx.restore();
+
+//     // "ELEVATE YOUR LOOK" text - outline style
+//     const elevateFontSize = Math.min(width * 0.065, 78);
+//     ctx.font = `900 ${elevateFontSize}px Inter`;
+//     ctx.textAlign = "left";
+//     ctx.textBaseline = "top";
+
+//     const elevateTexts = ["ELEVATE", "YOUR", "LOOK"];
+//     let elevateY = badgeY + 80;
+
+//     elevateTexts.forEach((text, index) => {
+//       const textY = elevateY + index * (elevateFontSize * 0.9);
+
+//       // Outline
+//       ctx.strokeStyle = "#8B4513";
+//       ctx.lineWidth = 2;
+//       ctx.strokeText(text, titleX, textY);
+
+//       // Fill with light color
+//       ctx.fillStyle = "rgba(139, 69, 19, 0.1)";
+//       ctx.fillText(text, titleX, textY);
+//     });
+
+//     // Product name
+//     const productNameY = bookY + bookHeight - 180;
+//     ctx.font = `bold ${Math.min(width * 0.035, 32)}px Inter`;
+//     ctx.fillStyle = "#8B4513";
+//     ctx.textAlign = "left";
+//     ctx.textBaseline = "top";
+//     ctx.fillText(productName.toUpperCase(), titleX, productNameY);
+
+//     // Price in box
+//     const priceBoxY = productNameY + 50;
+//     const priceBoxWidth = 120;
+//     const priceBoxHeight = 40;
+
+//     // Price box background
+//     ctx.strokeStyle = "#8B4513";
+//     ctx.lineWidth = 2;
+//     ctx.strokeRect(titleX, priceBoxY, priceBoxWidth, priceBoxHeight);
+
+//     // Price text
+//     ctx.font = `bold ${Math.min(width * 0.025, 24)}px Inter`;
+//     ctx.fillStyle = "#8B4513";
+//     ctx.textAlign = "center";
+//     ctx.textBaseline = "middle";
+//     ctx.fillText(
+//       `₦${productPrice.toLocaleString()}`,
+//       titleX + priceBoxWidth / 2,
+//       priceBoxY + priceBoxHeight / 2
+//     );
+
+//     // Secondary image (profile) - circular, bottom right
+//     const profileSize = Math.min(width * 0.08, 80);
+//     const profileX = bookX + bookWidth - 100;
+//     const profileY = bookY + bookHeight - 120;
+
+//     // Profile image shadow
+//     ctx.save();
+//     ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+//     ctx.shadowBlur = 10;
+//     ctx.shadowOffsetX = 5;
+//     ctx.shadowOffsetY = 5;
+
+//     // Circular clip for profile
+//     ctx.beginPath();
+//     ctx.arc(profileX, profileY, profileSize / 2, 0, Math.PI * 2);
+//     ctx.clip();
+
+//     ctx.drawImage(
+//       secondaryImage,
+//       profileX - profileSize / 2,
+//       profileY - profileSize / 2,
+//       profileSize,
+//       profileSize
+//     );
+//     ctx.restore();
+
+//     // Profile border
+//     ctx.beginPath();
+//     ctx.arc(profileX, profileY, profileSize / 2 + 2, 0, Math.PI * 2);
+//     ctx.strokeStyle = "#8B4513";
+//     ctx.lineWidth = 3;
+//     ctx.stroke();
+
+//     // Name below profile
+//     ctx.font = `500 ${Math.min(width * 0.018, 16)}px Inter`;
+//     ctx.fillStyle = "#8B4513";
+//     ctx.textAlign = "center";
+//     ctx.textBaseline = "top";
+//     ctx.fillText(name, profileX, profileY + profileSize / 2 + 10);
+
+//     // Version text
+//     ctx.font = `400 ${Math.min(width * 0.014, 12)}px Inter`;
+//     ctx.fillStyle = "#999999";
+//     ctx.fillText("VERSION 1.0", profileX, profileY + profileSize / 2 + 30);
+
+//     // Duplicate price at bottom (as shown in your image)
+//     const bottomPriceY = bookY + bookHeight - 50;
+//     ctx.font = `bold ${Math.min(width * 0.04, 36)}px Inter`;
+//     ctx.fillStyle = "#8B4513";
+//     ctx.textAlign = "left";
+//     ctx.textBaseline = "bottom";
+//     ctx.fillText(`₦ ${productPrice.toLocaleString()}`, titleX, bottomPriceY);
+
+//     return {
+//       success: true,
+//       processedImage: canvas.toBuffer("image/png", {
+//         compressionLevel: 3,
+//         resolution: 300,
+//       }),
+//     };
+//   } catch (error) {
+//     console.error("Error creating magazine style card:", error);
+//     throw error;
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import {
   createCanvas,
   loadImage,
@@ -2207,9 +2567,7 @@ import {
 import { registerFont } from "canvas";
 import path from "path";
 
-// Register fonts - You'll need these specific fonts for exact match
-// Primary: Playfair Display or similar serif for "INSPIRE"
-// Secondary: Inter or Helvetica Neue for body text
+// Register fonts
 registerFont(
   path.join(process.cwd(), "lib/assets/fonts/PlayfairDisplay-Black.ttf"),
   {
@@ -2239,7 +2597,7 @@ export async function createMagazineStyleCard({
   productName,
   productPrice,
   name,
-  dimensions = { width: 1200, height: 1200 }, // Square format like your image
+  dimensions = { width: 1200, height: 1200 },
 }: any) {
   const scale = 2;
   const width = dimensions.width;
@@ -2260,153 +2618,167 @@ export async function createMagazineStyleCard({
       loadImage(secondaryImageUrl),
     ]);
 
-    // Create the magazine/book background with 3D effect
+    // Create the overall canvas background (light beige)
+    ctx.fillStyle = "#F8F6F0";
+    ctx.fillRect(0, 0, width, height);
+
+    // Create the magazine/book dimensions
     const bookWidth = width * 0.85;
-    const bookHeight = height * 0.95;
+    const bookHeight = height * 0.9;
     const bookX = (width - bookWidth) / 2;
     const bookY = (height - bookHeight) / 2;
 
     // 3D Book spine shadow (right side)
-    const spineWidth = 25;
+    const spineWidth = 20;
     const spineGradient = ctx.createLinearGradient(
       bookX + bookWidth,
       bookY,
       bookX + bookWidth + spineWidth,
       bookY
     );
-    spineGradient.addColorStop(0, "rgba(180, 160, 140, 0.8)");
-    spineGradient.addColorStop(1, "rgba(120, 100, 80, 0.9)");
+    spineGradient.addColorStop(0, "rgba(160, 140, 120, 0.8)");
+    spineGradient.addColorStop(1, "rgba(100, 80, 60, 0.9)");
 
     ctx.fillStyle = spineGradient;
-    ctx.fillRect(bookX + bookWidth, bookY + 10, spineWidth, bookHeight - 10);
+    ctx.fillRect(bookX + bookWidth, bookY + 8, spineWidth, bookHeight - 8);
 
     // Bottom shadow for 3D effect
-    const bottomShadowHeight = 15;
+    const bottomShadowHeight = 12;
     const bottomGradient = ctx.createLinearGradient(
       bookX,
       bookY + bookHeight,
       bookX,
       bookY + bookHeight + bottomShadowHeight
     );
-    bottomGradient.addColorStop(0, "rgba(0, 0, 0, 0.3)");
+    bottomGradient.addColorStop(0, "rgba(0, 0, 0, 0.25)");
     bottomGradient.addColorStop(1, "rgba(0, 0, 0, 0)");
 
     ctx.fillStyle = bottomGradient;
     ctx.fillRect(
-      bookX + 5,
+      bookX + 3,
       bookY + bookHeight,
-      bookWidth + spineWidth - 5,
+      bookWidth + spineWidth - 3,
       bottomShadowHeight
     );
 
-    // Main book/magazine surface - light beige/cream color like your image
-    ctx.fillStyle = "#F5F1EB"; // Cream/beige background
+    // Calculate primary image dimensions to fill the book area
+    const imgAspectRatio = primaryImage.width / primaryImage.height;
+    const bookAspectRatio = bookWidth / bookHeight;
+
+    let imageWidth, imageHeight, imageX, imageY;
+
+    // Fill the entire book area with the image
+    if (imgAspectRatio > bookAspectRatio) {
+      // Image is wider - fit to height
+      imageHeight = bookHeight;
+      imageWidth = imageHeight * imgAspectRatio;
+      imageX = bookX - (imageWidth - bookWidth) / 2;
+      imageY = bookY;
+    } else {
+      // Image is taller - fit to width
+      imageWidth = bookWidth;
+      imageHeight = imageWidth / imgAspectRatio;
+      imageX = bookX;
+      imageY = bookY - (imageHeight - bookHeight) / 2;
+    }
+
+    // Draw the primary image as the book cover
+    ctx.save();
+
+    // Clip to book area
+    ctx.beginPath();
+    ctx.rect(bookX, bookY, bookWidth, bookHeight);
+    ctx.clip();
+
+    ctx.drawImage(primaryImage, imageX, imageY, imageWidth, imageHeight);
+
+    // Add a subtle overlay to make text more readable
+    const overlayGradient = ctx.createLinearGradient(
+      bookX,
+      bookY,
+      bookX,
+      bookY + bookHeight
+    );
+    overlayGradient.addColorStop(0, "rgba(245, 241, 235, 0.7)"); // Light cream overlay
+    overlayGradient.addColorStop(0.6, "rgba(245, 241, 235, 0.4)");
+    overlayGradient.addColorStop(1, "rgba(245, 241, 235, 0.8)");
+
+    ctx.fillStyle = overlayGradient;
     ctx.fillRect(bookX, bookY, bookWidth, bookHeight);
 
-    // Subtle book binding line
-    ctx.strokeStyle = "rgba(200, 180, 160, 0.4)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(bookX + bookWidth - 2, bookY);
-    ctx.lineTo(bookX + bookWidth - 2, bookY + bookHeight);
-    ctx.stroke();
+    ctx.restore();
 
-    // "INSPIRE" title - large serif font (exact match)
-    const titleFontSize = Math.min(width * 0.12, 140);
+    // "INSPIRE" title - large serif font on the image
+    const titleFontSize = Math.min(bookWidth * 0.13, 120);
     ctx.font = `900 ${titleFontSize}px Playfair Display, serif`;
-    ctx.fillStyle = "#8B4513"; // Dark brown color like your image
+    ctx.fillStyle = "#8B4513"; // Dark brown
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
 
-    const titleX = bookX + 40;
-    const titleY = bookY + 30;
+    const titleX = bookX + 30;
+    const titleY = bookY + 25;
     ctx.fillText("INSPIRE", titleX, titleY);
 
-    // "By PLUGGN" - smaller, positioned top right
-    const byFontSize = Math.min(width * 0.022, 26);
+    // "By PLUGGN" - top right on the image
+    const byFontSize = Math.min(bookWidth * 0.025, 22);
     ctx.font = `400 ${byFontSize}px Inter`;
     ctx.fillStyle = "#8B4513";
     ctx.textAlign = "right";
-    ctx.fillText("By PLUGGN", bookX + bookWidth - 40, titleY + 10);
+    ctx.fillText("By PLUGGN", bookX + bookWidth - 30, titleY + 5);
 
-    // "NEW" badge - black rounded rectangle
-    const badgeWidth = 80;
-    const badgeHeight = 35;
+    // "NEW" badge on the image
+    const badgeWidth = 70;
+    const badgeHeight = 30;
     const badgeX = titleX;
-    const badgeY = titleY + titleFontSize + 20;
+    const badgeY = titleY + titleFontSize + 15;
 
     // Badge background
     ctx.fillStyle = "#000000";
     ctx.beginPath();
-    ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 20);
+    ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 15);
     ctx.fill();
 
     // Badge text
-    ctx.font = `bold ${Math.min(width * 0.02, 16)}px Inter`;
+    ctx.font = `bold ${Math.min(bookWidth * 0.022, 14)}px Inter`;
     ctx.fillStyle = "#FFFFFF";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("NEW", badgeX + badgeWidth / 2, badgeY + badgeHeight / 2);
 
-    // Main product image - positioned in center-right area
-    const imageSize = Math.min(bookWidth * 0.55, bookHeight * 0.6);
-    const imageX = bookX + bookWidth * 0.4;
-    const imageY = bookY + bookHeight * 0.25;
-
-    // Image shadow
-    ctx.save();
-    ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetX = 10;
-    ctx.shadowOffsetY = 10;
-
-    // Calculate aspect ratio and draw image
-    const imgAspectRatio = primaryImage.width / primaryImage.height;
-    let drawWidth = imageSize;
-    let drawHeight = imageSize / imgAspectRatio;
-
-    if (drawHeight > imageSize) {
-      drawHeight = imageSize;
-      drawWidth = imageSize * imgAspectRatio;
-    }
-
-    ctx.drawImage(primaryImage, imageX, imageY, drawWidth, drawHeight);
-    ctx.restore();
-
-    // "ELEVATE YOUR LOOK" text - outline style
-    const elevateFontSize = Math.min(width * 0.065, 78);
+    // "ELEVATE YOUR LOOK" text - outline style on the image
+    const elevateFontSize = Math.min(bookWidth * 0.075, 65);
     ctx.font = `900 ${elevateFontSize}px Inter`;
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
 
     const elevateTexts = ["ELEVATE", "YOUR", "LOOK"];
-    let elevateY = badgeY + 80;
+    let elevateY = badgeY + 60;
 
     elevateTexts.forEach((text, index) => {
-      const textY = elevateY + index * (elevateFontSize * 0.9);
+      const textY = elevateY + index * (elevateFontSize * 0.85);
 
       // Outline
       ctx.strokeStyle = "#8B4513";
       ctx.lineWidth = 2;
       ctx.strokeText(text, titleX, textY);
 
-      // Fill with light color
+      // Fill with transparent color
       ctx.fillStyle = "rgba(139, 69, 19, 0.1)";
       ctx.fillText(text, titleX, textY);
     });
 
-    // Product name
-    const productNameY = bookY + bookHeight - 180;
-    ctx.font = `bold ${Math.min(width * 0.035, 32)}px Inter`;
+    // Product name on the image
+    const productNameY = bookY + bookHeight - 150;
+    ctx.font = `bold ${Math.min(bookWidth * 0.04, 28)}px Inter`;
     ctx.fillStyle = "#8B4513";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
     ctx.fillText(productName.toUpperCase(), titleX, productNameY);
 
-    // Price in box
-    const priceBoxY = productNameY + 50;
-    const priceBoxWidth = 120;
-    const priceBoxHeight = 40;
+    // Price in box on the image
+    const priceBoxY = productNameY + 40;
+    const priceBoxWidth = 100;
+    const priceBoxHeight = 35;
 
     // Price box background
     ctx.strokeStyle = "#8B4513";
@@ -2414,7 +2786,7 @@ export async function createMagazineStyleCard({
     ctx.strokeRect(titleX, priceBoxY, priceBoxWidth, priceBoxHeight);
 
     // Price text
-    ctx.font = `bold ${Math.min(width * 0.025, 24)}px Inter`;
+    ctx.font = `bold ${Math.min(bookWidth * 0.03, 20)}px Inter`;
     ctx.fillStyle = "#8B4513";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -2424,17 +2796,17 @@ export async function createMagazineStyleCard({
       priceBoxY + priceBoxHeight / 2
     );
 
-    // Secondary image (profile) - circular, bottom right
-    const profileSize = Math.min(width * 0.08, 80);
-    const profileX = bookX + bookWidth - 100;
-    const profileY = bookY + bookHeight - 120;
+    // Secondary image (profile) - circular, on the image
+    const profileSize = Math.min(bookWidth * 0.1, 70);
+    const profileX = bookX + bookWidth - 60;
+    const profileY = bookY + bookHeight - 100;
 
     // Profile image shadow
     ctx.save();
     ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
-    ctx.shadowBlur = 10;
-    ctx.shadowOffsetX = 5;
-    ctx.shadowOffsetY = 5;
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 3;
 
     // Circular clip for profile
     ctx.beginPath();
@@ -2454,28 +2826,36 @@ export async function createMagazineStyleCard({
     ctx.beginPath();
     ctx.arc(profileX, profileY, profileSize / 2 + 2, 0, Math.PI * 2);
     ctx.strokeStyle = "#8B4513";
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Name below profile
-    ctx.font = `500 ${Math.min(width * 0.018, 16)}px Inter`;
+    // Name below profile on the image
+    ctx.font = `500 ${Math.min(bookWidth * 0.02, 14)}px Inter`;
     ctx.fillStyle = "#8B4513";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
-    ctx.fillText(name, profileX, profileY + profileSize / 2 + 10);
+    ctx.fillText(name, profileX, profileY + profileSize / 2 + 8);
 
-    // Version text
-    ctx.font = `400 ${Math.min(width * 0.014, 12)}px Inter`;
-    ctx.fillStyle = "#999999";
-    ctx.fillText("VERSION 1.0", profileX, profileY + profileSize / 2 + 30);
+    // Version text on the image
+    ctx.font = `400 ${Math.min(bookWidth * 0.016, 10)}px Inter`;
+    ctx.fillStyle = "#666666";
+    ctx.fillText("VERSION 1.0", profileX, profileY + profileSize / 2 + 25);
 
-    // Duplicate price at bottom (as shown in your image)
-    const bottomPriceY = bookY + bookHeight - 50;
-    ctx.font = `bold ${Math.min(width * 0.04, 36)}px Inter`;
+    // Large price at bottom on the image
+    const bottomPriceY = bookY + bookHeight - 30;
+    ctx.font = `bold ${Math.min(bookWidth * 0.045, 32)}px Inter`;
     ctx.fillStyle = "#8B4513";
     ctx.textAlign = "left";
     ctx.textBaseline = "bottom";
     ctx.fillText(`₦ ${productPrice.toLocaleString()}`, titleX, bottomPriceY);
+
+    // Subtle book binding line
+    ctx.strokeStyle = "rgba(139, 69, 19, 0.3)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(bookX + bookWidth - 1, bookY);
+    ctx.lineTo(bookX + bookWidth - 1, bookY + bookHeight);
+    ctx.stroke();
 
     return {
       success: true,
