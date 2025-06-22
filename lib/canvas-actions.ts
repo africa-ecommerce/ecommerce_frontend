@@ -2874,6 +2874,281 @@
 
 
 
+// import {
+//   createCanvas,
+//   loadImage,
+//   CanvasRenderingContext2D as NodeCanvasRenderingContext2D,
+// } from "canvas";
+// import { registerFont } from "canvas";
+// import path from "path";
+
+// // Register fonts
+// registerFont(
+//   path.join(process.cwd(), "lib/assets/fonts/PlayfairDisplay-Black.ttf"),
+//   {
+//     family: "Playfair Display",
+//     weight: "900",
+//   }
+// );
+
+// registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Regular.ttf"), {
+//   family: "Inter",
+//   weight: "normal",
+// });
+
+// registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Medium.ttf"), {
+//   family: "Inter",
+//   weight: "500",
+// });
+
+// registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Bold.ttf"), {
+//   family: "Inter",
+//   weight: "bold",
+// });
+
+// /**
+//  * Creates a premium magazine-style advertisement card for a luxury shoe.
+//  * - Boosts image contrast and saturation for popping colors
+//  * - Applies a subtle gold-toned overlay
+//  * - Uses metallic-gold text and dynamic shadows
+//  * - Enlarges secondary profile image and related text
+//  * - Replaces duplicate price tag with a "CLICK TO BUY" gold button
+//  */
+// export async function createMagazineStyleCard({
+//   primaryImageUrl,
+//   secondaryImageUrl,
+//   productName,
+//   productPrice,
+//   creatorName,
+//   dimensions = { width: 1200, height: 1200 },
+// }: any) {
+//   const scale = 2;
+//   const width = dimensions.width;
+//   const height = dimensions.height;
+
+//   const canvas = createCanvas(width * scale, height * scale);
+//   const ctx = canvas.getContext("2d");
+
+//   ctx.scale(scale, scale);
+//   ctx.imageSmoothingEnabled = true;
+//   ctx.quality = "best";
+//   ctx.patternQuality = "best";
+//   ctx.textDrawingMode = "path";
+
+//   try {
+//     // Load images
+//     const [primaryImage, secondaryImage] = await Promise.all([
+//       loadImage(primaryImageUrl),
+//       loadImage(secondaryImageUrl),
+//     ]);
+
+//     // Draw background
+//     ctx.fillStyle = "#F8F6F0";
+//     ctx.fillRect(0, 0, width, height);
+
+//     // Calculate book dimensions for a 3D cover effect
+//     const bookWidth = width * 0.85;
+//     const bookHeight = height * 0.9;
+//     const bookX = (width - bookWidth) / 2;
+//     const bookY = (height - bookHeight) / 2;
+
+//     // Draw spine shadow
+//     const spineWidth = 20;
+//     const spineGradient = ctx.createLinearGradient(
+//       bookX + bookWidth,
+//       bookY,
+//       bookX + bookWidth + spineWidth,
+//       bookY
+//     );
+//     spineGradient.addColorStop(0, "rgba(160, 140, 120, 0.8)");
+//     spineGradient.addColorStop(1, "rgba(100, 80, 60, 0.9)");
+//     ctx.fillStyle = spineGradient;
+//     ctx.fillRect(bookX + bookWidth, bookY + 8, spineWidth, bookHeight - 8);
+
+//     // Draw bottom shadow
+//     const bottomShadowHeight = 12;
+//     const bottomGradient = ctx.createLinearGradient(
+//       bookX,
+//       bookY + bookHeight,
+//       bookX,
+//       bookY + bookHeight + bottomShadowHeight
+//     );
+//     bottomGradient.addColorStop(0, "rgba(0, 0, 0, 0.25)");
+//     bottomGradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+//     ctx.fillStyle = bottomGradient;
+//     ctx.fillRect(
+//       bookX + 3,
+//       bookY + bookHeight,
+//       bookWidth + spineWidth - 3,
+//       bottomShadowHeight
+//     );
+
+//     // Enhance primary image: boost contrast & saturation
+//     (ctx as any).filter = "contrast(1.2) saturate(1.2)";
+
+//     // Fit the primary image to the book cover
+//     const imgRatio = primaryImage.width / primaryImage.height;
+//     const bookRatio = bookWidth / bookHeight;
+//     let imgW, imgH, imgX, imgY;
+//     if (imgRatio > bookRatio) {
+//       imgH = bookHeight;
+//       imgW = imgH * imgRatio;
+//       imgX = bookX - (imgW - bookWidth) / 2;
+//       imgY = bookY;
+//     } else {
+//       imgW = bookWidth;
+//       imgH = imgW / imgRatio;
+//       imgX = bookX;
+//       imgY = bookY - (imgH - bookHeight) / 2;
+//     }
+
+//     ctx.save();
+//     ctx.beginPath();
+//     ctx.rect(bookX, bookY, bookWidth, bookHeight);
+//     ctx.clip();
+//     ctx.drawImage(primaryImage, imgX, imgY, imgW, imgH);
+
+//     // Apply gold-toned overlay gradient for depth
+//     const overlay = ctx.createLinearGradient(
+//       bookX,
+//       bookY,
+//       bookX,
+//       bookY + bookHeight
+//     );
+//     overlay.addColorStop(0, "rgba(255,215,0,0.15)");
+//     overlay.addColorStop(0.5, "rgba(255,215,0,0.1)");
+//     overlay.addColorStop(1, "rgba(255,215,0,0.15)");
+//     ctx.fillStyle = overlay;
+//     ctx.fillRect(bookX, bookY, bookWidth, bookHeight);
+//     ctx.restore();
+//     (ctx as any).filter = "none";
+
+//     // Render "INSPIRE" in metallic gold with 3D shadow
+//     const titleSize = Math.min(bookWidth * 0.13, 120);
+//     ctx.font = `900 ${titleSize}px Playfair Display`;
+//     ctx.textBaseline = "top";
+//     ctx.textAlign = "left";
+//     ctx.fillStyle = "#D4AF37";
+//     ctx.shadowColor = "rgba(0,0,0,0.4)";
+//     ctx.shadowOffsetX = 2;
+//     ctx.shadowOffsetY = 2;
+//     ctx.fillText("INSPIRE", bookX + 30, bookY + 25);
+//     ctx.shadowColor = "transparent";
+
+//     // By PLUGGN (fine font)
+//     const bySize = Math.min(bookWidth * 0.025, 22);
+//     ctx.font = `400 ${bySize}px Inter`;
+//     ctx.fillStyle = "#8B4513";
+//     ctx.textAlign = "right";
+//     ctx.fillText("By PLUGGN", bookX + bookWidth - 30, bookY + 30);
+
+//     // NEW badge
+//     const badgeW = 70;
+//     const badgeH = 30;
+//     const badgeX = bookX + 30;
+//     const badgeY = bookY + 25 + titleSize + 15;
+//     ctx.fillStyle = "#000";
+//     ctx.beginPath();
+//     ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 15);
+//     ctx.fill();
+//     ctx.fillStyle = "#FFF";
+//     ctx.font = `bold ${Math.min(bookWidth * 0.022, 14)}px Inter`;
+//     ctx.textAlign = "center";
+//     ctx.textBaseline = "middle";
+//     ctx.fillText("NEW", badgeX + badgeW / 2, badgeY + badgeH / 2);
+
+//     // ELEVATE YOUR LOOK (gold stroke & neon effect)
+//     const elevateSize = Math.min(bookWidth * 0.075, 65);
+//     ctx.font = `900 ${elevateSize}px Inter`;
+//     ctx.textAlign = "left";
+//     ctx.textBaseline = "top";
+//     ["ELEVATE", "YOUR", "LOOK"].forEach((line, i) => {
+//       const y = badgeY + badgeH + 30 + i * elevateSize * 0.9;
+//       ctx.lineWidth = 3;
+//       ctx.strokeStyle = "#D4AF37";
+//       ctx.strokeText(line, bookX + 30, y);
+//       ctx.fillStyle = "rgba(255,255,255,0.2)";
+//       ctx.fillText(line, bookX + 30, y);
+//     });
+
+//     // Product name
+//     const nameY = bookY + bookHeight - 170;
+//     ctx.font = `bold ${Math.min(bookWidth * 0.04, 28)}px Inter`;
+//     ctx.fillStyle = "#8B4513";
+//     ctx.textAlign = "left";
+//     ctx.fillText(productName.toUpperCase(), bookX + 30, nameY);
+
+//     // "CLICK TO BUY" gold button replacing duplicate price
+//     const btnW = 180;
+//     const btnH = 45;
+//     const btnX = bookX + 30;
+//     const btnY = nameY + 45;
+//     ctx.fillStyle = "#D4AF37";
+//     ctx.beginPath();
+//     ctx.roundRect(btnX, btnY, btnW, btnH, btnH / 2);
+//     ctx.fill();
+//     ctx.font = `bold ${Math.min(bookWidth * 0.03, 20)}px Inter`;
+//     ctx.fillStyle = "#FFF";
+//     ctx.textAlign = "center";
+//     ctx.textBaseline = "middle";
+//     ctx.fillText("CLICK TO BUY", btnX + btnW / 2, btnY + btnH / 2);
+
+//     // Secondary profile image (enlarged)
+//     const profSize = Math.min(bookWidth * 0.15, 120);
+//     const profX = bookX + bookWidth - 80;
+//     const profY = bookY + bookHeight - 120;
+//     ctx.save();
+//     ctx.shadowColor = "rgba(0,0,0,0.3)";
+//     ctx.shadowBlur = 10;
+//     ctx.shadowOffsetX = 4;
+//     ctx.shadowOffsetY = 4;
+//     ctx.beginPath();
+//     ctx.arc(profX, profY, profSize / 2, 0, Math.PI * 2);
+//     ctx.clip();
+//     ctx.drawImage(
+//       secondaryImage,
+//       profX - profSize / 2,
+//       profY - profSize / 2,
+//       profSize,
+//       profSize
+//     );
+//     ctx.restore();
+//     ctx.beginPath();
+//     ctx.arc(profX, profY, profSize / 2 + 3, 0, Math.PI * 2);
+//     ctx.strokeStyle = "#D4AF37";
+//     ctx.lineWidth = 3;
+//     ctx.stroke();
+
+//     // Creator name and version text
+//     ctx.font = `600 ${Math.min(bookWidth * 0.025, 16)}px Inter`;
+//     ctx.fillStyle = "#8B4513";
+//     ctx.textAlign = "center";
+//     ctx.fillText(creatorName, profX, profY + profSize / 2 + 10);
+//     ctx.font = `400 ${Math.min(bookWidth * 0.02, 12)}px Inter`;
+//     ctx.fillStyle = "#666";
+//     ctx.fillText("VERSION 1.0", profX, profY + profSize / 2 + 30);
+
+//     // Return buffer
+//     return {
+//       success: true,
+//       processedImage: canvas.toBuffer("image/png", {
+//         compressionLevel: 3,
+//         resolution: 300,
+//       }),
+//     };
+//   } catch (error) {
+//     console.error("Error creating magazine style card:", error);
+//     throw error;
+//   }
+// }
+
+
+
+
+
+
+
+
 import {
   createCanvas,
   loadImage,
@@ -2908,11 +3183,10 @@ registerFont(path.join(process.cwd(), "lib/assets/fonts/Inter-Bold.ttf"), {
 
 /**
  * Creates a premium magazine-style advertisement card for a luxury shoe.
- * - Boosts image contrast and saturation for popping colors
- * - Applies a subtle gold-toned overlay
- * - Uses metallic-gold text and dynamic shadows
- * - Enlarges secondary profile image and related text
- * - Replaces duplicate price tag with a "CLICK TO BUY" gold button
+ * - Enhanced 3D book effect with realistic shadows
+ * - Matches second image layout and typography exactly
+ * - Brown color scheme with proper contrast
+ * - Larger NEW badge and correct price placement
  */
 export async function createMagazineStyleCard({
   primaryImageUrl,
@@ -2942,166 +3216,177 @@ export async function createMagazineStyleCard({
       loadImage(secondaryImageUrl),
     ]);
 
-    // Draw background
-    ctx.fillStyle = "#F8F6F0";
+    // Draw background - lighter beige like second image
+    ctx.fillStyle = "#F5F3F0";
     ctx.fillRect(0, 0, width, height);
 
-    // Calculate book dimensions for a 3D cover effect
-    const bookWidth = width * 0.85;
-    const bookHeight = height * 0.9;
-    const bookX = (width - bookWidth) / 2;
-    const bookY = (height - bookHeight) / 2;
+    // Calculate book dimensions for enhanced 3D effect
+    const bookWidth = width * 0.82;
+    const bookHeight = height * 0.88;
+    const bookX = (width - bookWidth) / 2 - 15; // Slightly offset left
+    const bookY = (height - bookHeight) / 2 - 10; // Slightly offset up
 
-    // Draw spine shadow
-    const spineWidth = 20;
+    // Enhanced spine shadow (more prominent like second image)
+    const spineWidth = 35;
     const spineGradient = ctx.createLinearGradient(
       bookX + bookWidth,
       bookY,
       bookX + bookWidth + spineWidth,
       bookY
     );
-    spineGradient.addColorStop(0, "rgba(160, 140, 120, 0.8)");
-    spineGradient.addColorStop(1, "rgba(100, 80, 60, 0.9)");
+    spineGradient.addColorStop(0, "rgba(120, 100, 80, 0.9)");
+    spineGradient.addColorStop(0.3, "rgba(80, 60, 40, 0.95)");
+    spineGradient.addColorStop(1, "rgba(60, 40, 20, 0.8)");
     ctx.fillStyle = spineGradient;
-    ctx.fillRect(bookX + bookWidth, bookY + 8, spineWidth, bookHeight - 8);
+    ctx.fillRect(bookX + bookWidth, bookY + 15, spineWidth, bookHeight - 15);
 
-    // Draw bottom shadow
-    const bottomShadowHeight = 12;
+    // Enhanced bottom shadow (more realistic)
+    const bottomShadowHeight = 25;
     const bottomGradient = ctx.createLinearGradient(
       bookX,
       bookY + bookHeight,
       bookX,
       bookY + bookHeight + bottomShadowHeight
     );
-    bottomGradient.addColorStop(0, "rgba(0, 0, 0, 0.25)");
+    bottomGradient.addColorStop(0, "rgba(0, 0, 0, 0.4)");
+    bottomGradient.addColorStop(0.5, "rgba(0, 0, 0, 0.2)");
     bottomGradient.addColorStop(1, "rgba(0, 0, 0, 0)");
     ctx.fillStyle = bottomGradient;
     ctx.fillRect(
-      bookX + 3,
+      bookX + 8,
       bookY + bookHeight,
-      bookWidth + spineWidth - 3,
+      bookWidth + spineWidth - 8,
       bottomShadowHeight
     );
 
-    // Enhance primary image: boost contrast & saturation
-    (ctx as any).filter = "contrast(1.2) saturate(1.2)";
+    // Draw book cover background (white/cream)
+    ctx.fillStyle = "#FEFEFE";
+    ctx.fillRect(bookX, bookY, bookWidth, bookHeight);
 
-    // Fit the primary image to the book cover
-    const imgRatio = primaryImage.width / primaryImage.height;
-    const bookRatio = bookWidth / bookHeight;
-    let imgW, imgH, imgX, imgY;
-    if (imgRatio > bookRatio) {
-      imgH = bookHeight;
-      imgW = imgH * imgRatio;
-      imgX = bookX - (imgW - bookWidth) / 2;
-      imgY = bookY;
-    } else {
-      imgW = bookWidth;
-      imgH = imgW / imgRatio;
-      imgX = bookX;
-      imgY = bookY - (imgH - bookHeight) / 2;
-    }
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(bookX, bookY, bookWidth, bookHeight);
-    ctx.clip();
-    ctx.drawImage(primaryImage, imgX, imgY, imgW, imgH);
-
-    // Apply gold-toned overlay gradient for depth
-    const overlay = ctx.createLinearGradient(
+    // Subtle inner shadow for book cover depth
+    const innerShadow = ctx.createLinearGradient(
       bookX,
       bookY,
-      bookX,
-      bookY + bookHeight
+      bookX + 50,
+      bookY
     );
-    overlay.addColorStop(0, "rgba(255,215,0,0.15)");
-    overlay.addColorStop(0.5, "rgba(255,215,0,0.1)");
-    overlay.addColorStop(1, "rgba(255,215,0,0.15)");
-    ctx.fillStyle = overlay;
-    ctx.fillRect(bookX, bookY, bookWidth, bookHeight);
-    ctx.restore();
-    (ctx as any).filter = "none";
+    innerShadow.addColorStop(0, "rgba(0, 0, 0, 0.1)");
+    innerShadow.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = innerShadow;
+    ctx.fillRect(bookX, bookY, 50, bookHeight);
 
-    // Render "INSPIRE" in metallic gold with 3D shadow
-    const titleSize = Math.min(bookWidth * 0.13, 120);
+    // Position primary image (shoe) - centered right like second image
+    const imgSize = Math.min(bookWidth * 0.5, bookHeight * 0.45);
+    const imgX = bookX + bookWidth - imgSize - 60;
+    const imgY = bookY + bookHeight / 2 - imgSize / 2 + 20;
+
+    // Add subtle shadow behind product image
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetX = 8;
+    ctx.shadowOffsetY = 8;
+    ctx.drawImage(primaryImage, imgX, imgY, imgSize, imgSize);
+    ctx.restore();
+
+    // "INSPIRE" title - Brown color like second image
+    const titleSize = Math.min(bookWidth * 0.12, 110);
     ctx.font = `900 ${titleSize}px Playfair Display`;
     ctx.textBaseline = "top";
     ctx.textAlign = "left";
-    ctx.fillStyle = "#D4AF37";
-    ctx.shadowColor = "rgba(0,0,0,0.4)";
+    ctx.fillStyle = "#8B4513"; // Brown color
+    ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+    ctx.shadowBlur = 3;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
-    ctx.fillText("INSPIRE", bookX + 30, bookY + 25);
+    ctx.fillText("INSPIRE", bookX + 40, bookY + 35);
     ctx.shadowColor = "transparent";
 
-    // By PLUGGN (fine font)
-    const bySize = Math.min(bookWidth * 0.025, 22);
+    // "By PLUGGN" - smaller and positioned like second image
+    const bySize = Math.min(bookWidth * 0.025, 20);
     ctx.font = `400 ${bySize}px Inter`;
     ctx.fillStyle = "#8B4513";
     ctx.textAlign = "right";
-    ctx.fillText("By PLUGGN", bookX + bookWidth - 30, bookY + 30);
+    ctx.fillText("By PLUGGN", bookX + bookWidth - 40, bookY + 40);
 
-    // NEW badge
-    const badgeW = 70;
-    const badgeH = 30;
-    const badgeX = bookX + 30;
-    const badgeY = bookY + 25 + titleSize + 15;
+    // NEW badge - Larger like second image
+    const badgeW = 90;
+    const badgeH = 40;
+    const badgeX = bookX + 40;
+    const badgeY = bookY + 35 + titleSize + 10;
+
     ctx.fillStyle = "#000";
     ctx.beginPath();
-    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 15);
+    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 20);
     ctx.fill();
+
     ctx.fillStyle = "#FFF";
-    ctx.font = `bold ${Math.min(bookWidth * 0.022, 14)}px Inter`;
+    ctx.font = `bold ${Math.min(bookWidth * 0.03, 18)}px Inter`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("NEW", badgeX + badgeW / 2, badgeY + badgeH / 2);
 
-    // ELEVATE YOUR LOOK (gold stroke & neon effect)
-    const elevateSize = Math.min(bookWidth * 0.075, 65);
+    // "ELEVATE YOUR LOOK" - Brown outlined text like second image
+    const elevateSize = Math.min(bookWidth * 0.075, 60);
     ctx.font = `900 ${elevateSize}px Inter`;
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
-    ["ELEVATE", "YOUR", "LOOK"].forEach((line, i) => {
-      const y = badgeY + badgeH + 30 + i * elevateSize * 0.9;
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = "#D4AF37";
-      ctx.strokeText(line, bookX + 30, y);
-      ctx.fillStyle = "rgba(255,255,255,0.2)";
-      ctx.fillText(line, bookX + 30, y);
+
+    const elevateLines = ["ELEVATE", "YOUR", "LOOK"];
+    elevateLines.forEach((line, i) => {
+      const y = badgeY + badgeH + 25 + i * (elevateSize * 0.85);
+
+      // Outline stroke
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "#8B4513";
+      ctx.strokeText(line, bookX + 40, y);
+
+      // Fill
+      ctx.fillStyle = "#FEFEFE";
+      ctx.fillText(line, bookX + 40, y);
     });
 
-    // Product name
-    const nameY = bookY + bookHeight - 170;
-    ctx.font = `bold ${Math.min(bookWidth * 0.04, 28)}px Inter`;
+    // Product name - positioned above price
+    const nameY = bookY + bookHeight - 200;
+    ctx.font = `bold ${Math.min(bookWidth * 0.035, 24)}px Inter`;
     ctx.fillStyle = "#8B4513";
     ctx.textAlign = "left";
-    ctx.fillText(productName.toUpperCase(), bookX + 30, nameY);
+    ctx.textBaseline = "top";
+    ctx.fillText(productName.toUpperCase(), bookX + 40, nameY);
 
-    // "CLICK TO BUY" gold button replacing duplicate price
-    const btnW = 180;
-    const btnH = 45;
-    const btnX = bookX + 30;
-    const btnY = nameY + 45;
-    ctx.fillStyle = "#D4AF37";
-    ctx.beginPath();
-    ctx.roundRect(btnX, btnY, btnW, btnH, btnH / 2);
-    ctx.fill();
-    ctx.font = `bold ${Math.min(bookWidth * 0.03, 20)}px Inter`;
-    ctx.fillStyle = "#FFF";
+    // Product price - Large box like second image (positioned above button)
+    const priceBoxW = 140;
+    const priceBoxH = 50;
+    const priceBoxX = bookX + 40;
+    const priceBoxY = nameY + 40;
+
+    // Price box border
+    ctx.strokeStyle = "#8B4513";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(priceBoxX, priceBoxY, priceBoxW, priceBoxH);
+
+    // Price text
+    ctx.font = `bold ${Math.min(bookWidth * 0.04, 28)}px Inter`;
+    ctx.fillStyle = "#8B4513";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("CLICK TO BUY", btnX + btnW / 2, btnY + btnH / 2);
+    ctx.fillText(
+      productPrice,
+      priceBoxX + priceBoxW / 2,
+      priceBoxY + priceBoxH / 2
+    );
 
-    // Secondary profile image (enlarged)
-    const profSize = Math.min(bookWidth * 0.15, 120);
+    // Secondary profile image - positioned like second image
+    const profSize = Math.min(bookWidth * 0.12, 100);
     const profX = bookX + bookWidth - 80;
-    const profY = bookY + bookHeight - 120;
+    const profY = bookY + bookHeight - 100;
+
+    // Profile image shadow and border
     ctx.save();
-    ctx.shadowColor = "rgba(0,0,0,0.3)";
-    ctx.shadowBlur = 10;
-    ctx.shadowOffsetX = 4;
-    ctx.shadowOffsetY = 4;
+    ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 3;
     ctx.beginPath();
     ctx.arc(profX, profY, profSize / 2, 0, Math.PI * 2);
     ctx.clip();
@@ -3113,20 +3398,24 @@ export async function createMagazineStyleCard({
       profSize
     );
     ctx.restore();
+
+    // Profile border
     ctx.beginPath();
-    ctx.arc(profX, profY, profSize / 2 + 3, 0, Math.PI * 2);
-    ctx.strokeStyle = "#D4AF37";
-    ctx.lineWidth = 3;
+    ctx.arc(profX, profY, profSize / 2 + 2, 0, Math.PI * 2);
+    ctx.strokeStyle = "#8B4513";
+    ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Creator name and version text
-    ctx.font = `600 ${Math.min(bookWidth * 0.025, 16)}px Inter`;
+    // Creator name and version - Brown text
+    ctx.font = `600 ${Math.min(bookWidth * 0.022, 14)}px Inter`;
     ctx.fillStyle = "#8B4513";
     ctx.textAlign = "center";
-    ctx.fillText(creatorName, profX, profY + profSize / 2 + 10);
-    ctx.font = `400 ${Math.min(bookWidth * 0.02, 12)}px Inter`;
+    ctx.textBaseline = "top";
+    ctx.fillText(creatorName, profX, profY + profSize / 2 + 8);
+
+    ctx.font = `400 ${Math.min(bookWidth * 0.018, 11)}px Inter`;
     ctx.fillStyle = "#666";
-    ctx.fillText("VERSION 1.0", profX, profY + profSize / 2 + 30);
+    ctx.fillText("VERSION 1.0", profX, profY + profSize / 2 + 25);
 
     // Return buffer
     return {

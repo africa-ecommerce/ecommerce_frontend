@@ -517,7 +517,7 @@ export async function GET(
       product.data.images?.[0] || "https://via.placeholder.com/400",
     productName: "MAINSTREAM SNEAKER",
     productPrice: product.data.price || 0,
-    name: "Chinwe O.",
+    creatorName: "Chinwe O.",
     dimensions: { width: 1200, height: 1200 },
   });
 
