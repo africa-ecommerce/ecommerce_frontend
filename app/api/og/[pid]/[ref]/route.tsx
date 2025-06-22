@@ -518,7 +518,7 @@ export async function GET(
     productName: "MAINSTREAM SNEAKER",
     productPrice: product.data.price || 0,
     name: "Chinwe O.",
-    dimensions: { width: 1200, height: 630 },
+    dimensions: { width: 1200, height: 1200 },
   });
 
   if (!result.success || !result.processedImage) {
