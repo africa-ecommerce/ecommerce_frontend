@@ -897,17 +897,17 @@ export default function WithdrawalModal({
 
       if (response.ok && data.account_name) {
         setAccountDetails({
-          account_name: data.account_name,
+          account_name: data.accountName,
           account_number: accountNumber,
-          bank_id: data.bank_id || selectedBank.id,
+          bank_id: data.bankId || selectedBank.id,
         });
         setCurrentStep("confirm");
       } else {
-        throw new Error(data.message || "Failed to verify account");
+        throw new Error(data.message || "Unable to resolve account. Please check your details.");
       }
     } catch (err: any) {
       setError(
-        err.message || "Failed to verify account. Please check your details."
+        err.message 
       );
     } finally {
       setIsLoading(false);
@@ -960,7 +960,7 @@ export default function WithdrawalModal({
     setError("");
 
     try {
-      const response = await fetch("/api/payment/withdraw", {
+      const response = await fetch("/api/payments/withdraw", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1506,9 +1506,9 @@ export default function WithdrawalModal({
 
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 min-h-0">
           {error && (
-            <Alert className="mb-4 animate-slide-up">
+            <Alert className="mb-4 animate-slide-up border-red-500">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="text-xs sm:text-sm">
+              <AlertDescription className="text-xs sm:text-sm text-red-500">
                 {error}
               </AlertDescription>
             </Alert>
