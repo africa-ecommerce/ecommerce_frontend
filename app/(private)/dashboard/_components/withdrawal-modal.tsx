@@ -969,7 +969,7 @@ export default function WithdrawalModal({
           account_name: accountDetails.account_name,
           account_number: accountDetails.account_number,
           bank_id: accountDetails.bank_id,
-          withdrawal_code: withdrawalCode,
+         token: withdrawalCode,
         }),
       });
 
