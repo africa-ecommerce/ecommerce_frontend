@@ -960,7 +960,7 @@ export default function WithdrawalModal({
     setError("");
 
     try {
-      const response = await fetch("/api/payments/withdraw", {
+      const response = await fetch("/api/payments/plug/withdraw", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
