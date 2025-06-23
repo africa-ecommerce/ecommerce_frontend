@@ -895,7 +895,7 @@ export default function WithdrawalModal({
       const data = await response.json();
       console.log("resolveData", data)
 
-      if (response.ok && data.account_name) {
+      if (response.ok && data.accountName) {
         setAccountDetails({
           account_name: data.accountName,
           account_number: accountNumber,
@@ -1507,7 +1507,7 @@ export default function WithdrawalModal({
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 min-h-0">
           {error && (
             <Alert className="mb-4 animate-slide-up border-red-500">
-              <AlertCircle className="h-4 w-4" />
+              <AlertCircle className="h-4 w-4 border-red-500" />
               <AlertDescription className="text-xs sm:text-sm text-red-500">
                 {error}
               </AlertDescription>
