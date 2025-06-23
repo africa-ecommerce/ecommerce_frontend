@@ -1137,7 +1137,10 @@ export default function PlugDashboard() {
         <WithdrawalModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          unlockedPayment={paymentData?.data.unlockedAmount || 0}
+          unlockedPayment={
+            // paymentData?.data.unlockedAmount || 0
+            1000
+          }
         />
       </div>
     </TooltipProvider>
