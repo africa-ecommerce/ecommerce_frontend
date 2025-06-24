@@ -968,7 +968,7 @@ export default function WithdrawalModal({
         body: JSON.stringify({
           account_name: accountDetails.account_name,
           account_number: accountDetails.account_number,
-          bank_code: accountDetails.bank_id,
+          bank_code: String(accountDetails.bank_id),
          token: withdrawalCode,
         }),
       });
