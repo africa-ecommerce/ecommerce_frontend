@@ -97,14 +97,12 @@ const TabContent = ({
   data,
   error,
   isLoading,
-  type,
-  userType,
+  type
 }: {
   data?: ApiResponse
   error: any
   isLoading: boolean
   type: "issues" | "returns"
-  userType: string
 }) => {
   if (isLoading) {
     return (
@@ -216,7 +214,7 @@ export function IssueSection({ onBack, userType }: IssueSectionProps) {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-lg font-bold">Order Issues & Returns</h1>
+            <h1 className="text-lg font-bold">Issues & Returns</h1>
            
           </div>
         </div>
@@ -250,7 +248,6 @@ export function IssueSection({ onBack, userType }: IssueSectionProps) {
               error={issuesError}
               isLoading={issuesLoading}
               type="issues"
-              userType={userTypeLabel}
             />
           </TabsContent>
 
@@ -260,7 +257,6 @@ export function IssueSection({ onBack, userType }: IssueSectionProps) {
               error={returnsError}
               isLoading={returnsLoading}
               type="returns"
-              userType={userTypeLabel}
             />
           </TabsContent>
         </Tabs>
