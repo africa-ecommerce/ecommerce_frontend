@@ -1031,7 +1031,6 @@ import {
   toast,
 } from "@/components/ui/use-toast-advanced";
 import Image from "next/image";
-import { getProduct } from "@/lib/products";
 
 
 interface ShareModalProps {
@@ -1079,6 +1078,54 @@ const linkFetcher = async (
 
   return response.json();
 };
+
+
+
+
+export function getProduct(productId?: string, plugId?: string) {
+  // Create a unique key for SWR based on the parameters
+  const key = productId
+    ? `/public/products/${productId}${plugId ? `/${plugId}` : ""}`
+    : null;
+
+  // Use SWR for client-side data fetching with caching and revalidation
+  const { data, error, isLoading, mutate } = useSWR(
+    key,
+    async () => {
+      if (!productId) return null;
+
+      // Build the URL with path parameters
+      const url = `${
+        process.env.NEXT_PUBLIC_BACKEND_URL
+      }/public/products/${productId}${plugId ? `/${plugId}` : ""}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      return response.json();
+    },
+    {
+      revalidateOnFocus: false,
+      revalidateIfStale: false,
+      dedupingInterval: 60000, // 1 minute
+      shouldRetryOnError: false,
+    }
+  );
+
+  return {
+    product: data.data || null,
+    isLoading,
+    isError: error || null,
+    mutate,
+  };
+}
+
 
 export function ShareModal({
   open,
