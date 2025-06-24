@@ -836,6 +836,7 @@ export default function SupplierDashboard() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           unlockedPayment={paymentData?.data.unlockedAmount || 0}
+          mutateKey={"/api/payments/supplier/earnings"}
         />
       </div>
     </TooltipProvider>

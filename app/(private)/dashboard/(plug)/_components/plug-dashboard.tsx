@@ -1141,6 +1141,7 @@ export default function PlugDashboard() {
             // paymentData?.data.unlockedAmount || 0
             1000
           }
+          mutateKey={"/api/payments/plug/earnings"}
         />
       </div>
     </TooltipProvider>

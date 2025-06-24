@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { successToast } from "@/components/ui/use-toast-advanced";
+import { mutate } from "swr";
 
 interface Bank {
   id: number;
@@ -51,12 +52,14 @@ interface WithdrawalModalProps {
   isOpen: boolean;
   onClose: () => void;
   unlockedPayment: number;
+  mutateKey: string
 }
 
 export default function WithdrawalModal({
   isOpen,
   onClose,
   unlockedPayment,
+  mutateKey
 }: WithdrawalModalProps) {
   const [currentStep, setCurrentStep] = useState<ModalStep>("banks");
   const [banks, setBanks] = useState<Bank[]>([]);
@@ -216,10 +219,11 @@ export default function WithdrawalModal({
         }),
       });
 
-      const data = await response.json();
+    
 
       if (response.ok) {
         setCurrentStep("success");
+        mutate(mutateKey)
       } else {
         throw new Error("Withdrawal failed. Try again.");
       }
