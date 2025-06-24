@@ -91,7 +91,7 @@ export default function PaymentSection({ userType, onBack }: PaymentSectionProps
               </Card>
             ))}
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              <Loader2 className="h-6 w-6 animate-spin " />
               <span className="ml-2 text-muted-foreground">Loading payments...</span>
             </div>
           </div>
@@ -137,7 +137,7 @@ export default function PaymentSection({ userType, onBack }: PaymentSectionProps
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-sm font-semibold">{payment.orderNumber}</CardTitle>
-                    <Badge  className="flex items-center gap-1">
+                    <Badge  className="flex items-center bg-black gap-1">
                       <Clock className="h-3 w-3" />
                       {formatDaysLeft(payment.daysLeft)}
                     </Badge>
@@ -147,7 +147,7 @@ export default function PaymentSection({ userType, onBack }: PaymentSectionProps
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <p className="text-sm text-muted-foreground">Amount Due</p>
-                      <p className="text-base font-bold text-primary">{formatCurrency(payment.amount)}</p>
+                      <p className="text-base font-bold text-black">{formatCurrency(payment.amount)}</p>
                     </div>
                    
                   </div>
