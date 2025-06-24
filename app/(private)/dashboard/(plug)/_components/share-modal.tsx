@@ -1000,9 +1000,6 @@
 
 
 
-
-
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -1032,7 +1029,6 @@ import {
 } from "@/components/ui/use-toast-advanced";
 import Image from "next/image";
 
-
 interface ShareModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -1047,15 +1043,12 @@ interface LinkGenerationResponse {
   error?: string;
 }
 
-// Import your existing functions
-// import { createEnhancedMagazineCard } from "@/lib/magazine-card";
-// import { getProduct } from "@/lib/get-product";
-
 // Dynamic import for client-side only functions
 const loadImageGenerator = async () => {
   if (typeof window === "undefined") return null;
-  // Dynamically import your image generation function
-  const { createEnhancedMagazineCard } = await import("@/lib/magazine-card-generator");
+  const { createEnhancedMagazineCard } = await import(
+    "@/lib/magazine-card-generator"
+  );
   return createEnhancedMagazineCard;
 };
 
@@ -1079,53 +1072,24 @@ const linkFetcher = async (
   return response.json();
 };
 
+// Product fetcher function
+const productFetcher = async (productId: string, plugId?: string) => {
+  const url = `${
+    process.env.NEXT_PUBLIC_BACKEND_URL
+  }/public/products/${productId}${plugId ? `/${plugId}` : ""}`;
 
+  const response = await fetch(url, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
 
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
 
-export function getProduct(productId?: string, plugId?: string) {
-  // Create a unique key for SWR based on the parameters
-  const key = productId
-    ? `/public/products/${productId}${plugId ? `/${plugId}` : ""}`
-    : null;
-
-  // Use SWR for client-side data fetching with caching and revalidation
-  const { data, error, isLoading, mutate } = useSWR(
-    key,
-    async () => {
-      if (!productId) return null;
-
-      // Build the URL with path parameters
-      const url = `${
-        process.env.NEXT_PUBLIC_BACKEND_URL
-      }/public/products/${productId}${plugId ? `/${plugId}` : ""}`;
-
-      const response = await fetch(url, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      return response.json();
-    },
-    {
-      revalidateOnFocus: false,
-      revalidateIfStale: false,
-      dedupingInterval: 60000, // 1 minute
-      shouldRetryOnError: false,
-    }
-  );
-
-  return {
-    product: data.data || null,
-    isLoading,
-    isError: error || null,
-    mutate,
-  };
-}
-
+  const result = await response.json();
+  return result.data;
+};
 
 export function ShareModal({
   open,
@@ -1140,8 +1104,21 @@ export function ShareModal({
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
-  // Get product data
-  // const { product, isLoading: isLoadingProduct } = getProduct(productId, plugId);
+  // Get product data - move this to the top level of the component
+  const {
+    data: product,
+    error: productError,
+    isLoading: isLoadingProduct,
+  } = useSWR(
+    open && productId ? [productId, plugId] : null,
+    ([pid, plgId]) => productFetcher(pid, plgId),
+    {
+      revalidateOnFocus: false,
+      revalidateIfStale: false,
+      dedupingInterval: 60000,
+      shouldRetryOnError: false,
+    }
+  );
 
   // Hard-coded call to action that always appears
   const callToAction = "Get yours now! 🔥";
@@ -1195,37 +1172,38 @@ export function ShareModal({
         throw new Error("This function can only run on the client side");
       }
 
+      // Check if product data is available
+      if (!product) {
+        throw new Error(
+          "Product data not available. Please wait and try again."
+        );
+      }
+
+      // Ensure product has required fields
+      if (
+        !product.images ||
+        !product.images[0] ||
+        !product.name ||
+        !product.price
+      ) {
+        throw new Error("Product data is incomplete. Missing required fields.");
+      }
+
       // Dynamically load the image generator
       const createEnhancedMagazineCard = await loadImageGenerator();
       if (!createEnhancedMagazineCard) {
         throw new Error("Failed to load image generator");
       }
 
-      // Mock product data - replace with actual product data
-      const { product } = getProduct(
-                productId,
-                plugId
-              );
-        
-              // Generate the marketing card image
-              const { processedImage } = await createEnhancedMagazineCard({
-                primaryImageUrl: product.images[0],
-                secondaryImageUrl: product.images[0], // Using same image for now
-                productName: product.name,
-                productPrice: product.price,
-                creatorName: "John",
-                dimensions: { width: 1080, height: 1080 }, // Instagram square size
-              });
-
       // Generate the marketing card image
-      // const { processedImage } = await createEnhancedMagazineCard({
-      //   primaryImageUrl: mockProduct.images[0],
-      //   secondaryImageUrl: mockProduct.images[0], // Using same image for now
-      //   productName: mockProduct.name,
-      //   productPrice: mockProduct.price,
-      //   creatorName: "John",
-      //   dimensions: { width: 1080, height: 1080 }, // Instagram square size
-      // });
+      const { processedImage } = await createEnhancedMagazineCard({
+        primaryImageUrl: product.images[0],
+        secondaryImageUrl: product.images[0], // Using same image for now
+        productName: product.name,
+        productPrice: product.price,
+        creatorName: "John",
+        dimensions: { width: 1080, height: 1080 }, // Instagram square size
+      });
 
       // Create download link - ensure we're in browser environment
       if (typeof document !== "undefined") {
@@ -1249,8 +1227,16 @@ export function ShareModal({
       }
     } catch (error) {
       console.error("Error generating/downloading image:", error);
-      setDownloadError("Failed to generate marketing image. Please try again.");
-      errorToast("Failed to download image. Please try again.");
+      setDownloadError(
+        error instanceof Error
+          ? error.message
+          : "Failed to generate marketing image. Please try again."
+      );
+      errorToast(
+        error instanceof Error
+          ? error.message
+          : "Failed to download image. Please try again."
+      );
     } finally {
       setIsGeneratingImage(false);
     }
@@ -1381,6 +1367,25 @@ export function ShareModal({
 
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+            {/* Loading Product Data */}
+            {isLoadingProduct && (
+              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border">
+                <div className="flex items-center space-x-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <p className="text-sm">Loading product data...</p>
+                </div>
+              </div>
+            )}
+
+            {/* Product Error */}
+            {productError && (
+              <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  Failed to load product data. Please try again.
+                </p>
+              </div>
+            )}
+
             {/* Step 1: Download Marketing Image */}
             <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
               <div className="flex items-start space-x-2 mb-2">
@@ -1400,7 +1405,7 @@ export function ShareModal({
 
               <Button
                 onClick={handleDownloadImage}
-                disabled={isGeneratingImage}
+                disabled={isGeneratingImage || isLoadingProduct || !product}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white h-9"
               >
                 {isGeneratingImage ? (
