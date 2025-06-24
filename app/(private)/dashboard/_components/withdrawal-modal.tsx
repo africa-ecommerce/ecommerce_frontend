@@ -23,6 +23,7 @@ import {
   Lock,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { successToast } from "@/components/ui/use-toast-advanced";
 
 interface Bank {
   id: number;
@@ -71,7 +72,6 @@ export default function WithdrawalModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [loadingText, setLoadingText] = useState("");
-  const [success, setSuccess] = useState("");
 
   // Check if user has sufficient funds when modal opens
   useEffect(() => {
@@ -154,12 +154,11 @@ export default function WithdrawalModal({
         setCurrentStep("confirm");
       } else {
         throw new Error(
-          data.message ||
-            "Unable to resolve account. Please check your details."
+          "Unable to resolve account. Please check your details." 
         );
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
       setLoadingText("");
@@ -183,7 +182,7 @@ export default function WithdrawalModal({
       if (!response.ok) {
         throw new Error(data.message || "Too many request. Try again later!");
       }
-      setSuccess("Withdrawal code resent successfully!");
+      successToast("Withdrawal code resent successfully!");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -222,10 +221,10 @@ export default function WithdrawalModal({
       if (response.ok) {
         setCurrentStep("success");
       } else {
-        throw new Error(data.message || "Withdrawal failed. Try again.");
+        throw new Error("Withdrawal failed. Try again.");
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Something went wrong. Please try again.");
       setCurrentStep("error");
     } finally {
       setIsLoading(false);
@@ -752,17 +751,6 @@ export default function WithdrawalModal({
               </AlertDescription>
             </Alert>
           )}
-
-          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 min-h-0">
-            {success && (
-              <Alert className="mb-4 animate-slide-up border-green-500">
-                <AlertCircle className="h-4 w-4  " />
-                <AlertDescription className="text-xs sm:text-sm text-green-500">
-                  {success}
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
 
           <div className="animate-fade-in">
             {currentStep === "insufficient_funds" && renderInsufficientFunds()}
