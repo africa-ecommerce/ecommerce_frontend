@@ -66,7 +66,7 @@ export default function PaymentSection({ userType, onBack }: PaymentSectionProps
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">Pending Payments</h1>
+            <h1 className="text-lg font-bold">Pending Payments</h1>
            
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function PaymentSection({ userType, onBack }: PaymentSectionProps
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg font-semibold">{payment.orderNumber}</CardTitle>
+                    <CardTitle className="text-base font-semibold">{payment.orderNumber}</CardTitle>
                     <Badge  className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       {formatDaysLeft(payment.daysLeft)}
@@ -147,7 +147,7 @@ export default function PaymentSection({ userType, onBack }: PaymentSectionProps
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <p className="text-sm text-muted-foreground">Amount Due</p>
-                      <p className="text-2xl font-bold text-primary">{formatCurrency(payment.amount)}</p>
+                      <p className="text-base font-bold text-primary">{formatCurrency(payment.amount)}</p>
                     </div>
                    
                   </div>
