@@ -960,7 +960,7 @@ export default function WithdrawalModal({
     setError("");
 
     try {
-      const response = await fetch("/api/payments/plug/withdraw", {
+      const response = await fetch("/api/payments/withdraw", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -1146,9 +1146,9 @@ export default function WithdrawalModal({
                   <p className="font-medium text-xs sm:text-sm truncate">
                     {bank.name}
                   </p>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">
+                  {/* <p className="text-[10px] sm:text-xs text-muted-foreground">
                     Code: {bank.code}
-                  </p>
+                  </p> */}
                 </div>
               </div>
             </button>
