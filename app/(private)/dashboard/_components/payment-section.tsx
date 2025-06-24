@@ -136,7 +136,7 @@ export default function PaymentSection({ userType, onBack }: PaymentSectionProps
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-semibold">{payment.orderNumber}</CardTitle>
+                    <CardTitle className="text-sm font-semibold">{payment.orderNumber}</CardTitle>
                     <Badge  className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       {formatDaysLeft(payment.daysLeft)}

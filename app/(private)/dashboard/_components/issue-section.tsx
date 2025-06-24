@@ -53,12 +53,8 @@ const OrderCard = ({ item, type }: { item: OrderItem; type: "issues" | "returns"
     <Card className="animate-slide-up hover:shadow-md transition-all duration-200">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            {type === "issues" ? (
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
-            ) : (
-              <RotateCcw className="h-5 w-5 text-blue-500" />
-            )}
+          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+           
             {item.orderNumber}
           </CardTitle>
           <Badge variant="secondary" className="flex items-center gap-1">
@@ -70,7 +66,7 @@ const OrderCard = ({ item, type }: { item: OrderItem; type: "issues" | "returns"
       <CardContent>
         <div className="space-y-3">
           <div>
-            <h4 className="font-medium text-foreground mb-1">{item.productName}</h4>
+            <h4 className="font-medium text-sm text-foreground mb-1">{item.productName}</h4>
             <div className="flex flex-wrap gap-2">
               {displaySize !== "N/A" && (
                 <Badge variant="outline" className="text-xs">
@@ -167,15 +163,7 @@ const TabContent = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {data.data.length} {type === "issues" ? "paused order" : "returned item"}
-          {data.data.length !== 1 ? "s" : ""} found
-        </p>
-        <Badge variant="outline" className="animate-primary-pulse">
-          Total Items: {data.data.reduce((sum, item) => sum + item.pausedQuantity, 0)}
-        </Badge>
-      </div>
+      
 
       <div className="grid gap-4 grid-cols-1">
         {data.data.map((item, index) => (
