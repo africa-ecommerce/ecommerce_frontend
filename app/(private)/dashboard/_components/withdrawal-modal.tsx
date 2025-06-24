@@ -177,7 +177,7 @@ export default function WithdrawalModal({
     setError("");
 
     try {
-      const response = await fetch("/api/payment/resend-code", {
+      const response = await fetch("/api/payments/resend-code", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -420,7 +420,7 @@ export default function WithdrawalModal({
 
   const renderAccountForm = () => (
     <div className="space-y-4 sm:space-y-6">
-      <div className="p-3 sm:p-4 bg-accent/50 rounded-lg border">
+      <div className="p-3 sm:p-4 rounded-lg border">
         <div className="flex items-center space-x-3">
           <div className="p-2  rounded-lg flex-shrink-0">
             <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
@@ -474,7 +474,7 @@ export default function WithdrawalModal({
 
   const renderConfirmation = () => (
     <div className="space-y-4 sm:space-y-6">
-      <div className="p-3 sm:p-4 bg-accent/50 rounded-lg border space-y-3">
+      <div className="p-3 sm:p-4 rounded-lg border space-y-3">
         <div className="flex items-center space-x-3">
           <div className="p-2  rounded-lg flex-shrink-0">
             <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
@@ -657,11 +657,11 @@ export default function WithdrawalModal({
   const renderError = () => (
     <div className="text-center space-y-4 sm:space-y-6 py-2 sm:py-4">
       <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-red-100 rounded-full flex items-center justify-center animate-scale-in">
-        <AlertCircle className="h-6 w-6 sm:h-8 sm:w-8 text-red-600" />
+        <AlertCircle className="h-6 w-6 sm:h-8 sm:w-8 text-red-500" />
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-base sm:text-lg font-semibold text-red-700">
+        <h3 className="text-base sm:text-lg font-semibold text-red-500">
           Withdrawal Failed
         </h3>
         <p className="text-xs sm:text-sm text-muted-foreground px-2">
@@ -753,7 +753,7 @@ export default function WithdrawalModal({
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 min-h-0">
           {error && (
             <Alert className="mb-4 animate-slide-up border-red-500">
-              <AlertCircle className="h-4 w-4 text-red-500 bg-red-500" />
+              <AlertCircle className="h-4 w-4 text-red-500 " />
               <AlertDescription className="text-xs sm:text-sm text-red-500">
                 {error}
               </AlertDescription>
