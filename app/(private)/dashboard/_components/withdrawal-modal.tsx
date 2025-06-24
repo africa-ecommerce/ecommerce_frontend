@@ -1,8 +1,3 @@
-
-
-
-
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -76,6 +71,7 @@ export default function WithdrawalModal({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [loadingText, setLoadingText] = useState("");
+  const [success, setSuccess] = useState("");
 
   // Check if user has sufficient funds when modal opens
   useEffect(() => {
@@ -148,29 +144,27 @@ export default function WithdrawalModal({
       });
 
       const data = await response.json();
-      console.log("resolveData", data)
+      console.log("resolveData", data);
 
       if (response.ok && data.accountName) {
         setAccountDetails({
           account_name: data.accountName,
           account_number: accountNumber,
-         
         });
         setCurrentStep("confirm");
       } else {
-        throw new Error(data.message || "Unable to resolve account. Please check your details.");
+        throw new Error(
+          data.message ||
+            "Unable to resolve account. Please check your details."
+        );
       }
     } catch (err: any) {
-      setError(
-        err.message 
-      );
+      setError(err.message);
     } finally {
       setIsLoading(false);
       setLoadingText("");
     }
   };
-
-
 
   const resendWithdrawalCode = async () => {
     setIsResendingCode(true);
@@ -182,16 +176,16 @@ export default function WithdrawalModal({
         headers: {
           "Content-Type": "application/json",
         },
-       
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to resend withdrawal code");
+        throw new Error(data.message || "Too many request. Try again later!");
       }
+      setSuccess("Withdrawal code resent successfully!");
     } catch (err: any) {
-      setError(err.message || "Failed to resend code. Please try again.");
+      setError(err.message);
     } finally {
       setIsResendingCode(false);
     }
@@ -219,7 +213,7 @@ export default function WithdrawalModal({
           account_name: accountDetails.account_name,
           account_number: accountDetails.account_number,
           bank_code: selectedBank?.code,
-         token: withdrawalCode,
+          token: withdrawalCode,
         }),
       });
 
@@ -396,7 +390,6 @@ export default function WithdrawalModal({
                   <p className="font-medium text-xs sm:text-sm truncate">
                     {bank.name}
                   </p>
-                 
                 </div>
               </div>
             </button>
@@ -429,7 +422,6 @@ export default function WithdrawalModal({
             <p className="font-medium text-xs sm:text-sm truncate">
               {selectedBank?.name}
             </p>
-           
           </div>
         </div>
       </div>
@@ -521,8 +513,9 @@ export default function WithdrawalModal({
       </div>
 
       <Button
-        onClick={() => { setCurrentStep("code")}}
-       
+        onClick={() => {
+          setCurrentStep("code");
+        }}
         className="w-full h-11 sm:h-12"
         size="lg"
       >
@@ -753,12 +746,23 @@ export default function WithdrawalModal({
         <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 min-h-0">
           {error && (
             <Alert className="mb-4 animate-slide-up border-red-500">
-              <AlertCircle className="h-4 w-4 text-red-500 " />
+              <AlertCircle className="h-4 w-4  " />
               <AlertDescription className="text-xs sm:text-sm text-red-500">
                 {error}
               </AlertDescription>
             </Alert>
           )}
+
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 min-h-0">
+            {success && (
+              <Alert className="mb-4 animate-slide-up border-green-500">
+                <AlertCircle className="h-4 w-4  " />
+                <AlertDescription className="text-xs sm:text-sm text-green-500">
+                  {success}
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
 
           <div className="animate-fade-in">
             {currentStep === "insufficient_funds" && renderInsufficientFunds()}
