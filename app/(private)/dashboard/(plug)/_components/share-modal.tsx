@@ -608,7 +608,7 @@ export function ShareModal({
         productName: product.name,
         productPrice: product.price,
         creatorName: "John",
-        dimensions: { width: 1024, height: 1200 }, // Instagram square size
+        dimensions: { width: 1024, height: 1500 }, // Instagram square size
       });
 
       // Create download link - ensure we're in browser environment
