@@ -78,7 +78,7 @@ export function getProduct(
   );
 
   return {
-    product: data || null,
+    product: data.data || null,
     isLoading,
     isError: error || null,
     mutate,
