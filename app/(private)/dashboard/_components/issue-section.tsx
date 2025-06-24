@@ -26,11 +26,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-interface HelpSupportSectionProps {
+interface IssueSectionProps {
   onBack: () => void;
+  userType:  "PLUG" | "SUPPLIER";
+
 }
 
-export function HelpSupportSection({ onBack }: HelpSupportSectionProps) {
+export function IssueSection({ onBack, userType }: IssueSectionProps) {
   return (
     <div className="animate-fade-in">
       <div className="flex items-center gap-2 mb-6">

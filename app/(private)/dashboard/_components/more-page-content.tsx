@@ -4,24 +4,18 @@ import { useState } from "react";
 import {
   User,
   CreditCard,
-  Bell,
-  HelpCircle,
+ 
   LogOut,
   ChevronRight,
-  Shield,
   ArrowLeft,
-  LineChart,
+  AlertCircle,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { ProfileSection } from "./profile-section";
-import { VerificationSection } from "./verification-section";
-import { PaymentSection } from "./payment-section";
-import { NotificationSection } from "./notification-section";
-import { AppSettingsSection } from "./app-settings-section";
-import { HelpSupportSection } from "./help-support-section";
+import  PaymentSection from "./payment-section";
+
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
@@ -35,14 +29,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { IssueSection } from "./issue-section";
 
 type Section =
   | "profile"
-  | "verification"
+  
   | "payment"
-  | "notifications"
-  | "settings"
-  | "help"
+  
+  | "issues"
   | "account";
 
 interface MorePageContentProps {
@@ -98,16 +92,14 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
     switch (activeSection) {
       case "profile":
         return <ProfileSection onBack={handleBackFromSection} userType={userType} />;
-      // case "verification":
-      //   return <VerificationSection onBack={handleBackFromSection} />;
+      
       case "payment":
-        return <PaymentSection onBack={handleBackFromSection} />;
-      // case "notifications":
-      //   return <NotificationSection onBack={handleBackFromSection} />;
-      // case "settings":
-      //   return <AppSettingsSection onBack={handleBackFromSection} />;
-      // case "help":
-      //   return <HelpSupportSection onBack={handleBackFromSection} />;
+        return <PaymentSection onBack={handleBackFromSection} userType={userType}/>;
+      
+      case "issues":
+        return (
+          <IssueSection onBack={handleBackFromSection} userType={userType} />
+        );
      
       default:
         return (
@@ -146,33 +138,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                   </button>
 
                   <Separator />
-                  {/* {userType === "SUPPLIER" && (
-                    <>
-                      <button
-                        onClick={() => setActiveSection("verification")}
-                        className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
-                            <Shield className="h-4 w-4 text-primary" />
-                          </div>
-                          <div className="flex flex-col items-start">
-                            <span>Identity Verification</span>
-                            <span className="text-xs text-muted-foreground">
-                              Verify your identity
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-800">
-                            Pending
-                          </span>
-                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                      </button>
-                      <Separator />
-                    </>
-                  )} */}
+                
 
                   <button
                     onClick={() => setActiveSection("payment")}
@@ -182,59 +148,29 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
                         <CreditCard className="h-4 w-4 text-primary" />
                       </div>
-                      <span>Payment Settings</span>
+                      <span>Payment</span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </button>
                 </CardContent>
               </Card>
 
-              {/* <Card className="overflow-hidden">
-                <CardContent className="p-0">
-                  <button
-                    onClick={() => setActiveSection("notifications")}
-                    className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
-                        <Bell className="h-4 w-4 text-primary" />
-                      </div>
-                      <span>Notification Center</span>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </button>
-
-                  <Separator />
-
-                  <button
-                    onClick={() => setActiveSection("settings")}
-                    className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
-                        <LineChart className="h-4 w-4 text-primary" />
-                      </div>
-                      <span>Analytics</span>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </button>
-                </CardContent>
-              </Card> */}
+          
 
               <Card className="overflow-hidden">
                 <CardContent className="p-0">
-                  {/* <button
-                    onClick={() => setActiveSection("help")}
+                  <button
+                    onClick={() => setActiveSection("issues")}
                     className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
-                        <HelpCircle className="h-4 w-4 text-primary" />
+                        <AlertCircle className="h-4 w-4 text-primary" />
                       </div>
-                      <span>Help & Support</span>
+                      <span>Returns & Issues</span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </button> */}
+                  </button>
 
                   <Separator />
 
