@@ -1062,14 +1062,9 @@
 
 
 
-
-
-
-
-
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import useSWR from "swr";
 import {
   Dialog,
@@ -1085,10 +1080,9 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Copy,
   Loader2,
-  Download,
+  Share2,
   AlertCircle,
   CheckCircle,
-  Share2,
   Smartphone,
 } from "lucide-react";
 import {
@@ -1160,22 +1154,50 @@ const productFetcher = async (productId: string, plugId?: string) => {
   return result.data;
 };
 
-// Detect device capabilities
-const detectShareCapabilities = () => {
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isAndroid = /Android/.test(navigator.userAgent);
-  const isMobile = isIOS || isAndroid;
-  const isPWA = window.matchMedia("(display-mode: standalone)").matches;
+// Platform detection utility
+const detectPlatform = () => {
+  if (typeof window === "undefined") return "desktop";
 
-  return {
-    hasWebShare: typeof navigator.share !== "undefined",
-    hasClipboard: typeof navigator.clipboard !== "undefined",
-    canShareFiles:
-      navigator.canShare && typeof navigator.canShare === "function",
-    isMobile,
-    isPWA,
-    isDesktop: !isMobile,
-  };
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  const isIOS = /iphone|ipad|ipod/.test(userAgent);
+  const isAndroid = /android/.test(userAgent);
+  const isMobile = isIOS || isAndroid;
+  const isChrome = /chrome/.test(userAgent);
+  const isSafari = /safari/.test(userAgent) && !isChrome;
+  const isFirefox = /firefox/.test(userAgent);
+
+  if (isIOS && isSafari) return "ios-safari";
+  if (isIOS && isChrome) return "ios-chrome";
+  if (isAndroid && isChrome) return "android-chrome";
+  if (!isMobile && isChrome) return "desktop-chrome";
+  if (!isMobile && (isSafari || isFirefox)) return "desktop-other";
+
+  return isMobile ? "mobile-other" : "desktop-other";
+};
+
+// Enhanced sharing capabilities detection
+const getShareCapabilities = () => {
+  if (typeof window === "undefined") {
+    return { canShare: false, canShareFiles: false, hasClipboard: false };
+  }
+
+  const canShare = "share" in navigator && "canShare" in navigator;
+  const hasClipboard =
+    "clipboard" in navigator && "writeText" in navigator.clipboard;
+
+  let canShareFiles = false;
+  if (canShare) {
+    try {
+      // Test with a dummy file to check file sharing support
+      const testFile = new File(["test"], "test.png", { type: "image/png" });
+      canShareFiles =
+        navigator.canShare && navigator.canShare({ files: [testFile] });
+    } catch (e) {
+      canShareFiles = false;
+    }
+  }
+
+  return { canShare, canShareFiles, hasClipboard };
 };
 
 export function ShareModal({
@@ -1187,13 +1209,16 @@ export function ShareModal({
 }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
   const [customTagline, setCustomTagline] = useState("");
-  const [imageDownloaded, setImageDownloaded] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [downloadError, setDownloadError] = useState<string | null>(null);
-  const [currentImageBlob, setCurrentImageBlob] = useState<Blob | null>(null);
-  const [shareCapabilities, setShareCapabilities] = useState(
-    detectShareCapabilities()
+  const [generatedImageBlob, setGeneratedImageBlob] = useState<Blob | null>(
+    null
   );
+  const [shareCapabilities, setShareCapabilities] = useState({
+    canShare: false,
+    canShareFiles: false,
+    hasClipboard: false,
+  });
+  const [platform, setPlatform] = useState("desktop");
 
   // Get product data
   const {
@@ -1211,10 +1236,10 @@ export function ShareModal({
     }
   );
 
-  // Hard-coded call to action
+  // Hard-coded call to action that always appears
   const callToAction = "Get yours now! 🔥";
 
-  // Default tagline
+  // Default tagline as placeholder
   const defaultTagline = `Just discovered this amazing ${productName}! 😍 You need to see this! ✨`;
 
   // Generate the original share URL
@@ -1223,15 +1248,17 @@ export function ShareModal({
     return `${baseUrl}?pid=${productId}&ref=${plugId}`;
   };
 
-  // SWR configuration for link generation
+  // SWR configuration optimized for link generation
   const swrOptions = {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     revalidateIfStale: false,
-    dedupingInterval: 300000,
+    dedupingInterval: 300000, // 5 minutes
     errorRetryCount: 2,
     errorRetryInterval: 1000,
-    shouldRetryOnError: (error: any) => error.status >= 500,
+    shouldRetryOnError: (error: any) => {
+      return error.status >= 500;
+    },
     onError: (error: any) => {
       console.error("Link generation failed:", error);
       errorToast("Please try again or use the direct link");
@@ -1250,6 +1277,57 @@ export function ShareModal({
     swrOptions
   );
 
+  // Initialize platform detection and capabilities
+  useEffect(() => {
+    if (open) {
+      setPlatform(detectPlatform());
+      setShareCapabilities(getShareCapabilities());
+    }
+  }, [open]);
+
+  // Generate marketing image
+  const generateMarketingImage = async (): Promise<Blob> => {
+    if (!product) {
+      throw new Error("Product data not available");
+    }
+
+    if (generatedImageBlob) {
+      return generatedImageBlob;
+    }
+
+    setIsGeneratingImage(true);
+    try {
+      const createEnhancedMagazineCard = await loadImageGenerator();
+      if (!createEnhancedMagazineCard) {
+        throw new Error("Failed to load image generator");
+      }
+
+      const { processedImage } = await createEnhancedMagazineCard({
+        primaryImageUrl: product.images[0],
+        secondaryImageUrl: product.images[0],
+        productName: product.name,
+        productPrice: product.price,
+        creatorName: "John",
+        dimensions: { width: 1024, height: 1500 },
+      });
+
+      // Convert data URL to blob
+      const response = await fetch(processedImage);
+      const blob = await response.blob();
+
+      setGeneratedImageBlob(blob);
+      return blob;
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  // Generate the final message
+  const getFinalMessage = () => {
+    const tagline = customTagline.trim() || defaultTagline;
+    return `${tagline} ${callToAction}`;
+  };
+
   // Generate platform-specific share URL
   const generatePlatformUrl = (platform: string) => {
     const baseLink = linkData?.link || originalShareUrl();
@@ -1265,252 +1343,164 @@ export function ShareModal({
     return `${baseLink}?m=${platformCode}`;
   };
 
-  // Generate the final message
-  const getFinalMessage = () => {
-    const tagline = customTagline.trim() || defaultTagline;
-    return `${tagline} ${callToAction}`;
-  };
-
-  // Enhanced image generation with blob storage
-  const handleDownloadImage = async () => {
+  // Web Share API Level 2 implementation
+  const handleNativeShare = async (targetPlatform?: string) => {
     try {
-      setIsGeneratingImage(true);
-      setDownloadError(null);
-
-      if (typeof window === "undefined") {
-        throw new Error("This function can only run on the client side");
-      }
-
-      if (!product) {
-        throw new Error(
-          "Product data not available. Please wait and try again."
-        );
-      }
-
-      if (
-        !product.images ||
-        !product.images[0] ||
-        !product.name ||
-        !product.price
-      ) {
-        throw new Error("Product data is incomplete. Missing required fields.");
-      }
-
-      const createEnhancedMagazineCard = await loadImageGenerator();
-      if (!createEnhancedMagazineCard) {
-        throw new Error("Failed to load image generator");
-      }
-
-      const { processedImage } = await createEnhancedMagazineCard({
-        primaryImageUrl: product.images[0],
-        secondaryImageUrl: product.images[0],
-        productName: product.name,
-        productPrice: product.price,
-        creatorName: "John",
-        dimensions: { width: 1024, height: 1500 },
-      });
-
-      // Convert URL to blob for sharing
-      const response = await fetch(processedImage);
-      const blob = await response.blob();
-      setCurrentImageBlob(blob);
-
-      // Download for user
-      if (typeof document !== "undefined") {
-        const link = document.createElement("a");
-        link.href = processedImage;
-        link.download = `${productName.replace(
-          /\s+/g,
-          "_"
-        )}_marketing_image.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(processedImage);
-
-        setImageDownloaded(true);
-        successToast("Marketing image downloaded successfully! 🎉");
-      }
-    } catch (error) {
-      console.error("Error generating/downloading image:", error);
-      setDownloadError(
-        error instanceof Error
-          ? error.message
-          : "Failed to generate marketing image. Please try again."
-      );
-      errorToast(
-        error instanceof Error
-          ? error.message
-          : "Failed to download image. Please try again."
-      );
-    } finally {
-      setIsGeneratingImage(false);
-    }
-  };
-
-  // Native Web Share API handler
-  const handleNativeShare = async (platform: string) => {
-    if (!currentImageBlob) {
-      toast({
-        title: "Download Image First! 📸",
-        description: "Please download the marketing image before sharing",
-        variant: "warning",
-      });
-      return;
-    }
-
-    const platformSpecificUrl = generatePlatformUrl(platform);
-    const message = getFinalMessage();
-
-    try {
-      // Create file from blob
+      const imageBlob = await generateMarketingImage();
       const file = new File(
-        [currentImageBlob],
-        `${productName}_marketing.png`,
+        [imageBlob],
+        `${productName.replace(/\s+/g, "_")}_marketing.png`,
         {
           type: "image/png",
         }
       );
 
-      // Check if we can share files
-      if (
-        shareCapabilities.canShareFiles &&
-        navigator.canShare({ files: [file] })
-      ) {
-        await navigator.share({
-          title: `Check out this ${productName}!`,
-          text: `${message} ${platformSpecificUrl}`,
-          files: [file],
-        });
+      const shareData = {
+        title: productName,
+        text: getFinalMessage(),
+        files: [file],
+      };
 
+      // Check if we can share files
+      if (shareCapabilities.canShareFiles && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
         successToast("Shared successfully! 🎉");
-        return;
+        return true;
+      } else {
+        // Fallback to clipboard + intent
+        return await handleClipboardFallback(imageBlob, targetPlatform);
       }
     } catch (error) {
-      console.log("Native share failed, falling back to clipboard:", error);
+      if (error instanceof Error && error.name === "AbortError") {
+        // User canceled share - no need to show error
+        return false;
+      }
+      console.error("Native share failed:", error);
+      return await handleClipboardFallback(
+        await generateMarketingImage(),
+        targetPlatform
+      );
     }
-
-    // Fallback to clipboard + intent
-    await handleClipboardFallback(platform);
   };
 
-  // Clipboard fallback handler
-  const handleClipboardFallback = async (platform: string) => {
-    if (!currentImageBlob) {
-      toast({
-        title: "Download Image First! 📸",
-        description: "Please download the marketing image before sharing",
-        variant: "warning",
-      });
-      return;
-    }
-
-    const platformSpecificUrl = generatePlatformUrl(platform);
-    const message = getFinalMessage();
-
+  // Clipboard fallback implementation
+  const handleClipboardFallback = async (
+    imageBlob: Blob,
+    targetPlatform?: string
+  ) => {
     try {
-      // Copy image to clipboard
+      const message = getFinalMessage();
+      const platformUrl = targetPlatform
+        ? generatePlatformUrl(targetPlatform)
+        : linkData?.link || originalShareUrl();
+
       if (shareCapabilities.hasClipboard) {
-        const clipboardItem = new ClipboardItem({
-          [currentImageBlob.type]: currentImageBlob,
-        });
-        await navigator.clipboard.write([clipboardItem]);
+        // Copy image to clipboard
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              "image/png": imageBlob,
+            }),
+          ]);
+        } catch (e) {
+          console.warn("Could not copy image to clipboard:", e);
+        }
 
-        // Copy text message
-        await navigator.clipboard.writeText(
-          `${message} ${platformSpecificUrl}`
-        );
-      }
+        // Copy text to clipboard
+        const fullMessage = `${message} ${platformUrl}`;
+        await navigator.clipboard.writeText(fullMessage);
 
-      // Open platform intent or direct link
-      let shareLink = "";
-      const encodedUrl = encodeURIComponent(platformSpecificUrl);
-      const encodedText = encodeURIComponent(message);
-
-      switch (platform) {
-        case "whatsapp":
-          shareLink = `https://wa.me/?text=${encodedText}%20${encodedUrl}`;
-          break;
-        case "twitter":
-          shareLink = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
-          break;
-        case "facebook":
-          shareLink = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`;
-          break;
-        case "instagram":
-          // Instagram doesn't support URL intents, just copy to clipboard
-          toast({
-            title: "Ready for Instagram! 📸",
-            description:
-              "Image and message copied to clipboard. Open Instagram and paste them in a new post!",
-            variant: "success",
-          });
-          return;
-      }
-
-      if (shareLink) {
-        window.open(shareLink, "_blank");
-
-        // Show platform-specific UX guidance
-        showPlatformGuidance(platform);
+        // Show platform-specific guidance
+        showPlatformGuidance(targetPlatform);
+        return true;
+      } else {
+        throw new Error("Clipboard not supported");
       }
     } catch (error) {
       console.error("Clipboard fallback failed:", error);
-      toast({
-        title: "Manual Sharing Required",
-        description:
-          "Please manually copy the image and text, then share on your preferred platform.",
-        variant: "warning",
-      });
+      errorToast("Could not copy to clipboard. Please share manually.");
+      return false;
     }
   };
 
-  // Show platform-specific guidance
-  const showPlatformGuidance = (platform: string) => {
-    const messages = {
-      instagram:
-        "Note: Instagram may not auto-paste the message. Add it as your caption after uploading the image.",
-      facebook:
-        "Note: Facebook may strip the message for policy reasons. Paste it after uploading if needed.",
-      whatsapp: "Image and message copied! Paste them in your WhatsApp chat.",
-      twitter: "Image and message copied! Paste them in your tweet.",
-    };
+  // Platform-specific guidance
+  const showPlatformGuidance = (targetPlatform?: string) => {
+    let message = "✅ Image and message copied to clipboard!";
+    let description = "Paste them in your social post.";
+
+    switch (targetPlatform) {
+      case "instagram":
+        message = "📸 Ready for Instagram!";
+        description =
+          "Image copied! Open Instagram, create a post, and paste your message as caption.";
+        break;
+      case "facebook":
+        message = "📘 Ready for Facebook!";
+        description =
+          "Image and message copied! Facebook may strip the message - paste it after uploading the image.";
+        break;
+      case "twitter":
+        message = "🐦 Ready for Twitter!";
+        description =
+          "Image and message copied! Create a new tweet and paste both.";
+        break;
+      case "whatsapp":
+        message = "💬 Ready for WhatsApp!";
+        description =
+          "Image and message copied! Open WhatsApp and paste in your chat.";
+        break;
+    }
 
     toast({
-      title: "📋 Copied to Clipboard!",
-      description:
-        messages[platform as keyof typeof messages] ||
-        "Image and message copied. Paste them in your post!",
+      title: message,
+      description: description,
       variant: "success",
     });
   };
 
-  // Main share handler that chooses the best method
-  const handleShare = async (platform: string) => {
+  // Universal share handler
+  const handleShare = async (targetPlatform: string) => {
     if (isGeneratingLink) {
       toast({
-        title: "Please Wait",
+        title: "Please wait",
         description: "Link is being generated...",
         variant: "default",
       });
       return;
     }
 
-    if (!imageDownloaded || !currentImageBlob) {
-      toast({
-        title: "Download Image First! 📸",
-        description:
-          "Please download the marketing image before sharing for better results",
-        variant: "warning",
-      });
-      return;
-    }
+    // For desktop or platforms without native share, use clipboard + intent
+    if (platform.includes("desktop") || !shareCapabilities.canShare) {
+      const success = await handleClipboardFallback(
+        await generateMarketingImage(),
+        targetPlatform
+      );
+      if (success && targetPlatform !== "instagram") {
+        // Open platform intent URLs for non-Instagram platforms
+        const platformSpecificUrl = generatePlatformUrl(targetPlatform);
+        const encodedUrl = encodeURIComponent(platformSpecificUrl);
+        const encodedText = encodeURIComponent(getFinalMessage());
 
-    // Use native share if available, otherwise fallback
-    if (shareCapabilities.hasWebShare && shareCapabilities.isMobile) {
-      await handleNativeShare(platform);
+        let intentUrl = "";
+        switch (targetPlatform) {
+          case "whatsapp":
+            intentUrl = `https://wa.me/?text=${encodedText}%20${encodedUrl}`;
+            break;
+          case "twitter":
+            intentUrl = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
+            break;
+          case "facebook":
+            intentUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`;
+            break;
+        }
+
+        if (intentUrl) {
+          window.open(intentUrl, "_blank");
+        }
+      }
     } else {
-      await handleClipboardFallback(platform);
+      // Use native share API
+      await handleNativeShare(targetPlatform);
     }
   };
 
@@ -1521,6 +1511,7 @@ export function ShareModal({
 
     navigator.clipboard.writeText(directLink);
     setCopied(true);
+
     successToast("Link copied successfully!");
     setTimeout(() => setCopied(false), 2000);
   };
@@ -1529,22 +1520,48 @@ export function ShareModal({
   useEffect(() => {
     if (!open) {
       setCopied(false);
-      setImageDownloaded(false);
-      setDownloadError(null);
-      setCurrentImageBlob(null);
+      setGeneratedImageBlob(null);
     }
   }, [open]);
 
-  // Update capabilities on mount
-  useEffect(() => {
-    setShareCapabilities(detectShareCapabilities());
-  }, []);
+  // Retry link generation
+  const handleRetryLinkGeneration = () => {
+    regenerateLink();
+  };
 
   const displayUrl = isGeneratingLink
     ? "Generating link..."
     : linkData?.link
     ? `${linkData.link}?m=d`
     : `${originalShareUrl()}?m=d`;
+
+  // Platform-specific UI messages
+  const getPlatformMessage = () => {
+    if (platform.includes("ios") || platform.includes("android")) {
+      if (shareCapabilities.canShareFiles) {
+        return {
+          type: "success",
+          message: "📱 Full sharing experience available!",
+          description: "You can share images and text directly to apps.",
+        };
+      } else {
+        return {
+          type: "info",
+          message: "📱 Mobile sharing available",
+          description: "Image and text will be copied for you to paste.",
+        };
+      }
+    } else {
+      return {
+        type: "info",
+        message: "💻 Desktop sharing",
+        description:
+          "Image and text will be copied to clipboard. Mobile devices offer better sharing experience.",
+      };
+    }
+  };
+
+  const platformMessage = getPlatformMessage();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1555,27 +1572,51 @@ export function ShareModal({
               Share Product with Marketing Image
             </DialogTitle>
             <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
-              {shareCapabilities.isDesktop
-                ? "📱 For best sharing experience, open this on your mobile device"
-                : "Download your marketing image first, then share with your referral link"}
+              Share your referral link with a professional marketing image
             </DialogDescription>
           </DialogHeader>
 
-          {/* Desktop Notice */}
-          {shareCapabilities.isDesktop && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800 mb-3">
-              <div className="flex items-center space-x-2">
-                <Smartphone className="h-4 w-4 text-blue-600" />
-                <p className="text-sm text-blue-700 dark:text-blue-300">
-                  <strong>Best on Mobile:</strong> For seamless image + text
-                  sharing, scan QR code or open on your phone
-                </p>
-              </div>
-            </div>
-          )}
-
           {/* Scrollable Content */}
           <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+            {/* Platform Status */}
+            <div
+              className={`p-3 rounded-lg border ${
+                platformMessage.type === "success"
+                  ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+                  : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
+              }`}
+            >
+              <div className="flex items-start space-x-2">
+                <Smartphone
+                  className={`h-4 w-4 mt-0.5 ${
+                    platformMessage.type === "success"
+                      ? "text-green-600"
+                      : "text-blue-600"
+                  }`}
+                />
+                <div>
+                  <p
+                    className={`text-sm font-medium ${
+                      platformMessage.type === "success"
+                        ? "text-green-800 dark:text-green-200"
+                        : "text-blue-800 dark:text-blue-200"
+                    }`}
+                  >
+                    {platformMessage.message}
+                  </p>
+                  <p
+                    className={`text-xs mt-1 ${
+                      platformMessage.type === "success"
+                        ? "text-green-700 dark:text-green-300"
+                        : "text-blue-700 dark:text-blue-300"
+                    }`}
+                  >
+                    {platformMessage.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Loading Product Data */}
             {isLoadingProduct && (
               <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border">
@@ -1595,59 +1636,11 @@ export function ShareModal({
               </div>
             )}
 
-            {/* Step 1: Download Marketing Image */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="flex items-start space-x-2 mb-2">
-                <div className="bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                  1
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-200">
-                    Download Marketing Image
-                  </h3>
-                  <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                    Get your professional marketing material. Always download
-                    fresh for latest updates!
-                  </p>
-                </div>
-              </div>
-
-              <Button
-                onClick={handleDownloadImage}
-                disabled={isGeneratingImage || isLoadingProduct || !product}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white h-9"
-              >
-                {isGeneratingImage ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Generating Image...
-                  </>
-                ) : imageDownloaded ? (
-                  <>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Downloaded ✓ (Click to Re-download)
-                  </>
-                ) : (
-                  <>
-                    <Download className="h-4 w-4 mr-2" />
-                    Download Marketing Image
-                  </>
-                )}
-              </Button>
-
-              {downloadError && (
-                <div className="flex items-center space-x-1 mt-2">
-                  <AlertCircle className="h-3 w-3 text-red-600" />
-                  <p className="text-xs text-red-600">{downloadError}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Step 2: Customize Message */}
+            {/* Customize Message */}
             <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg border border-orange-200 dark:border-orange-800">
               <div className="flex items-start space-x-2 mb-2">
                 <div className="bg-orange-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                  2
+                  1
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-semibold text-orange-800 dark:text-orange-200">
@@ -1707,7 +1700,7 @@ export function ShareModal({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => regenerateLink()}
+                    onClick={handleRetryLinkGeneration}
                     className="h-6 px-2 text-xs text-red-600 hover:text-red-700"
                   >
                     Retry
@@ -1753,22 +1746,20 @@ export function ShareModal({
               </Button>
             </div>
 
-            {/* Step 3: Share with Image */}
+            {/* Share with Image */}
             <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
               <div className="flex items-start space-x-2 mb-3">
                 <div className="bg-green-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                  3
+                  2
                 </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-semibold text-green-800 dark:text-green-200">
-                    {shareCapabilities.hasWebShare && shareCapabilities.isMobile
-                      ? "Share Directly"
-                      : "Share with Your Image"}
+                    Share with Marketing Image
                   </h3>
                   <p className="text-xs text-green-700 dark:text-green-300 mt-1">
-                    {shareCapabilities.hasWebShare && shareCapabilities.isMobile
-                      ? "Tap to share image and text directly to your apps"
-                      : "Image and text will be copied to clipboard - paste them when sharing"}
+                    {shareCapabilities.canShareFiles
+                      ? "Share directly to your apps with image and text"
+                      : "Image and text will be copied for you to paste"}
                   </p>
                 </div>
               </div>
@@ -1779,14 +1770,18 @@ export function ShareModal({
                   variant="outline"
                   className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
                   onClick={() => handleShare("whatsapp")}
-                  disabled={isGeneratingLink}
+                  disabled={isGeneratingLink || isLoadingProduct || !product}
                 >
-                  <Image
-                    src={"/whatsapp.png"}
-                    height={20}
-                    width={20}
-                    alt="WhatsApp"
-                  />
+                  {isGeneratingImage ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Image
+                      src={"/whatsapp.png"}
+                      height={20}
+                      width={20}
+                      alt="WhatsApp"
+                    />
+                  )}
                   <span className="text-[10px]">WhatsApp</span>
                 </Button>
 
@@ -1794,14 +1789,18 @@ export function ShareModal({
                   variant="outline"
                   className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
                   onClick={() => handleShare("twitter")}
-                  disabled={isGeneratingLink}
+                  disabled={isGeneratingLink || isLoadingProduct || !product}
                 >
-                  <Image
-                    src={"/twitter.png"}
-                    height={20}
-                    width={20}
-                    alt="Twitter"
-                  />
+                  {isGeneratingImage ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Image
+                      src={"/twitter.png"}
+                      height={20}
+                      width={20}
+                      alt="Twitter"
+                    />
+                  )}
                   <span className="text-[10px]">Twitter</span>
                 </Button>
 
@@ -1809,14 +1808,18 @@ export function ShareModal({
                   variant="outline"
                   className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
                   onClick={() => handleShare("facebook")}
-                  disabled={isGeneratingLink}
+                  disabled={isGeneratingLink || isLoadingProduct || !product}
                 >
-                  <Image
-                    src={"/facebook.png"}
-                    height={20}
-                    width={20}
-                    alt="Facebook"
-                  />
+                  {isGeneratingImage ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Image
+                      src={"/facebook.png"}
+                      height={20}
+                      width={20}
+                      alt="Facebook"
+                    />
+                  )}
                   <span className="text-[10px]">Facebook</span>
                 </Button>
 
@@ -1824,28 +1827,51 @@ export function ShareModal({
                   variant="outline"
                   className="flex flex-col items-center justify-center h-14 gap-1 text-xs"
                   onClick={() => handleShare("instagram")}
-                  disabled={isGeneratingLink}
+                  disabled={isGeneratingLink || isLoadingProduct || !product}
                 >
-                  <Image
-                    src={"/instagram_logo.png"}
-                    height={20}
-                    width={20}
-                    alt="Instagram"
-                  />
+                  {isGeneratingImage ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Image
+                      src={"/instagram_logo.png"}
+                      height={20}
+                      width={20}
+                      alt="Instagram"
+                    />
+                  )}
                   <span className="text-[10px]">Instagram</span>
                 </Button>
               </div>
+
+              {/* Universal share button for supported platforms */}
+              {shareCapabilities.canShareFiles && (
+                <Button
+                  onClick={() => handleNativeShare()}
+                  disabled={isGeneratingLink || isLoadingProduct || !product}
+                  className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {isGeneratingImage ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Generating Image...
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share to Any App
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
 
-            {/* Pro Tip - Updated based on device */}
+            {/* Pro Tip */}
             <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border">
               <p className="text-xs text-gray-600 dark:text-gray-400">
                 <strong>💡 Pro Tip:</strong>{" "}
-                {shareCapabilities.isDesktop
-                  ? "For best results, open this page on your mobile device for direct sharing capabilities."
-                  : shareCapabilities.hasWebShare
-                  ? "Your device supports direct sharing! Tap a platform to share image and text together."
-                  : "Image and text will be copied to your clipboard automatically when you tap a platform."}
+                {shareCapabilities.canShareFiles
+                  ? "Use 'Share to Any App' for the best experience on mobile!"
+                  : "For best results, paste both the image and text in your post for maximum engagement!"}
               </p>
             </div>
           </div>
