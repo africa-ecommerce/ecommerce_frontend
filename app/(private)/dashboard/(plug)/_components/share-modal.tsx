@@ -1109,10 +1109,10 @@ interface LinkGenerationResponse {
 // Dynamic import for client-side only functions
 const loadImageGenerator = async () => {
   if (typeof window === "undefined") return null;
-  const { createEnhancedMagazineCard } = await import(
+  const { createLuxuryMagazineCard } = await import(
     "@/lib/magazine-card-generator"
   );
-  return createEnhancedMagazineCard;
+  return createLuxuryMagazineCard;
 };
 
 // SWR fetcher function for POST requests
@@ -1297,18 +1297,19 @@ export function ShareModal({
 
     setIsGeneratingImage(true);
     try {
-      const createEnhancedMagazineCard = await loadImageGenerator();
-      if (!createEnhancedMagazineCard) {
+      const createLuxuryMagazineCard = await loadImageGenerator();
+      if (!createLuxuryMagazineCard) {
         throw new Error("Failed to load image generator");
       }
 
-      const { processedImage } = await createEnhancedMagazineCard({
-        primaryImageUrl: product.images[0],
-        secondaryImageUrl: product.images[0],
-        productName: product.name,
-        productPrice: product.price,
-        creatorName: "John",
-        dimensions: { width: 1024, height: 1500 },
+      const { processedImage } = await createLuxuryMagazineCard({
+        imageUrl : "https://salescabal.s3.eu-west-3.amazonaws.com/stores/187287/products/e36c2c3d0765ad0f77127d2b9552c3794a1b37e9.jpeg",
+        productName : "LUXURY ESSENCE",
+        price : "₦299,000",
+        sellerName : "SOPHIA CHEN",
+        sellerInitials : "SC",
+        tagline : "TIMELESS ELEGANCE",
+        dimensions : { width: 560, height: 750 },
       });
 
       // Convert data URL to blob
