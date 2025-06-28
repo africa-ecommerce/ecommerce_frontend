@@ -2172,7 +2172,7 @@ export function ShareModal({
       
       successToast("Message copied to clipboard!");
       
-      setTimeout(() => setFinalMessageCopied(false), 3000);
+      // setTimeout(() => setFinalMessageCopied(false), 3000);
     } catch (error) {
       errorToast("Failed to copy message");
     }
@@ -2204,7 +2204,7 @@ export function ShareModal({
         });
         
         toast({
-          title: "🎉 Image shared successfully!",
+          title: "Image shared successfully!",
           description: `Now paste your copied message in ${selectedPlatform?.name}`,
           variant: "success",
           duration: 5000,
