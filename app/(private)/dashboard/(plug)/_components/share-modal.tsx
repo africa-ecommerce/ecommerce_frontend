@@ -2251,7 +2251,7 @@ export function ShareModal({
     <div className="space-y-2">
       <div className="text-center">
         
-        <h3 className="font-semibold text-lg">Write Your Marketing Message</h3>
+        <h3 className="font-semibold text-base">Write Your Marketing Message</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Create an engaging message to promote your product
         </p>
@@ -2275,8 +2275,8 @@ export function ShareModal({
         </div>
       </div>
 
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
-        <p className="text-sm text-yellow-800 dark:text-yellow-200">
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800 max-h-32 overflow-y-auto">
+        <p className="text-sm text-yellow-800 dark:text-yellow-200 whitespace-pre-wrap break-words">
           <strong>Preview:</strong> {customMessage.trim() || defaultMessage}
         </p>
       </div>
@@ -2297,7 +2297,7 @@ export function ShareModal({
     <div className="space-y-4">
       <div className="text-center">
       
-        <h3 className="font-semibold text-lg">Choose Your Platform</h3>
+        <h3 className="font-semibold text-base">Choose Your Platform</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Select where you want to share your product
         </p>
@@ -2326,12 +2326,12 @@ export function ShareModal({
               />
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
-                  <h4 className="font-medium">{platform.name}</h4>
+                  <h4 className="font-medium text-sm">{platform.name}</h4>
                   {selectedPlatform?.id === platform.id && (
                     <CheckCircle className="h-4 w-4 text-green-600" />
                   )}
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                   {platform.description}
                 </p>
                 <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
@@ -2369,7 +2369,7 @@ export function ShareModal({
     <div className="space-y-4">
       <div className="text-center">
        
-        <h3 className="font-semibold text-lg">Copy Message & Share Image</h3>
+        <h3 className="font-semibold text-base">Copy Message & Share Image</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Follow these steps to complete your share
         </p>
@@ -2384,7 +2384,7 @@ export function ShareModal({
               height={20}
               alt={selectedPlatform.name}
             />
-            <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+            <p className="text-xs font-medium text-blue-800 dark:text-blue-200">
               Sharing to {selectedPlatform.name}
             </p>
           </div>
@@ -2396,7 +2396,7 @@ export function ShareModal({
         <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
           <div className="flex items-center space-x-2 mb-2">
            
-            <h4 className="font-medium text-green-800 dark:text-green-200">
+            <h4 className="font-medium text-sm text-green-800 dark:text-green-200">
              Copy Your Complete Message
             </h4>
           </div>
@@ -2430,7 +2430,7 @@ export function ShareModal({
         <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
           <div className="flex items-center space-x-2 mb-3">
            
-            <h4 className="font-medium text-green-800 dark:text-green-200">
+            <h4 className="font-medium text-green-800 text-sm dark:text-green-200">
              Share Marketing Image
             </h4>
           </div>
@@ -2456,7 +2456,7 @@ export function ShareModal({
             ) : (
               <>
                 <Share2 className="mr-2 h-4 w-4" />
-                📸 Share Marketing Image
+                Share Marketing Image
               </>
             )}
           </Button>
@@ -2481,7 +2481,7 @@ export function ShareModal({
         className="w-full"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Platform Selection
+        Back
       </Button>
     </div>
   );
@@ -2490,7 +2490,7 @@ export function ShareModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-md max-h-[90vh] p-4 sm:p-6">
         <DialogHeader className="pb-4">
-          <DialogTitle className="text-lg">
+          <DialogTitle className="text-base">
             Share Product
           </DialogTitle>
           <DialogDescription className="text-sm">
