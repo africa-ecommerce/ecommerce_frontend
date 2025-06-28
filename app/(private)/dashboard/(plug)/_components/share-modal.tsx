@@ -2177,7 +2177,7 @@ export function ShareModal({
       await navigator.clipboard.writeText(finalMessage);
       setFinalMessageCopied(true);
       
-      successToast("✅ Message copied to clipboard!");
+      successToast("Message copied to clipboard!");
       
       setTimeout(() => setFinalMessageCopied(false), 3000);
     } catch (error) {
@@ -2206,7 +2206,7 @@ export function ShareModal({
       // Check if Web Share API is available
       if ("share" in navigator && navigator.canShare({ files: [file] })) {
         await navigator.share({
-          title: `${productName} - Marketing Image`,
+         
           files: [file],
         });
         
@@ -2229,7 +2229,7 @@ export function ShareModal({
         ]);
         
         toast({
-          title: "📸 Image copied to clipboard!",
+          title: "Image copied to clipboard!",
           description: `Open ${selectedPlatform?.name} and paste both the image and your message`,
           variant: "success",
           duration: 6000,
@@ -2255,11 +2255,9 @@ export function ShareModal({
 
   // Step 1: Write Marketing Message
   const renderStep1 = () => (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="text-center">
-        <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold">
-          1
-        </div>
+        
         <h3 className="font-semibold text-lg">Write Your Marketing Message</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Create an engaging message to promote your product
@@ -2276,11 +2274,11 @@ export function ShareModal({
           value={customMessage}
           onChange={(e) => setCustomMessage(e.target.value)}
           className="min-h-[100px] resize-none"
-          maxLength={280}
+          maxLength={150}
         />
         <div className="flex justify-between text-xs text-gray-500">
           <span>💡 Tip: Use emojis and engaging language!</span>
-          <span>{customMessage.length}/280</span>
+          <span>{customMessage.length}/150</span>
         </div>
       </div>
 
@@ -2292,10 +2290,10 @@ export function ShareModal({
 
       <Button
         onClick={handleStep1Next}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-        disabled={!customMessage.trim()}
+        className="w-full bg-orange-600 hover:bg-orange-700 text-white"
+       
       >
-        Continue to Platform Selection
+        Continue
         <ArrowRight className="ml-2 h-4 w-4" />
       </Button>
     </div>
@@ -2305,23 +2303,14 @@ export function ShareModal({
   const renderStep2 = () => (
     <div className="space-y-4">
       <div className="text-center">
-        <div className="w-8 h-8 bg-orange-600 text-white rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold">
-          2
-        </div>
+      
         <h3 className="font-semibold text-lg">Choose Your Platform</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Select where you want to share your product
         </p>
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-        <div className="flex items-start space-x-2">
-          <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>Important:</strong> The social media app must be installed on your device for sharing to work properly.
-          </p>
-        </div>
-      </div>
+     
 
       <div className="grid grid-cols-1 gap-3">
         {PLATFORMS.map((platform) => (
@@ -2375,7 +2364,7 @@ export function ShareModal({
           className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
           disabled={!selectedPlatform}
         >
-          Continue to Share
+          Continue
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
@@ -2386,9 +2375,7 @@ export function ShareModal({
   const renderStep3 = () => (
     <div className="space-y-4">
       <div className="text-center">
-        <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center mx-auto mb-2 text-sm font-bold">
-          3
-        </div>
+       
         <h3 className="font-semibold text-lg">Copy Message & Share Image</h3>
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Follow these steps to complete your share
@@ -2413,13 +2400,11 @@ export function ShareModal({
 
       <div className="space-y-3">
         {/* Step 3a: Copy Message */}
-        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
           <div className="flex items-center space-x-2 mb-2">
-            <div className="bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-              3a
-            </div>
-            <h4 className="font-medium text-purple-800 dark:text-purple-200">
-              First: Copy Your Complete Message
+           
+            <h4 className="font-medium text-green-800 dark:text-green-200">
+             Copy Your Complete Message
             </h4>
           </div>
           
@@ -2431,22 +2416,18 @@ export function ShareModal({
 
           <Button
             onClick={handleCopyMessage}
-            className={`w-full ${
-              finalMessageCopied
-                ? "bg-green-600 hover:bg-green-700"
-                : "bg-purple-600 hover:bg-purple-700"
-            } text-white`}
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
             disabled={isGeneratingLink}
           >
             {finalMessageCopied ? (
               <>
                 <CheckCircle className="mr-2 h-4 w-4" />
-                ✅ Message Copied!
+                Message Copied!
               </>
             ) : (
               <>
                 <Copy className="mr-2 h-4 w-4" />
-                📝 Copy Complete Message
+                Copy Complete Message
               </>
             )}
           </Button>
@@ -2455,18 +2436,16 @@ export function ShareModal({
         {/* Step 3b: Share Image */}
         <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
           <div className="flex items-center space-x-2 mb-3">
-            <div className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-              3b
-            </div>
+           
             <h4 className="font-medium text-green-800 dark:text-green-200">
-              Second: Share Marketing Image
+             Share Marketing Image
             </h4>
           </div>
 
           {!finalMessageCopied && (
             <div className="bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded border border-yellow-200 dark:border-yellow-800 mb-3">
               <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                ⚠️ You must copy your message first before sharing the image
+                You must copy your message first before sharing the image
               </p>
             </div>
           )}
@@ -2498,7 +2477,7 @@ export function ShareModal({
           <ol className="text-xs text-gray-600 dark:text-gray-400 mt-2 space-y-1 ml-4">
             <li>1. Image will be shared to {selectedPlatform?.name}</li>
             <li>2. Paste your copied message as the caption/text</li>
-            <li>3. Post to start earning from your referrals! 🎉</li>
+            <li>3. Then post, that is all! 🎉</li>
           </ol>
         </div>
       </div>
@@ -2518,8 +2497,8 @@ export function ShareModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-md max-h-[90vh] p-4 sm:p-6">
         <DialogHeader className="pb-4">
-          <DialogTitle className="text-xl">
-            Share Product & Earn Commissions
+          <DialogTitle className="text-lg">
+            Share Product
           </DialogTitle>
           <DialogDescription className="text-sm">
             Create your marketing message and share with a professional image
@@ -2527,7 +2506,7 @@ export function ShareModal({
         </DialogHeader>
 
         {/* Progress indicator */}
-        <div className="flex items-center justify-center space-x-2 mb-6">
+        <div className="flex items-center justify-center space-x-2 mb-3">
           {[1, 2, 3].map((step) => (
             <div
               key={step}
