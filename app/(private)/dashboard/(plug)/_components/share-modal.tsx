@@ -1307,9 +1307,10 @@ export function ShareModal({
         productName : "LUXURY ESSENCE",
         price : "₦299,000",
         sellerName : "SOPHIA CHEN",
-        sellerInitials : "SC",
+        sellerImage : "/placeholder.svg", 
         tagline : "TIMELESS ELEGANCE",
-        dimensions : { width: 560, height: 750 },
+        dimensions : { width: 530, height: 850 },
+        brandName : "pluggn",
       });
 
       // Convert data URL to blob
