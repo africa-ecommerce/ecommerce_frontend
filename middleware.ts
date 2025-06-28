@@ -56,8 +56,11 @@ export async function middleware(request: NextRequest) {
     }
 
     const page = pathname.replace(/^\/+/, "");
+    const pageWithHtml = page.endsWith(".html") ? page: `${page}.html`;
     return NextResponse.rewrite(
-      new URL(`${process.env.BACKEND_URL}/template/primary/${page}.html`)
+      new URL(
+        `${process.env.BACKEND_URL}/template/primary/${pageWithHtml}`
+      )
     );
   }
 
