@@ -1303,14 +1303,13 @@ export function ShareModal({
       }
 
       const { processedImage } = await createLuxuryMagazineCard({
-        imageUrl:
-          "https://salescabal.s3.eu-west-3.amazonaws.com/stores/187287/products/e36c2c3d0765ad0f77127d2b9552c3794a1b37e9.jpeg",
-        productName: "LUXURY ESSENCE",
-        price: "₦299,000",
-        sellerName: "SOPHIA CHEN",
-        sellerInitials: "SC",
-        tagline: "TIMELESS ELEGANCE",
-        dimensions: { width: 620, height: 800 },
+        imageUrl : "https://salescabal.s3.eu-west-3.amazonaws.com/stores/187287/products/e36c2c3d0765ad0f77127d2b9552c3794a1b37e9.jpeg",
+        productName : "LUXURY ESSENCE",
+        price : "₦299,000",
+        sellerName : "SOPHIA CHEN",
+        sellerInitials : "SC",
+        tagline : "TIMELESS ELEGANCE",
+        dimensions : { width: 560, height: 750 },
       });
 
       // Convert data URL to blob
