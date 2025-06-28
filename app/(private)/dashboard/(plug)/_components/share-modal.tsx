@@ -2148,14 +2148,7 @@ export function ShareModal({
 
   // Step handlers
   const handleStep1Next = () => {
-    if (!customMessage.trim()) {
-      toast({
-        title: "Marketing message required",
-        description: "Please write your marketing message to continue",
-       
-      });
-      return;
-    }
+   
     setCurrentStep(2);
   };
 
