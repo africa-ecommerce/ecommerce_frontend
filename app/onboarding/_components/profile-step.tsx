@@ -43,7 +43,7 @@ interface ProfileProps {
     phone?: string;
     state?: string;
     aboutBusiness?: string;
-    professionalPhoto?: File;
+    avatar?: File;
   };
 }
 
@@ -94,11 +94,11 @@ export default function ProfileStep({
 
     // Initialize professional photo if provided
     if (
-      initialData?.professionalPhoto &&
-      initialData.professionalPhoto instanceof File
+      initialData?.avatar &&
+      initialData.avatar instanceof File
     ) {
-      setValue("professionalPhoto", initialData.professionalPhoto);
-      setPhotoUrl(URL.createObjectURL(initialData.professionalPhoto));
+      setValue("avatar", initialData.avatar);
+      setPhotoUrl(URL.createObjectURL(initialData.avatar));
     }
   }, [initialData, setValue]);
 
@@ -147,7 +147,7 @@ export default function ProfileStep({
     // Create object URL for preview
     const objectUrl = URL.createObjectURL(file);
     setPhotoUrl(objectUrl);
-    setValue("professionalPhoto", file);
+    setValue("avatar", file);
 
     setUploading(true);
     setTimeout(() => {
@@ -171,7 +171,7 @@ export default function ProfileStep({
       URL.revokeObjectURL(photoUrl);
     }
     setPhotoUrl(null);
-    setValue("professionalPhoto", undefined);
+    setValue("avatar", undefined);
     if (photoInputRef.current) {
       photoInputRef.current.value = "";
     }
@@ -197,7 +197,7 @@ export default function ProfileStep({
               {/* Professional Photo Upload */}
               <FormField
                 control={control}
-                name="professionalPhoto"
+                name="avata"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-gray-700">
@@ -215,7 +215,7 @@ export default function ProfileStep({
                         <input
                           ref={photoInputRef}
                           type="file"
-                          id="professionalPhoto"
+                          id="avatar"
                           className="hidden"
                           accept="image/jpeg,image/png,image/webp"
                           onChange={handlePhotoInputChange}

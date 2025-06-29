@@ -96,7 +96,7 @@ export const plugInfoSchema = z.object({
 
 export const profileSchema = z.object({
 
-  professionalPhoto:  z.instanceof(File, {message: "Please provide your professional photo"}).describe("The professional photo file"), 
+  avatar:  z.instanceof(File, {message: "Please provide your professional photo"}).describe("The professional photo file"), 
   businessName: z.string().min(2, {
     message: "Please provide your business name",
   }),
