@@ -334,7 +334,7 @@ const profileFormSchema = userType === "SUPPLIER" ? updateSupplierSchema : updat
       setAvatarPreview(userData.avatar);
     }
   }, [userData]);
-
+  
   // Update form values when userData changes
   useEffect(() => {
     if (userData) {

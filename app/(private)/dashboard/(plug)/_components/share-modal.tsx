@@ -30,6 +30,7 @@ import {
   toast,
 } from "@/components/ui/use-toast-advanced";
 import Image from "next/image";
+import { useUser } from "@/app/_components/provider/UserContext";
 
 interface ShareModalProps {
   open: boolean;
@@ -147,6 +148,10 @@ export function ShareModal({
   // Default marketing message
   const defaultMessage = `Just discovered this amazing ${productName}! 😍 You need to see this! ✨`;
 
+    const {
+      userData: { user },
+    } = useUser();
+
   // Get product data
   const {
     data: product,
@@ -211,6 +216,8 @@ export function ShareModal({
       throw new Error("Product data not available");
     }
 
+    console.log("product", product)
+
     if (generatedImageBlob) {
       return generatedImageBlob;
     }
@@ -226,11 +233,11 @@ export function ShareModal({
         imageUrl: "https://salescabal.s3.eu-west-3.amazonaws.com/stores/187287/products/e36c2c3d0765ad0f77127d2b9552c3794a1b37e9.jpeg",
         productName: "LUXURY ESSENCE",
         price: "₦299,000",
-        sellerName: "SOPHIA CHEN",
-        sellerImage: "/placeholder.svg",
+        sellerName: user.name.toUpperCase(),
+        sellerImage: user.plug.avatar,
         tagline: "TIMELESS ELEGANCE",
         dimensions: { width: 520, height: 755 },
-        brandName: "pluggn",
+        brandName: user.plug.businessName,
       });
 
       const response = await fetch(processedImage);
