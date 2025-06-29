@@ -229,7 +229,7 @@ export function ShareModal({
         sellerName: "SOPHIA CHEN",
         sellerImage: "/placeholder.svg",
         tagline: "TIMELESS ELEGANCE",
-        dimensions: { width: 520, height: 775 },
+        dimensions: { width: 520, height: 760 },
         brandName: "pluggn",
       });
 
