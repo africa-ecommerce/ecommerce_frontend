@@ -194,19 +194,17 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
       );
       formData.append("supplierAddress.lga", data.supplierAddress.lga || "");
     } else {
-      // For plug, send individual fields
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          formData.append(key, value as string);
-        }
-      });
+      if (avatarFile) {
+        formData.append("avatar", avatarFile);
+      }
+  
+        formData.append("businessName", data.businessName || "");
+      formData.append("phone", data.phone || "");
+      formData.append("state", data.state || "");
+
     }
 
-    // Log formData entries in a way that shows the actual data
-    console.log("FormData contents:");
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`);
-    }
+   
 
     try {
       const response = await fetch("/api/auth/update-profile", {
@@ -332,10 +330,10 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
 
   // Set initial avatar preview if available
   useEffect(() => {
-    if (userType === "SUPPLIER" && userData?.avatar) {
+    if (userData?.avatar) {
       setAvatarPreview(userData.avatar);
     }
-  }, [userData, userType]);
+  }, [userData]);
 
   // Update form values when userData changes
   useEffect(() => {
@@ -371,7 +369,6 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
             <CardContent>
               <Form {...profileForm}>
                 <form onSubmit={profileForm.submit} className="space-y-6">
-                  {userType === "SUPPLIER" && (
                     <div className="flex flex-col items-center mb-6">
                       <div className="relative mb-4">
                         <Avatar className="h-24 w-24 border-4 border-background">
@@ -410,7 +407,6 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
                         </label>
                       </div>
                     </div>
-                  )}
 
                   <FormField
                     control={profileForm.control}
