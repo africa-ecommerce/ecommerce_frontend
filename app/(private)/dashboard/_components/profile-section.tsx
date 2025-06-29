@@ -167,10 +167,82 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
   };
 
   // Update profile function
+  // const updateProfile = async (data: any) => {
+  //   const formData = new FormData();
+
+  //   if (userType === "SUPPLIER" && avatarFile) {
+  //     formData.append("avatar", avatarFile);
+  //   }
+
+  //   // For supplier, send the supplierAddress fields individually
+  //   if (userType === "SUPPLIER") {
+  //     formData.append("businessName", data.businessName);
+  //     formData.append("phone", data.phone);
+
+  //     // Append supplierAddress fields individually
+  //     formData.append(
+  //       "supplierAddress.streetAddress",
+  //       data.supplierAddress.streetAddress || ""
+  //     );
+  //     formData.append(
+  //       "supplierAddress.directions",
+  //       data.supplierAddress.directions || ""
+  //     );
+  //     formData.append(
+  //       "supplierAddress.state",
+  //       data.supplierAddress.state || ""
+  //     );
+  //     formData.append("supplierAddress.lga", data.supplierAddress.lga || "");
+  //   } else {
+  //     if (avatarFile) {
+  //       formData.append("avatar", avatarFile);
+  //     }
+  
+  //       formData.append("businessName", data.businessName || "");
+  //     formData.append("phone", data.phone || "");
+  //     formData.append("state", data.state || "");
+
+  //   }
+
+   
+
+  //   try {
+  //     const response = await fetch("/api/auth/update-profile", {
+  //       method: "POST",
+  //       body: formData,
+  //       credentials: "include",
+  //     });
+
+  //     const result = await response.json();
+
+  //     if (!response.ok) {
+  //       errorToast(result.error);
+  //       return null;
+  //     }
+
+  //     successToast(result.message);
+
+  //     // Refresh user data after update
+  //     await mutate("/api/auth/current-user");
+
+  //     // Reset the form with the new values to ensure the updated data is displayed
+  //     profileForm.reset(data);
+
+  //     return result;
+  //   } catch (error) {
+  //     errorToast("Something went wrong");
+  //     return null;
+  //   }
+  // };
+
+
+
+  // Update profile function
   const updateProfile = async (data: any) => {
     const formData = new FormData();
 
-    if (userType === "SUPPLIER" && avatarFile) {
+    // Handle avatar file for both user types
+    if (avatarFile) {
       formData.append("avatar", avatarFile);
     }
 
@@ -194,17 +266,11 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
       );
       formData.append("supplierAddress.lga", data.supplierAddress.lga || "");
     } else {
-      if (avatarFile) {
-        formData.append("avatar", avatarFile);
-      }
-  
-        formData.append("businessName", data.businessName || "");
+      // For PLUG users
+      formData.append("businessName", data.businessName || "");
       formData.append("phone", data.phone || "");
       formData.append("state", data.state || "");
-
     }
-
-   
 
     try {
       const response = await fetch("/api/auth/update-profile", {
