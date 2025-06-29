@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/use-toast-advanced";
 import Image from "next/image";
 import { useUser } from "@/app/_components/provider/UserContext";
+import { formatPrice, truncateText } from "@/lib/utils";
 
 interface ShareModalProps {
   open: boolean;
@@ -216,7 +217,6 @@ export function ShareModal({
       throw new Error("Product data not available");
     }
 
-    console.log("product", product)
 
     if (generatedImageBlob) {
       return generatedImageBlob;
@@ -230,10 +230,10 @@ export function ShareModal({
       }
 
       const { processedImage } = await createLuxuryMagazineCard({
-        imageUrl: "https://salescabal.s3.eu-west-3.amazonaws.com/stores/187287/products/e36c2c3d0765ad0f77127d2b9552c3794a1b37e9.jpeg",
-        productName: "LUXURY ESSENCE",
-        price: "₦299,000",
-        sellerName: user.name.toUpperCase(),
+        imageUrl: product.images[0],
+        productName: truncateText(product.name.toUpperCase()),
+        price: formatPrice(String(product.price)),
+        sellerName: truncateText(user.name.toUpperCase()),
         sellerImage: user.plug.avatar,
         tagline: "TIMELESS ELEGANCE",
         dimensions: { width: 520, height: 755 },
