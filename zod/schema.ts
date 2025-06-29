@@ -442,3 +442,93 @@ export const updateSupplierSchema = z.object({
 
 })
 
+// Add this new schema to your zod schema file
+export const updateProfileSchema = z.object({
+  businessName: z.string().min(2, {
+    message: "Please provide your business name",
+  }),
+  phone: z
+    .string()
+    .refine(
+      (val) => {
+        // If empty string or undefined, it's valid (optional)
+        if (!val) return true;
+
+        // Otherwise validate as Nigerian phone number
+        return /^(\+?234|0)[\d]{10}$/.test(val);
+      },
+      {
+        message: "Please enter a valid Nigerian phone number",
+      }
+    )
+    .refine(
+      (val) => {
+        // Skip validation if empty
+        if (!val) return true;
+
+        // Check length requirements when value exists
+        return val.length >= 11 && val.length <= 15;
+      },
+      {
+        message: "Phone number must be between 11 and 15 digits",
+      }
+    )
+    .transform((val) => {
+      // Return as is if empty/undefined
+      if (!val) return val;
+
+      // Normalize phone number to standard format
+      if (val.startsWith("0")) {
+        return `+234${val.slice(1)}`;
+      }
+      if (val.startsWith("234")) {
+        return `+${val}`;
+      }
+      return val;
+    })
+    .optional(),
+  state: z.enum(
+    [
+      "Abia",
+      "Adamawa",
+      "Akwa Ibom",
+      "Anambra",
+      "Bauchi",
+      "Bayelsa",
+      "Benue",
+      "Borno",
+      "Cross River",
+      "Delta",
+      "Ebonyi",
+      "Edo",
+      "Ekiti",
+      "Enugu",
+      "Gombe",
+      "Imo",
+      "Jigawa",
+      "Kaduna",
+      "Kano",
+      "Katsina",
+      "Kebbi",
+      "Kogi",
+      "Kwara",
+      "Lagos",
+      "Nasarawa",
+      "Niger",
+      "Ogun",
+      "Ondo",
+      "Osun",
+      "Oyo",
+      "Plateau",
+      "Rivers",
+      "Sokoto",
+      "Taraba",
+      "Yobe",
+      "Zamfara",
+      "FCT",
+    ],
+    {
+      message: "Please select a valid state",
+    }
+  ),
+});
