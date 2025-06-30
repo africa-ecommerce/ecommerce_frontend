@@ -1094,13 +1094,13 @@ export default function PlugDashboard() {
                       <div className="text-xl font-bold">
                         {platform.percentage}
                       </div>
-                      <p className="text-[10px] sm:text-xs text-muted-foreground">
+                      <p className="text-[10px] md:text-xs text-muted-foreground">
                         {platform.description}
                       </p>
                       <div className="mt-3 space-y-2">
                         {platform.stats.map((stat: any, i: number) => (
                           <div key={i}>
-                            <div className="flex justify-between text-[10px] sm:text-xs">
+                            <div className="flex justify-between text-[10px] md:text-xs">
                               <span>{stat.label}</span>
                               <span className="font-medium">{stat.value}</span>
                             </div>
