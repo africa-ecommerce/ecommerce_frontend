@@ -52,8 +52,7 @@ const defaultConfig = {
     ACCENT_COLOR: "#666666",
     TEXT_COLOR: "#333333",
     BACKGROUND_COLOR: "#ffffff",
-    FOOTER_BACKGROUND: "#f0f0f0",
-    FOOTER_TEXT_COLOR: "#333333",
+   
     FONT_FAMILY: "Inter, sans-serif",
   },
 

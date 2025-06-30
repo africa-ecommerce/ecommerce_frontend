@@ -51,8 +51,7 @@ const colorPalettes = [
       ACCENT_COLOR: "#e74c3c",
       TEXT_COLOR: "#2c3e50",
       BACKGROUND_COLOR: "#ffffff",
-      FOOTER_BACKGROUND: "#f8f9fa",
-      FOOTER_TEXT_COLOR: "#34495e",
+    
       FONT_FAMILY: "Inter, sans-serif",
     },
   },
@@ -64,8 +63,7 @@ const colorPalettes = [
       ACCENT_COLOR: "#4ecdc4",
       TEXT_COLOR: "#2d3436",
       BACKGROUND_COLOR: "#ffffff",
-      FOOTER_BACKGROUND: "#fff5f5",
-      FOOTER_TEXT_COLOR: "#636e72",
+     
       FONT_FAMILY: "Poppins, sans-serif",
     },
   },
@@ -77,8 +75,7 @@ const colorPalettes = [
       ACCENT_COLOR: "#fd79a8",
       TEXT_COLOR: "#2d3436",
       BACKGROUND_COLOR: "#ffffff",
-      FOOTER_BACKGROUND: "#f1f8ff",
-      FOOTER_TEXT_COLOR: "#636e72",
+    
       FONT_FAMILY: "Roboto, sans-serif",
     },
   },
@@ -90,8 +87,7 @@ const colorPalettes = [
       ACCENT_COLOR: "#a29bfe",
       TEXT_COLOR: "#2d3436",
       BACKGROUND_COLOR: "#ffffff",
-      FOOTER_BACKGROUND: "#f4f6f7",
-      FOOTER_TEXT_COLOR: "#636e72",
+     
       FONT_FAMILY: "Source Sans Pro, sans-serif",
     },
   },
@@ -103,8 +99,7 @@ const colorPalettes = [
       ACCENT_COLOR: "#fdcb6e",
       TEXT_COLOR: "#2d3436",
       BACKGROUND_COLOR: "#fffef7",
-      FOOTER_BACKGROUND: "#fef7f0",
-      FOOTER_TEXT_COLOR: "#636e72",
+     
       FONT_FAMILY: "Lato, sans-serif",
     },
   },
@@ -116,8 +111,7 @@ const colorPalettes = [
       ACCENT_COLOR: "#fd79a8",
       TEXT_COLOR: "#2d3436",
       BACKGROUND_COLOR: "#ffffff",
-      FOOTER_BACKGROUND: "#f8f7ff",
-      FOOTER_TEXT_COLOR: "#636e72",
+     
       FONT_FAMILY: "Raleway, sans-serif",
     },
   },
@@ -129,8 +123,7 @@ const colorPalettes = [
       ACCENT_COLOR: "#e17055",
       TEXT_COLOR: "#2d3436",
       BACKGROUND_COLOR: "#ffffff",
-      FOOTER_BACKGROUND: "#f0fff4",
-      FOOTER_TEXT_COLOR: "#636e72",
+     
       FONT_FAMILY: "Open Sans, sans-serif",
     },
   },
@@ -142,8 +135,7 @@ const colorPalettes = [
       ACCENT_COLOR: "#00cec9",
       TEXT_COLOR: "#2d3436",
       BACKGROUND_COLOR: "#ffffff",
-      FOOTER_BACKGROUND: "#fdf2f8",
-      FOOTER_TEXT_COLOR: "#636e72",
+     
       FONT_FAMILY: "Nunito, sans-serif",
     },
   },
@@ -161,8 +153,7 @@ function areColorsEqual(
     "ACCENT_COLOR",
     "TEXT_COLOR",
     "BACKGROUND_COLOR",
-    "FOOTER_BACKGROUND",
-    "FOOTER_TEXT_COLOR",
+   
     "FONT_FAMILY",
   ];
 
@@ -417,27 +408,7 @@ export default function ColorCustomizer({
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="footer">
-                  <AccordionTrigger className="py-2 sm:py-3 text-xs sm:text-sm">
-                    Footer Colors
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-3 pt-1 sm:pt-2 pb-2">
-                    <ColorPicker
-                      label="Footer Background"
-                      value={colors.FOOTER_BACKGROUND || "#1a1a1a"}
-                      onChange={(value) =>
-                        updateColor("FOOTER_BACKGROUND", value)
-                      }
-                    />
-                    <ColorPicker
-                      label="Footer Text Color"
-                      value={colors.FOOTER_TEXT_COLOR || "#cccccc"}
-                      onChange={(value) =>
-                        updateColor("FOOTER_TEXT_COLOR", value)
-                      }
-                    />
-                  </AccordionContent>
-                </AccordionItem>
+               
               </Accordion>
             </TabsContent>
           </ScrollArea>
