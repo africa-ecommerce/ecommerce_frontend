@@ -75,8 +75,9 @@ export const formatQuantity = (quantity: number) => {
 
 
 export const formatPrice = (price: string) => {
- 
-  return `₦${price?.toLocaleString()}`;
+  const numPrice = parseFloat(price);
+  if (isNaN(numPrice)) return `₦0`; // or return `₦${price}` to show original
+  return `₦${numPrice.toLocaleString()}`;
 };
 
 export const truncateText = (text: string, maxLength: number = 20) => {
