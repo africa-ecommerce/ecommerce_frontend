@@ -714,7 +714,7 @@ const PLATFORMS = [
   {
     id: "tiktok",
     name: "TikTok",
-    icon: "/tiktik.png",
+    icon: "/tiktok.png",
     code: "tt",
     description: "Share as TikTok video or post content",
     requirement: "TikTok app must be installed on your device",
