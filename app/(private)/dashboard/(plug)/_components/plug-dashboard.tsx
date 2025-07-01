@@ -407,9 +407,11 @@ export default function PlugDashboard() {
     const platformImages: { [key: string]: string } = {
       whatsapp: "/whatsapp.png",
       instagram: "/instagram_logo.png",
+      tiktok: "/tiktok.png", 
       twitter: "/twitter.png",
       facebook: "/facebook.png",
     };
+    
 
     // Platform color mapping
     const platformColors: { [key: string]: string } = {
@@ -417,6 +419,7 @@ export default function PlugDashboard() {
       instagram: "text-pink-600",
       twitter: "text-blue-500",
       facebook: "text-blue-600",
+      tiktok: "text-black", 
     };
 
     return socialPlatforms.map((item: any) => {
