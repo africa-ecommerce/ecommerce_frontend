@@ -640,705 +640,6 @@
 
 
 
-// "use client";
-
-// import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
-// import {
-//   MapPin,
-//   Package,
-//   Home,
-//   Warehouse,
-//   Plus,
-//   Minus,
-//   Maximize2,
-//   Navigation,
-//   Info,
-//   X,
-// } from "lucide-react";
-// import { Button } from "@/components/ui/button";
-
-// interface OrderData {
-//   orderId: string;
-//   status: string;
-//   currentLocation: {
-//     lat: number;
-//     lng: number;
-//     address: string;
-//     timestamp: string;
-//   };
-//   origin: {
-//     lat: number;
-//     lng: number;
-//     address: string;
-//     name: string;
-//   };
-//   destination: {
-//     lat: number;
-//     lng: number;
-//     address: string;
-//     recipientName: string;
-//   };
-//   estimatedDelivery: string;
-// }
-
-// interface MapPoint {
-//   lat: number;
-//   lng: number;
-//   type: "origin" | "current" | "destination";
-//   label: string;
-//   address: string;
-//   details?: string;
-// }
-
-// // Sample order data for demo
-// const sampleOrderData: OrderData = {
-//   orderId: "ORD-2025-001",
-//   status: "In Transit",
-//   currentLocation: {
-//     lat: 40.7128,
-//     lng: -74.0060,
-//     address: "New York, NY",
-//     timestamp: "2025-07-02T14:30:00Z"
-//   },
-//   origin: {
-//     lat: 41.8781,
-//     lng: -87.6298,
-//     address: "123 Warehouse St, Chicago, IL 60601",
-//     name: "Chicago Distribution Center"
-//   },
-//   destination: {
-//     lat: 42.3601,
-//     lng: -71.0589,
-//     address: "456 Main St, Boston, MA 02101",
-//     recipientName: "John Smith"
-//   },
-//   estimatedDelivery: "2025-07-03T18:00:00Z"
-// };
-
-// export default function OrderTrackingMap({ orderData = sampleOrderData }: { orderData?: OrderData }) {
-//   const [selectedPoint, setSelectedPoint] = useState<MapPoint | null>(null);
-//   const [zoom, setZoom] = useState(6);
-//   const [center, setCenter] = useState({ lat: 41.5, lng: -81.5 });
-//   const [isDragging, setIsDragging] = useState(false);
-//   const [lastTouch, setLastTouch] = useState<{ x: number; y: number } | null>(null);
-//   const [mapStyle, setMapStyle] = useState<"roadmap" | "satellite">("roadmap");
-//   const [showControls, setShowControls] = useState(true);
-//   const [isAnimating, setIsAnimating] = useState(false);
-  
-//   const mapRef = useRef<HTMLDivElement>(null);
-//   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
-//   const lastPinchDistance = useRef<number | null>(null);
-//   const animationFrameRef = useRef<number | null>(null);
-
-//   const mapPoints: MapPoint[] = [
-//     {
-//       lat: orderData.origin.lat,
-//       lng: orderData.origin.lng,
-//       type: "origin",
-//       label: "Origin",
-//       address: orderData.origin.name,
-//       details: orderData.origin.address,
-//     },
-//     {
-//       lat: orderData.currentLocation.lat,
-//       lng: orderData.currentLocation.lng,
-//       type: "current",
-//       label: "Current Location",
-//       address: orderData.currentLocation.address,
-//       details: `Status: ${orderData.status} • ${new Date(orderData.currentLocation.timestamp).toLocaleString()}`,
-//     },
-//     {
-//       lat: orderData.destination.lat,
-//       lng: orderData.destination.lng,
-//       type: "destination",
-//       label: "Destination",
-//       address: orderData.destination.recipientName,
-//       details: `${orderData.destination.address} • ETA: ${new Date(orderData.estimatedDelivery).toLocaleString()}`,
-//     },
-//   ];
-
-//   // Enhanced initial positioning with better bounds calculation
-//   useEffect(() => {
-//     const lats = mapPoints.map((p) => p.lat);
-//     const lngs = mapPoints.map((p) => p.lng);
-
-//     const minLat = Math.min(...lats);
-//     const maxLat = Math.max(...lats);
-//     const minLng = Math.min(...lngs);
-//     const maxLng = Math.max(...lngs);
-
-//     const centerLat = (minLat + maxLat) / 2;
-//     const centerLng = (minLng + maxLng) / 2;
-
-//     // Add padding to the bounds
-//     const latPadding = (maxLat - minLat) * 0.3;
-//     const lngPadding = (maxLng - minLng) * 0.3;
-
-//     const paddedLatDiff = (maxLat - minLat) + latPadding;
-//     const paddedLngDiff = (maxLng - minLng) + lngPadding;
-//     const maxDiff = Math.max(paddedLatDiff, paddedLngDiff);
-
-//     let newZoom = 10;
-//     if (maxDiff > 30) newZoom = 3;
-//     else if (maxDiff > 20) newZoom = 4;
-//     else if (maxDiff > 10) newZoom = 5;
-//     else if (maxDiff > 5) newZoom = 6;
-//     else if (maxDiff > 2) newZoom = 7;
-//     else if (maxDiff > 1) newZoom = 8;
-//     else if (maxDiff > 0.5) newZoom = 9;
-//     else if (maxDiff > 0.2) newZoom = 10;
-
-//     setCenter({ lat: centerLat, lng: centerLng });
-//     setZoom(newZoom);
-//   }, [orderData]);
-
-//   // Improved coordinate conversion with better precision
-//   const latLngToPixel = useCallback(
-//     (lat: number, lng: number) => {
-//       const mapWidth = mapRef.current?.clientWidth || 800;
-//       const mapHeight = mapRef.current?.clientHeight || 400;
-
-//       const scale = Math.pow(2, zoom);
-//       const worldWidth = 256 * scale;
-
-//       // More accurate Mercator projection
-//       const latRad = (lat * Math.PI) / 180;
-//       const pixelX = ((lng + 180) / 360) * worldWidth;
-//       const pixelY = ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * worldWidth;
-
-//       // Center offset calculation
-//       const centerLatRad = (center.lat * Math.PI) / 180;
-//       const centerPixelX = ((center.lng + 180) / 360) * worldWidth;
-//       const centerPixelY = ((1 - Math.log(Math.tan(centerLatRad) + 1 / Math.cos(centerLatRad)) / Math.PI) / 2) * worldWidth;
-
-//       return {
-//         x: pixelX - centerPixelX + mapWidth / 2,
-//         y: pixelY - centerPixelY + mapHeight / 2,
-//       };
-//     },
-//     [zoom, center]
-//   );
-
-//   const pixelToLatLng = useCallback(
-//     (x: number, y: number) => {
-//       const mapWidth = mapRef.current?.clientWidth || 800;
-//       const mapHeight = mapRef.current?.clientHeight || 400;
-
-//       const scale = Math.pow(2, zoom);
-//       const worldWidth = 256 * scale;
-
-//       const centerLatRad = (center.lat * Math.PI) / 180;
-//       const centerPixelX = ((center.lng + 180) / 360) * worldWidth;
-//       const centerPixelY = ((1 - Math.log(Math.tan(centerLatRad) + 1 / Math.cos(centerLatRad)) / Math.PI) / 2) * worldWidth;
-
-//       const worldX = x - mapWidth / 2 + centerPixelX;
-//       const worldY = y - mapHeight / 2 + centerPixelY;
-
-//       const lng = (worldX / worldWidth) * 360 - 180;
-//       const lat = Math.atan(Math.sinh(Math.PI * (1 - (2 * worldY) / worldWidth))) * (180 / Math.PI);
-
-//       return { lat, lng };
-//     },
-//     [zoom, center]
-//   );
-
-//   // Enhanced touch handling with momentum and inertia
-//   const handleTouchStart = (e: React.TouchEvent) => {
-//     e.preventDefault();
-//     const touch = e.touches[0];
-//     if (e.touches.length === 1) {
-//       setIsDragging(true);
-//       setLastTouch({ x: touch.clientX, y: touch.clientY });
-//       touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
-//     } else if (e.touches.length === 2) {
-//       // Handle pinch for zoom
-//       const touch1 = e.touches[0];
-//       const touch2 = e.touches[1];
-//       const distance = Math.sqrt(
-//         Math.pow(touch2.clientX - touch1.clientX, 2) + 
-//         Math.pow(touch2.clientY - touch1.clientY, 2)
-//       );
-//       lastPinchDistance.current = distance;
-//       setIsDragging(false);
-//     }
-//   };
-
- 
-
-//   const handleTouchMove = useCallback(
-//     (e: React.TouchEvent) => {
-//       e.preventDefault();
-
-//       if (e.touches.length === 1 && isDragging && lastTouch) {
-//         const touch = e.touches[0];
-//         const deltaX = touch.clientX - lastTouch.x;
-//         const deltaY = touch.clientY - lastTouch.y;
-
-//         // Increase threshold for better performance
-//         if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
-//           const currentLatLng = pixelToLatLng(400, 200);
-//           const newLatLng = pixelToLatLng(400 - deltaX, 200 - deltaY);
-
-//           setCenter((prev) => ({
-//             lat: Math.max(
-//               -85,
-//               Math.min(85, prev.lat + (newLatLng.lat - currentLatLng.lat))
-//             ),
-//             lng:
-//               ((prev.lng + (newLatLng.lng - currentLatLng.lng) + 540) % 360) -
-//               180,
-//           }));
-
-//           setLastTouch({ x: touch.clientX, y: touch.clientY });
-//         }
-//       } else if (e.touches.length === 2 && lastPinchDistance.current !== null) {
-//         // Handle pinch zoom with throttling
-//         const touch1 = e.touches[0];
-//         const touch2 = e.touches[1];
-//         const distance = Math.sqrt(
-//           Math.pow(touch2.clientX - touch1.clientX, 2) +
-//             Math.pow(touch2.clientY - touch1.clientY, 2)
-//         );
-
-//         const scale = distance / lastPinchDistance.current;
-//         const zoomDelta = Math.log2(scale);
-
-//         // Increase threshold for zoom to reduce lag
-//         if (Math.abs(zoomDelta) > 0.2) {
-//           setZoom((prev) => Math.max(1, Math.min(20, prev + zoomDelta)));
-//           lastPinchDistance.current = distance;
-//         }
-//       }
-//     },
-//     [isDragging, lastTouch, pixelToLatLng]
-//   );
-
-//   const handleTouchEnd = (e: React.TouchEvent) => {
-//     if (e.touches.length === 0) {
-//       setIsDragging(false);
-//       setLastTouch(null);
-//       lastPinchDistance.current = null;
-      
-//       // Add momentum/inertia effect
-//       if (touchStartRef.current) {
-//         const touchEnd = { x: e.changedTouches[0]?.clientX || 0, y: e.changedTouches[0]?.clientY || 0, time: Date.now() };
-//         const timeDiff = touchEnd.time - touchStartRef.current.time;
-//         const deltaX = touchEnd.x - touchStartRef.current.x;
-//         const deltaY = touchEnd.y - touchStartRef.current.y;
-        
-//         if (timeDiff < 300 && (Math.abs(deltaX) > 50 || Math.abs(deltaY) > 50)) {
-//           // Apply momentum
-//           const velocityX = deltaX / timeDiff;
-//           const velocityY = deltaY / timeDiff;
-//           applyMomentum(velocityX, velocityY);
-//         }
-        
-//         touchStartRef.current = null;
-//       }
-//     }
-//   };
-
-//   const applyMomentum = (velocityX: number, velocityY: number) => {
-//     if (isAnimating) return;
-    
-//     setIsAnimating(true);
-//     const friction = 0.95;
-//     let currentVelocityX = velocityX * 2;
-//     let currentVelocityY = velocityY * 2;
-
-//     const animate = () => {
-//       if (Math.abs(currentVelocityX) < 0.1 && Math.abs(currentVelocityY) < 0.1) {
-//         setIsAnimating(false);
-//         return;
-//       }
-
-//       const currentLatLng = pixelToLatLng(400, 200);
-//       const newLatLng = pixelToLatLng(400 - currentVelocityX, 200 - currentVelocityY);
-
-//       setCenter(prev => ({
-//         lat: Math.max(-85, Math.min(85, prev.lat + (newLatLng.lat - currentLatLng.lat))),
-//         lng: ((prev.lng + (newLatLng.lng - currentLatLng.lng)) + 540) % 360 - 180,
-//       }));
-
-//       currentVelocityX *= friction;
-//       currentVelocityY *= friction;
-
-//       animationFrameRef.current = requestAnimationFrame(animate);
-//     };
-
-//     animate();
-//   };
-
-//   // Mouse event handlers with improved responsiveness
-//   const handleMouseDown = (e: React.MouseEvent) => {
-//     if (e.button !== 0) return; // Only left mouse button
-//     setIsDragging(true);
-//     setLastTouch({ x: e.clientX, y: e.clientY });
-//   };
-
-  
-//   const handleMouseMove = useCallback(
-//     (e: React.MouseEvent) => {
-//       if (!isDragging || !lastTouch) return;
-
-//       const deltaX = e.clientX - lastTouch.x;
-//       const deltaY = e.clientY - lastTouch.y;
-
-//       // Increase threshold for better performance
-//       if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
-//         const currentLatLng = pixelToLatLng(400, 200);
-//         const newLatLng = pixelToLatLng(400 - deltaX, 200 - deltaY);
-
-//         setCenter((prev) => ({
-//           lat: Math.max(
-//             -85,
-//             Math.min(85, prev.lat + (newLatLng.lat - currentLatLng.lat))
-//           ),
-//           lng:
-//             ((prev.lng + (newLatLng.lng - currentLatLng.lng) + 540) % 360) -
-//             180,
-//         }));
-
-//         setLastTouch({ x: e.clientX, y: e.clientY });
-//       }
-//     },
-//     [isDragging, lastTouch, pixelToLatLng]
-//   );
-
-//   const handleMouseUp = () => {
-//     setIsDragging(false);
-//     setLastTouch(null);
-//   };
-
-//   // Enhanced zoom functions with smooth transitions
-//   const smoothZoom = (targetZoom: number, duration: number = 300) => {
-//     const startZoom = zoom;
-//     const startTime = Date.now();
-    
-//     const animate = () => {
-//       const elapsed = Date.now() - startTime;
-//       const progress = Math.min(elapsed / duration, 1);
-//       const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
-      
-//       const currentZoom = startZoom + (targetZoom - startZoom) * easeProgress;
-//       setZoom(currentZoom);
-      
-//       if (progress < 1) {
-//         requestAnimationFrame(animate);
-//       }
-//     };
-    
-//     animate();
-//   };
-
-//   const zoomIn = () => smoothZoom(Math.min(zoom + 1, 18));
-//   const zoomOut = () => smoothZoom(Math.max(zoom - 1, 1));
-
-//   // Enhanced wheel zoom
-//   const handleWheel = (e: React.WheelEvent) => {
-//     e.preventDefault();
-//     const delta = e.deltaY > 0 ? -0.5 : 0.5;
-//     setZoom(prev => Math.max(1, Math.min(18, prev + delta)));
-//   };
-
-//   // Improved fit bounds with animation
-//   const fitBounds = () => {
-//     const lats = mapPoints.map((p) => p.lat);
-//     const lngs = mapPoints.map((p) => p.lng);
-
-//     const minLat = Math.min(...lats);
-//     const maxLat = Math.max(...lats);
-//     const minLng = Math.min(...lngs);
-//     const maxLng = Math.max(...lngs);
-
-//     const centerLat = (minLat + maxLat) / 2;
-//     const centerLng = (minLng + maxLng) / 2;
-
-//     const latPadding = (maxLat - minLat) * 0.3;
-//     const lngPadding = (maxLng - minLng) * 0.3;
-//     const paddedLatDiff = (maxLat - minLat) + latPadding;
-//     const paddedLngDiff = (maxLng - minLng) + lngPadding;
-//     const maxDiff = Math.max(paddedLatDiff, paddedLngDiff);
-
-//     let newZoom = 10;
-//     if (maxDiff > 30) newZoom = 3;
-//     else if (maxDiff > 20) newZoom = 4;
-//     else if (maxDiff > 10) newZoom = 5;
-//     else if (maxDiff > 5) newZoom = 6;
-//     else if (maxDiff > 2) newZoom = 7;
-//     else if (maxDiff > 1) newZoom = 8;
-//     else if (maxDiff > 0.5) newZoom = 9;
-
-//     // Animate to new position
-//     setCenter({ lat: centerLat, lng: centerLng });
-//     smoothZoom(newZoom);
-//   };
-
-//   // Auto-hide controls on mobile
-//   useEffect(() => {
-//     let timeout: NodeJS.Timeout;
-//     const resetTimeout = () => {
-//       setShowControls(true);
-//       clearTimeout(timeout);
-//       timeout = setTimeout(() => setShowControls(false), 3000);
-//     };
-
-//     const isMobile = window.innerWidth < 768;
-//     if (isMobile) {
-//       resetTimeout();
-//       const handleInteraction = () => resetTimeout();
-      
-//       window.addEventListener('touchstart', handleInteraction);
-//       window.addEventListener('touchmove', handleInteraction);
-      
-//       return () => {
-//         clearTimeout(timeout);
-//         window.removeEventListener('touchstart', handleInteraction);
-//         window.removeEventListener('touchmove', handleInteraction);
-//       };
-//     }
-//   }, []);
-
-//   const getMarkerColor = (type: string) => {
-//     switch (type) {
-//       case "origin": return "#22c55e";
-//       case "current": return "#3b82f6";
-//       case "destination": return "#ef4444";
-//       default: return "#6b7280";
-//     }
-//   };
-
-//   const getMarkerIcon = (type: string) => {
-//     switch (type) {
-//       case "origin": return <Warehouse className="h-5 w-5 text-white" />;
-//       case "current": return <Package className="h-5 w-5 text-white" />;
-//       case "destination": return <Home className="h-5 w-5 text-white" />;
-//       default: return <MapPin className="h-5 w-5 text-white" />;
-//     }
-//   };
-
-//   const getTileUrl = (x: number, y: number, z: number) => {
-//     if (mapStyle === "satellite") {
-//       return `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
-//     }
-//     return `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
-//   };
-
- 
-//   const getTilesInView = useCallback(() => {
-//     const mapWidth = mapRef.current?.clientWidth || 800;
-//     const mapHeight = mapRef.current?.clientHeight || 400;
-//     const tileSize = 256;
-//     const scale = Math.pow(2, zoom);
-//     const worldWidth = tileSize * scale;
-
-//     const centerLatRad = (center.lat * Math.PI) / 180;
-//     const centerPixelX = ((center.lng + 180) / 360) * worldWidth;
-//     const centerPixelY =
-//       ((1 -
-//         Math.log(Math.tan(centerLatRad) + 1 / Math.cos(centerLatRad)) /
-//           Math.PI) /
-//         2) *
-//       worldWidth;
-
-//     const startX = Math.floor((centerPixelX - mapWidth / 2) / tileSize) - 1;
-//     const endX = Math.ceil((centerPixelX + mapWidth / 2) / tileSize) + 1;
-//     const startY = Math.floor((centerPixelY - mapHeight / 2) / tileSize) - 1;
-//     const endY = Math.ceil((centerPixelY + mapHeight / 2) / tileSize) + 1;
-
-//     const tiles = [];
-//     const maxTiles = Math.pow(2, Math.floor(zoom));
-
-//     // Limit number of tiles for performance
-//     const maxTileCount = 25; // Reduce from potentially hundreds to 25
-//     let tileCount = 0;
-
-//     for (let x = startX; x <= endX && tileCount < maxTileCount; x++) {
-//       for (let y = startY; y <= endY && tileCount < maxTileCount; y++) {
-//         let tileX = ((x % maxTiles) + maxTiles) % maxTiles;
-//         if (y >= 0 && y < maxTiles) {
-//           const pixelX = x * tileSize - centerPixelX + mapWidth / 2;
-//           const pixelY = y * tileSize - centerPixelY + mapHeight / 2;
-
-//           tiles.push({
-//             x: tileX,
-//             y,
-//             z: Math.floor(zoom),
-//             pixelX,
-//             pixelY,
-//             url: getTileUrl(tileX, y, Math.floor(zoom)),
-//           });
-//           tileCount++;
-//         }
-//       }
-//     }
-
-//     return tiles;
-//   }, [zoom, center]);
-
-//   const memoizedMarkers = useMemo(() => {
-//     return mapPoints
-//       .map((point, index) => {
-//         const pixel = latLngToPixel(point.lat, point.lng);
-//         const mapWidth = mapRef.current?.clientWidth || 800;
-//         const mapHeight = mapRef.current?.clientHeight || 400;
-
-//         if (
-//           pixel.x < -100 ||
-//           pixel.x > mapWidth + 100 ||
-//           pixel.y < -100 ||
-//           pixel.y > mapHeight + 100
-//         ) {
-//           return null;
-//         }
-
-//         return { point, pixel, index };
-//       })
-//       .filter(Boolean);
-//   }, [mapPoints, latLngToPixel]);
-
-//   const tiles = getTilesInView();
-
-//   return (
-//     <div className="relative w-full h-[65vh] md:h-96 bg-gray-100 rounded-lg overflow-hidden border shadow-lg">
-//       {/* Map Container */}
-//       <div
-//         ref={mapRef}
-//         className={`absolute inset-0 select-none ${
-//           isDragging ? "cursor-grabbing" : "cursor-grab"
-//         } touch-none`}
-//         onMouseDown={handleMouseDown}
-//         onMouseMove={handleMouseMove}
-//         onMouseUp={handleMouseUp}
-//         onMouseLeave={handleMouseUp}
-//         onTouchStart={handleTouchStart}
-//         onTouchMove={handleTouchMove}
-//         onTouchEnd={handleTouchEnd}
-//         onWheel={handleWheel}
-//         style={{ touchAction: "none" }}
-//       >
-//         {/* Map Tiles */}
-//         <div className="absolute inset-0">
-//           {tiles.map((tile, index) => (
-//             <img
-//               key={`${tile.x}-${tile.y}-${tile.z}-${index}`}
-//               src={tile.url}
-//               alt=""
-//               className="absolute w-64 h-64 select-none pointer-events-none"
-//               style={{
-//                 left: tile.pixelX,
-//                 top: tile.pixelY,
-//                 imageRendering: zoom > 12 ? "pixelated" : "auto",
-//                 transition: isAnimating ? "none" : "transform 0.1s ease-out",
-//                 willChange: isDragging ? "transform" : "auto", // Optimize for transforms
-//                 backfaceVisibility: "hidden", // Force hardware acceleration
-//                 transform: "translateZ(0)", // Force GPU layer
-//               }}
-//               draggable={false}
-//               onError={(e) => {
-//                 if (mapStyle === "satellite") {
-//                   e.currentTarget.src = `https://tile.openstreetmap.org/${tile.z}/${tile.x}/${tile.y}.png`;
-//                 }
-//               }}
-//             />
-//           ))}
-//         </div>
-
-//         {/* Route Lines */}
-//         <svg className="absolute inset-0 w-full h-full pointer-events-none">
-//           <defs>
-//             <filter id="glow">
-//               <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-//               <feMerge>
-//                 <feMergeNode in="coloredBlur" />
-//                 <feMergeNode in="SourceGraphic" />
-//               </feMerge>
-//             </filter>
-//             <filter id="shadow">
-//               <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3" />
-//             </filter>
-//           </defs>
-
-//           {/* Completed route */}
-//           {(() => {
-//             const originPixel = latLngToPixel(
-//               orderData.origin.lat,
-//               orderData.origin.lng
-//             );
-//             const currentPixel = latLngToPixel(
-//               orderData.currentLocation.lat,
-//               orderData.currentLocation.lng
-//             );
-
-//             return (
-//               <line
-//                 x1={originPixel.x}
-//                 y1={originPixel.y}
-//                 x2={currentPixel.x}
-//                 y2={currentPixel.y}
-//                 stroke="#22c55e"
-//                 strokeWidth="5"
-//                 filter="url(#glow)"
-//                 opacity="0.9"
-//                 strokeLinecap="round"
-//               />
-//             );
-//           })()}
-
-//           {/* Remaining route */}
-//           {(() => {
-//             const currentPixel = latLngToPixel(
-//               orderData.currentLocation.lat,
-//               orderData.currentLocation.lng
-//             );
-//             const destPixel = latLngToPixel(
-//               orderData.destination.lat,
-//               orderData.destination.lng
-//             );
-
-//             return (
-//               <line
-//                 x1={currentPixel.x}
-//                 y1={currentPixel.y}
-//                 x2={destPixel.x}
-//                 y2={destPixel.y}
-//                 stroke="#94a3b8"
-//                 strokeWidth="5"
-//                 strokeDasharray="12,8"
-//                 filter="url(#glow)"
-//                 opacity="0.7"
-//                 strokeLinecap="round"
-//               />
-//             );
-//           })()}
-//         </svg>
-
-//         {/* Map Markers */}
-//         {memoizedMarkers.map((markerData) => {
-//           if (!markerData) return null;
-//           const { point, pixel, index } = markerData;
-
-//           return (
-//             <div
-//               key={index}
-//               className="absolute transform -translate-x-1/2 -translate-y-full cursor-pointer transition-all duration-200 hover:scale-110 z-10"
-//               style={{
-//                 left: pixel.x,
-//                 top: pixel.y,
-//                 filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.2))",
-//               }}
-//               onClick={(e) => {
-//                 e.stopPropagation();
-//                 setSelectedPoint(
-//                   selectedPoint?.type === point.type ? null : point
-//                 );
-//               }}
-//               onTouchEnd={(e) => {
-
-
-
-
-
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
@@ -1456,118 +757,42 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
     },
   ];
 
-  // Enhanced bounds calculation utility
-  const calculateOptimalBounds = useCallback((points: MapPoint[], containerWidth?: number, containerHeight?: number) => {
-    if (points.length === 0) return { center: { lat: 0, lng: 0 }, zoom: 1 };
-
-    const lats = points.map(p => p.lat);
-    const lngs = points.map(p => p.lng);
+  // Enhanced initial positioning with better bounds calculation
+  useEffect(() => {
+    const lats = mapPoints.map((p) => p.lat);
+    const lngs = mapPoints.map((p) => p.lng);
 
     const minLat = Math.min(...lats);
     const maxLat = Math.max(...lats);
     const minLng = Math.min(...lngs);
     const maxLng = Math.max(...lngs);
 
-    // Calculate center
     const centerLat = (minLat + maxLat) / 2;
     const centerLng = (minLng + maxLng) / 2;
 
-    // Calculate bounds dimensions
-    const latDiff = maxLat - minLat;
-    const lngDiff = maxLng - minLng;
+    // Add padding to the bounds
+    const latPadding = (maxLat - minLat) * 0.3;
+    const lngPadding = (maxLng - minLng) * 0.3;
 
-    // Handle edge cases where all points are very close or identical
-    const minLatDiff = 0.001; // ~100m
-    const minLngDiff = 0.001;
-    
-    const adjustedLatDiff = Math.max(latDiff, minLatDiff);
-    const adjustedLngDiff = Math.max(lngDiff, minLngDiff);
+    const paddedLatDiff = (maxLat - minLat) + latPadding;
+    const paddedLngDiff = (maxLng - minLng) + lngPadding;
+    const maxDiff = Math.max(paddedLatDiff, paddedLngDiff);
 
-    // Get container dimensions
-    const mapWidth = containerWidth || mapRef.current?.clientWidth || 800;
-    const mapHeight = containerHeight || mapRef.current?.clientHeight || 400;
+    let newZoom = 10;
+    if (maxDiff > 30) newZoom = 3;
+    else if (maxDiff > 20) newZoom = 4;
+    else if (maxDiff > 10) newZoom = 5;
+    else if (maxDiff > 5) newZoom = 6;
+    else if (maxDiff > 2) newZoom = 7;
+    else if (maxDiff > 1) newZoom = 8;
+    else if (maxDiff > 0.5) newZoom = 9;
+    else if (maxDiff > 0.2) newZoom = 10;
 
-    // Calculate padding based on container size (responsive padding)
-    const basePadding = Math.min(mapWidth, mapHeight) * 0.15; // 15% of smaller dimension
-    const minPadding = 50; // Minimum padding in pixels
-    const maxPadding = 150; // Maximum padding in pixels
-    const padding = Math.max(minPadding, Math.min(maxPadding, basePadding));
+    setCenter({ lat: centerLat, lng: centerLng });
+    setZoom(newZoom);
+  }, [orderData]);
 
-    // Convert padding from pixels to degrees (approximate)
-    const latPaddingDegrees = (padding / mapHeight) * adjustedLatDiff * 2;
-    const lngPaddingDegrees = (padding / mapWidth) * adjustedLngDiff * 2;
-
-    // Calculate padded bounds
-    const paddedLatDiff = adjustedLatDiff + latPaddingDegrees;
-    const paddedLngDiff = adjustedLngDiff + lngPaddingDegrees;
-
-    // Enhanced zoom calculation using Web Mercator projection
-    const WORLD_DIM = { height: 256, width: 256 };
-    const ZOOM_MAX = 18;
-
-    function latRad(lat: number) {
-      const sin = Math.sin(lat * Math.PI / 180);
-      const radX2 = Math.log((1 + sin) / (1 - sin)) / 2;
-      return Math.max(Math.min(radX2, Math.PI), -Math.PI) / 2;
-    }
-
-    function getZoomFromBounds(latDiff: number, lngDiff: number, mapWidth: number, mapHeight: number) {
-      const ne = { lat: centerLat + latDiff / 2, lng: centerLng + lngDiff / 2 };
-      const sw = { lat: centerLat - latDiff / 2, lng: centerLng - lngDiff / 2 };
-
-      const latFraction = (latRad(ne.lat) - latRad(sw.lat)) / Math.PI;
-      const lngDiff360 = ne.lng - sw.lng;
-      const lngFraction = ((lngDiff360 < 0) ? (lngDiff360 + 360) : lngDiff360) / 360;
-
-      const latZoom = Math.floor(Math.log(mapHeight / WORLD_DIM.height / latFraction) / Math.LN2);
-      const lngZoom = Math.floor(Math.log(mapWidth / WORLD_DIM.width / lngFraction) / Math.LN2);
-
-      return Math.min(latZoom, lngZoom, ZOOM_MAX);
-    }
-
-    let calculatedZoom = getZoomFromBounds(paddedLatDiff, paddedLngDiff, mapWidth, mapHeight);
-    
-    // Apply constraints and adjustments
-    calculatedZoom = Math.max(2, Math.min(16, calculatedZoom)); // Reasonable zoom range
-
-    // Special handling for very close points
-    if (latDiff < 0.01 && lngDiff < 0.01) {
-      calculatedZoom = Math.min(calculatedZoom, 14); // Limit max zoom for very close points
-    }
-
-    // Adjust for mobile devices (smaller screens need less zoom)
-    if (mapWidth < 768) {
-      calculatedZoom = Math.max(2, calculatedZoom - 1);
-    }
-
-    return {
-      center: { lat: centerLat, lng: centerLng },
-      zoom: calculatedZoom
-    };
-  }, []);
-
-  // Enhanced initial positioning
-  useEffect(() => {
-    const updateBounds = () => {
-      setTimeout(() => {
-        const bounds = calculateOptimalBounds(mapPoints);
-        setCenter(bounds.center);
-        setZoom(bounds.zoom);
-      }, 100); // Small delay to ensure container dimensions are available
-    };
-
-    updateBounds();
-
-    // Handle window resize
-    const handleResize = () => {
-      updateBounds();
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [orderData, calculateOptimalBounds, mapPoints]);
-
-  // Coordinate conversion functions
+  // Improved coordinate conversion with better precision
   const latLngToPixel = useCallback(
     (lat: number, lng: number) => {
       const mapWidth = mapRef.current?.clientWidth || 800;
@@ -1576,10 +801,12 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
       const scale = Math.pow(2, zoom);
       const worldWidth = 256 * scale;
 
+      // More accurate Mercator projection
       const latRad = (lat * Math.PI) / 180;
       const pixelX = ((lng + 180) / 360) * worldWidth;
       const pixelY = ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * worldWidth;
 
+      // Center offset calculation
       const centerLatRad = (center.lat * Math.PI) / 180;
       const centerPixelX = ((center.lng + 180) / 360) * worldWidth;
       const centerPixelY = ((1 - Math.log(Math.tan(centerLatRad) + 1 / Math.cos(centerLatRad)) / Math.PI) / 2) * worldWidth;
@@ -1615,7 +842,7 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
     [zoom, center]
   );
 
-  // Touch handling
+  // Enhanced touch handling with momentum and inertia
   const handleTouchStart = (e: React.TouchEvent) => {
     e.preventDefault();
     const touch = e.touches[0];
@@ -1624,6 +851,7 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
       setLastTouch({ x: touch.clientX, y: touch.clientY });
       touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
     } else if (e.touches.length === 2) {
+      // Handle pinch for zoom
       const touch1 = e.touches[0];
       const touch2 = e.touches[1];
       const distance = Math.sqrt(
@@ -1635,6 +863,8 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
     }
   };
 
+ 
+
   const handleTouchMove = useCallback(
     (e: React.TouchEvent) => {
       e.preventDefault();
@@ -1644,18 +874,25 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
         const deltaX = touch.clientX - lastTouch.x;
         const deltaY = touch.clientY - lastTouch.y;
 
-        if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+        // Increase threshold for better performance
+        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
           const currentLatLng = pixelToLatLng(400, 200);
           const newLatLng = pixelToLatLng(400 - deltaX, 200 - deltaY);
 
           setCenter((prev) => ({
-            lat: Math.max(-85, Math.min(85, prev.lat + (newLatLng.lat - currentLatLng.lat))),
-            lng: ((prev.lng + (newLatLng.lng - currentLatLng.lng) + 540) % 360) - 180,
+            lat: Math.max(
+              -85,
+              Math.min(85, prev.lat + (newLatLng.lat - currentLatLng.lat))
+            ),
+            lng:
+              ((prev.lng + (newLatLng.lng - currentLatLng.lng) + 540) % 360) -
+              180,
           }));
 
           setLastTouch({ x: touch.clientX, y: touch.clientY });
         }
       } else if (e.touches.length === 2 && lastPinchDistance.current !== null) {
+        // Handle pinch zoom with throttling
         const touch1 = e.touches[0];
         const touch2 = e.touches[1];
         const distance = Math.sqrt(
@@ -1666,8 +903,9 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
         const scale = distance / lastPinchDistance.current;
         const zoomDelta = Math.log2(scale);
 
-        if (Math.abs(zoomDelta) > 0.15) {
-          setZoom((prev) => Math.max(1, Math.min(18, prev + zoomDelta)));
+        // Increase threshold for zoom to reduce lag
+        if (Math.abs(zoomDelta) > 0.2) {
+          setZoom((prev) => Math.max(1, Math.min(20, prev + zoomDelta)));
           lastPinchDistance.current = distance;
         }
       }
@@ -1681,6 +919,7 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
       setLastTouch(null);
       lastPinchDistance.current = null;
       
+      // Add momentum/inertia effect
       if (touchStartRef.current) {
         const touchEnd = { x: e.changedTouches[0]?.clientX || 0, y: e.changedTouches[0]?.clientY || 0, time: Date.now() };
         const timeDiff = touchEnd.time - touchStartRef.current.time;
@@ -1688,6 +927,7 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
         const deltaY = touchEnd.y - touchStartRef.current.y;
         
         if (timeDiff < 300 && (Math.abs(deltaX) > 50 || Math.abs(deltaY) > 50)) {
+          // Apply momentum
           const velocityX = deltaX / timeDiff;
           const velocityY = deltaY / timeDiff;
           applyMomentum(velocityX, velocityY);
@@ -1729,13 +969,14 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
     animate();
   };
 
-  // Mouse handlers
+  // Mouse event handlers with improved responsiveness
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button !== 0) return;
+    if (e.button !== 0) return; // Only left mouse button
     setIsDragging(true);
     setLastTouch({ x: e.clientX, y: e.clientY });
   };
 
+  
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (!isDragging || !lastTouch) return;
@@ -1743,13 +984,19 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
       const deltaX = e.clientX - lastTouch.x;
       const deltaY = e.clientY - lastTouch.y;
 
-      if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
+      // Increase threshold for better performance
+      if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
         const currentLatLng = pixelToLatLng(400, 200);
         const newLatLng = pixelToLatLng(400 - deltaX, 200 - deltaY);
 
         setCenter((prev) => ({
-          lat: Math.max(-85, Math.min(85, prev.lat + (newLatLng.lat - currentLatLng.lat))),
-          lng: ((prev.lng + (newLatLng.lng - currentLatLng.lng) + 540) % 360) - 180,
+          lat: Math.max(
+            -85,
+            Math.min(85, prev.lat + (newLatLng.lat - currentLatLng.lat))
+          ),
+          lng:
+            ((prev.lng + (newLatLng.lng - currentLatLng.lng) + 540) % 360) -
+            180,
         }));
 
         setLastTouch({ x: e.clientX, y: e.clientY });
@@ -1763,15 +1010,15 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
     setLastTouch(null);
   };
 
-  // Enhanced zoom functions with animation
-  const smoothZoom = (targetZoom: number, duration: number = 200) => {
+  // Enhanced zoom functions with smooth transitions
+  const smoothZoom = (targetZoom: number, duration: number = 300) => {
     const startZoom = zoom;
     const startTime = Date.now();
     
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const easeProgress = 1 - Math.pow(1 - progress, 2); // Ease out quad
+      const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
       
       const currentZoom = startZoom + (targetZoom - startZoom) * easeProgress;
       setZoom(currentZoom);
@@ -1784,60 +1031,56 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
     animate();
   };
 
-  const zoomIn = () => smoothZoom(Math.min(zoom + 1.5, 18));
-  const zoomOut = () => smoothZoom(Math.max(zoom - 1.5, 1));
+  const zoomIn = () => smoothZoom(Math.min(zoom + 1, 18));
+  const zoomOut = () => smoothZoom(Math.max(zoom - 1, 1));
 
+  // Enhanced wheel zoom
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.5 : 0.5;
     setZoom(prev => Math.max(1, Math.min(18, prev + delta)));
   };
 
-  // Enhanced fit bounds function
-  const fitBounds = useCallback(() => {
-    const mapWidth = mapRef.current?.clientWidth || 800;
-    const mapHeight = mapRef.current?.clientHeight || 400;
-    
-    const bounds = calculateOptimalBounds(mapPoints, mapWidth, mapHeight);
-    
-    // Animate to new position
-    const startCenter = center;
-    const startZoom = zoom;
-    const startTime = Date.now();
-    const duration = 800;
-    
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const easeProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
-      
-      // Interpolate center
-      const currentCenter = {
-        lat: startCenter.lat + (bounds.center.lat - startCenter.lat) * easeProgress,
-        lng: startCenter.lng + (bounds.center.lng - startCenter.lng) * easeProgress,
-      };
-      
-      // Interpolate zoom
-      const currentZoom = startZoom + (bounds.zoom - startZoom) * easeProgress;
-      
-      setCenter(currentCenter);
-      setZoom(currentZoom);
-      
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-    
-    animate();
-  }, [mapPoints, calculateOptimalBounds, center, zoom]);
+  // Improved fit bounds with animation
+  const fitBounds = () => {
+    const lats = mapPoints.map((p) => p.lat);
+    const lngs = mapPoints.map((p) => p.lng);
 
-  // Auto-hide controls
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+
+    const centerLat = (minLat + maxLat) / 2;
+    const centerLng = (minLng + maxLng) / 2;
+
+    const latPadding = (maxLat - minLat) * 0.3;
+    const lngPadding = (maxLng - minLng) * 0.3;
+    const paddedLatDiff = (maxLat - minLat) + latPadding;
+    const paddedLngDiff = (maxLng - minLng) + lngPadding;
+    const maxDiff = Math.max(paddedLatDiff, paddedLngDiff);
+
+    let newZoom = 10;
+    if (maxDiff > 30) newZoom = 3;
+    else if (maxDiff > 20) newZoom = 4;
+    else if (maxDiff > 10) newZoom = 5;
+    else if (maxDiff > 5) newZoom = 6;
+    else if (maxDiff > 2) newZoom = 7;
+    else if (maxDiff > 1) newZoom = 8;
+    else if (maxDiff > 0.5) newZoom = 9;
+
+    // Animate to new position
+    setCenter({ lat: centerLat, lng: centerLng });
+    smoothZoom(newZoom);
+  };
+
+  // Auto-hide controls on mobile
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     const resetTimeout = () => {
       setShowControls(true);
       clearTimeout(timeout);
-      timeout = setTimeout(() => setShowControls(false), 4000);
+      timeout = setTimeout(() => setShowControls(false), 3000);
     };
 
     const isMobile = window.innerWidth < 768;
@@ -1881,6 +1124,7 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
     return `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
   };
 
+ 
   const getTilesInView = useCallback(() => {
     const mapWidth = mapRef.current?.clientWidth || 800;
     const mapHeight = mapRef.current?.clientHeight || 400;
@@ -1890,7 +1134,12 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
 
     const centerLatRad = (center.lat * Math.PI) / 180;
     const centerPixelX = ((center.lng + 180) / 360) * worldWidth;
-    const centerPixelY = ((1 - Math.log(Math.tan(centerLatRad) + 1 / Math.cos(centerLatRad)) / Math.PI) / 2) * worldWidth;
+    const centerPixelY =
+      ((1 -
+        Math.log(Math.tan(centerLatRad) + 1 / Math.cos(centerLatRad)) /
+          Math.PI) /
+        2) *
+      worldWidth;
 
     const startX = Math.floor((centerPixelX - mapWidth / 2) / tileSize) - 1;
     const endX = Math.ceil((centerPixelX + mapWidth / 2) / tileSize) + 1;
@@ -1899,7 +1148,9 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
 
     const tiles = [];
     const maxTiles = Math.pow(2, Math.floor(zoom));
-    const maxTileCount = 30;
+
+    // Limit number of tiles for performance
+    const maxTileCount = 25; // Reduce from potentially hundreds to 25
     let tileCount = 0;
 
     for (let x = startX; x <= endX && tileCount < maxTileCount; x++) {
@@ -1923,7 +1174,7 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
     }
 
     return tiles;
-  }, [zoom, center, mapStyle]);
+  }, [zoom, center]);
 
   const memoizedMarkers = useMemo(() => {
     return mapPoints
@@ -1932,7 +1183,12 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
         const mapWidth = mapRef.current?.clientWidth || 800;
         const mapHeight = mapRef.current?.clientHeight || 400;
 
-        if (pixel.x < -100 || pixel.x > mapWidth + 100 || pixel.y < -100 || pixel.y > mapHeight + 100) {
+        if (
+          pixel.x < -100 ||
+          pixel.x > mapWidth + 100 ||
+          pixel.y < -100 ||
+          pixel.y > mapHeight + 100
+        ) {
           return null;
         }
 
@@ -1948,7 +1204,9 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
       {/* Map Container */}
       <div
         ref={mapRef}
-        className={`absolute inset-0 select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"} touch-none`}
+        className={`absolute inset-0 select-none ${
+          isDragging ? "cursor-grabbing" : "cursor-grab"
+        } touch-none`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -1972,9 +1230,9 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
                 top: tile.pixelY,
                 imageRendering: zoom > 12 ? "pixelated" : "auto",
                 transition: isAnimating ? "none" : "transform 0.1s ease-out",
-                willChange: isDragging ? "transform" : "auto",
-                backfaceVisibility: "hidden",
-                transform: "translateZ(0)",
+                willChange: isDragging ? "transform" : "auto", // Optimize for transforms
+                backfaceVisibility: "hidden", // Force hardware acceleration
+                transform: "translateZ(0)", // Force GPU layer
               }}
               draggable={false}
               onError={(e) => {
@@ -1996,12 +1254,21 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+            <filter id="shadow">
+              <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3" />
+            </filter>
           </defs>
 
           {/* Completed route */}
           {(() => {
-            const originPixel = latLngToPixel(orderData.origin.lat, orderData.origin.lng);
-            const currentPixel = latLngToPixel(orderData.currentLocation.lat, orderData.currentLocation.lng);
+            const originPixel = latLngToPixel(
+              orderData.origin.lat,
+              orderData.origin.lng
+            );
+            const currentPixel = latLngToPixel(
+              orderData.currentLocation.lat,
+              orderData.currentLocation.lng
+            );
 
             return (
               <line
@@ -2020,8 +1287,14 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
 
           {/* Remaining route */}
           {(() => {
-            const currentPixel = latLngToPixel(orderData.currentLocation.lat, orderData.currentLocation.lng);
-            const destPixel = latLngToPixel(orderData.destination.lat, orderData.destination.lng);
+            const currentPixel = latLngToPixel(
+              orderData.currentLocation.lat,
+              orderData.currentLocation.lng
+            );
+            const destPixel = latLngToPixel(
+              orderData.destination.lat,
+              orderData.destination.lng
+            );
 
             return (
               <line
@@ -2056,7 +1329,9 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedPoint(selectedPoint?.type === point.type ? null : point);
+                setSelectedPoint(
+                  selectedPoint?.type === point.type ? null : point
+                );
               }}
               onTouchEnd={(e) => {
                 e.preventDefault();
