@@ -646,7 +646,7 @@
 
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import {
   MapPin,
   Package,
@@ -867,43 +867,93 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
     }
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    e.preventDefault();
+  // const handleTouchMove = (e: React.TouchEvent) => {
+  //   e.preventDefault();
     
-    if (e.touches.length === 1 && isDragging && lastTouch) {
-      const touch = e.touches[0];
-      const deltaX = touch.clientX - lastTouch.x;
-      const deltaY = touch.clientY - lastTouch.y;
+  //   if (e.touches.length === 1 && isDragging && lastTouch) {
+  //     const touch = e.touches[0];
+  //     const deltaX = touch.clientX - lastTouch.x;
+  //     const deltaY = touch.clientY - lastTouch.y;
 
-      if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
-        const currentLatLng = pixelToLatLng(400, 200);
-        const newLatLng = pixelToLatLng(400 - deltaX, 200 - deltaY);
+  //     if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
+  //       const currentLatLng = pixelToLatLng(400, 200);
+  //       const newLatLng = pixelToLatLng(400 - deltaX, 200 - deltaY);
 
-        setCenter(prev => ({
-          lat: Math.max(-85, Math.min(85, prev.lat + (newLatLng.lat - currentLatLng.lat))),
-          lng: ((prev.lng + (newLatLng.lng - currentLatLng.lng)) + 540) % 360 - 180,
-        }));
+  //       setCenter(prev => ({
+  //         lat: Math.max(-85, Math.min(85, prev.lat + (newLatLng.lat - currentLatLng.lat))),
+  //         lng: ((prev.lng + (newLatLng.lng - currentLatLng.lng)) + 540) % 360 - 180,
+  //       }));
 
-        setLastTouch({ x: touch.clientX, y: touch.clientY });
-      }
-    } else if (e.touches.length === 2 && lastPinchDistance.current !== null) {
-      // Handle pinch zoom
-      const touch1 = e.touches[0];
-      const touch2 = e.touches[1];
-      const distance = Math.sqrt(
-        Math.pow(touch2.clientX - touch1.clientX, 2) + 
-        Math.pow(touch2.clientY - touch1.clientY, 2)
-      );
+  //       setLastTouch({ x: touch.clientX, y: touch.clientY });
+  //     }
+  //   } else if (e.touches.length === 2 && lastPinchDistance.current !== null) {
+  //     // Handle pinch zoom
+  //     const touch1 = e.touches[0];
+  //     const touch2 = e.touches[1];
+  //     const distance = Math.sqrt(
+  //       Math.pow(touch2.clientX - touch1.clientX, 2) + 
+  //       Math.pow(touch2.clientY - touch1.clientY, 2)
+  //     );
 
-      const scale = distance / lastPinchDistance.current;
-      const zoomDelta = Math.log2(scale);
+  //     const scale = distance / lastPinchDistance.current;
+  //     const zoomDelta = Math.log2(scale);
       
-      if (Math.abs(zoomDelta) > 0.1) {
-        setZoom(prev => Math.max(1, Math.min(20, prev + zoomDelta)));
-        lastPinchDistance.current = distance;
+  //     if (Math.abs(zoomDelta) > 0.1) {
+  //       setZoom(prev => Math.max(1, Math.min(20, prev + zoomDelta)));
+  //       lastPinchDistance.current = distance;
+  //     }
+  //   }
+  // };
+
+
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+
+      if (e.touches.length === 1 && isDragging && lastTouch) {
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - lastTouch.x;
+        const deltaY = touch.clientY - lastTouch.y;
+
+        // Increase threshold for better performance
+        if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+          const currentLatLng = pixelToLatLng(400, 200);
+          const newLatLng = pixelToLatLng(400 - deltaX, 200 - deltaY);
+
+          setCenter((prev) => ({
+            lat: Math.max(
+              -85,
+              Math.min(85, prev.lat + (newLatLng.lat - currentLatLng.lat))
+            ),
+            lng:
+              ((prev.lng + (newLatLng.lng - currentLatLng.lng) + 540) % 360) -
+              180,
+          }));
+
+          setLastTouch({ x: touch.clientX, y: touch.clientY });
+        }
+      } else if (e.touches.length === 2 && lastPinchDistance.current !== null) {
+        // Handle pinch zoom with throttling
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        const distance = Math.sqrt(
+          Math.pow(touch2.clientX - touch1.clientX, 2) +
+            Math.pow(touch2.clientY - touch1.clientY, 2)
+        );
+
+        const scale = distance / lastPinchDistance.current;
+        const zoomDelta = Math.log2(scale);
+
+        // Increase threshold for zoom to reduce lag
+        if (Math.abs(zoomDelta) > 0.2) {
+          setZoom((prev) => Math.max(1, Math.min(20, prev + zoomDelta)));
+          lastPinchDistance.current = distance;
+        }
       }
-    }
-  };
+    },
+    [isDragging, lastTouch, pixelToLatLng]
+  );
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (e.touches.length === 0) {
@@ -968,24 +1018,53 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
     setLastTouch({ x: e.clientX, y: e.clientY });
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !lastTouch) return;
+  // const handleMouseMove = (e: React.MouseEvent) => {
+  //   if (!isDragging || !lastTouch) return;
 
-    const deltaX = e.clientX - lastTouch.x;
-    const deltaY = e.clientY - lastTouch.y;
+  //   const deltaX = e.clientX - lastTouch.x;
+  //   const deltaY = e.clientY - lastTouch.y;
 
-    if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
-      const currentLatLng = pixelToLatLng(400, 200);
-      const newLatLng = pixelToLatLng(400 - deltaX, 200 - deltaY);
+  //   if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
+  //     const currentLatLng = pixelToLatLng(400, 200);
+  //     const newLatLng = pixelToLatLng(400 - deltaX, 200 - deltaY);
 
-      setCenter(prev => ({
-        lat: Math.max(-85, Math.min(85, prev.lat + (newLatLng.lat - currentLatLng.lat))),
-        lng: ((prev.lng + (newLatLng.lng - currentLatLng.lng)) + 540) % 360 - 180,
-      }));
+  //     setCenter(prev => ({
+  //       lat: Math.max(-85, Math.min(85, prev.lat + (newLatLng.lat - currentLatLng.lat))),
+  //       lng: ((prev.lng + (newLatLng.lng - currentLatLng.lng)) + 540) % 360 - 180,
+  //     }));
 
-      setLastTouch({ x: e.clientX, y: e.clientY });
-    }
-  };
+  //     setLastTouch({ x: e.clientX, y: e.clientY });
+  //   }
+  // };
+
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isDragging || !lastTouch) return;
+
+      const deltaX = e.clientX - lastTouch.x;
+      const deltaY = e.clientY - lastTouch.y;
+
+      // Increase threshold for better performance
+      if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+        const currentLatLng = pixelToLatLng(400, 200);
+        const newLatLng = pixelToLatLng(400 - deltaX, 200 - deltaY);
+
+        setCenter((prev) => ({
+          lat: Math.max(
+            -85,
+            Math.min(85, prev.lat + (newLatLng.lat - currentLatLng.lat))
+          ),
+          lng:
+            ((prev.lng + (newLatLng.lng - currentLatLng.lng) + 540) % 360) -
+            180,
+        }));
+
+        setLastTouch({ x: e.clientX, y: e.clientY });
+      }
+    },
+    [isDragging, lastTouch, pixelToLatLng]
+  );
 
   const handleMouseUp = () => {
     setIsDragging(false);
@@ -1106,7 +1185,49 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
     return `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
   };
 
-  const getTilesInView = () => {
+  // const getTilesInView = () => {
+  //   const mapWidth = mapRef.current?.clientWidth || 800;
+  //   const mapHeight = mapRef.current?.clientHeight || 400;
+  //   const tileSize = 256;
+  //   const scale = Math.pow(2, zoom);
+  //   const worldWidth = tileSize * scale;
+
+  //   const centerLatRad = (center.lat * Math.PI) / 180;
+  //   const centerPixelX = ((center.lng + 180) / 360) * worldWidth;
+  //   const centerPixelY = ((1 - Math.log(Math.tan(centerLatRad) + 1 / Math.cos(centerLatRad)) / Math.PI) / 2) * worldWidth;
+
+  //   const startX = Math.floor((centerPixelX - mapWidth / 2) / tileSize) - 1;
+  //   const endX = Math.ceil((centerPixelX + mapWidth / 2) / tileSize) + 1;
+  //   const startY = Math.floor((centerPixelY - mapHeight / 2) / tileSize) - 1;
+  //   const endY = Math.ceil((centerPixelY + mapHeight / 2) / tileSize) + 1;
+
+  //   const tiles = [];
+  //   const maxTiles = Math.pow(2, Math.floor(zoom));
+    
+  //   for (let x = startX; x <= endX; x++) {
+  //     for (let y = startY; y <= endY; y++) {
+  //       let tileX = ((x % maxTiles) + maxTiles) % maxTiles;
+  //       if (y >= 0 && y < maxTiles) {
+  //         const pixelX = x * tileSize - centerPixelX + mapWidth / 2;
+  //         const pixelY = y * tileSize - centerPixelY + mapHeight / 2;
+
+  //         tiles.push({
+  //           x: tileX,
+  //           y,
+  //           z: Math.floor(zoom),
+  //           pixelX,
+  //           pixelY,
+  //           url: getTileUrl(tileX, y, Math.floor(zoom)),
+  //         });
+  //       }
+  //     }
+  //   }
+
+  //   return tiles;
+  // };
+
+
+  const getTilesInView = useCallback(() => {
     const mapWidth = mapRef.current?.clientWidth || 800;
     const mapHeight = mapRef.current?.clientHeight || 400;
     const tileSize = 256;
@@ -1115,7 +1236,12 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
 
     const centerLatRad = (center.lat * Math.PI) / 180;
     const centerPixelX = ((center.lng + 180) / 360) * worldWidth;
-    const centerPixelY = ((1 - Math.log(Math.tan(centerLatRad) + 1 / Math.cos(centerLatRad)) / Math.PI) / 2) * worldWidth;
+    const centerPixelY =
+      ((1 -
+        Math.log(Math.tan(centerLatRad) + 1 / Math.cos(centerLatRad)) /
+          Math.PI) /
+        2) *
+      worldWidth;
 
     const startX = Math.floor((centerPixelX - mapWidth / 2) / tileSize) - 1;
     const endX = Math.ceil((centerPixelX + mapWidth / 2) / tileSize) + 1;
@@ -1124,9 +1250,13 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
 
     const tiles = [];
     const maxTiles = Math.pow(2, Math.floor(zoom));
-    
-    for (let x = startX; x <= endX; x++) {
-      for (let y = startY; y <= endY; y++) {
+
+    // Limit number of tiles for performance
+    const maxTileCount = 25; // Reduce from potentially hundreds to 25
+    let tileCount = 0;
+
+    for (let x = startX; x <= endX && tileCount < maxTileCount; x++) {
+      for (let y = startY; y <= endY && tileCount < maxTileCount; y++) {
         let tileX = ((x % maxTiles) + maxTiles) % maxTiles;
         if (y >= 0 && y < maxTiles) {
           const pixelX = x * tileSize - centerPixelX + mapWidth / 2;
@@ -1140,12 +1270,34 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
             pixelY,
             url: getTileUrl(tileX, y, Math.floor(zoom)),
           });
+          tileCount++;
         }
       }
     }
 
     return tiles;
-  };
+  }, [zoom, center]);
+
+  const memoizedMarkers = useMemo(() => {
+    return mapPoints
+      .map((point, index) => {
+        const pixel = latLngToPixel(point.lat, point.lng);
+        const mapWidth = mapRef.current?.clientWidth || 800;
+        const mapHeight = mapRef.current?.clientHeight || 400;
+
+        if (
+          pixel.x < -100 ||
+          pixel.x > mapWidth + 100 ||
+          pixel.y < -100 ||
+          pixel.y > mapHeight + 100
+        ) {
+          return null;
+        }
+
+        return { point, pixel, index };
+      })
+      .filter(Boolean);
+  }, [mapPoints, latLngToPixel]);
 
   const tiles = getTilesInView();
 
@@ -1180,6 +1332,9 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
                 top: tile.pixelY,
                 imageRendering: zoom > 12 ? "pixelated" : "auto",
                 transition: isAnimating ? "none" : "transform 0.1s ease-out",
+                willChange: isDragging ? "transform" : "auto", // Optimize for transforms
+                backfaceVisibility: "hidden", // Force hardware acceleration
+                transform: "translateZ(0)", // Force GPU layer
               }}
               draggable={false}
               onError={(e) => {
@@ -1369,27 +1524,27 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center"
+                      className="sm:w-6 sm:h-6 w-4 h-4 rounded-full flex items-center justify-center"
                       style={{
                         backgroundColor: getMarkerColor(selectedPoint.type),
                       }}
                     >
                       <div className="w-3 h-3 bg-white rounded-full"></div>
                     </div>
-                    <h3 className="font-bold text-lg text-gray-900">
+                    <h3 className="font-bold text-sm md:text-base text-gray-900">
                       {selectedPoint.label}
                     </h3>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-base font-semibold text-gray-800">
+                    <p className="text-xs md:text-sm font-semibold text-gray-800">
                       {selectedPoint.address}
                     </p>
                     {selectedPoint.details && (
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                      <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
                         {selectedPoint.details}
                       </p>
                     )}
-                    <div className="text-xs text-gray-500 font-mono bg-gray-50 px-2 py-1 rounded">
+                    <div className="text-[10px] md:text-xs text-gray-500 font-mono bg-gray-50 px-2 py-1 rounded">
                       {selectedPoint.lat.toFixed(4)},{" "}
                       {selectedPoint.lng.toFixed(4)}
                     </div>
@@ -1483,8 +1638,7 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
           <Navigation className="h-5 w-5 text-green-600" />
         </Button> */}
 
-
-<Button
+        <Button
           variant="outline"
           size="sm"
           className="bg-white/90 backdrop-blur-sm hover:bg-green-50 transition-all duration-200 w-12 h-12 p-0 rounded-xl shadow-lg"
