@@ -1416,19 +1416,9 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
         </svg>
 
         {/* Map Markers */}
-        {mapPoints.map((point, index) => {
-          const pixel = latLngToPixel(point.lat, point.lng);
-          const mapWidth = mapRef.current?.clientWidth || 800;
-          const mapHeight = mapRef.current?.clientHeight || 400;
-
-          if (
-            pixel.x < -100 ||
-            pixel.x > mapWidth + 100 ||
-            pixel.y < -100 ||
-            pixel.y > mapHeight + 100
-          ) {
-            return null;
-          }
+        {memoizedMarkers.map((markerData) => {
+          if (!markerData) return null;
+          const { point, pixel, index } = markerData;
 
           return (
             <div
