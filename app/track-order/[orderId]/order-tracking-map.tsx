@@ -1521,7 +1521,7 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
               lng: orderData.currentLocation.lng,
             });
             // Use a more reasonable zoom level based on current zoom to avoid lag
-            const targetZoom = zoom < 8 ? Math.min(zoom + 3, 10) : 12;
+            const targetZoom = zoom < 11 ? Math.min(zoom + 3, 13) : 15;
             smoothZoom(targetZoom);
           }}
           title="Center on current location"
