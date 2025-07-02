@@ -778,15 +778,15 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
     const paddedLngDiff = (maxLng - minLng) + lngPadding;
     const maxDiff = Math.max(paddedLatDiff, paddedLngDiff);
 
-    let newZoom = 10;
-    if (maxDiff > 30) newZoom = 3;
-    else if (maxDiff > 20) newZoom = 4;
-    else if (maxDiff > 10) newZoom = 5;
-    else if (maxDiff > 5) newZoom = 6;
-    else if (maxDiff > 2) newZoom = 7;
-    else if (maxDiff > 1) newZoom = 8;
-    else if (maxDiff > 0.5) newZoom = 9;
-    else if (maxDiff > 0.2) newZoom = 10;
+    let newZoom = 13;
+    if (maxDiff > 30) newZoom = 5;
+    else if (maxDiff > 20) newZoom = 7;
+    else if (maxDiff > 10) newZoom = 8;
+    else if (maxDiff > 5) newZoom = 9;
+    else if (maxDiff > 2) newZoom = 10;
+    else if (maxDiff > 1) newZoom = 11;
+    else if (maxDiff > 0.5) newZoom = 12;
+    else if (maxDiff > 0.2) newZoom = 13;
 
     setCenter({ lat: centerLat, lng: centerLng });
     setZoom(newZoom);
@@ -1060,14 +1060,14 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
     const paddedLngDiff = (maxLng - minLng) + lngPadding;
     const maxDiff = Math.max(paddedLatDiff, paddedLngDiff);
 
-    let newZoom = 10;
-    if (maxDiff > 30) newZoom = 3;
-    else if (maxDiff > 20) newZoom = 4;
-    else if (maxDiff > 10) newZoom = 5;
-    else if (maxDiff > 5) newZoom = 6;
-    else if (maxDiff > 2) newZoom = 7;
-    else if (maxDiff > 1) newZoom = 8;
-    else if (maxDiff > 0.5) newZoom = 9;
+    let newZoom = 13;
+    if (maxDiff > 30) newZoom = 5;
+    else if (maxDiff > 20) newZoom = 7;
+    else if (maxDiff > 10) newZoom = 8;
+    else if (maxDiff > 5) newZoom = 9;
+    else if (maxDiff > 2) newZoom = 10;
+    else if (maxDiff > 1) newZoom = 11;
+    else if (maxDiff > 0.5) newZoom = 12;
 
     // Animate to new position
     setCenter({ lat: centerLat, lng: centerLng });
