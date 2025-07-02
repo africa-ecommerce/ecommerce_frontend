@@ -1165,7 +1165,7 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onWheel={handleWheel}
-        style={{ touchAction: 'none' }}
+        style={{ touchAction: "none" }}
       >
         {/* Map Tiles */}
         <div className="absolute inset-0">
@@ -1179,7 +1179,7 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
                 left: tile.pixelX,
                 top: tile.pixelY,
                 imageRendering: zoom > 12 ? "pixelated" : "auto",
-                transition: isAnimating ? 'none' : 'transform 0.1s ease-out',
+                transition: isAnimating ? "none" : "transform 0.1s ease-out",
               }}
               draggable={false}
               onError={(e) => {
@@ -1202,14 +1202,20 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
               </feMerge>
             </filter>
             <filter id="shadow">
-              <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3"/>
+              <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.3" />
             </filter>
           </defs>
 
           {/* Completed route */}
           {(() => {
-            const originPixel = latLngToPixel(orderData.origin.lat, orderData.origin.lng);
-            const currentPixel = latLngToPixel(orderData.currentLocation.lat, orderData.currentLocation.lng);
+            const originPixel = latLngToPixel(
+              orderData.origin.lat,
+              orderData.origin.lng
+            );
+            const currentPixel = latLngToPixel(
+              orderData.currentLocation.lat,
+              orderData.currentLocation.lng
+            );
 
             return (
               <line
@@ -1228,8 +1234,14 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
 
           {/* Remaining route */}
           {(() => {
-            const currentPixel = latLngToPixel(orderData.currentLocation.lat, orderData.currentLocation.lng);
-            const destPixel = latLngToPixel(orderData.destination.lat, orderData.destination.lng);
+            const currentPixel = latLngToPixel(
+              orderData.currentLocation.lat,
+              orderData.currentLocation.lng
+            );
+            const destPixel = latLngToPixel(
+              orderData.destination.lat,
+              orderData.destination.lng
+            );
 
             return (
               <line
@@ -1254,7 +1266,12 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
           const mapWidth = mapRef.current?.clientWidth || 800;
           const mapHeight = mapRef.current?.clientHeight || 400;
 
-          if (pixel.x < -100 || pixel.x > mapWidth + 100 || pixel.y < -100 || pixel.y > mapHeight + 100) {
+          if (
+            pixel.x < -100 ||
+            pixel.x > mapWidth + 100 ||
+            pixel.y < -100 ||
+            pixel.y > mapHeight + 100
+          ) {
             return null;
           }
 
@@ -1262,19 +1279,23 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
             <div
               key={index}
               className="absolute transform -translate-x-1/2 -translate-y-full cursor-pointer transition-all duration-200 hover:scale-110 z-10"
-              style={{ 
-                left: pixel.x, 
+              style={{
+                left: pixel.x,
                 top: pixel.y,
-                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))',
+                filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.2))",
               }}
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedPoint(selectedPoint?.type === point.type ? null : point);
+                setSelectedPoint(
+                  selectedPoint?.type === point.type ? null : point
+                );
               }}
               onTouchEnd={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setSelectedPoint(selectedPoint?.type === point.type ? null : point);
+                setSelectedPoint(
+                  selectedPoint?.type === point.type ? null : point
+                );
               }}
             >
               {/* Marker */}
@@ -1311,94 +1332,107 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
         })}
 
         {/* Enhanced Info Popup */}
-        {selectedPoint && (() => {
-          const pixel = latLngToPixel(selectedPoint.lat, selectedPoint.lng);
-          const mapWidth = mapRef.current?.clientWidth || 800;
-          const mapHeight = mapRef.current?.clientHeight || 400;
-          
-          // Smart positioning to keep popup in view
-          const popupWidth = 320;
-          const popupHeight = 140;
-          let left = pixel.x;
-          let top = pixel.y - popupHeight - 20;
-          
-          // Adjust horizontal position
-          if (left + popupWidth/2 > mapWidth - 20) {
-            left = mapWidth - popupWidth/2 - 20;
-          } else if (left - popupWidth/2 < 20) {
-            left = popupWidth/2 + 20;
-          }
-          
-          // Adjust vertical position
-          if (top < 20) {
-            top = pixel.y + 40;
-          }
+        {selectedPoint &&
+          (() => {
+            const pixel = latLngToPixel(selectedPoint.lat, selectedPoint.lng);
+            const mapWidth = mapRef.current?.clientWidth || 800;
+            const mapHeight = mapRef.current?.clientHeight || 400;
 
-          return (
-            <div
-              className="absolute z-30 bg-white rounded-xl shadow-2xl border p-4 transform -translate-x-1/2 backdrop-blur-sm bg-white/95"
-              style={{
-                left: left,
-                top: top,
-                width: '320px',
-                maxWidth: '90vw',
-              }}
-            >
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center"
-                    style={{ backgroundColor: getMarkerColor(selectedPoint.type) }}
-                  >
-                    <div className="w-3 h-3 bg-white rounded-full"></div>
-                  </div>
-                  <h3 className="font-bold text-lg text-gray-900">{selectedPoint.label}</h3>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-base font-semibold text-gray-800">{selectedPoint.address}</p>
-                  {selectedPoint.details && (
-                    <p className="text-sm text-gray-600 leading-relaxed">{selectedPoint.details}</p>
-                  )}
-                  <div className="text-xs text-gray-500 font-mono bg-gray-50 px-2 py-1 rounded">
-                    {selectedPoint.lat.toFixed(4)}, {selectedPoint.lng.toFixed(4)}
-                  </div>
-                </div>
-              </div>
+            // Smart positioning to keep popup in view
+            const popupWidth = 320;
+            const popupHeight = 140;
+            let left = pixel.x;
+            let top = pixel.y - popupHeight - 20;
 
-              <button
-                className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-lg font-bold shadow-lg transition-colors duration-200"
-                onClick={() => setSelectedPoint(null)}
-                onTouchEnd={(e) => {
-                  e.preventDefault();
-                  setSelectedPoint(null);
+            // Adjust horizontal position
+            if (left + popupWidth / 2 > mapWidth - 20) {
+              left = mapWidth - popupWidth / 2 - 20;
+            } else if (left - popupWidth / 2 < 20) {
+              left = popupWidth / 2 + 20;
+            }
+
+            // Adjust vertical position
+            if (top < 20) {
+              top = pixel.y + 40;
+            }
+
+            return (
+              <div
+                className="absolute z-30 bg-white rounded-xl shadow-2xl border p-4 transform -translate-x-1/2 backdrop-blur-sm bg-white/95"
+                style={{
+                  left: left,
+                  top: top,
+                  width: "320px",
+                  maxWidth: "90vw",
                 }}
               >
-                <X className="h-4 w-4" />
-              </button>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center"
+                      style={{
+                        backgroundColor: getMarkerColor(selectedPoint.type),
+                      }}
+                    >
+                      <div className="w-3 h-3 bg-white rounded-full"></div>
+                    </div>
+                    <h3 className="font-bold text-lg text-gray-900">
+                      {selectedPoint.label}
+                    </h3>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-base font-semibold text-gray-800">
+                      {selectedPoint.address}
+                    </p>
+                    {selectedPoint.details && (
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        {selectedPoint.details}
+                      </p>
+                    )}
+                    <div className="text-xs text-gray-500 font-mono bg-gray-50 px-2 py-1 rounded">
+                      {selectedPoint.lat.toFixed(4)},{" "}
+                      {selectedPoint.lng.toFixed(4)}
+                    </div>
+                  </div>
+                </div>
 
-              {/* Popup arrow */}
-              <div
-                className="absolute w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"
-                style={{
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  bottom: top < pixel.y ? 'auto' : '-4px',
-                  top: top < pixel.y ? '-4px' : 'auto',
-                  borderTopColor: top < pixel.y ? 'transparent' : 'white',
-                  borderBottomColor: top < pixel.y ? 'white' : 'transparent',
-                  borderBottomWidth: top < pixel.y ? '4px' : '0',
-                }}
-              />
-            </div>
-          );
-        })()}
+                <button
+                  className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-lg font-bold shadow-lg transition-colors duration-200"
+                  onClick={() => setSelectedPoint(null)}
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    setSelectedPoint(null);
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+
+                {/* Popup arrow */}
+                <div
+                  className="absolute w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"
+                  style={{
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    bottom: top < pixel.y ? "auto" : "-4px",
+                    top: top < pixel.y ? "-4px" : "auto",
+                    borderTopColor: top < pixel.y ? "transparent" : "white",
+                    borderBottomColor: top < pixel.y ? "white" : "transparent",
+                    borderBottomWidth: top < pixel.y ? "4px" : "0",
+                  }}
+                />
+              </div>
+            );
+          })()}
       </div>
 
       {/* Enhanced Controls with auto-hide on mobile */}
-      <div className={`absolute top-4 right-4 flex flex-col gap-3 transition-all duration-300 ${
-        showControls ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4 pointer-events-none'
-      } md:opacity-100 md:translate-x-0 md:pointer-events-auto`}>
-        
+      <div
+        className={`absolute top-4 right-4 flex flex-col gap-3 transition-all duration-300 ${
+          showControls
+            ? "opacity-100 translate-x-0"
+            : "opacity-0 translate-x-4 pointer-events-none"
+        } md:opacity-100 md:translate-x-0 md:pointer-events-auto`}
+      >
         {/* Zoom Controls */}
         <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
           <Button
@@ -1438,7 +1472,10 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
           size="sm"
           className="bg-white/90 backdrop-blur-sm hover:bg-green-50 transition-all duration-200 w-12 h-12 p-0 rounded-xl shadow-lg"
           onClick={() => {
-            setCenter({ lat: orderData.currentLocation.lat, lng: orderData.currentLocation.lng });
+            setCenter({
+              lat: orderData.currentLocation.lat,
+              lng: orderData.currentLocation.lng,
+            });
             smoothZoom(12);
           }}
           title="Center on current location"
@@ -1448,9 +1485,13 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
       </div>
 
       {/* Map Style Toggle */}
-      <div className={`absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden transition-all duration-300 ${
-        showControls ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 pointer-events-none'
-      } md:opacity-100 md:translate-x-0 md:pointer-events-auto`}>
+      <div
+        className={`absolute top-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden transition-all duration-300 ${
+          showControls
+            ? "opacity-100 translate-x-0"
+            : "opacity-0 -translate-x-4 pointer-events-none"
+        } md:opacity-100 md:translate-x-0 md:pointer-events-auto`}
+      >
         <Button
           variant={mapStyle === "roadmap" ? "default" : "ghost"}
           size="sm"
@@ -1469,41 +1510,8 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
         </Button>
       </div>
 
-      {/* Order Status Bar */}
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg px-4 py-3 flex items-center gap-3 max-w-md">
-        <div className="flex items-center gap-2">
-          <Package className="h-5 w-5 text-blue-600" />
-          <span className="font-semibold text-gray-900">Order {orderData.orderId}</span>
-        </div>
-        <div className="h-4 w-px bg-gray-300"></div>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-sm font-medium text-gray-700">{orderData.status}</span>
-        </div>
-      </div>
-
-      {/* Enhanced Status Indicators */}
-      <div className="absolute bottom-4 left-4 flex flex-col gap-2">
-        {/* Zoom Level */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 text-sm text-gray-600 shadow-sm">
-          <span className="font-medium">Zoom:</span> {zoom.toFixed(1)}
-        </div>
-        
-        {/* Current Location Info */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 text-sm text-gray-600 shadow-sm max-w-xs">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <span className="font-medium">Current Location</span>
-          </div>
-          <div className="text-xs">{orderData.currentLocation.address}</div>
-          <div className="text-xs text-gray-500">
-            Updated: {new Date(orderData.currentLocation.timestamp).toLocaleTimeString()}
-          </div>
-        </div>
-      </div>
-
       {/* Legend */}
-      <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-4 max-w-xs">
+      <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-2 max-w-xs">
         <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
           <Info className="h-4 w-4" />
           Legend
@@ -1513,34 +1521,50 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
             <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
               <Warehouse className="h-2 w-2 text-white" />
             </div>
-            <span className="text-sm text-gray-700">Origin</span>
+            <span className="md:text-xs text-[10px] text-gray-700">Origin</span>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center animate-pulse">
               <Package className="h-2 w-2 text-white" />
             </div>
-            <span className="text-sm text-gray-700">Current Location</span>
+            <span className="md:text-xs text-[10px] text-gray-700">
+              Current Location
+            </span>
           </div>
           <div className="flex items-center gap-3">
             <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
               <Home className="h-2 w-2 text-white" />
             </div>
-            <span className="text-sm text-gray-700">Destination</span>
+            <span className="md:text-xs text-[10px] text-gray-700">
+              Destination
+            </span>
           </div>
           <div className="flex items-center gap-3 pt-2 border-t border-gray-200">
             <div className="w-4 h-1 bg-green-500 rounded"></div>
-            <span className="text-sm text-gray-700">Completed Route</span>
+            <span className="md:text-xs text-[10px] text-gray-700">
+              Completed Route
+            </span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="w-4 h-1 bg-gray-400 rounded" style={{backgroundImage: 'repeating-linear-gradient(90deg, #94a3b8 0, #94a3b8 8px, transparent 8px, transparent 16px)'}}></div>
-            <span className="text-sm text-gray-700">Remaining Route</span>
+            <div
+              className="w-4 h-1 bg-gray-400 rounded"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(90deg, #94a3b8 0, #94a3b8 8px, transparent 8px, transparent 16px)",
+              }}
+            ></div>
+            <span className="md:text-xs text-[10px] text-gray-700">
+              Remaining Route
+            </span>
           </div>
         </div>
       </div>
 
       {/* Attribution */}
       <div className="absolute bottom-2 left-2 text-xs text-gray-500 bg-white/80 backdrop-blur-sm px-2 py-1 rounded shadow-sm">
-        {mapStyle === "satellite" ? "© Esri, DigitalGlobe" : "© OpenStreetMap contributors"}
+        {mapStyle === "satellite"
+          ? "© Esri, DigitalGlobe"
+          : "© OpenStreetMap contributors"}
       </div>
 
       {/* Mobile Interaction Hints */}
