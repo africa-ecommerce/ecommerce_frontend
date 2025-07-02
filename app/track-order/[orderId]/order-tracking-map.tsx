@@ -1302,7 +1302,7 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
   const tiles = getTilesInView();
 
   return (
-    <div className="relative w-full h-screen md:h-96 bg-gray-100 rounded-lg overflow-hidden border shadow-lg">
+    <div className="relative w-full h-[65vh] md:h-96 bg-gray-100 rounded-lg overflow-hidden border shadow-lg">
       {/* Map Container */}
       <div
         ref={mapRef}
