@@ -740,39 +740,6 @@ const mockOrders: Record<string, OrderData> = {
   },
 };
 
-// Demo addresses for testing
-const demoAddresses: DemoAddress[] = [
-  {
-    label: "Downtown Miami",
-    address: "100 Biscayne Blvd, Miami, FL 33132",
-    lat: 25.7617,
-    lng: -80.1918,
-  },
-  {
-    label: "Austin Tech District",
-    address: "500 W 2nd St, Austin, TX 78701",
-    lat: 30.2672,
-    lng: -97.7431,
-  },
-  {
-    label: "Boston Financial District",
-    address: "200 State St, Boston, MA 02109",
-    lat: 42.3601,
-    lng: -71.0589,
-  },
-  {
-    label: "Denver Downtown",
-    address: "1600 17th St, Denver, CO 80202",
-    lat: 39.7392,
-    lng: -104.9903,
-  },
-  {
-    label: "Phoenix Central",
-    address: "300 N Central Ave, Phoenix, AZ 85004",
-    lat: 33.4484,
-    lng: -112.074,
-  },
-];
 
 export default function TrackOrderPage() {
   const params = useParams();
@@ -929,7 +896,7 @@ export default function TrackOrderPage() {
         {/* Header - Mobile Optimized */}
         <div className="space-y-2 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
+            <h1 className="text-lg md:text-xl lg:text-2xl font-bold">
               Track Your Order
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground break-all">
@@ -949,34 +916,34 @@ export default function TrackOrderPage() {
                   Live Tracking
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-3 sm:p-6">
+              <CardContent className="p-3 md:p-6">
                 <OrderTrackingMap orderData={orderData} />
               </CardContent>
             </Card>
 
             {/* Address Update - Collapsible on mobile */}
             <Card>
-              <CardHeader className="pb-3 sm:pb-6">
+              <CardHeader className="pb-3 md:pb-6">
                 <button
                   onClick={() => setShowAddressUpdate(!showAddressUpdate)}
                   className="w-full flex items-center justify-between text-left"
                 >
-                  <CardTitle className="text-base sm:text-lg">
+                  <CardTitle className="text-sm md:text-base">
                     Different Destination?
                   </CardTitle>
                   {showAddressUpdate ? (
-                    <ChevronUp className="h-4 w-4 sm:hidden" />
+                    <ChevronUp className="h-4 w-4 md:hidden" />
                   ) : (
-                    <ChevronDown className="h-4 w-4 sm:hidden" />
+                    <ChevronDown className="h-4 w-4 md:hidden" />
                   )}
                 </button>
               </CardHeader>
               <CardContent
-                className={`space-y-4 p-3 sm:p-6 ${
-                  !showAddressUpdate ? "hidden sm:block" : ""
+                className={`space-y-4 p-3 md:p-6 ${
+                  !showAddressUpdate ? "hidden md:block" : ""
                 }`}
               >
-                <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex flex-col md:flex-row gap-2">
                   <Input
                     placeholder="Enter address or city..."
                     value={address}
@@ -1010,13 +977,13 @@ export default function TrackOrderPage() {
           <div className="space-y-4">
             {/* Order Status - Prominent on mobile */}
             <Card>
-              <CardHeader className="pb-3 sm:pb-6">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  <Package className="h-4 w-4 sm:h-5 sm:w-5" />
+              <CardHeader className="pb-3 md:pb-6">
+                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                  <Package className="h-4 w-4 md:h-5 md:w-5" />
                   Order Status
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
+              <CardContent className="space-y-3 md:space-y-4 p-3 md:p-6">
                 <div className="flex items-center gap-2">
                   <div
                     className={`w-3 h-3 rounded-full ${getStatusColor(
@@ -1033,11 +1000,11 @@ export default function TrackOrderPage() {
                     <Clock className="h-4 w-4" />
                     <span>Estimated Delivery:</span>
                   </div>
-                  <p className="font-medium text-sm sm:text-base">
-                    <span className="sm:hidden">
+                  <p className="font-medium text-sm md:text-base">
+                    <span className="md:hidden">
                       {formatDateMobile(orderData.estimatedDelivery)}
                     </span>
-                    <span className="hidden sm:inline">
+                    <span className="hidden md:inline">
                       {formatDate(orderData.estimatedDelivery)}
                     </span>
                   </p>
@@ -1052,10 +1019,10 @@ export default function TrackOrderPage() {
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Last updated:{" "}
-                    <span className="sm:hidden">
+                    <span className="md:hidden">
                       {formatDateMobile(orderData.currentLocation.timestamp)}
                     </span>
-                    <span className="hidden sm:inline">
+                    <span className="hidden md:inline">
                       {formatDate(orderData.currentLocation.timestamp)}
                     </span>
                   </p>
@@ -1065,14 +1032,14 @@ export default function TrackOrderPage() {
 
             {/* Delivery Details - Condensed on mobile */}
             <Card>
-              <CardHeader className="pb-3 sm:pb-6">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <CardHeader className="pb-3 md:pb-6">
+                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                   <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
                   Delivery Details
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-1 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
                   <div>
                     <h4 className="font-medium text-xs sm:text-sm text-muted-foreground">
                       Recipient
@@ -1108,8 +1075,8 @@ export default function TrackOrderPage() {
 
             {/* Contact Support */}
             <Card>
-              <CardHeader className="pb-3 sm:pb-6">
-                <CardTitle className="text-base sm:text-lg">
+              <CardHeader className="pb-3 md:pb-6">
+                <CardTitle className="text-base md:text-lg">
                   Need Help?
                 </CardTitle>
               </CardHeader>
@@ -1132,13 +1099,13 @@ export default function TrackOrderPage() {
           <CardHeader className="pb-3 sm:pb-6">
             <button
               onClick={() => setShowTrackingHistory(!showTrackingHistory)}
-              className="w-full flex items-center justify-between text-left sm:cursor-default"
+              className="w-full flex items-center justify-between text-left md:cursor-default"
             >
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                 <Truck className="h-4 w-4 sm:h-5 sm:w-5" />
                 Tracking History
               </CardTitle>
-              <div className="sm:hidden">
+              <div className="md:hidden">
                 {showTrackingHistory ? (
                   <ChevronUp className="h-4 w-4" />
                 ) : (
@@ -1148,8 +1115,8 @@ export default function TrackOrderPage() {
             </button>
           </CardHeader>
           <CardContent
-            className={`p-3 sm:p-6 ${
-              !showTrackingHistory ? "hidden sm:block" : ""
+            className={`p-3 md:p-6 ${
+              !showTrackingHistory ? "hidden md:block" : ""
             }`}
           >
             <div className="space-y-3 sm:space-y-4">
@@ -1176,10 +1143,10 @@ export default function TrackOrderPage() {
                       {event.description}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      <span className="sm:hidden">
+                      <span className="md:hidden">
                         {formatDateMobile(event.timestamp)}
                       </span>
-                      <span className="hidden sm:inline">
+                      <span className="hidden md:inline">
                         {formatDate(event.timestamp)}
                       </span>
                     </p>
