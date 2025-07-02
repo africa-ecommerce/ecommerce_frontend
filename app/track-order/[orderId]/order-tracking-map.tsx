@@ -1427,7 +1427,7 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
 
       {/* Enhanced Controls with auto-hide on mobile */}
       <div
-        className={`absolute top-4 right-4 flex flex-col gap-3 transition-all duration-300 ${
+        className={`absolute top-4 right-4 flex flex-col sm:gap-3 gap-6 transition-all duration-300 ${
           showControls
             ? "opacity-100 translate-x-0"
             : "opacity-0 translate-x-4 pointer-events-none"
@@ -1467,7 +1467,7 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
         </Button>
 
         {/* Center on Current Location */}
-        <Button
+        {/* <Button
           variant="outline"
           size="sm"
           className="bg-white/90 backdrop-blur-sm hover:bg-green-50 transition-all duration-200 w-12 h-12 p-0 rounded-xl shadow-lg"
@@ -1477,6 +1477,25 @@ export default function OrderTrackingMap({ orderData = sampleOrderData }: { orde
               lng: orderData.currentLocation.lng,
             });
             smoothZoom(12);
+          }}
+          title="Center on current location"
+        >
+          <Navigation className="h-5 w-5 text-green-600" />
+        </Button> */}
+
+
+<Button
+          variant="outline"
+          size="sm"
+          className="bg-white/90 backdrop-blur-sm hover:bg-green-50 transition-all duration-200 w-12 h-12 p-0 rounded-xl shadow-lg"
+          onClick={() => {
+            setCenter({
+              lat: orderData.currentLocation.lat,
+              lng: orderData.currentLocation.lng,
+            });
+            // Use a more reasonable zoom level based on current zoom to avoid lag
+            const targetZoom = zoom < 8 ? Math.min(zoom + 3, 10) : 12;
+            smoothZoom(targetZoom);
           }}
           title="Center on current location"
         >
