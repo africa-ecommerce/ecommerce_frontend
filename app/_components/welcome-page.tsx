@@ -82,9 +82,7 @@ export default function Home() {
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
-              {/* <ShoppingBag className="h-6 w-6 text-[#FF7A21]" />
-              <span className="text-xl font-bold">Pluggn</span> */}
-
+             
               <Image
                 src="/pluggn_logo.png"
                 alt="Pluggn Logo"
@@ -157,8 +155,7 @@ export default function Home() {
       >
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
-            {/* <ShoppingBag className="h-6 w-6 text-[#FF7A21]" />
-            <span className="text-xl font-bold">Pluggn</span> */}
+           
 
             <Image
               src="/pluggn_logo.png"
