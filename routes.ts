@@ -13,6 +13,7 @@ export const publicRoutes = [
   /^\/track-order\/.*$/, // /track-order/*** (any path after track-order/)
   /^\/[A-Za-z0-9]{7}$/, // link slug like /abc1234 (7 char nanoid)
   /^\/privacy$/,
+  /^\/terms$/,
 ];
 /**@type {string[]}*/
 export const authRoutes = [
