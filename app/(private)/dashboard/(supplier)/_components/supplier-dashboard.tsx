@@ -172,9 +172,9 @@ const OrderCard = ({ order }: { order: any }) => {
       </CardContent>
 
       {/* Action Buttons - Only show if user is verified */}
-      {user?.supplier?.verified && (
+      {/* {user?.supplier?.verified && ( */}
         <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
-          <Dialog open={delayModalOpen} onOpenChange={setDelayModalOpen}>
+          {/* <Dialog open={delayModalOpen} onOpenChange={setDelayModalOpen}>
             <DialogTrigger asChild>
               <Button
                 variant="outline"
@@ -190,7 +190,7 @@ const OrderCard = ({ order }: { order: any }) => {
               onOpenChange={setDelayModalOpen}
               onDelaySelect={handleDelaySelect}
             />
-          </Dialog>
+          </Dialog> */}
 
           <Button
             variant="destructive"
@@ -211,7 +211,7 @@ const OrderCard = ({ order }: { order: any }) => {
             Accept
           </Button>
         </CardFooter>
-      )}
+      {/* )} */}
     </Card>
   );
 };
@@ -709,7 +709,7 @@ export default function SupplierDashboard() {
           </div>
         </section>
 
-        {!user?.supplier?.verified ? (
+        {/* {!user?.supplier?.verified ? (
           <>
             {isLoading ? (
               <TipSkeleton />
@@ -774,7 +774,7 @@ export default function SupplierDashboard() {
               )}
             </section>
           </>
-        ) : (
+        ) : ( */}
           <section className="space-y-3 sm:space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
               <h2 className="text-sm sm:text-base font-semibold">
@@ -808,7 +808,7 @@ export default function SupplierDashboard() {
               </>
             )}
           </section>
-        )}
+        {/* )} */}
 
         {/* Educational Tip */}
         {isLoading ? (
