@@ -32,7 +32,7 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.pluggn.com.ng";
     console.log(`Using BACKEND_URL: ${backendUrl}`);
     
     return [
@@ -76,9 +76,9 @@ const nextConfig = {
   },
   // Set environment variables with fallbacks to prevent undefined issues
   env: {
-    BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL,
+    BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.pluggn.com.ng",
     APP_URL: process.env.APP_URL || process.env.VERCEL_URL,
-    NEXT_PUBLIC_BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL,
+    NEXT_PUBLIC_BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.pluggn.com.ng",
   }
 }
 
