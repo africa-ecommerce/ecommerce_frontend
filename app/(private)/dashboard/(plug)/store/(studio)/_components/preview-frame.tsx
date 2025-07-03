@@ -360,7 +360,7 @@ export default function PreviewFrame({
   
     // Define trusted domains that should be allowed
     const trustedDomains = [
-      'ecommerce-backend-peach-sigma.vercel.app',
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}`,
       'fonts.googleapis.com',
       'fonts.gstatic.com',
     ];

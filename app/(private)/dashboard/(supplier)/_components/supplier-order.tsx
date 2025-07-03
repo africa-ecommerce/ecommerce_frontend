@@ -180,11 +180,7 @@ const OrderCard = ({ order }: { order: any }) => {
   const { userData } = useUser();
   const { user } = userData || { user: null };
 
-  const handleDelaySelect = (minutes: number) => {
-    console.log(`Delaying order ${order.id} by ${minutes} minutes`);
-    // Add your delay logic here
-  };
-
+  
   const handleAccept = () => {
     console.log(`Accepting order ${order.id}`);
     // Add your accept logic here

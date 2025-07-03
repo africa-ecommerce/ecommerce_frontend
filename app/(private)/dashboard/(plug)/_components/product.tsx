@@ -649,7 +649,7 @@ export default function Products() {
 
     // Handle native sharing
     const handleShareTracking = async () => {
-      const trackingUrl = `https://pluggn.vercel.app/track-order/${order.orderId}`;
+      const trackingUrl = `${process.env.NEXT_PUBLIC_APP_URL}/track-order/${order.orderId}`;
       
       if (navigator.share) {
         try {

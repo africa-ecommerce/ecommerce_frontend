@@ -38,13 +38,13 @@ export async function middleware(request: NextRequest) {
 
       if (!data.exists) {
         return NextResponse.redirect(
-          new URL(`https://pluggn.vercel.app/subdomain-error`)
+          new URL(`${process.env.APP_URL}/subdomain-error`)
         );
       }
     } catch (e) {
       console.error("Failed to check subdomain", e);
       return NextResponse.redirect(
-        new URL(`https://pluggn.vercel.app/subdomain-error`)
+        new URL(`${process.env.APP_URL}/subdomain-error`)
       );
     }
 

@@ -97,14 +97,14 @@ export default function SubdomainErrorPage() {
         <div className="max-w-4xl mx-auto text-sm">
           <div className="flex flex-col justify-center items-center gap-2 sm:gap-3 md:gap-4 mb-2 sm:mb-3 md:mb-4 sm:flex-row">
             <Link
-              href="https://pluggn.vercel.app"
+              href="/"
               className="text-gray-600 hover:text-purple-600 transition-colors duration-200 font-medium text-xs sm:text-sm active:text-purple-700"
             >
               Home
             </Link>
             <div className="hidden sm:block w-1 h-1 bg-gray-300 rounded-full"></div>
             <Link
-              href="https://pluggn.vercel.app/help"
+              href="/help"
               className="text-gray-600 hover:text-purple-600 transition-colors duration-200 font-medium text-xs sm:text-sm active:text-purple-700"
             >
               Contact Support

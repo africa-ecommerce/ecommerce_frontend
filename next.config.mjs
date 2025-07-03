@@ -17,7 +17,7 @@ const nextConfig = {
           type: "host",
           value: "pluggn.store",
         }],
-        destination: "https://pluggn.vercel.app/:path*",
+        destination: `${process.env.APP_URL}/:path*`,
         permanent: true,
       },
       {
@@ -26,13 +26,13 @@ const nextConfig = {
           type: "host",
           value: "www.pluggn.store",
         }],
-        destination: "https://pluggn.vercel.app/:path*",
+        destination:  `${process.env.APP_URL}/:path*`,
         permanent: true,
       },
     ];
   },
   async rewrites() {
-    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ecommerce-backend-peach-sigma.vercel.app';
+    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
     console.log(`Using BACKEND_URL: ${backendUrl}`);
     
     return [
@@ -76,9 +76,9 @@ const nextConfig = {
   },
   // Set environment variables with fallbacks to prevent undefined issues
   env: {
-    BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ecommerce-backend-peach-sigma.vercel.app',
-    APP_URL: process.env.APP_URL || process.env.VERCEL_URL || 'https://ecommerce-backend-peach-sigma.vercel.app',
-    NEXT_PUBLIC_BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ecommerce-backend-peach-sigma.vercel.app',
+    BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL,
+    APP_URL: process.env.APP_URL || process.env.VERCEL_URL,
+    NEXT_PUBLIC_BACKEND_URL: process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL,
   }
 }
 
