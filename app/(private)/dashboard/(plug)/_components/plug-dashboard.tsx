@@ -47,6 +47,8 @@ import {
   truncateText,
 } from "@/lib/utils";
 import WithdrawalModal from "../../_components/withdrawal-modal";
+import { successToast } from "@/components/ui/use-toast-advanced";
+import { useRouter } from "next/navigation";
 
 
 
@@ -315,6 +317,8 @@ export default function PlugDashboard() {
     errorRetryInterval: 5000,
   });
 
+  const router = useRouter()
+
   // Fetch shipped orders data - following the exact pattern from products component
   const getOrdersUrl = (status: string) => {
     return `/api/orders/plug?orderStatus=${status.toUpperCase()}`;
@@ -491,6 +495,45 @@ export default function PlugDashboard() {
       );
     };
 
+
+    const handleTrackOrder = () => {
+      router.push(`/track-order/${order.orderId}`);
+
+    };
+
+    // Handle native sharing
+    const handleShareTracking = async () => {
+      const trackingUrl = `https://pluggn.vercel.app/track-order/${order.orderId}`;
+      
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `Track Order ${order.orderId}`,
+            text: `Track your order ${order.orderId} from pluggn`,
+            url: trackingUrl,
+          });
+        } catch (error) {
+         
+          fallbackShare(trackingUrl);
+        }
+      } else {
+        fallbackShare(trackingUrl);
+      }
+    };
+
+    // Fallback sharing method
+    const fallbackShare = async (url: string) => {
+      try {
+        await navigator.clipboard.writeText(url);
+        successToast('Tracking link copied to clipboard!');
+      } catch (error) {
+        console.error('Failed to copy to clipboard:', error);
+        // Final fallback: open in new window/tab
+        window.open(url, '_blank');
+      }
+    };
+
+
     return (
       <Card className="mb-3 sm:mb-4 last:mb-0">
         <CardHeader className="p-3 sm:p-4 pb-2">
@@ -584,11 +627,15 @@ export default function PlugDashboard() {
 
         {/* Action Buttons */}
         <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1 h-8 text-xs">
+          <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" onClick={handleShareTracking}>
             <Share2 className="h-3 w-3 mr-1" />
             Share Tracking
           </Button>
-          <Button size="sm" className="flex-1 h-8 text-xs">
+          <Button
+            size="sm"
+            className="flex-1 h-8 text-xs"
+            onClick={handleTrackOrder}
+          >
             <Truck className="h-3 w-3 mr-1" />
             Track Order
           </Button>

@@ -59,6 +59,7 @@ import { EditPriceModal } from "./edit-price-modal"
 import { ShareModal } from "./share-modal"
 import { useUser } from "@/app/_components/provider/UserContext"
 import { WriteReviewModal } from "./write-review-modal"
+import { useRouter } from "next/navigation"
 
 const TipSkeleton = () => (
   <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
@@ -240,6 +241,8 @@ export default function Products() {
   const { userData } = useUser();
   const { user } = userData || { user: null };
 
+  const router = useRouter()
+
   console.log("user", user);
 
   const { setIsMutate } = useShoppingCart();
@@ -366,6 +369,201 @@ export default function Products() {
   const totalPages = Math.ceil((filteredItems?.length || 0) / itemsPerPage);
 
   // Updated OrderCard component to match the API data structure and design
+  // const OrderCard = ({ order }: { order: any }) => {
+   
+  //   const getStatusBadge = (status: string) => {
+  //     // If no status is provided, determine from activeOrderTab or other context
+  //     const currentStatus = status || activeOrderTab;
+
+  //     switch (currentStatus?.toLowerCase()) {
+  //       case "pending":
+  //       case "active":
+  //         return (
+  //           <Badge
+  //             variant="default"
+  //             className="bg-orange-500 hover:bg-orange-600"
+  //           >
+  //             Pending
+  //           </Badge>
+  //         );
+  //       case "shipped":
+  //         return (
+  //           <Badge
+  //             variant="secondary"
+  //             className="bg-orange-500 hover:bg-orange-600"
+  //           >
+  //             Shipped
+  //           </Badge>
+  //         );
+  //       case "delivered":
+  //         return (
+  //           <Badge
+  //             variant="outline"
+  //             className="bg-orange-500 hover:bg-orange-600"
+  //           >
+  //             Delivered
+  //           </Badge>
+  //         );
+  //       case "cancelled":
+  //         return <Badge variant="destructive">Cancelled</Badge>;
+  //       default:
+  //         return (
+  //           <Badge
+  //             variant="default"
+  //             className="bg-orange-500 hover:bg-orange-600"
+  //           >
+  //             Pending
+  //           </Badge>
+  //         );
+  //     }
+  //   };
+
+    
+
+  //   // Calculate total amount from order items
+  //   const totalAmount =
+  //     order.orderItems?.reduce((total: number, item: any) => {
+  //      return total + (item.plugPrice || 0) * item.quantity;
+  //   }, 0) || 0;
+
+  //   const formatDate = (dateString: string) => {
+  //     const date = new Date(dateString);
+  //     return date.toLocaleDateString("en-US", {
+  //       year: "numeric",
+  //       month: "short",
+  //       day: "numeric",
+  //     });
+  //   };
+
+  //   const capitalizeWords = (str: string) => {
+  //     return (
+  //       str
+  //         ?.split(" ")
+  //         .map(
+  //           (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  //         )
+  //         .join(" ") || ""
+  //     );
+  //   };
+
+  //   return (
+  //     <Card className="mb-3 sm:mb-4 last:mb-0">
+  //       <CardHeader className="p-3 sm:p-4 pb-2">
+  //         <div className="flex justify-between items-start gap-2">
+  //           <div className="min-w-0">
+  //             <CardTitle className="text-sm font-medium">
+  //               {order.orderId}
+  //             </CardTitle>
+  //             <CardDescription className="text-xs mt-1">
+  //               {formatDate(order.createdAt)}
+  //             </CardDescription>
+  //           </div>
+  //           {getStatusBadge(activeOrderTab)}
+  //         </div>
+  //       </CardHeader>
+
+  //       <CardContent className="p-3 sm:p-4 pt-0 space-y-3">
+  //         {/* Customer Info */}
+  //         <div className="flex items-center gap-2 text-sm">
+  //           <Users className="h-4 w-4 text-muted-foreground" />
+  //           <span className="font-medium">
+  //             {capitalizeWords(order.buyerName)}
+  //           </span>
+  //           <span className="text-muted-foreground">•</span>
+  //           <span className="text-muted-foreground">
+  //             {capitalizeWords(order.buyerLga)},{" "}
+  //             {capitalizeWords(order.buyerState)}
+  //           </span>
+  //         </div>
+
+  //         {/* Phone Number */}
+  //         <div className="flex items-center gap-2 text-sm text-muted-foreground">
+  //           <Phone className="h-4 w-4" />
+  //           <span>{order.buyerPhone}</span>
+  //         </div>
+
+  //         {/* Products */}
+  //         <div className="space-y-2">
+  //           {order.orderItems?.map((item: any, index: number) => (
+  //             <div key={item.id} className="flex justify-between items-center">
+  //               <div className="flex-1">
+  //                 <div className="text-sm font-medium capitalize">
+  //                   {item.productName} <span className="lowercase">x</span> {item.quantity}
+  //                 </div>
+  //                 {/* Show variant details if available */}
+  //                 {item.variantId &&
+  //                   (item.variantColor || item.variantSize) && (
+  //                     <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+  //                       {item.variantColor && (
+  //                         <span className="capitalize">
+  //                           {item.variantColor}
+  //                         </span>
+  //                       )}
+  //                       {item.variantSize && (
+  //                         <span className="capitalize">
+  //                           ({item.variantSize})
+  //                         </span>
+  //                       )}
+  //                     </div>
+  //                   )}
+  //                 {/* Show product color/size if no variant but has product color/size */}
+  //                 {!item.variantId &&
+  //                   (item.productColor || item.productSize) && (
+  //                     <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+  //                       {item.productColor && (
+  //                         <span className="capitalize">
+  //                           {item.productColor}
+  //                         </span>
+  //                       )}
+  //                       {item.productSize && (
+  //                         <span className="capitalize">
+  //                           ({item.productSize})
+  //                         </span>
+  //                       )}
+  //                     </div>
+  //                   )}
+  //               </div>
+  //               <div className="text-sm font-medium">
+  //                 ₦{(
+  //                   (item.plugPrice || 0) * item.quantity
+  //                 ).toLocaleString()}
+  //               </div>
+  //             </div>
+  //           ))}
+  //         </div>
+
+  //         {/* Total */}
+  //         <div className="flex justify-between items-center text-sm pt-2 border-t">
+  //           <span className="font-medium">Total</span>
+  //           <span className="font-bold">₦{totalAmount.toLocaleString()}</span>
+  //         </div>
+  //       </CardContent>
+
+  //       {/* Action Buttons */}
+  //       <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
+  //         {activeOrderTab === "shipped" && (
+  //           <>
+  //             <Button
+  //               variant="outline"
+  //               size="sm"
+  //               className="flex-1 h-8 text-xs"
+  //             >
+  //               <Share2 className="h-3 w-3 mr-1" />
+  //               Share Tracking
+  //             </Button>
+  //             <Button size="sm" className="flex-1 h-8 text-xs">
+  //               <Truck className="h-3 w-3 mr-1" />
+  //               Track Order
+  //             </Button>
+  //           </>
+  //         )}
+  //       </CardFooter>
+  //     </Card>
+  //   );
+  // };
+
+
+
   const OrderCard = ({ order }: { order: any }) => {
    
     const getStatusBadge = (status: string) => {
@@ -441,6 +639,44 @@ export default function Products() {
           )
           .join(" ") || ""
       );
+    };
+
+    // Handle track order navigation
+    const handleTrackOrder = () => {
+      router.push(`/track-order/${order.orderId}`);
+
+    };
+
+    // Handle native sharing
+    const handleShareTracking = async () => {
+      const trackingUrl = `https://pluggn.vercel.app/track-order/${order.orderId}`;
+      
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `Track Order ${order.orderId}`,
+            text: `Track your order ${order.orderId} from pluggn`,
+            url: trackingUrl,
+          });
+        } catch (error) {
+         
+          fallbackShare(trackingUrl);
+        }
+      } else {
+        fallbackShare(trackingUrl);
+      }
+    };
+
+    // Fallback sharing method
+    const fallbackShare = async (url: string) => {
+      try {
+        await navigator.clipboard.writeText(url);
+        successToast('Tracking link copied to clipboard!');
+      } catch (error) {
+        console.error('Failed to copy to clipboard:', error);
+        // Final fallback: open in new window/tab
+        window.open(url, '_blank');
+      }
     };
 
     return (
@@ -544,11 +780,16 @@ export default function Products() {
                 variant="outline"
                 size="sm"
                 className="flex-1 h-8 text-xs"
+                onClick={handleShareTracking}
               >
                 <Share2 className="h-3 w-3 mr-1" />
                 Share Tracking
               </Button>
-              <Button size="sm" className="flex-1 h-8 text-xs">
+              <Button 
+                size="sm" 
+                className="flex-1 h-8 text-xs"
+                onClick={handleTrackOrder}
+              >
                 <Truck className="h-3 w-3 mr-1" />
                 Track Order
               </Button>
