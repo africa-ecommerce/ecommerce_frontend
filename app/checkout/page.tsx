@@ -640,11 +640,11 @@ export default function CheckoutPage() {
   const showPaymentCancelledModal = () => {
     // You could use a toast library or custom modal
     toast({
-      title: "Don't miss out! 🛒",
+      title: "Don't miss out!",
       description:
-        "Your items are still waiting for you. Complete your purchase now and get FREE delivery!",
+        "Your items are still waiting for you. Complete your purchase now",
       action: <div className="flex gap-2">{renderPlaceOrderButton()}</div>,
-      duration: 10000, // Show for 10 seconds
+      duration: 30000, // Show for 10 seconds
     });
   };
 

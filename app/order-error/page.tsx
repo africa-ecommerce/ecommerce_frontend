@@ -78,7 +78,7 @@ export default function OrderIssuePage() {
                   <img
                     src="/whatsapp.png"
                     alt="WhatsApp"
-                    className="h-4 w-4 mr-2"
+                    className="h-6 w-6 mr-2"
                   />
                   Chat on WhatsApp
                 </Button>
