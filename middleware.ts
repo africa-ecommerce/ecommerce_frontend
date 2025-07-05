@@ -13,8 +13,8 @@ import {
 // Setup constants
 const JWT_SECRET = process.env.JWT_SECRET || "defaultsecret";
 const JWT_SECRET_KEY = new TextEncoder().encode(JWT_SECRET);
-const ACCESS_TOKEN_EXPIRY = 15 * 60 * 1000;
-const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000;
+const ACCESS_TOKEN_EXPIRY = 15 * 60 ;
+const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60;
 
 export async function middleware(request: NextRequest) {
   const { nextUrl } = request;
@@ -278,14 +278,14 @@ export async function middleware(request: NextRequest) {
           // Set the new access token cookie
           response.cookies.set("accessToken", refreshData.accessToken, {
             ...cookieConfig,
-            maxAge: Math.floor(ACCESS_TOKEN_EXPIRY / 1000), // Convert to seconds
+            maxAge: Math.floor(ACCESS_TOKEN_EXPIRY * 1000), 
           });
 
           // Set the new refresh token cookie if it's included in the response
           if (refreshData.refreshToken) {
             response.cookies.set("refreshToken", refreshData.refreshToken, {
               ...cookieConfig,
-              maxAge: Math.floor(REFRESH_TOKEN_EXPIRY / 1000), // Convert to seconds
+              maxAge: Math.floor(REFRESH_TOKEN_EXPIRY * 1000), 
             });
           }
 
