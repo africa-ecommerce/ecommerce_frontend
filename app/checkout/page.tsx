@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/select";
 import { deliveryFormSchema } from "@/zod/schema";
 import { useCheckoutStore } from "@/hooks/checkout-store";
-import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
+import { errorToast, successToast, toast } from "@/components/ui/use-toast-advanced";
 import { getVariationDisplayName, parseCheckoutUrl } from "@/lib/url-parser";
 import { useProductFetching } from "@/hooks/use-product-fetcher";
 import { useProductStore } from "@/hooks/product-store";
@@ -636,6 +636,18 @@ export default function CheckoutPage() {
     }
   };
 
+
+  const showPaymentCancelledModal = () => {
+    // You could use a toast library or custom modal
+    toast({
+      title: "Don't miss out! 🛒",
+      description:
+        "Your items are still waiting for you. Complete your purchase now and get FREE delivery!",
+      action: <div className="flex gap-2">{renderPlaceOrderButton()}</div>,
+      duration: 10000, // Show for 10 seconds
+    });
+  };
+
   const paystackConfig = {
     email: watchedCustomerInfo?.email || "",
     amount: total * 100, // Paystack expects amount in kobo
@@ -665,7 +677,7 @@ export default function CheckoutPage() {
       }
     },
     onClose: () => {
-      alert("Payment cancelled");
+      showPaymentCancelledModal();
     },
   };
 
@@ -1425,7 +1437,7 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex items-start">
                         <span className="mr-2 text-primary">•</span>
-                        <p>We accept returns within 7 days of delivery</p>
+                        <p>We accept returns within 3 days of delivery</p>
                       </div>
 
                       <div className="flex items-start">

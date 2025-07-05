@@ -5,16 +5,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  AlertTriangle,
-  Phone,
-  MessageCircle,
-  Clock,
-  Heart,
-} from "lucide-react";
+import { AlertTriangle, Phone, Mail, Clock, Heart } from "lucide-react";
 
 export default function OrderIssuePage() {
-  const customerCareNumber = "09151425001";
+  const customerCareNumber = "2349151425001"; // International format for WhatsApp
+  const supportEmail = "support@pluggn.com.ng";
 
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent(
@@ -24,8 +19,8 @@ export default function OrderIssuePage() {
     window.open(whatsappUrl, "_blank");
   };
 
-  const handlePhoneCall = () => {
-    window.location.href = `tel:${customerCareNumber}`;
+  const handleEmailClick = () => {
+    window.location.href = `mailto:${supportEmail}`;
   };
 
   return (
@@ -74,36 +69,27 @@ export default function OrderIssuePage() {
                 Let's get this sorted out
               </h2>
 
-              {/* Phone Number Display */}
-              <div className="bg-card border rounded-lg p-3">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <Phone className="h-4 w-4 text-primary" />
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Customer Care
-                  </span>
-                </div>
-                <div className="text-xl font-bold text-foreground tracking-wider">
-                  {customerCareNumber}
-                </div>
-              </div>
-
               {/* Action Buttons */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Button
                   onClick={handleWhatsAppClick}
                   className="h-12 text-sm font-semibold bg-green-600 hover:bg-green-700 text-white transition-all duration-200 hover:scale-105"
                 >
-                  <MessageCircle className="h-4 w-4 mr-2" />
+                  <img
+                    src="/whatsapp.png"
+                    alt="WhatsApp"
+                    className="h-4 w-4 mr-2"
+                  />
                   Chat on WhatsApp
                 </Button>
 
                 <Button
-                  onClick={handlePhoneCall}
+                  onClick={handleEmailClick}
                   variant="outline"
                   className="h-12 text-sm font-semibold border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-200 hover:scale-105"
                 >
-                  <Phone className="h-4 w-4 mr-2" />
-                  Call Now
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Email
                 </Button>
               </div>
             </div>

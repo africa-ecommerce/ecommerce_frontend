@@ -254,7 +254,7 @@ export default function ThankYouPage() {
               variant="outline"
               size="sm"
               className="flex items-center justify-center space-x-2 py-6"
-              onClick={() => window.open("/support", "_blank")}
+              onClick={() => window.open("/help", "_blank")}
             >
               <MessageCircle className="h-4 w-4" />
               <span className="text-sm">Get Help</span>
