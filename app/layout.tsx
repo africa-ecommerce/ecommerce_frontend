@@ -1,7 +1,3 @@
-
-
-
-
 import type React from "react";
 import "./globals.css";
 import { Metadata } from "next";
@@ -14,6 +10,7 @@ import {
 } from "next/font/google";
 import { ToastProvider } from "./_components/provider/ClientToastWrapper";
 import { ToasterAdvanced } from "@/components/toaster-advanced";
+import { ConditionalFooter } from "./_components/conditionalFooter";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -43,10 +40,7 @@ export const metadata: Metadata = {
   title: "Pluggn - Empower Your Digital Business Journeys",
   description:
     "Connect with customers across Africa and beyond. Sell online, in-store, or through WhatsApp with Pluggn's all-in-one platform.",
-
 };
-
-
 
 export default function RootLayout({
   children,
@@ -60,13 +54,13 @@ export default function RootLayout({
       className={`${inter.variable} ${robotoMono.variable} ${playfair.variable} ${poppins.variable}`}
     >
       <body className="min-h-screen bg-background">
-      
-          <ToastProvider>
-            <Suspense>
-              {children}
-              <ToasterAdvanced />
-            </Suspense>
-          </ToastProvider>
+        <ToastProvider>
+          <Suspense>
+            {children}
+            <ToasterAdvanced />
+            <ConditionalFooter />
+          </Suspense>
+        </ToastProvider>
       </body>
     </html>
   );
