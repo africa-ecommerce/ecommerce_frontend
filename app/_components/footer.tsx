@@ -14,6 +14,7 @@ export function Footer() {
       <div className="container px-4 md:px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 lg:gap-12">
           <div className="col-span-2 md:col-span-1">
+          <Link href="/">
             <Image
               src="/pluggn_logo.png"
               alt="Pluggn Logo"
@@ -22,6 +23,7 @@ export function Footer() {
               priority // Add this for above-the-fold logos
               className="h-auto" // Maintains aspect ratio
             />
+            </Link>
             <p className="text-gray-400 mb-4 max-w-xs text-sm md:text-base">
               Empowering entrepreneurs across Africa to build successful
               digital businesses without inventory.
