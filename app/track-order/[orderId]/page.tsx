@@ -25,6 +25,7 @@ import {
   Navigation,
   ChevronDown,
   ChevronUp,
+  Mail,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 
@@ -420,7 +421,7 @@ export default function TrackOrderPage() {
           <div className="space-y-4">
             {/* Order Status - Prominent on mobile */}
             <Card>
-              <CardHeader className="pb-3 md:pb-6">
+              <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                   <Package className="h-4 w-4 md:h-5 md:w-5" />
                   Order Status
@@ -475,7 +476,7 @@ export default function TrackOrderPage() {
 
             {/* Delivery Details - Condensed on mobile */}
             <Card>
-              <CardHeader className="pb-3 md:pb-6">
+              <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                   <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
                   Delivery Details
@@ -518,22 +519,48 @@ export default function TrackOrderPage() {
 
             {/* Contact Support */}
             <Card>
-              <CardHeader className="pb-3 md:pb-6">
-                <CardTitle className="text-base md:text-lg">
-                  Need Help?
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 sm:p-6">
-                <Button
-                  className="w-full bg-transparent"
-                  variant="outline"
-                  size="sm"
-                >
-                  <Phone className="h-4 w-4 mr-2" />
-                  Contact Support
-                </Button>
-              </CardContent>
-            </Card>
+  <CardHeader className="pb-3 md:pb-6">
+    <CardTitle className="text-base md:text-lg">
+      Need Help?
+    </CardTitle>
+  </CardHeader>
+  <CardContent className="p-3 sm:p-6">
+    <div className="space-y-3">
+      <a
+        href="mailto:support@pluggn.com.ng"
+        className="w-full"
+      >
+        <Button
+          className="w-full bg-transparent"
+          variant="outline"
+          size="sm"
+        >
+          <Mail className="h-4 w-4 mr-2" />
+          Email Support
+        </Button>
+      </a>
+      
+      <a
+        href="https://wa.me/2349151425001"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full"
+      >
+        <Button
+          className="w-full bg-transparent"
+          variant="outline"
+          size="sm"
+        >
+          <Phone className="h-4 w-4 mr-2" />
+          WhatsApp Support
+        </Button>
+      </a>
+    </div>
+  </CardContent>
+</Card>
+
+
+            
           </div>
         </div>
 
