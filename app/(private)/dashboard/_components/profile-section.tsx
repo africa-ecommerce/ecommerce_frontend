@@ -1,7 +1,3 @@
-
-
-
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,6 +10,8 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  Check,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,12 +97,20 @@ const NIGERIAN_STATES = [
   "FCT",
 ];
 
-
-
 interface ProfileSectionProps {
   onBack: () => void;
   userType: "PLUG" | "SUPPLIER";
 }
+
+const checkPasswordRequirements = (password: string) => {
+  return {
+    minLength: password.length >= 8,
+    hasUppercase: /[A-Z]/.test(password),
+    hasLowercase: /[a-z]/.test(password),
+    hasNumber: /\d/.test(password),
+    hasSpecialChar: /[@$!%*?&]/.test(password),
+  };
+};
 
 export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
   const {
@@ -115,6 +121,11 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [newPasswordValue, setNewPasswordValue] = useState("");
+  const [confirmPasswordValue, setConfirmPasswordValue] = useState("");
+  const [showPasswordRequirements, setShowPasswordRequirements] =
+    useState(false);
 
   // State management for supplier address
   const [selectedState, setSelectedState] = useState<string>("");
@@ -169,8 +180,6 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
       };
     }
   };
-
-
 
   // Update profile function
   const updateProfile = async (data: any) => {
@@ -266,7 +275,8 @@ export function ProfileSection({ onBack, userType }: ProfileSectionProps) {
   };
 
   // Profile form
-const profileFormSchema = userType === "SUPPLIER" ? updateSupplierSchema : updateProfileSchema;
+  const profileFormSchema =
+    userType === "SUPPLIER" ? updateSupplierSchema : updateProfileSchema;
   const { form: profileForm } = useFormResolver(
     updateProfile,
     profileFormSchema,
@@ -334,7 +344,7 @@ const profileFormSchema = userType === "SUPPLIER" ? updateSupplierSchema : updat
       setAvatarPreview(userData.avatar);
     }
   }, [userData]);
-  
+
   // Update form values when userData changes
   useEffect(() => {
     if (userData) {
@@ -369,44 +379,43 @@ const profileFormSchema = userType === "SUPPLIER" ? updateSupplierSchema : updat
             <CardContent>
               <Form {...profileForm}>
                 <form onSubmit={profileForm.submit} className="space-y-6">
-                    <div className="flex flex-col items-center mb-6">
-                      <div className="relative mb-4">
-                        <Avatar className="h-24 w-24 border-4 border-background">
-                          <AvatarImage
-                            src={
-                              avatarPreview ||
-                              "/placeholder.svg?height=96&width=96"
-                            }
-                            alt="User"
-                          />
-                          <AvatarFallback className="text-2xl">
-                            {userData?.businessName
-                              ?.slice(0, 2)
-                              .toUpperCase() || "BZ"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <label htmlFor="avatar-upload">
-                          <Button
-                            size="icon"
-                            variant="secondary"
-                            className="absolute bottom-0 right-0 h-8 w-8 rounded-full"
-                            type="button"
-                            onClick={() =>
-                              document.getElementById("avatar-upload")?.click()
-                            }
-                          >
-                            <Camera className="h-4 w-4" />
-                          </Button>
-                          <input
-                            id="avatar-upload"
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleAvatarChange}
-                          />
-                        </label>
-                      </div>
+                  <div className="flex flex-col items-center mb-6">
+                    <div className="relative mb-4">
+                      <Avatar className="h-24 w-24 border-4 border-background">
+                        <AvatarImage
+                          src={
+                            avatarPreview ||
+                            "/placeholder.svg?height=96&width=96"
+                          }
+                          alt="User"
+                        />
+                        <AvatarFallback className="text-2xl">
+                          {userData?.businessName?.slice(0, 2).toUpperCase() ||
+                            "BZ"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <label htmlFor="avatar-upload">
+                        <Button
+                          size="icon"
+                          variant="secondary"
+                          className="absolute bottom-0 right-0 h-8 w-8 rounded-full"
+                          type="button"
+                          onClick={() =>
+                            document.getElementById("avatar-upload")?.click()
+                          }
+                        >
+                          <Camera className="h-4 w-4" />
+                        </Button>
+                        <input
+                          id="avatar-upload"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleAvatarChange}
+                        />
+                      </label>
                     </div>
+                  </div>
 
                   <FormField
                     control={profileForm.control}
@@ -667,6 +676,12 @@ const profileFormSchema = userType === "SUPPLIER" ? updateSupplierSchema : updat
                               {...field}
                               type={showNewPassword ? "text" : "password"}
                               placeholder="******"
+                              onChange={(e) => {
+                                field.onChange(e);
+                                setNewPasswordValue(e.target.value);
+                              }}
+                              onFocus={() => setShowPasswordRequirements(true)}
+                              onBlur={() => setShowPasswordRequirements(false)}
                             />
                             <Button
                               type="button"
@@ -685,6 +700,50 @@ const profileFormSchema = userType === "SUPPLIER" ? updateSupplierSchema : updat
                             </Button>
                           </div>
                         </FormControl>
+
+                        {/* Password Requirements */}
+                        {(showPasswordRequirements || newPasswordValue) && (
+                          <div className="mt-2 p-3 bg-muted/50 rounded-md text-xs">
+                            <p className="font-medium mb-2">
+                              Password must contain:
+                            </p>
+                            <div className="space-y-1">
+                              {Object.entries(
+                                checkPasswordRequirements(newPasswordValue)
+                              ).map(([key, met]) => {
+                                const labels = {
+                                  minLength: "At least 8 characters",
+                                  hasUppercase: "One uppercase letter",
+                                  hasLowercase: "One lowercase letter",
+                                  hasNumber: "One number",
+                                  hasSpecialChar:
+                                    "One special character (@$!%*?&)",
+                                };
+
+                                return (
+                                  <div
+                                    key={key}
+                                    className="flex items-center gap-2"
+                                  >
+                                    {met ? (
+                                      <Check className="h-3 w-3 text-green-500" />
+                                    ) : (
+                                      <X className="h-3 w-3 text-red-500" />
+                                    )}
+                                    <span
+                                      className={
+                                        met ? "text-green-700" : "text-red-700"
+                                      }
+                                    >
+                                      {labels[key as keyof typeof labels]}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
                         <FormMessage />
                       </FormItem>
                     )}
@@ -702,6 +761,10 @@ const profileFormSchema = userType === "SUPPLIER" ? updateSupplierSchema : updat
                               {...field}
                               type={showConfirmPassword ? "text" : "password"}
                               placeholder="******"
+                              onChange={(e) => {
+                                field.onChange(e);
+                                setConfirmPasswordValue(e.target.value);
+                              }}
                             />
                             <Button
                               type="button"
@@ -720,6 +783,28 @@ const profileFormSchema = userType === "SUPPLIER" ? updateSupplierSchema : updat
                             </Button>
                           </div>
                         </FormControl>
+
+                        {/* Password Match Indicator */}
+                        {confirmPasswordValue && (
+                          <div className="mt-2 flex items-center gap-2 text-xs">
+                            {newPasswordValue === confirmPasswordValue ? (
+                              <>
+                                <Check className="h-3 w-3 text-green-500" />
+                                <span className="text-green-700">
+                                  Passwords match
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <X className="h-3 w-3 text-red-500" />
+                                <span className="text-red-700">
+                                  Passwords do not match
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        )}
+
                         <FormMessage />
                       </FormItem>
                     )}

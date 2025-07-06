@@ -14,9 +14,13 @@ export const RegisterSchema = z.object({
   email: z.string().email({
     message: "Email is required",
   }),
-  password: z.string().min(6, {
-    message: "Minimum 6 characters required",
-  }),
+  password: z.string()
+    .min(8, {
+      message: "Password must be at least 8 characters long",
+    })
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+      message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)",
+    }),
   name: z.string()
     // Trim to remove leading/trailing whitespace
     .trim()
@@ -37,8 +41,6 @@ export const RegisterSchema = z.object({
       }, 
       { message: "Please provide both first and last name" }
     ),
-  // phone: z.string().optional(),
- 
 });
 
 export const ForgotPasswordSchema = z.object({
@@ -52,7 +54,16 @@ export const ResetPasswordSchema = z
   .object({
     newPassword: z
       .string()
-      .min(6, { message: "Password must be at least 6 characters" }),
+      .min(8, {
+        message: "Password must be at least 8 characters long",
+      })
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+        {
+          message:
+            "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)",
+        }
+      ),
     confirmPassword: z.string(),
     token: z.string(),
   })
@@ -68,9 +79,18 @@ export const ResetPasswordSchema = z
 export const passwordSchema = z
   .object({
     currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z
-      .string()
-      .min(6, { message: "Password must be at least 6 characters" }),
+    newPassword:z
+    .string()
+    .min(8, {
+      message: "Password must be at least 8 characters long",
+    })
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+      {
+        message:
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)",
+      }
+    ),
     confirmPassword: z.string(),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {

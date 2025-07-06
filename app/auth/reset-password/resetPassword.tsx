@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Check, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,6 @@ import { Input } from "@/components/ui/input";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { ResetPasswordSchema } from "@/zod/schema";
 import { successToast, errorToast } from "@/components/ui/use-toast-advanced";
-
-
-// Define the Zod schema for password reset
-
 
 type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>;
 
@@ -23,7 +19,7 @@ const resetPassword = async (data: ResetPasswordInput) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
-       credentials: "include" 
+      credentials: "include"
     });
 
     const result = await response.json();
@@ -34,12 +30,23 @@ const resetPassword = async (data: ResetPasswordInput) => {
     }
 
     successToast(result.message);
-    return result; // Return the parsed result instead of parsing the body again
+    return result;
   } catch (error) {
     console.error(error);
     errorToast("Something went wrong");
     return null;
   }
+};
+
+// Password requirements checker
+const checkPasswordRequirements = (password: string) => {
+  return {
+    minLength: password.length >= 8,
+    hasUppercase: /[A-Z]/.test(password),
+    hasLowercase: /[a-z]/.test(password),
+    hasNumber: /\d/.test(password),
+    hasSpecialChar: /[@$!%*?&]/.test(password),
+  };
 };
 
 export default function ResetPassword() {
@@ -49,6 +56,9 @@ export default function ResetPassword() {
   
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordValue, setPasswordValue] = useState("");
+  const [confirmPasswordValue, setConfirmPasswordValue] = useState("");
+  const [showRequirements, setShowRequirements] = useState(false);
 
   const {
     form: { register, submit, errors, isSubmitting, setValue },
@@ -59,7 +69,7 @@ export default function ResetPassword() {
   );
 
   // Set token from URL
- useEffect(() => {
+  useEffect(() => {
     setValue("token", token);
   }, [token, setValue]);
 
@@ -67,6 +77,21 @@ export default function ResetPassword() {
     e.preventDefault();
     await submit(e);
   };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPasswordValue(value);
+    setValue("newPassword", value);
+  };
+
+  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setConfirmPasswordValue(value);
+    setValue("confirmPassword", value);
+  };
+
+  const requirements = checkPasswordRequirements(passwordValue);
+  const passwordsMatch = passwordValue === confirmPasswordValue && confirmPasswordValue !== "";
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -110,6 +135,9 @@ export default function ResetPassword() {
                       id="password"
                       type={showPassword ? "text" : "password"}
                       {...register("newPassword")}
+                      onChange={handlePasswordChange}
+                      onFocus={() => setShowRequirements(true)}
+                      onBlur={() => setShowRequirements(false)}
                       className="block w-full pr-10"
                       placeholder="******"
                     />
@@ -125,6 +153,66 @@ export default function ResetPassword() {
                       )}
                     </button>
                   </div>
+                  
+                  {/* Password Requirements */}
+                  {(showRequirements || passwordValue) && (
+                    <div className="mt-2 p-3 bg-muted/50 rounded-md text-xs">
+                      <p className="font-medium mb-2">Password must contain:</p>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          {requirements.minLength ? (
+                            <Check className="h-3 w-3 text-green-500" />
+                          ) : (
+                            <X className="h-3 w-3 text-red-500" />
+                          )}
+                          <span className={requirements.minLength ? "text-green-700" : "text-red-700"}>
+                            At least 8 characters
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {requirements.hasUppercase ? (
+                            <Check className="h-3 w-3 text-green-500" />
+                          ) : (
+                            <X className="h-3 w-3 text-red-500" />
+                          )}
+                          <span className={requirements.hasUppercase ? "text-green-700" : "text-red-700"}>
+                            One uppercase letter
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {requirements.hasLowercase ? (
+                            <Check className="h-3 w-3 text-green-500" />
+                          ) : (
+                            <X className="h-3 w-3 text-red-500" />
+                          )}
+                          <span className={requirements.hasLowercase ? "text-green-700" : "text-red-700"}>
+                            One lowercase letter
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {requirements.hasNumber ? (
+                            <Check className="h-3 w-3 text-green-500" />
+                          ) : (
+                            <X className="h-3 w-3 text-red-500" />
+                          )}
+                          <span className={requirements.hasNumber ? "text-green-700" : "text-red-700"}>
+                            One number
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {requirements.hasSpecialChar ? (
+                            <Check className="h-3 w-3 text-green-500" />
+                          ) : (
+                            <X className="h-3 w-3 text-red-500" />
+                          )}
+                          <span className={requirements.hasSpecialChar ? "text-green-700" : "text-red-700"}>
+                            One special character (@$!%*?&)
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
                   {errors.newPassword && (
                     <p className="text-xs mt-1 text-red-500">
                       {errors.newPassword.message}
@@ -144,6 +232,7 @@ export default function ResetPassword() {
                       id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       {...register("confirmPassword")}
+                      onChange={handleConfirmPasswordChange}
                       className="block w-full pr-10"
                       placeholder="******"
                     />
@@ -161,6 +250,24 @@ export default function ResetPassword() {
                       )}
                     </button>
                   </div>
+                  
+                  {/* Password Match Indicator */}
+                  {confirmPasswordValue && (
+                    <div className="mt-2 flex items-center gap-2 text-xs">
+                      {passwordsMatch ? (
+                        <>
+                          <Check className="h-3 w-3 text-green-500" />
+                          <span className="text-green-700">Passwords match</span>
+                        </>
+                      ) : (
+                        <>
+                          <X className="h-3 w-3 text-red-500" />
+                          <span className="text-red-700">Passwords do not match</span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  
                   {errors.confirmPassword && (
                     <p className="text-xs mt-1 text-red-500">
                       {errors.confirmPassword.message}

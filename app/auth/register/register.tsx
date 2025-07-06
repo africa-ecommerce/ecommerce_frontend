@@ -4,7 +4,7 @@ import type React from "react";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Check, X } from "lucide-react";
 import { RegisterSchema } from "@/zod/schema";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import { useFormResolver } from "@/hooks/useFormResolver";
 import { useRouter } from "next/navigation";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 
-
 // OAuth Login Handler
 export const handleOAuthLogin = (provider: "google") => {
   try {
@@ -22,18 +21,29 @@ export const handleOAuthLogin = (provider: "google") => {
     const nestedCallback = urlParams.get("callbackUrl") || "/dashboard";
 
     const finalCallback = encodeURIComponent(nestedCallback);
-    // const redirectUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/${provider}?callbackUrl=${finalCallback}`;
-    // window.location.href = redirectUrl;
-     const redirectUrl = `/api/auth/${provider}?callbackUrl=${finalCallback}`;
-     window.location.href = redirectUrl;
+    const redirectUrl = `/api/auth/${provider}?callbackUrl=${finalCallback}`;
+    window.location.href = redirectUrl;
   } catch (error) {
     console.error(`${provider} login error:`, error);
   }
 };
 
+// Password requirements checker
+const checkPasswordRequirements = (password: string) => {
+  return {
+    minLength: password.length >= 8,
+    hasUppercase: /[A-Z]/.test(password),
+    hasLowercase: /[a-z]/.test(password),
+    hasNumber: /\d/.test(password),
+    hasSpecialChar: /[@$!%*?&]/.test(password),
+  };
+};
+
 export default function RegisterPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordValue, setPasswordValue] = useState("");
+  const [showRequirements, setShowRequirements] = useState(false);
 
   type RegisterInput = z.infer<typeof RegisterSchema>;
 
@@ -43,35 +53,41 @@ export default function RegisterPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-         credentials: "include" 
+        credentials: "include",
       });
 
       const result = await response.json();
       if (!response.ok) {
         errorToast(result.error || "Registration failed");
-        return null; // Return null to indicate failure
+        return null;
       }
       successToast(result.message);
-      return result; // Return the result to be passed to onSuccess
+      return result;
     } catch (error) {
       console.error(error);
       errorToast("Something went wrong");
-      return null; // Return null to indicate failure
+      return null;
     }
   };
 
   const {
     form: { register, setValue, submit, errors, isSubmitting },
   } = useFormResolver(registerUser, RegisterSchema, (data) => {
-    // Redirect to verification page after successful registration
     router.push("/auth/resend-email-verification");
   });
-
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await submit(e);
   };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPasswordValue(value);
+    setValue("password", value);
+  };
+
+  const requirements = checkPasswordRequirements(passwordValue);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -144,6 +160,9 @@ export default function RegisterPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     {...register("password")}
+                    onChange={handlePasswordChange}
+                    onFocus={() => setShowRequirements(true)}
+                    onBlur={() => setShowRequirements(false)}
                     className="block w-full pr-10"
                     placeholder="******"
                   />
@@ -159,6 +178,96 @@ export default function RegisterPage() {
                     )}
                   </button>
                 </div>
+
+                {/* Password Requirements */}
+                {(showRequirements || passwordValue) && (
+                  <div className="mt-2 p-3 bg-muted/50 rounded-md text-xs">
+                    <p className="font-medium mb-2">Password must contain:</p>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        {requirements.minLength ? (
+                          <Check className="h-3 w-3 text-green-500" />
+                        ) : (
+                          <X className="h-3 w-3 text-red-500" />
+                        )}
+                        <span
+                          className={
+                            requirements.minLength
+                              ? "text-green-700"
+                              : "text-red-700"
+                          }
+                        >
+                          At least 8 characters
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {requirements.hasUppercase ? (
+                          <Check className="h-3 w-3 text-green-500" />
+                        ) : (
+                          <X className="h-3 w-3 text-red-500" />
+                        )}
+                        <span
+                          className={
+                            requirements.hasUppercase
+                              ? "text-green-700"
+                              : "text-red-700"
+                          }
+                        >
+                          One uppercase letter
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {requirements.hasLowercase ? (
+                          <Check className="h-3 w-3 text-green-500" />
+                        ) : (
+                          <X className="h-3 w-3 text-red-500" />
+                        )}
+                        <span
+                          className={
+                            requirements.hasLowercase
+                              ? "text-green-700"
+                              : "text-red-700"
+                          }
+                        >
+                          One lowercase letter
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {requirements.hasNumber ? (
+                          <Check className="h-3 w-3 text-green-500" />
+                        ) : (
+                          <X className="h-3 w-3 text-red-500" />
+                        )}
+                        <span
+                          className={
+                            requirements.hasNumber
+                              ? "text-green-700"
+                              : "text-red-700"
+                          }
+                        >
+                          One number
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {requirements.hasSpecialChar ? (
+                          <Check className="h-3 w-3 text-green-500" />
+                        ) : (
+                          <X className="h-3 w-3 text-red-500" />
+                        )}
+                        <span
+                          className={
+                            requirements.hasSpecialChar
+                              ? "text-green-700"
+                              : "text-red-700"
+                          }
+                        >
+                          One special character (@$!%*?&)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {errors.password && (
                   <p className="text-xs mt-1 text-red-500">
                     {errors.password.message}
@@ -205,7 +314,6 @@ export default function RegisterPage() {
                   </div>
                   Google
                 </Button>
-               
               </div>
             </div>
 
@@ -226,7 +334,10 @@ export default function RegisterPage() {
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="text-primary hover:text-primary/90">
+            <Link
+              href="/privacy"
+              className="text-primary hover:text-primary/90"
+            >
               Privacy Policy
             </Link>
           </div>
