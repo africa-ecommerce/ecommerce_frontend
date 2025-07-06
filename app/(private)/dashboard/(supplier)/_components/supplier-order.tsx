@@ -271,7 +271,6 @@ const SupplierOrder = () => {
     errorRetryInterval: 5000,
   });
 
-  console.log("ordersData", ordersData);
 
   // Process orders data
   const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];

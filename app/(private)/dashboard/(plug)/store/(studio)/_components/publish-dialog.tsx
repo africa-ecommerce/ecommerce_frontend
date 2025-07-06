@@ -73,7 +73,6 @@ export default function PublishDialog({
   const debouncedSubdomain = useDebounce(subdomain, 500);
   const skipValidationForOriginal = useRef(isEditing);
 
-  console.log("publishResult", publishResult?.result)
 
     const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -104,11 +103,7 @@ export default function PublishDialog({
   const isOriginalSubdomain = (name: string) =>
     isEditing && name.toLowerCase() === originalSubdomainRef.current.toLowerCase();
 
-  console.log("originalSubdomain", isOriginalSubdomain(subdomain))
-
-  console.log("subdomain", subdomain);
-  console.log("currentoriginalSubdomainRef", originalSubdomainRef.current)
-
+  
   // Validation effect
   useEffect(() => {
     if (debouncedSubdomain) {
@@ -136,7 +131,6 @@ export default function PublishDialog({
     fetcher
   );
 
-  console.log("data", data)
 
   // Handle subdomain availability
   useEffect(() => {
@@ -150,7 +144,6 @@ export default function PublishDialog({
 
     if (data) {
       setNameAvailable(data.available);
-      console.log("yesss")
       if(!data.available){
         setInputError("This subdomain is already taken")
       }
@@ -235,12 +228,10 @@ export default function PublishDialog({
       });
       const data = await response.json();
 
-      console.log("data", data)
 
       if (data.available) {
         onConfirm(subdomain);
       } else {
-        console.log("error")
         setInputError("This subdomain is already taken");
       }
     } catch (err) {
@@ -248,7 +239,6 @@ export default function PublishDialog({
     }
   };
 
-  console.log("touched2", isTouched)
 
 
   const handleSubdomainChange = (value: string) => {
@@ -257,8 +247,7 @@ export default function PublishDialog({
 
   setIsTouched(true);
 
-  console.log("touched", isTouched)
-  console.log("true")
+
 
   // Check if this is the original subdomain when in edit mode
   if (isOriginalSubdomain(value)) {

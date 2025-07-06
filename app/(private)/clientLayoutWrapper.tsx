@@ -20,7 +20,6 @@ export default function ClientLayoutWrapper({
   const [isHydrated, setIsHydrated] = useState(false);
   const { user, isLoading } = useSwrUser(initialUserData);
 
-  console.log("user",user)
   
   useEffect(() => {
     setIsHydrated(true);

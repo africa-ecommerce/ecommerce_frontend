@@ -112,9 +112,7 @@ export async function middleware(request: NextRequest) {
 
   // CRITICAL: If we've tried refreshing too many times, clear cookies and force login
   if (refreshAttemptCount >= 2) {
-    console.log(
-      "Too many refresh attempts - redirecting to login and clearing cookies"
-    );
+   
     let callbackUrl = pathname;
     if (nextUrl.search) {
       callbackUrl += nextUrl.search;
@@ -166,7 +164,7 @@ export async function middleware(request: NextRequest) {
           userType: payload.userType as string,
         };
 
-        console.log("Setting user data from access token:", userData);
+       
 
         response.headers.set("X-User-Data", JSON.stringify(userData));
 
@@ -216,7 +214,6 @@ export async function middleware(request: NextRequest) {
       return response;
     } catch (error) {
       // Token validation failed (expired), fall through to refresh logic
-      console.log("Access token invalid, trying refresh flow");
     }
   }
 
@@ -225,9 +222,7 @@ export async function middleware(request: NextRequest) {
   // 2. Access token was invalid and we have a refresh token
 
   if (refreshToken) {
-    console.log(
-      `Attempting to refresh tokens (attempt #${refreshAttemptCount + 1})`
-    );
+   
 
     try {
       // Create a new request to refresh token endpoint
@@ -245,17 +240,14 @@ export async function middleware(request: NextRequest) {
 
       const refreshRes = await fetch(refreshReq);
 
-      // Add debug
-      console.log("Refresh response status:", refreshRes.status);
+    
 
       if (refreshRes.ok) {
-        console.log("Refresh successful, continuing");
 
         // Parse response to get tokens
         const refreshData = await refreshRes.json();
 
         // Add debug
-        console.log("Refresh data success:", refreshData.success);
 
         if (refreshData.success || refreshData.accessToken) {
           // Check for tokens even if success property missing
@@ -295,7 +287,6 @@ export async function middleware(request: NextRequest) {
           // Clear any refresh attempt counter
           response.cookies.delete("refreshAttempt");
 
-          console.log("Cookies set, returning to original request");
 
           // CRITICAL: Decode the new access token to extract user data
           try {
@@ -316,7 +307,6 @@ export async function middleware(request: NextRequest) {
                 userType: payload.userType as string,
               };
 
-              console.log("Setting user data from refreshed token:", userData);
 
               response.headers.set("X-User-Data", JSON.stringify(userData));
 
@@ -381,15 +371,11 @@ export async function middleware(request: NextRequest) {
           // Return the response that continues with the original request
           return response;
         } else {
-          console.log("Refresh failed - no tokens in response");
         }
       } else {
-        console.log("Refresh failed with status:", refreshRes.status);
         try {
           const errorData = await refreshRes.json();
-          console.log("Error details:", errorData);
         } catch (e) {
-          console.log("Could not parse error response");
         }
       }
 

@@ -382,7 +382,6 @@ export default function CheckoutPage() {
       setIsLoading(true);
       const orderData = prepareOrderData(paymentMethod, paymentReference);
 
-      console.log("orderData", orderData)
 
 
       const response = await fetch("/api/orders/place-order", {
@@ -410,7 +409,6 @@ export default function CheckoutPage() {
       if (result.data) {
         sessionStorage.setItem("orderSuccess", JSON.stringify(result.data));
       }
-      console.log("data", result.data)
 
       // Clear all checkout data and order summary
       clearCheckoutData();

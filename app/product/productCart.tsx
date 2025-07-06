@@ -123,7 +123,6 @@ export const SingleProduct = ({ productId, referralId, platform }: SingleProduct
 
   const productData: ProductData = data?.data || null;
 
-  console.log("productData", productData)
 
 
   // Handle variations logic

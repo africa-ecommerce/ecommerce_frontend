@@ -216,7 +216,7 @@ export function DiscoveryModeDialog({
       // Delay the prev action slightly to allow the animation to complete
       setTimeout(() => handlePrev(), 50);
     } else if (diff < -swipeThreshold) {
-      // Delay the next actio  n slightly to allow the animation to complete
+      // Delay the next action slightly to allow the animation to complete
       setTimeout(() => handleNext(), 50);
     }
 

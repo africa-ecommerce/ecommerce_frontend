@@ -147,7 +147,6 @@ export default function WithdrawalModal({
       });
 
       const data = await response.json();
-      console.log("resolveData", data);
 
       if (response.ok && data.accountName) {
         setAccountDetails({

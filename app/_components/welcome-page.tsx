@@ -18,9 +18,7 @@ import {
   Palette,
   CheckCircle,
   Star,
-  Instagram,
-  Facebook,
-  Twitter,
+ 
   MessageCircle,
   X,
   Menu,

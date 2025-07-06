@@ -109,7 +109,7 @@ export function ShoppingCartProvider({
     // Listen for the reset-is-mutate event
     const handleResetMutate = () => {
       setIsMutate(false);
-      console.log("isMutate reset to false");
+     
     };
 
     window.addEventListener("reset-is-mutate", handleResetMutate);
@@ -220,8 +220,7 @@ export function ShoppingCartProvider({
       price: item.sellingPrice || item.price,
     }));
 
-    console.log("items", JSON.stringify(products));
-
+   
     const response = await fetch("/api/plug/products/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

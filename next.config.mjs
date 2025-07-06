@@ -33,7 +33,6 @@ const nextConfig = {
   },
   async rewrites() {
     const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.pluggn.com.ng";
-    console.log(`Using BACKEND_URL: ${backendUrl}`);
     
     return [
       // ✅ Handle share link redirects

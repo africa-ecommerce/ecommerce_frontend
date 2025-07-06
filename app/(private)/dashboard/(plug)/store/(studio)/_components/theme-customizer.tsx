@@ -324,7 +324,6 @@ export default function ThemeCustomizer() {
       const triggerUpdate = { ...config };
       setConfig(triggerUpdate);
 
-      console.log(`Page changed from ${prevPageRef.current} to ${pageId}`);
     }
   };
 
@@ -368,7 +367,6 @@ export default function ThemeCustomizer() {
 
       const result = await response.json();
 
-      console.log("result", result);
       setPublishResult({ result, success: true });
      
       clearSavedData();

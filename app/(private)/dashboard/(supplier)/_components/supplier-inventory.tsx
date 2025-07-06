@@ -214,9 +214,7 @@ export default function Inventory() {
 
   // Fetch data
   const { data, error, isLoading, mutate } = useSWR("/api/products/supplier/");
-  console.log(data);
   const products = Array.isArray(data?.data) ? data?.data : [];
-  console.log("products", products);
 
   // Filter items based on selected category, filter, and search query
   const filteredItems = products?.filter((item: any) => {

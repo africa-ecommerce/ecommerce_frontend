@@ -143,7 +143,6 @@ export default function MarketplacePage() {
   // Load more products when scrolling to the bottom
   const handleInfiniteScroll = useCallback(() => {
     if (inView && hasNextPage && !isLoadingMore && !isInitialLoading) {
-      console.log("Loading more products...");
       setSize(size + 1);
     }
   }, [inView, hasNextPage, isLoadingMore, isInitialLoading, setSize, size]);

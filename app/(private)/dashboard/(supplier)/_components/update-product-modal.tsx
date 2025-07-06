@@ -281,7 +281,6 @@ const updateImagePreviews = (imageFiles: File[]) => {
 
   // We don't update formData.imageUrls as that's reserved for backend images
   // Instead, we'll use a separate state for previews
-  console.log("allPreview", allPreviews)
   setImagePreviews(allPreviews);
 };
 
@@ -492,7 +491,6 @@ const removeImage = (index: number) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("Submit triggered", formData);
 
     // If hasVariations is false, make sure variations is an empty array
     if (!formData.hasVariations) {

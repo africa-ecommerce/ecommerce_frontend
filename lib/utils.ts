@@ -99,7 +99,6 @@ export const getTotalStock = (item: any) => {
 
 
   export const getTotalStocks = (item: any) => {
-    console.log(item)
     if (item.variations && item.variations.length > 0) {
       return item.variations.reduce(
         (sum: number, variation: any) => sum + (variation.stocks || 0),

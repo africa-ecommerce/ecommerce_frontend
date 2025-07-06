@@ -61,7 +61,6 @@ const SupplierAddress = ({
     }
   }, []);
 
-  console.log("state", selectedState);
 
   const {
     form: {

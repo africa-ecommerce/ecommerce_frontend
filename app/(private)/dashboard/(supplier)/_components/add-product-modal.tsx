@@ -66,16 +66,13 @@ export function AddProductModal({
 
   const addProduct = async (data: ProductFormData) => {
     try {
-      console.log("Submitting data:", JSON.stringify(data, null, 2));
-      console.log("Images count:", data.images.length);
-
+     
       const formData = new FormData();
       data.images.forEach((file: File) => {
         formData.append("images", file);
       });
 
       const { images, imageUrls, ...jsonData } = data;
-      console.log("JSON data:", jsonData);
       formData.append("productData", JSON.stringify(jsonData));
 
       const response = await fetch("/api/products", {
@@ -92,7 +89,6 @@ export function AddProductModal({
       }
 
       const result = await response.json();
-      console.log("Success:", result);
       successToast(result.message);
       return result;
     } catch (error) {
@@ -372,7 +368,6 @@ export function AddProductModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("Submit triggered", formData);
 
     // If hasVariations is false, make sure variations is an empty array
     if (!formData.hasVariations) {

@@ -393,11 +393,9 @@ export default function PlugDashboard() {
       return [];
     }
 
-    console.log("analyticsData", analyticsData);
 
     const data = analyticsData;
 
-    console.log("Processed analytics data:", data);
 
     const totalOrdersObj = analyticsData.find((item) => 'totalOrders' in item);
     const totalOrders = totalOrdersObj?.totalOrders;

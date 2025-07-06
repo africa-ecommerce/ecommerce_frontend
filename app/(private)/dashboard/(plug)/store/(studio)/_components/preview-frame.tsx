@@ -234,7 +234,6 @@ export default function PreviewFrame({
       links.forEach((link) => {
         link.addEventListener("click", (e) => {
           e.preventDefault();
-          console.log("Link navigation prevented:", link.href);
         });
         link.style.cursor = "default";
       });
@@ -297,7 +296,6 @@ export default function PreviewFrame({
     try {
       const contentWindow = iframeRef.current.contentWindow;
       if (contentWindow && typeof contentWindow.updateConfig === "function") {
-        console.log("Applying config to iframe:", config);
         contentWindow.updateConfig(config);
       }
     } catch (error) {
@@ -324,12 +322,7 @@ export default function PreviewFrame({
         const heightScale = containerHeight / targetHeight;
 
         const newScale = Math.min(widthScale, heightScale, 1);
-        console.log(
-          "Recalculating scale on active:",
-          newScale,
-          "viewMode:",
-          viewMode
-        );
+       
         setScale(newScale);
       };
 
@@ -372,7 +365,7 @@ export default function PreviewFrame({
       if (href) {
         const isUntrusted = !trustedDomains.some(domain => href.includes(domain));
         if (isUntrusted) {
-          console.log('Removing untrusted stylesheet:', href);
+         
           link.parentNode?.removeChild(link);
         }
       }
@@ -385,7 +378,7 @@ export default function PreviewFrame({
       if (src) {
         const isUntrusted = !trustedDomains.some(domain => src.includes(domain));
         if (isUntrusted) {
-          console.log('Removing untrusted script:', src);
+         
           script.removeAttribute("src");
           script.textContent = `// External script reference: ${src} was removed\n${
             script.textContent || ""

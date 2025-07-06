@@ -67,7 +67,6 @@ const Page = () => {
   const handleSubmitSupplier = async (data: FormData): Promise<any> => {
     // Check if data is SupplierData type before accessing supplierInfo
     if ("supplierInfo" in data) {
-      console.log("submitted supplier data", data);
       try {
         // Create a FormData object to properly handle file uploads (rename to avoid conflict)
         const formDataForUpload = new FormData();
@@ -168,7 +167,6 @@ const Page = () => {
       // Send optimized data to backend
       formData.append("userData", JSON.stringify(processedData));
 
-      console.log("formDATA", formData)
       try {
         const response = await fetch("/api/onboarding", {
           method: "POST",

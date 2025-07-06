@@ -120,7 +120,6 @@ export default function ProductDetail() {
   const router = useRouter();
   const params = useParams();
   const productId = params.id;
-  console.log("productId", productId);
 
   // Use SWR for data fetching with caching
   const {
@@ -140,8 +139,7 @@ export default function ProductDetail() {
     userData: { user },
   } = useUser();
 
-  console.log("product", product);
-  console.log("data", product?.data);
+ 
 
   const isInCart = items.some((item) => item.id === product?.id);
 

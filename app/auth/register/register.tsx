@@ -48,11 +48,9 @@ export default function RegisterPage() {
 
       const result = await response.json();
       if (!response.ok) {
-        console.log("failed")
         errorToast(result.error || "Registration failed");
         return null; // Return null to indicate failure
       }
-      console.log("success")
       successToast(result.message);
       return result; // Return the result to be passed to onSuccess
     } catch (error) {
@@ -65,7 +63,6 @@ export default function RegisterPage() {
   const {
     form: { register, setValue, submit, errors, isSubmitting },
   } = useFormResolver(registerUser, RegisterSchema, (data) => {
-    console.log("Registration data:", data);
     // Redirect to verification page after successful registration
     router.push("/auth/resend-email-verification");
   });

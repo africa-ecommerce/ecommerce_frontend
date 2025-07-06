@@ -159,7 +159,6 @@ export function useProducts(filters: ProductsFilter, limit: number = 4) {
   // Reset pagination when filters change
   useEffect(() => {
     if (hasFilterChanged) {
-      console.log("Filters changed, resetting pagination");
       setSize(1);
     }
   }, [hasFilterChanged, setSize]);
@@ -167,7 +166,7 @@ export function useProducts(filters: ProductsFilter, limit: number = 4) {
   // Handle shopping cart mutations
   useEffect(() => {
     if (isMutate) {
-      console.log("Mutating products data due to isMutate flag");
+    
       mutate().then(() => {
         if (typeof window !== "undefined") {
           const resetEvent = new CustomEvent("reset-is-mutate");
