@@ -14,6 +14,16 @@ import {
   Info,
 } from "lucide-react";
 import useSWR, { mutate } from "swr";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -106,6 +116,7 @@ export default function CheckoutPage() {
   const [availableLgas, setAvailableLgas] = useState<string[]>([]);
   const [states, setStates] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showCancelledModal, setShowCancelledModal] = useState(false);
 
   const router = useRouter();
 
@@ -639,13 +650,7 @@ export default function CheckoutPage() {
 
   const showPaymentCancelledModal = () => {
     // You could use a toast library or custom modal
-    toast({
-      title: "Don't miss out!",
-      description:
-        "Your items are still waiting for you. Complete your purchase now",
-      action: <div className="flex gap-2">{renderPlaceOrderButton()}</div>,
-      duration: 30000, // Show for 10 seconds
-    });
+    setShowCancelledModal(true)
   };
 
   const paystackConfig = {
@@ -1452,6 +1457,29 @@ export default function CheckoutPage() {
           </div>
         </div>
       )}
+
+
+  <AlertDialog open={showCancelledModal} onOpenChange={setShowCancelledModal}>
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Don't miss out!</AlertDialogTitle>
+        <AlertDialogDescription>
+          Your items are still waiting for you. Complete your purchase now
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Maybe Later</AlertDialogCancel>
+        <AlertDialogAction onClick={() => {
+          setShowCancelledModal(false)
+          // Add your place order logic here
+        }}>
+          {renderPlaceOrderButton()}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+
+
     </div>
   );
 }
