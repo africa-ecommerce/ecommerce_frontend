@@ -272,20 +272,23 @@ export async function middleware(request: NextRequest) {
               process.env.NODE_ENV === "production"
                 ? ("none" as const)
                 : ("lax" as const),
+            domain: process.env.NODE_ENV === "development" 
+            ? "localhost"
+            : process.env.DOMAIN,   
             path: "/",
           };
 
           // Set the new access token cookie
           response.cookies.set("accessToken", refreshData.accessToken, {
             ...cookieConfig,
-            maxAge: Math.floor(ACCESS_TOKEN_EXPIRY * 1000), 
+            maxAge: Math.floor(ACCESS_TOKEN_EXPIRY), 
           });
 
           // Set the new refresh token cookie if it's included in the response
           if (refreshData.refreshToken) {
             response.cookies.set("refreshToken", refreshData.refreshToken, {
               ...cookieConfig,
-              maxAge: Math.floor(REFRESH_TOKEN_EXPIRY * 1000), 
+              maxAge: Math.floor(REFRESH_TOKEN_EXPIRY), 
             });
           }
 
