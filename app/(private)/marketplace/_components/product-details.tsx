@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import { useState } from "react";
@@ -139,7 +141,7 @@ export default function ProductDetail() {
     userData: { user },
   } = useUser();
 
- 
+
 
   const isInCart = items.some((item) => item.id === product?.id);
 
@@ -206,7 +208,21 @@ export default function ProductDetail() {
     return count === 1 ? `1 ${singular}` : `${count} ${plural}`;
   };
 
-  
+  // Hardcoded fulfillment rate for now
+  const fulfillmentRate = 94;
+  const getFulfillmentRateDescription = (rate: number) => {
+    if (rate >= 85) return "Excellent";
+    if (rate >= 70) return "Very Good";
+    if (rate >= 60) return "Good";
+    if (rate >= 45) return "Fair";
+    return "Poor";
+  };
+
+  const getFulfillmentRateColor = (rate: number) => {
+    if (rate >= 60) return "text-green-600"; // Good and above - green
+    if (rate >= 45) return "text-yellow-600"; // Fair - yellow
+    return "text-red-600"; // Poor - red
+  };
 
   return (
     <TooltipProvider>
@@ -333,7 +349,7 @@ export default function ProductDetail() {
             </Card>
 
             {/* Delivery & Stock Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
                 <div className="flex items-center gap-2">
                   <Truck className="h-5 w-5 text-muted-foreground" />
@@ -362,11 +378,34 @@ export default function ProductDetail() {
                 </div>
               </div>
 
-             
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <div className="text-xs md:text-sm font-medium">
+                      Fulfillment Rate
+                    </div>
+                    <div
+                      className={`text-xs font-medium ${getFulfillmentRateColor(
+                        fulfillmentRate
+                      )}`}
+                    >
+                      {getFulfillmentRateDescription(fulfillmentRate)}
+                    </div>
+                  </div>
+                </div>
+                <div className="font-semibold text-sm">{fulfillmentRate}%</div>
+              </div>
             </div>
 
-            
-            
+            {/* Fulfillment Rate Description */}
+            <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
+              <p>
+                <span className="font-medium">Fulfillment Rate:</span> The
+                percentage of orders successfully delivered without returns or
+                issues.
+              </p>
+            </div>
 
             {/* Product Details Tabs */}
             <Tabs defaultValue="description" className="mt-6">
