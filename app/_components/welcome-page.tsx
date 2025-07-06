@@ -987,14 +987,7 @@ export default function Home() {
                     For Plugs
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
-                  >
-                    Store Builder
-                  </Link>
-                </li>
+               
                 <li>
                   <Link
                     href="#"
@@ -1043,7 +1036,7 @@ export default function Home() {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href="#"
+                    href="/terms"
                     className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
                   >
                     Terms of Service
@@ -1051,20 +1044,13 @@ export default function Home() {
                 </li>
                 <li>
                   <Link
-                    href="#"
+                    href="/privacy"
                     className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
                   >
                     Privacy Policy
                   </Link>
                 </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
-                  >
-                    Cookie Policy
-                  </Link>
-                </li>
+               
               </ul>
             </div>
           </div>
