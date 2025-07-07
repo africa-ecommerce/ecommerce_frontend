@@ -36,11 +36,17 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
-export const metadata: Metadata = {
-  title: "Pluggn - Empower Your Digital Business Journeys",
-  description:
-    "Connect with customers across Africa and beyond. Sell online, in-store, or through WhatsApp with Pluggn's all-in-one platform.",
+export const metadata = {
+  title: 'Pluggn - Discover & Shop Trending Products in Nigeria',
+  description: 'Pluggn helps you discover and shop the latest trends in fashion, gadgets, and lifestyle across Nigeria. Shop smart, stay inspired.',
+  alternates: {
+    canonical: 'https://www.pluggn.com.ng/',
+  },
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
+
 
 export default function RootLayout({
   children,
