@@ -4,3 +4,5 @@ export const PRODUCT_CATEGORIES = [
   { value: "fashion", label: "Fashion" },
   { value: "beauty_skincare", label: "Beauty & Skincare" },
 ];
+
+
