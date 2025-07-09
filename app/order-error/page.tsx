@@ -75,11 +75,7 @@ export default function OrderIssuePage() {
                   onClick={handleWhatsAppClick}
                   className="h-12 text-sm font-semibold bg-green-600 hover:bg-green-700 text-white transition-all duration-200 hover:scale-105"
                 >
-                  <img
-                    src="/whatsapp.png"
-                    alt="WhatsApp"
-                    className="h-6 w-6 mr-2"
-                  />
+                 <Phone className="h-4 w-4 mr-2" />
                   Chat on WhatsApp
                 </Button>
 

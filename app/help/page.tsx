@@ -440,7 +440,7 @@ export default function HelpPage() {
                         className="w-full justify-start"
                         onClick={handleWhatsAppClick}
                       >
-                        <MessageCircle className="h-5 w-5 mr-2" />
+                        <Phone className="h-5 w-5 mr-2" />
                         Chat with Support
                       </Button>
 
@@ -571,7 +571,7 @@ export default function HelpPage() {
                       </div>
 
                       <div className="flex items-start">
-                        <MessageCircle className="h-5 w-5 text-primary mr-3 mt-0.5" />
+                        <Phone className="h-5 w-5 text-primary mr-3 mt-0.5" />
                         <div>
                           <h3 className="font-medium">WhatsApp Support</h3>
                           <button
