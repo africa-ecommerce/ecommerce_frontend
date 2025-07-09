@@ -58,14 +58,14 @@ const TwitterIcon = ({ className }: { className?: string }) => (
   >
     <g
       style={{
-        stroke: 'none',
+        stroke: "none",
         strokeWidth: 0,
-        strokeDasharray: 'none',
-        strokeLinecap: 'butt',
-        strokeLinejoin: 'miter',
+        strokeDasharray: "none",
+        strokeLinecap: "butt",
+        strokeLinejoin: "miter",
         strokeMiterlimit: 10,
-        fill: 'none',
-        fillRule: 'nonzero',
+        fill: "none",
+        fillRule: "nonzero",
         opacity: 1,
       }}
       transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)"
@@ -73,14 +73,14 @@ const TwitterIcon = ({ className }: { className?: string }) => (
       <polygon
         points="24.89,23.01 57.79,66.99 65.24,66.99 32.34,23.01"
         style={{
-          stroke: 'none',
+          stroke: "none",
           strokeWidth: 1,
-          strokeDasharray: 'none',
-          strokeLinecap: 'butt',
-          strokeLinejoin: 'miter',
+          strokeDasharray: "none",
+          strokeLinecap: "butt",
+          strokeLinejoin: "miter",
           strokeMiterlimit: 10,
-          fill: 'currentColor',
-          fillRule: 'nonzero',
+          fill: "black",
+          fillRule: "nonzero",
           opacity: 1,
         }}
         transform="matrix(1 0 0 1 0 0)"
@@ -88,14 +88,14 @@ const TwitterIcon = ({ className }: { className?: string }) => (
       <path
         d="M 72.349 0 H 17.651 C 7.902 0 0 7.902 0 17.651 v 54.699 C 0 82.098 7.902 90 17.651 90 h 54.699 C 82.098 90 90 82.098 90 72.349 V 17.651 C 90 7.902 82.098 0 72.349 0 z M 56.032 70.504 L 41.054 50.477 L 22.516 70.504 h -4.765 L 38.925 47.63 L 17.884 19.496 h 16.217 L 47.895 37.94 l 17.072 -18.444 h 4.765 L 50.024 40.788 l 22.225 29.716 H 56.032 z"
         style={{
-          stroke: 'none',
+          stroke: "none",
           strokeWidth: 1,
-          strokeDasharray: 'none',
-          strokeLinecap: 'butt',
-          strokeLinejoin: 'miter',
+          strokeDasharray: "none",
+          strokeLinecap: "butt",
+          strokeLinejoin: "miter",
           strokeMiterlimit: 10,
-          fill: 'currentColor',
-          fillRule: 'nonzero',
+          fill: "black",
+          fillRule: "nonzero",
           opacity: 1,
         }}
         transform="matrix(1 0 0 1 0 0)"

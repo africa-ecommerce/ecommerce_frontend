@@ -82,7 +82,7 @@ const TwitterIcon = () => (
           strokeLinecap: "butt",
           strokeLinejoin: "miter",
           strokeMiterlimit: 10,
-          fill: "currentColor",
+          fill: "black",
           fillRule: "nonzero",
           opacity: 1,
         }}
@@ -97,7 +97,7 @@ const TwitterIcon = () => (
           strokeLinecap: "butt",
           strokeLinejoin: "miter",
           strokeMiterlimit: 10,
-          fill: "currentColor",
+          fill: "black",
           fillRule: "nonzero",
           opacity: 1,
         }}
