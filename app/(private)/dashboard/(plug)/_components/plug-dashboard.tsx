@@ -596,19 +596,13 @@ export default function PlugDashboard() {
     );
 
     // Platform image mapping
-    const platformImages: { [key: string]: string } = {
-      whatsapp: "/whatsapp.png",
-      instagram: "/instagram_logo.png",
-      tiktok: "/tiktok.png",
-      twitter: "/twitter.png",
-      facebook: "/facebook.png",
-    };
+    
 
     // Platform color mapping
     const platformColors: { [key: string]: string } = {
       whatsapp: "text-green-600",
       instagram: "text-pink-600",
-      twitter: "text-blue-500",
+      twitter: "text-black",
       facebook: "text-blue-600",
       tiktok: "text-black",
     };
@@ -623,8 +617,7 @@ export default function PlugDashboard() {
         percentage: `${salesPercentage}%`,
         description: `Of your sales come from ${platformName}`,
         color: platformColors[platformName.toLowerCase()] || "text-gray-600",
-        imageSrc:
-          platformImages[platformName.toLowerCase()] || "/placeholder.png",
+       
         stats: [
           {
             label: "Visits",
@@ -1335,7 +1328,7 @@ export default function PlugDashboard() {
                   <Card key={platform.platform}>
                     <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-sm sm:text-base font-medium">
+                        <CardTitle className="text-sm sm:text-base font-medium capitalize">
                           {platform.platform}
                         </CardTitle>
                         <div className={platform.color}>
