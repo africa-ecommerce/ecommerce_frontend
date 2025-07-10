@@ -158,7 +158,7 @@ export default function HelpPage() {
 
   // Contact form state
   const [formData, setFormData] = useState({
-    name: "",
+   
     email: "",
     subject: "",
     message: "",
@@ -186,7 +186,7 @@ export default function HelpPage() {
     setSubmitStatus("idle");
 
     try {
-      const response = await fetch("/api/contact", {
+      const response = await fetch("/api/contact-support", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -196,7 +196,7 @@ export default function HelpPage() {
 
       if (response.ok) {
         setSubmitStatus("success");
-        setFormData({ name: "", email: "", subject: "", message: "" });
+        setFormData({  email: "", subject: "", message: "" });
       } else {
         setSubmitStatus("error");
       }
