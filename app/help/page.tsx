@@ -469,17 +469,7 @@ export default function HelpPage() {
                 <Card>
                   <CardContent className="p-6">
                     <form onSubmit={handleSubmit} className="space-y-4">
-                      <div>
-                        <Label htmlFor="name">Your Name</Label>
-                        <Input
-                          id="name"
-                          name="name"
-                          placeholder="Enter your name"
-                          value={formData.name}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
+                      
                       <div>
                         <Label htmlFor="email">Email Address</Label>
                         <Input
