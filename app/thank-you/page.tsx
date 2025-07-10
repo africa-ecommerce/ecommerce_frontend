@@ -121,7 +121,7 @@ export default function ThankYouPage() {
                   <div className="flex items-center space-x-2">
                     <Mail className="h-4 w-4 text-blue-600" />
                     <span className="text-sm font-medium text-blue-900">
-                      Tracking ID coming to your email soon
+                      Tracking ID has been sent to your email
                     </span>
                   </div>
                 </div>
@@ -143,7 +143,7 @@ export default function ThankYouPage() {
                         Cash Payment Instructions
                       </h2>
                       <p className="text-muted-foreground text-sm leading-relaxed">
-                        Since you selected cash payment, you'll receive payment
+                        Since you selected cash payment, we have sent you payment
                         instructions including the account details for your
                         order when it's delivered.
                       </p>
@@ -156,7 +156,7 @@ export default function ThankYouPage() {
                       <Mail className="h-4 w-4 text-orange-600 mt-0.5" />
                       <div className="space-y-1">
                         <span className="text-sm font-medium text-orange-900 block">
-                          Payment account details will be sent to your email
+                          Payment account details has been sent to your email
                         </span>
                         <span className="text-xs text-orange-700">
                           You'll receive the account number and payment
