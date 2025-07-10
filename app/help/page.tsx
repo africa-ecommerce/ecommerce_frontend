@@ -184,7 +184,7 @@ export default function HelpPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus("idle");
-
+ console.log("formData", formData)
     try {
       const response = await fetch("/api/contact-support", {
         method: "POST",
