@@ -37,8 +37,8 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  title: 'Pluggn - Discover & Shop Trending Products in Nigeria',
-  description: 'Pluggn helps you discover and shop the latest trends in fashion, gadgets, and lifestyle across Nigeria. Shop smart, stay inspired.',
+  title: 'Pluggn - Start Your Online Business in Nigeria Without Inventory',
+  description: 'Pluggn lets you launch and grow an online business effortlessly—no inventory, no logistics, no technical hassles. Discover trending products, sell online, and earn with ease across Nigeria.',
   alternates: {
     canonical: 'https://www.pluggn.com.ng/',
   },
