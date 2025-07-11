@@ -1051,7 +1051,14 @@ export default function Home() {
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/pluggn_logo.png" alt="Pluggn Logo" width={140} height={35} priority className="h-auto" />
+              <Image
+                src="/pluggn_logo.png"
+                alt="Pluggn Logo"
+                width={140}
+                height={35}
+                priority
+                className="h-auto"
+              />
             </Link>
           </div>
           <nav className="hidden md:flex gap-6">
@@ -1108,7 +1115,14 @@ export default function Home() {
         } flex flex-col`}
       >
         <div className="flex items-center justify-between p-4 border-b">
-          <Image src="/pluggn_logo.png" alt="Pluggn Logo" width={120} height={30} priority className="h-auto" />
+          <Image
+            src="/pluggn_logo.png"
+            alt="Pluggn Logo"
+            width={120}
+            height={30}
+            priority
+            className="h-auto"
+          />
           <button
             onClick={() => setMobileMenuOpen(false)}
             className="h-10 w-10 flex items-center justify-center rounded-md hover:bg-gray-100"
@@ -1167,10 +1181,15 @@ export default function Home() {
               <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm">
                 <div className="flex">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-[#FF7A21] text-[#FF7A21]" />
+                    <Star
+                      key={i}
+                      className="h-4 w-4 fill-[#FF7A21] text-[#FF7A21]"
+                    />
                   ))}
                 </div>
-                <span className="text-xs md:text-sm text-gray-600 font-medium">Trusted by 10,000+ entrepreneurs</span>
+                <span className="text-xs md:text-sm text-gray-600 font-medium">
+                  Trusted by 10,000+ entrepreneurs
+                </span>
               </div>
 
               {/* Main headline */}
@@ -1181,22 +1200,27 @@ export default function Home() {
                   </span>{" "}
                   Without Inventory, Logistics, or Technical Hassles
                   <br />
-                  <span className="text-xl md:text-2xl">Just Sell and Earn</span>
+                  <span className="text-xl md:text-2xl">
+                    Just Sell and Earn
+                  </span>
                 </h1>
                 <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                  Nigeria's #1 social commerce platform where anyone can earn money selling products online—without
-                  inventory, shipping, or technical skills.
+                  Nigeria's #1 social commerce platform where anyone can earn
+                  money selling products online—without inventory, shipping, or
+                  technical skills.
                 </p>
               </div>
 
               {/* User Type Selector */}
               <div className="w-full max-w-2xl">
-                <p className="text-lg font-semibold text-gray-700 mb-6">Choose your path to success:</p>
+                <p className="text-lg font-semibold text-gray-700 mb-6">
+                  Choose your path to success:
+                </p>
                 <div className="grid md:grid-cols-2 gap-4">
                   <button
                     onClick={() => {
-                      setSelectedUserType("supplier")
-                      scrollToSection("suppliers-section")
+                      setSelectedUserType("supplier");
+                      scrollToSection("suppliers-section");
                     }}
                     className="group relative bg-white hover:bg-[#FF7A21] border-2 border-[#FF7A21] rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:text-white"
                   >
@@ -1207,23 +1231,29 @@ export default function Home() {
                       I Have Products to Sell
                     </h3>
                     <p className="text-gray-600 group-hover:text-white/90 text-sm">
-                      Multiply your sales channels through our network of social sellers
+                      Multiply your sales channels through our network of social
+                      sellers
                     </p>
                     <ArrowRight className="h-5 w-5 absolute top-4 right-4 text-[#FF7A21] group-hover:text-white transition-colors" />
                   </button>
 
                   <button
                     onClick={() => {
-                      setSelectedUserType("plug")
-                      scrollToSection("plugs-section")
+                      setSelectedUserType("plug");
+                      scrollToSection("plugs-section");
                     }}
                     className="group relative bg-[#FF7A21] text-white border-2 border-[#FF7A21] rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:scale-105"
                   >
                     <div className="flex items-center justify-center mb-4">
                       <Smartphone className="h-12 w-12 text-white" />
                     </div>
-                    <h3 className="text-lg font-bold mb-2">I Want to Sell Online</h3>
-                    <p className="text-white/90 text-sm">Start earning without inventory, shipping, or upfront costs</p>
+                    <h3 className="text-lg font-bold mb-2">
+                      I Want to Sell Online
+                    </h3>
+                    <p className="text-white/90 text-sm">
+                      Start earning without inventory, shipping, or upfront
+                      costs
+                    </p>
                     <ArrowRight className="h-5 w-5 absolute top-4 right-4 text-white" />
                   </button>
                 </div>
@@ -1232,15 +1262,21 @@ export default function Home() {
               {/* Quick stats */}
               <div className="grid grid-cols-3 gap-8 pt-8">
                 <div className="text-center">
-                  <div className="text-xl md:text-2xl font-bold text-[#FF7A21]">10K+</div>
+                  <div className="text-xl md:text-2xl font-bold text-[#FF7A21]">
+                    10K+
+                  </div>
                   <div className="text-sm text-gray-600">Active Users</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xl md:text-2xl font-bold text-[#FF7A21]">₦2M+</div>
+                  <div className="text-xl md:text-2xl font-bold text-[#FF7A21]">
+                    ₦2M+
+                  </div>
                   <div className="text-sm text-gray-600">Monthly Sales</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-xl md:text-2xl font-bold text-[#FF7A21]">99%</div>
+                  <div className="text-xl md:text-2xl font-bold text-[#FF7A21]">
+                    99%
+                  </div>
                   <div className="text-sm text-gray-600">Success Rate</div>
                 </div>
               </div>
@@ -1249,20 +1285,25 @@ export default function Home() {
         </section>
 
         {/* Suppliers Section - Concise & Benefit-Focused */}
-        <section id="suppliers-section" className="w-full py-16 md:py-20 bg-white scroll-mt-16">
+        <section
+          id="suppliers-section"
+          className="w-full py-16 md:py-20 bg-white scroll-mt-16"
+        >
           <div className="container px-4 md:px-6">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-2 bg-orange-100 rounded-full px-4 py-2 mb-4">
                   <Store className="h-5 w-5 text-[#FF7A21]" />
-                  <span className="text-[#FF7A21] font-semibold">For Suppliers</span>
+                  <span className="text-[#FF7A21] font-semibold">
+                    For Suppliers
+                  </span>
                 </div>
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
                   Multiply Your Sales Channels
                 </h2>
                 <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                  Access hundreds of motivated social sellers who promote your products across Nigeria—while you focus
-                  on what you do best.
+                  Access hundreds of motivated social sellers who promote your
+                  products across Nigeria—while you focus on what you do best.
                 </p>
               </div>
 
@@ -1271,63 +1312,89 @@ export default function Home() {
                   <div className="w-16 h-16 bg-[#FF7A21] rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <TrendingUp className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-base md:text-lg font-bold mb-2">Multiply Sales Channels</h3>
-                  <p className="text-gray-600 text-sm">Access hundreds of social sellers promoting your products</p>
+                  <h3 className="text-base md:text-lg font-bold mb-2">
+                    Multiply Sales Channels
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Access hundreds of social sellers promoting your products
+                  </p>
                 </div>
 
                 <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
                   <div className="w-16 h-16 bg-[#FF7A21] rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Zap className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-base md:text-lg font-bold mb-2">Zero Marketing Effort</h3>
-                  <p className="text-gray-600 text-sm">Others promote your products while you focus on quality</p>
+                  <h3 className="text-base md:text-lg font-bold mb-2">
+                    Zero Marketing Effort
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Others promote your products while you focus on quality
+                  </p>
                 </div>
 
                 <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
                   <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Award className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-base md:text-lg font-bold mb-2">Professional Presentation</h3>
-                  <p className="text-gray-600 text-sm">We handle photos, listings, and store presentation</p>
+                  <h3 className="text-base md:text-lg font-bold mb-2">
+                    Professional Presentation
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    We handle photos, listings, and store presentation
+                  </p>
                 </div>
 
                 <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
                   <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Shield className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-base md:text-lg font-bold mb-2">Guaranteed Payments</h3>
-                  <p className="text-gray-600 text-sm">Secure, timely payouts after 3 days of delivery</p>
+                  <h3 className="text-base md:text-lg font-bold mb-2">
+                    Guaranteed Payments
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    Secure, timely payouts after 3 days of delivery
+                  </p>
                 </div>
               </div>
 
               {/* Quick Process */}
               <div className="bg-[#FF7A21]  rounded-3xl p-8 md:p-12 text-white text-center">
-                <h3 className="text-xl md:text-2xl font-bold mb-6">Simple 3-Step Process</h3>
+                <h3 className="text-xl md:text-2xl font-bold mb-6">
+                  Simple 3-Step Process
+                </h3>
                 <div className="grid md:grid-cols-3 gap-8">
                   <div className="flex flex-col items-center">
                     <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
                       <span className="text-xl font-bold">1</span>
                     </div>
                     <h4 className="font-semibold mb-2">List Your Products</h4>
-                    <p className="text-white/90 text-sm">Upload your inventory with our help</p>
+                    <p className="text-white/90 text-sm">
+                      Upload your inventory with our help
+                    </p>
                   </div>
                   <div className="flex flex-col items-center">
                     <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
                       <span className="text-xl font-bold">2</span>
                     </div>
                     <h4 className="font-semibold mb-2">Get Promoted</h4>
-                    <p className="text-white/90 text-sm">Social sellers share your products</p>
+                    <p className="text-white/90 text-sm">
+                      Social sellers share your products
+                    </p>
                   </div>
                   <div className="flex flex-col items-center">
                     <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
                       <span className="text-xl font-bold">3</span>
                     </div>
                     <h4 className="font-semibold mb-2">Get Paid</h4>
-                    <p className="text-white/90 text-sm">Automatic payouts after delivery</p>
+                    <p className="text-white/90 text-sm">
+                      Automatic payouts after delivery
+                    </p>
                   </div>
                 </div>
                 <Button className="mt-8 bg-white text-[#FF7A21] hover:bg-gray-100 font-semibold px-8 py-3">
-                  <Link href="/auth/register?type=supplier">Start as Supplier</Link>
+                  <Link href="/auth/register?type=supplier">
+                    Start as Supplier
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -1344,27 +1411,35 @@ export default function Home() {
               <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-2 bg-white rounded-full px-4 py-2 mb-4 shadow-sm">
                   <Smartphone className="h-5 w-5 text-[#FF7A21]" />
-                  <span className="text-[#FF7A21] font-semibold">For Plugs (Social Sellers)</span>
+                  <span className="text-[#FF7A21] font-semibold">
+                    For Plugs (Social Sellers)
+                  </span>
                 </div>
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
                   Start Your Online Business Today
                 </h2>
                 <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                  Earn money selling products online without inventory, shipping, or technical skills. Join thousands
-                  making ₦100K+ monthly.
+                  Earn money selling products online without inventory,
+                  shipping, or technical skills. Join thousands making ₦100K+
+                  monthly.
                 </p>
               </div>
 
               {/* What Plugs Do */}
               <div className="bg-white rounded-3xl p-8 md:p-12 shadow-lg mb-12">
-                <h3 className="text-2xl md:text-3xl font-bold text-center mb-8">What Plugs Do</h3>
+                <h3 className="text-2xl md:text-3xl font-bold text-center mb-8">
+                  What Plugs Do
+                </h3>
                 <div className="grid md:grid-cols-3 gap-8">
                   <div className="text-center">
                     <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <ShoppingBag className="h-8 w-8 text-white" />
                     </div>
                     <h4 className="font-bold mb-2">Choose Products</h4>
-                    <p className="text-gray-600 text-sm">Browse our marketplace and select products you want to sell</p>
+                    <p className="text-gray-600 text-sm">
+                      Browse our marketplace and select products you want to
+                      sell
+                    </p>
                   </div>
                   <div className="text-center">
                     <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -1372,7 +1447,8 @@ export default function Home() {
                     </div>
                     <h4 className="font-bold mb-2">Set Your Prices</h4>
                     <p className="text-gray-600 text-sm">
-                      Add your profit margin to each product—you control your earnings
+                      Add your profit margin to each product—you control your
+                      earnings
                     </p>
                   </div>
                   <div className="text-center">
@@ -1380,7 +1456,9 @@ export default function Home() {
                       <MessageCircle className="h-8 w-8 text-white" />
                     </div>
                     <h4 className="font-bold mb-2">Share & Earn</h4>
-                    <p className="text-gray-600 text-sm">Share on social media or your store and earn on every sale</p>
+                    <p className="text-gray-600 text-sm">
+                      Share on social media or your store and earn on every sale
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1388,14 +1466,17 @@ export default function Home() {
               {/* Store Creation */}
               <div className="grid lg:grid-cols-2 gap-12 items-center mb-12">
                 <div>
-                  <h3 className="text-2xl md:text-3xl font-bold mb-6">Build Your Professional Store</h3>
+                  <h3 className="text-2xl md:text-3xl font-bold mb-6">
+                    Build Your Professional Store
+                  </h3>
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
                       <CheckCircle className="h-6 w-6 text-[#FF7A21] mt-0.5 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold">No-Code Store Builder</h4>
                         <p className="text-gray-600 text-sm">
-                          Create a professional online store in minutes without technical skills
+                          Create a professional online store in minutes without
+                          technical skills
                         </p>
                       </div>
                     </div>
@@ -1404,7 +1485,8 @@ export default function Home() {
                       <div>
                         <h4 className="font-semibold">Fully Customizable</h4>
                         <p className="text-gray-600 text-sm">
-                          Add your branding, colors, and personal touch to stand out
+                          Add your branding, colors, and personal touch to stand
+                          out
                         </p>
                       </div>
                     </div>
@@ -1412,7 +1494,9 @@ export default function Home() {
                       <CheckCircle className="h-6 w-6 text-[#FF7A21] mt-0.5 flex-shrink-0" />
                       <div>
                         <h4 className="font-semibold">Mobile-Optimized</h4>
-                        <p className="text-gray-600 text-sm">Your store looks perfect on all devices automatically</p>
+                        <p className="text-gray-600 text-sm">
+                          Your store looks perfect on all devices automatically
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -1432,40 +1516,53 @@ export default function Home() {
 
               {/* Social Selling */}
               <div className="bg-white rounded-3xl p-8 md:p-12 shadow-lg mb-12">
-                <h3 className="text-2xl md:text-3xl font-bold text-center mb-8">Social Media Made Easy</h3>
+                <h3 className="text-2xl md:text-3xl font-bold text-center mb-8">
+                  Social Media Made Easy
+                </h3>
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   <div>
                     <div className="space-y-4">
                       <div className="flex items-start gap-3">
                         <div className="w-8 h-8 bg-[#FF7A21] rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-sm font-bold">1</span>
+                          <span className="text-white text-sm font-bold">
+                            1
+                          </span>
                         </div>
                         <div>
-                          <h4 className="font-semibold">Magazine-Style Product Cards</h4>
+                          <h4 className="font-semibold">
+                            Magazine-Style Product Cards
+                          </h4>
                           <p className="text-gray-600 text-sm">
-                            Beautiful, professional product images generated automatically
+                            Beautiful, professional product images generated
+                            automatically
                           </p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
                         <div className="w-8 h-8 bg-[#FF7A21] rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-sm font-bold">2</span>
+                          <span className="text-white text-sm font-bold">
+                            2
+                          </span>
                         </div>
                         <div>
                           <h4 className="font-semibold">One-Click Sharing</h4>
                           <p className="text-gray-600 text-sm">
-                            Share to WhatsApp, Instagram, Facebook, and more instantly
+                            Share to WhatsApp, Instagram, Facebook, and more
+                            instantly
                           </p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
                         <div className="w-8 h-8 bg-[#FF7A21] rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-sm font-bold">3</span>
+                          <span className="text-white text-sm font-bold">
+                            3
+                          </span>
                         </div>
                         <div>
                           <h4 className="font-semibold">Automatic Checkout</h4>
                           <p className="text-gray-600 text-sm">
-                            Customers click your link and go straight to secure checkout
+                            Customers click your link and go straight to secure
+                            checkout
                           </p>
                         </div>
                       </div>
@@ -1485,35 +1582,45 @@ export default function Home() {
 
               {/* Earning Process */}
               <div className="bg-[#FF7A21]  rounded-3xl p-8 md:p-12 text-white mb-12">
-                <h3 className="text-2xl md:text-3xl font-bold text-center mb-8">How You Earn Money</h3>
+                <h3 className="text-2xl md:text-3xl font-bold text-center mb-8">
+                  How You Earn Money
+                </h3>
                 <div className="grid md:grid-cols-4 gap-6">
                   <div className="text-center">
                     <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <Target className="h-8 w-8 text-white" />
                     </div>
                     <h4 className="font-bold mb-2">Set Your Margin</h4>
-                    <p className="text-white/90 text-sm">Add 20-50% profit to any product</p>
+                    <p className="text-white/90 text-sm">
+                      Add 20-50% profit to any product
+                    </p>
                   </div>
                   <div className="text-center">
                     <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <Users className="h-8 w-8 text-white" />
                     </div>
                     <h4 className="font-bold mb-2">Customer Orders</h4>
-                    <p className="text-white/90 text-sm">Buyers purchase through your links</p>
+                    <p className="text-white/90 text-sm">
+                      Buyers purchase through your links
+                    </p>
                   </div>
                   <div className="text-center">
                     <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <Truck className="h-8 w-8 text-white" />
                     </div>
                     <h4 className="font-bold mb-2">We Handle Delivery</h4>
-                    <p className="text-white/90 text-sm">Product ships directly to customer</p>
+                    <p className="text-white/90 text-sm">
+                      Product ships directly to customer
+                    </p>
                   </div>
                   <div className="text-center">
                     <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <CreditCard className="h-8 w-8 text-white" />
                     </div>
                     <h4 className="font-bold mb-2">Get Paid</h4>
-                    <p className="text-white/90 text-sm">Withdraw earnings after 3 days</p>
+                    <p className="text-white/90 text-sm">
+                      Withdraw earnings after 3 days
+                    </p>
                   </div>
                 </div>
               </div>
@@ -1560,71 +1667,93 @@ export default function Home() {
                 </div>
               </div> */}
 
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-lg mb-8 sm:mb-10 md:mb-12">
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-4 sm:mb-6 md:mb-8">
+                  Real Earning Example
+                </h3>
 
-<div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-lg mb-8 sm:mb-10 md:mb-12">
-  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-4 sm:mb-6 md:mb-8">
-    Real Earning Example
-  </h3>
+                <div className="max-w-xl mx-auto">
+                  <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
+                    <div className="text-center">
+                      <Image
+                        src="/placeholder.svg?height=200&width=200"
+                        alt="Sneaker Example"
+                        width={160}
+                        height={160}
+                        className="mx-auto rounded-lg mb-3 sm:mb-4"
+                      />
+                      <h4 className="text-lg sm:text-xl font-bold mb-2 sm:mb-4">
+                        Premium Sneakers
+                      </h4>
 
-  <div className="max-w-xl mx-auto">
-    <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
-      <div className="text-center">
-        <Image
-          src="/placeholder.svg?height=200&width=200"
-          alt="Sneaker Example"
-          width={160}
-          height={160}
-          className="mx-auto rounded-lg mb-3 sm:mb-4"
-        />
-        <h4 className="text-lg sm:text-xl font-bold mb-2 sm:mb-4">Premium Sneakers</h4>
+                      <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
+                        <div>
+                          <div className="text-lg sm:text-xl font-bold text-gray-600">
+                            ₦20,000
+                          </div>
+                          <div className="text-xs sm:text-sm text-gray-500">
+                            Supplier Price
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-lg sm:text-xl font-bold text-[#FF7A21]">
+                            ₦25,000
+                          </div>
+                          <div className="text-xs sm:text-sm text-gray-500">
+                            Your Price
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-lg sm:text-xl font-bold text-green-600">
+                            ₦4,500
+                          </div>
+                          <div className="text-xs sm:text-sm text-gray-500">
+                            Your Profit*
+                          </div>
+                        </div>
+                      </div>
 
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
-          <div>
-            <div className="text-lg sm:text-xl font-bold text-gray-600">₦20,000</div>
-            <div className="text-xs sm:text-sm text-gray-500">Supplier Price</div>
-          </div>
-          <div>
-            <div className="text-lg sm:text-xl font-bold text-[#FF7A21]">₦25,000</div>
-            <div className="text-xs sm:text-sm text-gray-500">Your Price</div>
-          </div>
-          <div>
-            <div className="text-lg sm:text-xl font-bold text-green-600">₦4,500</div>
-            <div className="text-xs sm:text-sm text-gray-500">Your Profit*</div>
-          </div>
-        </div>
+                      <p className="text-[10px] sm:text-xs text-gray-500 mt-2">
+                        *After 10% platform fee
+                      </p>
+                    </div>
+                  </div>
 
-        <p className="text-[10px] sm:text-xs text-gray-500 mt-2">*After 10% platform fee</p>
-      </div>
-    </div>
-
-    <div className="text-center px-2 sm:px-4">
-      <p className="text-base sm:text-lg text-gray-600 mb-2 sm:mb-4 font-medium">
-        Sell just 10 pairs per month = <span className="font-bold">₦45,000 profit!</span>
-      </p>
-      <p className="text-xs sm:text-sm text-gray-500 leading-snug">
-        Many of our top Plugs earn ₦200,000+ monthly by promoting multiple products
-      </p>
-    </div>
-  </div>
-</div>
-
+                  <div className="text-center px-2 sm:px-4">
+                    <p className="text-base sm:text-lg text-gray-600 mb-2 sm:mb-4 font-medium">
+                      Sell just 10 pairs per month ={" "}
+                      <span className="font-bold">₦45,000 profit!</span>
+                    </p>
+                    <p className="text-xs sm:text-sm text-gray-500 leading-snug">
+                      Many of our top Plugs earn ₦200,000+ monthly by promoting
+                      multiple products
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               {/* Benefits Summary */}
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
                   <Package className="h-12 w-12 text-[#FF7A21] mx-auto mb-4" />
                   <h4 className="font-bold mb-2">No Inventory Risk</h4>
-                  <p className="text-gray-600 text-sm">Never buy stock or worry about storage</p>
+                  <p className="text-gray-600 text-sm">
+                    Never buy stock or worry about storage
+                  </p>
                 </div>
                 <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
                   <Truck className="h-12 w-12 text-[#FF7A21] mx-auto mb-4" />
                   <h4 className="font-bold mb-2">No Shipping Hassle</h4>
-                  <p className="text-gray-600 text-sm">Products ship directly from suppliers</p>
+                  <p className="text-gray-600 text-sm">
+                    Products ship directly from suppliers
+                  </p>
                 </div>
                 <div className="bg-white rounded-2xl p-6 shadow-lg text-center">
                   <Zap className="h-12 w-12 text-[#FF7A21] mx-auto mb-4" />
                   <h4 className="font-bold mb-2">No Technical Skills</h4>
-                  <p className="text-gray-600 text-sm">Everything is designed for beginners</p>
+                  <p className="text-gray-600 text-sm">
+                    Everything is designed for beginners
+                  </p>
                 </div>
               </div>
 
@@ -1638,7 +1767,10 @@ export default function Home() {
         </section>
 
         {/* How It Works - Unified Process */}
-        <section id="how-it-works" className="w-full py-16 md:py-20 bg-white scroll-mt-16">
+        <section
+          id="how-it-works"
+          className="w-full py-16 md:py-20 bg-white scroll-mt-16"
+        >
           <div className="container px-4 md:px-6">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
@@ -1660,7 +1792,9 @@ export default function Home() {
                         <Store className="h-8 w-8 text-white" />
                       </div>
                       <h3 className="font-bold mb-2">Supplier Lists Product</h3>
-                      <p className="text-gray-600 text-sm">Business owner uploads sneakers at ₦20,000</p>
+                      <p className="text-gray-600 text-sm">
+                        Business owner uploads sneakers at ₦20,000
+                      </p>
                     </div>
                   </div>
 
@@ -1675,8 +1809,12 @@ export default function Home() {
                       <div className="w-16 h-16 bg-[#FF7A21]  rounded-full flex items-center justify-center mx-auto mb-4">
                         <Smartphone className="h-8 w-8 text-white" />
                       </div>
-                      <h3 className="font-bold mb-2">Plug Chooses & Promotes</h3>
-                      <p className="text-gray-600 text-sm">Social seller sets price at ₦25,000 and shares</p>
+                      <h3 className="font-bold mb-2">
+                        Plug Chooses & Promotes
+                      </h3>
+                      <p className="text-gray-600 text-sm">
+                        Social seller sets price at ₦25,000 and shares
+                      </p>
                     </div>
                   </div>
 
@@ -1692,7 +1830,9 @@ export default function Home() {
                         <Users className="h-8 w-8 text-white" />
                       </div>
                       <h3 className="font-bold mb-2">Buyer Purchases</h3>
-                      <p className="text-gray-600 text-sm">Customer pays ₦25,000 through secure checkout</p>
+                      <p className="text-gray-600 text-sm">
+                        Customer pays ₦25,000 through secure checkout
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1712,7 +1852,8 @@ export default function Home() {
                   What Pluggn Does For You
                 </h2>
                 <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                  We handle all the complex parts of e-commerce so you can focus on what matters—selling and earning
+                  We handle all the complex parts of e-commerce so you can focus
+                  on what matters—selling and earning
                 </p>
               </div>
 
@@ -1722,10 +1863,13 @@ export default function Home() {
                   <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <CreditCard className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-center mb-3">Secure Payments</h3>
+                  <h3 className="text-xl font-bold text-center mb-3">
+                    Secure Payments
+                  </h3>
                   <p className="text-gray-600 text-center text-sm">
-                    We process all payments securely through Paystack and handle Pay-on-Delivery options. Money is
-                    automatically distributed to everyone after delivery.
+                    We process all payments securely through Paystack and handle
+                    Pay-on-Delivery options. Money is automatically distributed
+                    to everyone after delivery.
                   </p>
                 </div>
 
@@ -1734,10 +1878,13 @@ export default function Home() {
                   <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Truck className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-center mb-3">Logistics & Delivery</h3>
+                  <h3 className="text-xl font-bold text-center mb-3">
+                    Logistics & Delivery
+                  </h3>
                   <p className="text-gray-600 text-center text-sm">
-                    Our logistics partners deliver products nationwide. We coordinate pickup from suppliers and delivery
-                    to customers with full tracking.
+                    Our logistics partners deliver products nationwide. We
+                    coordinate pickup from suppliers and delivery to customers
+                    with full tracking.
                   </p>
                 </div>
 
@@ -1746,10 +1893,13 @@ export default function Home() {
                   <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <MessageCircle className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-center mb-3">Customer Support</h3>
+                  <h3 className="text-xl font-bold text-center mb-3">
+                    Customer Support
+                  </h3>
                   <p className="text-gray-600 text-center text-sm">
-                    Our support team handles customer inquiries, order tracking, and resolves issues so you don't have
-                    to worry about after-sales service.
+                    Our support team handles customer inquiries, order tracking,
+                    and resolves issues so you don't have to worry about
+                    after-sales service.
                   </p>
                 </div>
 
@@ -1758,10 +1908,13 @@ export default function Home() {
                   <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Shield className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-center mb-3">Returns & Refunds</h3>
+                  <h3 className="text-xl font-bold text-center mb-3">
+                    Returns & Refunds
+                  </h3>
                   <p className="text-gray-600 text-center text-sm">
-                    We manage all returns and refunds according to our policy. If there's an issue with a product, we
-                    handle the entire process.
+                    We manage all returns and refunds according to our policy.
+                    If there's an issue with a product, we handle the entire
+                    process.
                   </p>
                 </div>
 
@@ -1770,10 +1923,13 @@ export default function Home() {
                   <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Award className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-center mb-3">Professional Presentation</h3>
+                  <h3 className="text-xl font-bold text-center mb-3">
+                    Professional Presentation
+                  </h3>
                   <p className="text-gray-600 text-center text-sm">
-                    We create beautiful product photos, write compelling descriptions, and design eye-catching social
-                    media cards for easy sharing.
+                    We create beautiful product photos, write compelling
+                    descriptions, and design eye-catching social media cards for
+                    easy sharing.
                   </p>
                 </div>
 
@@ -1782,10 +1938,13 @@ export default function Home() {
                   <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Package className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-center mb-3">Order Management</h3>
+                  <h3 className="text-xl font-bold text-center mb-3">
+                    Order Management
+                  </h3>
                   <p className="text-gray-600 text-center text-sm">
-                    From order placement to delivery confirmation, we track everything. You get real-time updates on all
-                    your sales and earnings.
+                    From order placement to delivery confirmation, we track
+                    everything. You get real-time updates on all your sales and
+                    earnings.
                   </p>
                 </div>
 
@@ -1794,10 +1953,13 @@ export default function Home() {
                   <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <CheckCircle className="h-8 w-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-center mb-3">Quality Product Selection</h3>
+                  <h3 className="text-xl font-bold text-center mb-3">
+                    Quality Product Selection
+                  </h3>
                   <p className="text-gray-600 text-center text-sm">
-                    We carefully handpick and curate high-quality products from trusted suppliers, ensuring you only
-                    sell items that meet our standards.
+                    We carefully handpick and curate high-quality products from
+                    trusted suppliers, ensuring you only sell items that meet
+                    our standards.
                   </p>
                 </div>
               </div>
@@ -1805,10 +1967,12 @@ export default function Home() {
               {/* Bottom CTA */}
               <div className="text-center mt-12">
                 <div className="bg-[#FF7A21]  rounded-2xl p-8 text-white">
-                  <h3 className="text-2xl font-bold mb-4">Focus on What You Do Best</h3>
+                  <h3 className="text-2xl font-bold mb-4">
+                    Focus on What You Do Best
+                  </h3>
                   <p className="text-lg mb-6 text-white/90">
-                    While we handle the technical stuff, you focus on building relationships with your customers and
-                    growing your business.
+                    While we handle the technical stuff, you focus on building
+                    relationships with your customers and growing your business.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Button className="bg-white text-[#FF7A21] hover:bg-gray-100 font-semibold px-6 py-3">
@@ -1832,8 +1996,12 @@ export default function Home() {
           <div className="container px-4 md:px-6">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Success Stories</h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto">Real people earning real money with Pluggn</p>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+                  Success Stories
+                </h2>
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                  Real people earning real money with Pluggn
+                </p>
               </div>
 
               <div className="grid md:grid-cols-3 gap-8">
@@ -1845,22 +2013,32 @@ export default function Home() {
                     </div>
                     <div>
                       <h3 className="font-bold">Adebayo Ogunlesi</h3>
-                      <p className="text-sm text-gray-600">Fashion Supplier, Lagos</p>
+                      <p className="text-sm text-gray-600">
+                        Fashion Supplier, Lagos
+                      </p>
                     </div>
                   </div>
                   <p className="text-gray-700 mb-4">
-                    "My sales increased by 300% in 6 months. I now have over 50 Plugs selling my products across
-                    Nigeria. Best decision ever!"
+                    "My sales increased by 300% in 6 months. I now have over 50
+                    Plugs selling my products across Nigeria. Best decision
+                    ever!"
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-[#FF7A21] text-[#FF7A21]" />
+                        <Star
+                          key={i}
+                          className="h-4 w-4 fill-[#FF7A21] text-[#FF7A21]"
+                        />
                       ))}
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-[#FF7A21]">₦800K+</div>
-                      <div className="text-xs text-gray-500">Monthly Revenue</div>
+                      <div className="text-lg font-bold text-[#FF7A21]">
+                        ₦800K+
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Monthly Revenue
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1877,18 +2055,25 @@ export default function Home() {
                     </div>
                   </div>
                   <p className="text-gray-700 mb-4">
-                    "Started with ₦0 capital. Now I make ₦500,000+ monthly just sharing products on WhatsApp. Changed my
-                    life completely!"
+                    "Started with ₦0 capital. Now I make ₦500,000+ monthly just
+                    sharing products on WhatsApp. Changed my life completely!"
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-[#FF7A21] text-[#FF7A21]" />
+                        <Star
+                          key={i}
+                          className="h-4 w-4 fill-[#FF7A21] text-[#FF7A21]"
+                        />
                       ))}
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-[#FF7A21]">₦500K+</div>
-                      <div className="text-xs text-gray-500">Monthly Earnings</div>
+                      <div className="text-lg font-bold text-[#FF7A21]">
+                        ₦500K+
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Monthly Earnings
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1905,18 +2090,25 @@ export default function Home() {
                     </div>
                   </div>
                   <p className="text-gray-700 mb-4">
-                    "University student earning more than my lecturers! Pluggn helped me become financially independent
-                    while studying."
+                    "University student earning more than my lecturers! Pluggn
+                    helped me become financially independent while studying."
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-[#FF7A21] text-[#FF7A21]" />
+                        <Star
+                          key={i}
+                          className="h-4 w-4 fill-[#FF7A21] text-[#FF7A21]"
+                        />
                       ))}
                     </div>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-[#FF7A21]">₦300K+</div>
-                      <div className="text-xs text-gray-500">Monthly Earnings</div>
+                      <div className="text-lg font-bold text-[#FF7A21]">
+                        ₦300K+
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Monthly Earnings
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1925,7 +2117,9 @@ export default function Home() {
               {/* Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#FF7A21]">10,000+</div>
+                  <div className="text-2xl font-bold text-[#FF7A21]">
+                    10,000+
+                  </div>
                   <div className="text-gray-600">Active Users</div>
                 </div>
                 <div className="text-center">
@@ -1946,7 +2140,10 @@ export default function Home() {
         </section>
 
         {/* About Us Section */}
-        <section id="about" className="w-full py-16 md:py-20 bg-white scroll-mt-16">
+        <section
+          id="about"
+          className="w-full py-16 md:py-20 bg-white scroll-mt-16"
+        >
           <div className="container px-4 md:px-6">
             <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="flex flex-col justify-center space-y-4">
@@ -1955,21 +2152,26 @@ export default function Home() {
                     About Pluggn
                   </h2>
                   <p className="max-w-[600px] text-gray-700 text-base md:text-lg">
-                    We're on a mission to empower entrepreneurs across Africa by removing barriers to digital commerce.
+                    We're on a mission to empower entrepreneurs across Africa by
+                    removing barriers to digital commerce.
                   </p>
                 </div>
                 <div className="space-y-3 md:space-y-4">
                   <p className="text-gray-700 text-sm md:text-base">
-                    Pluggn was founded with a simple idea: make it possible for anyone to start an online business
-                    without the traditional barriers of inventory investment and logistics management.
+                    Pluggn was founded with a simple idea: make it possible for
+                    anyone to start an online business without the traditional
+                    barriers of inventory investment and logistics management.
                   </p>
                   <p className="text-gray-700 text-sm md:text-base">
-                    Today, we're proud to help suppliers expand their market presence across Nigeria and beyond,
-                    creating new business opportunities for entrepreneurs at every level.
+                    Today, we're proud to help suppliers expand their market
+                    presence across Nigeria and beyond, creating new business
+                    opportunities for entrepreneurs at every level.
                   </p>
                   <p className="text-gray-700 text-sm md:text-base">
-                    Our platform handles the complex parts of e-commerce—payments, delivery, and inventory management—so
-                    you can focus on growing your business and serving your customers.
+                    Our platform handles the complex parts of
+                    e-commerce—payments, delivery, and inventory management—so
+                    you can focus on growing your business and serving your
+                    customers.
                   </p>
                 </div>
               </div>
@@ -2024,32 +2226,43 @@ export default function Home() {
         </section>
 
         {/* FAQ Section */}
-        <section id="faq" className="w-full py-16 md:py-20 bg-white scroll-mt-16">
+        <section
+          id="faq"
+          className="w-full py-16 md:py-20 bg-white scroll-mt-16"
+        >
           <div className="container px-4 md:px-6">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
                   Frequently Asked Questions
                 </h2>
-                <p className="text-lg md:text-xl text-gray-600">Everything you need to know about getting started</p>
+                <p className="text-lg md:text-xl text-gray-600">
+                  Everything you need to know about getting started
+                </p>
               </div>
 
               <div className="space-y-6">
                 {/* Supplier FAQs */}
                 <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6">
-                  <h3 className="text-xl font-bold mb-4 text-[#FF7A21]">For Suppliers</h3>
+                  <h3 className="text-xl font-bold mb-4 text-[#FF7A21]">
+                    For Suppliers
+                  </h3>
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-semibold mb-2">How much does it cost to list my products?</h4>
+                      <h4 className="font-semibold mb-2">
+                        How much does it cost to list my products?
+                      </h4>
                       <p className="text-gray-600 text-sm">
-                        Absolutely nothing! We only make money when you make sales. No listing fees, no monthly charges.
+                        Absolutely nothing! We only make money when you make
+                        sales. No listing fees, no monthly charges.
                       </p>
                     </div>
                     <div>
                       <h4 className="font-semibold mb-2">How do I get paid?</h4>
                       <p className="text-gray-600 text-sm">
-                        Payments are automatically transferred to your account 3 days after successful delivery. We
-                        handle all payment processing.
+                        Payments are automatically transferred to your account 3
+                        days after successful delivery. We handle all payment
+                        processing.
                       </p>
                     </div>
                   </div>
@@ -2057,34 +2270,48 @@ export default function Home() {
 
                 {/* Plug FAQs */}
                 <div className="bg-white border-2 border-orange-100 rounded-2xl p-6">
-                  <h3 className="text-xl font-bold mb-4 text-[#FF7A21]">For Plugs</h3>
+                  <h3 className="text-xl font-bold mb-4 text-[#FF7A21]">
+                    For Plugs
+                  </h3>
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-semibold mb-2">How much money can I realistically make?</h4>
+                      <h4 className="font-semibold mb-2">
+                        How much money can I realistically make?
+                      </h4>
                       <p className="text-gray-600 text-sm">
-                        Our top Plugs earn ₦200K-500K+ monthly. Beginners typically start with ₦50K-100K in their first
-                        month. Your earnings depend on your effort and audience size.
+                        Our top Plugs earn ₦200K-500K+ monthly. Beginners
+                        typically start with ₦50K-100K in their first month.
+                        Your earnings depend on your effort and audience size.
                       </p>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2">Do I need money to start?</h4>
+                      <h4 className="font-semibold mb-2">
+                        Do I need money to start?
+                      </h4>
                       <p className="text-gray-600 text-sm">
-                        No! It's completely free to join and start selling. You don't buy any products upfront—you only
-                        earn when customers purchase.
+                        No! It's completely free to join and start selling. You
+                        don't buy any products upfront—you only earn when
+                        customers purchase.
                       </p>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2">How do I handle customer service?</h4>
+                      <h4 className="font-semibold mb-2">
+                        How do I handle customer service?
+                      </h4>
                       <p className="text-gray-600 text-sm">
-                        Pluggn handles most customer service, delivery tracking, and returns. You focus on selling and
-                        building relationships with your audience.
+                        Pluggn handles most customer service, delivery tracking,
+                        and returns. You focus on selling and building
+                        relationships with your audience.
                       </p>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2">Can I sell on WhatsApp?</h4>
+                      <h4 className="font-semibold mb-2">
+                        Can I sell on WhatsApp?
+                      </h4>
                       <p className="text-gray-600 text-sm">
-                        Yes! Our platform is designed for social selling. Share product links directly to WhatsApp,
-                        Instagram, Facebook, or any social platform.
+                        Yes! Our platform is designed for social selling. Share
+                        product links directly to WhatsApp, Instagram, Facebook,
+                        or any social platform.
                       </p>
                     </div>
                   </div>
@@ -2092,26 +2319,37 @@ export default function Home() {
 
                 {/* General FAQs */}
                 <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6">
-                  <h3 className="text-xl font-bold mb-4 text-[#FF7A21]">General Questions</h3>
+                  <h3 className="text-xl font-bold mb-4 text-[#FF7A21]">
+                    General Questions
+                  </h3>
                   <div className="space-y-4">
                     <div>
-                      <h4 className="font-semibold mb-2">How does delivery work?</h4>
+                      <h4 className="font-semibold mb-2">
+                        How does delivery work?
+                      </h4>
                       <p className="text-gray-600 text-sm">
-                        We partner with reliable logistics companies across Nigeria. Products ship directly from
-                        suppliers to customers with full tracking.
+                        We partner with reliable logistics companies across
+                        Nigeria. Products ship directly from suppliers to
+                        customers with full tracking.
                       </p>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2">What if a customer wants to return a product?</h4>
+                      <h4 className="font-semibold mb-2">
+                        What if a customer wants to return a product?
+                      </h4>
                       <p className="text-gray-600 text-sm">
-                        We have a clear return policy. Pluggn handles all returns and refunds, so you don't have to
-                        worry about it.
+                        We have a clear return policy. Pluggn handles all
+                        returns and refunds, so you don't have to worry about
+                        it.
                       </p>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-2">Is this available outside Nigeria?</h4>
+                      <h4 className="font-semibold mb-2">
+                        Is this available outside Nigeria?
+                      </h4>
                       <p className="text-gray-600 text-sm">
-                        Currently, we focus on the Nigerian market, but we're expanding to other African countries soon!
+                        Currently, we focus on the Nigerian market, but we're
+                        expanding to other African countries soon!
                       </p>
                     </div>
                   </div>
@@ -2153,15 +2391,14 @@ export default function Home() {
                   <Smartphone className="h-12 w-12 mx-auto mb-4 text-white" />
                   <h3 className="text-xl font-bold mb-4">I'm a Plug</h3>
                   <p className="text-white/90 mb-6 text-sm">
-                    Start earning money online without inventory or upfront costs
+                    Start earning money online without inventory or upfront
+                    costs
                   </p>
                   <Button className="w-full bg-white text-[#FF7A21] hover:bg-gray-100 font-semibold">
                     <Link href="/auth/register?type=plug">Start as Plug</Link>
                   </Button>
                 </div>
               </div>
-
-              
             </div>
           </div>
         </section>
@@ -2189,5 +2426,5 @@ export default function Home() {
         </svg>
       </button>
     </div>
-  )
+  );
 }
