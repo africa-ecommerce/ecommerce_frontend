@@ -429,7 +429,7 @@ export default function Home() {
                   </div>
                 </div>
                 <Button className="mt-8 bg-white text-[#FF7A21] hover:bg-gray-100 font-semibold px-8 py-3">
-                  <Link href="/auth/register?type=supplier">
+                  <Link href="/auth/register">
                     Start as Supplier
                   </Link>
                 </Button>
@@ -725,7 +725,7 @@ export default function Home() {
 
                       <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                         <div>
-                          <div className="text-lg sm:text-xl font-bold text-gray-600">
+                          <div className="text-base md:text-xl font-bold text-gray-600">
                             ₦20,000
                           </div>
                           <div className="text-xs sm:text-sm text-gray-500">
@@ -733,7 +733,7 @@ export default function Home() {
                           </div>
                         </div>
                         <div>
-                          <div className="text-lg sm:text-xl font-bold text-[#FF7A21]">
+                          <div className="text-base md:text-xl font-bold text-[#FF7A21]">
                             ₦25,000
                           </div>
                           <div className="text-xs sm:text-sm text-gray-500">
@@ -741,7 +741,7 @@ export default function Home() {
                           </div>
                         </div>
                         <div>
-                          <div className="text-lg sm:text-xl font-bold text-green-600">
+                          <div className="text-base md:text-xl font-bold text-green-600">
                             ₦4,500
                           </div>
                           <div className="text-xs sm:text-sm text-gray-500">
