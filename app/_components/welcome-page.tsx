@@ -1176,7 +1176,7 @@ export default function Home() {
               {/* Main headline */}
               <div className="space-y-4">
                 <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-gray-900">
-                  <span className="bg-gradient-to-r from-[#FF7A21] to-[#ff8c42] bg-clip-text text-transparent">
+                  <span className="bg-[#FF7A21] bg-clip-text text-transparent">
                     Sell Online
                   </span>{" "}
                   Without Inventory, Logistics, or Technical Hassles
@@ -1198,7 +1198,7 @@ export default function Home() {
                       setSelectedUserType("supplier")
                       scrollToSection("suppliers-section")
                     }}
-                    className="group relative bg-white hover:bg-gradient-to-br hover:from-[#FF7A21] hover:to-[#ff8c42] border-2 border-[#FF7A21] rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:text-white"
+                    className="group relative bg-white hover:bg-[#FF7A21] border-2 border-[#FF7A21] rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:text-white"
                   >
                     <div className="flex items-center justify-center mb-4">
                       <Store className="h-12 w-12 text-[#FF7A21] group-hover:text-white transition-colors" />
@@ -1217,7 +1217,7 @@ export default function Home() {
                       setSelectedUserType("plug")
                       scrollToSection("plugs-section")
                     }}
-                    className="group relative bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] text-white border-2 border-[#FF7A21] rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:scale-105"
+                    className="group relative bg-[#FF7A21] text-white border-2 border-[#FF7A21] rounded-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:scale-105"
                   >
                     <div className="flex items-center justify-center mb-4">
                       <Smartphone className="h-12 w-12 text-white" />
@@ -1268,7 +1268,7 @@ export default function Home() {
 
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-[#FF7A21] rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <TrendingUp className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-lg font-bold mb-2">Multiply Sales Channels</h3>
@@ -1276,7 +1276,7 @@ export default function Home() {
                 </div>
 
                 <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-[#FF7A21] rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Zap className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-lg font-bold mb-2">Zero Marketing Effort</h3>
@@ -1284,7 +1284,7 @@ export default function Home() {
                 </div>
 
                 <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Award className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-lg font-bold mb-2">Professional Presentation</h3>
@@ -1292,7 +1292,7 @@ export default function Home() {
                 </div>
 
                 <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Shield className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-lg font-bold mb-2">Guaranteed Payments</h3>
@@ -1301,7 +1301,7 @@ export default function Home() {
               </div>
 
               {/* Quick Process */}
-              <div className="bg-gradient-to-r from-[#FF7A21] to-[#ff8c42] rounded-3xl p-8 md:p-12 text-white text-center">
+              <div className="bg-[#FF7A21]  rounded-3xl p-8 md:p-12 text-white text-center">
                 <h3 className="text-2xl md:text-3xl font-bold mb-6">Simple 3-Step Process</h3>
                 <div className="grid md:grid-cols-3 gap-8">
                   <div className="flex flex-col items-center">
@@ -1360,14 +1360,14 @@ export default function Home() {
                 <h3 className="text-2xl md:text-3xl font-bold text-center mb-8">What Plugs Do</h3>
                 <div className="grid md:grid-cols-3 gap-8">
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <ShoppingBag className="h-8 w-8 text-white" />
                     </div>
                     <h4 className="font-bold mb-2">Choose Products</h4>
                     <p className="text-gray-600 text-sm">Browse our marketplace and select products you want to sell</p>
                   </div>
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <DollarSign className="h-8 w-8 text-white" />
                     </div>
                     <h4 className="font-bold mb-2">Set Your Prices</h4>
@@ -1376,7 +1376,7 @@ export default function Home() {
                     </p>
                   </div>
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <MessageCircle className="h-8 w-8 text-white" />
                     </div>
                     <h4 className="font-bold mb-2">Share & Earn</h4>
@@ -1484,7 +1484,7 @@ export default function Home() {
               </div>
 
               {/* Earning Process */}
-              <div className="bg-gradient-to-r from-[#FF7A21] to-[#ff8c42] rounded-3xl p-8 md:p-12 text-white mb-12">
+              <div className="bg-[#FF7A21]  rounded-3xl p-8 md:p-12 text-white mb-12">
                 <h3 className="text-2xl md:text-3xl font-bold text-center mb-8">How You Earn Money</h3>
                 <div className="grid md:grid-cols-4 gap-6">
                   <div className="text-center">
@@ -1580,8 +1580,8 @@ export default function Home() {
               </div>
 
               <div className="text-center mt-12">
-                <Button className="bg-gradient-to-r from-[#FF7A21] to-[#ff8c42] hover:from-[#e85a2e] hover:to-[#e67d3a] text-white px-8 py-4 text-lg font-semibold shadow-lg">
-                  <Link href="/auth/register?type=plug">Start Earning as a Plug</Link>
+                <Button className="bg-[#FF7A21]  text-white px-8 py-4 text-lg font-semibold shadow-lg">
+                  <Link href="/auth/register">Start Earning as a Plug</Link>
                 </Button>
               </div>
             </div>
@@ -1607,7 +1607,7 @@ export default function Home() {
                   {/* Step 1 */}
                   <div className="relative">
                     <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21]  rounded-full flex items-center justify-center mx-auto mb-4">
                         <Store className="h-8 w-8 text-white" />
                       </div>
                       <h3 className="font-bold mb-2">Supplier Lists Product</h3>
@@ -1623,7 +1623,7 @@ export default function Home() {
                   {/* Step 2 */}
                   <div className="relative">
                     <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="w-16 h-16 bg-[#FF7A21]  rounded-full flex items-center justify-center mx-auto mb-4">
                         <Smartphone className="h-8 w-8 text-white" />
                       </div>
                       <h3 className="font-bold mb-2">Plug Chooses & Promotes</h3>
@@ -1639,7 +1639,7 @@ export default function Home() {
                   {/* Step 3 */}
                   <div className="relative">
                     <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center">
-                      <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="w-16 h-16 bg-[#FF7A21]  rounded-full flex items-center justify-center mx-auto mb-4">
                         <Users className="h-8 w-8 text-white" />
                       </div>
                       <h3 className="font-bold mb-2">Buyer Purchases</h3>
@@ -1670,7 +1670,7 @@ export default function Home() {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {/* Payment Processing */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <CreditCard className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-center mb-3">Secure Payments</h3>
@@ -1682,7 +1682,7 @@ export default function Home() {
 
                 {/* Logistics & Delivery */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Truck className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-center mb-3">Logistics & Delivery</h3>
@@ -1694,7 +1694,7 @@ export default function Home() {
 
                 {/* Customer Service */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <MessageCircle className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-center mb-3">Customer Support</h3>
@@ -1706,7 +1706,7 @@ export default function Home() {
 
                 {/* Returns & Refunds */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Shield className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-center mb-3">Returns & Refunds</h3>
@@ -1718,7 +1718,7 @@ export default function Home() {
 
                 {/* Product Photography */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Award className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-center mb-3">Professional Presentation</h3>
@@ -1730,7 +1730,7 @@ export default function Home() {
 
                 {/* Order Management */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <Package className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-center mb-3">Order Management</h3>
@@ -1742,7 +1742,7 @@ export default function Home() {
 
                 {/* Quality Product Curation */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                  <div className="w-16 h-16 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <CheckCircle className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-center mb-3">Quality Product Selection</h3>
@@ -1755,7 +1755,7 @@ export default function Home() {
 
               {/* Bottom CTA */}
               <div className="text-center mt-12">
-                <div className="bg-gradient-to-r from-[#FF7A21] to-[#ff8c42] rounded-2xl p-8 text-white">
+                <div className="bg-[#FF7A21]  rounded-2xl p-8 text-white">
                   <h3 className="text-2xl font-bold mb-4">Focus on What You Do Best</h3>
                   <p className="text-lg mb-6 text-white/90">
                     While we handle the technical stuff, you focus on building relationships with your customers and
@@ -1763,7 +1763,7 @@ export default function Home() {
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Button className="bg-white text-[#FF7A21] hover:bg-gray-100 font-semibold px-6 py-3">
-                      <Link href="/auth/register?type=supplier">Join as Supplier</Link>
+                      <Link href="/auth/register">Join as Supplier</Link>
                     </Button>
                     <Button className="bg-white/10 border border-white text-white hover:bg-white/20 font-semibold px-6 py-3">
                       <Link href="/auth/register?type=plug">Join as Plug</Link>
@@ -1791,7 +1791,7 @@ export default function Home() {
                 {/* Supplier Success */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg">
                   <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-full flex items-center justify-center mr-4">
+                    <div className="w-12 h-12 bg-[#FF7A21]  rounded-full flex items-center justify-center mr-4">
                       <span className="text-white font-bold">AO</span>
                     </div>
                     <div>
@@ -1819,7 +1819,7 @@ export default function Home() {
                 {/* Plug Success 1 */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg">
                   <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-full flex items-center justify-center mr-4">
+                    <div className="w-12 h-12 bg-[#FF7A21]  rounded-full flex items-center justify-center mr-4">
                       <span className="text-white font-bold">CI</span>
                     </div>
                     <div>
@@ -1847,7 +1847,7 @@ export default function Home() {
                 {/* Plug Success 2 */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg">
                   <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] rounded-full flex items-center justify-center mr-4">
+                    <div className="w-12 h-12 bg-[#FF7A21]  rounded-full flex items-center justify-center mr-4">
                       <span className="text-white font-bold">EM</span>
                     </div>
                     <div>
@@ -2073,7 +2073,7 @@ export default function Home() {
         </section>
 
         {/* Dual Call-to-Action */}
-        <section className="w-full py-16 md:py-20 bg-gradient-to-br from-[#FF7A21] to-[#ff8c42] relative overflow-hidden">
+        <section className="w-full py-16 md:py-20 bg-[#FF7A21]  relative overflow-hidden">
           {/* Background decoration */}
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="absolute top-10 right-10 w-72 h-72 bg-white/10 rounded-full blur-3xl"></div>
@@ -2121,7 +2121,7 @@ export default function Home() {
       {/* Back to top button */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-gradient-to-r from-[#FF7A21] to-[#ff8c42] text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 z-40 hover:scale-110"
+        className="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-[#FF7A21] text-white flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 z-40 hover:scale-110"
         aria-label="Back to top"
       >
         <svg
