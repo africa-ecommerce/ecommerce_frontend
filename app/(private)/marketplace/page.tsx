@@ -50,6 +50,8 @@ export default function MarketplacePage() {
     search: searchQuery,
     priceRange,
     selectedCategories,
+    selectedRatings,
+    sortBy: "createdAt",
     order: "desc",
   };
 
@@ -257,6 +259,7 @@ export default function MarketplacePage() {
               filters={filters}
               onPriceChange={setPriceRange}
               onToggleCategory={toggleCategory}
+              onToggleRating={toggleRating}
               onResetFilters={resetFilters}
               onApplyFilters={applyFilters}
             />
