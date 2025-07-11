@@ -31,7 +31,7 @@ export function Footer() {
             </Link>
             <p className="text-gray-400 mb-4 max-w-xs text-sm md:text-base">
               Empowering entrepreneurs across Africa to build successful online
-              businesses without the headaches of inventory, shipping and other ecommerce issues
+              businesses without the headaches of running an online business.
             </p>
             <div className="flex gap-4">
               <Link href="#" className="text-gray-400 hover:opacity-80">

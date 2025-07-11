@@ -33,16 +33,14 @@ export default function TermsOfService() {
       icon: <Package className="w-4 h-4 sm:w-5 sm:h-5" />,
       content: (
         <div className="space-y-3 sm:space-y-4">
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Pluggn provides an online platform that connects:
-          </p>
+         
           <div className="space-y-3 sm:space-y-4">
             <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <h5 className="font-medium text-sm sm:text-base text-blue-800 dark:text-blue-200 mb-1 sm:mb-2">
                 Suppliers
               </h5>
               <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">
-                Who list products.
+                Who have products to sell.
               </p>
             </div>
             <div className="p-3 sm:p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
@@ -50,7 +48,7 @@ export default function TermsOfService() {
                 Plugs (Independent Sellers)
               </h5>
               <p className="text-xs sm:text-sm text-green-700 dark:text-green-300">
-                Who promote and resell products.
+                Who promote and resell products online.
               </p>
             </div>
             <div className="p-3 sm:p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200 dark:border-purple-800">
@@ -58,7 +56,7 @@ export default function TermsOfService() {
                 Buyers
               </h5>
               <p className="text-xs sm:text-sm text-purple-700 dark:text-purple-300">
-                Who purchase products through Pluggn.
+                Who purchase products through Pluggn social sellers.
               </p>
             </div>
           </div>
@@ -222,26 +220,7 @@ export default function TermsOfService() {
               </p>
             </div>
           </div>
-          <div className="space-y-2 sm:space-y-3">
-            <h5 className="font-medium text-sm sm:text-base text-foreground">
-              Pluggn is not liable for:
-            </h5>
-            <div className="space-y-1 sm:space-y-2">
-              <div className="flex items-start gap-2">
-                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-red-500 rounded-full mt-1.5 sm:mt-2 flex-shrink-0"></div>
-                <span className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Delayed deliveries caused by third-party logistics providers.
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-red-500 rounded-full mt-1.5 sm:mt-2 flex-shrink-0"></div>
-                <span className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Quality issues in products (unless gross negligence is
-                  proven).
-                </span>
-              </div>
-            </div>
-          </div>
+          
         </div>
       ),
     },
