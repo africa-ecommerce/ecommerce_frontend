@@ -1188,7 +1188,7 @@ export default function Home() {
                   ))}
                 </div>
                 <span className="text-xs md:text-sm text-gray-600 font-medium">
-                  Trusted by 10,000+ entrepreneurs
+                  Trusted by 5,000+ entrepreneurs
                 </span>
               </div>
 
@@ -1206,8 +1206,8 @@ export default function Home() {
                 </h1>
                 <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
                   Nigeria's #1 social commerce platform where anyone can earn
-                  money selling products online—without inventory, shipping, or
-                  technical skills.
+                  money selling products online—without inventory, logistics issues, or
+                  technical skills and products are carefully curated with quality entrusted to protect buyers.
                 </p>
               </div>
 
@@ -1251,7 +1251,7 @@ export default function Home() {
                       I Want to Sell Online
                     </h3>
                     <p className="text-white/90 text-sm">
-                      Start earning without inventory, shipping, or upfront
+                      Start earning without inventory, logistics issues, or upfront
                       costs
                     </p>
                     <ArrowRight className="h-5 w-5 absolute top-4 right-4 text-white" />
@@ -1263,7 +1263,7 @@ export default function Home() {
               <div className="grid grid-cols-3 gap-8 pt-8">
                 <div className="text-center">
                   <div className="text-xl md:text-2xl font-bold text-[#FF7A21]">
-                    10K+
+                    5K+
                   </div>
                   <div className="text-sm text-gray-600">Active Users</div>
                 </div>
@@ -1340,7 +1340,7 @@ export default function Home() {
                     Professional Presentation
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    We handle photos, listings, and store presentation
+                    We handle photos, listings
                   </p>
                 </div>
 
@@ -1420,7 +1420,7 @@ export default function Home() {
                 </h2>
                 <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
                   Earn money selling products online without inventory,
-                  shipping, or technical skills. Join thousands making ₦100K+
+                  logistics issues, or technical skills. Join thousands making ₦100K+
                   monthly.
                 </p>
               </div>
@@ -1868,8 +1868,7 @@ export default function Home() {
                   </h3>
                   <p className="text-gray-600 text-center text-sm">
                     We process all payments securely through Paystack and handle
-                    Pay-on-Delivery options. Money is automatically distributed
-                    to everyone after delivery.
+                    Pay-on-Delivery options. you can withdraw after payment as being released after delivery.
                   </p>
                 </div>
 
@@ -2012,9 +2011,9 @@ export default function Home() {
                       <span className="text-white font-bold">AO</span>
                     </div>
                     <div>
-                      <h3 className="font-bold">Adebayo Ogunlesi</h3>
+                      <h3 className="font-bold">Adebayo Oladimeji</h3>
                       <p className="text-sm text-gray-600">
-                        Fashion Supplier, Lagos
+                        Fashion Supplier, Eko market
                       </p>
                     </div>
                   </div>
@@ -2034,7 +2033,7 @@ export default function Home() {
                     </div>
                     <div className="text-right">
                       <div className="text-lg font-bold text-[#FF7A21]">
-                        ₦800K+
+                        ₦400K+
                       </div>
                       <div className="text-xs text-gray-500">
                         Monthly Revenue
@@ -2051,12 +2050,12 @@ export default function Home() {
                     </div>
                     <div>
                       <h3 className="font-bold">Chioma Igwe</h3>
-                      <p className="text-sm text-gray-600">Plug, Abuja</p>
+                      <p className="text-sm text-gray-600">Plug, Unilag</p>
                     </div>
                   </div>
                   <p className="text-gray-700 mb-4">
-                    "Started with ₦0 capital. Now I make ₦500,000+ monthly just
-                    sharing products on WhatsApp. Changed my life completely!"
+                    "Started with no capital. Now I make around ₦100,000 monthly just
+                    sharing products on WhatsApp. Omo pluggn changed my life completely!"
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex">
@@ -2085,8 +2084,8 @@ export default function Home() {
                       <span className="text-white font-bold">EM</span>
                     </div>
                     <div>
-                      <h3 className="font-bold">Emmanuel Musa</h3>
-                      <p className="text-sm text-gray-600">Plug, Kano</p>
+                      <h3 className="font-bold">Emmanuel Oluwasegun</h3>
+                      <p className="text-sm text-gray-600">Plug, Ibadan</p>
                     </div>
                   </div>
                   <p className="text-gray-700 mb-4">
@@ -2104,7 +2103,7 @@ export default function Home() {
                     </div>
                     <div className="text-right">
                       <div className="text-lg font-bold text-[#FF7A21]">
-                        ₦300K+
+                        ₦90K+
                       </div>
                       <div className="text-xs text-gray-500">
                         Monthly Earnings
@@ -2118,7 +2117,7 @@ export default function Home() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-[#FF7A21]">
-                    10,000+
+                    5,000+
                   </div>
                   <div className="text-gray-600">Active Users</div>
                 </div>
@@ -2260,8 +2259,8 @@ export default function Home() {
                     <div>
                       <h4 className="font-semibold mb-2">How do I get paid?</h4>
                       <p className="text-gray-600 text-sm">
-                        Payments are automatically transferred to your account 3
-                        days after successful delivery. We handle all payment
+                       You can withdraw your margin to your account 3
+                        days after successful delivery. We handle the payment
                         processing.
                       </p>
                     </div>
@@ -2279,7 +2278,7 @@ export default function Home() {
                         How much money can I realistically make?
                       </h4>
                       <p className="text-gray-600 text-sm">
-                        Our top Plugs earn ₦200K-500K+ monthly. Beginners
+                        Our top Plugs earn ₦150K-250K+ monthly. Beginners
                         typically start with ₦50K-100K in their first month.
                         Your earnings depend on your effort and audience size.
                       </p>
@@ -2395,7 +2394,7 @@ export default function Home() {
                     costs
                   </p>
                   <Button className="w-full bg-white text-[#FF7A21] hover:bg-gray-100 font-semibold">
-                    <Link href="/auth/register?type=plug">Start as Plug</Link>
+                    <Link href="/auth/register">Start as Plug</Link>
                   </Button>
                 </div>
               </div>
