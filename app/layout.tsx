@@ -37,15 +37,17 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  title: 'Pluggn - Start Your Online Business in Nigeria Without Inventory',
-  description: 'Pluggn lets you launch and grow an online business effortlessly—no inventory, no logistics, no technical hassles. Discover trending products, sell online, and earn with ease across Nigeria.',
+  title: "Pluggn - Start Your Business Online Without the Usual Hassles",
+  description:
+    "Pluggn lets you start and grow a profitable online business effortlessly—no inventory, no logistics, no tech headaches.",
   alternates: {
-    canonical: 'https://www.pluggn.com.ng/',
+    canonical: "https://www.pluggn.com.ng/",
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: "/favicon.ico",
   },
 };
+
 
 
 export default function RootLayout({

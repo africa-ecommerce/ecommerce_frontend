@@ -30,8 +30,8 @@ export function Footer() {
               />
             </Link>
             <p className="text-gray-400 mb-4 max-w-xs text-sm md:text-base">
-              Empowering entrepreneurs across Africa to build successful online
-              businesses without the headaches of running an online business.
+              Empowering entrepreneurs across Africa to build successful
+              businesses without the headaches of running one.
             </p>
             <div className="flex gap-4">
               <Link href="#" className="text-gray-400 hover:opacity-80">
