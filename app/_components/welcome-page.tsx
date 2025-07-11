@@ -339,7 +339,7 @@ export default function Home() {
                   Multiply Your Sales Channels
                 </h2>
                 <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                  Access hundreds of motivated social sellers who promote your
+                  Access thousands of motivated social sellers who promote your
                   products across Nigeria—while you focus on what you do best.
                 </p>
               </div>
@@ -353,7 +353,7 @@ export default function Home() {
                     Multiply Sales Channels
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    Access hundreds of social sellers promoting your products
+                    Access thousands of social sellers promoting your products
                   </p>
                 </div>
 
@@ -662,48 +662,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Real Example */}
-              {/* <div className="bg-white rounded-3xl p-8 md:p-12 shadow-lg mb-12">
-                <h3 className="text-2xl md:text-3xl font-bold text-center mb-8">Real Earning Example</h3>
-                <div className="max-w-2xl mx-auto">
-                  <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 mb-6">
-                    <div className="text-center">
-                      <Image
-                        src="/placeholder.svg?height=200&width=200"
-                        alt="Sneaker Example"
-                        width={200}
-                        height={200}
-                        className="mx-auto rounded-lg mb-4"
-                      />
-                      <h4 className="text-xl font-bold mb-4">Premium Sneakers</h4>
-                      <div className="grid grid-cols-3 gap-4 text-center">
-                        <div>
-                          <div className="text-2xl font-bold text-gray-600">₦20,000</div>
-                          <div className="text-sm text-gray-500">Supplier Price</div>
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-[#FF7A21]">₦25,000</div>
-                          <div className="text-sm text-gray-500">Your Price</div>
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-green-600">₦4,500</div>
-                          <div className="text-sm text-gray-500">Your Profit*</div>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-2">*After 10% platform fee</p>
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-lg text-gray-600 mb-4">
-                      <strong>Sell just 10 pairs per month = ₦45,000 profit!</strong>
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Many of our top Plugs earn ₦200,000+ monthly by promoting multiple products
-                    </p>
-                  </div>
-                </div>
-              </div> */}
-
+              
               <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-lg mb-8 sm:mb-10 md:mb-12">
                 <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-4 sm:mb-6 md:mb-8">
                   Real Earning Example
@@ -1105,7 +1064,7 @@ export default function Home() {
                     </div>
                     <div className="text-right">
                       <div className="text-lg font-bold text-[#FF7A21]">
-                        ₦500K+
+                        ₦100K+
                       </div>
                       <div className="text-xs text-gray-500">
                         Monthly Earnings
