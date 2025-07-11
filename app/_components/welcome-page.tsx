@@ -1194,7 +1194,7 @@ export default function Home() {
 
               {/* Main headline */}
               <div className="space-y-4">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900">
                   <span className="bg-[#FF7A21] bg-clip-text text-transparent">
                     Sell Online
                   </span>{" "}
