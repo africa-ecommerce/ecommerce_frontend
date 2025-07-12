@@ -555,7 +555,7 @@ export default function Home() {
                 <div className="relative">
                   <div className="bg-white rounded-2xl p-6 shadow-xl">
                     <Image
-                      src="/placeholder.svg?height=300&width=400"
+                      src="/store-builder-interface.png"
                       alt="Store Builder Interface"
                       width={400}
                       height={300}
@@ -683,8 +683,10 @@ export default function Home() {
                 <div className="max-w-xl mx-auto">
                   <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
                     <div className="text-center">
+
+
                       <Image
-                        src="/placeholder.svg?height=200&width=200"
+                        src="/product-example.PNG"
                         alt="Wrist watch Example"
                         width={160}
                         height={160}
@@ -796,7 +798,7 @@ export default function Home() {
                       </div>
                       <h3 className="font-bold mb-2">Supplier Lists Product</h3>
                       <p className="text-gray-600 text-sm">
-                        Business owner uploads sneakers at ₦20,000
+                        Business owner uploads watch at ₦20,000
                       </p>
                     </div>
                   </div>
