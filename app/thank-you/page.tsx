@@ -234,7 +234,7 @@ export default function ThankYouPage() {
                   navigator.share({
                     title: `Just ordered from ${plugBusinessName}!`,
                     text: "Check out this amazing store",
-                    url: plugStore || window.location.origin,
+                    url: plugStore || "",
                   });
                 }
               }}
