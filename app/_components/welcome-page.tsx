@@ -693,12 +693,12 @@ export default function Home() {
                         className="mx-auto rounded-lg mb-3 sm:mb-4"
                       />
                       <h4 className="text-lg sm:text-xl font-bold mb-2 sm:mb-4">
-                        Premium Wrist watch
+                        Rolex Wrist watch
                       </h4>
                       <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                         <div>
                           <div className="text-base md:text-xl font-bold text-gray-600">
-                            ₦20,000
+                            ₦35,000
                           </div>
                           <div className="text-xs sm:text-sm text-gray-500">
                             Supplier Price
@@ -706,7 +706,7 @@ export default function Home() {
                         </div>
                         <div>
                           <div className="text-base md:text-xl font-bold text-[#FF7A21]">
-                            ₦25,000
+                            ₦40,000
                           </div>
                           <div className="text-xs sm:text-sm text-gray-500">
                             Your Price
