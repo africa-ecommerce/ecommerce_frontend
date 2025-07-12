@@ -461,32 +461,37 @@ const SellerCTA = () => {
   };
 
   return (
-    <div className="mx-4 my-4 sm:mx-6 sm:my-6">
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 border border-green-200 dark:border-green-800 rounded-xl p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+    <div className="mx-3 my-3 sm:mx-4 sm:my-4 md:mx-6 md:my-6">
+      <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/50 dark:to-emerald-950/50 border border-green-200 dark:border-green-800 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6">
+        <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2 xs:gap-3 sm:gap-4">
+          {/* Icon */}
           <div className="flex-shrink-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-              <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 dark:text-green-400" />
+            <div className="w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+              <Plus className="w-4 h-4 xs:w-4 xs:h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
+
+          {/* Content */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
+            <h3 className="text-xs xs:text-sm sm:text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100 mb-0.5 xs:mb-1">
               Want to sell or promote a product?
             </h3>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            <p className="text-xs xs:text-xs sm:text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               Can't find the product you wish to sell or promote? Message us and
               let's see what we can do.
             </p>
           </div>
-          <div className="flex-shrink-0 w-full sm:w-auto">
+
+          {/* Button */}
+          <div className="flex-shrink-0 w-full xs:w-auto sm:w-auto">
             <Button
               variant="default"
               size="sm"
-              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white transition-colors"
+              className="w-full xs:w-auto sm:w-auto bg-green-600 hover:bg-green-700 text-white transition-colors text-xs xs:text-sm px-3 xs:px-4 py-2 h-8 xs:h-9 sm:h-9"
               onClick={handleWhatsAppClick}
             >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              WhatsApp Us
+              <MessageCircle className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-2" />
+              <span className="text-xs xs:text-sm">WhatsApp Us</span>
             </Button>
           </div>
         </div>
