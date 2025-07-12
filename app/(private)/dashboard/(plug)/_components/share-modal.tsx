@@ -457,7 +457,7 @@ export function ShareModal({
         sellerName: truncateText(user.name.toUpperCase()),
         sellerImage: user.plug.avatar,
         tagline: "TIMELESS ELEGANCE",
-        dimensions: { width: 520, height: 755 },
+        dimensions: selectedPlatform?.id === "instagram" ? { width: 520, height: 650 } : { width: 520, height: 755 },
         brandName: user.plug.businessName,
       });
 
