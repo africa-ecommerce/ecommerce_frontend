@@ -558,7 +558,7 @@ export default function Home() {
                       src="/store-builder-interface.png"
                       alt="Store Builder Interface"
                       width={400}
-                      height={300}
+                      height={400}
                       className="rounded-lg"
                     />
                   </div>
