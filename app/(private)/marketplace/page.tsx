@@ -35,7 +35,7 @@ import { useUser } from "@/app/_components/provider/UserContext";
 // Seller CTA Component
 const SellerCTA = () => {
   const handleWhatsAppClick = () => {
-    const phoneNumber = "09151425001"; // Nigeria country code + number
+    const phoneNumber = "2349151425001"; // Nigeria country code + number
     const message =
       "Hello! I would love to sell this kind of products, or can I get this product in the marketplace? My audience needs it.";
     const encodedMessage = encodeURIComponent(message);
