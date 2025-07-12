@@ -1155,7 +1155,7 @@ export default function Home() {
                   <p className="text-gray-700 text-sm md:text-base">
                     Pluggn was founded with a simple idea: make it possible for
                     anyone to start an online business without the traditional
-                    barriers of inventory investment and logistics management.
+                    barriers.
                   </p>
                   <p className="text-gray-700 text-sm md:text-base">
                     Today, we're proud to help suppliers expand their market
