@@ -65,6 +65,7 @@ import EmptyState from "@/app/_components/empty-state";
 import { EditProductModal } from "./update-product-modal";
 import { useUser } from "@/app/_components/provider/UserContext";
 import { formatPrice, getTotalStock, truncateText } from "@/lib/utils";
+import { StockPriceModal } from "./update-modal";
 
 const LoadingSkeleton = () => (
   <Card>
@@ -903,11 +904,18 @@ export default function Inventory() {
           onOpenChange={setShowEnhancedAddProduct}
         />
 
-        <EditProductModal
+        {/* <EditProductModal
           itemData={currentItemData}
           open={editModalOpen}
           onOpenChange={setEditModalOpen}
           productId={selectedProductId}
+        /> */}
+
+        <StockPriceModal
+         itemData={currentItemData}
+         open={editModalOpen}
+         onOpenChange={setEditModalOpen}
+         productId={selectedProductId}
         />
 
         {/* Delete Confirmation Dialog */}
