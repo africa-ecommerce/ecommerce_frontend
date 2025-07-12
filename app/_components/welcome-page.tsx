@@ -621,8 +621,8 @@ export default function Home() {
                   </div>
                   <div className="bg-gradient-to-br from-orange-100 to-pink-100 rounded-2xl p-6">
                     <Image
-                      src="/placeholder.svg?height=250&width=300"
-                      alt="Social Media Cards"
+                      src="/product-card.PNG"
+                      alt="Social Media Card"
                       width={300}
                       height={250}
                       className="rounded-lg mx-auto"
@@ -685,13 +685,13 @@ export default function Home() {
                     <div className="text-center">
                       <Image
                         src="/placeholder.svg?height=200&width=200"
-                        alt="Sneaker Example"
+                        alt="Wrist watch Example"
                         width={160}
                         height={160}
                         className="mx-auto rounded-lg mb-3 sm:mb-4"
                       />
                       <h4 className="text-lg sm:text-xl font-bold mb-2 sm:mb-4">
-                        Premium Sneakers
+                        Premium Wrist watch
                       </h4>
                       <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                         <div>
@@ -726,7 +726,7 @@ export default function Home() {
                   </div>
                   <div className="text-center px-2 sm:px-4">
                     <p className="text-base sm:text-lg text-gray-600 mb-2 sm:mb-4 font-medium">
-                      Sell just 10 pairs per month ={" "}
+                      Sell just 10 per month ={" "}
                       <span className="font-bold">₦45,000 profit!</span>
                     </p>
                     <p className="text-xs sm:text-sm text-gray-500 leading-snug">
@@ -1181,10 +1181,10 @@ export default function Home() {
                 <div className="aspect-square bg-orange-100 rounded-xl overflow-hidden">
                   <div className="w-full h-full flex items-center justify-center">
                     <Image
-                      src="/placeholder.svg?height=300&width=300"
+                      src="/user1.jpg"
                       width={300}
                       height={300}
-                      alt="Team member"
+                      alt="User 1"
                       className="object-cover w-full h-full"
                     />
                   </div>
@@ -1192,10 +1192,10 @@ export default function Home() {
                 <div className="aspect-square bg-orange-100 rounded-xl overflow-hidden">
                   <div className="w-full h-full flex items-center justify-center">
                     <Image
-                      src="/placeholder.svg?height=300&width=300"
+                      src="/user2.jpg"
                       width={300}
                       height={300}
-                      alt="Office space"
+                      alt="user 2"
                       className="object-cover w-full h-full"
                     />
                   </div>
@@ -1203,15 +1203,15 @@ export default function Home() {
                 <div className="aspect-square bg-orange-100 rounded-xl overflow-hidden">
                   <div className="w-full h-full flex items-center justify-center">
                     <Image
-                      src="/placeholder.svg?height=300&width=300"
+                      src="/user3.jpg"
                       width={300}
                       height={300}
-                      alt="Product showcase"
+                      alt="user 3"
                       className="object-cover w-full h-full"
                     />
                   </div>
                 </div>
-                <div className="aspect-square bg-orange-100 rounded-xl overflow-hidden">
+                {/* <div className="aspect-square bg-orange-100 rounded-xl overflow-hidden">
                   <div className="w-full h-full flex items-center justify-center">
                     <Image
                       src="/placeholder.svg?height=300&width=300"
@@ -1221,7 +1221,7 @@ export default function Home() {
                       className="object-cover w-full h-full"
                     />
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
