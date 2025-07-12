@@ -54,7 +54,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { AddProductModal } from "./add-product-modal";
 import useSWR from "swr";
 import Image from "next/image";
 import { useDeleteResource } from "@/hooks/resourceManagement/useDeleteResources";
@@ -62,7 +61,6 @@ import DeleteDialog from "./delete-dialog";
 import { PRODUCT_CATEGORIES } from "@/app/constant";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import EmptyState from "@/app/_components/empty-state";
-import { EditProductModal } from "./update-product-modal";
 import { useUser } from "@/app/_components/provider/UserContext";
 import { formatPrice, getTotalStock, truncateText } from "@/lib/utils";
 import { StockPriceModal } from "./update-modal";
@@ -146,17 +144,12 @@ const EmptyFilterState = ({
   />
 );
 
-const EmptyProductsState = ({
-  onAddProduct,
-}: {
-  onAddProduct?: () => void;
-}) => (
+const EmptyProductsState = () => (
   <EmptyState
     icon={<Package className="h-12 w-12 text-muted-foreground" />}
     title="No products yet"
-    description="You haven't added any products to your inventory. Add your first product to get started."
-    actionText="Add Your First Product"
-    onAction={onAddProduct}
+    description="You don't have products in your inventory yet."
+    
     showBorder={false}
   />
 );
@@ -181,7 +174,6 @@ export default function Inventory() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [showEnhancedAddProduct, setShowEnhancedAddProduct] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   // Add state for delete confirmation
   const [productToDelete, setProductToDelete] = useState<string>("");
@@ -596,18 +588,7 @@ export default function Inventory() {
 
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
-          <div className="flex justify-end gap-2">
-            <div className="flex justify-end gap-2">
-              <Button
-                size="sm"
-                onClick={() => setShowEnhancedAddProduct(true)}
-                className="text-xs md:text-sm h-7 sm:h-8"
-              >
-                <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 mr-1" />{" "}
-                Add Product
-              </Button>
-            </div>
-          </div>
+         
           {/* Filters and Search */}
           <div className="flex flex-col gap-2 max-w-[360px]:gap-1.5 sm:gap-3">
             <div className="relative flex items-center">
@@ -750,9 +731,7 @@ export default function Inventory() {
                           <td colSpan={8} className="p-0">
                             {products.length === 0 ? (
                               <EmptyProductsState
-                                onAddProduct={() =>
-                                  setShowEnhancedAddProduct(true)
-                                }
+                               
                               />
                             ) : (
                               <EmptyFilterState
@@ -898,18 +877,10 @@ export default function Inventory() {
             </Card>
           </div>
         </section>
-        {/* Enhanced Add Product Modal */}
-        <AddProductModal
-          open={showEnhancedAddProduct}
-          onOpenChange={setShowEnhancedAddProduct}
-        />
+       
+       
 
-        {/* <EditProductModal
-          itemData={currentItemData}
-          open={editModalOpen}
-          onOpenChange={setEditModalOpen}
-          productId={selectedProductId}
-        /> */}
+       
 
         <StockPriceModal
          itemData={currentItemData}
