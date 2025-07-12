@@ -70,7 +70,7 @@ const SellerCTA = () => {
             </div>
             
             {/* Button on larger screens */}
-            <div className="hidden sm:block flex-shrink-0">
+            <div className="hidden md:block flex-shrink-0">
               <Button
                 variant="default"
                 size="sm"
@@ -84,7 +84,7 @@ const SellerCTA = () => {
           </div>
           
           {/* Button on mobile - below text */}
-          <div className="sm:hidden">
+          <div className="md:hidden">
             <Button
               variant="default"
               size="sm"
