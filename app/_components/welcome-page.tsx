@@ -621,7 +621,7 @@ export default function Home() {
                   </div>
                   <div className="bg-gradient-to-br from-orange-100 to-pink-100 rounded-2xl p-6">
                     <Image
-                      src="/product-card.PNG"
+                      src="/product-card.png"
                       alt="Social Media Card"
                       width={300}
                       height={250}
