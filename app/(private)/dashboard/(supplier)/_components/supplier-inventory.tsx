@@ -557,34 +557,36 @@ export default function Inventory() {
 
         {isLoading && <TipSkeleton />}
 
-        {!user?.supplier.verified && !isLoading ? (
-          <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
-            <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
-              <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
-                <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-xs sm:text-sm">
-                  Action Required
-                </h3>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">
-                  Please verify your account to start accepting payments and
-                  processing orders. Verified account are more likely to receive
-                  orders.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="ml-auto text-xs h-7 sm:h-8"
-              >
-                <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Verify
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          ""
-        )}
+        {!isLoading && (
+  <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
+    <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+      <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
+        <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="font-medium text-xs sm:text-sm">
+          Want to Upload Products?
+        </h3>
+        <p className="text-[10px] sm:text-xs text-muted-foreground">
+          Whether you're a new user looking to upload your first products or an existing user with new items to add, we're here to help you get started.
+        </p>
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        className="ml-auto text-xs h-7 sm:h-8"
+        onClick={() => {
+          const phoneNumber = "2349151425001";
+          const message = "Hi! I would like to upload/add products to my store. Can you help me get started?";
+          const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+          window.open(whatsappUrl, '_blank');
+        }}
+      >
+        <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Message Us
+      </Button>
+    </CardContent>
+  </Card>
+)}
 
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
