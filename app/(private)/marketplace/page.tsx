@@ -445,6 +445,7 @@ import { ProductCardSkeleton } from "./_components/product-card-skeleton";
 import { NoResults } from "./_components/no-results";
 import { ActiveFilters } from "./_components/active-filters";
 import { FilterSheet } from "./_components/filter-sheet";
+import { useUser } from "@/app/_components/provider/UserContext";
 
 // Seller CTA Component
 const SellerCTA = () => {
@@ -508,6 +509,8 @@ export default function MarketplacePage() {
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+    const { userData } = useUser();
+  
 
   // Flag to prevent URL sync on initial load
   const [isInitialized, setIsInitialized] = useState(false);
@@ -755,8 +758,8 @@ export default function MarketplacePage() {
             </Button>
           </div>
 
-          {/* Seller CTA - positioned after Discovery Mode */}
-          <SellerCTA />
+          { userData?.userType === "PLUG" &&
+          <SellerCTA />}
 
           {/* Categories - horizontal scroll optimized for mobile */}
           <section className="px-4 py-2 sm:px-6">
