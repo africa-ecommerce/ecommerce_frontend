@@ -965,8 +965,7 @@ export default function Home() {
                   <p className="text-gray-600 text-center text-sm">
                     Every purchase is protected with our money-back guarantee.
                     If buyers aren't completely satisfied with product quality,
-                    we provide full refunds and handle all returns at no cost to
-                    them.
+                    we provide full refunds and handle all returns.
                   </p>
                 </div>
               </div>
