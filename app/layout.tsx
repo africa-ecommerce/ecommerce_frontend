@@ -39,14 +39,21 @@ const poppins = Poppins({
 export const metadata = {
   title: "Pluggn - Start Your Business Online Without the Usual Hassles",
   description:
-    "Pluggn lets you start and grow a profitable online business effortlessly—no inventory, no logistics, no tech headaches.",
+    "Pluggn lets you start and grow a profitable online business effortlessly—no inventory, no logistics, no technical headaches.",
   alternates: {
     canonical: "https://www.pluggn.com.ng/",
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico", type: "image/x-icon", sizes: "48x48" },
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+    ],
+    apple: "/apple-touch-icon.png",
   },
+  manifest: "/site.webmanifest",
 };
+
 
 
 
