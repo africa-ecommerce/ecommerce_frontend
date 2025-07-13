@@ -1321,10 +1321,10 @@ export default function Home() {
                     </div>
                     <div>
                       <h4 className="font-semibold mb-2">
-                        How does pluggn make money?
+                        How does Pluggn make money?
                       </h4>
                       <p className="text-gray-600 text-sm">
-                        pluggn only make money when you make sales. We charge a
+                        Pluggn only make money when you make sales. We charge a
                         10% commission on each sale margin added by plugs, which
                         is deducted from your earnings after delivery.
                       </p>

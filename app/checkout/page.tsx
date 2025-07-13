@@ -233,9 +233,7 @@ export default function CheckoutPage() {
           watchedLga
         )}&streetAddress=${encodeURIComponent(
           watchedStreetAddress
-        )}&supplierLat=${
-          orderSummaries[0].pickupLocation.latitude
-        }&supplierLng=${orderSummaries[0].pickupLocation.longitude}`
+        )}`
       : null;
 
   const {
