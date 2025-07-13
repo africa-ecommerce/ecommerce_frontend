@@ -22,31 +22,7 @@ import { Separator } from "@/components/ui/separator";
 
 // Sample FAQ data
 const faqCategories = [
-  {
-    id: "account",
-    name: "Account & Profile",
-    icon: <HelpCircle className="h-5 w-5" />,
-    questions: [
-      {
-        id: "create-account",
-        question: "How do I create an account?",
-        answer:
-          "To create an account, tap on the Profile icon in the bottom navigation, then select 'Sign Up'. Fill in your details including name, email, and password. You can also sign up using your WhatsApp number for a faster experience.",
-      },
-      {
-        id: "reset-password",
-        question: "How do I reset my password?",
-        answer:
-          "If you've forgotten your password, go to the login screen and tap 'Forgot Password'. Enter your email address or phone number, and we'll send you instructions to reset your password.",
-      },
-      {
-        id: "edit-profile",
-        question: "How can I edit my profile information?",
-        answer:
-          "To edit your profile, go to the Profile tab, tap on 'Personal Information'. Here you can update your name, contact details, and other account information.",
-      },
-    ],
-  },
+ 
   {
     id: "orders",
     name: "Orders & Payments",
@@ -56,47 +32,13 @@ const faqCategories = [
         id: "track-order",
         question: "How do I track my order?",
         answer:
-          "You can track your order by going to the Profile tab, selecting 'Orders', and tapping on the specific order you want to track. You'll see the current status and delivery information.",
+          "A link to track an order would be sent to your mail, click on it and you'll see the current status and delivery information.",
       },
-      {
-        id: "payment-methods",
-        question: "What payment methods are accepted?",
-        answer:
-          "AfriConnect accepts various payment methods including credit/debit cards, mobile money (MTN, Airtel, M-Pesa), bank transfers, and cash on delivery in selected areas.",
-      },
-      {
-        id: "cancel-order",
-        question: "How do I cancel an order?",
-        answer:
-          "To cancel an order, go to the Profile tab, select 'Orders', find the order you want to cancel, and tap 'Cancel Order'. Note that you can only cancel orders that haven't been shipped yet.",
-      },
+     
+      
     ],
   },
-  {
-    id: "shopping",
-    name: "Shopping & Products",
-    icon: <HelpCircle className="h-5 w-5" />,
-    questions: [
-      {
-        id: "product-quality",
-        question: "How can I be sure about product quality?",
-        answer:
-          "All sellers on AfriConnect are verified businesses. You can check product ratings and reviews from other customers. We also have a satisfaction guarantee policy for all purchases.",
-      },
-      {
-        id: "save-products",
-        question: "How do I save products for later?",
-        answer:
-          "To save a product, tap the heart icon on any product page. You can view all your saved items in the Profile tab under 'Wishlist'.",
-      },
-      {
-        id: "product-availability",
-        question: "What if a product is out of stock?",
-        answer:
-          "If a product is out of stock, you can tap 'Notify Me' on the product page to receive an alert when it becomes available again.",
-      },
-    ],
-  },
+
   {
     id: "delivery",
     name: "Shipping & Delivery",
@@ -106,19 +48,20 @@ const faqCategories = [
         id: "delivery-time",
         question: "How long does delivery take?",
         answer:
-          "Standard delivery typically takes 2-4 business days within major cities, and 4-7 business days for other locations. Express delivery options are available in select areas for 1-2 day delivery.",
+          "Standard delivery typically takes 2-4 days in some location, and 4-7 days for some other locations."
+          
       },
       {
         id: "delivery-cost",
         question: "How much does delivery cost?",
         answer:
-          "Delivery costs vary based on location and package size. Standard delivery starts at ₦1,500. Some products offer free shipping, which will be clearly marked on the product page.",
+          "Delivery costs vary based on location.",
       },
       {
         id: "delivery-areas",
         question: "Which areas do you deliver to?",
         answer:
-          "We currently deliver to all major cities in Nigeria, Ghana, Kenya, and South Africa. We're continuously expanding our delivery network across Africa.",
+          "We currently deliver to all major cities in Nigeria.",
       },
     ],
   },
@@ -131,14 +74,9 @@ const faqCategories = [
         id: "return-policy",
         question: "What is your return policy?",
         answer:
-          "You can return most items within 7 days of delivery. The item must be in its original condition and packaging. Some categories like perishable goods cannot be returned.",
+          "You can return most items within 3 days of delivery. The item must be in its original condition and packaging.",
       },
-      {
-        id: "refund-process",
-        question: "How long do refunds take to process?",
-        answer:
-          "Once we receive your returned item, refunds typically take 3-5 business days to process. The time it takes for the money to appear in your account depends on your payment method and bank.",
-      },
+     
       {
         id: "damaged-items",
         question: "What if I receive a damaged item?",
@@ -398,16 +336,8 @@ export default function HelpPage() {
                       name: "Shipping & Delivery",
                       icon: <ChevronRight className="h-5 w-5" />,
                     },
-                    {
-                      id: "payment",
-                      name: "Payment Methods",
-                      icon: <ChevronRight className="h-5 w-5" />,
-                    },
-                    {
-                      id: "account",
-                      name: "Account Settings",
-                      icon: <ChevronRight className="h-5 w-5" />,
-                    },
+                   
+                  
                     {
                       id: "orders",
                       name: "Order Tracking",

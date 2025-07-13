@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -683,8 +681,6 @@ export default function Home() {
                 <div className="max-w-xl mx-auto">
                   <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
                     <div className="text-center">
-
-
                       <Image
                         src="/product-example.PNG"
                         alt="Wrist watch Example"
@@ -1213,17 +1209,6 @@ export default function Home() {
                     />
                   </div>
                 </div>
-                {/* <div className="aspect-square bg-orange-100 rounded-xl overflow-hidden">
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Image
-                      src="/placeholder.svg?height=300&width=300"
-                      width={300}
-                      height={300}
-                      alt="Customer using app"
-                      className="object-cover w-full h-full"
-                    />
-                  </div>
-                </div> */}
               </div>
             </div>
           </div>
@@ -1332,6 +1317,16 @@ export default function Home() {
                         We partner with reliable logistics companies across
                         Nigeria. Products ship directly from suppliers to
                         customers with full tracking.
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2">
+                        How does pluggn make money?
+                      </h4>
+                      <p className="text-gray-600 text-sm">
+                        pluggn only make money when you make sales. We charge a
+                        10% commission on each sale margin added by plugs, which
+                        is deducted from your earnings after delivery.
                       </p>
                     </div>
                     <div>
