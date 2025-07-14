@@ -62,8 +62,8 @@ const defaultConfig = {
     HERO_TITLE: "Spring Collection 2025",
     HERO_DESCRIPTION:
       "Discover our latest fashion pieces designed for the modern lifestyle",
-    PRIMARY_CTA_TEXT: "Shop Women",
-    SECONDARY_CTA_TEXT: "Shop Men",
+    PRIMARY_CTA_TEXT: "Discover",
+    SECONDARY_CTA_TEXT: "Learn more",
     PRODUCTS_TITLE: "Featured Products",
     ABOUT_TEXT:
       "<p>We are a modern fashion boutique dedicated to bringing you the latest trends at affordable prices.</p>",
