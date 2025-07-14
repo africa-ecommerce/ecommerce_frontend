@@ -196,16 +196,15 @@ export default function TrackOrderPage() {
     isLoading,
     mutate,
   } = useSWR<ApiResponse>(trackingId ? `/api/logistics/tracking/${trackingId}` : null, fetcher, {
-    refreshInterval: 30000, // Refresh every 30 seconds
+    refreshInterval: 60000, // Refresh every 30 seconds
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
-    errorRetryCount: 3,
+    errorRetryCount: 1,
     errorRetryInterval: 5000,
   })
 
   const [orderData, setOrderData] = useState<OrderData | null>(null)
-  const [selectedAddress, setSelectedAddress] = useState<any>(null)
-  const [showAddressUpdate, setShowAddressUpdate] = useState(false)
+
 
   // Transform API data when it changes
   useEffect(() => {
