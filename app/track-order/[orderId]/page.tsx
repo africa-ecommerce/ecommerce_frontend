@@ -229,20 +229,7 @@ export default function TrackOrderPage() {
     }
   }, [orderId]);
 
-  const handleAddressSubmit = () => {
-    if (orderData) {
-      setSelectedAddress(selectedAddress);
-      setOrderData({
-        ...orderData,
-        destination: {
-          ...orderData.destination,
-          lat: selectedAddress!.lat,
-          lng: selectedAddress!.lng,
-          address: selectedAddress!.address,
-        },
-      });
-    }
-  };
+
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -309,24 +296,7 @@ export default function TrackOrderPage() {
               {error}. Please check the order ID and try again.
             </AlertDescription>
           </Alert>
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground mb-4">
-              Try these sample order IDs:
-            </p>
-            <div className="flex gap-2 justify-center flex-wrap">
-              {Object.keys(mockOrders).map((id) => (
-                <Button
-                  key={id}
-                  variant="outline"
-                  size="sm"
-                  className="text-xs sm:text-sm"
-                  onClick={() => (window.location.href = `/track-order/${id}`)}
-                >
-                  {id}
-                </Button>
-              ))}
-            </div>
-          </div>
+         
         </div>
       </div>
     );
@@ -365,56 +335,7 @@ export default function TrackOrderPage() {
               </CardContent>
             </Card>
 
-            {/* Address Update - Collapsible on mobile */}
-            <Card>
-              <CardHeader className="pb-3 md:pb-6">
-                <button
-                  onClick={() => setShowAddressUpdate(!showAddressUpdate)}
-                  className="w-full flex items-center justify-between text-left"
-                >
-                  <CardTitle className="text-sm md:text-base">
-                    Different Destination?
-                  </CardTitle>
-                  {showAddressUpdate ? (
-                    <ChevronUp className="h-4 w-4 md:hidden" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 md:hidden" />
-                  )}
-                </button>
-              </CardHeader>
-              <CardContent
-                className={`space-y-4 p-3 md:p-6 ${
-                  !showAddressUpdate ? "hidden md:block" : ""
-                }`}
-              >
-                <div className="flex flex-col md:flex-row gap-2">
-                  <Input
-                    placeholder="Enter address or city..."
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    onKeyPress={(e) =>
-                      e.key === "Enter" && handleAddressSubmit()
-                    }
-                    className="text-sm"
-                  />
-                  <Button
-                    onClick={handleAddressSubmit}
-                    size="sm"
-                    className="whitespace-nowrap"
-                  >
-                    Update
-                  </Button>
-                </div>
-                {selectedAddress && (
-                  <Alert>
-                    <CheckCircle className="h-4 w-4" />
-                    <AlertDescription className="text-sm">
-                      Destination updated to: {selectedAddress.address}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </CardContent>
-            </Card>
+          
           </div>
 
           {/* Order Info Sidebar - Stacked on mobile */}
