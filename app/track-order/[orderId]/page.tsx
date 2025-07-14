@@ -470,12 +470,7 @@ export default function TrackOrderPage() {
                           >
                             {step.description}
                           </p>
-                          {step.timestamp && (
-                            <p className="text-xs text-muted-foreground">
-                              <span className="md:hidden">{formatDateMobile(step.timestamp)}</span>
-                              <span className="hidden md:inline">{formatDate(step.timestamp)}</span>
-                            </p>
-                          )}
+                        
                         </div>
                       </div>
                     ))}
