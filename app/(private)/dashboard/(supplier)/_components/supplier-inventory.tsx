@@ -11,7 +11,6 @@ import {
   HelpCircle,
   MoreHorizontal,
   Settings,
-  Plus,
   Search,
   Tag,
   Trash2,

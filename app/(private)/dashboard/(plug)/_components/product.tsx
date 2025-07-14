@@ -1,14 +1,8 @@
+"use client";
 
-
-
-
-
-
-"use client"
-
-import { useState, useMemo } from "react"
-import Link from "next/link"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useState, useMemo } from "react";
+import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import {
   AlertCircle,
@@ -28,13 +22,25 @@ import {
   PackageCheck,
   Share2,
   Phone,
-} from "lucide-react"
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,24 +48,30 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-import useSWR from "swr"
-import Image from "next/image"
-import { useDeleteResource } from "@/hooks/resourceManagement/useDeleteResources"
-import { PRODUCT_CATEGORIES } from "@/app/constant"
-import { errorToast, successToast } from "@/components/ui/use-toast-advanced"
-import EmptyState from "@/app/_components/empty-state"
-import DeleteDialog from "../../(supplier)/_components/delete-dialog"
-import { Tabs, TabsContent, TabsTrigger, TabsList } from "@/components/ui/tabs"
-import { getTotalStocks, truncateText } from "@/lib/utils"
-import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider"
-import { EditPriceModal } from "./edit-price-modal"
-import { ShareModal } from "./share-modal"
-import { useUser } from "@/app/_components/provider/UserContext"
-import { WriteReviewModal } from "./write-review-modal"
-import { useRouter } from "next/navigation"
+import useSWR from "swr";
+import Image from "next/image";
+import { useDeleteResource } from "@/hooks/resourceManagement/useDeleteResources";
+import { PRODUCT_CATEGORIES } from "@/app/constant";
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
+import EmptyState from "@/app/_components/empty-state";
+import DeleteDialog from "../../(supplier)/_components/delete-dialog";
+import { Tabs, TabsContent, TabsTrigger, TabsList } from "@/components/ui/tabs";
+import { getTotalStocks, truncateText } from "@/lib/utils";
+import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
+import { EditPriceModal } from "./edit-price-modal";
+import { ShareModal } from "./share-modal";
+import { useUser } from "@/app/_components/provider/UserContext";
+import { WriteReviewModal } from "./write-review-modal";
+import { useRouter } from "next/navigation";
 
 const TipSkeleton = () => (
   <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
@@ -73,7 +85,7 @@ const TipSkeleton = () => (
       <Skeleton className="h-7 w-[80px]" />
     </CardContent>
   </Card>
-)
+);
 
 const LoadingOrdersSkeleton = () => (
   <div className="space-y-3 sm:space-y-4">
@@ -104,7 +116,7 @@ const LoadingOrdersSkeleton = () => (
       </Card>
     ))}
   </div>
-)
+);
 
 const LoadingSkeleton = () => (
   <Card>
@@ -145,9 +157,7 @@ const LoadingSkeleton = () => (
       </div>
     </CardContent>
   </Card>
-)
-
-
+);
 
 const ErrorState = ({ onRetry }: { onRetry?: () => void }) => (
   <EmptyState
@@ -157,12 +167,12 @@ const ErrorState = ({ onRetry }: { onRetry?: () => void }) => (
     actionText="Try Again"
     onAction={onRetry}
   />
-)
+);
 
 const EmptyFilterState = ({
   onResetFilters,
 }: {
-  onResetFilters?: () => void
+  onResetFilters?: () => void;
 }) => (
   <EmptyState
     icon={<FilterX className="h-12 w-12 text-muted-foreground" />}
@@ -171,7 +181,7 @@ const EmptyFilterState = ({
     actionText="Reset Filters"
     onAction={onResetFilters}
   />
-)
+);
 
 const EmptyProductsState = () => (
   <EmptyState
@@ -180,7 +190,7 @@ const EmptyProductsState = () => (
     description="You have not plugged into any product yet."
     showBorder={false}
   />
-)
+);
 
 const EmptyOrdersState = ({ status }: { status: string }) => {
   const statusConfig = {
@@ -209,12 +219,20 @@ const EmptyOrdersState = ({ status }: { status: string }) => {
       title: "No Cancelled Orders",
       description: "You don't have any cancelled order yet.",
     },
-  }
+  };
 
-  const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.active
+  const config =
+    statusConfig[status as keyof typeof statusConfig] || statusConfig.active;
 
-  return <EmptyState icon={config.icon} title={config.title} description={config.description} showBorder={false} />
-}
+  return (
+    <EmptyState
+      icon={config.icon}
+      title={config.title}
+      description={config.description}
+      showBorder={false}
+    />
+  );
+};
 
 const ErrorOrdersState = ({ onRetry }: { onRetry?: () => void }) => (
   <EmptyState
@@ -224,10 +242,10 @@ const ErrorOrdersState = ({ onRetry }: { onRetry?: () => void }) => (
     actionText="Try Again"
     onAction={onRetry}
   />
-)
+);
 
 // Scrollable container with max height
-const scrollableClasses = "max-h-[calc(100vh-400px)] overflow-y-auto pr-2"
+const scrollableClasses = "max-h-[calc(100vh-400px)] overflow-y-auto pr-2";
 
 export default function Products() {
   // State management
@@ -241,8 +259,7 @@ export default function Products() {
   const { userData } = useUser();
   const { user } = userData || { user: null };
 
-  const router = useRouter()
-
+  const router = useRouter();
 
   const { setIsMutate } = useShoppingCart();
 
@@ -305,11 +322,8 @@ export default function Products() {
     errorRetryInterval: 5000,
   });
 
-
   // Process orders data
   const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];
-
-
 
   const { deleteResource } = useDeleteResource(
     "/api/plug/products/",
@@ -324,7 +338,6 @@ export default function Products() {
   );
 
   // Fetch data
-
 
   // Filter items based on selected category, filter, and search query
   const filteredItems = products?.filter((item: any) => {
@@ -365,11 +378,7 @@ export default function Products() {
   const currentItems = filteredItems?.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil((filteredItems?.length || 0) / itemsPerPage);
 
- 
-
-
   const OrderCard = ({ order }: { order: any }) => {
-   
     const getStatusBadge = (status: string) => {
       // If no status is provided, determine from activeOrderTab or other context
       const currentStatus = status || activeOrderTab;
@@ -417,13 +426,11 @@ export default function Products() {
       }
     };
 
-    
-
     // Calculate total amount from order items
     const totalAmount =
       order.orderItems?.reduce((total: number, item: any) => {
-       return total + (item.plugPrice || 0) * item.quantity;
-    }, 0) || 0;
+        return total + (item.plugPrice || 0) * item.quantity;
+      }, 0) || 0;
 
     const formatDate = (dateString: string) => {
       const date = new Date(dateString);
@@ -448,13 +455,12 @@ export default function Products() {
     // Handle track order navigation
     const handleTrackOrder = () => {
       router.push(`/track-order/${order.orderId}`);
-
     };
 
     // Handle native sharing
     const handleShareTracking = async () => {
       const trackingUrl = `${process.env.NEXT_PUBLIC_APP_URL}/track-order/${order.orderId}`;
-      
+
       if (navigator.share) {
         try {
           await navigator.share({
@@ -463,7 +469,6 @@ export default function Products() {
             url: trackingUrl,
           });
         } catch (error) {
-         
           fallbackShare(trackingUrl);
         }
       } else {
@@ -475,11 +480,11 @@ export default function Products() {
     const fallbackShare = async (url: string) => {
       try {
         await navigator.clipboard.writeText(url);
-        successToast('Tracking link copied to clipboard!');
+        successToast("Tracking link copied to clipboard!");
       } catch (error) {
-        console.error('Failed to copy to clipboard:', error);
+        console.error("Failed to copy to clipboard:", error);
         // Final fallback: open in new window/tab
-        window.open(url, '_blank');
+        window.open(url, "_blank");
       }
     };
 
@@ -525,7 +530,8 @@ export default function Products() {
               <div key={item.id} className="flex justify-between items-center">
                 <div className="flex-1">
                   <div className="sm:text-sm text-xs font-medium capitalize">
-                    {item.productName} <span className="lowercase">x</span> {item.quantity}
+                    {item.productName} <span className="lowercase">x</span>{" "}
+                    {item.quantity}
                   </div>
                   {/* Show variant details if available */}
                   {item.variantId &&
@@ -561,9 +567,7 @@ export default function Products() {
                     )}
                 </div>
                 <div className="text-sm font-medium">
-                  ₦{(
-                    (item.plugPrice || 0) * item.quantity
-                  ).toLocaleString()}
+                  ₦{((item.plugPrice || 0) * item.quantity).toLocaleString()}
                 </div>
               </div>
             ))}
@@ -589,8 +593,30 @@ export default function Products() {
                 <Share2 className="h-3 w-3 mr-1" />
                 Share Tracking
               </Button>
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
+                className="flex-1 h-8 text-xs"
+                onClick={handleTrackOrder}
+              >
+                <Truck className="h-3 w-3 mr-1" />
+                Track Order
+              </Button>
+            </>
+          )}
+
+          {activeOrderTab === "pending" && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 h-8 text-xs"
+                onClick={handleShareTracking}
+              >
+                <Share2 className="h-3 w-3 mr-1" />
+                Share Tracking
+              </Button>
+              <Button
+                size="sm"
                 className="flex-1 h-8 text-xs"
                 onClick={handleTrackOrder}
               >
@@ -870,7 +896,7 @@ export default function Products() {
             <Card>
               <CardHeader className="pb-0">
                 <CardTitle className="flex items-center gap-1 text-sm">
-                  Total Profit
+                  Total Profit before commission
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="cursor-help">
