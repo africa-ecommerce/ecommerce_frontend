@@ -542,35 +542,30 @@
 
 
 
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useState, useEffect } from "react"
+import { useParams } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   MapPin,
   Package,
   Truck,
   Clock,
   Phone,
-  Share2,
-  Printer,
   AlertCircle,
   CheckCircle,
   Navigation,
-  ChevronDown,
-  ChevronUp,
   Mail,
-  Circle,
-  CheckCircle2,
+  PackageCheck,
+  ShoppingCart,
   X,
-} from "lucide-react";
-import dynamic from "next/dynamic";
+} from "lucide-react"
+import dynamic from "next/dynamic"
 
 // Dynamically import the map component to avoid SSR issues
 const OrderTrackingMap = dynamic(() => import("./order-tracking-map"), {
@@ -579,53 +574,51 @@ const OrderTrackingMap = dynamic(() => import("./order-tracking-map"), {
     <div className="h-48 sm:h-64 md:h-80 lg:h-96 bg-muted rounded-lg flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-primary mx-auto mb-2"></div>
-        <p className="text-xs sm:text-sm text-muted-foreground">
-          Loading map...
-        </p>
+        <p className="text-xs sm:text-sm text-muted-foreground">Loading map...</p>
       </div>
     </div>
   ),
-});
+})
 
 // TypeScript interfaces
 interface OrderData {
-  orderId: string;
-  status: string;
+  orderId: string
+  status: string
   currentLocation: {
-    lat: number;
-    lng: number;
-    address: string;
-    timestamp: string;
-  };
+    lat: number
+    lng: number
+    address: string
+    timestamp: string
+  }
   origin: {
-    lat: number;
-    lng: number;
-    address: string;
-    name: string;
-  };
+    lat: number
+    lng: number
+    address: string
+    name: string
+  }
   destination: {
-    lat: number;
-    lng: number;
-    address: string;
-    recipientName: string;
-  };
-  estimatedDelivery: string;
-  trackingHistory: Array<{
-    status: string;
-    location: string;
-    timestamp: string;
-    description: string;
-  }>;
+    lat: number
+    lng: number
+    address: string
+    recipientName: string
+  }
+  estimatedDelivery: string
+  trackingProgress: Array<{
+    status: string
+    timestamp: string
+    description: string
+    completed: boolean
+  }>
 }
 
 interface DemoAddress {
-  label: string;
-  address: string;
-  lat: number;
-  lng: number;
+  label: string
+  address: string
+  lat: number
+  lng: number
 }
 
-// Mock order data with improved descriptions
+// Mock order data with improved tracking progress
 const mockOrders: Record<string, OrderData> = {
   "ORD-2024-001": {
     orderId: "ORD-2024-001",
@@ -649,30 +642,24 @@ const mockOrders: Record<string, OrderData> = {
       recipientName: "John Smith",
     },
     estimatedDelivery: "2024-01-17T18:00:00Z",
-    trackingHistory: [
+    trackingProgress: [
       {
         status: "pending",
-        location: "Online",
         timestamp: "2024-01-14T10:00:00Z",
-        description: "Order confirmed and payment processed successfully",
-      },
-      {
-        status: "pending",
-        location: "NYC Fulfillment Center",
-        timestamp: "2024-01-14T15:30:00Z",
-        description: "Package prepared and ready for shipment",
+        description: "Order confirmed and being prepared for shipment",
+        completed: true,
       },
       {
         status: "shipped",
-        location: "NYC Fulfillment Center",
         timestamp: "2024-01-15T08:00:00Z",
-        description: "Order left origin facility and is on its way",
+        description: "Package has left our facility and is on its way to you",
+        completed: true,
       },
       {
-        status: "shipped",
-        location: "Chicago Distribution Center",
-        timestamp: "2024-01-15T14:30:00Z",
-        description: "Package arrived at intermediate sorting facility",
+        status: "delivered",
+        timestamp: "",
+        description: "Package will be delivered to your address",
+        completed: false,
       },
     ],
   },
@@ -698,117 +685,108 @@ const mockOrders: Record<string, OrderData> = {
       recipientName: "Sarah Johnson",
     },
     estimatedDelivery: "2024-01-15T17:00:00Z",
-    trackingHistory: [
+    trackingProgress: [
       {
         status: "pending",
-        location: "Online",
         timestamp: "2024-01-13T14:20:00Z",
-        description: "Order confirmed and payment processed successfully",
-      },
-      {
-        status: "pending",
-        location: "Seattle Distribution Hub",
-        timestamp: "2024-01-14T09:00:00Z",
-        description: "Package prepared and ready for shipment",
+        description: "Order confirmed and being prepared for shipment",
+        completed: true,
       },
       {
         status: "shipped",
-        location: "Seattle Distribution Hub",
         timestamp: "2024-01-14T16:45:00Z",
-        description: "Order left origin facility and is on its way",
+        description: "Package has left our facility and is on its way to you",
+        completed: true,
       },
       {
         status: "delivered",
-        location: "San Francisco Local Depot",
-        timestamp: "2024-01-15T09:15:00Z",
-        description: "Package successfully delivered to recipient",
+        timestamp: "2024-01-15T17:30:00Z",
+        description: "Package successfully delivered to your address",
+        completed: true,
       },
     ],
   },
-};
+}
 
 export default function TrackOrderPage() {
-  const params = useParams();
-  const orderId = params.orderId as string;
-
-  const [orderData, setOrderData] = useState<OrderData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [address, setAddress] = useState("");
-  const [selectedAddress, setSelectedAddress] = useState<DemoAddress | null>(
-    null
-  );
-  const [showAddressUpdate, setShowAddressUpdate] = useState(false);
+  const params = useParams()
+  const orderId = params.orderId as string
+  const [orderData, setOrderData] = useState<OrderData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [address, setAddress] = useState("")
+  const [selectedAddress, setSelectedAddress] = useState<DemoAddress | null>(null)
+  const [showAddressUpdate, setShowAddressUpdate] = useState(false)
 
   useEffect(() => {
     // Simulate API call
     const fetchOrderData = async () => {
-      setLoading(true);
-      setError(null);
-
+      setLoading(true)
+      setError(null)
       try {
         // Simulate network delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        const order = mockOrders[orderId];
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+        const order = mockOrders[orderId]
         if (!order) {
-          throw new Error("Order not found");
+          throw new Error("Order not found")
         }
-
-        setOrderData(order);
+        setOrderData(order)
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch order data"
-        );
+        setError(err instanceof Error ? err.message : "Failed to fetch order data")
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
     if (orderId) {
-      fetchOrderData();
+      fetchOrderData()
     }
-  }, [orderId]);
+  }, [orderId])
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "delivered":
-        return "bg-green-500";
+        return "bg-green-500"
       case "shipped":
-        return "bg-blue-500";
+        return "bg-blue-500"
       case "pending":
-        return "bg-orange-500";
+        return "bg-yellow-500"
       case "cancelled":
-        return "bg-red-500";
+        return "bg-red-500"
       default:
-        return "bg-gray-500";
+        return "bg-gray-500"
     }
-  };
+  }
 
-  const getProgressSteps = () => {
-    return [
-      { key: "pending", label: "Pending", icon: Circle },
-      { key: "shipped", label: "Shipped", icon: Truck },
-      { key: "delivered", label: "Delivered", icon: CheckCircle2 },
-    ];
-  };
-
-  const getStepStatus = (stepKey: string, currentStatus: string) => {
-    const steps = ["pending", "shipped", "delivered"];
-    const currentIndex = steps.indexOf(currentStatus.toLowerCase());
-    const stepIndex = steps.indexOf(stepKey);
-
-    if (currentStatus.toLowerCase() === "cancelled") {
-      return stepIndex === 0 ? "completed" : "cancelled";
+  const getStatusIcon = (status: string, completed: boolean) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return completed ? (
+          <CheckCircle className="h-5 w-5 text-green-500" />
+        ) : (
+          <ShoppingCart className="h-5 w-5 text-gray-400" />
+        )
+      case "shipped":
+        return completed ? (
+          <CheckCircle className="h-5 w-5 text-green-500" />
+        ) : (
+          <Truck className="h-5 w-5 text-gray-400" />
+        )
+      case "delivered":
+        return completed ? (
+          <CheckCircle className="h-5 w-5 text-green-500" />
+        ) : (
+          <PackageCheck className="h-5 w-5 text-gray-400" />
+        )
+      case "cancelled":
+        return <X className="h-5 w-5 text-red-500" />
+      default:
+        return <Package className="h-5 w-5 text-gray-400" />
     }
-
-    if (stepIndex <= currentIndex) {
-      return "completed";
-    }
-    return "pending";
-  };
+  }
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return ""
     return new Date(dateString).toLocaleString("en-US", {
       weekday: "short",
       year: "numeric",
@@ -816,17 +794,23 @@ export default function TrackOrderPage() {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    });
-  };
+    })
+  }
 
   const formatDateMobile = (dateString: string) => {
+    if (!dateString) return ""
     return new Date(dateString).toLocaleString("en-US", {
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    });
-  };
+    })
+  }
+
+  const getCurrentStepIndex = (progress: OrderData["trackingProgress"]) => {
+    const completedSteps = progress.filter((step) => step.completed).length
+    return Math.max(0, completedSteps - 1)
+  }
 
   if (loading) {
     return (
@@ -845,7 +829,7 @@ export default function TrackOrderPage() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -854,16 +838,16 @@ export default function TrackOrderPage() {
         <div className="max-w-6xl mx-auto">
           <Alert className="mb-4 sm:mb-6">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-sm">
-              {error}. Please check the order ID and try again.
-            </AlertDescription>
+            <AlertDescription className="text-sm">{error}. Please check the order ID and try again.</AlertDescription>
           </Alert>
         </div>
       </div>
-    );
+    )
   }
 
-  if (!orderData) return null;
+  if (!orderData) return null
+
+  const currentStepIndex = getCurrentStepIndex(orderData.trackingProgress)
 
   return (
     <div className="min-h-screen bg-background">
@@ -871,12 +855,8 @@ export default function TrackOrderPage() {
         {/* Header - Mobile Optimized */}
         <div className="space-y-2 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-lg md:text-xl lg:text-2xl font-bold">
-              Track Your Order
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground break-all">
-              Order ID: {orderData.orderId}
-            </p>
+            <h1 className="text-lg md:text-xl lg:text-2xl font-bold">Track Your Order</h1>
+            <p className="text-sm sm:text-base text-muted-foreground break-all">Order ID: {orderData.orderId}</p>
           </div>
         </div>
 
@@ -900,113 +880,117 @@ export default function TrackOrderPage() {
             <Card>
               <CardHeader className="pb-3 sm:pb-6">
                 <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                  <Package className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <Truck className="h-4 w-4 sm:h-5 sm:w-5" />
                   Tracking Progress
                 </CardTitle>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  Follow your order's journey from start to delivery
+                </p>
               </CardHeader>
               <CardContent className="p-3 md:p-6">
-                {/* Progress Steps */}
-                <div className="mb-6">
-                  <div className="flex justify-between items-center mb-4">
-                    {getProgressSteps().map((step, index) => {
-                      const stepStatus = getStepStatus(
-                        step.key,
-                        orderData.status
-                      );
-                      const Icon = step.icon;
-
-                      return (
-                        <div
-                          key={step.key}
-                          className="flex flex-col items-center flex-1"
-                        >
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
-                              stepStatus === "completed"
-                                ? "bg-green-500 text-white"
-                                : stepStatus === "cancelled"
-                                ? "bg-red-500 text-white"
-                                : "bg-gray-200 text-gray-500"
-                            }`}
-                          >
-                            {orderData.status.toLowerCase() === "cancelled" &&
-                            index > 0 ? (
-                              <X className="h-4 w-4" />
-                            ) : (
-                              <Icon className="h-4 w-4" />
-                            )}
-                          </div>
-                          <span
-                            className={`text-xs sm:text-sm text-center ${
-                              stepStatus === "completed"
-                                ? "font-medium text-green-600"
-                                : "text-gray-500"
-                            }`}
-                          >
-                            {step.label}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-
+                <div className="space-y-6">
                   {/* Progress Bar */}
                   <div className="relative">
-                    <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 -translate-y-1/2"></div>
-                    <div
-                      className={`absolute top-4 left-0 h-0.5 -translate-y-1/2 transition-all duration-500 ${
-                        orderData.status.toLowerCase() === "cancelled"
-                          ? "bg-red-500"
-                          : "bg-green-500"
-                      }`}
-                      style={{
-                        width:
-                          orderData.status.toLowerCase() === "cancelled"
-                            ? "0%"
-                            : orderData.status.toLowerCase() === "pending"
-                            ? "0%"
-                            : orderData.status.toLowerCase() === "shipped"
-                            ? "50%"
-                            : "100%",
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                {/* Tracking Details */}
-                <div className="space-y-3 sm:space-y-4">
-                  {orderData.trackingHistory.map((event, index) => (
-                    <div key={index} className="flex gap-3 sm:gap-4">
-                      <div className="flex flex-col items-center">
+                    <div className="flex items-center justify-between mb-2">
+                      {orderData.trackingProgress.map((step, index) => (
                         <div
-                          className={`w-3 h-3 rounded-full ${getStatusColor(
-                            event.status
-                          )}`}
-                        ></div>
-                        {index < orderData.trackingHistory.length - 1 && (
-                          <div className="w-px h-6 sm:h-8 bg-border mt-2"></div>
-                        )}
-                      </div>
-                      <div className="flex-1 pb-3 sm:pb-4 min-w-0">
-                        <div className="flex flex-col gap-1 mb-1">
-                          <h4 className="font-medium text-sm capitalize">
-                            {event.status}
-                          </h4>
+                          key={index}
+                          className={`flex flex-col items-center relative z-10 ${
+                            index <= currentStepIndex ? "text-green-600" : "text-gray-400"
+                          }`}
+                        >
+                          <div
+                            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center mb-2 transition-all duration-300 ${
+                              step.completed
+                                ? "bg-green-500 border-green-500 text-white"
+                                : index === currentStepIndex + 1
+                                  ? "bg-blue-500 border-blue-500 text-white animate-pulse"
+                                  : "bg-white border-gray-300 text-gray-400"
+                            }`}
+                          >
+                            {getStatusIcon(step.status, step.completed)}
+                          </div>
+                          <span className="text-xs font-medium capitalize hidden sm:block">{step.status}</span>
                         </div>
-                        <p className="text-xs sm:text-sm text-muted-foreground mb-1 break-words">
-                          {event.description}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          <span className="md:hidden">
-                            {formatDateMobile(event.timestamp)}
-                          </span>
-                          <span className="hidden md:inline">
-                            {formatDate(event.timestamp)}
-                          </span>
-                        </p>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+
+                    {/* Progress Line */}
+                    <div className="absolute top-4 sm:top-5 left-4 sm:left-5 right-4 sm:right-5 h-0.5 bg-gray-200 -z-0">
+                      <div
+                        className="h-full bg-green-500 transition-all duration-500 ease-out"
+                        style={{
+                          width: `${(currentStepIndex / (orderData.trackingProgress.length - 1)) * 100}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Progress Details */}
+                  <div className="space-y-4">
+                    {orderData.trackingProgress.map((step, index) => (
+                      <div
+                        key={index}
+                        className={`flex gap-4 p-3 rounded-lg transition-all duration-200 ${
+                          step.completed
+                            ? "bg-green-50 border border-green-200"
+                            : index === currentStepIndex + 1
+                              ? "bg-blue-50 border border-blue-200"
+                              : "bg-gray-50 border border-gray-200"
+                        }`}
+                      >
+                        <div className="flex-shrink-0 mt-1">{getStatusIcon(step.status, step.completed)}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
+                            <h4
+                              className={`font-semibold text-sm capitalize ${
+                                step.completed
+                                  ? "text-green-700"
+                                  : index === currentStepIndex + 1
+                                    ? "text-blue-700"
+                                    : "text-gray-600"
+                              }`}
+                            >
+                              {step.status === "pending"
+                                ? "Order Confirmed"
+                                : step.status === "shipped"
+                                  ? "Package Shipped"
+                                  : step.status === "delivered"
+                                    ? "Package Delivered"
+                                    : step.status}
+                            </h4>
+                            {step.completed && (
+                              <Badge variant="secondary" className="text-xs w-fit bg-green-100 text-green-700">
+                                Completed
+                              </Badge>
+                            )}
+                            {!step.completed && index === currentStepIndex + 1 && (
+                              <Badge variant="secondary" className="text-xs w-fit bg-blue-100 text-blue-700">
+                                In Progress
+                              </Badge>
+                            )}
+                          </div>
+                          <p
+                            className={`text-xs sm:text-sm mb-2 ${
+                              step.completed
+                                ? "text-green-600"
+                                : index === currentStepIndex + 1
+                                  ? "text-blue-600"
+                                  : "text-gray-500"
+                            }`}
+                          >
+                            {step.description}
+                          </p>
+                          {step.timestamp && (
+                            <p className="text-xs text-muted-foreground">
+                              <span className="md:hidden">{formatDateMobile(step.timestamp)}</span>
+                              <span className="hidden md:inline">{formatDate(step.timestamp)}</span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -1024,49 +1008,29 @@ export default function TrackOrderPage() {
               </CardHeader>
               <CardContent className="space-y-3 md:space-y-4 p-3 md:p-6">
                 <div className="flex items-center gap-2">
-                  <div
-                    className={`w-3 h-3 rounded-full ${getStatusColor(
-                      orderData.status
-                    )}`}
-                  ></div>
-                  <Badge
-                    variant="secondary"
-                    className="text-xs sm:text-sm capitalize"
-                  >
+                  <div className={`w-3 h-3 rounded-full ${getStatusColor(orderData.status)}`}></div>
+                  <Badge variant="secondary" className="text-xs sm:text-sm capitalize">
                     {orderData.status}
                   </Badge>
                 </div>
-
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Clock className="h-4 w-4" />
                     <span>Estimated Delivery:</span>
                   </div>
                   <p className="font-medium text-sm md:text-base">
-                    <span className="md:hidden">
-                      {formatDateMobile(orderData.estimatedDelivery)}
-                    </span>
-                    <span className="hidden md:inline">
-                      {formatDate(orderData.estimatedDelivery)}
-                    </span>
+                    <span className="md:hidden">{formatDateMobile(orderData.estimatedDelivery)}</span>
+                    <span className="hidden md:inline">{formatDate(orderData.estimatedDelivery)}</span>
                   </p>
                 </div>
-
                 <Separator />
-
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm">Current Location</h4>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    {orderData.currentLocation.address}
-                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{orderData.currentLocation.address}</p>
                   <p className="text-xs text-muted-foreground">
                     Last updated:{" "}
-                    <span className="md:hidden">
-                      {formatDateMobile(orderData.currentLocation.timestamp)}
-                    </span>
-                    <span className="hidden md:inline">
-                      {formatDate(orderData.currentLocation.timestamp)}
-                    </span>
+                    <span className="md:hidden">{formatDateMobile(orderData.currentLocation.timestamp)}</span>
+                    <span className="hidden md:inline">{formatDate(orderData.currentLocation.timestamp)}</span>
                   </p>
                 </div>
               </CardContent>
@@ -1083,33 +1047,19 @@ export default function TrackOrderPage() {
               <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-6">
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-3">
                   <div>
-                    <h4 className="font-medium text-xs sm:text-sm text-muted-foreground">
-                      Recipient
-                    </h4>
-                    <p className="text-sm sm:text-base font-medium">
-                      {orderData.destination.recipientName}
-                    </p>
+                    <h4 className="font-medium text-xs sm:text-sm text-muted-foreground">Recipient</h4>
+                    <p className="text-sm sm:text-base font-medium">{orderData.destination.recipientName}</p>
                   </div>
-
                   <div>
-                    <h4 className="font-medium text-xs sm:text-sm text-muted-foreground">
-                      Delivery Address
-                    </h4>
+                    <h4 className="font-medium text-xs sm:text-sm text-muted-foreground">Delivery Address</h4>
                     <p className="text-xs sm:text-sm text-muted-foreground break-words">
                       {orderData.destination.address}
                     </p>
                   </div>
-
                   <div>
-                    <h4 className="font-medium text-xs sm:text-sm text-muted-foreground">
-                      Origin
-                    </h4>
-                    <p className="text-xs sm:text-sm font-medium">
-                      {orderData.origin.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground break-words">
-                      {orderData.origin.address}
-                    </p>
+                    <h4 className="font-medium text-xs sm:text-sm text-muted-foreground">Origin</h4>
+                    <p className="text-xs sm:text-sm font-medium">{orderData.origin.name}</p>
+                    <p className="text-xs text-muted-foreground break-words">{orderData.origin.address}</p>
                   </div>
                 </div>
               </CardContent>
@@ -1118,34 +1068,18 @@ export default function TrackOrderPage() {
             {/* Contact Support */}
             <Card>
               <CardHeader className="pb-3 md:pb-6">
-                <CardTitle className="text-base md:text-lg">
-                  Need Help?
-                </CardTitle>
+                <CardTitle className="text-base md:text-lg">Need Help?</CardTitle>
               </CardHeader>
               <CardContent className="p-3 sm:p-6">
                 <div className="space-y-3">
                   <a href="mailto:support@pluggn.com.ng" className="w-full">
-                    <Button
-                      className="w-full bg-transparent"
-                      variant="outline"
-                      size="sm"
-                    >
+                    <Button className="w-full bg-transparent" variant="outline" size="sm">
                       <Mail className="h-4 w-4 mr-2" />
                       Email Support
                     </Button>
                   </a>
-
-                  <a
-                    href="https://wa.me/2349151425001"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full"
-                  >
-                    <Button
-                      className="w-full bg-transparent"
-                      variant="outline"
-                      size="sm"
-                    >
+                  <a href="https://wa.me/2349151425001" target="_blank" rel="noopener noreferrer" className="w-full">
+                    <Button className="w-full bg-transparent" variant="outline" size="sm">
                       <Phone className="h-4 w-4 mr-2" />
                       WhatsApp Support
                     </Button>
@@ -1157,5 +1091,5 @@ export default function TrackOrderPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
