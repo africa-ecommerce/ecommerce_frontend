@@ -1,5 +1,3 @@
-
-
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
@@ -46,7 +44,11 @@ import {
 } from "@/components/ui/select";
 import { deliveryFormSchema } from "@/zod/schema";
 import { useCheckoutStore } from "@/hooks/checkout-store";
-import { errorToast, successToast, toast } from "@/components/ui/use-toast-advanced";
+import {
+  errorToast,
+  successToast,
+  toast,
+} from "@/components/ui/use-toast-advanced";
 import { getVariationDisplayName, parseCheckoutUrl } from "@/lib/url-parser";
 import { useProductFetching } from "@/hooks/use-product-fetcher";
 import { useProductStore } from "@/hooks/product-store";
@@ -73,17 +75,17 @@ const fetcher = async (url: string) => {
 const swrOptions = {
   revalidateOnFocus: false,
   revalidateOnReconnect: true,
-  refreshInterval: 0, 
-  dedupingInterval: 5000, 
+  refreshInterval: 0,
+  dedupingInterval: 5000,
   errorRetryCount: 0,
 };
 
 // Specific SWR options for logistics pricing (more frequent updates)
 const logisticsPricingOptions = {
   ...swrOptions,
-  refreshInterval: 600000, 
-  revalidateOnFocus: false, 
-  dedupingInterval: 600000, 
+  refreshInterval: 600000,
+  revalidateOnFocus: false,
+  dedupingInterval: 600000,
 };
 
 // SWR options for buyer info (cached longer)
@@ -231,9 +233,7 @@ export default function CheckoutPage() {
           watchedState
         )}&lga=${encodeURIComponent(
           watchedLga
-        )}&streetAddress=${encodeURIComponent(
-          watchedStreetAddress
-        )}`
+        )}&streetAddress=${encodeURIComponent(watchedStreetAddress)}`
       : null;
 
   const {
@@ -312,19 +312,16 @@ export default function CheckoutPage() {
     }
   }, [logisticsPricingData, logisticsPricingError, updateDeliveryFee]);
 
-
-
   const formatOrderItems = () => {
     if (!orderSummaries.length) return [];
 
     return orderSummaries.flatMap((summary) => ({
       productId: summary.item.productId,
       quantity: summary.item.quantity,
-      supplierPrice: summary.item.originalPrice, 
+      supplierPrice: summary.item.originalPrice,
       plugPrice: summary.item.price,
       productName: summary.item.name,
       supplierId: summary.item.supplierId,
-
 
       ...(summary.item.variationId && {
         variantId: summary.item.variationId,
@@ -343,8 +340,6 @@ export default function CheckoutPage() {
     paymentMethod: string,
     paymentReference?: string
   ) => {
-   
-
     const orderData = {
       // Buyer information
       buyerName: checkoutData.customerInfo.name,
@@ -361,8 +356,14 @@ export default function CheckoutPage() {
       totalAmount: total,
       deliveryFee: deliveryFee,
       platform: orderSummaries[0]?.platform || platform,
-      subdomain: orderSummaries[0].platform === "store" && orderSummaries[0].referralId || "",
-      plugId: orderSummaries[0]?.platform !== "store" && orderSummaries[0]?.referralId || "",
+      subdomain:
+        (orderSummaries[0].platform === "store" &&
+          orderSummaries[0].referralId) ||
+        "",
+      plugId:
+        (orderSummaries[0]?.platform !== "store" &&
+          orderSummaries[0]?.referralId) ||
+        "",
       orderItems: formatOrderItems(),
 
       // Payment reference for online payments
@@ -379,8 +380,6 @@ export default function CheckoutPage() {
     try {
       setIsLoading(true);
       const orderData = prepareOrderData(paymentMethod, paymentReference);
-
-
 
       const response = await fetch("/api/orders/place-order", {
         method: "POST",
@@ -449,10 +448,12 @@ export default function CheckoutPage() {
             quantity: item.qty,
             image: product.image || product.images?.[0] || "/placeholder.svg",
             color: item.variation
-              ? product.variations?.find((v: any) => v.id === item.variation)?.color
+              ? product.variations?.find((v: any) => v.id === item.variation)
+                  ?.color
               : undefined,
             size: item.variation
-              ? product.variations?.find((v: any) => v.id === item.variation)?.size
+              ? product.variations?.find((v: any) => v.id === item.variation)
+                  ?.size
               : undefined,
             variationId: item.variation,
             variationName: item.variation
@@ -472,7 +473,7 @@ export default function CheckoutPage() {
             item: productItem,
             subtotal,
             total,
-           
+
             referralId: ref,
             platform: platform,
             pickupLocation: product.pickupLocation
@@ -491,8 +492,6 @@ export default function CheckoutPage() {
       }
     }
   }, [platform, productsData, isProductsLoading, ref, setOrderSummaries]);
-
- 
 
   // Calculate delivery fee based on method and logistics pricing
   const getDeliveryFee = () => {
@@ -643,10 +642,9 @@ export default function CheckoutPage() {
     }
   };
 
-
   const showPaymentCancelledModal = () => {
     // You could use a toast library or custom modal
-    setShowCancelledModal(true)
+    setShowCancelledModal(true);
   };
 
   const paystackConfig = {
@@ -1432,15 +1430,17 @@ export default function CheckoutPage() {
                       <div className="flex items-start">
                         <span className="mr-2 text-primary">•</span>
                         <p>
-                          Orders are typically delivered within 2-4 business
-                          days
+                          Orders are typically delivered 2-3 days for locations within
+                          Lagos and Ibadan, and 4-7 days for other locations
                         </p>
                       </div>
                       <div className="flex items-start">
                         <span className="mr-2 text-primary">•</span>
-                        <p>We accept returns within 3 days of delivery</p>
+                        <p>
+                          We accept returns within 3 days of delivery, provided
+                          items are in good condition
+                        </p>
                       </div>
-
                       <div className="flex items-start">
                         <span className="mr-2 text-primary">•</span>
                         <p>Detailed addresses help reduce delivery costs</p>
@@ -1454,28 +1454,30 @@ export default function CheckoutPage() {
         </div>
       )}
 
-
-  <AlertDialog open={showCancelledModal} onOpenChange={setShowCancelledModal}>
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>Don't miss out!</AlertDialogTitle>
-        <AlertDialogDescription>
-          Your items are still waiting for you. Complete your purchase now
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter>
-        <AlertDialogCancel>Maybe Later</AlertDialogCancel>
-        <AlertDialogAction onClick={() => {
-          setShowCancelledModal(false)
-          // Add your place order logic here
-        }}>
-          {renderPlaceOrderButton()}
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
-
-
+      <AlertDialog
+        open={showCancelledModal}
+        onOpenChange={setShowCancelledModal}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Don't miss out!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your items are still waiting for you. Complete your purchase now
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Maybe Later</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowCancelledModal(false);
+                // Add your place order logic here
+              }}
+            >
+              {renderPlaceOrderButton()}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
