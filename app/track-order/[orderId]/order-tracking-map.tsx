@@ -1583,47 +1583,69 @@ export default function OrderTrackingMap({
     return tiles;
   }, [zoom, center]);
 
+  // const memoizedMarkers = useMemo(() => {
+  //   const lats = [
+  //     orderData.origin.lat,
+  //     orderData.currentLocation.lat,
+  //     orderData.destination.lat,
+  //   ];
+  //   const lngs = [
+  //     orderData.origin.lng,
+  //     orderData.currentLocation.lng,
+  //     orderData.destination.lng,
+  //   ];
+  //   const minLat = Math.min(...lats);
+  //   const maxLat = Math.max(...lats);
+  //   const minLng = Math.min(...lngs);
+  //   const maxLng = Math.max(...lngs);
+
+  //   const centerLat = (minLat + maxLat) / 2;
+  //   const centerLng = (minLng + maxLng) / 2;
+
+  //   // Add padding to the bounds
+  //   const latPadding = (maxLat - minLat) * 0.3;
+  //   const lngPadding = (maxLng - minLng) * 0.3;
+
+  //   const paddedLatDiff = maxLat - minLat + latPadding;
+  //   const paddedLngDiff = maxLng - minLng + lngPadding;
+
+  //   const maxDiff = Math.max(paddedLatDiff, paddedLngDiff);
+
+  //   let newZoom = 13;
+  //   if (maxDiff > 30) newZoom = 5;
+  //   else if (maxDiff > 20) newZoom = 7;
+  //   else if (maxDiff > 10) newZoom = 8;
+  //   else if (maxDiff > 5) newZoom = 9;
+  //   else if (maxDiff > 2) newZoom = 10;
+  //   else if (maxDiff > 1) newZoom = 11;
+  //   else if (maxDiff > 0.5) newZoom = 12;
+  //   else if (maxDiff > 0.2) newZoom = 13;
+
+  //   setCenter({ lat: centerLat, lng: centerLng });
+  //   setZoom(newZoom);
+
+  //   return mapPoints
+  //     .map((point, index) => {
+  //       const pixel = latLngToPixel(point.lat, point.lng);
+  //       const mapWidth = mapRef.current?.clientWidth || 800;
+  //       const mapHeight = mapRef.current?.clientHeight || 400;
+
+  //       if (
+  //         pixel.x < -100 ||
+  //         pixel.x > mapWidth + 100 ||
+  //         pixel.y < -100 ||
+  //         pixel.y > mapHeight + 100
+  //       ) {
+  //         return null;
+  //       }
+
+  //       return { point, pixel, index };
+  //     })
+  //     .filter(Boolean);
+  // }, [latLngToPixel]);
+
+
   const memoizedMarkers = useMemo(() => {
-    const lats = [
-      orderData.origin.lat,
-      orderData.currentLocation.lat,
-      orderData.destination.lat,
-    ];
-    const lngs = [
-      orderData.origin.lng,
-      orderData.currentLocation.lng,
-      orderData.destination.lng,
-    ];
-    const minLat = Math.min(...lats);
-    const maxLat = Math.max(...lats);
-    const minLng = Math.min(...lngs);
-    const maxLng = Math.max(...lngs);
-
-    const centerLat = (minLat + maxLat) / 2;
-    const centerLng = (minLng + maxLng) / 2;
-
-    // Add padding to the bounds
-    const latPadding = (maxLat - minLat) * 0.3;
-    const lngPadding = (maxLng - minLng) * 0.3;
-
-    const paddedLatDiff = maxLat - minLat + latPadding;
-    const paddedLngDiff = maxLng - minLng + lngPadding;
-
-    const maxDiff = Math.max(paddedLatDiff, paddedLngDiff);
-
-    let newZoom = 13;
-    if (maxDiff > 30) newZoom = 5;
-    else if (maxDiff > 20) newZoom = 7;
-    else if (maxDiff > 10) newZoom = 8;
-    else if (maxDiff > 5) newZoom = 9;
-    else if (maxDiff > 2) newZoom = 10;
-    else if (maxDiff > 1) newZoom = 11;
-    else if (maxDiff > 0.5) newZoom = 12;
-    else if (maxDiff > 0.2) newZoom = 13;
-
-    setCenter({ lat: centerLat, lng: centerLng });
-    setZoom(newZoom);
-
     return mapPoints
       .map((point, index) => {
         const pixel = latLngToPixel(point.lat, point.lng);
@@ -1642,7 +1664,7 @@ export default function OrderTrackingMap({
         return { point, pixel, index };
       })
       .filter(Boolean);
-  }, [latLngToPixel]);
+  }, [latLngToPixel, mapPoints]);
 
   const tiles = getTilesInView();
 
