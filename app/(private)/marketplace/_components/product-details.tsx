@@ -209,7 +209,7 @@ export default function ProductDetail() {
   };
 
   // Hardcoded fulfillment rate for now
-  const fulfillmentRate = 94;
+  const fulfillmentRate = 100;
   const getFulfillmentRateDescription = (rate: number) => {
     if (rate >= 85) return "Excellent";
     if (rate >= 70) return "Very Good";
@@ -349,8 +349,8 @@ export default function ProductDetail() {
             </Card>
 
             {/* Delivery & Stock Info */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
                 <div className="flex items-center gap-2">
                   <Truck className="h-5 w-5 text-muted-foreground" />
                   <div>
@@ -360,7 +360,7 @@ export default function ProductDetail() {
                   </div>
                 </div>
                 <div className="font-semibold text-sm">2 - 3 days</div>
-              </div>
+              </div> */}
 
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
                 <div className="flex items-center gap-2">
