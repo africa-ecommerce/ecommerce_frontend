@@ -241,9 +241,7 @@ export default function Home() {
                   </span>
                 </h1>
                 <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                  Nigeria's #1 social commerce platform where anyone can earn
-                  money selling products online—without inventory, logistics
-                  issues, or technical skills. When purchasing from a Pluggn
+                Africa’s fastest-growing social commerce platform—where anyone can build a business without inventory or logistics. When purchasing from a Pluggn
                   store, buyers can be totally assured of premium product
                   quality and secure transactions, as all products are carefully
                   curated and verified by our expert team.
