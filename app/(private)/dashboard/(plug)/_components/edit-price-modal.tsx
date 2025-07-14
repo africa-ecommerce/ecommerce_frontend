@@ -184,7 +184,7 @@ export function EditPriceModal({
             <Alert className="bg-amber-50 text-amber-800 border-amber-200">
               <AlertTitle>Price Change Notice</AlertTitle>
               <AlertDescription>
-                Any price changes will take effect in 3 days from submission.
+                Any price changes will take effect in 24 hours from submission.
               </AlertDescription>
             </Alert>
 
@@ -203,7 +203,7 @@ export function EditPriceModal({
                 <div className="mb-2">
                   <span className="text-sm text-blue-700">Effective: </span>
                   <span className="font-medium text-blue-900">
-                    {formatDaysRemaining(productData.priceEffectiveAt)}
+                    24 hours from when updated
                   </span>
                 </div>
               </div>

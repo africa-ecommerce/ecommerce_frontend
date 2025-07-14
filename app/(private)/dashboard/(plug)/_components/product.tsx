@@ -604,7 +604,7 @@ export default function Products() {
             </>
           )}
 
-          {activeOrderTab === "pending" && (
+          {activeOrderTab === "active" && (
             <>
               <Button
                 variant="outline"
