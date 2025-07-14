@@ -204,9 +204,9 @@ export default function PlugSuccess() {
                   <ShoppingCart className="h-4 w-4 text-[#FF7A29]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium text-sm">Add  Products</h3>
+                  <h3 className="font-medium text-sm">Add Products</h3>
                   <p className="text-xs text-gray-500">
-                    Expand your store with your first products
+                    Expand your store with your first product
                   </p>
                   <div className="mt-1.5">
                     <Progress value={0} className="h-1.5 bg-gray-100 w-full" />
@@ -215,22 +215,7 @@ export default function PlugSuccess() {
               </div>
             </div>
 
-            <div className="group">
-              <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center mt-0.5 group-hover:scale-110 transition-transform flex-shrink-0">
-                  <CreditCard className="h-4 w-4 text-[#FF7A29]" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-sm">Set Up Payments</h3>
-                  <p className="text-xs text-gray-500">
-                    Connect your payment methods to start receiving orders
-                  </p>
-                  <div className="mt-1.5">
-                    <Progress value={0} className="h-1.5 bg-gray-100 w-full" />
-                  </div>
-                </div>
-              </div>
-            </div>
+           
 
             <div className="group">
               <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
@@ -270,16 +255,7 @@ export default function PlugSuccess() {
                   </span>
                 </li>
               </ul>
-              <div className="mt-4 flex justify-center md:justify-start">
-                <Button
-                  variant="outline"
-                  className="bg-white text-[#FF7A29] border-[#FF7A29] text-sm group"
-                >
-                  <Users className="mr-1.5 h-3.5 w-3.5" />
-                  Join the Pluggn Community
-                  <ChevronRight className="ml-1.5 h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </div>
+             
             </div>
           </div>
         </div>
