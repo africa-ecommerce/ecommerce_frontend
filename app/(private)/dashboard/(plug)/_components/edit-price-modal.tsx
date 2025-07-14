@@ -203,7 +203,7 @@ export function EditPriceModal({
                 <div className="mb-2">
                   <span className="text-sm text-blue-700">Effective: </span>
                   <span className="font-medium text-blue-900">
-                    24 hours from when updated
+                    24 hours from when submission
                   </span>
                 </div>
               </div>

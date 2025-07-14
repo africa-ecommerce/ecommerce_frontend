@@ -917,7 +917,7 @@ export default function PlugDashboard() {
               <Card className="h-full border rounded-lg">
                 <CardHeader className="p-2 sm:p-3 pb-0">
                   <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                    Profit before commission
+                    Profit Before Commission
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <HelpCircle className="h-3 w-3 text-muted-foreground" />

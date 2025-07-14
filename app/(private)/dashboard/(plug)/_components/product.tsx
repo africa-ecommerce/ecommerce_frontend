@@ -809,7 +809,7 @@ export default function Products() {
             {/* Total Products Card */}
             <Card>
               <CardHeader className="pb-0">
-                <CardTitle className="flex items-center gap-1 text-sm">
+                <CardTitle className="flex gap-1 text-sm">
                   Total Products
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -835,7 +835,7 @@ export default function Products() {
             {/* Low Stock Card */}
             <Card>
               <CardHeader className="pb-0">
-                <CardTitle className="flex items-center gap-1 text-sm">
+                <CardTitle className="flex gap-1 text-sm">
                   Low Stock Items
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -865,7 +865,7 @@ export default function Products() {
             {/* Out of Stock Card */}
             <Card>
               <CardHeader className="pb-0">
-                <CardTitle className="flex items-center gap-1 text-sm">
+                <CardTitle className="flex gap-1 text-sm">
                   Out of Stock
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -895,8 +895,8 @@ export default function Products() {
             {/* Total Profit Card */}
             <Card>
               <CardHeader className="pb-0">
-                <CardTitle className="flex items-center gap-1 text-sm">
-                  Total Profit before commission
+                <CardTitle className="flex gap-1 text-sm">
+                  Profit Before Commission
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="cursor-help">
