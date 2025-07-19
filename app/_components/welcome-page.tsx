@@ -716,7 +716,7 @@ export default function Home() {
                         </div>
                       </div>
                       <p className="text-[10px] sm:text-xs text-gray-500 mt-2">
-                        *After 10% platform fee
+                        *After platform commission
                       </p>
                     </div>
                   </div>
@@ -1323,7 +1323,7 @@ export default function Home() {
                       </h4>
                       <p className="text-gray-600 text-sm">
                         Pluggn only make money when you make sales. We charge a
-                        10% commission on each sale margin added by plugs, which
+                         commission on each sale margin added by plugs, which
                         is deducted from your earnings after delivery.
                       </p>
                     </div>

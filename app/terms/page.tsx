@@ -113,7 +113,7 @@ export default function TermsOfService() {
                 </h5>
               </div>
               <p className="text-xs sm:text-sm text-green-700 dark:text-green-300">
-                Plugs receive free online stores upon registration.
+                Plugs can create free online stores upon registration.
               </p>
             </div>
             <div className="p-3 sm:p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
