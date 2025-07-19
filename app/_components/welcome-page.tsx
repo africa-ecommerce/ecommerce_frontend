@@ -860,8 +860,7 @@ export default function Home() {
                     Secure Payments
                   </h3>
                   <p className="text-gray-600 text-center text-sm">
-                    We process all payments securely through Paystack and handle
-                    Pay-on-Delivery options. you can withdraw after payment has
+                    We process all payments securely through Paystack. you can withdraw after payment has
                     been released after delivery.
                   </p>
                 </div>

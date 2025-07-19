@@ -117,12 +117,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
                 <div className="text-[12px] font-semibold md:text-base">₦{product?.price?.toLocaleString()}</div>
-                {/* Show price range if available */}
-                {product?.minPrice && product?.maxPrice && (
-                  <div className="text-[10px] text-muted-foreground">
-                    Range: ₦{product.minPrice.toLocaleString()} - ₦{product.maxPrice.toLocaleString()}
-                  </div>
-                )}
+                
               </div>
               <Tooltip>
                 <TooltipTrigger asChild>
