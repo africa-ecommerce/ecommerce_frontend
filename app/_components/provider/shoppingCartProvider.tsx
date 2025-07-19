@@ -1405,12 +1405,7 @@ function PriceModal({
                       {formatCurrency(commissionData.plugMargin)}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
-                   
-                    <span className="font-medium text-blue-600">
-                      {commissionData.marginPercent.toFixed(1)}%
-                    </span>
-                  </div>
+                 
                   <div className="flex justify-between items-center">
                     <span>Commission Rate:</span>
                     <span className="font-medium text-orange-600">
