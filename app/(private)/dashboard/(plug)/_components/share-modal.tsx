@@ -452,9 +452,9 @@ export function ShareModal({
 
       const { processedImage } = await createLuxuryMagazineCard({
         imageUrl: product.images[0],
-        productName: truncateText(product.name.toUpperCase()),
+        productName: truncateText(product.name.toUpperCase(), 30),
         price: formatPrice(String(product.price)),
-        sellerName: truncateText(user.name.toUpperCase()),
+        sellerName: truncateText(user.name.toUpperCase(), 25),
         sellerImage: user.plug.avatar,
         tagline: "TIMELESS ELEGANCE",
         dimensions: selectedPlatform?.id === "instagram" ? { width: 520, height: 650 } : { width: 520, height: 755 },

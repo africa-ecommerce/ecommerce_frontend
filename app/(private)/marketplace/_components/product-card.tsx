@@ -1,87 +1,281 @@
-"use client";
+// "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import {
+// import { useState, useEffect } from "react";
+// import Link from "next/link";
+// import {
  
-  Package,
-  Plus,
-  ShoppingBag,
-  Users,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
-import { cn, formatQuantity } from "@/lib/utils";
-import Image from "next/image";
-import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
-import { useUser } from "@/app/_components/provider/UserContext";
+//   Package,
+//   Plus,
+//   ShoppingBag,
+//   Users,
+// } from "lucide-react";
+// import { Button } from "@/components/ui/button";
+// import { Card } from "@/components/ui/card";
+// import {
+//   Tooltip,
+//   TooltipContent,
+//   TooltipTrigger,
+//   TooltipProvider,
+// } from "@/components/ui/tooltip";
+// import { cn, formatQuantity } from "@/lib/utils";
+// import Image from "next/image";
+// import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
+// import { useUser } from "@/app/_components/provider/UserContext";
+
+// interface ProductCardProps {
+//   product: any;
+//   className?: string;
+// }
+
+// export function ProductCard({ product, className }: ProductCardProps) {
+//   const [isAdding, setIsAdding] = useState(false);
+//   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+//     const { addItem, items } = useShoppingCart();
+
+//   const { userData: {user} } = useUser();
+
+
+//   // Check if product is already in cart
+//   const isInCart = items.some((item) => item.id === product.id);
+
+//   // Format the sales count with proper handling for 0 and 99+
+  
+
+//   // Handle image carousel effect
+//   useEffect(() => {
+//     // Only set up the carousel if there are multiple images
+//     if (!product?.images || product.images.length === 0) return;
+//     if (product?.images?.length > 1) {
+//       const interval = setInterval(() => {
+//         setCurrentImageIndex((prevIndex) =>
+//           prevIndex === product?.images.length - 1 ? 0 : prevIndex + 1
+//         );
+//       }, 5000); // Change image every 5 seconds
+
+//       return () => clearInterval(interval);
+//     }
+//   }, [product?.images]);
+
+//   const handleAddToStore = (e: React.MouseEvent) => {
+//     e.preventDefault(); // Prevent card click when clicking the button
+//     e.stopPropagation(); // Stop event propagation
+
+
+//     setIsAdding(true);
+
+//     // Create cart item from product
+//     const cartItem = {
+//       id: product.id,
+//       name: product.name,
+//       price: product.price,
+//       image:
+//         product.images && product.images.length > 0
+//           ? product.images[0]
+//           : "/placeholder.svg",
+//     };
+
+//     // Add item to cart after a short delay to show loading state
+//     setTimeout(() => {
+//       if (!isInCart) {
+//         addItem(cartItem, false); // Second parameter opens the cart
+//       }
+//       setIsAdding(false);
+//     }, 800);
+//   };
+
+//   return (
+//     <TooltipProvider>
+//       <Link href={`/marketplace/product/${product?.id}`}>
+//         <Card
+//           className={cn(
+//             "overflow-hidden transition-all hover:shadow-md group relative border-muted cursor-pointer",
+//             "w-full max-w-[350px] mx-auto h-full flex flex-col", // Fixed height and flex column
+//             className
+//           )}
+//         >
+//           {/* Product Image with Badges */}
+//           <div className="relative aspect-square overflow-hidden bg-muted">
+//             {product?.images && product.images.length > 0 && (
+//               <div className="relative h-full w-full">
+//                 {product.images.map((image, index) => (
+//                   <Image
+//                     key={index}
+//                     src={image || "/placeholder.svg"}
+//                     alt={`${product?.name} - image ${index + 1}`}
+//                     className={`h-full w-full object-cover absolute top-0 left-0 transition-opacity duration-1000 ${
+//                       index === currentImageIndex ? "opacity-100" : "opacity-0"
+//                     }`}
+//                     loading="lazy"
+//                     width={350}
+//                     height={350}
+//                   />
+//                 ))}
+//               </div>
+//             )}
+//           </div>
+
+//           {/* Product Details */}
+//           <div className="p-3 md:space-y-2 space-y-1 flex-1 flex flex-col">
+//             {/* Title */}
+//             <div className="flex items-start justify-between gap-2">
+//               <h3 className="font-medium text-xs leading-tight md:text-base capitalize truncate max-w-full">
+//                 {product?.name}
+//               </h3>
+//             </div>
+
+//             {/* Category and Sales */}
+//             <div className="flex items-center text-xs text-muted-foreground flex-wrap gap-x-1">
+//               <div className="flex items-center">
+//                 <ShoppingBag className="mr-0.5 h-3 w-3" />
+//                 <span className="truncate">
+//                   {formatQuantity(product?.sales || 0)} sold
+//                 </span>
+//               </div>
+//             </div>
+
+//             {/* Price and Competition */}
+//             <div className="flex items-center justify-between gap-2">
+//               <div className="min-w-0">
+//                 <div className="text-[12px] font-semibold md:text-base">
+//                   ₦{product?.price?.toLocaleString()}
+//                 </div>
+//               </div>
+
+//               <Tooltip>
+//                 <TooltipTrigger asChild>
+//                   <div
+//                     className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 whitespace-nowrap"
+//                     onClick={(e) => e.stopPropagation()}
+//                   >
+//                     <Users className="h-3 w-3 flex-shrink-0" />
+//                     <span className="text-[10px] sm:text-xs">
+//                       {formatQuantity(product?.plugsCount)}{" "}
+//                       {product?.plugsCount === 1 ? "plug" : "plugs"}
+//                     </span>
+//                   </div>
+//                 </TooltipTrigger>
+//                 <TooltipContent side="top" onClick={(e) => e.stopPropagation()}>
+//                   <p className="text-xs">
+//                     Number of Plugs selling this product
+//                   </p>
+//                 </TooltipContent>
+//               </Tooltip>
+//             </div>
+
+//             {/* Supplier Info */}
+
+//             {/* Action Buttons - Push to bottom with flex spacer */}
+
+//             {user?.userType === "PLUG" && (
+//               <div className="mt-auto pt-2">
+//                 <Button
+//                   className={`w-full h-8 sm:h-9 ${
+//                     isInCart
+//                       ? "bg-green-100 text-green-800 hover:bg-green-100"
+//                       : product?.isPlugged
+//                       ? "bg-red-100 text-red-800 hover:bg-red-100"
+//                       : ""
+//                   }`}
+//                   onClick={handleAddToStore}
+//                   disabled={isAdding || isInCart || product?.isPlugged}
+//                   aria-live="polite"
+//                 >
+//                   {isAdding ? (
+//                     <span className="animate-pulse">Adding...</span>
+//                   ) : isInCart ? (
+//                     <>
+//                       <Package className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+//                       <span className="text-xs sm:text-sm">In Cart</span>
+//                     </>
+//                   ) : product?.isPlugged ? (
+//                     <>
+//                       <Package className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+//                       <span className="text-xs sm:text-sm">Added</span>
+//                     </>
+//                   ) : (
+//                     <>
+//                       <Plus className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+//                       <span className="text-xs sm:text-sm">Add to Store</span>
+//                     </>
+//                   )}
+//                 </Button>
+//               </div>
+//             )}
+//           </div>
+//         </Card>
+//       </Link>
+//     </TooltipProvider>
+//   );
+// }
+
+
+
+
+
+"use client"
+import { useState, useEffect } from "react"
+import type React from "react"
+
+import Link from "next/link"
+import { Package, Plus, ShoppingBag, Users } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
+import { cn, formatQuantity } from "@/lib/utils"
+import Image from "next/image"
+import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider"
+import { useUser } from "@/app/_components/provider/UserContext"
 
 interface ProductCardProps {
-  product: any;
-  className?: string;
+  product: any
+  className?: string
 }
 
 export function ProductCard({ product, className }: ProductCardProps) {
-  const [isAdding, setIsAdding] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const { addItem, items } = useShoppingCart();
+  const [isAdding, setIsAdding] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-  const { userData: {user} } = useUser();
-
+  const { addItem, items } = useShoppingCart()
+  const {
+    userData: { user },
+  } = useUser()
 
   // Check if product is already in cart
-  const isInCart = items.some((item) => item.id === product.id);
-
-  // Format the sales count with proper handling for 0 and 99+
-  
+  const isInCart = items.some((item) => item.id === product.id)
 
   // Handle image carousel effect
   useEffect(() => {
-    // Only set up the carousel if there are multiple images
-    if (!product?.images || product.images.length === 0) return;
+    if (!product?.images || product.images.length === 0) return
     if (product?.images?.length > 1) {
       const interval = setInterval(() => {
-        setCurrentImageIndex((prevIndex) =>
-          prevIndex === product?.images.length - 1 ? 0 : prevIndex + 1
-        );
-      }, 5000); // Change image every 5 seconds
-
-      return () => clearInterval(interval);
+        setCurrentImageIndex((prevIndex) => (prevIndex === product?.images.length - 1 ? 0 : prevIndex + 1))
+      }, 5000)
+      return () => clearInterval(interval)
     }
-  }, [product?.images]);
+  }, [product?.images])
 
   const handleAddToStore = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent card click when clicking the button
-    e.stopPropagation(); // Stop event propagation
+    e.preventDefault()
+    e.stopPropagation()
+    setIsAdding(true)
 
-
-    setIsAdding(true);
-
-    // Create cart item from product
+    // Create cart item from product with min/max price constraints
     const cartItem = {
       id: product.id,
       name: product.name,
       price: product.price,
-      image:
-        product.images && product.images.length > 0
-          ? product.images[0]
-          : "/placeholder.svg",
-    };
+      minPrice: product.minPrice || product.price, // Use product.minPrice
+      maxPrice: product.maxPrice || 0, // Use product.maxPrice (0 means no limit)
+      image: product.images && product.images.length > 0 ? product.images[0] : "/placeholder.svg",
+    }
 
-    // Add item to cart after a short delay to show loading state
     setTimeout(() => {
       if (!isInCart) {
-        addItem(cartItem, false); // Second parameter opens the cart
+        addItem(cartItem, false)
       }
-      setIsAdding(false);
-    }, 800);
-  };
+      setIsAdding(false)
+    }, 800)
+  }
 
   return (
     <TooltipProvider>
@@ -89,8 +283,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <Card
           className={cn(
             "overflow-hidden transition-all hover:shadow-md group relative border-muted cursor-pointer",
-            "w-full max-w-[350px] mx-auto h-full flex flex-col", // Fixed height and flex column
-            className
+            "w-full max-w-[350px] mx-auto h-full flex flex-col",
+            className,
           )}
         >
           {/* Product Image with Badges */}
@@ -127,20 +321,21 @@ export function ProductCard({ product, className }: ProductCardProps) {
             <div className="flex items-center text-xs text-muted-foreground flex-wrap gap-x-1">
               <div className="flex items-center">
                 <ShoppingBag className="mr-0.5 h-3 w-3" />
-                <span className="truncate">
-                  {formatQuantity(product?.sales || 0)} sold
-                </span>
+                <span className="truncate">{formatQuantity(product?.sales || 0)} sold</span>
               </div>
             </div>
 
             {/* Price and Competition */}
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <div className="text-[12px] font-semibold md:text-base">
-                  ₦{product?.price?.toLocaleString()}
-                </div>
+                <div className="text-[12px] font-semibold md:text-base">₦{product?.price?.toLocaleString()}</div>
+                {/* Show price range if available */}
+                {product?.minPrice && product?.maxPrice && (
+                  <div className="text-[10px] text-muted-foreground">
+                    Range: ₦{product.minPrice.toLocaleString()} - ₦{product.maxPrice.toLocaleString()}
+                  </div>
+                )}
               </div>
-
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div
@@ -149,23 +344,17 @@ export function ProductCard({ product, className }: ProductCardProps) {
                   >
                     <Users className="h-3 w-3 flex-shrink-0" />
                     <span className="text-[10px] sm:text-xs">
-                      {formatQuantity(product?.plugsCount)}{" "}
-                      {product?.plugsCount === 1 ? "plug" : "plugs"}
+                      {formatQuantity(product?.plugsCount)} {product?.plugsCount === 1 ? "plug" : "plugs"}
                     </span>
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="top" onClick={(e) => e.stopPropagation()}>
-                  <p className="text-xs">
-                    Number of Plugs selling this product
-                  </p>
+                  <p className="text-xs">Number of Plugs selling this product</p>
                 </TooltipContent>
               </Tooltip>
             </div>
 
-            {/* Supplier Info */}
-
-            {/* Action Buttons - Push to bottom with flex spacer */}
-
+            {/* Action Buttons */}
             {user?.userType === "PLUG" && (
               <div className="mt-auto pt-2">
                 <Button
@@ -173,8 +362,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
                     isInCart
                       ? "bg-green-100 text-green-800 hover:bg-green-100"
                       : product?.isPlugged
-                      ? "bg-red-100 text-red-800 hover:bg-red-100"
-                      : ""
+                        ? "bg-red-100 text-red-800 hover:bg-red-100"
+                        : ""
                   }`}
                   onClick={handleAddToStore}
                   disabled={isAdding || isInCart || product?.isPlugged}
@@ -205,5 +394,5 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </Card>
       </Link>
     </TooltipProvider>
-  );
+  )
 }
