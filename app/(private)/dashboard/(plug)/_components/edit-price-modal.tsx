@@ -393,6 +393,8 @@ export function EditPriceModal({
   const maxPrice = productData?.maxPrice || 0;
   const supplierPrice = productData?.originalPrice || 0;
 
+  console.log("productData", productData)
+
   // Calculate commission data whenever price changes
   useEffect(() => {
     if (!productData) return;
