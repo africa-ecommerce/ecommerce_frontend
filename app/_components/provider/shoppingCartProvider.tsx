@@ -1406,10 +1406,7 @@ function PriceModal({
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-1">
-                      <Percent className="h-3 w-3 text-blue-600" />
-                      <span>Margin %:</span>
-                    </div>
+                   
                     <span className="font-medium text-blue-600">
                       {commissionData.marginPercent.toFixed(1)}%
                     </span>
@@ -1420,12 +1417,7 @@ function PriceModal({
                       {commissionData.commissionRate.toFixed(1)}%
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span>Platform Fee:</span>
-                    <span className="font-medium text-red-600">
-                      -{formatCurrency(commissionData.platformCommission)}
-                    </span>
-                  </div>
+                  
                   <div className="border-t pt-2 mt-2">
                     <div className="flex justify-between items-center">
                       <span className="font-medium">Your Take Home:</span>

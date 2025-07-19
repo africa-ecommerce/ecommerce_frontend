@@ -162,6 +162,8 @@ export default function ProductDetail() {
         product.images && product.images.length > 0
           ? product.images[0]
           : "/placeholder.svg",
+           minPrice: product.minPrice, // Use product.minPrice
+      maxPrice: product.maxPrice, // Use product.maxPrice (0 means no limit)
     };
 
     // Add item to cart after a short delay to show loading state

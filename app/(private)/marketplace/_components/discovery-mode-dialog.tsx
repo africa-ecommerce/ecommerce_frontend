@@ -132,6 +132,8 @@ export function DiscoveryModeDialog({
         currentProduct.images && currentProduct.images.length > 0
           ? currentProduct.images[0]
           : "/placeholder.svg",
+      minPrice: currentProduct.minPrice, // Use product.minPrice
+      maxPrice: currentProduct.maxPrice, // Use product.maxPrice (0 means no limit)
     };
 
     // Add item to cart after a short delay to show loading state

@@ -264,8 +264,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
       id: product.id,
       name: product.name,
       price: product.price,
-      minPrice: product.minPrice || product.price, // Use product.minPrice
-      maxPrice: product.maxPrice || 0, // Use product.maxPrice (0 means no limit)
+      minPrice: product.minPrice, // Use product.minPrice
+      maxPrice: product.maxPrice, // Use product.maxPrice (0 means no limit)
       image: product.images && product.images.length > 0 ? product.images[0] : "/placeholder.svg",
     }
 
