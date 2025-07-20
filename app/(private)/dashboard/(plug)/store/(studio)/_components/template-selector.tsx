@@ -30,7 +30,7 @@ const templates = [
     id: "primary",
     name: "Fashion Boutique",
     description: "Elegant and minimalist fashion boutique template",
-    image: "/fashionNova.png",
+    image: "/fashion.png",
     category: "fashion",
   },
   {
@@ -63,13 +63,13 @@ const pages = [
     id: "index",
     name: "Home",
     description: "Main landing page",
-    image: "/placeholder.svg?height=200&width=300",
+    image: "/fashion.png",
   },
   {
     id: "marketplace",
     name: "Marketplace",
     description: "Browse all products",
-    image: "/placeholder.svg?height=200&width=300",
+    image: "/fashion_marketplace.png",
   },
   
 ]
