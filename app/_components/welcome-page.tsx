@@ -402,7 +402,7 @@ export default function Home() {
                     Guaranteed Payments
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    Secure, timely payouts after 3 days of delivery
+                    Secure, timely payouts after delivery
                   </p>
                 </div>
               </div>
@@ -666,7 +666,7 @@ export default function Home() {
                     </div>
                     <h4 className="font-bold mb-2">Get Paid</h4>
                     <p className="text-white/90 text-sm">
-                      Withdraw earnings after 3 days
+                      Withdraw earnings after delivery
                     </p>
                   </div>
                 </div>
@@ -1245,7 +1245,7 @@ export default function Home() {
                     <div>
                       <h4 className="font-semibold mb-2">How do I get paid?</h4>
                       <p className="text-gray-600 text-sm">
-                        You can withdraw your margin to your account 3 days
+                        You can withdraw your margin to your account
                         after successful delivery. We handle the payment
                         processing.
                       </p>

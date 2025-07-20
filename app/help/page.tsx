@@ -516,7 +516,7 @@ export default function HelpPage() {
                       <div>
                         <h4 className="font-medium">Lagos, Nigeria (HQ)</h4>
                         <p className="text-sm text-muted-foreground">
-                          123 Broad Street, Victoria Island
+                         7, seidu ajibowo, ikeja
                           <br />
                           Lagos, Nigeria
                         </p>
