@@ -34,7 +34,12 @@ export function Footer() {
               businesses without the headaches of running one.
             </p>
             <div className="flex gap-4">
-              <Link href="#" className="text-gray-400 hover:opacity-80">
+              <Link
+                href="https://www.instagram.com/pluggnhq/"
+                className="text-gray-400 hover:opacity-80"
+                 target="_blank"
+  rel="noopener noreferrer"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -59,7 +64,8 @@ export function Footer() {
                 </svg>
                 <span className="sr-only">Instagram</span>
               </Link>
-              <Link href="#" className="text-gray-400 hover:opacity-80">
+              <Link href="#" className="text-gray-400 hover:opacity-80"  target="_blank"
+  rel="noopener noreferrer">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -76,7 +82,8 @@ export function Footer() {
                 </svg>
                 <span className="sr-only">Facebook</span>
               </Link>
-              <Link href="#" className="text-gray-400 hover:opacity-80">
+              <Link href="https://x.com/pluggnhq" className="text-gray-400 hover:opacity-80"  target="_blank"
+  rel="noopener noreferrer">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
