@@ -1383,8 +1383,8 @@ export default function PlugDashboard() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           unlockedPayment={
-            // paymentData?.data.unlockedAmount || 0
-            1000
+            paymentData?.data.unlockedAmount || 0
+            
           }
           mutateKey={"/api/payments/plug/earnings"}
         />
