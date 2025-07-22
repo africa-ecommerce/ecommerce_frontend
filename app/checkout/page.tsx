@@ -632,7 +632,7 @@ export default function CheckoutPage() {
         },
       ],
     },
-    publicKey: "pk_test_eff9334b69c4057bd0b89b293824020426f0d011",
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
     text: isLoading ? "Processing..." : "Place Order",
     onSuccess: async (reference) => {
       try {
