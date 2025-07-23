@@ -220,7 +220,7 @@ export function EditPriceModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-[480px] h-[90vh] max-h-[800px] flex flex-col p-0 gap-0">
+      <DialogContent className="w-[95vw] max-w-[480px] max-h-[800px] flex flex-col p-0 gap-0">
         {/* Fixed Header */}
         <DialogHeader className="flex-shrink-0 p-6 pb-0">
           <DialogTitle className="text-lg sm:text-xl">Edit Product Price</DialogTitle>
