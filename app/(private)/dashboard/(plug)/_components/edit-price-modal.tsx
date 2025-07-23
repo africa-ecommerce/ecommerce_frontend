@@ -188,7 +188,7 @@ export function EditPriceModal({
       }
 
       const result = await response.json();
-      successToast(result.message);
+      successToast("Price has been updated successfully");
       mutate("/api/plug/products/");
 
       // Reset form
@@ -248,16 +248,16 @@ export function EditPriceModal({
         <div className="flex-1 overflow-y-auto px-6 py-4">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Price Change Notification */}
-            <Alert className="bg-amber-50 text-amber-800 border-amber-200">
+            {/* <Alert className="bg-amber-50 text-amber-800 border-amber-200">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle className="text-sm font-medium">Price Change Notice</AlertTitle>
               <AlertDescription className="text-sm">
                 Any price changes will take effect in 24 hours from submission.
               </AlertDescription>
-            </Alert>
+            </Alert> */}
 
             {/* Pending Price Change Display */}
-            {productData?.pendingPrice && (
+            {/* {productData?.pendingPrice && (
               <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
                 <h4 className="mb-3 font-medium text-blue-800 text-sm">
                   Pending Price Change
@@ -283,7 +283,7 @@ export function EditPriceModal({
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* Price Guidelines */}
             <div className="rounded-lg bg-muted p-4">
