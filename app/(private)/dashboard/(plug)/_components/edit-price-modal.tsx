@@ -223,7 +223,9 @@ export function EditPriceModal({
       <DialogContent className="w-[95vw] max-w-[480px] max-h-[800px] flex flex-col p-0 gap-0">
         {/* Fixed Header */}
         <DialogHeader className="flex-shrink-0 p-6 pb-0">
-          <DialogTitle className="text-lg sm:text-xl">Edit Product Price</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">
+            Edit Product Price
+          </DialogTitle>
           {isLoading ? (
             <div className="text-sm text-muted-foreground">
               <Skeleton className="h-4 w-3/4" />
@@ -324,7 +326,9 @@ export function EditPriceModal({
 
             {/* Price Input */}
             <div className="space-y-2">
-              <Label htmlFor="price" className="text-sm font-medium">New Price (NGN)</Label>
+              <Label htmlFor="price" className="text-sm font-medium">
+                New Price (NGN)
+              </Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
                   ₦
@@ -376,14 +380,21 @@ export function EditPriceModal({
                       {formatCurrency(commissionData.plugMargin)}
                     </span>
                   </div>
-                 
+
                   <div className="flex justify-between items-center">
                     <span>Commission Rate:</span>
                     <span className="font-medium text-orange-600">
                       {commissionData.commissionRate.toFixed(1)}%
                     </span>
                   </div>
-                  
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Your Take Home:</span>
+                      <span className="font-bold text-green-700 text-base">
+                        {formatCurrency(commissionData.plugTakeHome)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 <div className="mt-3 p-2 bg-blue-100 rounded text-xs text-blue-800">
                   💡 Higher margins (30%+ = 17.5% fee, 60%+ = 15% fee) get
@@ -441,7 +452,7 @@ export function EditPriceModal({
                 </div>
               </div>
             )}
-            
+
             {/* Add some bottom padding for the last item */}
             <div className="h-4"></div>
           </form>
