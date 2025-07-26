@@ -146,7 +146,7 @@ export default function SupplierSuccess() {
             variant="outline"
             className="w-full md:w-[85%] md:flex-1 border-[#FF7A29] text-[#FF7A29] py-3 text-sm md:text-base group transition-all duration-200"
           >
-            <Link href="/contact">
+            <Link href="/help">
               Contact Our Team
               <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Link>
