@@ -98,10 +98,7 @@ const capitalizeWords = (str: string) => {
   return str.replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
-const truncateAddress = (address: string, maxLength = 50) => {
-  if (address.length <= maxLength) return address;
-  return address.substring(0, maxLength) + "...";
-};
+
 
 const formatFullAddress = (address: string, lga: string, state: string) => {
   return `${capitalizeWords(address)}, ${capitalizeWords(
@@ -202,6 +199,8 @@ const transformApiData = (
     ];
     return baseProgress;
   };
+
+  
 
   return {
     orderId: trackingId,
