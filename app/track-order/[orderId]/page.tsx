@@ -465,133 +465,139 @@ export default function TrackOrderPage() {
                 </p>
               </CardHeader>
               <CardContent className="p-3 md:p-6">
-                <div className="space-y-6">
-                  {/* Progress Bar */}
-                  <div className="relative">
-                    <div className="flex items-center justify-between mb-2">
-                      {orderData.trackingProgress.map((step, index) => (
-                        <div
-                          key={index}
-                          className={`flex flex-col items-center relative z-10 ${
-                            step.stepState === "completed"
-                              ? "text-green-600"
-                              : step.stepState === "current"
-                              ? "text-blue-600"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          <div
-                            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center mb-2 transition-all duration-300 ${
-                              step.stepState === "completed"
-                                ? "bg-green-500 border-green-500 text-white"
-                                : step.stepState === "current"
-                                ? "bg-blue-500 border-blue-500 text-white animate-pulse"
-                                : "bg-white border-gray-300 text-gray-400"
-                            }`}
-                          >
-                            {getStatusIcon(step.status, step.stepState)}
-                          </div>
-                          <span className="text-xs font-medium capitalize">
-                            {step.status}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                    {/* Progress Line */}
-                    <div className="absolute top-4 sm:top-5 left-4 sm:left-5 right-4 sm:right-5 h-0.5 bg-gray-200 -z-0">
-                      <div
-                        className="h-full bg-green-500 transition-all duration-500 ease-out"
-                        style={{
-                          width:
-                            orderData.trackingProgress.length > 1
-                              ? `${
-                                  (completedStepsCount /
-                                    (orderData.trackingProgress.length - 1)) *
-                                  100
-                                }%`
-                              : "0%",
-                        }}
-                      />
-                    </div>
-                  </div>
+               
 
-                  {/* Progress Details */}
-                  <div className="space-y-4">
-                    {orderData.trackingProgress.map((step, index) => (
-                      <div
-                        key={index}
-                        className={`flex gap-4 p-3 rounded-lg transition-all duration-200 ${
-                          step.stepState === "completed"
-                            ? "bg-green-50 border border-green-200"
-                            : step.stepState === "current"
-                            ? "bg-blue-50 border border-blue-200"
-                            : "bg-gray-50 border border-gray-200"
-                        }`}
-                      >
-                        <div className="flex-shrink-0 mt-1">
-                          {getStatusIcon(step.status, step.stepState)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
-                            <h4
-                              className={`font-semibold text-sm capitalize ${
-                                step.stepState === "completed"
-                                  ? "text-green-700"
-                                  : step.stepState === "current"
-                                  ? "text-blue-700"
-                                  : "text-gray-600"
-                              }`}
-                            >
-                              {step.status === "pending"
-                                ? "Order Confirmed"
-                                : step.status === "shipped"
-                                ? "Package Shipped"
-                                : step.status === "delivered"
-                                ? "Package Delivered"
-                                : step.status}
-                            </h4>
-                            {step.stepState === "completed" && (
-                              <Badge
-                                variant="secondary"
-                                className="text-xs w-fit bg-green-100 text-green-700"
-                              >
-                                Completed
-                              </Badge>
-                            )}
-                            {step.stepState === "current" && (
-                              <Badge
-                                variant="secondary"
-                                className="text-xs w-fit bg-blue-100 text-blue-700"
-                              >
-                                Current Step
-                              </Badge>
-                            )}
-                            {step.stepState === "upcoming" && (
-                              <Badge
-                                variant="secondary"
-                                className="text-xs w-fit bg-gray-100 text-gray-700"
-                              >
-                                Upcoming
-                              </Badge>
-                            )}
-                          </div>
-                          <p
-                            className={`text-xs sm:text-sm mb-2 ${
-                              step.stepState === "completed"
-                                ? "text-green-600"
-                                : step.stepState === "current"
-                                ? "text-blue-600"
-                                : "text-gray-500"
-                            }`}
-                          >
-                            {step.description}
-                          </p>
-                         
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+
+
+                <div className="space-y-6">
+  {/* Progress Bar */}
+  <div className="relative">
+    <div className="flex items-center justify-between mb-2">
+      {orderData.trackingProgress.map((step, index) => (
+        <div
+          key={index}
+          className={`flex flex-col items-center relative z-10 ${
+            step.stepState === "completed"
+              ? "text-green-600"
+              : step.stepState === "current"
+              ? "text-blue-600"
+              : "text-gray-400"
+          }`}
+        >
+          <div
+            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center mb-2 transition-all duration-300 ${
+              step.stepState === "completed"
+                ? "bg-green-500 border-green-500 text-white"
+                : step.stepState === "current"
+                ? "bg-blue-500 border-blue-500 text-white animate-pulse"
+                : "bg-white border-gray-300 text-gray-400"
+            }`}
+          >
+            {getStatusIcon(step.status, step.stepState)}
+          </div>
+          <span className="text-xs font-medium capitalize">
+            {step.status}
+          </span>
+        </div>
+      ))}
+    </div>
+    
+    {/* Fixed Progress Line */}
+    <div className="absolute top-4 sm:top-5 left-0 right-0 h-0.5 bg-gray-200 -z-0 flex items-center px-4 sm:px-5">
+      <div className="w-full h-0.5 bg-gray-200 relative">
+        <div
+          className="h-full bg-green-500 transition-all duration-500 ease-out absolute left-0 top-0"
+          style={{
+            width:
+              orderData.trackingProgress.length > 1
+                ? `${
+                    (completedStepsCount /
+                      (orderData.trackingProgress.length - 1)) *
+                    100
+                  }%`
+                : "0%",
+          }}
+        />
+      </div>
+    </div>
+  </div>
+
+  {/* Progress Details */}
+  <div className="space-y-4">
+    {orderData.trackingProgress.map((step, index) => (
+      <div
+        key={index}
+        className={`flex gap-4 p-3 rounded-lg transition-all duration-200 ${
+          step.stepState === "completed"
+            ? "bg-green-50 border border-green-200"
+            : step.stepState === "current"
+            ? "bg-blue-50 border border-blue-200"
+            : "bg-gray-50 border border-gray-200"
+        }`}
+      >
+        <div className="flex-shrink-0 mt-1">
+          {getStatusIcon(step.status, step.stepState)}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
+            <h4
+              className={`font-semibold text-sm capitalize ${
+                step.stepState === "completed"
+                  ? "text-green-700"
+                  : step.stepState === "current"
+                  ? "text-blue-700"
+                  : "text-gray-600"
+              }`}
+            >
+              {step.status === "pending"
+                ? "Order Confirmed"
+                : step.status === "shipped"
+                ? "Package Shipped"
+                : step.status === "delivered"
+                ? "Package Delivered"
+                : step.status}
+            </h4>
+            {step.stepState === "completed" && (
+              <Badge
+                variant="secondary"
+                className="text-xs w-fit bg-green-100 text-green-700"
+              >
+                Completed
+              </Badge>
+            )}
+            {step.stepState === "current" && (
+              <Badge
+                variant="secondary"
+                className="text-xs w-fit bg-blue-100 text-blue-700"
+              >
+                Current Step
+              </Badge>
+            )}
+            {step.stepState === "upcoming" && (
+              <Badge
+                variant="secondary"
+                className="text-xs w-fit bg-gray-100 text-gray-700"
+              >
+                Upcoming
+              </Badge>
+            )}
+          </div>
+          <p
+            className={`text-xs sm:text-sm mb-2 ${
+              step.stepState === "completed"
+                ? "text-green-600"
+                : step.stepState === "current"
+                ? "text-blue-600"
+                : "text-gray-500"
+            }`}
+          >
+            {step.description}
+          </p>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
               </CardContent>
             </Card>
           </div>
