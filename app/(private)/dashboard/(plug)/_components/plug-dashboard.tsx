@@ -106,7 +106,6 @@ const TwitterIcon = () => (
   </svg>
 );
 
-
 const FacebookIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -220,9 +219,9 @@ const InstagramIcon = () => (
         x2="61.3394"
         y2="63.3397"
       >
-        <stop offset="0%" stopColor="rgb(255,100,0)"  stopOpacity="1" />
-        <stop offset="50%" stopColor="rgb(255,1,0);s" stopOpacity="1"/>
-        <stop offset="100%" stopColor="rgb(253,0,86)"  stopOpacity="1" />
+        <stop offset="0%" stopColor="rgb(255,100,0)" stopOpacity="1" />
+        <stop offset="50%" stopColor="rgb(255,1,0);s" stopOpacity="1" />
+        <stop offset="100%" stopColor="rgb(253,0,86)" stopOpacity="1" />
       </linearGradient>
       <path
         d="M 44.999 21.892 c -12.762 0 -23.108 10.346 -23.108 23.108 s 10.346 23.108 23.108 23.108 c 12.763 0 23.108 -10.346 23.108 -23.108 S 57.762 21.892 44.999 21.892 z M 44.999 60 C 36.716 59.999 30 53.284 30 45 c 0 -8.284 6.715 -15 15 -15 c 8.284 0.001 15 6.716 15 15 C 60 53.284 53.284 60 44.999 60 z"
@@ -595,7 +594,6 @@ export default function PlugDashboard() {
     );
 
     // Platform image mapping
-    
 
     // Platform color mapping
     const platformColors: { [key: string]: string } = {
@@ -616,7 +614,7 @@ export default function PlugDashboard() {
         percentage: `${salesPercentage}%`,
         description: `Of your sales come from ${platformName}`,
         color: platformColors[platformName.toLowerCase()] || "text-gray-600",
-       
+
         stats: [
           {
             label: "Visits",
@@ -729,12 +727,7 @@ export default function PlugDashboard() {
           <div className="flex items-center gap-2 text-sm">
             <Users className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">
-              {capitalizeWords(order.buyerName)}
-            </span>
-            <span className="text-muted-foreground">•</span>
-            <span className="text-muted-foreground">
-              {capitalizeWords(order.buyerLga)},{" "}
-              {capitalizeWords(order.buyerState)}
+              {truncateText(capitalizeWords(order.buyerName), 30)}
             </span>
           </div>
 
@@ -750,7 +743,8 @@ export default function PlugDashboard() {
               <div key={item.id} className="flex justify-between items-center">
                 <div className="flex-1">
                   <div className="text-sm font-medium capitalize">
-                    {item.productName} x {item.quantity}
+                    {truncateText(item.productName, 37)}{" "}
+                    <span className="lowercase">x</span> {item.quantity}
                   </div>
                   {/* Show variant details if available */}
                   {item.variantId &&
@@ -1382,10 +1376,7 @@ export default function PlugDashboard() {
         <WithdrawalModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          unlockedPayment={
-            paymentData?.data.unlockedAmount || 0
-            
-          }
+          unlockedPayment={paymentData?.data.unlockedAmount || 0}
           mutateKey={"/api/payments/plug/earnings"}
         />
       </div>

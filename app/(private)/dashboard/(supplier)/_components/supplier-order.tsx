@@ -35,6 +35,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { IntelligenceSection } from "./order-intelligence";
+import { truncateText } from "@/lib/utils";
 
 // Utility functions remain the same
 
@@ -177,13 +178,9 @@ const OrderCard = ({ order }: { order: any }) => {
         <div className="flex items-center gap-2 text-sm">
           <Users className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">
-            {capitalizeWords(order.buyerName)}
+            {truncateText(capitalizeWords(order.buyerName), 30)}
           </span>
-          <span className="text-muted-foreground">•</span>
-          <span className="text-muted-foreground">
-            {capitalizeWords(order.buyerLga)},{" "}
-            {capitalizeWords(order.buyerState)}
-          </span>
+          
         </div>
 
        
@@ -194,7 +191,7 @@ const OrderCard = ({ order }: { order: any }) => {
             <div key={item.id} className="flex justify-between items-center">
               <div className="flex-1">
                 <div className="text-sm font-medium capitalize">
-                  {item.productName} <span className="lowercase">x</span> {item.quantity}
+                  {truncateText(item.productName, 37)} <span className="lowercase">x</span> {item.quantity}
                 </div>
                 {/* Show variant details if available */}
                 {item.variantId &&

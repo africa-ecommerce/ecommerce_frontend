@@ -509,12 +509,7 @@ export default function Products() {
           <div className="flex items-center gap-2 text-sm">
             <Users className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium sm:text-base text-sm">
-              {capitalizeWords(order.buyerName)}
-            </span>
-            <span className="text-muted-foreground">•</span>
-            <span className="text-muted-foreground sm:text-base text-sm">
-              {capitalizeWords(order.buyerLga)},{" "}
-              {capitalizeWords(order.buyerState)}
+              {truncateText(capitalizeWords(order.buyerName), 30)}
             </span>
           </div>
 
@@ -530,8 +525,8 @@ export default function Products() {
               <div key={item.id} className="flex justify-between items-center">
                 <div className="flex-1">
                   <div className="sm:text-sm text-xs font-medium capitalize">
-                    {item.productName} <span className="lowercase">x</span>{" "}
-                    {item.quantity}
+                    {truncateText(item.productName, 37)}{" "}
+                    <span className="lowercase">x</span> {item.quantity}
                   </div>
                   {/* Show variant details if available */}
                   {item.variantId &&
