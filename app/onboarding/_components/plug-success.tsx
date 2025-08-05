@@ -35,7 +35,7 @@ interface ConfettiPiece {
   horizontalSwing: number;
 }
 
-export default function PlugSuccess() {
+export default function PlugSuccess({ onLearnMoreClick }: { onLearnMoreClick: () => void }) {
   const [showConfetti, setShowConfetti] = useState<boolean>(true);
   const [confettiPieces, setConfettiPieces] = useState<ConfettiPiece[]>([]);
 
@@ -215,8 +215,6 @@ export default function PlugSuccess() {
               </div>
             </div>
 
-           
-
             <div className="group">
               <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
                 <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center mt-0.5 group-hover:scale-110 transition-transform flex-shrink-0">
@@ -247,7 +245,6 @@ export default function PlugSuccess() {
                 Quick Tips for Success
               </h3>
               <ul className="space-y-2 text-sm text-gray-700">
-                
                 <li className="flex items-center gap-2">
                   <div className="h-1.5 w-1.5 rounded-full bg-[#FF7A29] flex-shrink-0"></div>
                   <span>
@@ -255,11 +252,18 @@ export default function PlugSuccess() {
                   </span>
                 </li>
               </ul>
-             
             </div>
           </div>
         </div>
       </div>
+
+       <Button
+        onClick={onLearnMoreClick}
+        variant="link"
+        className="text-[#FF7A29] mt-6"
+      >
+        Learn More
+      </Button>
     </div>
   );
 }

@@ -36,12 +36,20 @@ import  LearnMoreSection  from "./learn-more-section";
 type Section = "profile" | "payment" | "issues" | "learnMore" | "account";
 
 interface MorePageContentProps {
-  onBack: () => void; // New prop to handle closing the more page
+  onBack: () => void;
   userType: "PLUG" | "SUPPLIER";
+  initialSection?: Section | null;
 }
 
-export function MorePageContent({ onBack, userType }: MorePageContentProps) {
-  const [activeSection, setActiveSection] = useState<Section | null>(null);
+
+export function MorePageContent({
+  onBack,
+  userType,
+  initialSection = null,
+}: MorePageContentProps) {
+  const [activeSection, setActiveSection] = useState<Section | null>(
+    initialSection
+  );
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showSignOutModal, setShowSignOutModal] = useState(false); // State for the confirmation modal
   const router = useRouter();
