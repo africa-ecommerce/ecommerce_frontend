@@ -333,11 +333,7 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
         );
 
       case "learnMore":
-        return (
-          <LearnMoreSection
-           
-          />
-        );
+        return <LearnMoreSection onBack={handleBackFromSection} />;
 
       default:
         return (
