@@ -36,9 +36,10 @@ interface PlatformInfo {
 
 interface LearnMoreSectionProps {
   onBack?: () => void;
+  modal?:  Boolean
 }
 
-export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
+export default function LearnMoreSection({ onBack, modal }: LearnMoreSectionProps) {
   const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>(
     {}
   );
@@ -202,7 +203,8 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         },
         {
           title: "Create product showcase videos",
-          description: "Show unboxings, usage, and product experiences if you can",
+          description:
+            "Show unboxings, usage, and product experiences if you can",
         },
         {
           title: "Direct to other channels",
@@ -223,7 +225,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         "Use trending sounds and effects",
         "Keep videos under 30 seconds for better engagement",
         "Respond to comments to boost engagement",
-        "Use tiktok to direct sales to other channels"
+        "Use tiktok to direct sales to other channels",
       ],
     },
     whatsapp: {
@@ -316,9 +318,9 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
     },
   };
 
-  return (
-    <div className="animate-fade-in md:max-w-[400px] max-w-[340px]">
-      {/* Header */}
+  const renderContent = () => (
+    <>
+      {" "}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           {onBack && (
@@ -333,7 +335,6 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
           <h1 className="text-xl font-bold text-gray-900">Learn More</h1>
         </div>
       </div>
-
       <div className="space-y-6">
         {/* Title Section */}
         <div className="text-center space-y-2">
@@ -664,6 +665,18 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
           </div>
         </div>
       </div>
+    </>
+  );
+
+  return modal ? (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white rounded-lg shadow-lg max-h-[90vh] overflow-y-auto w-[90%] md:w-[400px] animate-fade-in p-4">
+        {renderContent()}
+      </div>
+    </div>
+  ) : (
+    <div className="animate-fade-in md:max-w-[400px] max-w-[340px]">
+      {renderContent()}
     </div>
   );
 }
