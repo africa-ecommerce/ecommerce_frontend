@@ -19,6 +19,7 @@ import {
   Camera,
   Video,
   Settings,
+  ArrowLeft,
 } from "lucide-react";
 
 interface PlatformInfo {
@@ -33,7 +34,11 @@ interface PlatformInfo {
   tips: string[];
 }
 
-export default function LearnMoreSection() {
+interface LearnMoreSectionProps {
+  onBack?: () => void;
+}
+
+export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
   const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>(
     {}
   );
@@ -317,333 +322,366 @@ export default function LearnMoreSection() {
   };
 
   return (
-    <div className="w-full max-w-none mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6 lg:space-y-8">
-      <div className="text-center space-y-2 sm:space-y-4">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent leading-tight">
-          Social Media Marketing Strategy
-        </h1>
-        <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-4xl mx-auto px-2">
-          Master social media marketing for your e-commerce store with
-          platform-specific strategies and universal best practices.
-        </p>
+    <div className="animate-fade-in">
+      {/* Header with Back Button and Title */}
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <div className="flex items-center">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="mr-2 sm:mr-3 p-1.5 sm:p-2 hover:bg-gray-100 rounded-md transition-colors"
+              aria-label="Back"
+            >
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 text-gray-700" />
+            </button>
+          )}
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
+            Learn More
+          </h1>
+        </div>
       </div>
 
-      {/* Universal Principles */}
-      <div className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
-        <div className="p-4 sm:p-6 border-b border-purple-200">
-          <h2 className="flex items-center gap-2 text-lg sm:text-xl font-semibold">
-            <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
-            Universal Principles
+      <div className="w-full max-w-none mx-auto space-y-4 sm:space-y-6">
+        <div className="text-center space-y-2 sm:space-y-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
+            Social Media Marketing Strategy
           </h2>
-          <p className="text-sm sm:text-base text-gray-600 mt-2">
-            These principles apply to all social media platforms and form the
-            foundation of your strategy.
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-4xl mx-auto px-2">
+            Master social media marketing for your e-commerce store with
+            platform-specific strategies and universal best practices.
           </p>
         </div>
-        <div className="p-4 sm:p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-            {universalPrinciples.map((principle, index) => (
-              <div
-                key={index}
-                className="flex items-start gap-3 p-3 sm:p-4 bg-white rounded-lg border"
-              >
-                <div className="text-purple-600 mt-1 flex-shrink-0">
-                  {principle.icon}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base leading-tight">
-                    {principle.title}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-600 mt-1 leading-relaxed">
-                    {principle.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {/* Platform Tabs */}
-      <div className="w-full">
-        <div className="overflow-x-auto">
-          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg min-w-max">
-            {Object.entries(platforms).map(([key, platform]) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
-                  activeTab === key
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                }`}
-              >
-                <span className={platform.color}>{platform.icon}</span>
-                <span>{platform.name}</span>
-              </button>
-            ))}
+        {/* Universal Principles */}
+        <div className="border-2 border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg">
+          <div className="p-3 sm:p-4 md:p-6 border-b border-gray-200">
+            <h3 className="flex items-center gap-2 text-base sm:text-lg md:text-xl font-semibold text-gray-900">
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-700" />
+              Universal Principles
+            </h3>
+            <p className="text-xs sm:text-sm md:text-base text-gray-600 mt-1 sm:mt-2">
+              These principles apply to all social media platforms and form the
+              foundation of your strategy.
+            </p>
           </div>
-        </div>
-
-        {/* Platform Content */}
-        {Object.entries(platforms).map(([key, platform]) => (
-          <div
-            key={key}
-            className={`space-y-4 sm:space-y-6 mt-6 ${
-              activeTab === key ? "block" : "hidden"
-            }`}
-          >
-            {/* Platform Overview */}
-            <div className="bg-white border rounded-lg">
-              <div className="p-4 sm:p-6 border-b">
-                <div className="flex items-start sm:items-center gap-3">
-                  <div
-                    className={`p-2 sm:p-3 rounded-full text-white ${platform.bgColor} flex-shrink-0`}
-                  >
-                    {platform.icon}
+          <div className="p-3 sm:p-4 md:p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
+              {universalPrinciples.map((principle, index) => (
+                <div
+                  key={index}
+                  className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 md:p-4 bg-white rounded-lg border"
+                >
+                  <div className="text-gray-700 mt-0.5 sm:mt-1 flex-shrink-0">
+                    {principle.icon}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h2 className="text-xl sm:text-2xl font-semibold leading-tight">
-                      {platform.name} Strategy
-                    </h2>
-                    <p className="text-sm sm:text-base text-gray-600 mt-1">
-                      Platform-specific requirements, limitations, and
-                      opportunities
+                    <h4 className="font-semibold text-gray-900 text-xs sm:text-sm md:text-base leading-tight">
+                      {principle.title}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1 leading-relaxed">
+                      {principle.description}
                     </p>
                   </div>
                 </div>
-              </div>
-              <div className="p-4 sm:p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {/* Requirements */}
-                  <div className="space-y-3">
-                    <h3 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
-                      <Settings className="w-4 h-4 flex-shrink-0" />
-                      Requirements
-                    </h3>
-                    <div className="space-y-2">
-                      {platform.requirements.map((req, index) => (
-                        <div key={index} className="flex items-start gap-2">
-                          <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                          <span className="text-xs sm:text-sm leading-relaxed">
-                            {req}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Limitations */}
-                  <div className="space-y-3">
-                    <h3 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
-                      <XCircle className="w-4 h-4 flex-shrink-0" />
-                      Limitations
-                    </h3>
-                    <div className="space-y-2">
-                      {platform.limitations.map((limitation, index) => (
-                        <div key={index} className="flex items-start gap-2">
-                          <XCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-xs sm:text-sm leading-relaxed">
-                            {limitation}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Opportunities */}
-                  <div className="space-y-3">
-                    <h3 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
-                      <TrendingUp className="w-4 h-4 flex-shrink-0" />
-                      Opportunities
-                    </h3>
-                    <div className="space-y-2">
-                      {platform.opportunities.map((opportunity, index) => (
-                        <div key={index} className="flex items-start gap-2">
-                          <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                          <span className="text-xs sm:text-sm leading-relaxed">
-                            {opportunity}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Steps */}
-            <div className="bg-white border rounded-lg">
-              <div className="p-4 sm:p-6 border-b">
-                <h2 className="flex items-center gap-2 text-lg sm:text-xl font-semibold">
-                  <CheckCircle className="w-5 h-5" />
-                  Action Steps
-                </h2>
-                <p className="text-sm sm:text-base text-gray-600 mt-1">
-                  Follow these steps to set up and optimize your {platform.name}{" "}
-                  presence
-                </p>
-              </div>
-              <div className="p-4 sm:p-6">
-                <div className="space-y-3 sm:space-y-4">
-                  {platform.steps.map((step, index) => {
-                    const stepId = `${key}-step-${index}`;
-                    const isCompleted = completedSteps[stepId];
-
-                    return (
-                      <div
-                        key={index}
-                        className={`p-3 sm:p-4 border rounded-lg transition-all ${
-                          isCompleted
-                            ? "bg-green-50 border-green-200"
-                            : "bg-gray-50 border-gray-200"
-                        }`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <input
-                            type="checkbox"
-                            checked={isCompleted}
-                            onChange={() => toggleStep(stepId)}
-                            className="mt-1 flex-shrink-0 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <h3
-                              className={`font-semibold text-sm sm:text-base leading-tight ${
-                                isCompleted ? "text-green-800" : "text-gray-900"
-                              }`}
-                            >
-                              {index + 1}. {step.title}
-                            </h3>
-                            <p
-                              className={`text-xs sm:text-sm mt-1 whitespace-pre-line leading-relaxed ${
-                                isCompleted ? "text-green-700" : "text-gray-600"
-                              }`}
-                            >
-                              {step.description}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Pro Tips */}
-            <div className="bg-white border rounded-lg">
-              <button
-                onClick={() => toggleSection(`${key}-tips`)}
-                className="w-full p-4 sm:p-6 text-left hover:bg-gray-50 transition-colors"
-              >
-                <h2 className="flex items-center justify-between text-lg sm:text-xl font-semibold">
-                  <span className="flex items-center gap-2">
-                    <Zap className="w-5 h-5 text-yellow-600" />
-                    Pro Tips for {platform.name}
-                  </span>
-                  <ChevronDown
-                    className={`w-5 h-5 flex-shrink-0 transition-transform ${
-                      expandedSections[`${key}-tips`] ? "rotate-180" : ""
-                    }`}
-                  />
-                </h2>
-              </button>
-              {expandedSections[`${key}-tips`] && (
-                <div className="px-4 sm:px-6 pb-4 sm:pb-6">
-                  <div className="grid gap-3">
-                    {platform.tips.map((tip, index) => (
-                      <div
-                        key={index}
-                        className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200"
-                      >
-                        <Zap className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                        <span className="text-xs sm:text-sm text-yellow-800 leading-relaxed">
-                          {tip}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* Quick Reference */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 rounded-lg">
-        <div className="p-4 sm:p-6 border-b border-blue-200">
-          <h2 className="flex items-center gap-2 text-lg sm:text-xl font-semibold">
-            <ExternalLink className="w-5 h-5 text-blue-600" />
-            Quick Reference
-          </h2>
-          <p className="text-sm sm:text-base text-gray-600 mt-1">
-            Key reminders for successful social media marketing
-          </p>
         </div>
-        <div className="p-4 sm:p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            <div className="space-y-3">
-              <h3 className="font-semibold text-green-800 text-sm sm:text-base">
-                ✅ Always Do
-              </h3>
-              <ul className="space-y-2">
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm leading-relaxed">
-                    Use your Pluggn store URL consistently
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm leading-relaxed">
-                    Post high-quality, branded content
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm leading-relaxed">
-                    Engage authentically with your audience
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm leading-relaxed">
-                    Include clear calls-to-action
-                  </span>
-                </li>
-              </ul>
+
+        {/* Platform Tabs */}
+        <div className="w-full">
+          <div className="overflow-x-auto">
+            <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg min-w-max">
+              {Object.entries(platforms).map(([key, platform]) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
+                    activeTab === key
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
+                >
+                  <span className={platform.color}>{platform.icon}</span>
+                  <span className="hidden xs:inline">{platform.name}</span>
+                </button>
+              ))}
             </div>
-            <div className="space-y-3">
-              <h3 className="font-semibold text-red-800 text-sm sm:text-base">
-                ❌ Never Do
-              </h3>
-              <ul className="space-y-2">
-                <li className="flex items-start gap-2">
-                  <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm leading-relaxed">
-                    Spam or over-promote
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm leading-relaxed">
-                    Ignore customer comments/messages
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm leading-relaxed">
-                    Use low-quality images
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-xs sm:text-sm leading-relaxed">
-                    Forget to include your store link
-                  </span>
-                </li>
-              </ul>
+          </div>
+
+          {/* Platform Content */}
+          {Object.entries(platforms).map(([key, platform]) => (
+            <div
+              key={key}
+              className={`space-y-3 sm:space-y-4 md:space-y-6 mt-4 sm:mt-6 ${
+                activeTab === key ? "block" : "hidden"
+              }`}
+            >
+              {/* Platform Overview */}
+              <div className="bg-white border rounded-lg">
+                <div className="p-3 sm:p-4 md:p-6 border-b">
+                  <div className="flex items-start sm:items-center gap-2 sm:gap-3">
+                    <div
+                      className={`p-1.5 sm:p-2 md:p-3 rounded-full text-white ${platform.bgColor} flex-shrink-0`}
+                    >
+                      {platform.icon}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-lg sm:text-xl md:text-2xl font-semibold leading-tight text-gray-900">
+                        {platform.name} Strategy
+                      </h3>
+                      <p className="text-xs sm:text-sm md:text-base text-gray-600 mt-0.5 sm:mt-1">
+                        Platform-specific requirements, limitations, and
+                        opportunities
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-3 sm:p-4 md:p-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
+                    {/* Requirements */}
+                    <div className="space-y-2 sm:space-y-3">
+                      <h4 className="font-semibold flex items-center gap-2 text-xs sm:text-sm md:text-base text-gray-900">
+                        <Settings className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        Requirements
+                      </h4>
+                      <div className="space-y-1.5 sm:space-y-2">
+                        {platform.requirements.map((req, index) => (
+                          <div
+                            key={index}
+                            className="flex items-start gap-1.5 sm:gap-2"
+                          >
+                            <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <span className="text-xs sm:text-sm leading-relaxed text-gray-700">
+                              {req}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Limitations */}
+                    <div className="space-y-2 sm:space-y-3">
+                      <h4 className="font-semibold flex items-center gap-2 text-xs sm:text-sm md:text-base text-gray-900">
+                        <XCircle className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        Limitations
+                      </h4>
+                      <div className="space-y-1.5 sm:space-y-2">
+                        {platform.limitations.map((limitation, index) => (
+                          <div
+                            key={index}
+                            className="flex items-start gap-1.5 sm:gap-2"
+                          >
+                            <XCircle className="w-3 h-3 sm:w-4 sm:h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-xs sm:text-sm leading-relaxed text-gray-700">
+                              {limitation}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Opportunities */}
+                    <div className="space-y-2 sm:space-y-3">
+                      <h4 className="font-semibold flex items-center gap-2 text-xs sm:text-sm md:text-base text-gray-900">
+                        <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        Opportunities
+                      </h4>
+                      <div className="space-y-1.5 sm:space-y-2">
+                        {platform.opportunities.map((opportunity, index) => (
+                          <div
+                            key={index}
+                            className="flex items-start gap-1.5 sm:gap-2"
+                          >
+                            <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                            <span className="text-xs sm:text-sm leading-relaxed text-gray-700">
+                              {opportunity}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Steps */}
+              <div className="bg-white border rounded-lg">
+                <div className="p-3 sm:p-4 md:p-6 border-b">
+                  <h3 className="flex items-center gap-2 text-base sm:text-lg md:text-xl font-semibold text-gray-900">
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                    Action Steps
+                  </h3>
+                  <p className="text-xs sm:text-sm md:text-base text-gray-600 mt-0.5 sm:mt-1">
+                    Follow these steps to set up and optimize your{" "}
+                    {platform.name} presence
+                  </p>
+                </div>
+                <div className="p-3 sm:p-4 md:p-6">
+                  <div className="space-y-2 sm:space-y-3 md:space-y-4">
+                    {platform.steps.map((step, index) => {
+                      const stepId = `${key}-step-${index}`;
+                      const isCompleted = completedSteps[stepId];
+
+                      return (
+                        <div
+                          key={index}
+                          className={`p-2 sm:p-3 md:p-4 border rounded-lg transition-all ${
+                            isCompleted
+                              ? "bg-green-50 border-green-200"
+                              : "bg-gray-50 border-gray-200"
+                          }`}
+                        >
+                          <div className="flex items-start gap-2 sm:gap-3">
+                            <input
+                              type="checkbox"
+                              checked={isCompleted}
+                              onChange={() => toggleStep(stepId)}
+                              className="mt-0.5 sm:mt-1 flex-shrink-0 w-3 h-3 sm:w-4 sm:h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <h4
+                                className={`font-semibold text-xs sm:text-sm md:text-base leading-tight ${
+                                  isCompleted
+                                    ? "text-green-800"
+                                    : "text-gray-900"
+                                }`}
+                              >
+                                {index + 1}. {step.title}
+                              </h4>
+                              <p
+                                className={`text-xs sm:text-sm mt-0.5 sm:mt-1 whitespace-pre-line leading-relaxed ${
+                                  isCompleted
+                                    ? "text-green-700"
+                                    : "text-gray-600"
+                                }`}
+                              >
+                                {step.description}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Pro Tips */}
+              <div className="bg-white border rounded-lg">
+                <button
+                  onClick={() => toggleSection(`${key}-tips`)}
+                  className="w-full p-3 sm:p-4 md:p-6 text-left hover:bg-gray-50 transition-colors"
+                >
+                  <h3 className="flex items-center justify-between text-base sm:text-lg md:text-xl font-semibold text-gray-900">
+                    <span className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600" />
+                      Pro Tips for {platform.name}
+                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 transition-transform ${
+                        expandedSections[`${key}-tips`] ? "rotate-180" : ""
+                      }`}
+                    />
+                  </h3>
+                </button>
+                {expandedSections[`${key}-tips`] && (
+                  <div className="px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 md:pb-6">
+                    <div className="grid gap-2 sm:gap-3">
+                      {platform.tips.map((tip, index) => (
+                        <div
+                          key={index}
+                          className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-yellow-50 rounded-lg border border-yellow-200"
+                        >
+                          <Zap className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs sm:text-sm text-yellow-800 leading-relaxed">
+                            {tip}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick Reference */}
+        <div className="bg-gradient-to-r from-blue-50 to-gray-50 border-2 border-blue-200 rounded-lg">
+          <div className="p-3 sm:p-4 md:p-6 border-b border-blue-200">
+            <h3 className="flex items-center gap-2 text-base sm:text-lg md:text-xl font-semibold text-gray-900">
+              <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+              Quick Reference
+            </h3>
+            <p className="text-xs sm:text-sm md:text-base text-gray-600 mt-0.5 sm:mt-1">
+              Key reminders for successful social media marketing
+            </p>
+          </div>
+          <div className="p-3 sm:p-4 md:p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+              <div className="space-y-2 sm:space-y-3">
+                <h4 className="font-semibold text-green-800 text-xs sm:text-sm md:text-base">
+                  ✅ Always Do
+                </h4>
+                <ul className="space-y-1.5 sm:space-y-2">
+                  <li className="flex items-start gap-1.5 sm:gap-2">
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm leading-relaxed text-gray-700">
+                      Use your Pluggn store URL consistently
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-1.5 sm:gap-2">
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm leading-relaxed text-gray-700">
+                      Post high-quality, branded content
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-1.5 sm:gap-2">
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm leading-relaxed text-gray-700">
+                      Engage authentically with your audience
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-1.5 sm:gap-2">
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm leading-relaxed text-gray-700">
+                      Include clear calls-to-action
+                    </span>
+                  </li>
+                </ul>
+              </div>
+              <div className="space-y-2 sm:space-y-3">
+                <h4 className="font-semibold text-red-800 text-xs sm:text-sm md:text-base">
+                  ❌ Never Do
+                </h4>
+                <ul className="space-y-1.5 sm:space-y-2">
+                  <li className="flex items-start gap-1.5 sm:gap-2">
+                    <XCircle className="w-3 h-3 sm:w-4 sm:h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm leading-relaxed text-gray-700">
+                      Spam or over-promote
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-1.5 sm:gap-2">
+                    <XCircle className="w-3 h-3 sm:w-4 sm:h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm leading-relaxed text-gray-700">
+                      Ignore customer comments/messages
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-1.5 sm:gap-2">
+                    <XCircle className="w-3 h-3 sm:w-4 sm:h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm leading-relaxed text-gray-700">
+                      Use low-quality images
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-1.5 sm:gap-2">
+                    <XCircle className="w-3 h-3 sm:w-4 sm:h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-xs sm:text-sm leading-relaxed text-gray-700">
+                      Forget to include your store link
+                    </span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
