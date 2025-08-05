@@ -317,7 +317,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
   };
 
   return (
-    <div className="animate-fade-in md:max-w-[420px] max-w-[360px]">
+    <div className="animate-fade-in md:max-w-[400px] max-w-[340px]">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
