@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -19,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import LearnMoreSection from "@/app/(private)/dashboard/_components/learn-more-section";
 
 // Define the confetti piece type
 interface ConfettiPiece {
@@ -35,9 +34,15 @@ interface ConfettiPiece {
   horizontalSwing: number;
 }
 
-export default function PlugSuccess({ onLearnMoreClick }: { onLearnMoreClick: () => void }) {
+export default function PlugSuccess() {
   const [showConfetti, setShowConfetti] = useState<boolean>(true);
   const [confettiPieces, setConfettiPieces] = useState<ConfettiPiece[]>([]);
+
+  const [isLearnMore, setIsLearnMore] = useState<boolean>(false);
+
+  const onLearnMoreClick = () => {
+    setIsLearnMore(true);
+  };
 
   useEffect(() => {
     // Generate random confetti pieces
@@ -161,11 +166,10 @@ export default function PlugSuccess({ onLearnMoreClick }: { onLearnMoreClick: ()
             asChild
             variant="outline"
             className="w-full md:w-[85%] md:flex-1 border-[#FF7A29] text-[#FF7A29] py-3 text-sm md:text-base group transition-all duration-200"
+            onClick={onLearnMoreClick}
           >
-            <Link href="/dashboard/studio">
-              Create Your Store Now
-              <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            Learn More
+            <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
 
@@ -256,15 +260,7 @@ export default function PlugSuccess({ onLearnMoreClick }: { onLearnMoreClick: ()
           </div>
         </div>
       </div>
-
-       <Button
-        onClick={onLearnMoreClick}
-        variant="link"
-        className="text-[#FF7A29] mt-6"
-      >
-        Learn More
-      </Button>
+      {isLearnMore && <LearnMoreSection />}
     </div>
   );
 }
-
