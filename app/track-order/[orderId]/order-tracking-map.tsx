@@ -1139,10 +1139,7 @@ export default function OrderTrackingMap({
         <FitBounds bounds={bounds} />
 
         {/* Origin Marker */}
-        <Marker
-          position={[origin.lat, origin.lng]}
-          icon={loadIcon("origin")}
-        >
+        <Marker position={[origin.lat, origin.lng]} icon={loadIcon("origin")}>
           <Popup>
             <strong>Origin:</strong> {origin.name} <br />
             {origin.address}
@@ -1199,28 +1196,50 @@ export default function OrderTrackingMap({
       <div
         style={{
           position: "absolute",
-          bottom: 10,
-          left: 10,
-          background: "white",
-          padding: "10px",
+          bottom: "20px",
+          left: "20px",
+          backgroundColor: "white",
+          border: "1px solid #ccc",
           borderRadius: "8px",
-          boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-          fontSize: "14px",
+          padding: "10px 12px",
+          zIndex: 1000,
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          fontSize: "13px",
+          width: "fit-content",
         }}
       >
-        <strong>Legend:</strong>
-        <div style={{ display: "flex", gap: "10px", marginTop: "5px" }}>
-          <div>
-            <img src="/icons/origin.png" width="20" />
+        <strong style={{ display: "block", marginBottom: "5px" }}>
+          Legend
+        </strong>
+        <div style={{ display: "flex", gap: "15px", alignItems: "center" }}>
+          <div style={{ textAlign: "center" }}>
+            <img src="/icons/origin.png" width="24" height="24" />
             <div>Origin</div>
           </div>
-          <div>
-            <img src="/icons/current.png" width="20" />
+          <div style={{ textAlign: "center" }}>
+            <img src="/icons/current.png" width="24" height="24" />
             <div>Current</div>
           </div>
-          <div>
-            <img src="/icons/destination.png" width="20" />
+          <div style={{ textAlign: "center" }}>
+            <img src="/icons/destination.png" width="24" height="24" />
             <div>Destination</div>
+          </div>
+        </div>
+        <hr style={{ margin: "8px 0" }} />
+        <div style={{ fontSize: "12px" }}>
+          <div>
+            <span style={{ color: "green" }}>━</span> Completed Path
+          </div>
+          <div>
+            <span
+              style={{
+                borderBottom: "2px dotted red",
+                display: "inline-block",
+                width: "24px",
+                marginRight: "4px",
+              }}
+            ></span>
+            Remaining Path
           </div>
         </div>
       </div>
