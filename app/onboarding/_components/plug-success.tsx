@@ -163,7 +163,7 @@ export default function PlugSuccess() {
             </Link>
           </Button>
           <Button
-            asChild
+           
             variant="outline"
             className="w-full md:w-[85%] md:flex-1 border-[#FF7A29] text-[#FF7A29] py-3 text-sm md:text-base group transition-all duration-200"
             onClick={onLearnMoreClick}
