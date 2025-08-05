@@ -793,10 +793,10 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
       bgColor: "bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400",
       requirements: [
         "Professional Account for business features",
-        "1k+ followers for Shop Now buttons",
+       
       ],
       limitations: [
-        "Only 1 clickable link in bio",
+        "Only clickable links are in bio",
         "Links in captions/comments are NOT clickable",
       ],
       opportunities: [
@@ -808,7 +808,7 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
         {
           title: "Switch to Professional Account",
           description:
-            "Go to Settings > Account > Switch to Professional Account",
+            "Switch to a professional account to get analytics",
         },
         {
           title: "Optimize your bio",
