@@ -2,8 +2,6 @@
 export interface Supplier {
   id: string;
   rating: number;
-  // fulfillmentRate: number;
-  // responseTime: string;
   image: string;
  name: string;
 }
