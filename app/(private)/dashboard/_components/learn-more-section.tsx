@@ -316,7 +316,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
   };
 
   return (
-    <div className="animate-fade-in md:max-w-[420px] max-w-[380px]">
+    <div className="animate-fade-in md:max-w-[420px] max-w-[360px]">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
@@ -346,7 +346,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         </div>
 
         {/* Universal Principles */}
-        <div className="border-2 border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg overflow-hidden">
+        <div className="border-2 border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg overflow-hidden p-4">
           <div className="p-4 border-b border-gray-200">
             <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
               <Zap className="w-5 h-5 text-gray-700" />
@@ -406,7 +406,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
           {Object.entries(platforms).map(([key, platform]) => (
             <div
               key={key}
-              className={`space-y-4 mt-6 ${
+              className={`space-y-4 mt-6 p-4 ${
                 activeTab === key ? "block" : "hidden"
               }`}
             >
@@ -586,7 +586,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         </div>
 
         {/* Quick Reference */}
-        <div className="bg-gradient-to-r from-blue-50 to-gray-50 border-2 border-blue-200 rounded-lg overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-50 to-gray-50 border-2 border-blue-200 rounded-lg overflow-hidden p-4">
           <div className="p-4 border-b border-blue-200">
             <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
               <ExternalLink className="w-5 h-5 text-blue-600" />
