@@ -60,7 +60,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
       icon: <Link className="w-4 h-4" />,
       title: "Use your Pluggn store URL",
       description:
-        "Use mystore.pluggn.store as your main link across all platforms",
+        "Use (e.g., yourstore.pluggn.store) as your main link across all platforms",
     },
     {
       icon: <Camera className="w-4 h-4" />,
@@ -107,7 +107,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         {
           title: "Optimize your bio",
           description:
-            "🎁 Affordable Accessories & More\n🛍 Shop Now 👇\n🔗 mystore.pluggn.store (e.g., yourstore.pluggn.store)",
+            "🎁 Affordable Accessories & More\n🛍 Shop Now 👇\n🔗 (e.g., yourstore.pluggn.store)",
         },
         {
           title: "Post branded content",
@@ -152,7 +152,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         {
           title: "Add website link",
           description:
-            "Add mystore.pluggn.store (e.g., yourstore.pluggn.store) under 'About' section",
+            "Add (e.g., yourstore.pluggn.store) under 'About' section",
         },
         {
           title: "Add Shop Now button",
@@ -202,11 +202,11 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         },
         {
           title: "Create product showcase videos",
-          description: "Show unboxings, usage, and product experiences",
+          description: "Show unboxings, usage, and product experiences if you can",
         },
         {
           title: "Direct to other channels",
-          description: "Mention: 'DM to shop or visit mystore.pluggn.store'",
+          description: "Mention: 'DM to shop or visit yourstore.pluggn.store'",
         },
         {
           title: "Post engaging content regularly",
@@ -223,6 +223,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         "Use trending sounds and effects",
         "Keep videos under 30 seconds for better engagement",
         "Respond to comments to boost engagement",
+        "Use tiktok to direct sales to other channels"
       ],
     },
     whatsapp: {
@@ -254,7 +255,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         {
           title: "Set up auto-reply",
           description:
-            "Thanks for reaching out! Shop here: mystore.pluggn.store 👇",
+            "Thanks for reaching out! Shop here: yourstore.pluggn.store 👇",
         },
         {
           title: "Share in Status and Groups",
@@ -286,7 +287,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         {
           title: "Optimize bio",
           description:
-            "Affordable fashion | DM to order 🛍 mystore.pluggn.store",
+            "Affordable fashion | DM to order 🛍 yourstore.pluggn.store",
         },
         {
           title: "Tweet product drops",
@@ -336,7 +337,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
       <div className="space-y-6">
         {/* Title Section */}
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-lg md:text-xl font-bold text-gray-900">
             Social Media Marketing Strategy
           </h2>
           <p className="text-sm text-gray-600">
