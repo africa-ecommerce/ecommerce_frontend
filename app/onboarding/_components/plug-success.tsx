@@ -44,6 +44,10 @@ export default function PlugSuccess() {
     setIsLearnMore(true);
   };
 
+  const handleClose = () => {
+    setIsLearnMore(false);
+  }
+
   useEffect(() => {
     // Generate random confetti pieces
     const generateConfetti = (): ConfettiPiece[] => {
@@ -260,7 +264,7 @@ export default function PlugSuccess() {
           </div>
         </div>
       </div>
-      {isLearnMore && <LearnMoreSection />}
+      {isLearnMore && <LearnMoreSection modal={true} onClose={handleClose} />}
     </div>
   );
 }
