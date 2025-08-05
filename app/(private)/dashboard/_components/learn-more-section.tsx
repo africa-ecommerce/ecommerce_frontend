@@ -322,7 +322,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
   };
 
   return (
-    <div className="animate-fade-in w-full">
+    <div className="animate-fade-in">
       {/* Header with Back Button and Title */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
