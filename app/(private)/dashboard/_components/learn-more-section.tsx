@@ -58,27 +58,24 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
   const universalPrinciples = [
     {
       icon: <Link className="w-4 h-4" />,
-      title: "Always use your Pluggn store URL",
+      title: "Use your Pluggn store URL",
       description:
-        "Use mystore.pluggn.store (e.g., yourstore.pluggn.store) as your main link across all platforms",
+        "Use mystore.pluggn.store as your main link across all platforms",
     },
     {
       icon: <Camera className="w-4 h-4" />,
       title: "High-quality product images",
-      description:
-        "Pluggn shares help with this - always include marketing messages with product links",
+      description: "Always include marketing messages with product links",
     },
     {
       icon: <Heart className="w-4 h-4" />,
       title: "Sound human and trustworthy",
-      description:
-        "Maintain a friendly, authentic tone that builds trust with customers",
+      description: "Maintain a friendly, authentic tone that builds trust",
     },
     {
       icon: <ShoppingBag className="w-4 h-4" />,
       title: "Optimize your bio",
-      description:
-        "Clearly state what you sell and include a call-to-action with your store URL",
+      description: "Clearly state what you sell and include a call-to-action",
     },
   ];
 
@@ -209,8 +206,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         },
         {
           title: "Direct to other channels",
-          description:
-            "Mention: 'DM to shop or visit mystore.pluggn.store' (replace with your actual store URL)",
+          description: "Mention: 'DM to shop or visit mystore.pluggn.store'",
         },
         {
           title: "Post engaging content regularly",
@@ -230,7 +226,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
       ],
     },
     whatsapp: {
-      name: "WhatsApp Business",
+      name: "WhatsApp",
       icon: <MessageCircle className="w-4 h-4" />,
       color: "text-green-600",
       bgColor: "bg-green-600",
@@ -249,18 +245,16 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         },
         {
           title: "Set up Business Profile",
-          description:
-            "Add your Pluggn store link (e.g., mystore.pluggn.store) in the business profile",
+          description: "Add your Pluggn store link in the business profile",
         },
         {
           title: "Create a Catalog",
-          description:
-            "Set up catalog with link in description, even if empty initially",
+          description: "Set up catalog with link in description",
         },
         {
           title: "Set up auto-reply",
           description:
-            "Thanks for reaching out! Shop here: mystore.pluggn.store 👇 (replace with your store URL)",
+            "Thanks for reaching out! Shop here: mystore.pluggn.store 👇",
         },
         {
           title: "Share in Status and Groups",
@@ -292,7 +286,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         {
           title: "Optimize bio",
           description:
-            "Affordable fashion | DM to order 🛍 mystore.pluggn.store (e.g., yourstore.pluggn.store)",
+            "Affordable fashion | DM to order 🛍 mystore.pluggn.store",
         },
         {
           title: "Tweet product drops",
@@ -323,25 +317,26 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
 
   return (
     <div className="animate-fade-in">
-      {/* Header with Back Button and Title */}
-      <div className="flex items-center justify-between mb-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           {onBack && (
             <button
               onClick={onBack}
-              className="mr-2 p-1.5 hover:bg-gray-100 rounded-md transition-colors"
+              className="mr-2 p-2 hover:bg-gray-100 rounded-md transition-colors"
               aria-label="Back"
             >
-              <ArrowLeft className="h-4 w-4 text-gray-700" />
+              <ArrowLeft className="h-5 w-5 text-gray-700" />
             </button>
           )}
-          <h1 className="text-lg font-bold text-gray-900">Learn More</h1>
+          <h1 className="text-xl font-bold text-gray-900">Learn More</h1>
         </div>
       </div>
 
-      <div className="w-full space-y-4">
+      <div className="space-y-6">
+        {/* Title Section */}
         <div className="text-center space-y-2">
-          <h2 className="text-xl font-bold text-gray-900 leading-tight">
+          <h2 className="text-2xl font-bold text-gray-900">
             Social Media Marketing Strategy
           </h2>
           <p className="text-sm text-gray-600">
@@ -351,10 +346,10 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         </div>
 
         {/* Universal Principles */}
-        <div className="border-2 border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg">
+        <div className="border-2 border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg overflow-hidden">
           <div className="p-4 border-b border-gray-200">
-            <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900">
-              <Zap className="w-4 h-4 text-gray-700" />
+            <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+              <Zap className="w-5 h-5 text-gray-700" />
               Universal Principles
             </h3>
             <p className="text-sm text-gray-600 mt-1">
@@ -372,11 +367,11 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
                   <div className="text-gray-700 mt-0.5 flex-shrink-0">
                     {principle.icon}
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h4 className="font-semibold text-gray-900 text-sm leading-tight">
+                  <div className="min-w-0">
+                    <h4 className="font-semibold text-gray-900 text-sm">
                       {principle.title}
                     </h4>
-                    <p className="text-sm text-gray-600 mt-1 leading-relaxed">
+                    <p className="text-sm text-gray-600 mt-1">
                       {principle.description}
                     </p>
                   </div>
@@ -387,9 +382,9 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         </div>
 
         {/* Platform Tabs */}
-        <div className="w-full">
+        <div>
           <div className="overflow-x-auto">
-            <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg min-w-max">
+            <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-max min-w-full">
               {Object.entries(platforms).map(([key, platform]) => (
                 <button
                   key={key}
@@ -401,7 +396,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
                   }`}
                 >
                   <span className={platform.color}>{platform.icon}</span>
-                  <span>{platform.name}</span>
+                  <span className="hidden xs:inline">{platform.name}</span>
                 </button>
               ))}
             </div>
@@ -411,12 +406,12 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
           {Object.entries(platforms).map(([key, platform]) => (
             <div
               key={key}
-              className={`space-y-4 mt-4 ${
+              className={`space-y-4 mt-6 ${
                 activeTab === key ? "block" : "hidden"
               }`}
             >
               {/* Platform Overview */}
-              <div className="bg-white border rounded-lg">
+              <div className="bg-white border rounded-lg overflow-hidden">
                 <div className="p-4 border-b">
                   <div className="flex items-start gap-3">
                     <div
@@ -424,8 +419,8 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
                     >
                       {platform.icon}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-lg font-semibold leading-tight text-gray-900">
+                    <div className="min-w-0">
+                      <h3 className="text-xl font-semibold text-gray-900">
                         {platform.name} Strategy
                       </h3>
                       <p className="text-sm text-gray-600 mt-1">
@@ -435,70 +430,66 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
                     </div>
                   </div>
                 </div>
-                <div className="p-4">
-                  <div className="space-y-4">
-                    {/* Requirements */}
+                <div className="p-4 space-y-4">
+                  {/* Requirements */}
+                  <div>
+                    <h4 className="font-semibold flex items-center gap-2 text-sm text-gray-900 mb-2">
+                      <Settings className="w-4 h-4" />
+                      Requirements
+                    </h4>
                     <div className="space-y-2">
-                      <h4 className="font-semibold flex items-center gap-2 text-sm text-gray-900">
-                        <Settings className="w-4 h-4 flex-shrink-0" />
-                        Requirements
-                      </h4>
-                      <div className="space-y-2">
-                        {platform.requirements.map((req, index) => (
-                          <div key={index} className="flex items-start gap-2">
-                            <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm leading-relaxed text-gray-700">
-                              {req}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                      {platform.requirements.map((req, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">{req}</span>
+                        </div>
+                      ))}
                     </div>
+                  </div>
 
-                    {/* Limitations */}
+                  {/* Limitations */}
+                  <div>
+                    <h4 className="font-semibold flex items-center gap-2 text-sm text-gray-900 mb-2">
+                      <XCircle className="w-4 h-4" />
+                      Limitations
+                    </h4>
                     <div className="space-y-2">
-                      <h4 className="font-semibold flex items-center gap-2 text-sm text-gray-900">
-                        <XCircle className="w-4 h-4 flex-shrink-0" />
-                        Limitations
-                      </h4>
-                      <div className="space-y-2">
-                        {platform.limitations.map((limitation, index) => (
-                          <div key={index} className="flex items-start gap-2">
-                            <XCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm leading-relaxed text-gray-700">
-                              {limitation}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                      {platform.limitations.map((limitation, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <XCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">
+                            {limitation}
+                          </span>
+                        </div>
+                      ))}
                     </div>
+                  </div>
 
-                    {/* Opportunities */}
+                  {/* Opportunities */}
+                  <div>
+                    <h4 className="font-semibold flex items-center gap-2 text-sm text-gray-900 mb-2">
+                      <TrendingUp className="w-4 h-4" />
+                      Opportunities
+                    </h4>
                     <div className="space-y-2">
-                      <h4 className="font-semibold flex items-center gap-2 text-sm text-gray-900">
-                        <TrendingUp className="w-4 h-4 flex-shrink-0" />
-                        Opportunities
-                      </h4>
-                      <div className="space-y-2">
-                        {platform.opportunities.map((opportunity, index) => (
-                          <div key={index} className="flex items-start gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                            <span className="text-sm leading-relaxed text-gray-700">
-                              {opportunity}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                      {platform.opportunities.map((opportunity, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">
+                            {opportunity}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Action Steps */}
-              <div className="bg-white border rounded-lg">
+              <div className="bg-white border rounded-lg overflow-hidden">
                 <div className="p-4 border-b">
-                  <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900">
-                    <CheckCircle className="w-4 h-4" />
+                  <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                    <CheckCircle className="w-5 h-5" />
                     Action Steps
                   </h3>
                   <p className="text-sm text-gray-600 mt-1">
@@ -515,7 +506,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
                       return (
                         <div
                           key={index}
-                          className={`p-3 border rounded-lg transition-all ${
+                          className={`p-3 border rounded-lg ${
                             isCompleted
                               ? "bg-green-50 border-green-200"
                               : "bg-gray-50 border-gray-200"
@@ -526,11 +517,11 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
                               type="checkbox"
                               checked={isCompleted}
                               onChange={() => toggleStep(stepId)}
-                              className="mt-1 flex-shrink-0 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                              className="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 flex-shrink-0"
                             />
-                            <div className="flex-1 min-w-0">
+                            <div className="min-w-0">
                               <h4
-                                className={`font-semibold text-sm leading-tight ${
+                                className={`font-semibold text-sm ${
                                   isCompleted
                                     ? "text-green-800"
                                     : "text-gray-900"
@@ -539,7 +530,7 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
                                 {index + 1}. {step.title}
                               </h4>
                               <p
-                                className={`text-sm mt-1 whitespace-pre-line leading-relaxed ${
+                                className={`text-sm mt-1 whitespace-pre-line ${
                                   isCompleted
                                     ? "text-green-700"
                                     : "text-gray-600"
@@ -557,18 +548,18 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
               </div>
 
               {/* Pro Tips */}
-              <div className="bg-white border rounded-lg">
+              <div className="bg-white border rounded-lg overflow-hidden">
                 <button
                   onClick={() => toggleSection(`${key}-tips`)}
                   className="w-full p-4 text-left hover:bg-gray-50 transition-colors"
                 >
-                  <h3 className="flex items-center justify-between text-base font-semibold text-gray-900">
+                  <h3 className="flex items-center justify-between text-lg font-semibold text-gray-900">
                     <span className="flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-yellow-600" />
+                      <Zap className="w-5 h-5 text-yellow-600" />
                       Pro Tips for {platform.name}
                     </span>
                     <ChevronDown
-                      className={`w-4 h-4 flex-shrink-0 transition-transform ${
+                      className={`w-5 h-5 transition-transform ${
                         expandedSections[`${key}-tips`] ? "rotate-180" : ""
                       }`}
                     />
@@ -576,16 +567,14 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
                 </button>
                 {expandedSections[`${key}-tips`] && (
                   <div className="px-4 pb-4">
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {platform.tips.map((tip, index) => (
                         <div
                           key={index}
                           className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200"
                         >
                           <Zap className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-yellow-800 leading-relaxed">
-                            {tip}
-                          </span>
+                          <span className="text-sm text-yellow-800">{tip}</span>
                         </div>
                       ))}
                     </div>
@@ -597,79 +586,78 @@ export default function LearnMoreSection({ onBack }: LearnMoreSectionProps) {
         </div>
 
         {/* Quick Reference */}
-        <div className="bg-gradient-to-r from-blue-50 to-gray-50 border-2 border-blue-200 rounded-lg">
+        <div className="bg-gradient-to-r from-blue-50 to-gray-50 border-2 border-blue-200 rounded-lg overflow-hidden">
           <div className="p-4 border-b border-blue-200">
-            <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900">
-              <ExternalLink className="w-4 h-4 text-blue-600" />
+            <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
+              <ExternalLink className="w-5 h-5 text-blue-600" />
               Quick Reference
             </h3>
             <p className="text-sm text-gray-600 mt-1">
               Key reminders for successful social media marketing
             </p>
           </div>
-          <div className="p-4">
-            <div className="space-y-4">
+          <div className="p-4 space-y-6">
+            <div>
+              <h4 className="font-semibold text-green-800 text-sm mb-3">
+                ✅ Always Do
+              </h4>
               <div className="space-y-2">
-                <h4 className="font-semibold text-green-800 text-sm">
-                  ✅ Always Do
-                </h4>
-                <ul className="space-y-2">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm leading-relaxed text-gray-700">
-                      Use your Pluggn store URL consistently
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm leading-relaxed text-gray-700">
-                      Post high-quality, branded content
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm leading-relaxed text-gray-700">
-                      Engage authentically with your audience
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm leading-relaxed text-gray-700">
-                      Include clear calls-to-action
-                    </span>
-                  </li>
-                </ul>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">
+                    Use your Pluggn store URL consistently
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">
+                    Post high-quality, branded content
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">
+                    Engage authentically with your audience
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">
+                    Include clear calls-to-action
+                  </span>
+                </div>
               </div>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-red-800 text-sm mb-3">
+                ❌ Never Do
+              </h4>
               <div className="space-y-2">
-                <h4 className="font-semibold text-red-800 text-sm">
-                  ❌ Never Do
-                </h4>
-                <ul className="space-y-2">
-                  <li className="flex items-start gap-2">
-                    <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm leading-relaxed text-gray-700">
-                      Spam or over-promote
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm leading-relaxed text-gray-700">
-                      Ignore customer comments/messages
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm leading-relaxed text-gray-700">
-                      Use low-quality images
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-sm leading-relaxed text-gray-700">
-                      Forget to include your store link
-                    </span>
-                  </li>
-                </ul>
+                <div className="flex items-start gap-2">
+                  <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">
+                    Spam or over-promote
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">
+                    Ignore customer comments/messages
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">
+                    Use low-quality images
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-700">
+                    Forget to include your store link
+                  </span>
+                </div>
               </div>
             </div>
           </div>
