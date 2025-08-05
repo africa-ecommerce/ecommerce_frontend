@@ -1386,13 +1386,11 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
   if (modal) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div 
-          className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+        <div
+          className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="h-full overflow-y-auto p-6">
-            {contentComponent}
-          </div>
+          <div className="flex-1 overflow-y-auto p-6">{contentComponent}</div>
         </div>
       </div>
     );
