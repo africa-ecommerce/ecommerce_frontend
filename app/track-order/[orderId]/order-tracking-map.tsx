@@ -1036,8 +1036,6 @@
 
 
 
-
-
 // OrderTrackingMap.tsx
 import {
   MapContainer,
@@ -1049,6 +1047,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import { useEffect } from "react";
+import "leaflet/dist/leaflet.css";
 
 interface LatLngInfo {
   lat: number;
@@ -1067,7 +1066,6 @@ interface OrderData {
   destination: LatLngInfo;
   estimatedDelivery: string;
 }
-
 
 const sampleOrderData: OrderData = {
   orderId: "ORD-2025-001",
@@ -1093,26 +1091,26 @@ const sampleOrderData: OrderData = {
   estimatedDelivery: "2025-07-03T18:00:00Z",
 };
 
-
 const FitBounds = ({ bounds }: { bounds: [number, number][] }) => {
   const map = useMap();
   useEffect(() => {
     if (bounds.length > 0) {
-      map.fitBounds(bounds, { padding: [50, 50] });
+      map.fitBounds(bounds, { padding: [60, 60] });
     }
   }, [map, bounds]);
   return null;
 };
 
-const createCustomIcon = (color: string) =>
-  L.divIcon({
-    html: `<div style="background:${color};border-radius:50%;width:16px;height:16px;"></div>`,
-    className: "",
-    iconSize: [16, 16],
+// Icon loaders
+const loadIcon = (name: string) =>
+  L.icon({
+    iconUrl: `/icons/${name}.png`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
   });
 
-// export default function OrderTrackingMap = ({ order }: Props) => {
- export default function OrderTrackingMap({
+export default function OrderTrackingMap({
   orderData = sampleOrderData,
 }: {
   orderData?: OrderData;
@@ -1125,61 +1123,107 @@ const createCustomIcon = (color: string) =>
     [destination.lat, destination.lng],
   ];
 
-  const polylinePositions: [number, number][] = bounds;
-
   return (
-    <MapContainer
-      center={[currentLocation.lat, currentLocation.lng]}
-      zoom={13}
-      scrollWheelZoom={true}
-      style={{ height: "500px", width: "100%" }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://osm.org">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-
-      <FitBounds bounds={bounds} />
-
-      {/* Origin Marker */}
-      <Marker
-        position={[origin.lat, origin.lng]}
-        icon={createCustomIcon("green")}
+    <div style={{ position: "relative" }}>
+      <MapContainer
+        center={[currentLocation.lat, currentLocation.lng]}
+        zoom={13}
+        scrollWheelZoom={true}
+        style={{ height: "500px", width: "100%" }}
       >
-        <Popup>
-          <strong>Origin:</strong> {origin.name} <br />
-          {origin.address}
-        </Popup>
-      </Marker>
+        <TileLayer
+          attribution='&copy; <a href="https://osm.org">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-      {/* Current Location Marker */}
-      <Marker
-        position={[currentLocation.lat, currentLocation.lng]}
-        icon={createCustomIcon("blue")}
+        <FitBounds bounds={bounds} />
+
+        {/* Origin Marker */}
+        <Marker
+          position={[origin.lat, origin.lng]}
+          icon={loadIcon("origin")}
+        >
+          <Popup>
+            <strong>Origin:</strong> {origin.name} <br />
+            {origin.address}
+          </Popup>
+        </Marker>
+
+        {/* Current Location Marker */}
+        <Marker
+          position={[currentLocation.lat, currentLocation.lng]}
+          icon={loadIcon("current")}
+        >
+          <Popup>
+            <strong>Current Location</strong> <br />
+            {currentLocation.address} <br />
+            <small>Last seen: {currentLocation.timestamp}</small>
+          </Popup>
+        </Marker>
+
+        {/* Destination Marker */}
+        <Marker
+          position={[destination.lat, destination.lng]}
+          icon={loadIcon("destination")}
+        >
+          <Popup>
+            <strong>Destination:</strong> {destination.recipientName} <br />
+            {destination.address}
+          </Popup>
+        </Marker>
+
+        {/* Completed Route: origin → current */}
+        <Polyline
+          positions={[
+            [origin.lat, origin.lng],
+            [currentLocation.lat, currentLocation.lng],
+          ]}
+          pathOptions={{ color: "green", weight: 4 }}
+        />
+
+        {/* Remaining Route: current → destination (dotted line) */}
+        <Polyline
+          positions={[
+            [currentLocation.lat, currentLocation.lng],
+            [destination.lat, destination.lng],
+          ]}
+          pathOptions={{
+            color: "red",
+            dashArray: "8, 8",
+            weight: 3,
+          }}
+        />
+      </MapContainer>
+
+      {/* Legend */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 10,
+          left: 10,
+          background: "white",
+          padding: "10px",
+          borderRadius: "8px",
+          boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+          fontSize: "14px",
+        }}
       >
-        <Popup>
-          <strong>Current Location</strong> <br />
-          {currentLocation.address} <br />
-          <small>Last seen: {currentLocation.timestamp}</small>
-        </Popup>
-      </Marker>
-
-      {/* Destination Marker */}
-      <Marker
-        position={[destination.lat, destination.lng]}
-        icon={createCustomIcon("red")}
-      >
-        <Popup>
-          <strong>Destination:</strong> {destination.recipientName} <br />
-          {destination.address}
-        </Popup>
-      </Marker>
-
-      {/* Route Line */}
-      <Polyline
-        positions={polylinePositions}
-        pathOptions={{ color: "purple", weight: 3 }}
-      />
-    </MapContainer>
+        <strong>Legend:</strong>
+        <div style={{ display: "flex", gap: "10px", marginTop: "5px" }}>
+          <div>
+            <img src="/icons/origin.png" width="20" />
+            <div>Origin</div>
+          </div>
+          <div>
+            <img src="/icons/current.png" width="20" />
+            <div>Current</div>
+          </div>
+          <div>
+            <img src="/icons/destination.png" width="20" />
+            <div>Destination</div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-};
+}
