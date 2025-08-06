@@ -27,7 +27,6 @@ interface PlatformInfo {
   name: string;
   icon: React.ReactNode;
   color: string;
-  bgColor: string;
   requirements: string[];
   limitations: string[];
   opportunities: string[];
@@ -111,7 +110,6 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
       name: "Instagram",
       icon: <InstagramIcon className="w-4 h-4" />,
       color: "text-pink-600",
-      bgColor: "bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400",
       requirements: ["Professional Account for business features"],
       limitations: [
         "Only clickable links are in bio",
@@ -158,7 +156,6 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
       name: "Facebook",
       icon: <FacebookIcon className="w-4 h-4" />,
       color: "text-blue-600",
-      bgColor: "bg-blue-600",
       requirements: ["Business Page for shop features"],
       limitations: ["Organic reach is limited"],
       opportunities: [
@@ -203,7 +200,6 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
       name: "TikTok",
       icon: <TikTokIcon className="w-4 h-4" />,
       color: "text-black",
-      bgColor: "bg-black",
       requirements: [
         "1,000 followers for bio link",
         "Business Account recommended",
@@ -254,7 +250,6 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
       name: "WhatsApp",
       icon: <WhatsAppIcon className="w-4 h-4" />,
       color: "text-green-600",
-      bgColor: "bg-green-600",
       requirements: ["WhatsApp Business App"],
       limitations: ["Limited to direct messaging"],
       opportunities: [
@@ -298,7 +293,6 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
       name: "X (Twitter)",
       icon: <TwitterIcon className="w-4 h-4" />,
       color: "text-black",
-      bgColor: "bg-black",
       requirements: ["Active account"],
       limitations: ["Character limit for posts"],
       opportunities: [
@@ -449,7 +443,7 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
                 <div className="p-4 border-b">
                   <div className="flex items-start gap-3">
                     <div
-                      className={`p-2 rounded-full text-white ${platform.bgColor} flex-shrink-0`}
+                      className={"p-2 rounded-full flex-shrink-0"}
                     >
                       {platform.icon}
                     </div>
