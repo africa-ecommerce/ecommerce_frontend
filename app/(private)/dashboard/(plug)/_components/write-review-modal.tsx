@@ -92,6 +92,7 @@ export function WriteReviewModal({
           rating,
           review: reviewText,
         }),
+        credentials: "include"
       })
 
       if (!response.ok) {
@@ -117,7 +118,7 @@ export function WriteReviewModal({
         headers: {
           "Content-Type": "application/json",
         },
-        
+        credentials: "include"
       })
 
       if (!response.ok) {

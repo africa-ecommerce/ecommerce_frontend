@@ -144,6 +144,7 @@ export default function WithdrawalModal({
           account_number: accountNumber,
           bank_code: selectedBank.code,
         }),
+        credentials: "include"
       });
 
       const data = await response.json();
@@ -210,6 +211,7 @@ export default function WithdrawalModal({
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           account_name: accountDetails.account_name,
           account_number: accountDetails.account_number,

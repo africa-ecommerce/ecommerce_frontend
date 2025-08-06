@@ -6,10 +6,7 @@
 import type React from "react";
 import { useState, useEffect } from "react";
 import {
-  Instagram,
-  Facebook,
-  Twitter,
-  MessageCircle,
+  
   CheckCircle,
   XCircle,
   ChevronDown,
@@ -20,11 +17,11 @@ import {
   Heart,
   TrendingUp,
   Camera,
-  Video,
   Settings,
   ArrowLeft,
   X,
 } from "lucide-react";
+import { FacebookIcon, InstagramIcon, TikTokIcon, TwitterIcon, WhatsAppIcon } from "@/app/icons";
 
 interface PlatformInfo {
   name: string;
@@ -112,13 +109,10 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
   const platforms: Record<string, PlatformInfo> = {
     instagram: {
       name: "Instagram",
-      icon: <Instagram className="w-4 h-4" />,
+      icon: <InstagramIcon className="w-4 h-4" />,
       color: "text-pink-600",
       bgColor: "bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400",
-      requirements: [
-        "Professional Account for business features",
-       
-      ],
+      requirements: ["Professional Account for business features"],
       limitations: [
         "Only clickable links are in bio",
         "Links in captions/comments are NOT clickable",
@@ -131,8 +125,7 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
       steps: [
         {
           title: "Switch to Professional Account",
-          description:
-            "Switch to a professional account to get analytics",
+          description: "Switch to a professional account to get analytics and boost with ads if you can",
         },
         {
           title: "Optimize your bio",
@@ -163,7 +156,7 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
     },
     facebook: {
       name: "Facebook",
-      icon: <Facebook className="w-4 h-4" />,
+      icon: <FacebookIcon className="w-4 h-4" />,
       color: "text-blue-600",
       bgColor: "bg-blue-600",
       requirements: ["Business Page for shop features"],
@@ -208,7 +201,7 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
     },
     tiktok: {
       name: "TikTok",
-      icon: <Video className="w-4 h-4" />,
+      icon: <TikTokIcon className="w-4 h-4" />,
       color: "text-black",
       bgColor: "bg-black",
       requirements: [
@@ -232,7 +225,8 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
         },
         {
           title: "Create product showcase videos",
-          description: "Show unboxings, usage, and product experiences if you can",
+          description:
+            "Show unboxings, usage, and product experiences if you can",
         },
         {
           title: "Direct to other channels",
@@ -253,12 +247,12 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
         "Use trending sounds and effects",
         "Keep videos under 30 seconds for better engagement",
         "Respond to comments to boost engagement",
-        "Use tiktok to direct sales to other channels"
+        "Use tiktok to direct sales to other channels",
       ],
     },
     whatsapp: {
       name: "WhatsApp",
-      icon: <MessageCircle className="w-4 h-4" />,
+      icon: <WhatsAppIcon className="w-4 h-4" />,
       color: "text-green-600",
       bgColor: "bg-green-600",
       requirements: ["WhatsApp Business App"],
@@ -302,7 +296,7 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
     },
     twitter: {
       name: "X (Twitter)",
-      icon: <Twitter className="w-4 h-4" />,
+      icon: <TwitterIcon className="w-4 h-4" />,
       color: "text-black",
       bgColor: "bg-black",
       requirements: ["Active account"],
