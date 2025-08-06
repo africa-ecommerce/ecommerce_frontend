@@ -448,7 +448,7 @@ export default function LearnMoreSection({ onBack, modal, onClose }: LearnMoreSe
                       {platform.icon}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-xl font-semibold text-gray-900">
+                      <h3 className="text-xl font-semibold ">
                         {platform.name} Strategy
                       </h3>
                       <p className="text-sm text-gray-600 mt-1">
