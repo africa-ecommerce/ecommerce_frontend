@@ -5,7 +5,7 @@ import { ChevronDown, ArrowLeft, ArrowRight } from "lucide-react";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { plugInfoSchema } from "@/zod/schema";
 import { FormData } from "../page";
-import { PRODUCT_CATEGORIES } from "@/app/constant";
+import { NICHE_CATEGORIES } from "@/app/constant";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -69,7 +69,7 @@ export default function PlugInfo({
     setValue("niches", updated);
   };
 
-  const selectedLabels = PRODUCT_CATEGORIES.filter((cat) =>
+  const selectedLabels = NICHE_CATEGORIES.filter((cat) =>
     currentNiches.includes(cat.value)
   ).map((cat) => cat.label);
 
@@ -127,7 +127,7 @@ export default function PlugInfo({
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-4 max-h-60 overflow-y-auto">
                   <div className="space-y-2">
-                    {PRODUCT_CATEGORIES.map((cat) => (
+                    {NICHE_CATEGORIES.map((cat) => (
                       <div
                         key={cat.value}
                         className="flex items-center space-x-2 cursor-pointer"

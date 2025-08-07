@@ -6,6 +6,11 @@ export const PRODUCT_CATEGORIES = [
 ];
 
 
+export const NICHE_CATEGORIES = [
+  { value: "electronics", label: "Electronics" },
+  { value: "fashion", label: "Fashion" },
+  { value: "beauty_skincare", label: "Beauty & Skincare" },
+];
 
 
 
