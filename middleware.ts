@@ -85,6 +85,18 @@ export async function middleware(request: NextRequest) {
     const accessToken = request.cookies.get("accessToken")?.value;
     const refreshToken = request.cookies.get("refreshToken")?.value;
 
+    //clear invalid refresh tokens on auth routes to prevent redirect loops
+     const clearRefreshReq = new Request(`${process.env.BACKEND_URL}/auth/clearRefresh`, {
+       method: "POST",
+       headers: {
+         "Content-Type": "application/json",
+         Cookie: `refreshToken=${refreshToken}`,
+       },
+       credentials: "include",
+     });
+
+      await fetch(clearRefreshReq);
+
     if (accessToken || refreshToken) {
       return NextResponse.redirect(
         new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)

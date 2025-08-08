@@ -315,6 +315,15 @@ export function ShareModal({
         { type: "image/png" }
       );
 
+      const platform = selectedPlatform?.id
+
+       await fetch("/api/admin/analytics/share", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ platform }),
+    credentials: "include"
+  });
+
       // Check if Web Share API is available
       if ("share" in navigator && navigator.canShare({ files: [file] })) {
         await navigator.share({
