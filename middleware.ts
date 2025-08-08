@@ -48,43 +48,20 @@ export async function middleware(request: NextRequest) {
       );
     }
 
-    // // If the subdomain is valid, render the static page
-    // if (pathname === "/") {
-    //   return NextResponse.rewrite(
-    //     new URL(`${process.env.BACKEND_URL}/template/primary/index.html`)
-    //   );
-    // }
+    // If the subdomain is valid, render the static page
+    if (pathname === "/") {
+      return NextResponse.rewrite(
+        new URL(`${process.env.BACKEND_URL}/template/primary/index.html`)
+      );
+    }
 
-    // const page = pathname.replace(/^\/+/, "");
-    // const pageWithHtml = page.endsWith(".html") ? page: `${page}.html`;
-    // return NextResponse.rewrite(
-    //   new URL(
-    //     `${process.env.BACKEND_URL}/template/primary/${pageWithHtml}`
-    //   )
-    // );
-
-    // For any valid path on the subdomain, serve the complete SPA
-    // This includes root /, /marketplace, /about, etc.
-    const requestedPath =
-      pathname === "/" ? "index" : pathname.replace(/^\/+/, "");
-
-    // Create the SPA request URL with the requested path as a parameter
-    const spaUrl = `${
-      process.env.BACKEND_URL
-    }/template/spa/${subdomain}?requestedPath=${encodeURIComponent(
-      requestedPath
-    )}`;
-
-    const response = NextResponse.rewrite(new URL(spaUrl));
-
-    // Add cache headers for better performance
-    response.headers.set(
-      "Cache-Control",
-      "public, max-age=300, s-maxage=600, stale-while-revalidate=3600"
+    const page = pathname.replace(/^\/+/, "");
+    const pageWithHtml = page.endsWith(".html") ? page: `${page}.html`;
+    return NextResponse.rewrite(
+      new URL(
+        `${process.env.BACKEND_URL}/template/primary/${pageWithHtml}`
+      )
     );
-    response.headers.set("Vary", "Accept-Encoding");
-
-    return response;
   }
 
   // Skip middleware for API routes and public assets
