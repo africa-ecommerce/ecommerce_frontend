@@ -107,20 +107,13 @@ export default function ThankYouPage() {
                     </h2>
                     <p className="text-muted-foreground text-sm leading-relaxed">
                       We're handpicking and packing your items with care.
-                      Tracking details have been sent to your email.
+                     You'll be notified when it's ready for delivery.
                     </p>
                   </div>
                 </div>
 
                 {/* Quick Status */}
-                <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
-                  <div className="flex items-center space-x-2">
-                    <Mail className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium text-blue-900">
-                      Tracking ID sent to your email
-                    </span>
-                  </div>
-                </div>
+               
               </div>
             </CardContent>
           </Card>
