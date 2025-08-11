@@ -25,7 +25,7 @@ export interface ProductsFilter {
   
 }
 
-export function useProducts(filters: ProductsFilter, limit: number = 4) {
+export function useProducts(filters: ProductsFilter, limit: number = 20) {
   const debouncedSearch = useDebounce(filters.search, 300);
   const { isMutate } = useShoppingCart();
 

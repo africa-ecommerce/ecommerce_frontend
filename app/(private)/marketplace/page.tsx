@@ -149,7 +149,7 @@ export default function MarketplacePage() {
     setSize,
     clearCache,
     refreshData,
-  } = useProducts(filters);
+  } = useProducts(filters, 20);
 
   // Define explicit loading states for better control
   const isInitialLoading = isLoading && products.length === 0;
