@@ -9,3 +9,4 @@ git merge dev
 
 # Push the updated main branch to GitHub
 git push origin main
+git checkout dev
