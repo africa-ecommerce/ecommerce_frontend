@@ -255,8 +255,7 @@ export async function middleware(request: NextRequest) {
           // Check for tokens even if success property missing
           // Create a response that continues to the original path
           // IMPORTANT: Use next() instead of redirect() to avoid losing cookies
-          // const response = NextResponse.next();
-          const response = NextResponse.redirect(nextUrl);
+          const response = NextResponse.next();
 
           // Set cookies manually (this is more reliable than forwarding set-cookie headers)
           // We use same cookie config as backend
@@ -267,9 +266,7 @@ export async function middleware(request: NextRequest) {
               process.env.NODE_ENV === "production"
                 ? ("none" as const)
                 : ("lax" as const),
-            domain: process.env.NODE_ENV === "development" 
-            ? "localhost"
-            : process.env.DOMAIN,   
+            domain: process.env.DOMAIN,
             path: "/",
           };
 
@@ -375,13 +372,7 @@ export async function middleware(request: NextRequest) {
           return response;
         } else {
         }
-      } else {
-        try {
-          const errorData = await refreshRes.json();
-        } catch (e) {
-        }
       }
-
       // If we got here, refresh failed
       let callbackUrl = pathname;
       if (nextUrl.search) {
