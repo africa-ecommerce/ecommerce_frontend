@@ -87,7 +87,7 @@ export async function middleware(request: NextRequest) {
 
     
 
-    if (accessToken || refreshToken) {
+    if (accessToken) {
       return NextResponse.redirect(
         new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
       );
