@@ -251,7 +251,7 @@ export async function middleware(request: NextRequest) {
 
         // Add debug
 
-        if (refreshData.success || refreshData.accessToken) {
+        if (refreshData.success === true && refreshData.accessToken && refreshData.refreshToken) {
           // Check for tokens even if success property missing
           // Create a response that continues to the original path
           // IMPORTANT: Use next() instead of redirect() to avoid losing cookies
@@ -371,6 +371,21 @@ export async function middleware(request: NextRequest) {
           // Return the response that continues with the original request
           return response;
         } else {
+
+             // If we got here, refresh failed
+      let callbackUrl = pathname;
+      if (nextUrl.search) {
+        callbackUrl += nextUrl.search;
+      }
+      const encodedCallBackUrl = encodeURIComponent(callbackUrl);
+      const response = NextResponse.redirect(
+        new URL(`/auth/login?callbackUrl=${encodedCallBackUrl}`, nextUrl.origin)
+      );
+      response.cookies.delete("accessToken");
+      response.cookies.delete("refreshToken");
+      response.cookies.delete("refreshAttempt");
+      return response;
+
         }
       }
       // If we got here, refresh failed
