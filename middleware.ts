@@ -81,19 +81,32 @@ export async function middleware(request: NextRequest) {
   }
 
   // Handle authentication routes
-  // if (authRoutes.includes(pathname)) {
-  //   const accessToken = request.cookies.get("accessToken")?.value;
-  //   const refreshToken = request.cookies.get("refreshToken")?.value;
+  if (authRoutes.includes(pathname)) {
+    const accessToken = request.cookies.get("accessToken")?.value;
+    const refreshToken = request.cookies.get("refreshToken")?.value;
 
-    
+    if (accessToken) {
+      try {
+        // Verify token
+        await jwtVerify(accessToken, JWT_SECRET_KEY, {
+          algorithms: ["HS256"],
+        });
+        // ✅ Access token valid → redirect to dashboard
+        return NextResponse.redirect(
+          new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
+        );
+      } catch {
+        // ❌ Access token expired → fall through to refresh logic
+      }
+    }
 
-  //   if (accessToken) {
-  //     return NextResponse.redirect(
-  //       new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
-  //     );
-  //   }
-  //   return NextResponse.next();
-  // }
+    if (refreshToken) {
+      // ✅ Don’t terminate here → let refresh flow later handle it
+    } else {
+      // ❌ No tokens → allow visiting login/signup
+      return NextResponse.next();
+    }
+  }
 
   // Handle public routes or product detail pages
   if (
@@ -224,7 +237,7 @@ export async function middleware(request: NextRequest) {
   // 2. Access token was invalid and we have a refresh token
 
   if (refreshToken) {
-const newRefreshAttemptCount = refreshAttemptCount + 1;   
+   
 
     try {
       // Create a new request to refresh token endpoint
@@ -257,16 +270,7 @@ const newRefreshAttemptCount = refreshAttemptCount + 1;
           // IMPORTANT: Use next() instead of redirect() to avoid losing cookies
           // const response = NextResponse.next();
 
-          // const response = NextResponse.redirect(request.nextUrl);
-
-           let response;
-           if (authRoutes.includes(pathname)) {
-             response = NextResponse.redirect(
-               new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
-             );
-           } else {
-             response = NextResponse.redirect(request.nextUrl);
-           }
+          const response = NextResponse.redirect(request.nextUrl);
 
           // Set cookies manually (this is more reliable than forwarding set-cookie headers)
           // We use same cookie config as backend
@@ -379,41 +383,21 @@ const newRefreshAttemptCount = refreshAttemptCount + 1;
           // Return the response that continues with the original request
           return response;
         } else {
-          // ✅ ADD: Increment attempt counter on failed refresh
-          if (newRefreshAttemptCount < 2) {
-            const retryResponse = NextResponse.redirect(request.nextUrl);
-            retryResponse.cookies.set(
-              "refreshAttempt",
-              newRefreshAttemptCount.toString(),
-              {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite:
-                  process.env.NODE_ENV === "production" ? "none" : "lax",
-                path: "/",
-                domain: process.env.DOMAIN,
-                maxAge: 60,
-              }
-            );
-            return retryResponse;
-          }
 
-          // If we got here, refresh failed
-          let callbackUrl = pathname;
-          if (nextUrl.search) {
-            callbackUrl += nextUrl.search;
-          }
-          const encodedCallBackUrl = encodeURIComponent(callbackUrl);
-          const response = NextResponse.redirect(
-            new URL(
-              `/auth/login?callbackUrl=${encodedCallBackUrl}`,
-              nextUrl.origin
-            )
-          );
-          response.cookies.delete("accessToken");
-          response.cookies.delete("refreshToken");
-          response.cookies.delete("refreshAttempt");
-          return response;
+             // If we got here, refresh failed
+      let callbackUrl = pathname;
+      if (nextUrl.search) {
+        callbackUrl += nextUrl.search;
+      }
+      const encodedCallBackUrl = encodeURIComponent(callbackUrl);
+      const response = NextResponse.redirect(
+        new URL(`/auth/login?callbackUrl=${encodedCallBackUrl}`, nextUrl.origin)
+      );
+      response.cookies.delete("accessToken");
+      response.cookies.delete("refreshToken");
+      response.cookies.delete("refreshAttempt");
+      return response;
+
         }
       }
       // If we got here, refresh failed
@@ -431,24 +415,6 @@ const newRefreshAttemptCount = refreshAttemptCount + 1;
       return response;
     } catch (error) {
       console.error("Error during token refresh:", error);
-
-      // ✅ ADD: Increment attempt counter on failed refresh
-      if (newRefreshAttemptCount < 2) {
-        const retryResponse = NextResponse.redirect(request.nextUrl);
-        retryResponse.cookies.set(
-          "refreshAttempt",
-          newRefreshAttemptCount.toString(),
-          {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-            path: "/",
-            domain: process.env.DOMAIN,
-            maxAge: 60,
-          }
-        );
-        return retryResponse;
-      }
       // Something went wrong with the refresh request
       let callbackUrl = pathname;
       if (nextUrl.search) {
@@ -479,6 +445,5 @@ const newRefreshAttemptCount = refreshAttemptCount + 1;
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
-
 
 
