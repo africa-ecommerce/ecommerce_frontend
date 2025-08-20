@@ -255,7 +255,9 @@ export async function middleware(request: NextRequest) {
           // Check for tokens even if success property missing
           // Create a response that continues to the original path
           // IMPORTANT: Use next() instead of redirect() to avoid losing cookies
-          const response = NextResponse.next();
+          // const response = NextResponse.next();
+
+          const response = NextResponse.redirect(request.nextUrl);
 
           // Set cookies manually (this is more reliable than forwarding set-cookie headers)
           // We use same cookie config as backend
@@ -276,13 +278,10 @@ export async function middleware(request: NextRequest) {
             maxAge: Math.floor(ACCESS_TOKEN_EXPIRY), 
           });
 
-          // Set the new refresh token cookie if it's included in the response
-          if (refreshData.refreshToken) {
             response.cookies.set("refreshToken", refreshData.refreshToken, {
               ...cookieConfig,
               maxAge: Math.floor(REFRESH_TOKEN_EXPIRY), 
             });
-          }
 
           // Clear any refresh attempt counter
           response.cookies.delete("refreshAttempt");
