@@ -3,7 +3,7 @@ import WelcomePage from "./_components/welcome-page";
 
 export const metadata = {
   title: 'Pluggn - Start Your Business Online Without the Usual Hassles',
-  description: 'Pluggn lets you start and grow a profitable online business effortlessly—no inventory, no logistics, no tech headaches.',
+  description: 'Pluggn lets you start and grow a profitable online business effortlessly—no inventory, no logistics, no technical headaches.',
   alternates: {
     canonical: 'https://www.pluggn.com.ng/',
   }
