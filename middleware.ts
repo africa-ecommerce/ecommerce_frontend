@@ -56,11 +56,9 @@ export async function middleware(request: NextRequest) {
     }
 
     const page = pathname.replace(/^\/+/, "");
-    const pageWithHtml = page.endsWith(".html") ? page: `${page}.html`;
+    const pageWithHtml = page.endsWith(".html") ? page : `${page}.html`;
     return NextResponse.rewrite(
-      new URL(
-        `${process.env.BACKEND_URL}/template/primary/${pageWithHtml}`
-      )
+      new URL(`${process.env.BACKEND_URL}/template/primary/${pageWithHtml}`)
     );
   }
 
@@ -80,32 +78,24 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Handle authentication routes
+  // Handle authentication routes (login, register, etc.)
   if (authRoutes.includes(pathname)) {
     const accessToken = request.cookies.get("accessToken")?.value;
-    const refreshToken = request.cookies.get("refreshToken")?.value;
 
     if (accessToken) {
       try {
-        // Verify token
-        await jwtVerify(accessToken, JWT_SECRET_KEY, {
-          algorithms: ["HS256"],
-        });
-        // ✅ Access token valid → redirect to dashboard
+        await jwtVerify(accessToken, JWT_SECRET_KEY, { algorithms: ["HS256"] });
+        // ✅ Logged in → redirect away from login/register
         return NextResponse.redirect(
           new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
         );
       } catch {
-        // ❌ Access token expired → fall through to refresh logic
+        // ❌ Token invalid/expired → ignore, let them access login/register
       }
     }
 
-    if (refreshToken) {
-      // ✅ Don’t terminate here → let refresh flow later handle it
-    } else {
-      // ❌ No tokens → allow visiting login/signup
-      return NextResponse.next();
-    }
+    // ✅ Always stop here — do not try refresh for /auth/*
+    return NextResponse.next();
   }
 
   // Handle public routes or product detail pages
@@ -127,7 +117,6 @@ export async function middleware(request: NextRequest) {
 
   // CRITICAL: If we've tried refreshing too many times, clear cookies and force login
   if (refreshAttemptCount >= 2) {
-   
     let callbackUrl = pathname;
     if (nextUrl.search) {
       callbackUrl += nextUrl.search;
@@ -178,8 +167,6 @@ export async function middleware(request: NextRequest) {
           isOnboarded: payload.isOnboarded as boolean,
           userType: payload.userType as string,
         };
-
-       
 
         response.headers.set("X-User-Data", JSON.stringify(userData));
 
@@ -237,8 +224,6 @@ export async function middleware(request: NextRequest) {
   // 2. Access token was invalid and we have a refresh token
 
   if (refreshToken) {
-   
-
     try {
       // Create a new request to refresh token endpoint
       const refreshReq = new Request(
@@ -255,16 +240,17 @@ export async function middleware(request: NextRequest) {
 
       const refreshRes = await fetch(refreshReq);
 
-    
-
       if (refreshRes.ok) {
-
         // Parse response to get tokens
         const refreshData = await refreshRes.json();
 
         // Add debug
 
-        if (refreshData.success === true && refreshData.accessToken && refreshData.refreshToken) {
+        if (
+          refreshData.success === true &&
+          refreshData.accessToken &&
+          refreshData.refreshToken
+        ) {
           // Check for tokens even if success property missing
           // Create a response that continues to the original path
           // IMPORTANT: Use next() instead of redirect() to avoid losing cookies
@@ -288,17 +274,16 @@ export async function middleware(request: NextRequest) {
           // Set the new access token cookie
           response.cookies.set("accessToken", refreshData.accessToken, {
             ...cookieConfig,
-            maxAge: Math.floor(ACCESS_TOKEN_EXPIRY), 
+            maxAge: Math.floor(ACCESS_TOKEN_EXPIRY),
           });
 
-            response.cookies.set("refreshToken", refreshData.refreshToken, {
-              ...cookieConfig,
-              maxAge: Math.floor(REFRESH_TOKEN_EXPIRY), 
-            });
+          response.cookies.set("refreshToken", refreshData.refreshToken, {
+            ...cookieConfig,
+            maxAge: Math.floor(REFRESH_TOKEN_EXPIRY),
+          });
 
           // Clear any refresh attempt counter
           response.cookies.delete("refreshAttempt");
-
 
           // CRITICAL: Decode the new access token to extract user data
           try {
@@ -318,7 +303,6 @@ export async function middleware(request: NextRequest) {
                 isOnboarded: payload.isOnboarded as boolean,
                 userType: payload.userType as string,
               };
-
 
               response.headers.set("X-User-Data", JSON.stringify(userData));
 
@@ -383,21 +367,22 @@ export async function middleware(request: NextRequest) {
           // Return the response that continues with the original request
           return response;
         } else {
-
-             // If we got here, refresh failed
-      let callbackUrl = pathname;
-      if (nextUrl.search) {
-        callbackUrl += nextUrl.search;
-      }
-      const encodedCallBackUrl = encodeURIComponent(callbackUrl);
-      const response = NextResponse.redirect(
-        new URL(`/auth/login?callbackUrl=${encodedCallBackUrl}`, nextUrl.origin)
-      );
-      response.cookies.delete("accessToken");
-      response.cookies.delete("refreshToken");
-      response.cookies.delete("refreshAttempt");
-      return response;
-
+          // If we got here, refresh failed
+          let callbackUrl = pathname;
+          if (nextUrl.search) {
+            callbackUrl += nextUrl.search;
+          }
+          const encodedCallBackUrl = encodeURIComponent(callbackUrl);
+          const response = NextResponse.redirect(
+            new URL(
+              `/auth/login?callbackUrl=${encodedCallBackUrl}`,
+              nextUrl.origin
+            )
+          );
+          response.cookies.delete("accessToken");
+          response.cookies.delete("refreshToken");
+          response.cookies.delete("refreshAttempt");
+          return response;
         }
       }
       // If we got here, refresh failed
