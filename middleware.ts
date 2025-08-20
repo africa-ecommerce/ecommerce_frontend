@@ -767,7 +767,11 @@ export async function middleware(request: NextRequest) {
           {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            sameSite:
+              process.env.NODE_ENV === "production"
+                ? ("none" as const)
+                : ("lax" as const),
+            domain: process.env.DOMAIN,
             path: "/",
             maxAge: 60, // Short expiry for attempt counter
           }
