@@ -433,8 +433,6 @@
 
 
 
-
-
 import { NextResponse, NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
@@ -457,7 +455,7 @@ const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60;
 function needsAuthentication(pathname: string): boolean {
   const isPublicRoute = publicRoutes.some((pattern) => pattern.test(pathname));
   const isAuthRoute = authRoutes.includes(pathname);
-  
+
   // Return true if this route requires authentication
   return !isPublicRoute && !isAuthRoute;
 }
@@ -467,7 +465,70 @@ export async function middleware(request: NextRequest) {
   const pathname = nextUrl.pathname;
   const hostname = request.headers.get("host") || "";
 
-  // Subdomain handling (unchanged)
+  // Skip middleware for API routes and public assets FIRST
+  if (pathname.startsWith("/api") || pathname.includes(".")) {
+    if (request.nextUrl.pathname.startsWith("/api/og/")) {
+      const response = NextResponse.next();
+      response.headers.set(
+        "Cache-Control",
+        "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800"
+      );
+      response.headers.set("Vary", "Accept-Encoding, Accept");
+      return response;
+    }
+    return NextResponse.next();
+  }
+
+  // CRITICAL: Check if this route needs authentication EARLY
+  const routeNeedsAuth = needsAuthentication(pathname);
+
+  // If route doesn't need authentication, handle subdomain logic but NO auth operations
+  if (!routeNeedsAuth) {
+    console.log(`Public route ${pathname} - handling without auth logic`);
+
+    // Handle subdomain logic for public routes
+    if (
+      hostname.endsWith(".pluggn.store") &&
+      hostname !== "www.pluggn.store" &&
+      hostname !== "pluggn.store"
+    ) {
+      const subdomain = hostname.replace(".pluggn.store", "");
+
+      try {
+        const checkUrl = `${process.env.BACKEND_URL}/public/store/verifySubdomain?subdomain=${subdomain}`;
+        const resp = await fetch(checkUrl);
+        const data = await resp.json();
+
+        if (!data.exists) {
+          return NextResponse.redirect(
+            new URL(`${process.env.APP_URL}/subdomain-error`)
+          );
+        }
+      } catch (e) {
+        console.error("Failed to check subdomain", e);
+        return NextResponse.redirect(
+          new URL(`${process.env.APP_URL}/subdomain-error`)
+        );
+      }
+
+      if (pathname === "/") {
+        return NextResponse.rewrite(
+          new URL(`${process.env.BACKEND_URL}/template/primary/index.html`)
+        );
+      }
+
+      const page = pathname.replace(/^\/+/, "");
+      const pageWithHtml = page.endsWith(".html") ? page : `${page}.html`;
+      return NextResponse.rewrite(
+        new URL(`${process.env.BACKEND_URL}/template/primary/${pageWithHtml}`)
+      );
+    }
+
+    // For main domain public routes, just proceed without any auth operations
+    return NextResponse.next();
+  }
+
+  // Handle subdomain logic for protected routes
   if (
     hostname.endsWith(".pluggn.store") &&
     hostname !== "www.pluggn.store" &&
@@ -492,31 +553,8 @@ export async function middleware(request: NextRequest) {
       );
     }
 
-    if (pathname === "/") {
-      return NextResponse.rewrite(
-        new URL(`${process.env.BACKEND_URL}/template/primary/index.html`)
-      );
-    }
-
-    const page = pathname.replace(/^\/+/, "");
-    const pageWithHtml = page.endsWith(".html") ? page : `${page}.html`;
-    return NextResponse.rewrite(
-      new URL(`${process.env.BACKEND_URL}/template/primary/${pageWithHtml}`)
-    );
-  }
-
-  // Skip middleware for API routes and public assets
-  if (pathname.startsWith("/api") || pathname.includes(".")) {
-    if (request.nextUrl.pathname.startsWith("/api/og/")) {
-      const response = NextResponse.next();
-      response.headers.set(
-        "Cache-Control",
-        "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800"
-      );
-      response.headers.set("Vary", "Accept-Encoding, Accept");
-      return response;
-    }
-    return NextResponse.next();
+    // For protected routes on subdomains, still need to handle auth
+    // Continue to auth logic below
   }
 
   // Handle authentication routes - only check if already logged in
@@ -535,15 +573,6 @@ export async function middleware(request: NextRequest) {
       }
     }
     // Not logged in or invalid token → proceed to auth page
-    return NextResponse.next();
-  }
-
-  // CRITICAL: Check if this route needs authentication
-  const routeNeedsAuth = needsAuthentication(pathname);
-
-  // If route doesn't need authentication, just proceed
-  if (!routeNeedsAuth) {
-    console.log(`Public route ${pathname} - skipping auth logic`);
     return NextResponse.next();
   }
 
@@ -638,10 +667,7 @@ export async function middleware(request: NextRequest) {
         const isOnboardingRoute =
           pathname === "/onboarding" || pathname.startsWith("/onboarding/");
 
-        if (
-          !isOnboarded &&
-          !isOnboardingRoute
-        ) {
+        if (!isOnboarded && !isOnboardingRoute) {
           return NextResponse.redirect(new URL("/onboarding", nextUrl.origin));
         }
 
@@ -660,7 +686,7 @@ export async function middleware(request: NextRequest) {
   // REFRESH TOKEN LOGIC - Only runs for protected routes now
   if (refreshToken) {
     console.log("Attempting token refresh for protected route");
-    
+
     try {
       const refreshReq = new Request(
         `${process.env.BACKEND_URL}/auth/refresh`,
@@ -759,10 +785,7 @@ export async function middleware(request: NextRequest) {
                 pathname === "/onboarding" ||
                 pathname.startsWith("/onboarding/");
 
-              if (
-                !isOnboarded &&
-                !isOnboardingRoute
-              ) {
+              if (!isOnboarded && !isOnboardingRoute) {
                 return NextResponse.redirect(
                   new URL("/onboarding", nextUrl.origin)
                 );
@@ -785,7 +808,6 @@ export async function middleware(request: NextRequest) {
       // Refresh failed
       console.log("Token refresh failed - clearing cookies and redirecting");
       return clearCookiesAndRedirect();
-      
     } catch (error) {
       console.error("Error during token refresh:", error);
       return clearCookiesAndRedirect();
