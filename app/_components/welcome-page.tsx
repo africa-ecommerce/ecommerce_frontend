@@ -119,7 +119,7 @@ export default function Home() {
           </nav>
           <div className="flex items-center gap-4">
             <Link
-              href="/dashboard"
+              href="/auth/login"
               className="hidden md:inline-flex h-9 items-center justify-center rounded-md border border-[#FF7A21] px-4 py-2 text-sm font-medium text-[#FF7A21] transition-colors hover:bg-[#FF7A21] hover:text-white"
             >
               Sign In
