@@ -109,7 +109,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
             <div className="flex items-center text-xs text-muted-foreground flex-wrap gap-x-1">
               <div className="flex items-center">
                 <ShoppingBag className="mr-0.5 h-3 w-3" />
-                <span className="truncate">{formatQuantity(product?.sales || 0)} sold</span>
+                <span className="truncate">{formatQuantity(product?.sold || 0)} sold</span>
               </div>
             </div>
 
