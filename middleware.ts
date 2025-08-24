@@ -95,17 +95,21 @@ export async function middleware(request: NextRequest) {
       }
     }
 
+    console.log("refreshToken", refreshToken)
     // If user has a refresh token (even without valid access token), redirect away from auth pages
     if (refreshToken) {
       try {
+        console.log("yes")
         await jwtVerify(refreshToken, JWT_SECRET_KEY, {
           algorithms: ["HS256"],
         });
+             console.log("yess")
         // ✅ Has valid refresh token → redirect away from login/register
         return NextResponse.redirect(
           new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
         );
       } catch {
+             console.log("no")
         // ❌ Refresh token also invalid → let them access login/register
       }
     }
