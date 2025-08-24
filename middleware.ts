@@ -78,10 +78,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Handle authentication routes (login, register, etc.)
   if (authRoutes.includes(pathname)) {
     const accessToken = request.cookies.get("accessToken")?.value;
+    const refreshToken = request.cookies.get("refreshToken")?.value;
 
+    // If user has a valid access token, redirect away from auth pages
     if (accessToken) {
       try {
         await jwtVerify(accessToken, JWT_SECRET_KEY, { algorithms: ["HS256"] });
@@ -90,11 +91,26 @@ export async function middleware(request: NextRequest) {
           new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
         );
       } catch {
-        // ❌ Token invalid/expired → ignore, let them access login/register
+        // ❌ Token invalid/expired → continue to check refresh token
       }
     }
 
-    // ✅ Always stop here — do not try refresh for /auth/*
+    // If user has a refresh token (even without valid access token), redirect away from auth pages
+    if (refreshToken) {
+      try {
+        await jwtVerify(refreshToken, JWT_SECRET_KEY, {
+          algorithms: ["HS256"],
+        });
+        // ✅ Has valid refresh token → redirect away from login/register
+        return NextResponse.redirect(
+          new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
+        );
+      } catch {
+        // ❌ Refresh token also invalid → let them access login/register
+      }
+    }
+
+    // ✅ No valid tokens → allow access to auth pages
     return NextResponse.next();
   }
 
