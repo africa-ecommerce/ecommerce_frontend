@@ -429,10 +429,9 @@
 
 // export const config = {
 //   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
-// };
-import { NextResponse, NextRequest } from "next/server";
+// };import { NextResponse, NextRequest } from "next/server";
 import { jwtVerify } from "jose";
-
+import { NextResponse, NextRequest } from "next/server";
 import {
   authRoutes,
   publicRoutes,
@@ -580,108 +579,37 @@ export async function middleware(request: NextRequest) {
     // Continue to auth logic below for protected routes on subdomains
   }
 
-  // Handle authentication routes - check if already logged in OR has valid refresh token
+  // Handle authentication routes - FIXED LOGIC
   if (authRoutes.includes(pathname)) {
-    console.log(`🔐 AUTH ROUTE: ${pathname} - checking existing session`);
+    console.log(`🔐 AUTH ROUTE: ${pathname} - checking for any valid session`);
     const accessToken = request.cookies.get("accessToken")?.value;
     const refreshToken = request.cookies.get("refreshToken")?.value;
 
-    // First check if access token is valid
+    // If user has refresh token, they should be redirected to dashboard immediately
+    // Don't even check if access token is valid - just redirect
+    if (refreshToken) {
+      console.log(`🔄 REFRESH TOKEN FOUND on auth route: Redirecting to dashboard immediately`);
+      return NextResponse.redirect(
+        new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
+      );
+    }
+
+    // If user has valid access token, redirect to dashboard
     if (accessToken) {
       try {
         await jwtVerify(accessToken, JWT_SECRET_KEY, { algorithms: ["HS256"] });
-        console.log(`✅ ACCESS TOKEN VALID: Redirecting away from auth route`);
-        // Already logged in → redirect away from login/register
+        console.log(`✅ ACCESS TOKEN VALID on auth route: Redirecting to dashboard`);
         return NextResponse.redirect(
           new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
         );
       } catch {
-        console.log(`❌ ACCESS TOKEN INVALID: Will check refresh token`);
-        // Token invalid/expired → check refresh token
+        console.log(`❌ ACCESS TOKEN INVALID on auth route: Allowing access to auth page`);
+        // Token invalid and no refresh token → allow access to auth page
       }
     }
 
-    // If no access token or invalid, but has refresh token, try to refresh
-    if (refreshToken) {
-      console.log(`🔄 REFRESH TOKEN FOUND: Attempting refresh for auth route`);
-      try {
-        const refreshReq = new Request(
-          `${process.env.BACKEND_URL}/auth/refresh`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Cookie: `refreshToken=${refreshToken}`,
-            },
-            credentials: "include",
-          }
-        );
-
-        const refreshRes = await fetch(refreshReq);
-
-        if (refreshRes.ok) {
-          const refreshData = await refreshRes.json();
-
-          if (
-            refreshData.success === true &&
-            refreshData.accessToken &&
-            refreshData.refreshToken
-          ) {
-            console.log(`✅ REFRESH SUCCESS: Redirecting to dashboard with new tokens`);
-            // Refresh successful → redirect to dashboard with new cookies
-            const response = NextResponse.redirect(
-              new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
-            );
-
-            // Set the new cookies
-            const cookieConfig = {
-              httpOnly: true,
-              secure: process.env.NODE_ENV === "production",
-              sameSite:
-                process.env.NODE_ENV === "production"
-                  ? ("none" as const)
-                  : ("lax" as const),
-              domain: process.env.DOMAIN,
-              path: "/",
-            };
-
-            response.cookies.set("accessToken", refreshData.accessToken, {
-              ...cookieConfig,
-              maxAge: Math.floor(ACCESS_TOKEN_EXPIRY),
-            });
-
-            response.cookies.set("refreshToken", refreshData.refreshToken, {
-              ...cookieConfig,
-              maxAge: Math.floor(REFRESH_TOKEN_EXPIRY),
-            });
-
-            // Clear any refresh attempt counter
-            response.cookies.delete("refreshAttempt");
-
-            return response;
-          }
-        }
-
-        console.log(`❌ REFRESH FAILED: Proceeding to auth page`);
-        // Refresh failed → clear cookies and let them access auth page
-        const response = NextResponse.next();
-        response.cookies.delete("accessToken");
-        response.cookies.delete("refreshToken");
-        response.cookies.delete("refreshAttempt");
-        return response;
-      } catch (error) {
-        console.error("Error during refresh on auth route:", error);
-        // Error during refresh → clear cookies and let them access auth page
-        const response = NextResponse.next();
-        response.cookies.delete("accessToken");
-        response.cookies.delete("refreshToken");
-        response.cookies.delete("refreshAttempt");
-        return response;
-      }
-    }
-
-    // No tokens or refresh failed → proceed to auth page
-    console.log(`📝 NO VALID SESSION: Proceeding to auth page ${pathname}`);
+    // No tokens or invalid tokens → allow access to auth page
+    console.log(`📝 NO VALID SESSION: Allowing access to auth page ${pathname}`);
     return NextResponse.next();
   }
 
