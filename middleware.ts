@@ -431,8 +431,6 @@
 //   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 // };
 
-
-
 import { NextResponse, NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
@@ -456,6 +454,22 @@ function needsAuthentication(pathname: string): boolean {
   const isPublicRoute = publicRoutes.some((pattern) => pattern.test(pathname));
   const isAuthRoute = authRoutes.includes(pathname);
 
+  // DEBUG: Log what's happening
+  console.log("🔍 DEBUG - Route analysis:", {
+    pathname,
+    isPublicRoute,
+    isAuthRoute,
+    needsAuth: !isPublicRoute && !isAuthRoute,
+  });
+
+  // Test each public route pattern
+  publicRoutes.forEach((pattern, index) => {
+    const matches = pattern.test(pathname);
+    console.log(
+      `   Pattern ${index}: ${pattern} matches "${pathname}": ${matches}`
+    );
+  });
+
   // Return true if this route requires authentication
   return !isPublicRoute && !isAuthRoute;
 }
@@ -465,8 +479,11 @@ export async function middleware(request: NextRequest) {
   const pathname = nextUrl.pathname;
   const hostname = request.headers.get("host") || "";
 
+  console.log(`🌐 MIDDLEWARE START: ${hostname}${pathname}`);
+
   // Skip middleware for API routes and public assets FIRST
   if (pathname.startsWith("/api") || pathname.includes(".")) {
+    console.log(`⚡ SKIPPING: API/Asset route ${pathname}`);
     if (request.nextUrl.pathname.startsWith("/api/og/")) {
       const response = NextResponse.next();
       response.headers.set(
@@ -479,19 +496,24 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // CRITICAL: Check if this route needs authentication EARLY
+  // CRITICAL: Check if this route needs authentication EARLY - BEFORE subdomain logic
   const routeNeedsAuth = needsAuthentication(pathname);
 
-  // If route doesn't need authentication, handle subdomain logic but NO auth operations
-  if (!routeNeedsAuth) {
-    console.log(`Public route ${pathname} - handling without auth logic`);
+  console.log(`🚀 MIDDLEWARE: ${pathname} - needsAuth: ${routeNeedsAuth}`);
 
-    // Handle subdomain logic for public routes
+  // If route doesn't need authentication, handle it appropriately
+  if (!routeNeedsAuth) {
+    console.log(`✅ PUBLIC ROUTE: ${pathname} - handling without auth logic`);
+
+    // Handle subdomain logic ONLY for .pluggn.store domains
     if (
       hostname.endsWith(".pluggn.store") &&
       hostname !== "www.pluggn.store" &&
       hostname !== "pluggn.store"
     ) {
+      console.log(
+        `🏪 SUBDOMAIN PUBLIC: ${hostname} - handling subdomain logic`
+      );
       const subdomain = hostname.replace(".pluggn.store", "");
 
       try {
@@ -500,10 +522,13 @@ export async function middleware(request: NextRequest) {
         const data = await resp.json();
 
         if (!data.exists) {
+          console.log(`❌ SUBDOMAIN NOT FOUND: ${subdomain}`);
           return NextResponse.redirect(
             new URL(`${process.env.APP_URL}/subdomain-error`)
           );
         }
+
+        console.log(`✅ SUBDOMAIN VERIFIED: ${subdomain}`);
       } catch (e) {
         console.error("Failed to check subdomain", e);
         return NextResponse.redirect(
@@ -512,6 +537,7 @@ export async function middleware(request: NextRequest) {
       }
 
       if (pathname === "/") {
+        console.log(`🏠 SUBDOMAIN ROOT: Rewriting to template`);
         return NextResponse.rewrite(
           new URL(`${process.env.BACKEND_URL}/template/primary/index.html`)
         );
@@ -519,21 +545,30 @@ export async function middleware(request: NextRequest) {
 
       const page = pathname.replace(/^\/+/, "");
       const pageWithHtml = page.endsWith(".html") ? page : `${page}.html`;
+      console.log(
+        `📄 SUBDOMAIN PAGE: Rewriting ${pathname} to ${pageWithHtml}`
+      );
       return NextResponse.rewrite(
         new URL(`${process.env.BACKEND_URL}/template/primary/${pageWithHtml}`)
       );
     }
 
-    // For main domain public routes, just proceed without any auth operations
+    // For main domain (pluggn.com.ng) public routes, just proceed without any auth operations
+    console.log(
+      `🌍 MAIN DOMAIN PUBLIC: ${hostname}${pathname} - proceeding normally`
+    );
     return NextResponse.next();
   }
 
-  // Handle subdomain logic for protected routes
+  // Handle subdomain logic for PROTECTED routes on .pluggn.store
   if (
     hostname.endsWith(".pluggn.store") &&
     hostname !== "www.pluggn.store" &&
     hostname !== "pluggn.store"
   ) {
+    console.log(
+      `🔒 SUBDOMAIN PROTECTED: ${hostname} - verifying subdomain before auth`
+    );
     const subdomain = hostname.replace(".pluggn.store", "");
 
     try {
@@ -553,8 +588,7 @@ export async function middleware(request: NextRequest) {
       );
     }
 
-    // For protected routes on subdomains, still need to handle auth
-    // Continue to auth logic below
+    // Continue to auth logic below for protected routes on subdomains
   }
 
   // Handle authentication routes - only check if already logged in
