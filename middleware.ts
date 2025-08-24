@@ -430,7 +430,6 @@
 // export const config = {
 //   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 // };
-
 import { NextResponse, NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
@@ -453,23 +452,21 @@ const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60;
 function needsAuthentication(pathname: string): boolean {
   const isPublicRoute = publicRoutes.some((pattern) => pattern.test(pathname));
   const isAuthRoute = authRoutes.includes(pathname);
-
+  
   // DEBUG: Log what's happening
   console.log("🔍 DEBUG - Route analysis:", {
     pathname,
     isPublicRoute,
     isAuthRoute,
-    needsAuth: !isPublicRoute && !isAuthRoute,
+    needsAuth: !isPublicRoute && !isAuthRoute
   });
-
+  
   // Test each public route pattern
   publicRoutes.forEach((pattern, index) => {
     const matches = pattern.test(pathname);
-    console.log(
-      `   Pattern ${index}: ${pattern} matches "${pathname}": ${matches}`
-    );
+    console.log(`   Pattern ${index}: ${pattern} matches "${pathname}": ${matches}`);
   });
-
+  
   // Return true if this route requires authentication
   return !isPublicRoute && !isAuthRoute;
 }
@@ -478,7 +475,7 @@ export async function middleware(request: NextRequest) {
   const { nextUrl } = request;
   const pathname = nextUrl.pathname;
   const hostname = request.headers.get("host") || "";
-
+  
   console.log(`🌐 MIDDLEWARE START: ${hostname}${pathname}`);
 
   // Skip middleware for API routes and public assets FIRST
@@ -498,22 +495,20 @@ export async function middleware(request: NextRequest) {
 
   // CRITICAL: Check if this route needs authentication EARLY - BEFORE subdomain logic
   const routeNeedsAuth = needsAuthentication(pathname);
-
+  
   console.log(`🚀 MIDDLEWARE: ${pathname} - needsAuth: ${routeNeedsAuth}`);
 
   // If route doesn't need authentication, handle it appropriately
   if (!routeNeedsAuth) {
     console.log(`✅ PUBLIC ROUTE: ${pathname} - handling without auth logic`);
-
+    
     // Handle subdomain logic ONLY for .pluggn.store domains
     if (
       hostname.endsWith(".pluggn.store") &&
       hostname !== "www.pluggn.store" &&
       hostname !== "pluggn.store"
     ) {
-      console.log(
-        `🏪 SUBDOMAIN PUBLIC: ${hostname} - handling subdomain logic`
-      );
+      console.log(`🏪 SUBDOMAIN PUBLIC: ${hostname} - handling subdomain logic`);
       const subdomain = hostname.replace(".pluggn.store", "");
 
       try {
@@ -527,7 +522,7 @@ export async function middleware(request: NextRequest) {
             new URL(`${process.env.APP_URL}/subdomain-error`)
           );
         }
-
+        
         console.log(`✅ SUBDOMAIN VERIFIED: ${subdomain}`);
       } catch (e) {
         console.error("Failed to check subdomain", e);
@@ -545,18 +540,14 @@ export async function middleware(request: NextRequest) {
 
       const page = pathname.replace(/^\/+/, "");
       const pageWithHtml = page.endsWith(".html") ? page : `${page}.html`;
-      console.log(
-        `📄 SUBDOMAIN PAGE: Rewriting ${pathname} to ${pageWithHtml}`
-      );
+      console.log(`📄 SUBDOMAIN PAGE: Rewriting ${pathname} to ${pageWithHtml}`);
       return NextResponse.rewrite(
         new URL(`${process.env.BACKEND_URL}/template/primary/${pageWithHtml}`)
       );
     }
-
+    
     // For main domain (pluggn.com.ng) public routes, just proceed without any auth operations
-    console.log(
-      `🌍 MAIN DOMAIN PUBLIC: ${hostname}${pathname} - proceeding normally`
-    );
+    console.log(`🌍 MAIN DOMAIN PUBLIC: ${hostname}${pathname} - proceeding normally`);
     return NextResponse.next();
   }
 
@@ -566,9 +557,7 @@ export async function middleware(request: NextRequest) {
     hostname !== "www.pluggn.store" &&
     hostname !== "pluggn.store"
   ) {
-    console.log(
-      `🔒 SUBDOMAIN PROTECTED: ${hostname} - verifying subdomain before auth`
-    );
+    console.log(`🔒 SUBDOMAIN PROTECTED: ${hostname} - verifying subdomain before auth`);
     const subdomain = hostname.replace(".pluggn.store", "");
 
     try {
@@ -591,22 +580,108 @@ export async function middleware(request: NextRequest) {
     // Continue to auth logic below for protected routes on subdomains
   }
 
-  // Handle authentication routes - only check if already logged in
+  // Handle authentication routes - check if already logged in OR has valid refresh token
   if (authRoutes.includes(pathname)) {
+    console.log(`🔐 AUTH ROUTE: ${pathname} - checking existing session`);
     const accessToken = request.cookies.get("accessToken")?.value;
+    const refreshToken = request.cookies.get("refreshToken")?.value;
 
+    // First check if access token is valid
     if (accessToken) {
       try {
         await jwtVerify(accessToken, JWT_SECRET_KEY, { algorithms: ["HS256"] });
+        console.log(`✅ ACCESS TOKEN VALID: Redirecting away from auth route`);
         // Already logged in → redirect away from login/register
         return NextResponse.redirect(
           new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
         );
       } catch {
-        // Token invalid/expired → let them access auth pages (no refresh needed)
+        console.log(`❌ ACCESS TOKEN INVALID: Will check refresh token`);
+        // Token invalid/expired → check refresh token
       }
     }
-    // Not logged in or invalid token → proceed to auth page
+
+    // If no access token or invalid, but has refresh token, try to refresh
+    if (refreshToken) {
+      console.log(`🔄 REFRESH TOKEN FOUND: Attempting refresh for auth route`);
+      try {
+        const refreshReq = new Request(
+          `${process.env.BACKEND_URL}/auth/refresh`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Cookie: `refreshToken=${refreshToken}`,
+            },
+            credentials: "include",
+          }
+        );
+
+        const refreshRes = await fetch(refreshReq);
+
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+
+          if (
+            refreshData.success === true &&
+            refreshData.accessToken &&
+            refreshData.refreshToken
+          ) {
+            console.log(`✅ REFRESH SUCCESS: Redirecting to dashboard with new tokens`);
+            // Refresh successful → redirect to dashboard with new cookies
+            const response = NextResponse.redirect(
+              new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
+            );
+
+            // Set the new cookies
+            const cookieConfig = {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+              sameSite:
+                process.env.NODE_ENV === "production"
+                  ? ("none" as const)
+                  : ("lax" as const),
+              domain: process.env.DOMAIN,
+              path: "/",
+            };
+
+            response.cookies.set("accessToken", refreshData.accessToken, {
+              ...cookieConfig,
+              maxAge: Math.floor(ACCESS_TOKEN_EXPIRY),
+            });
+
+            response.cookies.set("refreshToken", refreshData.refreshToken, {
+              ...cookieConfig,
+              maxAge: Math.floor(REFRESH_TOKEN_EXPIRY),
+            });
+
+            // Clear any refresh attempt counter
+            response.cookies.delete("refreshAttempt");
+
+            return response;
+          }
+        }
+
+        console.log(`❌ REFRESH FAILED: Proceeding to auth page`);
+        // Refresh failed → clear cookies and let them access auth page
+        const response = NextResponse.next();
+        response.cookies.delete("accessToken");
+        response.cookies.delete("refreshToken");
+        response.cookies.delete("refreshAttempt");
+        return response;
+      } catch (error) {
+        console.error("Error during refresh on auth route:", error);
+        // Error during refresh → clear cookies and let them access auth page
+        const response = NextResponse.next();
+        response.cookies.delete("accessToken");
+        response.cookies.delete("refreshToken");
+        response.cookies.delete("refreshAttempt");
+        return response;
+      }
+    }
+
+    // No tokens or refresh failed → proceed to auth page
+    console.log(`📝 NO VALID SESSION: Proceeding to auth page ${pathname}`);
     return NextResponse.next();
   }
 
@@ -701,7 +776,10 @@ export async function middleware(request: NextRequest) {
         const isOnboardingRoute =
           pathname === "/onboarding" || pathname.startsWith("/onboarding/");
 
-        if (!isOnboarded && !isOnboardingRoute) {
+        if (
+          !isOnboarded &&
+          !isOnboardingRoute
+        ) {
           return NextResponse.redirect(new URL("/onboarding", nextUrl.origin));
         }
 
@@ -720,7 +798,7 @@ export async function middleware(request: NextRequest) {
   // REFRESH TOKEN LOGIC - Only runs for protected routes now
   if (refreshToken) {
     console.log("Attempting token refresh for protected route");
-
+    
     try {
       const refreshReq = new Request(
         `${process.env.BACKEND_URL}/auth/refresh`,
@@ -819,7 +897,10 @@ export async function middleware(request: NextRequest) {
                 pathname === "/onboarding" ||
                 pathname.startsWith("/onboarding/");
 
-              if (!isOnboarded && !isOnboardingRoute) {
+              if (
+                !isOnboarded &&
+                !isOnboardingRoute
+              ) {
                 return NextResponse.redirect(
                   new URL("/onboarding", nextUrl.origin)
                 );
@@ -842,6 +923,7 @@ export async function middleware(request: NextRequest) {
       // Refresh failed
       console.log("Token refresh failed - clearing cookies and redirecting");
       return clearCookiesAndRedirect();
+      
     } catch (error) {
       console.error("Error during token refresh:", error);
       return clearCookiesAndRedirect();
