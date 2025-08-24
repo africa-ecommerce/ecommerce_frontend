@@ -188,7 +188,7 @@ export default function Home() {
           </button>
           <div className="pt-4 border-t">
             <Link
-              href="/dashboard"
+              href="/auth/login"
               className="block w-full py-2 px-4 text-center rounded-md border border-[#FF7A21] text-[#FF7A21] font-medium mb-3"
             >
               Sign In
