@@ -5,6 +5,7 @@
 export const publicRoutes = [
   /^\/$/, // root
   /^\/product$/, // /product
+  /^\/products\/[^\/]+$/, // /products/123 (product detail pages)
   /^\/checkout$/, // /checkout
   /^\/order-error$/, // /order-error
   /^\/thank-you$/, // /thank-you
