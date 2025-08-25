@@ -219,7 +219,7 @@ export function SwipeGuide({
           <X size={14} strokeWidth={2.5} />
         </button>
 
-        {/* Guide Content */}
+        
         <div className="flex items-center space-x-3">
           <span
             className="text-sm font-semibold tracking-wide"
