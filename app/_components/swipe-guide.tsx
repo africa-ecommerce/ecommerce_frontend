@@ -7,6 +7,7 @@ interface SwipeGuideProps {
   context: string
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left"
   onDismiss?: () => void
+  relative?: boolean // New prop to control positioning type
 }
 
 interface SwipeGuideData {
@@ -16,7 +17,12 @@ interface SwipeGuideData {
   context: string
 }
 
-export function SwipeGuide({ context, position = "bottom-right", onDismiss }: SwipeGuideProps) {
+export function SwipeGuide({ 
+  context, 
+  position = "bottom-right", 
+  onDismiss,
+  relative = false // Default to fixed positioning (current behavior)
+}: SwipeGuideProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [animationCycle, setAnimationCycle] = useState(0)
@@ -114,17 +120,19 @@ export function SwipeGuide({ context, position = "bottom-right", onDismiss }: Sw
     dismissGuide(context)
   }
 
-  // Position classes
+  // Position classes - Updated to handle both fixed and absolute positioning
   const getPositionClasses = () => {
+    const positionType = relative ? "absolute" : "fixed"
+    
     switch (position) {
       case "bottom-left":
-        return "bottom-4 left-4"
+        return `${positionType} bottom-4 left-4`
       case "top-right":
-        return "top-4 right-4"
+        return `${positionType} top-4 right-4`
       case "top-left":
-        return "top-4 left-4"
+        return `${positionType} top-4 left-4`
       default:
-        return "bottom-4 right-4"
+        return `${positionType} bottom-4 right-4`
     }
   }
 
@@ -172,7 +180,7 @@ export function SwipeGuide({ context, position = "bottom-right", onDismiss }: Sw
   if (!isMobile || !isVisible) return null
 
   return (
-    <div className={`fixed ${getPositionClasses()} z-50 pointer-events-auto`} role="img" aria-hidden="true">
+    <div className={`${getPositionClasses()} z-50 pointer-events-auto`} role="img" aria-hidden="true">
       {/* Guide Container */}
       <div
         className="relative bg-black/80 backdrop-blur-sm rounded-lg p-3 shadow-lg"

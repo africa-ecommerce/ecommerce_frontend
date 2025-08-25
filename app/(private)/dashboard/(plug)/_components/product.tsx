@@ -953,10 +953,10 @@ export default function Products() {
         )}
 
         {/* Product Catalog Management */}
-        <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
+       <section className="relative space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
           {/* Filters and Search */}
 
-                  <SwipeGuide context="product-catalog" position="top-right" />
+                  <SwipeGuide context="product-catalog" position="top-right" relative={true} />
 
 
           <div
