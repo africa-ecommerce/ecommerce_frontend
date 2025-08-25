@@ -115,10 +115,6 @@ export function SwipeGuide({
     }
   };
 
-  // Handle successful swipe interaction (auto-dismiss)
-  const handleSwipeSuccess = () => {
-    dismissGuide(context);
-  };
 
   // Position classes - Updated to handle both fixed and absolute positioning
   const getPositionClasses = () => {
@@ -230,7 +226,7 @@ export function SwipeGuide({
               textShadow: "0 1px 2px rgba(255, 255, 255, 0.8)",
             }}
           >
-            Swipe left to see more
+            Swipe left to share
           </span>
 
           {/* Animated Hand */}
