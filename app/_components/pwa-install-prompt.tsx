@@ -45,9 +45,9 @@ export default function PWAInstallPrompt() {
 
     // Check if user has dismissed recently
     const lastDismissed = localStorage.getItem("pwa-dismissed")
-    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+    const aDayAgo = Date.now() - 1 * 24 * 60 * 60 * 1000
 
-    if (lastDismissed && Number.parseInt(lastDismissed) > sevenDaysAgo) {
+    if (lastDismissed && Number.parseInt(lastDismissed) > aDayAgo) {
       return
     }
 
