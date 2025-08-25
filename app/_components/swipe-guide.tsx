@@ -168,7 +168,7 @@ export function SwipeGuide({
         setAnimationCycle((prev) => prev + 1)
       }, 3000) // 2s animation + 1s pause
 
-      if (animationCycle >= 3) {
+      if (animationCycle >= 6) {
         setIsVisible(false)
       }
 
@@ -181,9 +181,9 @@ export function SwipeGuide({
 
   return (
     <div className={`${getPositionClasses()} z-50 pointer-events-auto`} role="img" aria-hidden="true">
-      {/* Guide Container */}
+      {/* Guide Container - Updated with glassmorphism */}
       <div
-        className="relative bg-black/80 backdrop-blur-sm rounded-lg p-3 shadow-lg"
+        className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-3 shadow-xl"
         onClick={() => dismissGuide(context)}
       >
         {/* Dismiss Button */}
@@ -192,33 +192,37 @@ export function SwipeGuide({
             e.stopPropagation()
             dismissGuide(context)
           }}
-          className="absolute -top-2 -right-2 w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors"
+          className="absolute -top-2 -right-2 w-6 h-6 bg-white/90 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center text-gray-600 hover:text-gray-800 hover:bg-white transition-all"
           aria-label="Dismiss swipe guide"
         >
           <X size={12} />
         </button>
 
         {/* Guide Content */}
-        <div className="flex items-center space-x-2 text-white text-sm">
-          <span>Swipe to see more</span>
+        <div className="flex items-center space-x-2 text-white text-sm font-medium">
+          <span className="drop-shadow-sm">Swipe left to see more</span>
 
           {/* Animated Hand */}
           <div className="relative w-12 h-8 overflow-hidden">
             <div className={`absolute inset-0 ${prefersReducedMotion ? "" : "animate-swipe-guide"}`}>
-              {/* Hand SVG */}
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white opacity-70">
-                <path
-                  d="M13 2C13 1.45 12.55 1 12 1S11 1.45 11 2V8.5L9.5 7C8.67 6.17 7.33 6.17 6.5 7S5.83 8.67 6.5 9.5L11 14V22H13V14L17.5 9.5C18.33 8.67 18.33 7.33 17.5 6.5S16.17 5.83 15.5 6.5L13 9V2Z"
-                  fill="currentColor"
-                />
-                {/* Touch indicator */}
-                <circle
-                  cx="12"
-                  cy="8"
-                  r="2"
-                  fill="currentColor"
-                  className={`${prefersReducedMotion ? "opacity-50" : "animate-pulse"}`}
-                />
+              {/* Hand SVG - Fixed className */}
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className="lucide lucide-pointer-icon lucide-pointer drop-shadow-sm"
+              >
+                <path d="M22 14a8 8 0 0 1-8 8"/>
+                <path d="M18 11v-1a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/>
+                <path d="M14 10V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1"/>
+                <path d="M10 9.5V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v10"/>
+                <path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
               </svg>
             </div>
           </div>
