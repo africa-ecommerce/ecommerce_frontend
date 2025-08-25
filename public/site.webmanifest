@@ -1,7 +1,12 @@
 {
-  "name": "Pluggn",
+  "name": "Pluggn - Social Commerce Platform",
   "short_name": "Pluggn",
+  "description": "Africa's fastest-growing social commerce platform where anyone can build a business without inventory or logistics.",
   "start_url": "/dashboard",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#FF7A21",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -13,8 +18,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  ]
 }
