@@ -956,9 +956,12 @@ export default function Products() {
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
           {/* Filters and Search */}
 
+                  <SwipeGuide context="product-catalog" position="top-right" />
+
+
           <div
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
+            className="snap-x snap-mandatory"
             onScroll={handleScroll}
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
@@ -1422,8 +1425,7 @@ export default function Products() {
           deleteResource={deleteResource}
         />
 
-        {/* Swipe Guide */}
-        <SwipeGuide context="product-catalog" position="top-right" />
+        
 
         <EditPriceModal
           itemData={currentItemData}
