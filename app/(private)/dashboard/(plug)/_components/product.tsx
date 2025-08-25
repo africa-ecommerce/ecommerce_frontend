@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -72,6 +72,7 @@ import { ShareModal } from "./share-modal";
 import { useUser } from "@/app/_components/provider/UserContext";
 import { WriteReviewModal } from "./write-review-modal";
 import { useRouter } from "next/navigation";
+import { SwipeGuide, useSwipeGuide } from "@/app/_components/swipe-guide";
 
 const TipSkeleton = () => (
   <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
@@ -258,6 +259,21 @@ export default function Products() {
   const [activeOrderTab, setActiveOrderTab] = useState("active"); // Add this state
   const { userData } = useUser();
   const { user } = userData || { user: null };
+
+   const scrollRef = useRef<HTMLDivElement>(null)
+  const { handleSwipeSuccess } = useSwipeGuide("product-catalog")
+
+  // Handle scroll/swipe detection
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current
+
+      // If user has scrolled significantly, consider it a successful swipe
+      if (scrollLeft > 50) {
+        handleSwipeSuccess()
+      }
+    }
+  }
 
   const router = useRouter();
 
@@ -939,321 +955,339 @@ export default function Products() {
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
           {/* Filters and Search */}
-          <div className="flex flex-col gap-2 max-w-[360px]:gap-1.5 sm:gap-3">
-            <div className="relative flex items-center">
-              <Search className="absolute left-2.5 max-w-[360px]:left-2 top-1/2 transform -translate-y-1/2 h-3.5 max-w-[360px]:h-3 w-3.5 max-w-[360px]:w-3 text-muted-foreground" />
-              <Input
-                placeholder="Search products..."
-                className={`pl-8 max-w-[360px]:pl-7 pr-8 max-w-[360px]:pr-7 text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 transition-all ${
-                  isSearchFocused ? "border-primary ring-1 ring-primary" : ""
-                }`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
-              />
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={clearSearch}
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 max-w-[360px]:h-5 w-6 max-w-[360px]:w-5"
-                >
-                  <X className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5" />
-                </Button>
-              )}
-            </div>
-            <div className="flex items-center gap-2 max-w-[360px]:gap-1 overflow-x-auto pb-1 scrollbar-hide">
-              <div className="flex gap-1.5 max-w-[360px]:gap-1">
-                <Button
-                  variant={selectedFilter === "all" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    setSelectedFilter("all");
-                    setCurrentPage(1);
-                  }}
-                  className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
-                >
-                  All
-                </Button>
-                <Button
-                  variant={
-                    selectedFilter === "out-of-stock" ? "default" : "outline"
-                  }
-                  size="sm"
-                  onClick={() => {
-                    setSelectedFilter("out-of-stock");
-                    setCurrentPage(1);
-                  }}
-                  className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
-                >
-                  Out of Stock
-                </Button>
-                <Button
-                  variant={
-                    selectedFilter === "low-stock" ? "default" : "outline"
-                  }
-                  size="sm"
-                  onClick={() => {
-                    setSelectedFilter("low-stock");
-                    setCurrentPage(1);
-                  }}
-                  className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
-                >
-                  Low Stock
-                </Button>
-                <Button
-                  variant={selectedFilter === "optimal" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    setSelectedFilter("optimal");
-                    setCurrentPage(1);
-                  }}
-                  className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
-                >
-                  In Stock
-                </Button>
-              </div>
-              <div className="">
-                <Select
-                  value={selectedCategory}
-                  onValueChange={(value) => {
-                    setSelectedCategory(value);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <SelectTrigger className="w-[120px] md:w-[150px] text-xs md:text-sm h-8 sm:h-9">
-                    <SelectValue placeholder="Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PRODUCT_CATEGORIES.map((category) => (
-                      <SelectItem
-                        key={category.value}
-                        value={category.value}
-                        className="text-xs md:text-sm"
-                      >
-                        {category.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
 
-          {/* Product Table */}
-          <div className="">
-            <Card>
-              <CardContent className="p-0">
-                <div className="relative overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="text-xs uppercase bg-muted/50">
-                      <tr>
-                        <th className="p-2 sm:p-3  text-left">Product</th>
-                        <th className="p-2 sm:p-3  text-left">Selling Price</th>
-                        <th className="p-2 sm:p-3  text-left">Cost Price</th>
-                        <th className="p-2 sm:p-3  text-left">Stock</th>
-                        <th className="p-2 sm:p-3  w-[70px] text-left">
-                          Status
-                        </th>
-                        <th className="p-2 sm:p-3  text-left">Plugs</th>
-                        <th className="p-2 sm:p-3  text-left">Sales</th>
-                        <th className="p-2 sm:p-3  w-[70px] text-left">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {isLoading ? (
+          <div
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
+            onScroll={handleScroll}
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            <div className="flex flex-col gap-2 max-w-[360px]:gap-1.5 sm:gap-3">
+              <div className="relative flex items-center">
+                <Search className="absolute left-2.5 max-w-[360px]:left-2 top-1/2 transform -translate-y-1/2 h-3.5 max-w-[360px]:h-3 w-3.5 max-w-[360px]:w-3 text-muted-foreground" />
+                <Input
+                  placeholder="Search products..."
+                  className={`pl-8 max-w-[360px]:pl-7 pr-8 max-w-[360px]:pr-7 text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 transition-all ${
+                    isSearchFocused ? "border-primary ring-1 ring-primary" : ""
+                  }`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={clearSearch}
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 max-w-[360px]:h-5 w-6 max-w-[360px]:w-5"
+                  >
+                    <X className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5" />
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center gap-2 max-w-[360px]:gap-1 overflow-x-auto pb-1 scrollbar-hide">
+                <div className="flex gap-1.5 max-w-[360px]:gap-1">
+                  <Button
+                    variant={selectedFilter === "all" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      setSelectedFilter("all");
+                      setCurrentPage(1);
+                    }}
+                    className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
+                  >
+                    All
+                  </Button>
+                  <Button
+                    variant={
+                      selectedFilter === "out-of-stock" ? "default" : "outline"
+                    }
+                    size="sm"
+                    onClick={() => {
+                      setSelectedFilter("out-of-stock");
+                      setCurrentPage(1);
+                    }}
+                    className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
+                  >
+                    Out of Stock
+                  </Button>
+                  <Button
+                    variant={
+                      selectedFilter === "low-stock" ? "default" : "outline"
+                    }
+                    size="sm"
+                    onClick={() => {
+                      setSelectedFilter("low-stock");
+                      setCurrentPage(1);
+                    }}
+                    className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
+                  >
+                    Low Stock
+                  </Button>
+                  <Button
+                    variant={
+                      selectedFilter === "optimal" ? "default" : "outline"
+                    }
+                    size="sm"
+                    onClick={() => {
+                      setSelectedFilter("optimal");
+                      setCurrentPage(1);
+                    }}
+                    className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
+                  >
+                    In Stock
+                  </Button>
+                </div>
+                <div className="">
+                  <Select
+                    value={selectedCategory}
+                    onValueChange={(value) => {
+                      setSelectedCategory(value);
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <SelectTrigger className="w-[120px] md:w-[150px] text-xs md:text-sm h-8 sm:h-9">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PRODUCT_CATEGORIES.map((category) => (
+                        <SelectItem
+                          key={category.value}
+                          value={category.value}
+                          className="text-xs md:text-sm"
+                        >
+                          {category.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Product Table */}
+            <div className="">
+              <Card>
+                <CardContent className="p-0">
+                  <div className="relative overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="text-xs uppercase bg-muted/50">
                         <tr>
-                          <td colSpan={8} className="p-0">
-                            <LoadingSkeleton />
-                          </td>
+                          <th className="p-2 sm:p-3  text-left">Product</th>
+                          <th className="p-2 sm:p-3  text-left">
+                            Selling Price
+                          </th>
+                          <th className="p-2 sm:p-3  text-left">Cost Price</th>
+                          <th className="p-2 sm:p-3  text-left">Stock</th>
+                          <th className="p-2 sm:p-3  w-[70px] text-left">
+                            Status
+                          </th>
+                          <th className="p-2 sm:p-3  text-left">Plugs</th>
+                          <th className="p-2 sm:p-3  text-left">Sales</th>
+                          <th className="p-2 sm:p-3  w-[70px] text-left">
+                            Actions
+                          </th>
                         </tr>
-                      ) : error ? (
-                        <tr>
-                          <td colSpan={8} className="p-0">
-                            <ErrorState onRetry={() => mutate()} />
-                          </td>
-                        </tr>
-                      ) : filteredItems?.length === 0 ? (
-                        <tr>
-                          <td colSpan={8} className="p-0">
-                            {products.length === 0 ? (
-                              <EmptyProductsState />
-                            ) : (
-                              <EmptyFilterState
-                                onResetFilters={() => {
-                                  setSelectedCategory("all");
-                                  setSelectedFilter("all");
-                                  setSearchQuery("");
-                                }}
-                              />
-                            )}
-                          </td>
-                        </tr>
-                      ) : (
-                        currentItems.map((item: any) => {
-                          const stockStatus = getStockStatus(item);
-                          return (
-                            <tr
-                              key={item.id}
-                              className="border-b hover:bg-muted/30"
-                            >
-                              <td className="p-2 sm:p-3">
-                                <div className="flex items-center gap-2 sm:gap-3">
-                                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
-                                    <Image
-                                      src={item.images[0] || "/placeholder.svg"}
-                                      alt={item.name}
-                                      width={32}
-                                      height={32}
-                                      className="w-full h-full object-cover"
-                                    />
+                      </thead>
+                      <tbody>
+                        {isLoading ? (
+                          <tr>
+                            <td colSpan={8} className="p-0">
+                              <LoadingSkeleton />
+                            </td>
+                          </tr>
+                        ) : error ? (
+                          <tr>
+                            <td colSpan={8} className="p-0">
+                              <ErrorState onRetry={() => mutate()} />
+                            </td>
+                          </tr>
+                        ) : filteredItems?.length === 0 ? (
+                          <tr>
+                            <td colSpan={8} className="p-0">
+                              {products.length === 0 ? (
+                                <EmptyProductsState />
+                              ) : (
+                                <EmptyFilterState
+                                  onResetFilters={() => {
+                                    setSelectedCategory("all");
+                                    setSelectedFilter("all");
+                                    setSearchQuery("");
+                                  }}
+                                />
+                              )}
+                            </td>
+                          </tr>
+                        ) : (
+                          currentItems.map((item: any) => {
+                            const stockStatus = getStockStatus(item);
+                            return (
+                              <tr
+                                key={item.id}
+                                className="border-b hover:bg-muted/30"
+                              >
+                                <td className="p-2 sm:p-3">
+                                  <div className="flex items-center gap-2 sm:gap-3">
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden">
+                                      <Image
+                                        src={
+                                          item.images[0] || "/placeholder.svg"
+                                        }
+                                        alt={item.name}
+                                        width={32}
+                                        height={32}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                    <Link
+                                      href={`/marketplace/product/${item.originalId}`}
+                                    >
+                                      <span className="font-medium text-xs sm:text-sm whitespace-nowrap max-w-[250px] capitalize underline text-blue-700">
+                                        {truncateText(item.name, 15) || "-"}
+                                      </span>
+                                    </Link>
                                   </div>
-                                  <Link
-                                    href={`/marketplace/product/${item.originalId}`}
-                                  >
-                                    <span className="font-medium text-xs sm:text-sm whitespace-nowrap max-w-[250px] capitalize underline text-blue-700">
-                                      {truncateText(item.name, 15) || "-"}
+                                </td>
+                                <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
+                                  {item.price
+                                    ? `₦${item.price.toLocaleString()}`
+                                    : "-"}
+                                </td>
+                                <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
+                                  {item.originalPrice
+                                    ? `₦${item.originalPrice.toLocaleString()}`
+                                    : "-"}
+                                </td>
+                                <td className="p-2 sm:p-3 text-xs sm:text-sm">
+                                  <div className="flex items-center gap-1">
+                                    <span
+                                      className={getStockStatusColor(
+                                        stockStatus
+                                      )}
+                                    >
+                                      {getTotalStocks(item)}
                                     </span>
-                                  </Link>
-                                </div>
-                              </td>
-                              <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                {item.price
-                                  ? `₦${item.price.toLocaleString()}`
-                                  : "-"}
-                              </td>
-                              <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                {item.originalPrice
-                                  ? `₦${item.originalPrice.toLocaleString()}`
-                                  : "-"}
-                              </td>
-                              <td className="p-2 sm:p-3 text-xs sm:text-sm">
-                                <div className="flex items-center gap-1">
-                                  <span
-                                    className={getStockStatusColor(stockStatus)}
-                                  >
-                                    {getTotalStocks(item)}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="p-2 sm:p-3">
-                                {getStockStatusBadge(stockStatus)}
-                              </td>
-                              <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                <div className="flex items-center gap-1">
-                                  <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground" />
-                                  <span>{displayValue(item.plugsCount)}</span>
-                                </div>
-                              </td>
-                              <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
-                                {displayValue(item.sold)}
-                              </td>
-                              <td className="p-2 sm:p-3">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7 sm:h-8 sm:w-8"
-                                    >
-                                      <MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                      <span className="sr-only">Open menu</span>
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel className="text-xs sm:text-sm">
-                                      Actions
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuItem
-                                      className="text-xs sm:text-sm"
-                                      onClick={() => {
-                                        setProductToEdit(item.id);
-                                        setCurrentItemData(item);
-                                        setPriceModalOpen(true);
-                                      }}
-                                    >
-                                      <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
-                                      Manage
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      className="text-xs sm:text-sm"
-                                      onClick={() => {
-                                        setProductToShare({
-                                          id: item.id,
-                                          name: item.name,
-                                        });
-                                        setShareModalOpen(true);
-                                      }}
-                                    >
-                                      <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
-                                      Share
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      className="text-xs sm:text-sm"
-                                      onClick={() => {
-                                        setProductToReview({
-                                          originalId: item.originalId,
-                                          name: item.name,
-                                        });
-                                        setReviewModalOpen(true);
-                                      }}
-                                    >
-                                      <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
-                                      Review
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      className="text-destructive text-xs sm:text-sm"
-                                      onClick={() =>
-                                        setProductToDelete(item.id)
-                                      }
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
-                                      Remove
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-              <CardFooter className="flex items-center justify-between p-3 sm:p-4 border-t">
-                <div className="text-xs sm:text-sm text-muted-foreground">
-                  Showing{" "}
-                  {Math.min(indexOfFirstItem + 1, filteredItems?.length || 0)}-
-                  {Math.min(indexOfLastItem, filteredItems?.length || 0)} of{" "}
-                  {filteredItems?.length || 0} products
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={currentPage === 1}
-                    onClick={prevPage}
-                    className="h-7 sm:h-8 text-xs"
-                  >
-                    <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={currentPage >= totalPages}
-                    onClick={nextPage}
-                    className="h-7 sm:h-8 text-xs"
-                  >
-                    Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
+                                  </div>
+                                </td>
+                                <td className="p-2 sm:p-3">
+                                  {getStockStatusBadge(stockStatus)}
+                                </td>
+                                <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
+                                  <div className="flex items-center gap-1">
+                                    <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground" />
+                                    <span>{displayValue(item.plugsCount)}</span>
+                                  </div>
+                                </td>
+                                <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
+                                  {displayValue(item.sold)}
+                                </td>
+                                <td className="p-2 sm:p-3">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 sm:h-8 sm:w-8"
+                                      >
+                                        <MoreHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                        <span className="sr-only">
+                                          Open menu
+                                        </span>
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuLabel className="text-xs sm:text-sm">
+                                        Actions
+                                      </DropdownMenuLabel>
+                                      <DropdownMenuItem
+                                        className="text-xs sm:text-sm"
+                                        onClick={() => {
+                                          setProductToEdit(item.id);
+                                          setCurrentItemData(item);
+                                          setPriceModalOpen(true);
+                                        }}
+                                      >
+                                        <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                        Manage
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        className="text-xs sm:text-sm"
+                                        onClick={() => {
+                                          setProductToShare({
+                                            id: item.id,
+                                            name: item.name,
+                                          });
+                                          setShareModalOpen(true);
+                                        }}
+                                      >
+                                        <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                        Share
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        className="text-xs sm:text-sm"
+                                        onClick={() => {
+                                          setProductToReview({
+                                            originalId: item.originalId,
+                                            name: item.name,
+                                          });
+                                          setReviewModalOpen(true);
+                                        }}
+                                      >
+                                        <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                        Review
+                                      </DropdownMenuItem>
+                                      <DropdownMenuSeparator />
+                                      <DropdownMenuItem
+                                        className="text-destructive text-xs sm:text-sm"
+                                        onClick={() =>
+                                          setProductToDelete(item.id)
+                                        }
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                        Remove
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex items-center justify-between p-3 sm:p-4 border-t">
+                  <div className="text-xs sm:text-sm text-muted-foreground">
+                    Showing{" "}
+                    {Math.min(indexOfFirstItem + 1, filteredItems?.length || 0)}
+                    -{Math.min(indexOfLastItem, filteredItems?.length || 0)} of{" "}
+                    {filteredItems?.length || 0} products
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage === 1}
+                      onClick={prevPage}
+                      className="h-7 sm:h-8 text-xs"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage >= totalPages}
+                      onClick={nextPage}
+                      className="h-7 sm:h-8 text-xs"
+                    >
+                      Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                    </Button>
+                  </div>
+                </CardFooter>
+              </Card>
+            </div>
           </div>
         </section>
 
@@ -1387,6 +1421,9 @@ export default function Products() {
           setProductToDelete={setProductToDelete}
           deleteResource={deleteResource}
         />
+
+        {/* Swipe Guide */}
+        <SwipeGuide context="product-catalog" position="top-right" />
 
         <EditPriceModal
           itemData={currentItemData}
