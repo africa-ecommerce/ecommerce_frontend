@@ -86,9 +86,9 @@ export default function PWAInstallPrompt() {
   useEffect(() => {
     if (hasScrolled && !showBanner && !isStandalone && (isIOS || deferredPrompt)) {
       const lastDismissed = localStorage.getItem("pwa-dismissed")
-      const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+      const aDaysAgo = Date.now() - 1 * 24 * 60 * 60 * 1000
 
-      if (!lastDismissed || Number.parseInt(lastDismissed) < sevenDaysAgo) {
+      if (!lastDismissed || Number.parseInt(lastDismissed) < aDaysAgo) {
         setShowBanner(true)
       }
     }
