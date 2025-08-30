@@ -1,8 +1,3 @@
-
-
-
-
-
 import Link from "next/link";
 import Image from "next/image";
 
@@ -37,8 +32,8 @@ export function Footer() {
               <Link
                 href="https://www.instagram.com/pluggnhq/"
                 className="text-gray-400 hover:opacity-80"
-                 target="_blank"
-  rel="noopener noreferrer"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -64,8 +59,12 @@ export function Footer() {
                 </svg>
                 <span className="sr-only">Instagram</span>
               </Link>
-              <Link href="#" className="text-gray-400 hover:opacity-80"  target="_blank"
-  rel="noopener noreferrer">
+              <Link
+                href="#"
+                className="text-gray-400 hover:opacity-80"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -82,8 +81,12 @@ export function Footer() {
                 </svg>
                 <span className="sr-only">Facebook</span>
               </Link>
-              <Link href="https://x.com/pluggnhq" className="text-gray-400 hover:opacity-80"  target="_blank"
-  rel="noopener noreferrer">
+              <Link
+                href="https://x.com/pluggnhq"
+                className="text-gray-400 hover:opacity-80"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -192,9 +195,13 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="border-t border-gray-800 mt-8 md:mt-12 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-xs md:text-sm">
+        <div className="border-t border-gray-800 mt-8 md:mt-12 pt-6 md:pt-8 flex flex-col items-center space-y-2">
+          <p className="text-gray-400 text-xs md:text-sm text-center">
             © {new Date().getFullYear()} Pluggn. All rights reserved.
+          </p>
+          <p className="text-gray-500 text-xs md:text-sm text-center">
+            Pluggn is a product of{" "}
+            <span className="font-semibold">NOWAGIE OPS</span>
           </p>
         </div>
       </div>
