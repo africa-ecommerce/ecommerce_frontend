@@ -186,6 +186,14 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/legal"
+                  className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
+                >
+                  Legal
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/privacy"
                   className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
                 >
