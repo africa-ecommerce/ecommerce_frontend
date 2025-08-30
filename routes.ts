@@ -15,6 +15,7 @@ export const publicRoutes = [
   /^\/[A-Za-z0-9]{7}$/, // link slug like /abc1234 (7 char nanoid)
   /^\/privacy$/,
   /^\/terms$/,
+  /^\/legal$/
 ];
 /**@type {string[]}*/
 export const authRoutes = [
