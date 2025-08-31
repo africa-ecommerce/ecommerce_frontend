@@ -5555,10 +5555,9 @@ export default function CheckoutPage() {
                                 </Label>
                                 <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-3">
                                   <div className="flex items-center justify-between">
-                                    <p className="text-sm text-blue-800">
+                                    <p className="text-xs text-blue-800">
                                       <strong>
-                                        Terminal Pickup Price for{" "}
-                                        {selectedState}:
+                                        Terminal Pickup Price
                                       </strong>
                                     </p>
                                     <span className="text-lg font-bold text-blue-900">
@@ -5569,7 +5568,7 @@ export default function CheckoutPage() {
                                       )}
                                     </span>
                                   </div>
-                                  <p className="text-xs text-blue-700 mt-1">
+                                  <p className="text-sm text-blue-700 mt-1">
                                     All pickup locations in {selectedState} have
                                     the same price
                                   </p>
@@ -6050,8 +6049,8 @@ export default function CheckoutPage() {
                       <div className="flex items-start">
                         <span className="mr-2 text-primary">•</span>
                         <p>
-                          Orders are typically delivered 2-3 days for locations
-                          within Lagos and Ibadan, and 4-7 days for other
+                          Orders are typically delivered 1-3 days for locations
+                          within Lagos and Ogun, and 3-7 days for other
                           locations
                         </p>
                       </div>
