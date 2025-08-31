@@ -3747,7 +3747,7 @@ export default function CheckoutPage() {
                                   <span className="text-red-500">*</span>
                                 </Label>
                                 <p className="text-sm text-muted-foreground mb-2">
-                                  Choose a GIG Logistics office near you for
+                                  Scroll to choose a GIG Logistics office near you for
                                   pickup:
                                 </p>
                                 <div className="border rounded-md max-h-48 overflow-y-auto">
@@ -4223,7 +4223,7 @@ export default function CheckoutPage() {
                         <span className="mr-2 text-primary">•</span>
                         <p>
                           We accept returns within 3 days of delivery, provided
-                          items are in good condition
+                          items meet our return policy
                         </p>
                       </div>
                       <div className="flex items-start">
