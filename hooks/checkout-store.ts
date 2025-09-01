@@ -12,29 +12,31 @@ interface CustomerAddress {
   state: string;
   lga: string;
   directions?: string;
+
 }
 
 interface CheckoutData {
   customerInfo: CustomerInfo;
   customerAddress: CustomerAddress;
-  deliveryMethod: "standard" | "express" | "pickup";
+  deliveryMethod: "terminal" | "home";
   paymentMethod: "online" | "cash";
   deliveryInstructions?: string;
   currentStep: "delivery" | "review";
+  terminalAddress?: string
 }
 
 interface CheckoutStore {
   checkoutData: CheckoutData;
   setCustomerInfo: (info: Partial<CustomerInfo>) => void;
   setCustomerAddress: (address: Partial<CustomerAddress>) => void;
-  setDeliveryMethod: (method: "standard" | "express" | "pickup") => void;
+  setDeliveryMethod: (method: "terminal" | "home") => void;
   setPaymentMethod: (method: "online" | "cash") => void;
   setDeliveryInstructions: (instructions: string) => void;
   setCurrentStep: (step: "delivery" | "review") => void;
   updateCheckoutData: (data: Partial<CheckoutData>) => void;
   clearCheckoutData: () => void;
   getCheckoutData: () => CheckoutData;
-  
+  setTerminalAddress: (address: string) => void;
 }
 
 const defaultCheckoutData: CheckoutData = {
@@ -49,10 +51,11 @@ const defaultCheckoutData: CheckoutData = {
     lga: "",
     directions: "",
   },
-  deliveryMethod: "standard",
+  deliveryMethod: "terminal",
   paymentMethod: "online",
   deliveryInstructions: "",
   currentStep: "delivery",
+  terminalAddress: ""
 };
 
 export const useCheckoutStore = create<CheckoutStore>()(
@@ -82,11 +85,19 @@ export const useCheckoutStore = create<CheckoutStore>()(
           },
         })),
 
+        setTerminalAddress: (address) =>
+        set((state) => ({
+          checkoutData: {
+            ...state.checkoutData,
+            terminalAddress: address,
+          },
+        })),
+
       setDeliveryMethod: (method) =>
         set((state) => ({
           checkoutData: {
             ...state.checkoutData,
-            deliveryMethod: method,
+            deliveryType: method,
           },
         })),
 
