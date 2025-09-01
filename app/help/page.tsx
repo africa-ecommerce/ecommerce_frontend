@@ -48,7 +48,7 @@ const faqCategories = [
         id: "delivery-time",
         question: "How long does delivery take?",
         answer:
-          "Standard delivery typically takes 2-3 days in some location, and 4-7 days for some other locations."
+          "Standard delivery typically takes 1-3 days in some location, and 3-7 days for some other locations."
           
       },
       {
