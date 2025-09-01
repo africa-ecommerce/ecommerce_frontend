@@ -94,12 +94,12 @@ export const useCheckoutStore = create<CheckoutStore>()(
         })),
 
       setDeliveryMethod: (method) =>
-        set((state) => ({
-          checkoutData: {
-            ...state.checkoutData,
-            deliveryType: method,
-          },
-        })),
+  set((state) => ({
+    checkoutData: {
+      ...state.checkoutData,
+      deliveryMethod: method, // Changed from deliveryType to deliveryMethod
+    },
+  })),
 
       setPaymentMethod: (method) =>
         set((state) => ({
