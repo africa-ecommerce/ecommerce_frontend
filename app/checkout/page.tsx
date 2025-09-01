@@ -9178,7 +9178,6 @@
 
 
 
-
 "use client"
 import { useState, useEffect, useMemo } from "react"
 import dynamic from "next/dynamic"
@@ -9262,6 +9261,8 @@ export default function CheckoutPage() {
     latitude: number | null
     longitude: number | null
   }>({ latitude: null, longitude: null })
+
+  const [hasHydrated, setHasHydrated] = useState(false)
 
   // Replace local state with Zustand store
   const {
@@ -9353,6 +9354,15 @@ export default function CheckoutPage() {
     clearOrderSummaries,
     updateDeliveryFee,
   } = useProductStore()
+
+  useEffect(() => {
+    // Wait for Zustand to hydrate from localStorage
+    const unsubscribe = useCheckoutStore.persist.onFinishHydration(() => {
+      setHasHydrated(true);
+    });
+
+    return unsubscribe;
+  }, []);
 
   // Get cart items from orderSummaries (works for both store and non-store platforms)
   const cartItems = useMemo(() => {
@@ -9672,35 +9682,44 @@ export default function CheckoutPage() {
   const total = subtotal + (deliveryFee || 0)
 
   // Initialize states and form data
-  useEffect(() => {
-    setIsClient(true)
-    // Initialize Nigerian states
-    try {
-      const statesData = NaijaStates.states()
-      if (Array.isArray(statesData)) {
-        const stateNames = statesData
-          .map((state: any) => {
-            return typeof state === "string" ? state : state.state || state.name
-          })
-          .filter(Boolean)
-        setStates(stateNames)
-      }
-    } catch (error) {
-      console.error("Error fetching states:", error)
-      setStates([])
+ useEffect(() => {
+  if (!hasHydrated) return // Wait for hydration to complete
+  
+  setIsClient(true)
+  // Initialize Nigerian states
+  try {
+    const statesData = NaijaStates.states()
+    if (Array.isArray(statesData)) {
+      const stateNames = statesData
+        .map((state: any) => {
+          return typeof state === "string" ? state : state.state || state.name
+        })
+        .filter(Boolean)
+      setStates(stateNames)
     }
+  } catch (error) {
+    console.error("Error fetching states:", error)
+    setStates([])
+  }
 
-    setSelectedTerminal(checkoutData.terminalAddress || "")
+  setSelectedTerminal(checkoutData.terminalAddress || "")
 
-    // Initialize form with stored data
-    setValue("customerInfo.name", checkoutData.customerInfo.name || "")
-    setValue("customerInfo.email", checkoutData.customerInfo.email || "")
-    setValue("customerInfo.phone", checkoutData.customerInfo.phone || "")
-    setValue("customerAddress.streetAddress", checkoutData.customerAddress.streetAddress || "")
-    setValue("customerAddress.state", checkoutData.customerAddress.state || "")
-    setValue("customerAddress.lga", checkoutData.customerAddress.lga || "")
-    setValue("customerAddress.directions", checkoutData.customerAddress.directions || "")
-  }, [setValue, checkoutData])
+  // Initialize form with stored data AFTER hydration
+  setValue("customerInfo.name", checkoutData.customerInfo.name || "")
+  setValue("customerInfo.email", checkoutData.customerInfo.email || "")
+  setValue("customerInfo.phone", checkoutData.customerInfo.phone || "")
+  setValue("customerAddress.streetAddress", checkoutData.customerAddress.streetAddress || "")
+  setValue("customerAddress.state", checkoutData.customerAddress.state || "")
+  setValue("customerAddress.lga", checkoutData.customerAddress.lga || "")
+  setValue("customerAddress.directions", checkoutData.customerAddress.directions || "")
+
+  // Set selected state if it exists to load LGAs
+  if (checkoutData.customerAddress.state) {
+    setSelectedState(checkoutData.customerAddress.state)
+    const lgas = getLgasForState(checkoutData.customerAddress.state)
+    setAvailableLgas(lgas)
+  }
+}, [setValue, checkoutData, hasHydrated])
 
   // Watch state changes to update LGAs
   useEffect(() => {
@@ -9814,51 +9833,23 @@ export default function CheckoutPage() {
 
 
 
-  // const goToNextStep = async () => {
-  //   if (currentStep === "delivery") {
-  //     // For terminal delivery, only validate customer info
-  //     if (deliveryMethod === "terminal") {
-  //       const customerInfoValid = await trigger("customerInfo")
-  //       const terminalSelected = selectedTerminal !== "" && selectedTerminal !== null
-
-  //       if (customerInfoValid && terminalSelected) {
-  //         setDeliveryMethod("terminal")
-  //         setTerminalAddress(selectedTerminal)
-  //         setCurrentStep("review")
-  //       } else {
-  //         if (!terminalSelected) {
-  //           setShowTerminalAlert(true)
-  //           return
-  //         }
-  //         const firstError = document.querySelector(".border-red-500")
-  //         if (firstError) {
-  //           firstError.scrollIntoView({ behavior: "smooth", block: "center" })
-  //         }
-  //       }
-  //     } else {
-  //       // For home delivery, validate all fields
-  //       const isFormValid = await trigger()
-  //       if (isFormValid) {
-  //         setDeliveryMethod("home")
-  //         setCurrentStep("review")
-  //       } else {
-  //         const firstError = document.querySelector(".border-red-500")
-  //         if (firstError) {
-  //           firstError.scrollIntoView({ behavior: "smooth", block: "center" })
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-
-
-  const goToNextStep = async () => {
+ const goToNextStep = async () => {
   if (currentStep === "delivery") {
-    // First, always validate customer info (required for both delivery methods)
+    // First, validate customer info (required for both delivery methods)
     const customerInfoValid = await trigger("customerInfo")
     
-    if (!customerInfoValid) {
-      // Scroll to first error in customer info section
+    // Get current form values to check if they're filled
+    const customerInfo = watch("customerInfo")
+    const customerAddress = watch("customerAddress")
+    
+    // Check if customer info is actually filled (not just validation passing)
+    const isCustomerInfoFilled = 
+      customerInfo.name?.trim() && 
+      customerInfo.email?.trim() && 
+      customerInfo.phone?.trim()
+    
+    if (!customerInfoValid || !isCustomerInfoFilled) {
+      // Scroll to first error
       const firstError = document.querySelector(".border-red-500")
       if (firstError) {
         firstError.scrollIntoView({ behavior: "smooth", block: "center" })
@@ -9869,55 +9860,38 @@ export default function CheckoutPage() {
     // For terminal delivery
     if (deliveryMethod === "terminal") {
       const terminalSelected = selectedTerminal !== "" && selectedTerminal !== null
-
+      
       if (!terminalSelected) {
         setShowTerminalAlert(true)
         return
       }
-
-      // If customer info is valid and terminal is selected, proceed
+      
+      // All terminal requirements met
       setDeliveryMethod("terminal")
       setTerminalAddress(selectedTerminal)
       setCurrentStep("review")
     } 
     // For home delivery
     else {
-      // Validate all address fields for home delivery
+      // Validate address fields
       const addressValid = await trigger("customerAddress")
       
-      if (!addressValid) {
-        // Scroll to first error in address section
+      // Check if required address fields are filled
+      const isAddressInfoFilled = 
+        customerAddress.state?.trim() && 
+        customerAddress.lga?.trim() && 
+        customerAddress.streetAddress?.trim()
+      
+      if (!addressValid || !isAddressInfoFilled) {
+        // Scroll to first error
         const firstError = document.querySelector(".border-red-500")
         if (firstError) {
           firstError.scrollIntoView({ behavior: "smooth", block: "center" })
         }
         return
       }
-
-      // Additional check to ensure required address fields are not empty
-      const requiredAddressFields = {
-        state: watchedState,
-        lga: watchedLga,
-        streetAddress: watchedStreetAddress
-      }
-
-      const missingFields = Object.entries(requiredAddressFields)
-        .filter(([key, value]) => !value || value.trim() === "")
-        .map(([key]) => key)
-
-      if (missingFields.length > 0) {
-        console.log("Missing required address fields:", missingFields)
-        // Focus on the first missing field
-        const firstMissingField = missingFields[0]
-        const fieldElement = document.querySelector(`[name="customerAddress.${firstMissingField}"]`)
-        if (fieldElement) {
-          fieldElement.scrollIntoView({ behavior: "smooth", block: "center" })
-          fieldElement.focus()
-        }
-        return
-      }
-
-      // If all validations pass, proceed
+      
+      // All home delivery requirements met
       setDeliveryMethod("home")
       setCurrentStep("review")
     }
@@ -9929,12 +9903,9 @@ export default function CheckoutPage() {
   }
 
   // Handle delivery instructions change
-  const handleDeliveryInstructionsChange = (instructions: string) => {
-    // setDeliveryInstructions(instructions);
-    // For now, we'll store this in the customer address or create a separate field
-    // This should be handled by the store - adding a setDeliveryInstructions method
-    console.log("Delivery instructions:", instructions)
-  }
+const handleDeliveryInstructionsChange = (instructions: string) => {
+  setDeliveryInstructions(instructions)
+}
 
   const renderPlaceOrderButton = () => {
     // Only render PaystackButton on client side
@@ -9954,7 +9925,12 @@ export default function CheckoutPage() {
     <div className="flex flex-col min-h-screen pb-16 md:pb-0">
       {platform !== "store" && (
         <div className="sticky top-0 z-20 flex items-center p-4 bg-background/80 backdrop-blur-md border-b">
-          <Button variant="ghost" size="sm" onClick={handleBackNavigation} className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBackNavigation}
+            className="flex items-center gap-2"
+          >
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
@@ -9977,7 +9953,9 @@ export default function CheckoutPage() {
       {platform === "store" && productFetchError && !isProductsLoading && (
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <Alert className="max-w-md mx-auto">
-            <AlertDescription>Failed to load products. Please try refreshing the page.</AlertDescription>
+            <AlertDescription>
+              Failed to load products. Please try refreshing the page.
+            </AlertDescription>
           </Alert>
         </div>
       )}
@@ -9990,7 +9968,9 @@ export default function CheckoutPage() {
               {currentStep === "delivery" && (
                 <Card>
                   <CardContent className="p-4 md:p-6">
-                    <h2 className="text-xl font-semibold mb-4">Delivery Information</h2>
+                    <h2 className="text-xl font-semibold mb-4">
+                      Delivery Information
+                    </h2>
                     <div className="space-y-6">
                       {/* Customer Information */}
                       <div>
@@ -10006,39 +9986,59 @@ export default function CheckoutPage() {
                               id="customerName"
                               {...register("customerInfo.name")}
                               placeholder="Enter your full name"
-                              className={errors.customerInfo?.name ? "border-red-500" : ""}
+                              className={
+                                errors.customerInfo?.name
+                                  ? "border-red-500"
+                                  : ""
+                              }
                             />
                             {errors.customerInfo?.name && (
-                              <p className="text-sm text-red-600">{errors.customerInfo.name.message}</p>
+                              <p className="text-sm text-red-600">
+                                {errors.customerInfo.name.message}
+                              </p>
                             )}
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="customerEmail">
-                              Email Address <span className="text-red-500">*</span>
+                              Email Address{" "}
+                              <span className="text-red-500">*</span>
                             </Label>
                             <Input
                               id="customerEmail"
                               type="email"
                               {...register("customerInfo.email")}
                               placeholder="Enter your email address"
-                              className={errors.customerInfo?.email ? "border-red-500" : ""}
+                              className={
+                                errors.customerInfo?.email
+                                  ? "border-red-500"
+                                  : ""
+                              }
                             />
                             {errors.customerInfo?.email && (
-                              <p className="text-sm text-red-600">{errors.customerInfo.email.message}</p>
+                              <p className="text-sm text-red-600">
+                                {errors.customerInfo.email.message}
+                              </p>
                             )}
                           </div>
                           <div className="space-y-2 md:col-span-2">
                             <Label htmlFor="customerPhone">
-                              Phone Number <span className="text-red-500">*</span>
+                              Phone Number{" "}
+                              <span className="text-red-500">*</span>
                             </Label>
                             <Input
                               id="customerPhone"
                               {...register("customerInfo.phone")}
                               placeholder="Enter your phone number"
-                              className={errors.customerInfo?.phone ? "border-red-500" : ""}
+                              className={
+                                errors.customerInfo?.phone
+                                  ? "border-red-500"
+                                  : ""
+                              }
                             />
                             {errors.customerInfo?.phone && (
-                              <p className="text-sm text-red-600">{errors.customerInfo.phone.message}</p>
+                              <p className="text-sm text-red-600">
+                                {errors.customerInfo.phone.message}
+                              </p>
                             )}
                           </div>
                         </div>
@@ -10063,20 +10063,30 @@ export default function CheckoutPage() {
                                 <Select
                                   value={field.value}
                                   onValueChange={async (value) => {
-                                    field.onChange(value)
-                                    setCustomerAddress({ state: value })
+                                    field.onChange(value);
+                                    setCustomerAddress({ state: value });
                                     // Reset delivery type and terminal selection when state changes
-                                    setDeliveryMethod("terminal")
-                                    setSelectedTerminal("")
-                                    if (value && errors.customerAddress?.state) {
-                                      const isValid = await trigger("customerAddress.state")
-                                      if (isValid) clearErrors("customerAddress.state")
+                                    setDeliveryMethod("terminal");
+                                    setSelectedTerminal("");
+                                    if (
+                                      value &&
+                                      errors.customerAddress?.state
+                                    ) {
+                                      const isValid = await trigger(
+                                        "customerAddress.state"
+                                      );
+                                      if (isValid)
+                                        clearErrors("customerAddress.state");
                                     }
                                   }}
                                 >
                                   <SelectTrigger
                                     id="state"
-                                    className={errors.customerAddress?.state ? "border-red-500" : ""}
+                                    className={
+                                      errors.customerAddress?.state
+                                        ? "border-red-500"
+                                        : ""
+                                    }
                                   >
                                     <SelectValue placeholder="Select a state" />
                                   </SelectTrigger>
@@ -10091,78 +10101,97 @@ export default function CheckoutPage() {
                               )}
                             />
                             {errors.customerAddress?.state && (
-                              <p className="text-sm text-red-600">{errors.customerAddress.state.message}</p>
+                              <p className="text-sm text-red-600">
+                                {errors.customerAddress.state.message}
+                              </p>
                             )}
                           </div>
 
-                          {selectedState && (selectedState === "Lagos" || selectedState === "Ogun") && (
-                            <div className="space-y-2">
-                              <Label className="text-base font-medium">Delivery Method</Label>
+                          {selectedState &&
+                            (selectedState === "Lagos" ||
+                              selectedState === "Ogun") && (
+                              <div className="space-y-2">
+                                <Label className="text-base font-medium">
+                                  Delivery Method
+                                </Label>
 
-                              {showTerminalAlert && (
-                                <Alert className="border-red-200 bg-red-50">
-                                  <AlertDescription className="text-red-800">
-                                    Please select a terminal location before continuing.
-                                  </AlertDescription>
-                                </Alert>
-                              )}
+                                {showTerminalAlert && (
+                                  <Alert className="border-red-200 bg-red-50">
+                                    <AlertDescription className="text-red-800">
+                                      Please select a terminal location before
+                                      continuing.
+                                    </AlertDescription>
+                                  </Alert>
+                                )}
 
-                              <div className="space-y-3">
-                                <div className="flex items-center space-x-2">
-                                  <input
-                                    type="radio"
-                                    id="terminal"
-                                    name="deliveryType"
-                                    value="terminal"
-                                    checked={deliveryMethod === "terminal"}
-                                    onChange={(e) => {
-                                      const newDeliveryType = e.target.value as "terminal" | "home"
-                                      setDeliveryMethod(newDeliveryType)
-                                      setShowTerminalAlert(false)
-                                    }}
-                                    className="w-4 h-4 text-blue-600"
-                                  />
-                                  <Label htmlFor="terminal" className="font-normal">
-                                    Terminal Pickup
-                                  </Label>
+                                <div className="space-y-3">
+                                  <div className="flex items-center space-x-2">
+                                    <input
+                                      type="radio"
+                                      id="terminal"
+                                      name="deliveryType"
+                                      value="terminal"
+                                      checked={deliveryMethod === "terminal"}
+                                      onChange={(e) => {
+                                        const newDeliveryType = e.target
+                                          .value as "terminal" | "home";
+                                        setDeliveryMethod(newDeliveryType);
+                                        setShowTerminalAlert(false);
+                                      }}
+                                      className="w-4 h-4 text-blue-600"
+                                    />
+                                    <Label
+                                      htmlFor="terminal"
+                                      className="font-normal"
+                                    >
+                                      Terminal Pickup
+                                    </Label>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <input
+                                      type="radio"
+                                      id="home"
+                                      name="deliveryType"
+                                      value="home"
+                                      checked={deliveryMethod === "home"}
+                                      onChange={(e) => {
+                                        const newDeliveryType = e.target
+                                          .value as "terminal" | "home";
+                                        setDeliveryMethod(newDeliveryType);
+                                        // Clear terminal selection when switching to home delivery
+                                        if (newDeliveryType === "home") {
+                                          setSelectedTerminal("");
+                                          setTerminalAddress("");
+                                          setShowTerminalAlert(false);
+                                        }
+                                      }}
+                                      className="w-4 h-4 text-blue-600"
+                                    />
+                                    <Label
+                                      htmlFor="home"
+                                      className="font-normal"
+                                    >
+                                      Home Delivery
+                                    </Label>
+                                  </div>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                  <input
-                                    type="radio"
-                                    id="home"
-                                    name="deliveryType"
-                                    value="home"
-                                    checked={deliveryMethod === "home"}
-                                    onChange={(e) => {
-                                      const newDeliveryType = e.target.value as "terminal" | "home"
-                                      setDeliveryMethod(newDeliveryType)
-                                      // Clear terminal selection when switching to home delivery
-                                      if (newDeliveryType === "home") {
-                                        setSelectedTerminal("")
-                                        setTerminalAddress("")
-                                        setShowTerminalAlert(false)
-                                      }
-                                    }}
-                                    className="w-4 h-4 text-blue-600"
-                                  />
-                                  <Label htmlFor="home" className="font-normal">
-                                    Home Delivery
-                                  </Label>
-                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  Terminal pickup locations are GIG Logistics
+                                  pickup offices where you can collect your
+                                  order.
+                                </p>
                               </div>
-                              <p className="text-sm text-muted-foreground">
-                                Terminal pickup locations are GIG Logistics pickup offices where you can collect your
-                                order.
-                              </p>
-                            </div>
-                          )}
+                            )}
 
                           {selectedState &&
                             deliveryMethod === "terminal" &&
-                            terminalAddresses[selectedState as keyof typeof terminalAddresses] && (
+                            terminalAddresses[
+                              selectedState as keyof typeof terminalAddresses
+                            ] && (
                               <div className="space-y-2">
                                 <Label>
-                                  Select Terminal <span className="text-red-500">*</span>
+                                  Select Terminal{" "}
+                                  <span className="text-red-500">*</span>
                                 </Label>
                                 <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-3">
                                   <div className="flex items-center justify-between">
@@ -10171,47 +10200,57 @@ export default function CheckoutPage() {
                                     </p>
                                     <span className="text-lg font-bold text-blue-900">
                                       {formatPrice(
-                                        TerminalPickupPrices[selectedState as keyof typeof TerminalPickupPrices] || 0,
+                                        TerminalPickupPrices[
+                                          selectedState as keyof typeof TerminalPickupPrices
+                                        ] || 0
                                       )}
                                     </span>
                                   </div>
                                   <p className="text-sm text-blue-700 mt-1">
-                                    All pickup locations in {selectedState} have the same price
+                                    All pickup locations in {selectedState} have
+                                    the same price
                                   </p>
                                 </div>
                                 <p className="text-sm text-muted-foreground mb-2">
-                                  Scroll to choose a GIG Logistics office near you for pickup:
+                                  Scroll to choose a GIG Logistics office near
+                                  you for pickup:
                                 </p>
                                 <div className="border rounded-md max-h-48 overflow-y-auto">
-                                  {terminalAddresses[selectedState as keyof typeof terminalAddresses].map(
-                                    (terminal, index) => (
-                                      <div
-                                        key={index}
-                                        className={`p-3 border-b last:border-b-0 cursor-pointer hover:bg-muted/50 ${
-                                          selectedTerminal === terminal ? "bg-blue-50 border-blue-200" : ""
-                                        }`}
-                                        onClick={() => {
-                                          setSelectedTerminal(terminal)
-                                          setTerminalAddress(terminal)
-                                        }}
-                                      >
-                                        <div className="flex items-start space-x-2">
-                                          <input
-                                            type="radio"
-                                            name="terminal"
-                                            value={terminal}
-                                            checked={selectedTerminal === terminal}
-                                            onChange={() => {
-                                              setSelectedTerminal(terminal)
-                                              setTerminalAddress(terminal)
-                                            }}
-                                            className="w-4 h-4 text-blue-600 mt-1"
-                                          />
-                                          <span className="text-xs whitespace-normal break-words">{terminal}</span>
-                                        </div>
+                                  {terminalAddresses[
+                                    selectedState as keyof typeof terminalAddresses
+                                  ].map((terminal, index) => (
+                                    <div
+                                      key={index}
+                                      className={`p-3 border-b last:border-b-0 cursor-pointer hover:bg-muted/50 ${
+                                        selectedTerminal === terminal
+                                          ? "bg-blue-50 border-blue-200"
+                                          : ""
+                                      }`}
+                                      onClick={() => {
+                                        setSelectedTerminal(terminal);
+                                        setTerminalAddress(terminal);
+                                      }}
+                                    >
+                                      <div className="flex items-start space-x-2">
+                                        <input
+                                          type="radio"
+                                          name="terminal"
+                                          value={terminal}
+                                          checked={
+                                            selectedTerminal === terminal
+                                          }
+                                          onChange={() => {
+                                            setSelectedTerminal(terminal);
+                                            setTerminalAddress(terminal);
+                                          }}
+                                          className="w-4 h-4 text-blue-600 mt-1"
+                                        />
+                                        <span className="text-xs whitespace-normal break-words">
+                                          {terminal}
+                                        </span>
                                       </div>
-                                    ),
-                                  )}
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
                             )}
@@ -10222,16 +10261,20 @@ export default function CheckoutPage() {
                               <Alert className="mb-4">
                                 <Info className="h-4 w-4" />
                                 <AlertDescription>
-                                  <strong>💡 Pro Tip:</strong> Providing a very specific and detailed address helps our
-                                  logistics partners optimize delivery routes, which can potentially reduce your
-                                  delivery costs. Include landmarks, building descriptions, and clear directions.
+                                  <strong>💡 Pro Tip:</strong> Providing a very
+                                  specific and detailed address helps our
+                                  logistics partners optimize delivery routes,
+                                  which can potentially reduce your delivery
+                                  costs. Include landmarks, building
+                                  descriptions, and clear directions.
                                 </AlertDescription>
                               </Alert>
 
                               {/* LGA Selection */}
                               <div className="space-y-2">
                                 <Label htmlFor="lga">
-                                  Local Government Area <span className="text-red-500">*</span>
+                                  Local Government Area{" "}
+                                  <span className="text-red-500">*</span>
                                 </Label>
                                 <Controller
                                   name="customerAddress.lga"
@@ -10240,18 +10283,31 @@ export default function CheckoutPage() {
                                     <Select
                                       value={field.value}
                                       onValueChange={async (value) => {
-                                        field.onChange(value)
-                                        setCustomerAddress({ lga: value })
-                                        if (value && errors.customerAddress?.lga) {
-                                          const isValid = await trigger("customerAddress.lga")
-                                          if (isValid) clearErrors("customerAddress.lga")
+                                        field.onChange(value);
+                                        setCustomerAddress({ lga: value });
+                                        if (
+                                          value &&
+                                          errors.customerAddress?.lga
+                                        ) {
+                                          const isValid = await trigger(
+                                            "customerAddress.lga"
+                                          );
+                                          if (isValid)
+                                            clearErrors("customerAddress.lga");
                                         }
                                       }}
-                                      disabled={!selectedState || availableLgas.length === 0}
+                                      disabled={
+                                        !selectedState ||
+                                        availableLgas.length === 0
+                                      }
                                     >
                                       <SelectTrigger
                                         id="lga"
-                                        className={errors.customerAddress?.lga ? "border-red-500" : ""}
+                                        className={
+                                          errors.customerAddress?.lga
+                                            ? "border-red-500"
+                                            : ""
+                                        }
                                       >
                                         <SelectValue
                                           placeholder={
@@ -10272,41 +10328,62 @@ export default function CheckoutPage() {
                                   )}
                                 />
                                 {errors.customerAddress?.lga && (
-                                  <p className="text-sm text-red-600">{errors.customerAddress.lga.message}</p>
+                                  <p className="text-sm text-red-600">
+                                    {errors.customerAddress.lga.message}
+                                  </p>
                                 )}
                               </div>
 
                               {/* Street Address */}
                               <div className="space-y-2">
                                 <Label htmlFor="streetAddress">
-                                  Street Address <span className="text-red-500">*</span>
+                                  Street Address{" "}
+                                  <span className="text-red-500">*</span>
                                 </Label>
                                 <Textarea
                                   id="streetAddress"
                                   {...register("customerAddress.streetAddress")}
                                   rows={3}
-                                  className={errors.customerAddress?.streetAddress ? "border-red-500" : ""}
+                                  className={
+                                    errors.customerAddress?.streetAddress
+                                      ? "border-red-500"
+                                      : ""
+                                  }
                                   placeholder="Enter your full street address including house number, street name, area, and nearby landmarks for accurate delivery"
                                 />
                                 {errors.customerAddress?.streetAddress && (
-                                  <p className="text-sm text-red-600">{errors.customerAddress.streetAddress.message}</p>
+                                  <p className="text-sm text-red-600">
+                                    {
+                                      errors.customerAddress.streetAddress
+                                        .message
+                                    }
+                                  </p>
                                 )}
                               </div>
 
                               {/* Additional Directions */}
                               <div className="space-y-2">
                                 <Label htmlFor="directions">
-                                  Additional Directions <span className="text-gray-500">(Optional)</span>
+                                  Additional Directions{" "}
+                                  <span className="text-gray-500">
+                                    (Optional)
+                                  </span>
                                 </Label>
                                 <Textarea
                                   id="directions"
                                   {...register("customerAddress.directions")}
                                   rows={3}
-                                  className={errors.customerAddress?.directions ? "border-red-500" : ""}
+                                  className={
+                                    errors.customerAddress?.directions
+                                      ? "border-red-500"
+                                      : ""
+                                  }
                                   placeholder="Additional directions to help locate your address (e.g., 'Opposite First Bank', 'Blue gate with security post', 'Third floor, Apartment 3B')"
                                 />
                                 {errors.customerAddress?.directions && (
-                                  <p className="text-sm text-red-600">{errors.customerAddress.directions.message}</p>
+                                  <p className="text-sm text-red-600">
+                                    {errors.customerAddress.directions.message}
+                                  </p>
                                 )}
                               </div>
                             </>
@@ -10315,19 +10392,26 @@ export default function CheckoutPage() {
                           {/* Delivery Pricing Status */}
                           {(isLogisticsPricingLoading ||
                             logisticsPricingError ||
-                            logisticsPricingData?.data?.price !== undefined) && (
+                            logisticsPricingData?.data?.price !==
+                              undefined) && (
                             <div className="p-3 border rounded-md bg-muted/50">
                               <div className="flex items-center gap-2">
                                 {logisticsPricingError && (
                                   <span className="text-sm text-red-600">
-                                    Unable to calculate delivery fee - using standard rate
+                                    Unable to calculate delivery fee - using
+                                    standard rate
                                   </span>
                                 )}
-                                {logisticsPricingData?.data?.price !== undefined && !isLogisticsPricingLoading && (
-                                  <span className="text-sm text-green-600">
-                                    Delivery fee calculated: {formatPrice(logisticsPricingData.data.price)}
-                                  </span>
-                                )}
+                                {logisticsPricingData?.data?.price !==
+                                  undefined &&
+                                  !isLogisticsPricingLoading && (
+                                    <span className="text-sm text-green-600">
+                                      Delivery fee calculated:{" "}
+                                      {formatPrice(
+                                        logisticsPricingData.data.price
+                                      )}
+                                    </span>
+                                  )}
                               </div>
                             </div>
                           )}
@@ -10341,8 +10425,12 @@ export default function CheckoutPage() {
                         <div className="flex items-center space-x-2 p-3 border rounded-md bg-muted/50">
                           <CreditCard className="h-4 w-4 mr-2 text-muted-foreground flex-shrink-0" />
                           <div className="min-w-0">
-                            <span className="font-medium block">Card, Bank Transfer and Mobile Money</span>
-                            <p className="text-xs text-muted-foreground">Secure payment processing</p>
+                            <span className="font-medium block">
+                              Card, Bank Transfer and Mobile Money
+                            </span>
+                            <p className="text-xs text-muted-foreground">
+                              Secure payment processing
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -10350,12 +10438,16 @@ export default function CheckoutPage() {
                       <Separator />
 
                       <div>
-                        <h3 className="font-medium mb-3">Delivery Instructions (Optional)</h3>
+                        <h3 className="font-medium mb-3">
+                          Delivery Instructions (Optional)
+                        </h3>
                         <Textarea
                           placeholder="Add any special instructions for delivery..."
                           className="resize-none"
-                          // value={checkoutData.deliveryInstructions}
-                          onChange={(e) => handleDeliveryInstructionsChange(e.target.value)}
+                          value={checkoutData.deliveryInstructions || ""}
+                          onChange={(e) =>
+                            handleDeliveryInstructionsChange(e.target.value)
+                          }
                         />
                       </div>
                     </div>
@@ -10371,13 +10463,20 @@ export default function CheckoutPage() {
               {currentStep === "review" && (
                 <Card>
                   <CardContent className="p-4 md:p-6">
-                    <h2 className="text-xl font-semibold mb-4">Review Your Order</h2>
+                    <h2 className="text-xl font-semibold mb-4">
+                      Review Your Order
+                    </h2>
                     <div className="space-y-6">
                       <div>
-                        <h3 className="font-medium mb-3">Items in Your Order</h3>
+                        <h3 className="font-medium mb-3">
+                          Items in Your Order
+                        </h3>
                         <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
                           {cartItems?.map((item) => (
-                            <div key={item.id} className="flex items-start space-x-3">
+                            <div
+                              key={item.id}
+                              className="flex items-start space-x-3"
+                            >
                               <div className="w-16 h-16 relative rounded-md overflow-hidden flex-shrink-0 bg-muted">
                                 <Image
                                   src={item.image || "/placeholder.svg"}
@@ -10388,16 +10487,22 @@ export default function CheckoutPage() {
                               </div>
                               <div className="flex-1 min-w-0">
                                 <h4 className="font-medium text-sm">
-                                  <span className="capitalize">{item.name}</span>
+                                  <span className="capitalize">
+                                    {item.name}
+                                  </span>
                                   {item.variationName && (
-                                    <span className="text-muted-foreground ml-2">({item.variationName})</span>
+                                    <span className="text-muted-foreground ml-2">
+                                      ({item.variationName})
+                                    </span>
                                   )}
                                 </h4>
                                 <div className="flex justify-between mt-1">
                                   <span className="text-sm">
                                     {item.quantity} x {formatPrice(item.price)}
                                   </span>
-                                  <span className="text-sm font-medium">{formatPrice(item.price * item.quantity)}</span>
+                                  <span className="text-sm font-medium">
+                                    {formatPrice(item.price * item.quantity)}
+                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -10409,37 +10514,49 @@ export default function CheckoutPage() {
 
                       {/* Updated review section to show terminal address when delivery method is terminal */}
                       <div>
-                        <h3 className="font-medium mb-3">Delivery Information</h3>
+                        <h3 className="font-medium mb-3">
+                          Delivery Information
+                        </h3>
                         <div className="flex items-start space-x-2">
                           <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm">
-                              {checkoutData.customerInfo.name || "Customer Name"}
+                              {checkoutData.customerInfo.name ||
+                                "Customer Name"}
                               <br />
                               {checkoutData.deliveryMethod === "terminal" ? (
                                 <span className="break-words whitespace-normal">
                                   <strong>Terminal Pickup:</strong>
                                   <br />
-                                  {checkoutData.terminalAddress || selectedTerminal || "Terminal Address"}
+                                  {checkoutData.terminalAddress ||
+                                    selectedTerminal ||
+                                    "Terminal Address"}
                                 </span>
                               ) : (
                                 // Show regular address for home delivery
                                 <>
-                                  {checkoutData.customerAddress.streetAddress || "Street Address"}
+                                  {checkoutData.customerAddress.streetAddress ||
+                                    "Street Address"}
                                   {checkoutData.customerAddress.directions && (
                                     <>
                                       <br />
                                       <span className="text-muted-foreground">
-                                        Directions: {checkoutData.customerAddress.directions}
+                                        Directions:{" "}
+                                        {
+                                          checkoutData.customerAddress
+                                            .directions
+                                        }
                                       </span>
                                     </>
                                   )}
                                   <br />
-                                  {checkoutData.customerAddress.lga}, {checkoutData.customerAddress.state}
+                                  {checkoutData.customerAddress.lga},{" "}
+                                  {checkoutData.customerAddress.state}
                                 </>
                               )}
                               <br />
-                              {checkoutData.customerInfo.phone || "Phone Number"}
+                              {checkoutData.customerInfo.phone ||
+                                "Phone Number"}
                             </p>
                           </div>
                         </div>
@@ -10451,12 +10568,18 @@ export default function CheckoutPage() {
                         <h3 className="font-medium mb-3">Payment Method</h3>
                         <div className="flex items-center">
                           <CreditCard className="h-5 w-5 text-muted-foreground mr-2 flex-shrink-0" />
-                          <span className="text-sm">Card, Bank Transfer and Mobile Money</span>
+                          <span className="text-sm">
+                            Card, Bank Transfer and Mobile Money
+                          </span>
                         </div>
                       </div>
                     </div>
                     <div className="mt-6 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-                      <Button variant="outline" className="flex-1 bg-transparent" onClick={goToPreviousStep}>
+                      <Button
+                        variant="outline"
+                        className="flex-1 bg-transparent"
+                        onClick={goToPreviousStep}
+                      >
                         Back
                       </Button>
                       {renderPlaceOrderButton()}
@@ -10470,27 +10593,41 @@ export default function CheckoutPage() {
               <div className="sticky top-20">
                 <Card>
                   <CardContent className="p-4 md:p-6">
-                    <h3 className="font-semibold text-lg mb-4">Order Summary</h3>
+                    <h3 className="font-semibold text-lg mb-4">
+                      Order Summary
+                    </h3>
                     <div className="space-y-3 mb-6">
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground text-sm">Subtotal</span>
-                        <span className="text-sm">{formatPrice(subtotal!)}</span>
+                        <span className="text-muted-foreground text-sm">
+                          Subtotal
+                        </span>
+                        <span className="text-sm">
+                          {formatPrice(subtotal!)}
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-muted-foreground text-sm">
                           Delivery Fee
-                          {isLogisticsPricingLoading && <Loader2 className="h-3 w-3 animate-spin ml-1 inline" />}
+                          {isLogisticsPricingLoading && (
+                            <Loader2 className="h-3 w-3 animate-spin ml-1 inline" />
+                          )}
                         </span>
                         <span className="text-sm">
                           {deliveryMethod === "terminal" && selectedState
-                            ? formatPrice(TerminalPickupPrices[selectedState as keyof typeof TerminalPickupPrices] || 0)
-                            : !watchedState || !watchedLga || !watchedStreetAddress
-                              ? "Enter address to calculate"
-                              : deliveryFee === null
-                                ? "Calculating..."
-                                : deliveryFee === 0
-                                  ? "Free"
-                                  : formatPrice(deliveryFee)}
+                            ? formatPrice(
+                                TerminalPickupPrices[
+                                  selectedState as keyof typeof TerminalPickupPrices
+                                ] || 0
+                              )
+                            : !watchedState ||
+                              !watchedLga ||
+                              !watchedStreetAddress
+                            ? "Enter address to calculate"
+                            : deliveryFee === null
+                            ? "Calculating..."
+                            : deliveryFee === 0
+                            ? "Free"
+                            : formatPrice(deliveryFee)}
                         </span>
                       </div>
                       {logisticsPricingError && (
@@ -10508,11 +10645,17 @@ export default function CheckoutPage() {
                       <div className="flex items-start space-x-2">
                         <p className="text-xs text-muted-foreground">
                           By continuing I agree to the{" "}
-                          <a href="/terms" className="text-primary hover:underline">
+                          <a
+                            href="/terms"
+                            className="text-primary hover:underline"
+                          >
                             Terms of Service
                           </a>{" "}
                           and{" "}
-                          <a href="/privacy" className="text-primary hover:underline">
+                          <a
+                            href="/privacy"
+                            className="text-primary hover:underline"
+                          >
                             Privacy Policy
                           </a>
                         </p>
@@ -10536,13 +10679,17 @@ export default function CheckoutPage() {
                       <div className="flex items-start">
                         <span className="mr-2 text-primary">•</span>
                         <p>
-                          Orders are typically delivered 1-3 days for locations within Lagos and Ogun, and 3-7 days for
-                          other locations
+                          Orders are typically delivered 1-3 days for locations
+                          within Lagos and Ogun, and 3-7 days for other
+                          locations
                         </p>
                       </div>
                       <div className="flex items-start">
                         <span className="mr-2 text-primary">•</span>
-                        <p>We accept returns within 3 days of delivery, provided items meet our return policy</p>
+                        <p>
+                          We accept returns within 3 days of delivery, provided
+                          items meet our return policy
+                        </p>
                       </div>
                       <div className="flex items-start">
                         <span className="mr-2 text-primary">•</span>
@@ -10557,7 +10704,10 @@ export default function CheckoutPage() {
         </div>
       )}
 
-      <AlertDialog open={showCancelledModal} onOpenChange={setShowCancelledModal}>
+      <AlertDialog
+        open={showCancelledModal}
+        onOpenChange={setShowCancelledModal}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Don't miss out!</AlertDialogTitle>
@@ -10569,7 +10719,7 @@ export default function CheckoutPage() {
             <AlertDialogCancel>Maybe Later</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                setShowCancelledModal(false)
+                setShowCancelledModal(false);
                 // Add your place order logic here
               }}
             >
@@ -10579,5 +10729,5 @@ export default function CheckoutPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

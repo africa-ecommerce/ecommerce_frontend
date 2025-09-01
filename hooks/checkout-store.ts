@@ -144,8 +144,6 @@
 
 
 
-
-
 import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
 
@@ -174,6 +172,8 @@ interface CheckoutData {
 
 interface CheckoutStore {
   checkoutData: CheckoutData
+  _hasHydrated: boolean
+  setHasHydrated: (hasHydrated: boolean) => void
   setCustomerInfo: (info: Partial<CustomerInfo>) => void
   setCustomerAddress: (address: Partial<CustomerAddress>) => void
   setDeliveryMethod: (method: "terminal" | "home") => void
@@ -210,7 +210,9 @@ export const useCheckoutStore = create<CheckoutStore>()(
     (set, get) => ({
       checkoutData: defaultCheckoutData,
       _hasHydrated: false,
-
+      
+      setHasHydrated: (hasHydrated) => set({ _hasHydrated: hasHydrated }),
+      
       setCustomerInfo: (info) =>
         set((state) => ({
           checkoutData: {
@@ -218,7 +220,7 @@ export const useCheckoutStore = create<CheckoutStore>()(
             customerInfo: { ...state.checkoutData.customerInfo, ...info },
           },
         })),
-
+        
       setCustomerAddress: (address) =>
         set((state) => ({
           checkoutData: {
@@ -229,7 +231,7 @@ export const useCheckoutStore = create<CheckoutStore>()(
             },
           },
         })),
-
+        
       setTerminalAddress: (address) =>
         set((state) => ({
           checkoutData: {
@@ -237,7 +239,7 @@ export const useCheckoutStore = create<CheckoutStore>()(
             terminalAddress: address,
           },
         })),
-
+        
       setDeliveryMethod: (method) =>
         set((state) => ({
           checkoutData: {
@@ -245,7 +247,7 @@ export const useCheckoutStore = create<CheckoutStore>()(
             deliveryMethod: method,
           },
         })),
-
+        
       setPaymentMethod: (method) =>
         set((state) => ({
           checkoutData: {
@@ -253,7 +255,7 @@ export const useCheckoutStore = create<CheckoutStore>()(
             paymentMethod: method,
           },
         })),
-
+        
       setDeliveryInstructions: (instructions) =>
         set((state) => ({
           checkoutData: {
@@ -261,7 +263,7 @@ export const useCheckoutStore = create<CheckoutStore>()(
             deliveryInstructions: instructions,
           },
         })),
-
+        
       setCurrentStep: (step) =>
         set((state) => ({
           checkoutData: {
@@ -269,20 +271,22 @@ export const useCheckoutStore = create<CheckoutStore>()(
             currentStep: step,
           },
         })),
-
+        
       updateCheckoutData: (data) =>
         set((state) => ({
           checkoutData: { ...state.checkoutData, ...data },
         })),
-
+        
       clearCheckoutData: () => set({ checkoutData: defaultCheckoutData }),
-
+      
       getCheckoutData: () => get().checkoutData,
     }),
     {
       name: "checkout-store",
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true)
+      },
     },
   ),
 )
-
