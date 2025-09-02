@@ -86,10 +86,7 @@ const buyerInfoOptions = {
 };
 
 export default function CheckoutPage() {
-  const [buyerCoordinates, setBuyerCoordinates] = useState<{
-    latitude: number | null;
-    longitude: number | null;
-  }>({ latitude: null, longitude: null });
+  
 
   // Replace local state with Zustand store
   const {
@@ -202,6 +199,7 @@ export default function CheckoutPage() {
   const buyerInfoKey =
     watchedName &&
     watchedEmail &&
+    deliveryType === "home" &&
     watchedPhone &&
     watchedName.trim().length >= 2 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedEmail) &&
@@ -278,29 +276,11 @@ export default function CheckoutPage() {
         // Update the store with the fetched delivery fee
         updateDeliveryFee(price);
         // Store buyer coordinates if available
-        if (
-          logisticsPricingData.data.buyerLatitude &&
-          logisticsPricingData.data.buyerLongitude
-        ) {
-          setBuyerCoordinates({
-            latitude: logisticsPricingData.data.buyerLatitude,
-            longitude: logisticsPricingData.data.buyerLongitude,
-          });
-        } else {
-          setBuyerCoordinates({
-            latitude: 6.5244 + (Math.random() - 0.5) * 0.1,
-            longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
-          });
-        }
+       
       }
     } else if (logisticsPricingError) {
       console.error("Logistics pricing error:", logisticsPricingError);
-      // Update store with fallback fee
-      updateDeliveryFee(1500);
-      setBuyerCoordinates({
-        latitude: 6.5244 + (Math.random() - 0.5) * 0.1,
-        longitude: 3.3792 + (Math.random() - 0.5) * 0.1,
-      });
+     
     }
   }, [logisticsPricingData, logisticsPricingError, updateDeliveryFee]);
 
@@ -337,8 +317,6 @@ export default function CheckoutPage() {
       buyerState: checkoutData.customerAddress.state,
       buyerDirections: checkoutData.customerAddress.directions || "",
       buyerInstructions: checkoutData.deliveryInstructions || "",
-      buyerLatitude: buyerCoordinates.latitude,
-      buyerLongitude: buyerCoordinates.longitude,
       paymentMethod: "online",
       totalAmount: total,
       deliveryFee: deliveryFee,
