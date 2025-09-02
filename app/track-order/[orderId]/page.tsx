@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -739,8 +737,8 @@ export default function TrackOrderPage() {
                     <h4 className="font-medium text-xs sm:text-sm text-muted-foreground">
                       {getDeliveryAddressLabel()}
                     </h4>
-                    <p className="text-xs sm:text-sm text-muted-foreground break-words">
-                      {truncateText(orderData.destination.address, 60)}
+                    <p className="text-xs sm:text-sm text-muted-foreground break-all hyphens-auto leading-relaxed overflow-wrap-anywhere">
+                      {orderData.destination.address}
                     </p>
                     {isTerminalPickup() && (
                       <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
@@ -748,8 +746,8 @@ export default function TrackOrderPage() {
                           📍 Terminal Pickup Available
                         </p>
                         <p className="text-xs text-blue-600 mt-1">
-                          Visit the terminal with your tracking ID to collect
-                          your package
+                          Visit the terminal with your order ID to collect your
+                          package
                         </p>
                       </div>
                     )}
