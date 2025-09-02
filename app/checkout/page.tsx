@@ -333,7 +333,7 @@ export default function CheckoutPage() {
       // Payment reference for online payments
       paymentReference,
       deliveryType: deliveryType,
-      terminalAddress: deliveryType === "terminal" ? selectedTerminal : null,
+      terminalAddress: deliveryType === "terminal" ? selectedTerminal : "",
     };
     return orderData;
   };
