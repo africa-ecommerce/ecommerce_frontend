@@ -1074,6 +1074,12 @@ export default function Home() {
                       </p>
                     </div>
                     <div>
+                      <h4 className="font-semibold mb-2">Is Pluggn a marketplace like jiji & jumia</h4>
+                      <p className="text-gray-600 text-sm">
+                        No. Pluggn is an app that gives you the tools to build and run your own online business without the complexities of inventory management, logistics, or technical setup. Pluggn provides everything you need to become a social commerce entrepreneur - from professional store creation, professional social media product presentation to automated payment processing - while we handle all the backend operations so you can focus purely on selling and building your brand. 
+                      </p>
+                    </div>
+                    <div>
                       <h4 className="font-semibold mb-2">How does Pluggn make money?</h4>
                       <p className="text-gray-600 text-sm">
                         Pluggn only make money when you make sales. We charge a commission on each sale margin added by
