@@ -603,43 +603,86 @@ export default function CheckoutPage() {
     }
   }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors]);
 
+  // const continueToReview = async () => {
+  //   // Check if terminal is selected when delivery type is terminal
+  //   if (deliveryType === "terminal" && !selectedTerminal) {
+  //     setShowTerminalAlert(true);
+  //     return;
+  //   }
+
+  //   // For terminal delivery, only validate customer info
+  //   if (deliveryType === "terminal") {
+  //     const customerInfoValid = await trigger([
+  //       "customerInfo.name",
+  //       "customerInfo.email",
+  //       "customerInfo.phone",
+  //     ]);
+  //     const stateValid = await trigger("customerAddress.state");
+
+  //     if (customerInfoValid && stateValid) {
+  //       setCurrentStep("review");
+  //       if (orderSummaries.length > 0) {
+  //         orderSummaries.forEach((orderSummary) => {
+  //           mutate(
+  //             `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
+  //           );
+  //         });
+  //       }
+  //     } else {
+  //       const firstError = document.querySelector(".border-red-500");
+  //       if (firstError) {
+  //         firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+  //       }
+  //     }
+  //     return;
+  //   }
+
+  //   // For home delivery, validate all fields
+  //   const isFormValid = await trigger();
+  //   if (isFormValid) {
+  //     setCurrentStep("review");
+  //     if (orderSummaries.length > 0) {
+  //       orderSummaries.forEach((orderSummary) => {
+  //         mutate(
+  //           `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
+  //         );
+  //       });
+  //     }
+  //   } else {
+  //     const firstError = document.querySelector(".border-red-500");
+  //     if (firstError) {
+  //       firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+  //     }
+  //   }
+  // };
+
   const continueToReview = async () => {
-    // Check if terminal is selected when delivery type is terminal
-    if (deliveryType === "terminal" && !selectedTerminal) {
-      setShowTerminalAlert(true);
+  // Check if terminal is selected when delivery type is terminal
+  if (deliveryType === "terminal" && !selectedTerminal) {
+    setShowTerminalAlert(true);
+    return;
+  }
+
+  // For terminal delivery, validate customer info and check delivery fee
+  if (deliveryType === "terminal") {
+    const customerInfoValid = await trigger([
+      "customerInfo.name",
+      "customerInfo.email",
+      "customerInfo.phone",
+    ]);
+    const stateValid = await trigger("customerAddress.state");
+
+    // Check if delivery fee is available for terminal delivery
+    const terminalDeliveryFee = selectedState 
+      ? TerminalPickupPrices[selectedState as keyof typeof TerminalPickupPrices]
+      : null;
+
+    if (!terminalDeliveryFee) {
+      errorToast("Unable to calculate delivery fee for selected terminal. Please try again.");
       return;
     }
 
-    // For terminal delivery, only validate customer info
-    if (deliveryType === "terminal") {
-      const customerInfoValid = await trigger([
-        "customerInfo.name",
-        "customerInfo.email",
-        "customerInfo.phone",
-      ]);
-      const stateValid = await trigger("customerAddress.state");
-
-      if (customerInfoValid && stateValid) {
-        setCurrentStep("review");
-        if (orderSummaries.length > 0) {
-          orderSummaries.forEach((orderSummary) => {
-            mutate(
-              `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
-            );
-          });
-        }
-      } else {
-        const firstError = document.querySelector(".border-red-500");
-        if (firstError) {
-          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }
-      return;
-    }
-
-    // For home delivery, validate all fields
-    const isFormValid = await trigger();
-    if (isFormValid) {
+    if (customerInfoValid && stateValid) {
       setCurrentStep("review");
       if (orderSummaries.length > 0) {
         orderSummaries.forEach((orderSummary) => {
@@ -654,7 +697,34 @@ export default function CheckoutPage() {
         firstError.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     }
-  };
+    return;
+  }
+
+  // For home delivery, validate all fields and check delivery fee
+  const isFormValid = await trigger();
+  
+  // Check if delivery fee is available for home delivery
+  if (deliveryFee === null) {
+    errorToast("Please wait for delivery fee calculation to complete before proceeding.");
+    return;
+  }
+
+  if (isFormValid) {
+    setCurrentStep("review");
+    if (orderSummaries.length > 0) {
+      orderSummaries.forEach((orderSummary) => {
+        mutate(
+          `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
+        );
+      });
+    }
+  } else {
+    const firstError = document.querySelector(".border-red-500");
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+};
 
   const showPaymentCancelledModal = () => {
     // You could use a toast library or custom modal
