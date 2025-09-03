@@ -9,19 +9,19 @@ export default function LegalPage() {
         </h1>
         <p className="mb-4 text-gray-700">
           Pluggn is a social commerce platform owned and operated by{" "}
-          <span className="font-semibold">NOWAGIE OPS</span>, a company
+          <span className="font-semibold">Pluggn Innovations</span>, a business
           registered under the Corporate Affairs Commission (CAC) in Nigeria.
         </p>
 
         <div className="bg-gray-100 rounded-lg p-4 mb-6">
           <p>
-            <strong>Registered Entity Name:</strong> NOWAGIE OPS
+            <strong>Registered Entity Name:</strong> Pluggn Innovations
           </p>
           <p>
-            <strong>Business Registration Number (RC/BN):</strong> 7081272
+            <strong>Business Registration Number (RC/BN):</strong> 8787052
           </p>
           <p>
-            <strong>Registration Type:</strong> ICT / Technology Solutions
+            <strong>Registration Type:</strong> Software development
           </p>
         </div>
 

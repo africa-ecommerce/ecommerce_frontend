@@ -366,9 +366,11 @@ export const deliveryFormSchema = z.object({
 const variationSchema = z.object({
   id: z.string(),
   size: z.string().optional(),
-  color: z.string().optional(),
+  color: z.array(z.string()).optional(),
   stock: z.number().or(z.string()).optional(),
 })
+
+export type Variation = z.infer<typeof variationSchema>;
 
 // Main product schema with improved validation
 export const productFormSchema = z
@@ -379,7 +381,7 @@ export const productFormSchema = z
     size: z.string().optional(),
     price: z.number().min(1, "Price is required"),
     stock: z.number().optional(),
-    color: z.string().optional(),
+    color: z.array(z.string()).optional(),
     hasVariations: z.boolean(),
     variations: z.array(variationSchema),
     images: z.array(z.instanceof(File)),

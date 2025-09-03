@@ -18,6 +18,59 @@ export const PRODUCT_CATEGORIES = [
 ];
 
 
+export const categoryRecommendations = {
+  skincare: [
+    "Include skin type compatibility",
+    "List key ingredients",
+    "Specify product volume/weight",
+  ],
+  haircare: [
+    "Include hair type compatibility",
+    "List key ingredients",
+    "Specify product volume",
+  ],
+  bodycare: [
+    "Include product volume/weight",
+    "List key ingredients",
+    "Specify usage instructions",
+  ],
+  makeup: [
+    "Include shades/variants",
+    "List key ingredients",
+    "Specify product weight",
+  ],
+  fragrance: [
+    "Include scent notes",
+    "Specify bottle size",
+    "Indicate concentration",
+  ],
+  accessories: [
+    "Include dimensions",
+    "Specify materials used",
+    "Add color variations",
+  ],
+  electronics: [
+    "Include technical specifications",
+    "List compatible devices",
+    "Specify warranty information",
+  ],
+  fashion: [
+    "Include size guide",
+    "Specify fabric/material",
+    "Add care instructions",
+  ],
+  beauty_skincare: [
+    "Include skin type compatibility",
+    "List key ingredients",
+    "Specify product volume/weight",
+  ],
+  all: [
+    "Include detailed description",
+    "Add high-quality images",
+    "Specify product dimensions",
+  ],
+};
+
 export const NICHE_CATEGORIES = [
     { value: "footwears", label: "Footwears" },
   { value: "bags", label: "Bags" },
