@@ -40,7 +40,7 @@ export function ColorPicker({
 
   return (
     <div className={cn("space-y-2", className)}>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={setOpen} className="z-[110]">
         <PopoverTrigger asChild>
           <Button
             variant="outline"
