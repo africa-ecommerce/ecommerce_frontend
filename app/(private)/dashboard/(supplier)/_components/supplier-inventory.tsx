@@ -63,6 +63,7 @@ import EmptyState from "@/app/_components/empty-state";
 import { useUser } from "@/app/_components/provider/UserContext";
 import { formatPrice, getTotalStock, truncateText } from "@/lib/utils";
 import { StockPriceModal } from "./update-modal";
+import { AddProductModal } from "./add-product-modal";
 
 const LoadingSkeleton = () => (
   <Card>
@@ -143,14 +144,35 @@ const EmptyFilterState = ({
   />
 );
 
-const EmptyProductsState = () => (
-  <EmptyState
-    icon={<Package className="h-12 w-12 text-muted-foreground" />}
-    title="No products yet"
-    description="You don't have products in your inventory yet."
-    
-    showBorder={false}
-  />
+const EmptyProductsState = ({
+  onAddProduct,
+}: {
+  onAddProduct?: () => void;
+}) => (
+  <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
+    <div className="text-center space-y-4 max-w-md">
+      <div className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-muted flex items-center justify-center">
+        <Package className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
+      </div>
+      <div className="space-y-2">
+        <h3 className="text-lg sm:text-xl font-semibold text-foreground">
+          No products yet
+        </h3>
+        <p className="text-sm sm:text-base text-muted-foreground">
+          You don't have products in your inventory yet.
+        </p>
+      </div>
+      {onAddProduct && (
+        <Button
+          onClick={onAddProduct}
+          className="bg-primary text-white hover:bg-primary/90 text-sm h-9 sm:h-10 px-6 sm:px-8 mt-6"
+        >
+          <Package className="h-4 w-4 mr-2" />
+          Add Your First Product
+        </Button>
+      )}
+    </div>
+  </div>
 );
 
 const deleteProductFn = async (id: string) => {
@@ -179,6 +201,7 @@ export default function Inventory() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [currentItemData, setCurrentItemData] = useState(null);
+  const [addProductModalOpen, setAddProductModalOpen] = useState(false)
 
   const handleEdit = (productId: string, item: any) => {
     setSelectedProductId(productId);
@@ -615,29 +638,43 @@ export default function Inventory() {
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
           {/* Filters and Search */}
           <div className="flex flex-col gap-2 max-w-[360px]:gap-1.5 sm:gap-3">
-            <div className="relative flex items-center">
-              <Search className="absolute left-2.5 max-w-[360px]:left-2 top-1/2 transform -translate-y-1/2 h-3.5 max-w-[360px]:h-3 w-3.5 max-w-[360px]:w-3 text-muted-foreground" />
-              <Input
-                placeholder="Search products..."
-                className={`pl-8 max-w-[360px]:pl-7 pr-8 max-w-[360px]:pr-7 text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 transition-all ${
-                  isSearchFocused ? "border-primary ring-1 ring-primary" : ""
-                }`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
-              />
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={clearSearch}
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 max-w-[360px]:h-5 w-6 max-w-[360px]:w-5"
-                >
-                  <X className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5" />
-                </Button>
-              )}
+            {/* Add Product Button and Search Row */}
+            <div className="flex items-center gap-2 max-w-[360px]:gap-1.5">
+              <div className="relative flex-1 flex items-center">
+                <Search className="absolute left-2.5 max-w-[360px]:left-2 top-1/2 transform -translate-y-1/2 h-3.5 max-w-[360px]:h-3 w-3.5 max-w-[360px]:w-3 text-muted-foreground" />
+                <Input
+                  placeholder="Search products..."
+                  className={`pl-8 max-w-[360px]:pl-7 pr-8 max-w-[360px]:pr-7 text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 transition-all ${
+                    isSearchFocused ? "border-primary ring-1 ring-primary" : ""
+                  }`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={clearSearch}
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 max-w-[360px]:h-5 w-6 max-w-[360px]:w-5"
+                  >
+                    <X className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5" />
+                  </Button>
+                )}
+              </div>
+
+              {/* Add Product Button */}
+              <Button
+                onClick={() => setAddProductModalOpen(true)}
+                className="bg-primary text-white hover:bg-primary/90 text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 px-3 max-w-[360px]:px-2 sm:px-4 whitespace-nowrap flex-shrink-0 min-w-0"
+              >
+                <Package className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 sm:h-4 sm:w-4 mr-1.5 max-w-[360px]:mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Add Product</span>
+                <span className="sm:hidden">Add</span>
+              </Button>
             </div>
+
             <div className="flex items-center gap-2 max-w-[360px]:gap-1 overflow-x-auto pb-1 scrollbar-hide">
               <div className="flex gap-1.5 max-w-[360px]:gap-1">
                 <Button
@@ -754,7 +791,11 @@ export default function Inventory() {
                         <tr>
                           <td colSpan={8} className="p-0">
                             {products.length === 0 ? (
-                              <EmptyProductsState />
+                              <EmptyProductsState
+                                onAddProduct={() =>
+                                  setAddProductModalOpen(true)
+                                }
+                              />
                             ) : (
                               <EmptyFilterState
                                 onResetFilters={() => {
@@ -899,10 +940,10 @@ export default function Inventory() {
           </div>
         </section>
 
-        {/* <AddProductModal
-        open={}
-        onOpenChange
-        /> */}
+        <AddProductModal
+          open={addProductModalOpen}
+          onOpenChange={setAddProductModalOpen}
+        />
 
         <StockPriceModal
           itemData={currentItemData}
