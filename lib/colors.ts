@@ -11,8 +11,8 @@ export const PREDEFINED_COLORS: ColorOption[] = [
   { name: "Green", value: "green", hex: "#22c55e" },
   { name: "Yellow", value: "yellow", hex: "#eab308" },
   { name: "Purple", value: "purple", hex: "#a855f7" },
-  { name: "Orange", value: "orange", hex: "#f97316" },
   { name: "Pink", value: "pink", hex: "#ec4899" },
+  { name: "Orange", value: "orange", hex: "#f97316" },
 
   // Neutral Colors
   { name: "Black", value: "black", hex: "#000000" },
@@ -23,21 +23,17 @@ export const PREDEFINED_COLORS: ColorOption[] = [
   // Fashion Colors
   { name: "Navy", value: "navy", hex: "#1e3a8a" },
   { name: "Burgundy", value: "burgundy", hex: "#7c2d12" },
-  { name: "Olive", value: "olive", hex: "#65a30d" },
-  { name: "Maroon", value: "maroon", hex: "#991b1b" },
-  { name: "Teal", value: "teal", hex: "#0d9488" },
-  { name: "Coral", value: "coral", hex: "#fb7185" },
-  { name: "Lavender", value: "lavender", hex: "#c084fc" },
+  { name: "Beige", value: "beige", hex: "#f5f5dc" },
+  { name: "Cream", value: "cream", hex: "#fffdd0" },
+  { name: "Khaki", value: "khaki", hex: "#f0e68c" },
 
   // Popular Product Colors
   { name: "Rose Gold", value: "rose-gold", hex: "#e8b4b8" },
-  { name: "Space Gray", value: "space-gray", hex: "#4a5568" },
-  { name: "Midnight", value: "midnight", hex: "#1a202c" },
-  { name: "Champagne", value: "champagne", hex: "#f7e7ce" },
-  { name: "Bronze", value: "bronze", hex: "#cd7f32" },
-  { name: "Copper", value: "copper", hex: "#b87333" },
+  { name: "Space Gray", value: "space-gray", hex: "#4a4a4a" },
+  { name: "Midnight Blue", value: "midnight-blue", hex: "#191970" },
+  { name: "Forest Green", value: "forest-green", hex: "#228b22" },
+  { name: "Coral", value: "coral", hex: "#ff7f50" },
+  { name: "Turquoise", value: "turquoise", hex: "#40e0d0" },
+  { name: "Lavender", value: "lavender", hex: "#e6e6fa" },
   { name: "Mint", value: "mint", hex: "#98fb98" },
-  { name: "Cream", value: "cream", hex: "#fffdd0" },
-  { name: "Beige", value: "beige", hex: "#f5f5dc" },
-  { name: "Charcoal", value: "charcoal", hex: "#36454f" },
 ]

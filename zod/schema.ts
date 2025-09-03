@@ -370,8 +370,6 @@ const variationSchema = z.object({
   stock: z.number().or(z.string()).optional(),
 })
 
-export type Variation = z.infer<typeof variationSchema>;
-
 // Main product schema with improved validation
 export const productFormSchema = z
   .object({
@@ -387,7 +385,18 @@ export const productFormSchema = z
     images: z.array(z.instanceof(File)),
     imageUrls: z.array(z.string()),
   })
-
+  .refine(
+    (data) => {
+      if (data.hasVariations) {
+        return data.variations.length > 0
+      }
+      return true
+    },
+    {
+      message: "At least one variation is required when variations are enabled",
+      path: ["variations"],
+    },
+  )
   export const updateProductFormSchema = z
   .object({
     name: z.string().min(1, "Name is required").max(100),
