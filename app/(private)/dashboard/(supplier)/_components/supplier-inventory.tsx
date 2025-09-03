@@ -672,7 +672,7 @@ export default function Inventory() {
               {/* Add Product Button */}
               <Button
                 onClick={() => setAddProductModalOpen(true)}
-                disabled={!user?.supplier?.verified}
+                // disabled={!user?.supplier?.verified}
                 className="bg-primary text-white hover:bg-primary/90 text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 px-3 max-w-[360px]:px-2 sm:px-4 whitespace-nowrap flex-shrink-0 min-w-0
     disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:bg-gray-300"
               >

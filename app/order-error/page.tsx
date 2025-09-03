@@ -13,7 +13,7 @@ export default function OrderIssuePage() {
 
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent(
-      "Hello, I need help with my order. Could you please assist me?"
+      "Hello, I have an error while placing order. Could you please assist me?"
     );
     const whatsappUrl = `https://wa.me/${customerCareNumber}?text=${message}`;
     window.open(whatsappUrl, "_blank");
