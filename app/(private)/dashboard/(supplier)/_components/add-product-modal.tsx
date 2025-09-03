@@ -1829,6 +1829,7 @@ export function AddProductModal({
                   selectedColors={variation.color || []}
                   onColorsChange={(colors) => updateVariation(index, "color", colors)}
                   placeholder="Select colors..."
+                  className="z-[110]"
                 />
               </div>
             </div>
@@ -1900,6 +1901,7 @@ export function AddProductModal({
           selectedColors={formData.color || []}
           onColorsChange={(colors) => setValue("color", colors)}
           placeholder="Select colors..."
+         className="z-[110]"
         />
       </div>
     </div>
