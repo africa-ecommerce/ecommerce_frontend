@@ -101,10 +101,15 @@ export default function SupplierSuccess() {
                 style={{
                   backgroundColor: piece.color,
                   width: `${piece.size}px`,
-                  height: piece.shape === "rectangle" ? `${piece.size * 2}px` : `${piece.size}px`,
+                  height:
+                    piece.shape === "rectangle"
+                      ? `${piece.size * 2}px`
+                      : `${piece.size}px`,
                   borderRadius: piece.shape === "circle" ? "50%" : "0",
                   transform: `rotate(${piece.rotation}deg)`,
-                  animation: `confettiSpin ${Math.abs(6 / piece.rotationSpeed)}s linear infinite, confettiSwing ${
+                  animation: `confettiSpin ${Math.abs(
+                    6 / piece.rotationSpeed
+                  )}s linear infinite, confettiSwing ${
                     Math.random() * 2 + 1
                   }s ease-in-out infinite alternate`,
                 }}
@@ -124,9 +129,13 @@ export default function SupplierSuccess() {
 
         {/* Main heading - Responsive text sizing */}
         <div className="text-center mb-5 sm:mb-6 md:mb-8">
-          <p className="text-[#FF7A29] font-medium text-sm sm:text-base md:text-lg mb-2">Welcome to our supplier network!</p>
+          <p className="text-[#FF7A29] font-medium text-sm sm:text-base md:text-lg mb-2">
+            Welcome to our supplier network!
+          </p>
           <p className="text-gray-600 text-xs sm:text-sm md:text-base">
-            Your account is now active. Our team will help you get your products listed and start receiving orders.
+            Your account is now active. Before your products go live, we’ll
+            carefully verify your supplier profile to ensure the best fit for
+            our marketplace.
           </p>
         </div>
 
@@ -169,10 +178,17 @@ export default function SupplierSuccess() {
                   <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#FF7A29]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium text-xs sm:text-sm">We'll Contact You</h3>
-                  <p className="text-xs text-gray-500">Our team will reach out to schedule a product consultation</p>
+                  <h3 className="font-medium text-xs sm:text-sm">
+                    We'll Contact You
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Our team will reach out to schedule a product consultation
+                  </p>
                   <div className="mt-1.5">
-                    <Progress value={100} className="h-1.5 bg-gray-100 w-full" />
+                    <Progress
+                      value={100}
+                      className="h-1.5 bg-gray-100 w-full"
+                    />
                   </div>
                 </div>
               </div>
@@ -184,8 +200,14 @@ export default function SupplierSuccess() {
                   <Camera className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#FF7A29]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium text-xs sm:text-sm">Product Photography</h3>
-                  <p className="text-xs text-gray-500">We'll arrange professional photos of your products</p>
+                  <h3 className="font-medium text-xs sm:text-sm">
+                    Supplier Review
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    We carefully review and approve suppliers who meet our
+                    standards.
+                  </p>
+
                   <div className="mt-1.5">
                     <Progress value={0} className="h-1.5 bg-gray-100 w-full" />
                   </div>
@@ -199,8 +221,14 @@ export default function SupplierSuccess() {
                   <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#FF7A29]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium text-xs sm:text-sm">Product Listing</h3>
-                  <p className="text-xs text-gray-500">We'll create optimized listings for your products</p>
+                  <h3 className="font-medium text-xs sm:text-sm">
+                    Product Approval
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Once verified, your products will be approved and prepared
+                    for listing.
+                  </p>
+
                   <div className="mt-1.5">
                     <Progress value={0} className="h-1.5 bg-gray-100 w-full" />
                   </div>
@@ -215,7 +243,9 @@ export default function SupplierSuccess() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-medium text-xs sm:text-sm">Go Live</h3>
-                  <p className="text-xs text-gray-500">Your products will be live and ready for orders</p>
+                  <p className="text-xs text-gray-500">
+                    Your products will be live and ready for orders
+                  </p>
                   <div className="mt-1.5">
                     <Progress value={0} className="h-1.5 bg-gray-100 w-full" />
                   </div>
@@ -232,26 +262,26 @@ export default function SupplierSuccess() {
               <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5 text-[#FF7A29]" />
             </div>
             <div className="flex-1">
-              <h3 className="font-medium text-sm sm:text-base text-center sm:text-left mb-2 sm:mb-3">Why We Handle Product Listings</h3>
-              <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-700">
-                <li className="flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-[#FF7A29] flex-shrink-0"></div>
-                  <span>Professional quality control ensures better customer experience</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-[#FF7A29] flex-shrink-0"></div>
-                  <span>Optimized listings increase your product visibility and sales</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-[#FF7A29] flex-shrink-0"></div>
-                  <span>Consistent presentation builds trust with customers</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-[#FF7A29] flex-shrink-0"></div>
-                  <span>Focus on what you do best - creating great products</span>
-                </li>
-              </ul>
-             
+              <h3 className="font-medium text-sm sm:text-base text-center sm:text-left mb-2 sm:mb-3">
+                Why We Verify Suppliers
+              </h3>
+
+             <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-700">
+  <li className="flex items-center gap-2">
+    <div className="h-1.5 w-1.5 rounded-full bg-[#FF7A29] flex-shrink-0"></div>
+    <span>We carefully select and verify suppliers to maintain quality standards</span>
+  </li>
+  
+  <li className="flex items-center gap-2">
+    <div className="h-1.5 w-1.5 rounded-full bg-[#FF7A29] flex-shrink-0"></div>
+    <span>Only verified suppliers get to add their products</span>
+  </li>
+  <li className="flex items-center gap-2">
+    <div className="h-1.5 w-1.5 rounded-full bg-[#FF7A29] flex-shrink-0"></div>
+    <span>Being verified gives you higher visibility and credibility</span>
+  </li>
+</ul>
+
             </div>
           </div>
         </div>
@@ -267,7 +297,7 @@ export default function SupplierSuccess() {
             transform: translateY(100vh) rotate(360deg);
           }
         }
-        
+
         @keyframes confettiSpin {
           0% {
             transform: rotate(0deg);
@@ -276,7 +306,7 @@ export default function SupplierSuccess() {
             transform: rotate(360deg);
           }
         }
-        
+
         @keyframes confettiSwing {
           0% {
             transform: translateX(0);
@@ -285,20 +315,21 @@ export default function SupplierSuccess() {
             transform: translateX(var(--swing-distance, 10px));
           }
         }
-        
+
         @keyframes pulse-subtle {
-          0%, 100% {
+          0%,
+          100% {
             opacity: 1;
           }
           50% {
             opacity: 0.8;
           }
         }
-        
+
         .animate-pulse-subtle {
           animation: pulse-subtle 2s ease-in-out infinite;
         }
       `}</style>
     </div>
-  )
+  );
 }

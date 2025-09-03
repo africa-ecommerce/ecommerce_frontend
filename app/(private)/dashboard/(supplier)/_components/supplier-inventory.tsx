@@ -146,8 +146,10 @@ const EmptyFilterState = ({
 
 const EmptyProductsState = ({
   onAddProduct,
+  verified,
 }: {
   onAddProduct?: () => void;
+  verified: boolean;
 }) => (
   <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4">
     <div className="text-center space-y-4 max-w-md">
@@ -165,7 +167,9 @@ const EmptyProductsState = ({
       {onAddProduct && (
         <Button
           onClick={onAddProduct}
-          className="bg-primary text-white hover:bg-primary/90 text-sm h-9 sm:h-10 px-6 sm:px-8 mt-6"
+          disabled={verified}
+          className="bg-primary text-white hover:bg-primary/90 text-sm h-9 sm:h-10 px-6 sm:px-8 mt-6
+      disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:bg-gray-300"
         >
           <Package className="h-4 w-4 mr-2" />
           Add Your First Product
@@ -178,7 +182,7 @@ const EmptyProductsState = ({
 const deleteProductFn = async (id: string) => {
   const response = await fetch(`/api/products/${id}`, {
     method: "DELETE",
-     credentials: "include" 
+    credentials: "include",
   });
   const result = await response.json();
 
@@ -201,7 +205,7 @@ export default function Inventory() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [currentItemData, setCurrentItemData] = useState(null);
-  const [addProductModalOpen, setAddProductModalOpen] = useState(false)
+  const [addProductModalOpen, setAddProductModalOpen] = useState(false);
 
   const handleEdit = (productId: string, item: any) => {
     setSelectedProductId(productId);
@@ -216,7 +220,9 @@ export default function Inventory() {
   const { deleteResource } = useDeleteResource(
     "/api/products/supplier/",
     async () => {
-      const res = await fetch("/api/products/supplier/", { credentials: "include" });
+      const res = await fetch("/api/products/supplier/", {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error("Failed to fetch products");
       return res.json();
     },
@@ -588,12 +594,11 @@ export default function Inventory() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-xs sm:text-sm">
-                    Want to Upload Products?
+                    Looking to Add Products?
                   </h3>
                   <p className="text-[10px] sm:text-xs text-muted-foreground">
-                    Whether you're a new user looking to upload your first
-                    products or an existing user with new items to add, we're
-                    here to help you get started.
+                    Want to upload your first product, message us let help you
+                    get started.
                   </p>
                 </div>
                 <Button
@@ -622,7 +627,7 @@ export default function Inventory() {
                 onClick={() => {
                   const phoneNumber = "2349151425001";
                   const message =
-                    "Hi! I would like to upload/add products to my store. Can you help me get started?";
+                    "Hi! I’m looking to add products to my store. Please help me get started.";
                   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
                     message
                   )}`;
@@ -667,11 +672,13 @@ export default function Inventory() {
               {/* Add Product Button */}
               <Button
                 onClick={() => setAddProductModalOpen(true)}
-                className="bg-primary text-white hover:bg-primary/90 text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 px-3 max-w-[360px]:px-2 sm:px-4 whitespace-nowrap flex-shrink-0 min-w-0"
+                disabled={!user?.supplier?.verified}
+                className="bg-primary text-white hover:bg-primary/90 text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 px-3 max-w-[360px]:px-2 sm:px-4 whitespace-nowrap flex-shrink-0 min-w-0
+    disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:bg-gray-300"
               >
                 <Package className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 sm:h-4 sm:w-4 mr-1.5 max-w-[360px]:mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Add Product</span>
-                <span className="sm:hidden">Add</span>
+                <span className="hidden xs:inline">Add Product</span>
+                <span className="xs:hidden">Add</span>
               </Button>
             </div>
 
@@ -795,6 +802,7 @@ export default function Inventory() {
                                 onAddProduct={() =>
                                   setAddProductModalOpen(true)
                                 }
+                                verified={!user.supplier.verified}
                               />
                             ) : (
                               <EmptyFilterState
