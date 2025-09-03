@@ -899,6 +899,11 @@ export default function Inventory() {
           </div>
         </section>
 
+        {/* <AddProductModal
+        open={}
+        onOpenChange
+        /> */}
+
         <StockPriceModal
           itemData={currentItemData}
           open={editModalOpen}

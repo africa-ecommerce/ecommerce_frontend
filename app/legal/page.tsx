@@ -9,13 +9,13 @@ export default function LegalPage() {
         </h1>
         <p className="mb-4 text-gray-700">
           Pluggn is a social commerce platform owned and operated by{" "}
-          <span className="font-semibold">Pluggn Innovations</span>, a business
+          <span className="font-semibold">PLUGGN INNOVATIONS</span>, a business
           registered under the Corporate Affairs Commission (CAC) in Nigeria.
         </p>
 
         <div className="bg-gray-100 rounded-lg p-4 mb-6">
           <p>
-            <strong>Registered Entity Name:</strong> Pluggn Innovations
+            <strong>Registered Entity Name:</strong> PLUGGN INNOVATIONS
           </p>
           <p>
             <strong>Business Registration Number (RC/BN):</strong> 8787052

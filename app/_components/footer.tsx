@@ -209,7 +209,7 @@ export function Footer() {
           </p>
           <p className="text-gray-500 text-xs md:text-sm text-center">
             Pluggn is a product of{" "}
-            <span className="font-semibold">Pluggn Innovations</span>
+            <span className="font-semibold">PLUGGN INNOVATIONS</span>
           </p>
         </div>
       </div>
