@@ -8,7 +8,7 @@ import { formatPrice } from "@/lib/utils"
 interface Variation {
   id: string
   size?: string
-  color?: string
+  colors?: string
   stock?: string
   price?: string
 }
@@ -176,7 +176,7 @@ export function ProductSpecifications({
                         Color
                       </span>
                       <span className="text-xs capitalize">
-                        {variation.color || "-"}
+                        {variation.colors || "-"}
                       </span>
                     </div>
                     <div className="flex justify-between">

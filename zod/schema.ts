@@ -366,7 +366,7 @@ export const deliveryFormSchema = z.object({
 const variationSchema = z.object({
   id: z.string(),
   size: z.string().optional(),
-  color: z.array(z.string()).optional(),
+  colors: z.array(z.string()).optional(),
   stock: z.number().or(z.string()).optional(),
 })
 
@@ -379,7 +379,7 @@ export const productFormSchema = z
     size: z.string().optional(),
     price: z.number().min(1, "Price is required"),
     stock: z.number().optional(),
-    color: z.array(z.string()).optional(),
+    colors: z.array(z.string()).optional(),
     hasVariations: z.boolean(),
     variations: z.array(variationSchema),
     images: z.array(z.instanceof(File)),
@@ -405,12 +405,24 @@ export const productFormSchema = z
     size: z.string().optional(),
     price: z.number().min(1, "Price is required"),
     stock: z.number().optional(),
-    color: z.string().optional(),
+    colors: z.array(z.string()).optional(),
     hasVariations: z.boolean(),
     variations: z.array(variationSchema),
-    images: z.array(z.instanceof(File)).optional(),
-    imageUrls: z.array(z.string()).optional(),
+    images: z.array(z.instanceof(File)),
+    imageUrls: z.array(z.string()),
   })
+  .refine(
+    (data) => {
+      if (data.hasVariations) {
+        return data.variations.length > 0
+      }
+      return true
+    },
+    {
+      message: "At least one variation is required when variations are enabled",
+      path: ["variations"],
+    },
+  )
 
   export type UpdateFormData = z.infer<typeof updateProductFormSchema>
  

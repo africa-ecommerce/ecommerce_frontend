@@ -1,358 +1,237 @@
 
 
 
-"use client";
+"use client"
 
-import type React from "react";
+import { useState, useRef, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
+import { Badge } from "@/components/ui/badge"
+import { ChevronRight, Upload, Plus, Trash2, ImageIcon, ChevronLeft, X, HelpCircle } from "lucide-react"
+import { ColorPicker } from "./color-picker"
+import { PREDEFINED_COLORS } from "@/lib/colors"
+import type React from "react"
+import { motion, AnimatePresence } from "framer-motion"
 
-import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  HelpCircle,
-  ImageIcon,
-  Loader2,
-  Plus,
-  Trash2,
-  Upload,
-  X,
-} from "lucide-react";
-import useSWR, { mutate } from "swr";
+import { Check } from "lucide-react"
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { cn, truncateText } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useFormResolver } from "@/hooks/useFormResolver";
-import { updateProductFormSchema, type UpdateFormData } from "@/zod/schema";
-import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
-import { Skeleton } from "@/components/ui/skeleton";
-
-export const PRODUCT_CATEGORIES = [
-  { value: "all", label: "All Categories" },
-  { value: "electronics", label: "Electronics" },
-  { value: "fashion", label: "Fashion" },
-  { value: "beauty_skincare", label: "Beauty & Skincare" },
-];
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced"
+import { categoryRecommendations, PRODUCT_CATEGORIES } from "@/app/constant"
+import { type UpdateFormData, updateProductFormSchema } from "@/zod/schema"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { cn, truncateText } from "@/lib/utils"
 
 interface Variation {
-  id: string;
-  stock?: string | number;
-  size?: string;
-  color?: string;
-  [key: string]: any;
+  id: string
+  stock?: string | number
+  size?: string
+  color?: string[]
+  [key: string]: any
 }
 
-interface EditProductModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  productId: string;
-  itemData?: any
-}
-
-export function EditProductModal({
+export function UpdateProductModal({
   open,
   onOpenChange,
   productId,
-  itemData
-}: EditProductModalProps) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [direction, setDirection] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const dropAreaRef = useRef<HTMLDivElement>(null);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  itemData,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  productId: string
+  itemData: any // The existing product data to populate the form
+}) {
+  const [currentStep, setCurrentStep] = useState(0)
+  const [direction, setDirection] = useState(0)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const dropAreaRef = useRef<HTMLDivElement>(null)
 
+  const {
+    register,
+    handleSubmit: formSubmit,
+    formState: { errors },
+    watch,
+    setValue,
+    reset,
+    trigger,
+  } = useForm<UpdateFormData>({
+    resolver: zodResolver(updateProductFormSchema),
+    defaultValues: {
+      name: itemData?.name || "",
+      category: itemData?.category || "",
+      description: itemData?.description || "",
+      size: itemData?.size || "",
+      price: itemData?.price || 0,
+      stock: itemData?.stock || 0,
+      colors: itemData?.colors || [],
+      hasVariations: (itemData?.variations?.length || 0) > 0,
+      variations: itemData?.variations || [],
+      images: [], // Always start with empty files array
+      imageUrls: itemData?.imageUrls || [], // Existing image URLs
+    },
+  })
 
-  
+  useEffect(() => {
+    if (itemData && open) {
+      reset({
+        name: itemData?.name || "",
+        category: itemData?.category || "",
+        description: itemData?.description || "",
+        size: itemData?.size || "",
+        price: itemData?.price || 0,
+        stock: itemData?.stock || 0,
+        colors: itemData?.colors || [],
+        hasVariations: (itemData?.variations?.length || 0) > 0,
+        variations: itemData?.variations || [],
+        images: [],
+        imageUrls: itemData?.imageUrls || [],
+      })
+    }
+  }, [itemData, open, reset])
 
-  
-   const data = itemData
-   const isLoading = !itemData
+  const formData = watch()
 
-
-  const editProduct = async (data: UpdateFormData) => {
+  const updateProduct = async (data: UpdateFormData) => {
     try {
-      
+      const formData = new FormData()
+      data.images.forEach((file: File) => {
+        formData.append("images", file)
+      })
 
-      const formData = new FormData();
-      data.images?.forEach((file: File) => {
-        formData.append("images", file);
-      });
-
-      const { images, ...jsonData } = data;
-      formData.append("productData", JSON.stringify(jsonData));
-
-      
+      const { images, imageUrls, ...jsonData } = data
+      formData.append("productData", JSON.stringify(jsonData))
 
       const response = await fetch(`/api/products/${productId}`, {
         method: "PUT",
         body: formData,
-         credentials: "include" 
-      });
+        credentials: "include",
+      })
 
       if (!response.ok) {
-        const errorResult = await response.json();
-        errorToast(errorResult.error || "Server error");
-        return null;
+        const errorResult = await response.json()
+        console.error("Server error:", errorResult)
+        errorToast(errorResult.error || "Server error")
+        return null
       }
 
-      const result = await response.json();
-      successToast(result.message || "Product updated successfully");
-      return result;
+      const result = await response.json()
+      successToast(result.message)
+      return result
     } catch (error) {
-      errorToast("Something went wrong");
-      return null;
+      console.error("Submission error:", error)
+      errorToast("Something went wrong")
+      return null
     }
-  };
-
-  const {
-    form: { register, submit, errors, setValue, isSubmitting, watch },
-  } = useFormResolver<UpdateFormData>(
-    editProduct,
-    updateProductFormSchema,
-    () => {
-      onOpenChange(false);
-      setCurrentStep(0);
-       mutate("/api/products/supplier/");
-      
-    },
-    {
-      hasVariations: false,
-      variations: [],
-      price: undefined,
-      stock: undefined,
-    }
-  );
-
-  const formData = watch();
-
-  // Populate form with initial data when it loads
-  useEffect(() => {
-    if (data) {
-      setValue("name", data.name);
-      setValue("category", data.category);
-      setValue("price", data.price);
-      setValue("description", data.description || "");
-
-      // Handle variations if they exist
-      if (
-        data.variations &&
-        data.variations.length > 0
-      ) {
-        setValue("hasVariations", true);
-        setValue("variations", data.variations);
-      } else {
-        setValue("hasVariations", false);
-        setValue("size", data.size || "");
-        setValue("color", data.color || "");
-        setValue("stock", data.stock);
-      }
-
-      // Handle existing images
-      if (data.images && data.images.length > 0) {
-        const imageUrls = data.images.map((img: any) => img);
-        setValue("imageUrls", imageUrls);
-        setImagePreviews(imageUrls); // Also set preview images
-      }
-    }
-  }, [data, setValue]);
+  }
 
   // Handle drag and drop for images
   useEffect(() => {
-    const dropArea = dropAreaRef.current;
-    if (!dropArea || !open) return;
+    const dropArea = dropAreaRef.current
+    if (!dropArea || !open) return
 
     const handleDragOver = (e: DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropArea.classList.add("border-primary");
-    };
+      e.preventDefault()
+      e.stopPropagation()
+      dropArea.classList.add("border-primary")
+    }
 
     const handleDragLeave = (e: DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropArea.classList.remove("border-primary");
-    };
+      e.preventDefault()
+      e.stopPropagation()
+      dropArea.classList.remove("border-primary")
+    }
 
     const handleDrop = (e: DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dropArea.classList.remove("border-primary");
+      e.preventDefault()
+      e.stopPropagation()
+      dropArea.classList.remove("border-primary")
 
       if (e.dataTransfer?.files) {
-        handleFiles(e.dataTransfer.files);
+        handleFiles(e.dataTransfer.files)
       }
-    };
+    }
 
-    dropArea.addEventListener("dragover", handleDragOver);
-    dropArea.addEventListener("dragleave", handleDragLeave);
-    dropArea.addEventListener("drop", handleDrop);
+    dropArea.addEventListener("dragover", handleDragOver)
+    dropArea.addEventListener("dragleave", handleDragLeave)
+    dropArea.addEventListener("drop", handleDrop)
 
     return () => {
-      dropArea.removeEventListener("dragover", handleDragOver);
-      dropArea.removeEventListener("dragleave", handleDragLeave);
-      dropArea.removeEventListener("drop", handleDrop);
-    };
-  }, [open]);
-
-
-  const closeModal = () => {
-    onOpenChange(false)
-    setCurrentStep(0);
-    
-  }
-
-  
-
-const handleFiles = (files: FileList) => {
-  // First check file types and sizes
-  const newFiles = Array.from(files).filter(
-    (file) =>
-      (file.type === "image/jpeg" ||
-        file.type === "image/png" ||
-        file.type === "image/webp" ||
-        file.type === "image/svg+xml") &&
-      file.size <= 5 * 1024 * 1024
-  );
-
-  if (newFiles.length === 0) {
-    errorToast("Only images under 5MB allowed");
-    return;
-  }
-
-  // Get current counts
-  const existingImagesCount = formData.imageUrls?.length || 0;
-  const currentNewImagesCount = formData.images?.length || 0;
-  const totalCurrentCount = existingImagesCount + currentNewImagesCount;
-  
-  // Check if we're already at the limit
-  if (totalCurrentCount >= 3) {
-    errorToast("Maximum 3 images already reached");
-    return;
-  }
-  
-  // Calculate how many more images we can add
-  const spaceRemaining = 3 - totalCurrentCount;
-  
-  // If we're trying to add more than our limit allows
-  if (newFiles.length > spaceRemaining) {
-    errorToast(`Only ${spaceRemaining} more image${spaceRemaining > 1 ? 's' : ''} can be added (max 3 total)`);
-    // Trim array to only include what we can add
-    newFiles.splice(spaceRemaining);
-  }
-
-  // Now add the files (which may have been trimmed)
-  const currentImages = formData.images || [];
-  const newImages = [...currentImages, ...newFiles];
-  setValue("images", newImages);
-  
-  // Generate and update preview URLs for all images
-  updateImagePreviews(newImages);
-};
-
-
-const updateImagePreviews = (imageFiles: File[]) => {
-  // Create a map of existing previews
-  const currentPreviews = new Map();
-  imageFiles.forEach((file, index) => {
-    // Generate preview URL for the file if it doesn't have one
-    if (!currentPreviews.has(file.name)) {
-      currentPreviews.set(file.name, URL.createObjectURL(file));
+      dropArea.removeEventListener("dragover", handleDragOver)
+      dropArea.removeEventListener("dragleave", handleDragLeave)
+      dropArea.removeEventListener("drop", handleDrop)
     }
-  });
+  }, [open])
 
-  // Create merged array of all image URLs for display
-  const allPreviews = [
-    ...(formData.imageUrls || []), // Existing images from backend
-    ...Array.from(currentPreviews.values()), // New images with preview URLs
-  ];
+  const handleFiles = (files: FileList) => {
+    const currentImages = formData.images || []
+    const newFiles = Array.from(files).filter(
+      (file) =>
+        (file.type === "image/jpeg" ||
+          file.type === "image/png" ||
+          file.type === "image/webp" ||
+          file.type === "image/svg+xml") &&
+        file.size <= 5 * 1024 * 1024,
+    )
 
-  // We don't update formData.imageUrls as that's reserved for backend images
-  // Instead, we'll use a separate state for previews
-  setImagePreviews(allPreviews);
-};
+    if (newFiles.length === 0) {
+      errorToast("Only images under 5MB allowed")
+      return
+    }
+
+    if (currentImages.length + newFiles.length > 3) {
+      errorToast("Maximum 3 images allowed")
+      newFiles.splice(3 - currentImages.length)
+    }
+
+    const newImages = [...currentImages, ...newFiles]
+    const newImageUrls = [...(formData.imageUrls || []), ...newFiles.map((file) => URL.createObjectURL(file))]
+
+    setValue("images", newImages)
+    setValue("imageUrls", newImageUrls)
+  }
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      handleFiles(e.target.files);
-    }
-  };
-
- 
-
-
-const removeImage = (index: number) => {
-  const existingImagesCount = formData.imageUrls?.length || 0;
-
-  // If removing an existing image from backend
-  if (index < existingImagesCount) {
-    const newImageUrls = [...(formData.imageUrls || [])];
-    newImageUrls.splice(index, 1);
-    setValue("imageUrls", newImageUrls);
-
-    // Update previews
-    const newPreviews = [...imagePreviews];
-    newPreviews.splice(index, 1);
-    setImagePreviews(newPreviews);
-  }
-  // If removing a newly added image
-  else {
-    const newIndex = index - existingImagesCount;
-    const newImages = [...(formData.images || [])];
-
-    // Revoke object URL to prevent memory leaks
-    if (imagePreviews[index]) {
-      URL.revokeObjectURL(imagePreviews[index]);
-    }
-
-    newImages.splice(newIndex, 1);
-    setValue("images", newImages);
-
-    // Update previews
-    const newPreviews = [...imagePreviews];
-    newPreviews.splice(index, 1);
-    setImagePreviews(newPreviews);
-
-    // If we have more new images, update their previews
-    if (newImages.length > 0) {
-      updateImagePreviews(newImages);
+      handleFiles(e.target.files)
     }
   }
-};
+
+  const removeImage = (index: number) => {
+    const newImages = [...(formData.images || [])]
+    const newImageUrls = [...(formData.imageUrls || [])]
+
+    if (newImageUrls[index]?.startsWith("blob:")) {
+      URL.revokeObjectURL(newImageUrls[index])
+    }
+    newImages.splice(index, 1)
+    newImageUrls.splice(index, 1)
+
+    setValue("images", newImages)
+    setValue("imageUrls", newImageUrls)
+  }
 
   const addVariation = () => {
     const newVariation = {
       id: `var-${Date.now()}`,
       size: "",
-      color: "",
+      colors: [],
       stock: "",
-    };
+    }
 
-    setValue("variations", [...(formData.variations || []), newVariation]);
-  };
+    setValue("variations", [...(formData.variations || []), newVariation])
+  }
 
-  const updateVariation = (
-    index: number,
-    field: string,
-    value: string | number
-  ) => {
-    const updatedVariations = [...(formData.variations || [])] as Variation[];
+  const updateVariation = (index: number, field: string, value: string | number | string[]) => {
+    const updatedVariations = [...(formData.variations || [])] as Variation[]
 
     // Handle nested dimensions fields
     if (field.includes(".")) {
-      const [parent, child] = field.split(".");
+      const [parent, child] = field.split(".")
       if (parent === "dimensions") {
         updatedVariations[index] = {
           ...updatedVariations[index],
@@ -360,64 +239,64 @@ const removeImage = (index: number) => {
             ...(updatedVariations[index].dimensions || {}),
             [child]: value,
           },
-        };
+        }
       }
     } else if (field === "stock") {
       // Special handling for stock field to handle empty string
       updatedVariations[index] = {
         ...updatedVariations[index],
         [field]: value === "" ? "" : Number(value),
-      };
+      }
     } else {
       updatedVariations[index] = {
         ...updatedVariations[index],
         [field]: value,
-      };
+      }
     }
 
-    setValue("variations", updatedVariations);
-  };
+    setValue("variations", updatedVariations)
+  }
 
   const removeVariation = (index: number) => {
-    const updatedVariations = [...(formData.variations || [])];
-    updatedVariations.splice(index, 1);
+    const updatedVariations = [...(formData.variations || [])]
+    updatedVariations.splice(index, 1)
 
-    setValue("variations", updatedVariations);
-  };
+    setValue("variations", updatedVariations)
+  }
 
   // Updated step navigation logic
   const goToNextStep = () => {
     if (currentStep < steps.length - 1) {
-      setDirection(1);
+      setDirection(1)
 
       // If we're on the first step (category) and variations are enabled,
       // go directly to variations step (step 1)
       if (currentStep === 0) {
-        setCurrentStep(1);
+        setCurrentStep(1)
       }
       // If we're on variations step and variations are enabled,
       // skip the single product details step
       else if (currentStep === 1 && formData.hasVariations) {
-        setCurrentStep(3); // Skip to media step
+        setCurrentStep(3) // Skip to media step
       } else {
-        setCurrentStep(currentStep + 1);
+        setCurrentStep(currentStep + 1)
       }
     }
-  };
+  }
 
   const goToPreviousStep = () => {
     if (currentStep > 0) {
-      setDirection(-1);
+      setDirection(-1)
 
       // If we're on media step and variations are enabled,
       // go back to variations step
       if (currentStep === 3 && formData.hasVariations) {
-        setCurrentStep(1);
+        setCurrentStep(1)
       } else {
-        setCurrentStep(currentStep - 1);
+        setCurrentStep(currentStep - 1)
       }
     }
-  };
+  }
 
   const variants = {
     enter: (direction: number) => ({
@@ -432,7 +311,7 @@ const removeImage = (index: number) => {
       x: direction < 0 ? "100%" : "-100%",
       opacity: 0,
     }),
-  };
+  }
 
   const steps = [
     { id: "category", title: "Category" },
@@ -440,9 +319,8 @@ const removeImage = (index: number) => {
     { id: "details", title: "Details" },
     { id: "media", title: "Media" },
     { id: "review", title: "Review" },
-  ];
+  ]
 
-  // Improved step validation
   const isStepValid = () => {
     switch (currentStep) {
       case 0: // Category step
@@ -453,108 +331,62 @@ const removeImage = (index: number) => {
           !errors.name &&
           !!formData.price && // Added price validation to first step
           !errors.price
-        );
+        )
       case 1: // Variations step
         if (formData.hasVariations) {
           // Check if at least one variation exists and has required fields
           return (
             formData.variations &&
             formData.variations.length > 0 &&
-            formData.variations.every(
-              (v: Variation) =>
-                v.stock !== undefined && v.stock !== "" && Number(v.stock) >= 1
-            )
-          );
+            formData.variations.every((v: Variation) => v.stock !== undefined && v.stock !== "" && Number(v.stock) >= 1)
+          )
         }
-        return true; // If no variations, this step is valid
+        return true // If no variations, this step is valid
       case 2: // Single product details
         return !errors.stock && formData.stock! >= 1
       case 3: // Media step
-        return (
-          ( formData.images?.length! > 0 || formData.imageUrls?.length! > 0) &&
-          !errors.images
-        );
+        return (formData.images?.length > 0 || formData.imageUrls?.length > 0) && !errors.images
       case 4: // Review step
         const baseValidation =
           !!formData.category &&
           !!formData.name &&
           !!formData.price &&
           !errors.price &&
-          ((formData.images && formData.images.length > 0) ||
-            (formData.imageUrls && formData.imageUrls.length > 0));
-        return baseValidation;
+          ((formData.images && formData.images.length > 0) || (formData.imageUrls && formData.imageUrls.length > 0))
+        return baseValidation
       default:
-        return false;
+        return false
     }
-  };
+  }
 
+  // Ensure we have valid data before submitting
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+    e.preventDefault()
 
     // If hasVariations is false, make sure variations is an empty array
     if (!formData.hasVariations) {
-      setValue("variations", []);
+      setValue("variations", [])
     }
 
-     if (formData.hasVariations) {
+    if (formData.hasVariations) {
       // When variations are enabled, reset single product fields
-      setValue("size", "");
-      setValue("color", "");
-      setValue("stock", undefined);
+      setValue("size", "")
+      setValue("colors", [])
+      setValue("stock", undefined)
     }
 
-    // Ensure we have valid data before submitting
+    // Force validation using the submit function from your form hook
     try {
-      // Force validation using the submit function from your form hook
-      await submit(e);
+      await formSubmit(updateProduct)(formData)
     } catch (error) {
-      errorToast("Please check all required fields");
+      console.error("Form submission error:", error)
+      errorToast("Please check all required fields")
     }
-  };
-
-  
-
-  // If modal is not open, render nothing but ensure hooks are called
-  if (!open) return null;
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-sm md:items-center">
-        <motion.div
-          initial={{ y: "100%" }}
-          animate={{ y: 0 }}
-          exit={{ y: "100%" }}
-          transition={{ type: "spring", damping: 30, stiffness: 300 }}
-          className="relative flex h-[90vh] w-full flex-col overflow-hidden rounded-t-2xl bg-background shadow-xl md:h-[85vh] md:max-h-[700px] md:w-[95vw] md:max-w-2xl md:rounded-lg"
-        >
-          <div className="flex items-center justify-between border-b px-4 py-3 md:px-6">
-            <h2 className="text-lg font-semibold">Edit Product</h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => closeModal()}
-              className="h-9 w-9 rounded-full"
-            >
-              <X className="h-5 w-5" />
-              <span className="sr-only">Close</span>
-            </Button>
-          </div>
-          <div className="p-6 space-y-4">
-            <Skeleton className="h-8 w-1/3" />
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-12 w-full" />
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-12 w-full" />
-          </div>
-        </motion.div>
-      </div>
-    );
   }
 
- 
+  // If modal is not open, render nothing but ensure hooks are called
+  if (!open) return null
+
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-sm md:items-center">
       <motion.div
@@ -570,24 +402,14 @@ const removeImage = (index: number) => {
           <div className="flex items-center justify-between border-b px-4 py-3 md:px-6">
             <div className="flex items-center gap-2">
               {currentStep > 0 && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={goToPreviousStep}
-                  className="h-9 w-9 rounded-full"
-                >
+                <Button variant="ghost" size="icon" onClick={goToPreviousStep} className="h-9 w-9 rounded-full">
                   <ChevronLeft className="h-5 w-5" />
                   <span className="sr-only">Back</span>
                 </Button>
               )}
-              <h2 className="text-lg font-semibold">Edit Product</h2>
+              <h2 className="text-lg font-semibold">Update Product</h2>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => closeModal()}
-              className="h-9 w-9 rounded-full"
-            >
+            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-9 w-9 rounded-full">
               <X className="h-5 w-5" />
               <span className="sr-only">Close</span>
             </Button>
@@ -613,15 +435,11 @@ const removeImage = (index: number) => {
                   index < currentStep
                     ? "bg-primary text-primary-foreground"
                     : index === currentStep
-                    ? "border-2 border-primary bg-background text-foreground"
-                    : "border border-muted-foreground/30 bg-background text-muted-foreground"
+                      ? "border-2 border-primary bg-background text-foreground"
+                      : "border border-muted-foreground/30 bg-background text-muted-foreground",
                 )}
               >
-                {index < currentStep ? (
-                  <Check className="h-3 w-3" />
-                ) : (
-                  index + 1
-                )}
+                {index < currentStep ? <Check className="h-3 w-3" /> : index + 1}
                 <span className="sr-only">{step.title}</span>
               </div>
             ))}
@@ -660,32 +478,20 @@ const removeImage = (index: number) => {
                         </SelectTrigger>
                         <SelectContent className="z-[200]">
                           {PRODUCT_CATEGORIES.map((category) => (
-                            <SelectItem
-                              key={category.value}
-                              value={category.value}
-                              className="text-xs md:text-sm"
-                            >
+                            <SelectItem key={category.value} value={category.value} className="text-xs md:text-sm">
                               {category.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      {errors.category && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {errors.category.message}
-                        </p>
-                      )}
+                      {errors.category && <p className="text-xs text-red-500 mt-1">{errors.category.message}</p>}
                     </div>
 
                     {formData.category && (
                       <div className="rounded-xl border bg-muted/30 p-4">
-                        <h3 className="mb-3 text-sm font-medium">
-                          Category Recommendations
-                        </h3>
+                        <h3 className="mb-3 text-sm font-medium">Category Recommendations</h3>
                         <ul className="space-y-3">
-                          {(
-                            categoryRecommendations as Record<string, string[]>
-                          )[formData.category]?.map((req, i) => (
+                          {(categoryRecommendations as Record<string, string[]>)[formData.category]?.map((req, i) => (
                             <li key={i} className="flex items-start gap-3">
                               <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-green-500" />
                               <span className="text-sm">{req}</span>
@@ -704,14 +510,9 @@ const removeImage = (index: number) => {
                         maxLength={100}
                         className="h-12 text-base"
                       />
-                      {errors.name && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {errors.name.message}
-                        </p>
-                      )}
+                      {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
                       <p className="text-xs text-muted-foreground">
-                        {formData.name?.length || 0}/100 (Long names will be
-                        truncated in display)
+                        {formData.name?.length || 0}/100 (Long names will be truncated in display)
                       </p>
                     </div>
 
@@ -729,17 +530,12 @@ const removeImage = (index: number) => {
                         placeholder="0.00"
                         className="h-12 text-base"
                       />
-                      {errors.price && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {errors.price.message}
-                        </p>
-                      )}
+                      {errors.price && <p className="text-xs text-red-500 mt-1">{errors.price.message}</p>}
                     </div>
 
                     <div className="space-y-3">
                       <Label htmlFor="description">
-                        Description{" "}
-                        <span className="text-gray-500">(Recommended)</span>
+                        Description <span className="text-gray-500">(Strongly Recommended)</span>
                       </Label>
                       <div className="relative">
                         <Textarea
@@ -754,16 +550,12 @@ const removeImage = (index: number) => {
                           {formData.description?.length || 0}/1000
                         </div>
                       </div>
-                      {errors.description && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {errors.description.message}
-                        </p>
-                      )}
+                      {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>}
                     </div>
                   </div>
                 )}
 
-                {/* Step 2: Variations - Enhanced with price field */}
+                {/* Step 2: Variations - Enhanced with sticky Add button */}
                 {currentStep === 1 && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between rounded-lg bg-muted/30 p-4">
@@ -771,9 +563,7 @@ const removeImage = (index: number) => {
                         <Switch
                           id="hasVariations"
                           checked={formData.hasVariations}
-                          onCheckedChange={(checked) =>
-                            setValue("hasVariations", checked)
-                          }
+                          onCheckedChange={(checked) => setValue("hasVariations", checked)}
                         />
                         <Label htmlFor="hasVariations" className="font-medium">
                           Multiple Variations
@@ -784,7 +574,7 @@ const removeImage = (index: number) => {
                           variant="outline"
                           size="sm"
                           onClick={addVariation}
-                          className="h-9"
+                          className="h-9 bg-transparent"
                           type="button"
                         >
                           <Plus className="mr-1 h-4 w-4" /> Add
@@ -792,11 +582,11 @@ const removeImage = (index: number) => {
                       )}
                     </div>
 
+                    {/* Remove the sticky button section and keep the original structure */}
                     {!formData.hasVariations ? (
                       <div className="rounded-xl border bg-muted/30 p-4 text-center">
                         <p className="text-muted-foreground">
-                          This product will be managed as a single item with no
-                          variations.
+                          This product will be managed as a single item with no variations.
                         </p>
                         <p className="text-sm text-muted-foreground mt-2">
                           You'll be able to set stock in the next step.
@@ -807,25 +597,31 @@ const removeImage = (index: number) => {
                         <ImageIcon className="mb-3 h-8 w-8 text-muted-foreground" />
                         <p className="mb-3 font-medium">No variations added</p>
                         <p className="text-sm text-muted-foreground mb-4">
-                          Add variations with different sizes, colors and stock
-                          levels.
+                          Add variations with different sizes, colors and stock levels.
                         </p>
                         <Button onClick={addVariation} type="button">
                           <Plus className="mr-2 h-4 w-4" /> Add First Variation
                         </Button>
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        {formData.variations?.map(
-                          (variation: Variation, index) => (
-                            <div
-                              key={variation.id}
-                              className="rounded-xl border bg-muted/30 p-4"
-                            >
+                      <div className="relative">
+                        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b pb-4 mb-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={addVariation}
+                            className="h-9 w-full bg-transparent"
+                            type="button"
+                          >
+                            <Plus className="mr-1 h-4 w-4" /> Add Variation
+                          </Button>
+                        </div>
+
+                        <div className="space-y-4">
+                          {formData.variations?.map((variation: Variation, index) => (
+                            <div key={variation.id} className="rounded-xl border bg-muted/30 p-4">
                               <div className="mb-4 flex items-center justify-between">
-                                <h3 className="font-medium">
-                                  Variation {index + 1}
-                                </h3>
+                                <h3 className="font-medium">Variation {index + 1}</h3>
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -839,65 +635,36 @@ const removeImage = (index: number) => {
 
                               <div className="grid gap-4 grid-cols-2">
                                 <div className="space-y-3 pb-4">
-                                  <Label htmlFor={`size-${index}`}>
-                                    Size *
-                                  </Label>
+                                  <Label htmlFor={`size-${index}`}>Size *</Label>
                                   <Input
                                     id={`size-${index}`}
                                     placeholder="e.g. XL, 250ml, 32 inches"
                                     value={variation.size || ""}
-                                    onChange={(e) =>
-                                      updateVariation(
-                                        index,
-                                        "size",
-                                        e.target.value
-                                      )
-                                    }
+                                    onChange={(e) => updateVariation(index, "size", e.target.value)}
                                     className="h-12 text-base"
                                   />
                                 </div>
 
                                 <div className="space-y-3 pb-4">
-                                  <Label htmlFor={`color-${index}`}>
-                                    Color *
-                                  </Label>
-                                  <Input
-                                    id={`color-${index}`}
-                                    placeholder="e.g. Red"
-                                    value={variation.color || ""}
-                                    onChange={(e) =>
-                                      updateVariation(
-                                        index,
-                                        "color",
-                                        e.target.value
-                                      )
-                                    }
-                                    className="h-12 text-base"
+                                  <Label htmlFor={`color-${index}`}>Colors *</Label>
+                                  <ColorPicker
+                                    selectedColors={variation.colors || []}
+                                    onColorsChange={(colors) => updateVariation(index, "colors", colors)}
+                                    placeholder="Select colors..."
+                                    className="z-[110]"
                                   />
                                 </div>
                               </div>
 
                               <div className="space-y-3">
-                                <Label htmlFor={`stock-${index}`}>
-                                  Stock *
-                                </Label>
+                                <Label htmlFor={`stock-${index}`}>Stock *</Label>
                                 <Input
                                   id={`stock-${index}`}
                                   type="number"
                                   placeholder="1"
-                                  value={
-                                    variation.stock === undefined
-                                      ? ""
-                                      : variation.stock
-                                  }
+                                  value={variation.stock === undefined ? "" : variation.stock}
                                   onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "stock",
-                                      e.target.value === ""
-                                        ? ""
-                                        : Number(e.target.value)
-                                    )
+                                    updateVariation(index, "stock", e.target.value === "" ? "" : Number(e.target.value))
                                   }
                                   className="h-12 text-base"
                                   required
@@ -905,43 +672,36 @@ const removeImage = (index: number) => {
                                 {variation.stock !== "" &&
                                   variation.stock !== undefined &&
                                   Number(variation.stock) < 1 && (
-                                    <p className="text-xs text-red-500">
-                                      Stock must be at least 1
-                                    </p>
+                                    <p className="text-xs text-red-500">Stock must be at least 1</p>
                                   )}
                               </div>
                             </div>
-                          )
-                        )}
+                          ))}
+                        </div>
                       </div>
                     )}
 
-                    {formData.hasVariations &&
-                      formData.variations?.length > 0 && (
-                        <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-4 text-blue-800 dark:text-blue-300">
-                          <div className="flex items-start gap-3">
-                            <HelpCircle className="h-5 w-5 flex-shrink-0" />
-                            <p className="text-sm">
-                              When using variations, each variation must have
-                              stock specified. You'll skip the general product
-                              details step.
-                            </p>
-                          </div>
+                    {formData.hasVariations && formData.variations?.length > 0 && (
+                      <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-4 text-blue-800 dark:text-blue-300">
+                        <div className="flex items-start gap-3">
+                          <HelpCircle className="h-5 w-5 flex-shrink-0" />
+                          <p className="text-sm">
+                            When using variations, each variation must have stock specified. You'll skip the general
+                            product details step.
+                          </p>
                         </div>
-                      )}
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Step 3: Single Product Details - Price removed, now in step 1 */}
+                {/* Step 3: Single Product Details */}
                 {currentStep === 2 && (
                   <div className="space-y-6">
                     <div className="rounded-lg bg-muted/30 p-4">
-                      <h3 className="mb-3 text-sm font-medium">
-                        Single Product Details
-                      </h3>
+                      <h3 className="mb-3 text-sm font-medium">Single Product Details</h3>
                       <p className="text-sm text-muted-foreground">
-                        These details will apply to this product since you're
-                        not using variations.
+                        These details will apply to this product since you're not using variations.
                       </p>
                     </div>
                     <div className="grid gap-4 grid-cols-2">
@@ -953,21 +713,16 @@ const removeImage = (index: number) => {
                           placeholder="e.g. XL, 250ml, 32 inches"
                           className="h-12 text-base"
                         />
-                        {errors.size && (
-                          <p className="text-xs text-red-500 mt-1">
-                            {errors.size.message}
-                          </p>
-                        )}
+                        {errors.size && <p className="text-xs text-red-500 mt-1">{errors.size.message}</p>}
                       </div>
 
                       <div className="space-y-3">
-                        <Label htmlFor="color">Color</Label>
-                        <Input
-                          id="color"
-                          type="text"
-                          {...register("color")}
-                          placeholder="e.g. Red"
-                          className="h-12 text-base"
+                        <Label htmlFor="color">Colors</Label>
+                        <ColorPicker
+                          selectedColors={formData.colors || []}
+                          onColorsChange={(colors) => setValue("colors", colors)}
+                          placeholder="Select colors..."
+                          className="z-[110]"
                         />
                       </div>
                     </div>
@@ -978,16 +733,12 @@ const removeImage = (index: number) => {
                         id="stock"
                         type="number"
                         {...register("stock", {
-                          valueAsNumber: true, // Convert to number automatically
+                          valueAsNumber: true,
                         })}
                         placeholder="0"
                         className="h-12 text-base"
                       />
-                      {errors.stock && (
-                        <p className="text-xs text-red-500 mt-1">
-                          Stock must be at least 1
-                        </p>
-                      )}
+                      {errors.stock && <p className="text-xs text-red-500 mt-1">Stock must be at least 1</p>}
                     </div>
                   </div>
                 )}
@@ -1000,13 +751,11 @@ const removeImage = (index: number) => {
                       <p className="text-sm text-muted-foreground">
                         Max 3 images (5MB each) - JPG, PNG, WEBP and SVG only
                       </p>
-
                       <div className="rounded-lg bg-blue-50 dark:bg-blue-900/20 p-3 text-blue-800 dark:text-blue-300">
                         <div className="flex items-start gap-2">
                           <ImageIcon className="h-4 w-4 flex-shrink-0 mt-0.5" />
                           <p className="text-sm">
-                            <strong>Note:</strong> The first image you upload
-                            will be used as the main product image.
+                            <strong>Note:</strong> The first image you upload will be used as the main product image.
                           </p>
                         </div>
                       </div>
@@ -1028,30 +777,30 @@ const removeImage = (index: number) => {
                         </div>
                         <div>
                           <p className="font-medium">Drag & drop images here</p>
-                          <p className="text-sm text-muted-foreground">
-                            or click to browse files
-                          </p>
+                          <p className="text-sm text-muted-foreground">or click to browse files</p>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          className="mt-2"
-                          type="button"
-                        >
+                        <Button variant="outline" size="lg" className="mt-2 bg-transparent" type="button">
                           Select Images
                         </Button>
                       </div>
                     </div>
 
-                    {imagePreviews.length > 0 && (
+                    {(formData.imageUrls?.length || 0) > 0 && (
                       <div className="space-y-3">
-                        <Label>Uploaded Images ({imagePreviews.length})</Label>
+                        <Label>
+                          Uploaded Images ({formData.imageUrls?.length})
+                          {formData.imageUrls?.length > 0 && (
+                            <span className="ml-2 text-xs text-muted-foreground">• First image is main image</span>
+                          )}
+                        </Label>
                         <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
-                          {imagePreviews.map((url, index) => (
-                            <div
-                              key={index}
-                              className="group relative aspect-square overflow-hidden rounded-lg"
-                            >
+                          {formData.imageUrls?.map((url, index) => (
+                            <div key={index} className="group relative aspect-square overflow-hidden rounded-lg">
+                              {index === 0 && (
+                                <div className="absolute left-2 top-2 rounded-full bg-primary px-2 py-1 text-xs text-white z-10">
+                                  Main
+                                </div>
+                              )}
                               <img
                                 src={url || "/placeholder.svg"}
                                 alt={`Preview ${index + 1}`}
@@ -1059,8 +808,8 @@ const removeImage = (index: number) => {
                               />
                               <button
                                 onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeImage(index);
+                                  e.stopPropagation()
+                                  removeImage(index)
                                 }}
                                 className="absolute right-2 top-2 rounded-full bg-destructive p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
                                 type="button"
@@ -1075,58 +824,38 @@ const removeImage = (index: number) => {
                   </div>
                 )}
 
-                {/* Step 5: Review - Enhanced summary cards */}
+                {/* Step 5: Review */}
                 {currentStep === 4 && (
                   <div className="space-y-6">
                     <div className="space-y-3">
-                      <h3 className="text-lg font-medium">
-                        Review Your Product
-                      </h3>
+                      <h3 className="text-lg font-medium">Review Your Product</h3>
                       <p className="text-muted-foreground">
-                        Check all details before submitting. You can go back to
-                        edit any section.
+                        Check all details before submitting. You can go back to edit any section.
                       </p>
                     </div>
 
                     <div className="space-y-4">
                       <div className="rounded-xl border bg-muted/30 p-5">
-                        <h4 className="mb-3 text-sm font-medium">
-                          Basic Information
-                        </h4>
+                        <h4 className="mb-3 text-sm font-medium">Basic Information</h4>
                         <div className="grid gap-4 grid-cols-2">
                           <div>
-                            <p className="text-sm text-muted-foreground">
-                              Name
-                            </p>
-                            <p className="font-medium truncate capitalize">
-                              {truncateText(formData.name) || "-"}
-                            </p>
+                            <p className="text-sm text-muted-foreground">Name</p>
+                            <p className="font-medium truncate capitalize">{truncateText(formData.name) || "-"}</p>
                           </div>
                           <div>
-                            <p className="text-sm text-muted-foreground">
-                              Category
-                            </p>
-                            <p className="font-medium capitalize">
-                              {formData.category || "-"}
-                            </p>
+                            <p className="text-sm text-muted-foreground">Category</p>
+                            <p className="font-medium capitalize">{formData.category || "-"}</p>
                           </div>
                           <div>
-                            <p className="text-sm text-muted-foreground">
-                              Base Price
-                            </p>
-                            <p className="font-medium">
-                              ₦{formData.price || "0.00"}
-                            </p>
+                            <p className="text-sm text-muted-foreground">Base Price</p>
+                            <p className="font-medium">₦{formData.price || "0.00"}</p>
                           </div>
                           <div className="col-span-2 w-full">
                             <div className="rounded-xl border bg-muted/30 w-full p-5">
-                              <h4 className="mb-3 text-sm font-medium">
-                                Description
-                              </h4>
+                              <h4 className="mb-3 text-sm font-medium">Description</h4>
                               <ScrollArea className="max-h-[200px] w-full overflow-y-auto overflow-x-hidden rounded-md border p-2">
                                 <p className="text-muted-foreground leading-relaxed break-all word-wrap overflow-wrap-anywhere hyphens-auto text-sm">
-                                  {formData.description ||
-                                    "No description provided"}
+                                  {formData.description || "No description provided"}
                                 </p>
                               </ScrollArea>
                             </div>
@@ -1136,99 +865,110 @@ const removeImage = (index: number) => {
 
                       {!formData.hasVariations && (
                         <div className="rounded-xl border bg-muted/30 p-5">
-                          <h4 className="mb-3 text-sm font-medium">
-                            Product Specifications
-                          </h4>
+                          <h4 className="mb-3 text-sm font-medium">Product Specifications</h4>
                           <div className="grid gap-4 grid-cols-2">
                             <div>
-                              <p className="text-sm text-muted-foreground">
-                                Stock
-                              </p>
-                              <p className="font-medium">
-                                {formData.stock || "0"}
-                              </p>
+                              <p className="text-sm text-muted-foreground">Stock</p>
+                              <p className="font-medium">{formData.stock || "0"}</p>
                             </div>
                             <div>
-                              <p className="text-sm text-muted-foreground">
-                                Color
-                              </p>
-                              <p className="font-medium capitalize ">
-                                {formData.color || "-"}
-                              </p>
+                              <p className="text-sm text-muted-foreground">Colors</p>
+                              {formData.colors && formData.colors.length > 0 ? (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {formData.colors.map((colorValue) => {
+                                    const color = PREDEFINED_COLORS.find((c) => c.value === colorValue)
+                                    return (
+                                      <Badge
+                                        key={colorValue}
+                                        variant="secondary"
+                                        className="flex items-center gap-1 text-xs"
+                                      >
+                                        <div
+                                          className="h-2 w-2 rounded-full border border-gray-300"
+                                          style={{
+                                            backgroundColor: color?.hex || "#gray",
+                                          }}
+                                        />
+                                        {color?.name || colorValue}
+                                      </Badge>
+                                    )
+                                  })}
+                                </div>
+                              ) : (
+                                <p className="font-medium">-</p>
+                              )}
                             </div>
                             <div>
-                              <p className="text-sm text-muted-foreground">
-                                Size
-                              </p>
-                              <p className="font-medium capitalize ">
-                                {formData.size || "-"}
-                              </p>
+                              <p className="text-sm text-muted-foreground">Size</p>
+                              <p className="font-medium capitalize">{formData.size || "-"}</p>
                             </div>
                           </div>
                         </div>
                       )}
 
-                      {formData.hasVariations &&
-                        (formData.variations?.length || 0) > 0 && (
-                          <div className="rounded-xl border bg-muted/30 p-5">
-                            <h4 className="mb-3 text-sm font-medium">
-                              Variations ({formData.variations?.length})
-                            </h4>
-                            <div className="space-y-3">
-                              {formData.variations?.map(
-                                (variation: Variation, index) => (
-                                  <div
-                                    key={variation.id}
-                                    className="rounded-lg border p-3"
-                                  >
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div>
-                                        <p className="text-sm text-muted-foreground">
-                                          Variation
-                                        </p>
-                                        <p className="font-medium capitalize">
-                                          {variation.size || variation.color
-                                            ? [variation.size, variation.color]
-                                                .filter(Boolean)
-                                                .join(" / ")
-                                            : `Variation ${index + 1}`}
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <p className="text-sm text-muted-foreground">
-                                          Stock
-                                        </p>
-                                        <p className="font-medium capitalize">
-                                          {variation.stock}
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <p className="text-sm text-muted-foreground">
-                                          Size
-                                        </p>
-                                        <p className="font-medium capitalize ">
-                                          {variation.size || "-"}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                      {imagePreviews.length > 0 && (
+                      {formData.hasVariations && (formData.variations?.length || 0) > 0 && (
                         <div className="rounded-xl border bg-muted/30 p-5">
-                          <h4 className="mb-3 text-sm font-medium">
-                            Images ({imagePreviews.length})
-                          </h4>
+                          <h4 className="mb-3 text-sm font-medium">Variations ({formData.variations?.length})</h4>
+                          <div className="space-y-3">
+                            {formData.variations?.map((variation: Variation, index) => (
+                              <div key={variation.id} className="rounded-lg border p-3">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Variation</p>
+                                    <p className="font-medium capitalize">
+                                      {variation.size || variation.color?.length
+                                        ? [variation.size, variation.color?.join(", ")].filter(Boolean).join(" / ")
+                                        : `Variation ${index + 1}`}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Stock</p>
+                                    <p className="font-medium">{variation.stock}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Size</p>
+                                    <p className="font-medium capitalize">{variation.size || "-"}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Colors</p>
+                                    {variation.color && variation.color.length > 0 ? (
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {variation.color.map((colorValue) => {
+                                          const color = PREDEFINED_COLORS.find((c) => c.value === colorValue)
+                                          return (
+                                            <Badge
+                                              key={colorValue}
+                                              variant="secondary"
+                                              className="flex items-center gap-1 text-xs"
+                                            >
+                                              <div
+                                                className="h-2 w-2 rounded-full border border-gray-300"
+                                                style={{
+                                                  backgroundColor: color?.hex || "#gray",
+                                                }}
+                                              />
+                                              {color?.name || colorValue}
+                                            </Badge>
+                                          )
+                                        })}
+                                      </div>
+                                    ) : (
+                                      <p className="font-medium">-</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {(formData.imageUrls?.length || 0) > 0 && (
+                        <div className="rounded-xl border bg-muted/30 p-5">
+                          <h4 className="mb-3 text-sm font-medium">Images ({formData.imageUrls?.length})</h4>
                           <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
-                            {imagePreviews.map((url, index) => (
-                              <div
-                                key={index}
-                                className="aspect-square overflow-hidden rounded-lg"
-                              >
+                            {formData.imageUrls?.map((url, index) => (
+                              <div key={index} className="aspect-square overflow-hidden rounded-lg">
                                 <img
                                   src={url || "/placeholder.svg"}
                                   alt={`Preview ${index + 1}`}
@@ -1261,29 +1001,12 @@ const removeImage = (index: number) => {
             </Button>
             <div className="flex items-center gap-3">
               {currentStep < steps.length - 1 ? (
-                <Button
-                  onClick={goToNextStep}
-                  disabled={!isStepValid()}
-                  className="flex-1 md:flex-none"
-                  type="button"
-                >
+                <Button onClick={goToNextStep} disabled={!isStepValid()} className="flex-1 md:flex-none" type="button">
                   Continue <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               ) : (
-                <Button
-                  onClick={(e) => handleSubmit(e)}
-                  disabled={isSubmitting || !isStepValid()}
-                  className="flex-1 md:flex-none"
-                  type="button"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    "Save Changes"
-                  )}
+                <Button onClick={handleSubmit} disabled={!isStepValid()} className="flex-1 md:flex-none" type="button">
+                  Update Product
                 </Button>
               )}
             </div>
@@ -1291,58 +1014,5 @@ const removeImage = (index: number) => {
         </div>
       </motion.div>
     </div>
-  );
+  )
 }
-
-const categoryRecommendations = {
-  skincare: [
-    "Include skin type compatibility",
-    "List key ingredients",
-    "Specify product volume/weight",
-  ],
-  haircare: [
-    "Include hair type compatibility",
-    "List key ingredients",
-    "Specify product volume",
-  ],
-  bodycare: [
-    "Include product volume/weight",
-    "List key ingredients",
-    "Specify usage instructions",
-  ],
-  makeup: [
-    "Include shades/variants",
-    "List key ingredients",
-    "Specify product weight",
-  ],
-  fragrance: [
-    "Include scent notes",
-    "Specify bottle size",
-    "Indicate concentration",
-  ],
-  accessories: [
-    "Include dimensions",
-    "Specify materials used",
-    "Add color variations",
-  ],
-  electronics: [
-    "Include technical specifications",
-    "List compatible devices",
-    "Specify warranty information",
-  ],
-  fashion: [
-    "Include size guide",
-    "Specify fabric/material",
-    "Add care instructions",
-  ],
-  beauty_skincare: [
-    "Include skin type compatibility",
-    "List key ingredients",
-    "Specify product volume/weight",
-  ],
-  all: [
-    "Include detailed description",
-    "Add high-quality images",
-    "Specify product dimensions",
-  ],
-};

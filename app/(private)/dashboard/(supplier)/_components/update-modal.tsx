@@ -136,7 +136,7 @@ export function StockPriceModal({
   const getVariationName = (variation: Variation) => {
     const parts = [];
     if (variation.size) parts.push(variation.size);
-    if (variation.color) parts.push(variation.color);
+    if (variation.colors) parts.push(variation.colors);
     return parts.length > 0 ? parts.join(" / ") : `Variant`;
   };
 
