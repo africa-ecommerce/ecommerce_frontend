@@ -207,6 +207,7 @@ export default function Inventory() {
   const [selectedProductId, setSelectedProductId] = useState<string>("");
   const [currentItemData, setCurrentItemData] = useState(null);
   const [addProductModalOpen, setAddProductModalOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("all");
 
   const handleEdit = (productId: string, item: any) => {
     setSelectedProductId(productId);
@@ -247,6 +248,13 @@ export default function Inventory() {
     if (selectedCategory !== "all" && item.category !== selectedCategory)
       return false;
 
+    // Status filter (NEW)
+    if (
+      selectedStatus !== "all" &&
+      item.status?.toLowerCase() !== selectedStatus.toLowerCase()
+    )
+      return false;
+
     // Stock-based filters
     if (selectedFilter === "out-of-stock" && hasStock && totalStock > 0)
       return false;
@@ -270,6 +278,61 @@ export default function Inventory() {
 
     return true;
   });
+
+  const getStatusColor = (status: string) => {
+  switch (status?.toUpperCase()) {
+    case "PENDING":
+      return "text-orange-500";
+    case "APPROVED":
+      return "text-green-500";
+    case "QUERIED":
+      return "text-red-500";
+    default:
+      return "text-muted-foreground";
+  }
+};
+
+
+const getStatusBadge = (status: string) => {
+  switch (status?.toUpperCase()) {
+    case "PENDING":
+      return (
+        <Badge
+          variant="outline"
+          className="text-xs py-0 px-2 text-orange-500 border-orange-200 bg-orange-50 whitespace-nowrap"
+        >
+          PENDING
+        </Badge>
+      );
+    case "APPROVED":
+      return (
+        <Badge
+          variant="outline"
+          className="text-xs py-0 px-2 text-green-500 border-green-200 bg-green-50 whitespace-nowrap"
+        >
+          APPROVED
+        </Badge>
+      );
+    case "QUERIED":
+      return (
+        <Badge
+          variant="destructive"
+          className="text-xs py-0 px-2 whitespace-nowrap"
+        >
+          QUERIED
+        </Badge>
+      );
+    default:
+      return (
+        <Badge
+          variant="outline"
+          className="text-xs py-0 px-2 text-muted-foreground border-muted bg-muted/50 whitespace-nowrap"
+        >
+          UNKNOWN
+        </Badge>
+      );
+  }
+};
 
   // Get current items for pagination
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -733,6 +796,42 @@ export default function Inventory() {
                 >
                   In Stock
                 </Button>
+                {/* NEW STATUS FILTERS */}
+                <Button
+                  variant={
+                    selectedStatus === "approved" ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => {
+                    setSelectedStatus("approved");
+                    setCurrentPage(1);
+                  }}
+                  className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
+                >
+                  Approved
+                </Button>
+                <Button
+                  variant={selectedStatus === "pending" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    setSelectedStatus("pending");
+                    setCurrentPage(1);
+                  }}
+                  className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
+                >
+                  Pending
+                </Button>
+                <Button
+                  variant={selectedStatus === "queried" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => {
+                    setSelectedStatus("queried");
+                    setCurrentPage(1);
+                  }}
+                  className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
+                >
+                  Queried
+                </Button>
               </div>
               <div className="">
                 <Select
@@ -775,6 +874,8 @@ export default function Inventory() {
                         <th className="p-2 sm:p-3 w-[70px] text-left">
                           Status
                         </th>
+                        <th className="p-2 sm:p-3 w-[70px] text-left">State</th>{" "}
+                        {/* NEW COLUMN */}
                         <th className="p-2 sm:p-3 text-left">Plugs</th>
                         <th className="p-2 sm:p-3 text-left">Sales</th>
                         <th className="p-2 sm:p-3 w-[70px] text-left">
@@ -785,19 +886,19 @@ export default function Inventory() {
                     <tbody>
                       {isLoading ? (
                         <tr>
-                          <td colSpan={8} className="p-0">
+                          <td colSpan={9} className="p-0">
                             <LoadingSkeleton />
                           </td>
                         </tr>
                       ) : error ? (
                         <tr>
-                          <td colSpan={8} className="p-0">
+                          <td colSpan={9} className="p-0">
                             <ErrorState onRetry={() => mutate()} />
                           </td>
                         </tr>
                       ) : filteredItems?.length === 0 ? (
                         <tr>
-                          <td colSpan={8} className="p-0">
+                          <td colSpan={9} className="p-0">
                             {products.length === 0 ? (
                               <EmptyProductsState
                                 onAddProduct={() =>
@@ -810,6 +911,7 @@ export default function Inventory() {
                                 onResetFilters={() => {
                                   setSelectedCategory("all");
                                   setSelectedFilter("all");
+                                  setSelectedStatus("all"); // NEW
                                   setSearchQuery("");
                                 }}
                               />
@@ -860,6 +962,9 @@ export default function Inventory() {
                               </td>
                               <td className="p-2 sm:p-3">
                                 {getStockStatusBadge(stockStatus)}
+                              </td>
+                              <td className="p-2 sm:p-3">
+                                {getStatusBadge(item.status)}
                               </td>
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
                                 <div className="flex items-center gap-1">
