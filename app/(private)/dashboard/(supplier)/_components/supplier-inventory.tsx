@@ -753,6 +753,7 @@ const getStatusBadge = (status: string) => {
                   size="sm"
                   onClick={() => {
                     setSelectedFilter("all");
+                    setSelectedStatus("all");
                     setCurrentPage(1);
                   }}
                   className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
