@@ -1,38 +1,50 @@
+"use client";
 
+import { useState, useRef, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import {
+  ChevronRight,
+  Upload,
+  Plus,
+  Trash2,
+  ImageIcon,
+  ChevronLeft,
+  X,
+  HelpCircle,
+} from "lucide-react";
+import { ColorPicker } from "./color-picker";
+import { PREDEFINED_COLORS } from "@/lib/colors";
+import type React from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
+import { Check } from "lucide-react";
 
-"use client"
-
-import { useState, useRef, useEffect } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Badge } from "@/components/ui/badge"
-import { ChevronRight, Upload, Plus, Trash2, ImageIcon, ChevronLeft, X, HelpCircle } from "lucide-react"
-import { ColorPicker } from "./color-picker"
-import { PREDEFINED_COLORS } from "@/lib/colors"
-import type React from "react"
-import { motion, AnimatePresence } from "framer-motion"
-
-import { Check } from "lucide-react"
-
-import { errorToast, successToast } from "@/components/ui/use-toast-advanced"
-import { categoryRecommendations, PRODUCT_CATEGORIES } from "@/app/constant"
-import { type UpdateFormData, updateProductFormSchema } from "@/zod/schema"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { cn, truncateText } from "@/lib/utils"
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
+import { categoryRecommendations, PRODUCT_CATEGORIES } from "@/app/constant";
+import { type UpdateFormData, updateProductFormSchema } from "@/zod/schema";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn, truncateText } from "@/lib/utils";
 
 interface Variation {
-  id: string
-  stock?: string | number
-  size?: string
-  color?: string[]
-  [key: string]: any
+  id: string;
+  stock?: string | number;
+  size?: string;
+  color?: string[];
+  [key: string]: any;
 }
 
 export function UpdateProductModal({
@@ -41,15 +53,17 @@ export function UpdateProductModal({
   productId,
   itemData,
 }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  productId: string
-  itemData: any // The existing product data to populate the form
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  productId: string;
+  itemData: any; // The existing product data to populate the form
 }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropAreaRef = useRef<HTMLDivElement>(null);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   console.log("itemData", itemData);
 
@@ -105,15 +119,60 @@ export function UpdateProductModal({
 
   const formData = watch();
 
+  // const updateProduct = async (data: UpdateFormData) => {
+  //   try {
+  //     const formData = new FormData();
+  //     data.images.forEach((file: File) => {
+  //       formData.append("images", file);
+  //     });
+
+  //     const { images, imageUrls, ...jsonData } = data;
+  //     formData.append("productData", JSON.stringify(jsonData));
+
+  //     const response = await fetch(`/api/products/${productId}`, {
+  //       method: "PUT",
+  //       body: formData,
+  //       credentials: "include",
+  //     });
+
+  //     if (!response.ok) {
+  //       const errorResult = await response.json();
+  //       console.error("Server error:", errorResult);
+  //       errorToast(errorResult.error || "Server error");
+  //       return null;
+  //     }
+
+  //     const result = await response.json();
+  //     successToast(result.message);
+  //     return result;
+  //   } catch (error) {
+  //     console.error("Submission error:", error);
+  //     errorToast("Something went wrong");
+  //     return null;
+  //   }
+  // };
+
   const updateProduct = async (data: UpdateFormData) => {
     try {
+      setIsSubmitting(true);
       const formData = new FormData();
-      data.images.forEach((file: File) => {
+
+      // Append new image files
+      data.images?.forEach((file: File) => {
         formData.append("images", file);
       });
 
+      // Include existing images so backend knows which ones to keep
+      const existingImages =
+        data.imageUrls?.filter((url) => !url.startsWith("blob:")) || [];
+
       const { images, imageUrls, ...jsonData } = data;
-      formData.append("productData", JSON.stringify(jsonData));
+      const productData = {
+        ...jsonData,
+        existingImages, // Send existing images to backend
+      };
+
+      formData.append("productData", JSON.stringify(productData));
 
       const response = await fetch(`/api/products/${productId}`, {
         method: "PUT",
@@ -123,19 +182,19 @@ export function UpdateProductModal({
 
       if (!response.ok) {
         const errorResult = await response.json();
-        console.error("Server error:", errorResult);
         errorToast(errorResult.error || "Server error");
         return null;
       }
 
       const result = await response.json();
-      successToast(result.message);
+      successToast(result.message || "Product updated successfully");
       return result;
     } catch (error) {
-      console.error("Submission error:", error);
       errorToast("Something went wrong");
       return null;
-    }
+    } finally {
+    setIsSubmitting(false);
+  }
   };
 
   // Handle drag and drop for images
@@ -177,7 +236,7 @@ export function UpdateProductModal({
   }, [open]);
 
   const handleFiles = (files: FileList) => {
-    const currentImages = formData.images || [];
+    // First check file types and sizes
     const newFiles = Array.from(files).filter(
       (file) =>
         (file.type === "image/jpeg" ||
@@ -192,19 +251,45 @@ export function UpdateProductModal({
       return;
     }
 
-    if (currentImages.length + newFiles.length > 3) {
-      errorToast("Maximum 3 images allowed");
-      newFiles.splice(3 - currentImages.length);
+    // Get current counts
+    const existingImagesCount = formData.imageUrls?.length || 0;
+    const currentNewImagesCount = formData.images?.length || 0;
+    const totalCurrentCount = existingImagesCount + currentNewImagesCount;
+
+    // Check if we're already at the limit
+    if (totalCurrentCount >= 3) {
+      errorToast("Maximum 3 images already reached");
+      return;
     }
 
+    // Calculate how many more images we can add
+    const spaceRemaining = 3 - totalCurrentCount;
+
+    // If we're trying to add more than our limit allows
+    if (newFiles.length > spaceRemaining) {
+      errorToast(
+        `Only ${spaceRemaining} more image${
+          spaceRemaining > 1 ? "s" : ""
+        } can be added (max 3 total)`
+      );
+      // Trim array to only include what we can add
+      newFiles.splice(spaceRemaining);
+    }
+
+    // Add the new files to existing images array
+    const currentImages = formData.images || [];
     const newImages = [...currentImages, ...newFiles];
-    const newImageUrls = [
-      ...(formData.imageUrls || []),
-      ...newFiles.map((file) => URL.createObjectURL(file)),
+    setValue("images", newImages);
+
+    // Update preview state - combine existing URLs with new blob URLs
+    const newBlobUrls = newFiles.map((file) => URL.createObjectURL(file));
+    const allPreviews = [
+      ...(formData.imageUrls || []), // Existing backend images
+      ...currentImages.map((file) => URL.createObjectURL(file)), // Existing new images
+      ...newBlobUrls, // Newly added images
     ];
 
-    setValue("images", newImages);
-    setValue("imageUrls", newImageUrls);
+    setImagePreviews(allPreviews);
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,17 +299,52 @@ export function UpdateProductModal({
   };
 
   const removeImage = (index: number) => {
-    const newImages = [...(formData.images || [])];
-    const newImageUrls = [...(formData.imageUrls || [])];
+    const existingImagesCount = formData.imageUrls?.length || 0;
 
-    if (newImageUrls[index]?.startsWith("blob:")) {
-      URL.revokeObjectURL(newImageUrls[index]);
+    // If removing an existing image from backend
+    if (index < existingImagesCount) {
+      const newImageUrls = [...(formData.imageUrls || [])];
+      newImageUrls.splice(index, 1);
+      setValue("imageUrls", newImageUrls);
+
+      // Update previews - remove the image at this index
+      const newPreviews = [...imagePreviews];
+      newPreviews.splice(index, 1);
+      setImagePreviews(newPreviews);
     }
-    newImages.splice(index, 1);
-    newImageUrls.splice(index, 1);
+    // If removing a newly added image
+    else {
+      const newImageIndex = index - existingImagesCount;
+      const newImages = [...(formData.images || [])];
 
-    setValue("images", newImages);
-    setValue("imageUrls", newImageUrls);
+      // Revoke object URL to prevent memory leaks for the specific image being removed
+      const currentImages = formData.images || [];
+      if (currentImages[newImageIndex]) {
+        // Find the blob URL for this specific image and revoke it
+        const imageToRemove = currentImages[newImageIndex];
+        const blobUrl = imagePreviews.find(
+          (url) =>
+            url.startsWith("blob:") &&
+            url === URL.createObjectURL(imageToRemove)
+        );
+        if (blobUrl) {
+          URL.revokeObjectURL(blobUrl);
+        }
+      }
+
+      // Remove the image from the array
+      newImages.splice(newImageIndex, 1);
+      setValue("images", newImages);
+
+      // Recreate all preview URLs properly
+      const newBlobUrls = newImages.map((file) => URL.createObjectURL(file));
+      const allPreviews = [
+        ...(formData.imageUrls || []), // Keep existing backend images
+        ...newBlobUrls, // New images with fresh blob URLs
+      ];
+
+      setImagePreviews(allPreviews);
+    }
   };
 
   const addVariation = () => {
@@ -364,10 +484,10 @@ export function UpdateProductModal({
       case 2: // Single product details
         return !errors.stock && formData.stock! >= 1;
       case 3: // Media step
-        return (
-          (formData.images?.length > 0 || formData.imageUrls?.length > 0) &&
-          !errors.images
-        );
+  return (
+    (formData.images?.length! > 0 || formData.imageUrls?.length! > 0 || imagePreviews.length > 0) &&
+    !errors.images
+  );
       case 4: // Review step
         const baseValidation =
           !!formData.category &&
@@ -910,18 +1030,18 @@ export function UpdateProductModal({
                       </div>
                     </div>
 
-                    {(formData.imageUrls?.length || 0) > 0 && (
+                    {imagePreviews.length > 0 && (
                       <div className="space-y-3">
                         <Label>
-                          Uploaded Images ({formData.imageUrls?.length})
-                          {formData.imageUrls?.length > 0 && (
+                          Uploaded Images ({imagePreviews.length})
+                          {imagePreviews.length > 0 && (
                             <span className="ml-2 text-xs text-muted-foreground">
                               • First image is main image
                             </span>
                           )}
                         </Label>
                         <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
-                          {formData.imageUrls?.map((url, index) => (
+                          {imagePreviews.map((url, index) => (
                             <div
                               key={index}
                               className="group relative aspect-square overflow-hidden rounded-lg"
@@ -943,6 +1063,7 @@ export function UpdateProductModal({
                                 }}
                                 className="absolute right-2 top-2 rounded-full bg-destructive p-1.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
                                 type="button"
+                                disabled={isSubmitting}
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
@@ -1215,13 +1336,20 @@ export function UpdateProductModal({
                 </Button>
               ) : (
                 <Button
-                  onClick={handleSubmit}
-                  disabled={!isStepValid()}
-                  className="flex-1 md:flex-none"
-                  type="button"
-                >
-                  Update Product
-                </Button>
+  onClick={handleSubmit}
+  disabled={!isStepValid() || isSubmitting}
+  className="flex-1 md:flex-none"
+  type="button"
+>
+  {isSubmitting ? (
+    <>
+      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+      Updating...
+    </>
+  ) : (
+    "Update Product"
+  )}
+</Button>
               )}
             </div>
           </div>

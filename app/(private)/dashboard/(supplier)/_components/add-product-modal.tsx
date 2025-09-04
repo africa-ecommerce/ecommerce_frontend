@@ -56,6 +56,7 @@ export function AddProductModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [direction, setDirection] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropAreaRef = useRef<HTMLDivElement>(null);
@@ -89,6 +90,7 @@ export function AddProductModal({
 
   const addProduct = async (data: ProductFormData) => {
     try {
+      setIsSubmitting(true);
       const formData = new FormData();
       data.images.forEach((file: File) => {
         formData.append("images", file);
@@ -112,11 +114,19 @@ export function AddProductModal({
 
       const result = await response.json();
       successToast(result.message);
+
+      // Close modal and reset form on success
+      onOpenChange(false);
+      reset();
+      setCurrentStep(0);
+
       return result;
     } catch (error) {
       console.error("Submission error:", error);
       errorToast("Something went wrong");
       return null;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -156,6 +166,13 @@ export function AddProductModal({
       dropArea.removeEventListener("dragleave", handleDragLeave);
       dropArea.removeEventListener("drop", handleDrop);
     };
+  }, [open]);
+
+  // Reset step when modal closes
+  useEffect(() => {
+    if (!open) {
+      setCurrentStep(0);
+    }
   }, [open]);
 
   const handleFiles = (files: FileList) => {
@@ -811,7 +828,9 @@ export function AddProductModal({
                         <Label htmlFor="color">Colors</Label>
                         <ColorPicker
                           selectedColors={formData.colors || []}
-                          onColorsChange={(colors) => setValue("colors", colors)}
+                          onColorsChange={(colors) =>
+                            setValue("colors", colors)
+                          }
                           placeholder="Select colors..."
                           className="z-[110]"
                         />
@@ -1194,11 +1213,11 @@ export function AddProductModal({
               ) : (
                 <Button
                   onClick={handleSubmit}
-                  disabled={!isStepValid()}
+                  disabled={!isStepValid() || isSubmitting}
                   className="flex-1 md:flex-none"
                   type="button"
                 >
-                  Add Product
+                  {isSubmitting ? "Adding Product..." : "Add Product"}
                 </Button>
               )}
             </div>
