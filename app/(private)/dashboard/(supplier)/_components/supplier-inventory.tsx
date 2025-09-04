@@ -64,6 +64,7 @@ import { useUser } from "@/app/_components/provider/UserContext";
 import { formatPrice, getTotalStock, truncateText } from "@/lib/utils";
 import { StockPriceModal } from "./update-modal";
 import { AddProductModal } from "./add-product-modal";
+import { UpdateProductModal } from "./update-product-modal";
 
 const LoadingSkeleton = () => (
   <Card>
@@ -953,7 +954,7 @@ export default function Inventory() {
           onOpenChange={setAddProductModalOpen}
         />
 
-        <StockPriceModal
+        <UpdateProductModal
           itemData={currentItemData}
           open={editModalOpen}
           onOpenChange={setEditModalOpen}
