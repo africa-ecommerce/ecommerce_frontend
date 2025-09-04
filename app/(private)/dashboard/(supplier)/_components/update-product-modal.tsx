@@ -51,6 +51,8 @@ export function UpdateProductModal({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropAreaRef = useRef<HTMLDivElement>(null)
 
+  console.log("itemData", itemData)
+
   const {
     register,
     handleSubmit: formSubmit,
