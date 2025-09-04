@@ -39,6 +39,7 @@ import { categoryRecommendations, PRODUCT_CATEGORIES } from "@/app/constant";
 import { ProductFormData, productFormSchema } from "@/zod/schema";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn, truncateText } from "@/lib/utils";
+import { mutate } from "swr";
 
 interface Variation {
   id: string;
@@ -111,6 +112,8 @@ export function AddProductModal({
         errorToast(errorResult.error || "Server error");
         return null;
       }
+
+      mutate("/api/products/supplier/");
 
       const result = await response.json();
       successToast(result.message);
