@@ -73,7 +73,7 @@ export default function ProductStatusInfo({ onBack }: { onBack: () => void }) {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className="grid gap-8 ">
         {/* Queried Products Section */}
         <Card className="h-fit">
           <CardHeader className="text-center pb-6">
