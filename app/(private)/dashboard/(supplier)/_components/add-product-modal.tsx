@@ -179,39 +179,42 @@ export function AddProductModal({
   }, [open]);
 
   const handleFiles = (files: FileList) => {
-    const currentImages = formData.images || [];
-    const newFiles = Array.from(files).filter(
-      (file) =>
-        (file.type === "image/jpeg" ||
-          file.type === "image/png" ||
-          file.type === "image/webp" ||
-          file.type === "image/svg+xml") &&
-        file.size <= 5 * 1024 * 1024
-    );
+  const currentImages = formData.images || [];
+  const validFiles = Array.from(files).filter(
+    (file) =>
+      (file.type === "image/jpeg" ||
+        file.type === "image/png" ||
+        file.type === "image/webp" ||
+        file.type === "image/svg+xml") &&
+      file.size <= 5 * 1024 * 1024
+  );
 
-    if (newFiles.length === 0) {
-      errorToast("Only images under 5MB allowed");
-      return;
-    }
+  if (validFiles.length === 0) {
+    errorToast("Only images under 5MB allowed");
+    return;
+  }
 
-    // Check total count including existing images
-    if (currentImages.length + newFiles.length > 3) {
-      errorToast("Maximum 3 images allowed");
-      // Trim to only what we can add
-      newFiles.splice(3 - currentImages.length);
-    }
+  // Check total limit
+  const totalAfterAdd = currentImages.length + validFiles.length;
+  const filesToAdd = totalAfterAdd > 3 ? validFiles.slice(0, 3 - currentImages.length) : validFiles;
 
-    const newImages = [...currentImages, ...newFiles];
+  if (totalAfterAdd > 3) {
+    errorToast("Maximum 3 images allowed");
+  }
 
-    // Generate unique preview URLs for each new file
-    const newImageUrls = [
-      ...(formData.imageUrls || []),
-      ...newFiles.map((file) => URL.createObjectURL(file)),
-    ];
+  if (filesToAdd.length === 0) {
+    return;
+  }
 
-    setValue("images", newImages);
-    setValue("imageUrls", newImageUrls);
-  };
+  // Add files - each file gets its own entry regardless of name
+  const newImages = [...currentImages, ...filesToAdd];
+  
+  // Generate preview URLs for ALL images (not just new ones)
+  const allPreviewUrls = newImages.map(file => URL.createObjectURL(file));
+
+  setValue("images", newImages);
+  setValue("imageUrls", allPreviewUrls);
+};
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -219,23 +222,26 @@ export function AddProductModal({
     }
   };
 
-  const removeImage = (index: number) => {
-    const newImages = [...(formData.images || [])];
-    const newImageUrls = [...(formData.imageUrls || [])];
+ const removeImage = (index: number) => {
+   const newImages = [...(formData.images || [])];
+   const newImageUrls = [...(formData.imageUrls || [])];
 
-    // Revoke the object URL to prevent memory leaks
-    const urlToRevoke = newImageUrls[index];
-    if (urlToRevoke && urlToRevoke.startsWith("blob:")) {
-      URL.revokeObjectURL(urlToRevoke);
-    }
+   // Revoke the specific URL being removed
+   if (newImageUrls[index] && newImageUrls[index].startsWith("blob:")) {
+     URL.revokeObjectURL(newImageUrls[index]);
+   }
 
-    newImages.splice(index, 1);
-    newImageUrls.splice(index, 1);
+   // Remove from both arrays
+   newImages.splice(index, 1);
 
-    setValue("images", newImages);
-    setValue("imageUrls", newImageUrls);
-  };
+   // Regenerate ALL preview URLs to maintain consistency
+   const regeneratedUrls = newImages.map((file) => URL.createObjectURL(file));
 
+   setValue("images", newImages);
+   setValue("imageUrls", regeneratedUrls);
+ };
+
+ 
   const addVariation = () => {
     const newVariation = {
       id: `var-${Date.now()}`,
