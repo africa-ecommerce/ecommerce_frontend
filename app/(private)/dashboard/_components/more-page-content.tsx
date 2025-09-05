@@ -10,6 +10,7 @@ import {
   ChevronRight,
   ArrowLeft,
   AlertCircle,
+  HelpCircle,
   BookOpen,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,8 +33,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { IssueSection } from "./issue-section";
 import  LearnMoreSection  from "./learn-more-section";
+import ProductStatusInfo from "./notice";
 
-type Section = "profile" | "payment" | "issues" | "learnMore" | "account";
+type Section = "profile" | "payment" | "issues" | "learnMore" | "notice" |"account";
 
 interface MorePageContentProps {
   onBack: () => void; // New prop to handle closing the more page
@@ -103,7 +105,8 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
 
       case "learnMore":
         return <LearnMoreSection onBack={handleBackFromSection} />;
-
+      case "notice":
+        return <ProductStatusInfo onBack={handleBackFromSection} />
       default:
         return (
           <div className="animate-fade-in">
@@ -169,6 +172,25 @@ export function MorePageContent({ onBack, userType }: MorePageContentProps) {
                           <BookOpen className="h-4 w-4 text-primary" />
                         </div>
                         <span>Learn More</span>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  </CardContent>
+                </Card>
+              )}
+
+                {userType === "SUPPLIER" && (
+                <Card className="overflow-hidden">
+                  <CardContent className="p-0">
+                    <button
+                      onClick={() => setActiveSection("notice")}
+                      className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10">
+                          <HelpCircle className="h-4 w-4 text-primary" />
+                        </div>
+                        <span>Notice</span>
                       </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </button>
