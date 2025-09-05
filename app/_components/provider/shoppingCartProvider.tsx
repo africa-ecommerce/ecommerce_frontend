@@ -595,7 +595,7 @@ export function useShoppingCart() {
   return context;
 }
 
-function PriceModal({
+export function PriceModal({
   open,
   onOpenChange,
   onSubmit,
