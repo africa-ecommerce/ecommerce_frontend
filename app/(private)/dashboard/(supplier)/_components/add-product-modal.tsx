@@ -1091,10 +1091,10 @@ export function AddProductModal({
                                         </p>
                                         <p className="font-medium capitalize">
                                           {variation.size ||
-                                          variation.color?.length
+                                          variation.colors?.length
                                             ? [
                                                 variation.size,
-                                                variation.color?.join(", "),
+                                                variation.colors?.join(", "),
                                               ]
                                                 .filter(Boolean)
                                                 .join(" / ")

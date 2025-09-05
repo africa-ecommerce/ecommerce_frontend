@@ -223,7 +223,7 @@ export default function Home() {
                   <span className="text-xl md:text-2xl">Just Sell and Earn</span>
                 </h1>
                 <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                  Africa’s fastest-growing social commerce platform—where anyone can build a business without inventory
+                  Africa’s fastest-growing social commerce platform—where anyone can build a business without inventory upfront
                   or logistics. When purchasing from a Pluggn store, buyers can be totally assured of premium product
                   quality and secure transactions, as all products are carefully curated and verified by our expert
                   team.
