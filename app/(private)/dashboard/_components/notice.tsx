@@ -6,6 +6,7 @@ import {
   FileText,
   Tag,
   ArrowLeft,
+  HelpCircle
 } from "lucide-react";
 import {
   Card,
