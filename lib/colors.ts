@@ -37,3 +37,8 @@ export const PREDEFINED_COLORS: ColorOption[] = [
   { name: "Lavender", value: "lavender", hex: "#e6e6fa" },
   { name: "Mint", value: "mint", hex: "#98fb98" },
 ]
+
+
+
+
+

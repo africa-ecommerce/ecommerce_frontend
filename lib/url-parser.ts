@@ -4,6 +4,8 @@ export interface ParsedUrlItem {
   pid: string;
   qty: number;
   variation?: string;
+  size?: string;
+  color?: string;
 }
 
 export interface ParsedCheckoutUrl {
@@ -22,12 +24,17 @@ export function parseCheckoutUrl(
   const singlePid = searchParams.get("pid");
   if (singlePid) {
     const variation = searchParams.get("variation");
+    const size = searchParams.get("size");
+    const color = searchParams.get("color");
+
     return {
       items: [
         {
           pid: singlePid,
           qty: 1,
           ...(variation && { variation }),
+          ...(size && { size }),
+          ...(color && { color }),
         },
       ],
       ref,
@@ -45,11 +52,15 @@ export function parseCheckoutUrl(
 
     const qty = Number.parseInt(searchParams.get(`item[${index}][qty]`) || "1");
     const variation = searchParams.get(`item[${index}][variation]`);
+    const size = searchParams.get(`item[${index}][size]`);
+    const color = searchParams.get(`item[${index}][color]`);
 
     items.push({
       pid,
       qty,
       ...(variation && { variation }),
+      ...(size && { size }),
+      ...(color && { color }),
     });
 
     index++;
@@ -62,13 +73,13 @@ export function parseCheckoutUrl(
   };
 }
 
- export  const getVariationDisplayName = (variation: any) => {
-   
+export const getVariationDisplayName = (variation: any) => {
+  const parts = [];
+  if (variation.size) parts.push(variation.size.toUpperCase());
+  if (variation.color)
+    parts.push(
+      variation.color.charAt(0).toUpperCase() + variation.color.slice(1)
+    );
 
-    const parts = []
-    if (variation.size) parts.push(variation.size.toUpperCase())
-    if (variation.color) parts.push(variation.color.charAt(0).toUpperCase() + variation.color.slice(1))
-
-    return parts.join(" - ") || "Variation"
-  }
-
+  return parts.join(" - ") || "Variation";
+};

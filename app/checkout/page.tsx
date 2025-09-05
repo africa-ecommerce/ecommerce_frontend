@@ -295,12 +295,12 @@ export default function CheckoutPage() {
       supplierId: summary.item.supplierId,
       ...(summary.item.variationId && {
         variantId: summary.item.variationId,
-        variantColor: summary.item.color,
+        variantColor: summary.item.selectedColor,
         variantSize: summary.item.size,
       }),
       // For non-variation items, use product-level color and size
       ...(!summary.item.variationId && {
-        productColor: summary.item.color,
+        productColor: summary.item.selectedColor,
         productSize: summary.item.size,
       }),
     }));
@@ -405,10 +405,11 @@ export default function CheckoutPage() {
             productId: product.originalId,
             quantity: item.qty,
             image: product.image || product.images?.[0] || "/placeholder.svg",
-            color: item.variation
-              ? product.variations?.find((v: any) => v.id === item.variation)
-                  ?.color
-              : undefined,
+            // selectedColor: item.variation
+            //   ? product.variations?.find((v: any) => v.id === item.variation)
+            //       ?.color
+            //   : undefined,
+            selectedColor: item.color,
             size: item.variation
               ? product.variations?.find((v: any) => v.id === item.variation)
                   ?.size
