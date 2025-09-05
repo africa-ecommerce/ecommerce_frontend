@@ -110,6 +110,58 @@ const EmptyState = ({
 );
 
 
+const DelayOrderModal = ({
+  open,
+  onOpenChange,
+  onDelaySelect,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onDelaySelect: (minutes: number) => void;
+}) => {
+  const delayOptions = [5, 10, 15, 30, 60, 120]; // minutes
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-[90vw] max-w-[400px] rounded-lg">
+        <DialogHeader>
+          <DialogTitle className="text-center text-base">
+            Delay Order
+          </DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-2 gap-2 py-3">
+          {delayOptions.map((time) => (
+            <Button
+              key={time}
+              variant="outline"
+              className="flex flex-col h-12 p-2"
+              onClick={() => {
+                onDelaySelect(time);
+                onOpenChange(false);
+              }}
+            >
+              <span className="font-medium text-sm">
+                {time >= 60 ? `${time / 60} hr` : `${time} min`}
+              </span>
+            </Button>
+          ))}
+        </div>
+        <div className="flex justify-center mt-1">
+          <Button
+            variant="ghost"
+            onClick={() => onOpenChange(false)}
+            className="text-destructive text-sm"
+          >
+            Cancel
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+
+
 const TipSkeleton = () => (
   <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
     <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
@@ -127,8 +179,22 @@ const TipSkeleton = () => (
 
 // Updated Supplier Order Card Component
 const OrderCard = ({ order }: { order: any }) => {
-  
+  const [delayModalOpen, setDelayModalOpen] = useState(false);
 
+   const handleDelaySelect = (minutes: number) => {
+     console.log(`Delaying order ${order.id} by ${minutes} minutes`);
+     // Add your delay logic here
+   };
+
+   const handleAccept = () => {
+     console.log(`Accepting order ${order.id}`);
+     // Add your accept logic here
+   };
+
+   const handleDecline = () => {
+     console.log(`Declining order ${order.id}`);
+     // Add your decline logic here
+   };
   
  
 
@@ -242,10 +308,44 @@ const OrderCard = ({ order }: { order: any }) => {
         </div>
       </CardContent>
 
-      {/* Action Buttons - Only show if user is verified */}
-      {/* {user?.supplier?.verified && ( */}
-      
-      {/* )} */}
+      <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
+          <Dialog open={delayModalOpen} onOpenChange={setDelayModalOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 h-8 text-xs"
+              >
+                <Clock className="h-3 w-3 mr-1" />
+                Delay
+              </Button>
+            </DialogTrigger>
+            <DelayOrderModal
+              open={delayModalOpen}
+              onOpenChange={setDelayModalOpen}
+              onDelaySelect={handleDelaySelect}
+            />
+          </Dialog>
+
+          <Button
+            variant="destructive"
+            size="sm"
+            className="flex-1 h-8 text-xs"
+            onClick={handleDecline}
+          >
+            <X className="h-3 w-3 mr-1" />
+            Decline
+          </Button>
+
+          <Button
+            size="sm"
+            className="flex-1 h-8 text-xs"
+            onClick={handleAccept}
+          >
+            <PackageCheck className="h-3 w-3 mr-1" />
+            Accept
+          </Button>
+        </CardFooter>
     </Card>
   );
 };
