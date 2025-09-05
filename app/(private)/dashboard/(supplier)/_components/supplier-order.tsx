@@ -280,64 +280,7 @@ const SupplierOrder = () => {
         ordersLoading={ordersLoading}
         ordersError={ordersError}
       />
-      {/* {!user?.supplier?.verified ? (
-        <>
-          {ordersLoading ? (
-            <TipSkeleton />
-          ) : (
-            <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
-              <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
-                <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
-                  <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-xs sm:text-sm">
-                    Action Required
-                  </h3>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">
-                    Please verify your account to start accepting payments and
-                    processing orders. Verified accounts are more likely to
-                    receive orders.
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="ml-auto text-xs h-7 sm:h-8"
-                >
-                  <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Verify
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          <section className="space-y-3 sm:space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-              <h2 className="text-sm sm:text-base font-semibold">
-                Order Fulfillment
-              </h2>
-            </div>
-
-            {ordersError ? (
-              <ErrorState onRetry={() => ordersMutate()} />
-            ) : ordersLoading ? (
-              <LoadingSkeleton />
-            ) : (
-              <>
-                {orders.length === 0 ? (
-                  <EmptyState message="No orders found" icon={PackageCheck} />
-                ) : (
-                  <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
-                    {orders.map((order: any) => (
-                      <OrderCard key={order.id} order={order} />
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-          </section>
-        </>
-      ) : ( */}
+    
         <section className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
             <h2 className="text-sm sm:text-base font-semibold">
