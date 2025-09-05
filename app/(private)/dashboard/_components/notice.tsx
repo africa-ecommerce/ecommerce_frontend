@@ -6,7 +6,7 @@ import {
   FileText,
   Tag,
   ArrowLeft,
-  HelpCircle
+  HelpCircle,
 } from "lucide-react";
 import {
   Card,
@@ -78,7 +78,7 @@ export default function ProductStatusInfo({ onBack }: { onBack: () => void }) {
         <Card className="h-fit">
           <CardHeader className="text-center pb-6">
             <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
-              <AlertCircle className="w-4 h-4 text-destructive" />
+              <AlertCircle className="w-8 h-8 text-destructive" />
             </div>
             <CardTitle className="text-sm md:text-base">
               Queried Products
@@ -120,7 +120,7 @@ export default function ProductStatusInfo({ onBack }: { onBack: () => void }) {
         <Card className="h-fit">
           <CardHeader className="text-center pb-6">
             <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-950/30 rounded-full flex items-center justify-center mb-4">
-              <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <Clock className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             </div>
             <CardTitle className="text-sm md:text-base">
               Pending Products
@@ -191,19 +191,16 @@ export default function ProductStatusInfo({ onBack }: { onBack: () => void }) {
       {/* Bottom CTA Section */}
       <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
         <CardContent className="text-center py-8 px-6">
-          <h3 className="text-sm md:text-base font-semibold mb-2">Need Help?</h3>
+          <h3 className="text-sm md:text-base font-semibold mb-2">
+            Need Help?
+          </h3>
           <p className="text-muted-foreground mb-4 text-pretty">
             If you have questions about your product status or need assistance
             with updates, our support team is here to help.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <Badge variant="outline" className="text-sm px-3 py-1">
-              {" "}
-              <a href="/help">
-                <HelpCircle className="h-4 w-4" />
-                Contact Support
-              </a>
-            </Badge>
+            {" "}
+            <a href="/help">Contact Support</a>
           </div>
         </CardContent>
       </Card>
