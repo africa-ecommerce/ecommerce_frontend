@@ -209,8 +209,9 @@ export function UpdateProductModal({
     setCurrentStep(0);
   };
 
- const handleFiles = (files: FileList) => {
-  const validFiles = Array.from(files).filter(
+  const handleFiles = (files: FileList) => {
+  // First check file types and sizes
+  const newFiles = Array.from(files).filter(
     (file) =>
       (file.type === "image/jpeg" ||
         file.type === "image/png" ||
@@ -219,7 +220,7 @@ export function UpdateProductModal({
       file.size <= 5 * 1024 * 1024
   );
 
-  if (validFiles.length === 0) {
+  if (newFiles.length === 0) {
     errorToast("Only images under 5MB allowed");
     return;
   }
@@ -228,55 +229,44 @@ export function UpdateProductModal({
   const existingImagesCount = formData.imageUrls?.length || 0;
   const currentNewImagesCount = formData.images?.length || 0;
   const totalCurrentCount = existingImagesCount + currentNewImagesCount;
-
+  
   // Check if we're already at the limit
   if (totalCurrentCount >= 3) {
     errorToast("Maximum 3 images already reached");
     return;
   }
-
+  
   // Calculate how many more images we can add
   const spaceRemaining = 3 - totalCurrentCount;
-  const filesToAdd = validFiles.slice(0, spaceRemaining);
-
-  if (validFiles.length > spaceRemaining) {
-    errorToast(
-      `Only ${spaceRemaining} more image${
-        spaceRemaining > 1 ? "s" : ""
-      } can be added (max 3 total)`
-    );
+  
+  // If we're trying to add more than our limit allows
+  if (newFiles.length > spaceRemaining) {
+    errorToast(`Only ${spaceRemaining} more image${spaceRemaining > 1 ? 's' : ''} can be added (max 3 total)`);
+    // Trim array to only include what we can add
+    newFiles.splice(spaceRemaining);
   }
 
-  // Add the new files
+  // Now add the files (which may have been trimmed)
   const currentImages = formData.images || [];
-  const newImages = [...currentImages, ...filesToAdd];
-  setValue("images", newImages);
-
-  // Generate new preview URLs and update imagePreviews state
-  const newPreviewUrls = filesToAdd.map(file => URL.createObjectURL(file));
-  const updatedPreviews = [
-    ...(formData.imageUrls || []), // Existing backend images
-    ...currentImages.map(file => URL.createObjectURL(file)), // Previous new images
-    ...newPreviewUrls // Latest new images
-  ];
+  const updatedImages = [...currentImages, ...newFiles];
+  setValue("images", updatedImages);
   
-  setImagePreviews(updatedPreviews);
+  // Generate and update preview URLs for all images
+  updateImagePreviews(updatedImages);
 };
 
-// const updateImagePreviews = (imageFiles: File[]) => {
-//   // Generate preview URLs for all new image files
-//   const newImagePreviews = imageFiles.map((file) => URL.createObjectURL(file));
+  const updateImagePreviews = (imageFiles: File[]) => {
+  // Create preview URLs for each new file (no deduplication by name)
+  const newPreviews = imageFiles.map(file => URL.createObjectURL(file));
 
-//   // Create merged array of all image URLs for display
-//   const allPreviews = [
-//     ...(formData.imageUrls || []), // Existing images from backend
-//     ...newImagePreviews, // New images with preview URLs
-//   ];
+  // Create merged array of all image URLs for display
+  const allPreviews = [
+    ...(formData.imageUrls || []), // Existing images from backend
+    ...newPreviews, // New images with preview URLs
+  ];
 
-//   // Update the preview state
-//   setImagePreviews(allPreviews);
-// };
-
+  setImagePreviews(allPreviews);
+};
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -284,35 +274,44 @@ export function UpdateProductModal({
     }
   };
 
-const removeImage = (index: number) => {
-  const existingImagesCount = formData.imageUrls?.length || 0;
+  const removeImage = (index: number) => {
+    const existingImagesCount = formData.imageUrls?.length || 0;
 
-  // If removing an existing backend image
-  if (index < existingImagesCount) {
-    const newImageUrls = [...(formData.imageUrls || [])];
-    newImageUrls.splice(index, 1);
-    setValue("imageUrls", newImageUrls);
-  }
-  // If removing a newly added image
-  else {
-    const newFileIndex = index - existingImagesCount;
-    const newImages = [...(formData.images || [])];
-    newImages.splice(newFileIndex, 1);
-    setValue("images", newImages);
-  }
+    // If removing an existing image from backend
+    if (index < existingImagesCount) {
+      const newImageUrls = [...(formData.imageUrls || [])];
+      newImageUrls.splice(index, 1);
+      setValue("imageUrls", newImageUrls);
 
-  // Always regenerate all previews after removal
-  const updatedPreviews = [
-    ...(index < existingImagesCount ? 
-        formData.imageUrls?.filter((_, i) => i !== index) || [] : 
-        formData.imageUrls || []),
-    ...(index >= existingImagesCount ? 
-        (formData.images || []).filter((_, i) => i !== (index - existingImagesCount)).map(file => URL.createObjectURL(file)) :
-        (formData.images || []).map(file => URL.createObjectURL(file)))
-  ];
+      // Update previews
+      const newPreviews = [...imagePreviews];
+      newPreviews.splice(index, 1);
+      setImagePreviews(newPreviews);
+    }
+    // If removing a newly added image
+    else {
+      const newIndex = index - existingImagesCount;
+      const newImages = [...(formData.images || [])];
 
-  setImagePreviews(updatedPreviews);
-};
+      // Revoke object URL to prevent memory leaks
+      if (imagePreviews[index]) {
+        URL.revokeObjectURL(imagePreviews[index]);
+      }
+
+      newImages.splice(newIndex, 1);
+      setValue("images", newImages);
+
+      // Update previews
+      const newPreviews = [...imagePreviews];
+      newPreviews.splice(index, 1);
+      setImagePreviews(newPreviews);
+
+      // If we have more new images, update their previews
+      if (newImages.length > 0) {
+        updateImagePreviews(newImages);
+      }
+    }
+  };
 
   const addVariation = () => {
     const newVariation = {
