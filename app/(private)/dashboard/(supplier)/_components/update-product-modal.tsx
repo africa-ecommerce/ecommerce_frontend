@@ -1584,26 +1584,66 @@ export function UpdateProductModal({ open, onOpenChange, productId, itemData }: 
     updateImagePreviews(newImages)
   }
 
-  const updateImagePreviews = (imageFiles: File[]) => {
-    // Create a map of existing previews
-    const currentPreviews = new Map()
-    imageFiles.forEach((file, index) => {
-      // Generate preview URL for the file if it doesn't have one
-      if (!currentPreviews.has(file.name)) {
-        currentPreviews.set(file.name, URL.createObjectURL(file))
-      }
-    })
+  // const updateImagePreviews = (imageFiles: File[]) => {
+  //   // Create a map of existing previews
+  //   const currentPreviews = new Map()
+  //   imageFiles.forEach((file, index) => {
+  //     // Generate preview URL for the file if it doesn't have one
+  //     if (!currentPreviews.has(file.name)) {
+  //       currentPreviews.set(file.name, URL.createObjectURL(file))
+  //     }
+  //   })
 
-    // Create merged array of all image URLs for display
+  //   // Create merged array of all image URLs for display
+  //   const allPreviews = [
+  //     ...(formData.imageUrls || []), // Existing images from backend
+  //     ...Array.from(currentPreviews.values()), // New images with preview URLs
+  //   ]
+
+  //   // We don't update formData.imageUrls as that's reserved for backend images
+  //   // Instead, we'll use a separate state for previews
+  //   setImagePreviews(allPreviews)
+  // }
+
+
+  const updateImagePreviews = (imageFiles: File[]) => {
+    // Create preview URLs for new files
+    const newFilePreviews = imageFiles.map((file) => URL.createObjectURL(file));
+
+    // Combine existing backend images with new file previews
     const allPreviews = [
       ...(formData.imageUrls || []), // Existing images from backend
-      ...Array.from(currentPreviews.values()), // New images with preview URLs
-    ]
+      ...newFilePreviews, // New images with preview URLs
+    ];
 
-    // We don't update formData.imageUrls as that's reserved for backend images
-    // Instead, we'll use a separate state for previews
-    setImagePreviews(allPreviews)
-  }
+    setImagePreviews(allPreviews);
+  };
+
+
+
+  useEffect(() => {
+    // Sync imagePreviews whenever imageUrls or images change
+    const existingImages = formData.imageUrls || [];
+    const newImages = formData.images || [];
+
+    // Create preview URLs for new images
+    const newImagePreviews = newImages.map((file) => URL.createObjectURL(file));
+
+    // Combine all images
+    const allPreviews = [...existingImages, ...newImagePreviews];
+
+    setImagePreviews(allPreviews);
+
+    // Cleanup function to revoke URLs when component unmounts or images change
+    return () => {
+      newImagePreviews.forEach((url) => {
+        if (url.startsWith("blob:")) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, [formData.imageUrls, formData.images]);
+
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -1611,44 +1651,71 @@ export function UpdateProductModal({ open, onOpenChange, productId, itemData }: 
     }
   }
 
+  // const removeImage = (index: number) => {
+  //   const existingImagesCount = formData.imageUrls?.length || 0
+
+  //   // If removing an existing image from backend
+  //   if (index < existingImagesCount) {
+  //     const newImageUrls = [...(formData.imageUrls || [])]
+  //     newImageUrls.splice(index, 1)
+  //     setValue("imageUrls", newImageUrls)
+
+  //     // Update previews
+  //     const newPreviews = [...imagePreviews]
+  //     newPreviews.splice(index, 1)
+  //     setImagePreviews(newPreviews)
+  //   }
+  //   // If removing a newly added image
+  //   else {
+  //     const newIndex = index - existingImagesCount
+  //     const newImages = [...(formData.images || [])]
+
+  //     // Revoke object URL to prevent memory leaks
+  //     if (imagePreviews[index]) {
+  //       URL.revokeObjectURL(imagePreviews[index])
+  //     }
+
+  //     newImages.splice(newIndex, 1)
+  //     setValue("images", newImages)
+
+  //     // Update previews
+  //     const newPreviews = [...imagePreviews]
+  //     newPreviews.splice(index, 1)
+  //     setImagePreviews(newPreviews)
+
+  //     // If we have more new images, update their previews
+  //     if (newImages.length > 0) {
+  //       updateImagePreviews(newImages)
+  //     }
+  //   }
+  // }
+
+
   const removeImage = (index: number) => {
-    const existingImagesCount = formData.imageUrls?.length || 0
+  const existingImagesCount = formData.imageUrls?.length || 0
 
-    // If removing an existing image from backend
-    if (index < existingImagesCount) {
-      const newImageUrls = [...(formData.imageUrls || [])]
-      newImageUrls.splice(index, 1)
-      setValue("imageUrls", newImageUrls)
-
-      // Update previews
-      const newPreviews = [...imagePreviews]
-      newPreviews.splice(index, 1)
-      setImagePreviews(newPreviews)
-    }
-    // If removing a newly added image
-    else {
-      const newIndex = index - existingImagesCount
-      const newImages = [...(formData.images || [])]
-
-      // Revoke object URL to prevent memory leaks
-      if (imagePreviews[index]) {
-        URL.revokeObjectURL(imagePreviews[index])
-      }
-
-      newImages.splice(newIndex, 1)
-      setValue("images", newImages)
-
-      // Update previews
-      const newPreviews = [...imagePreviews]
-      newPreviews.splice(index, 1)
-      setImagePreviews(newPreviews)
-
-      // If we have more new images, update their previews
-      if (newImages.length > 0) {
-        updateImagePreviews(newImages)
-      }
-    }
+  // If removing an existing image from backend
+  if (index < existingImagesCount) {
+    const newImageUrls = [...(formData.imageUrls || [])]
+    newImageUrls.splice(index, 1)
+    setValue("imageUrls", newImageUrls)
   }
+  // If removing a newly added image
+  else {
+    const newIndex = index - existingImagesCount
+    const newImages = [...(formData.images || [])]
+
+    // Revoke object URL to prevent memory leaks
+    const currentPreviews = [...imagePreviews]
+    if (currentPreviews[index] && currentPreviews[index].startsWith('blob:')) {
+      URL.revokeObjectURL(currentPreviews[index])
+    }
+
+    newImages.splice(newIndex, 1)
+    setValue("images", newImages)
+  }
+  // The useEffect will handle updating imagePreviews automatically
+}
 
   const addVariation = () => {
     const newVariation = {
@@ -1795,62 +1862,51 @@ export function UpdateProductModal({ open, onOpenChange, productId, itemData }: 
   //   }
   // }
 
-  const isStepValid = () => {
-    switch (currentStep) {
-      case 0: // Category step
+const isStepValid = () => {
+  switch (currentStep) {
+    case 0: // Category step
+      return (
+        !!formData.category &&
+        !errors.category &&
+        !!formData.name &&
+        !errors.name &&
+        !!formData.price &&
+        !errors.price
+      )
+    case 1: // Variations step
+      if (formData.hasVariations) {
         return (
-          !!formData.category &&
-          !errors.category &&
-          !!formData.name &&
-          !errors.name &&
-          !!formData.price && // Added price validation to first step
-          !errors.price
-        );
-      case 1: // Variations step
-        if (formData.hasVariations) {
-          // Check if at least one variation exists and has required fields
-          return (
-            formData.variations &&
-            formData.variations.length > 0 &&
-            formData.variations.every(
-              (v: Variation) =>
-                v.stock !== undefined && v.stock !== "" && Number(v.stock) >= 1
-            )
-          );
-        }
-        return true; // If no variations, this step is valid
-      case 2: // Single product details
-        return !errors.stock && formData.stock! >= 1;
-      case 3: // Media step - FIXED
-        // Check if we have at least one image from either source
-        const hasExistingImages =
-          formData.imageUrls && formData.imageUrls.length > 0;
-        const hasNewImages = formData.images && formData.images.length > 0;
-        const totalImages =
-          (formData.imageUrls?.length || 0) + (formData.images?.length || 0);
+          formData.variations &&
+          formData.variations.length > 0 &&
+          formData.variations.every((v: Variation) => v.stock !== undefined && v.stock !== "" && Number(v.stock) >= 1)
+        )
+      }
+      return true
+    case 2: // Single product details
+      return !errors.stock && Number(formData.stock) >= 1
+    case 3: // Media step - FIXED
+      const existingImagesCount = formData.imageUrls?.length || 0
+      const newImagesCount = formData.images?.length || 0
+      const totalImages = existingImagesCount + newImagesCount
+      
+      return totalImages > 0 && !errors.images
+    case 4: // Review step
+      const baseValidation =
+        !!formData.category &&
+        !!formData.name &&
+        !!formData.price &&
+        !errors.price
+      
+      const existingImages = formData.imageUrls?.length || 0
+      const newImages = formData.images?.length || 0
+      const hasImages = (existingImages + newImages) > 0
+      
+      return baseValidation && hasImages
+    default:
+      return false
+  }
+}
 
-        return (
-          (hasExistingImages || hasNewImages) &&
-          totalImages > 0 &&
-          !errors.images
-        );
-      case 4: // Review step
-        const baseValidation =
-          !!formData.category &&
-          !!formData.name &&
-          !!formData.price &&
-          !errors.price;
-
-        // Check for images - same logic as step 3
-        const hasImages =
-          (formData.imageUrls && formData.imageUrls.length > 0) ||
-          (formData.images && formData.images.length > 0);
-
-        return baseValidation && hasImages;
-      default:
-        return false;
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
