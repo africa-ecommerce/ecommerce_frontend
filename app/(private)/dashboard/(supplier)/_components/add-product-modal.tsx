@@ -194,12 +194,16 @@ export function AddProductModal({
       return;
     }
 
+    // Check total count including existing images
     if (currentImages.length + newFiles.length > 3) {
       errorToast("Maximum 3 images allowed");
+      // Trim to only what we can add
       newFiles.splice(3 - currentImages.length);
     }
 
     const newImages = [...currentImages, ...newFiles];
+
+    // Generate unique preview URLs for each new file
     const newImageUrls = [
       ...(formData.imageUrls || []),
       ...newFiles.map((file) => URL.createObjectURL(file)),
@@ -219,7 +223,12 @@ export function AddProductModal({
     const newImages = [...(formData.images || [])];
     const newImageUrls = [...(formData.imageUrls || [])];
 
-    URL.revokeObjectURL(newImageUrls[index]);
+    // Revoke the object URL to prevent memory leaks
+    const urlToRevoke = newImageUrls[index];
+    if (urlToRevoke && urlToRevoke.startsWith("blob:")) {
+      URL.revokeObjectURL(urlToRevoke);
+    }
+
     newImages.splice(index, 1);
     newImageUrls.splice(index, 1);
 
