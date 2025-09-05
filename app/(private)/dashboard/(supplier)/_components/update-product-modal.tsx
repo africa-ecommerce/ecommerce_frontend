@@ -1757,6 +1757,44 @@ export function UpdateProductModal({ open, onOpenChange, productId, itemData }: 
   ]
 
   // Improved step validation
+  // const isStepValid = () => {
+  //   switch (currentStep) {
+  //     case 0: // Category step
+  //       return (
+  //         !!formData.category &&
+  //         !errors.category &&
+  //         !!formData.name &&
+  //         !errors.name &&
+  //         !!formData.price && // Added price validation to first step
+  //         !errors.price
+  //       )
+  //     case 1: // Variations step
+  //       if (formData.hasVariations) {
+  //         // Check if at least one variation exists and has required fields
+  //         return (
+  //           formData.variations &&
+  //           formData.variations.length > 0 &&
+  //           formData.variations.every((v: Variation) => v.stock !== undefined && v.stock !== "" && Number(v.stock) >= 1)
+  //         )
+  //       }
+  //       return true // If no variations, this step is valid
+  //     case 2: // Single product details
+  //       return !errors.stock && formData.stock! >= 1
+  //     case 3: // Media step
+  //       return (formData.images?.length! > 0 || formData.imageUrls?.length! > 0) && !errors.images
+  //     case 4: // Review step
+  //       const baseValidation =
+  //         !!formData.category &&
+  //         !!formData.name &&
+  //         !!formData.price &&
+  //         !errors.price &&
+  //         ((formData.images && formData.images.length > 0) || (formData.imageUrls && formData.imageUrls.length > 0))
+  //       return baseValidation
+  //     default:
+  //       return false
+  //   }
+  // }
+
   const isStepValid = () => {
     switch (currentStep) {
       case 0: // Category step
@@ -1767,33 +1805,52 @@ export function UpdateProductModal({ open, onOpenChange, productId, itemData }: 
           !errors.name &&
           !!formData.price && // Added price validation to first step
           !errors.price
-        )
+        );
       case 1: // Variations step
         if (formData.hasVariations) {
           // Check if at least one variation exists and has required fields
           return (
             formData.variations &&
             formData.variations.length > 0 &&
-            formData.variations.every((v: Variation) => v.stock !== undefined && v.stock !== "" && Number(v.stock) >= 1)
-          )
+            formData.variations.every(
+              (v: Variation) =>
+                v.stock !== undefined && v.stock !== "" && Number(v.stock) >= 1
+            )
+          );
         }
-        return true // If no variations, this step is valid
+        return true; // If no variations, this step is valid
       case 2: // Single product details
-        return !errors.stock && formData.stock! >= 1
-      case 3: // Media step
-        return (formData.images?.length! > 0 || formData.imageUrls?.length! > 0) && !errors.images
+        return !errors.stock && formData.stock! >= 1;
+      case 3: // Media step - FIXED
+        // Check if we have at least one image from either source
+        const hasExistingImages =
+          formData.imageUrls && formData.imageUrls.length > 0;
+        const hasNewImages = formData.images && formData.images.length > 0;
+        const totalImages =
+          (formData.imageUrls?.length || 0) + (formData.images?.length || 0);
+
+        return (
+          (hasExistingImages || hasNewImages) &&
+          totalImages > 0 &&
+          !errors.images
+        );
       case 4: // Review step
         const baseValidation =
           !!formData.category &&
           !!formData.name &&
           !!formData.price &&
-          !errors.price &&
-          ((formData.images && formData.images.length > 0) || (formData.imageUrls && formData.imageUrls.length > 0))
-        return baseValidation
+          !errors.price;
+
+        // Check for images - same logic as step 3
+        const hasImages =
+          (formData.imageUrls && formData.imageUrls.length > 0) ||
+          (formData.images && formData.images.length > 0);
+
+        return baseValidation && hasImages;
       default:
-        return false
+        return false;
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
