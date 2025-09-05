@@ -45,7 +45,7 @@ interface Variation {
   id: string;
   stock?: string | number;
   size?: string;
-  color?: string[];
+  colors?: string[];
   [key: string]: any;
 }
 
@@ -1121,10 +1121,10 @@ export function AddProductModal({
                                         <p className="text-sm text-muted-foreground">
                                           Colors
                                         </p>
-                                        {variation.color &&
-                                        variation.color.length > 0 ? (
+                                        {variation.colors &&
+                                        variation.colors.length > 0 ? (
                                           <div className="flex flex-wrap gap-1 mt-1">
-                                            {variation.color.map(
+                                            {variation.colors.map(
                                               (colorValue) => {
                                                 const color =
                                                   PREDEFINED_COLORS.find(
