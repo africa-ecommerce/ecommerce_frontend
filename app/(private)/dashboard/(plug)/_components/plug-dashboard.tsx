@@ -2007,7 +2007,7 @@ export default function PlugDashboard() {
             <CardHeader className="p-3 sm:p-4 pb-1">
               <CardTitle className="text-xs sm:text-sm font-medium">Price Alerts</CardTitle>
               <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                Some products have supplier price changes and are currently unavailable. Please update your prices to restore availability.
+                Some products have supplier price changes and are currently unavailable to your customer. Please update your prices to restore availability.
               </p>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 pt-0">
