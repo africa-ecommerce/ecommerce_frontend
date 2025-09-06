@@ -342,6 +342,7 @@ export default function CheckoutPage() {
     try {
       setIsLoading(true);
       const orderData = prepareOrderData(paymentReference);
+      console.log("orderData", orderData.orderItems)
       const response = await fetch("/api/orders/place-order", {
         method: "POST",
         headers: {
