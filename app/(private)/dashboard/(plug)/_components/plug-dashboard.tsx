@@ -1211,7 +1211,7 @@ import {
   Users,
   Wallet,
   Phone,
-  DollarSign,
+  TriangleAlert,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -1765,34 +1765,30 @@ export default function PlugDashboard() {
       {
         id: "1",
         product: "Samsung Galaxy S24 Ultra 256GB Smartphone with Advanced Camera",
-        oldSupplierPrice: 850000,
+       
         newSupplierPrice: 920000,
-        currentSellingPrice: 1100000,
-        status: "Price Increased",
+        
       },
       {
         id: "2",
         product: "Apple MacBook Pro 14-inch M3 Chip with 16GB RAM",
-        oldSupplierPrice: 1200000,
+       
         newSupplierPrice: 1050000,
-        currentSellingPrice: 1450000,
-        status: "Price Decreased",
+       
       },
       {
         id: "3",
         product: "Sony WH-1000XM5 Wireless Noise Canceling Headphones",
-        oldSupplierPrice: 180000,
+        
         newSupplierPrice: 210000,
-        currentSellingPrice: 250000,
-        status: "Price Increased",
+       
       },
       {
         id: "4",
         product: "Dell XPS 13 Laptop Intel Core i7 with 32GB RAM and 1TB SSD",
-        oldSupplierPrice: 950000,
+       
         newSupplierPrice: 890000,
-        currentSellingPrice: 1200000,
-        status: "Price Decreased",
+        
       },
     ]
   }, [])
@@ -2011,8 +2007,7 @@ export default function PlugDashboard() {
             <CardHeader className="p-3 sm:p-4 pb-1">
               <CardTitle className="text-xs sm:text-sm font-medium">Price Alerts</CardTitle>
               <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                If you are seeing this, it means some of the products you are plugged into have price changes from the
-                supplier and are not available to your buyers to buy. You have to include your new price.
+                Some products have supplier price changes and are currently unavailable. Please update your prices to restore availability.
               </p>
             </CardHeader>
             <CardContent className="p-3 sm:p-4 pt-0">
@@ -2020,14 +2015,10 @@ export default function PlugDashboard() {
                 {priceAlerts.map((alert) => (
                   <div key={alert.id} className="flex items-center gap-2 sm:gap-3">
                     <div
-                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        alert.status === "Price Increased" ? "bg-red-100" : "bg-green-100"
-                      }`}
+                      className={"w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-red-100" }
                     >
-                      <DollarSign
-                        className={`h-4 w-4 sm:h-5 sm:w-5 ${
-                          alert.status === "Price Increased" ? "text-red-600" : "text-green-600"
-                        }`}
+                      <TriangleAlert 
+                        className={"h-4 w-4 sm:h-5 sm:w-5 text-red-600"}
                       />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -2046,17 +2037,8 @@ export default function PlugDashboard() {
                       </div>
                       <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
                         <p>
-                          Supplier Price: {formatPrice(alert.newSupplierPrice)}
-                          {alert.status === "Price Increased" && (
-                            <span className="text-red-600 ml-1">
-                              (+{formatPrice(alert.newSupplierPrice - alert.oldSupplierPrice)})
-                            </span>
-                          )}
-                          {alert.status === "Price Decreased" && (
-                            <span className="text-green-600 ml-1">
-                              (-{formatPrice(alert.oldSupplierPrice - alert.newSupplierPrice)})
-                            </span>
-                          )}
+                        {formatPrice(alert.newSupplierPrice)}
+                          
                         </p>
                       </div>
                     </div>
