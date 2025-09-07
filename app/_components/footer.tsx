@@ -208,7 +208,7 @@ export function Footer() {
             © {new Date().getFullYear()} Pluggn. All rights reserved.
           </p>
           <p className="text-gray-500 text-xs md:text-sm text-center">
-            Pluggn is a product of{" "}
+           A brand of{" "}
             <span className="font-semibold">PLUGGN INNOVATIONS</span>
           </p>
         </div>
