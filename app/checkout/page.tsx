@@ -1,5 +1,3 @@
-
-
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
@@ -86,8 +84,6 @@ const buyerInfoOptions = {
 };
 
 export default function CheckoutPage() {
-  
-
   // Replace local state with Zustand store
   const {
     checkoutData,
@@ -117,6 +113,117 @@ export default function CheckoutPage() {
     reference: string;
     orderNumber: string;
   }>(null);
+
+
+  const formatOrderItems = () => {
+     if (!orderSummaries.length) return [];
+     return orderSummaries.flatMap((summary) => ({
+       productId: summary.item.productId,
+       quantity: summary.item.quantity,
+       supplierPrice: summary.item.originalPrice,
+       plugPrice: summary.item.price,
+       productName: summary.item.name,
+       supplierId: summary.item.supplierId,
+       ...(summary.item.variationId && {
+         variantId: summary.item.variationId,
+         variantColor: summary.item.selectedColor,
+         variantSize: summary.item.size,
+       }),
+       // For non-variation items, use product-level color and size
+       ...(!summary.item.variationId && {
+         productColor: summary.item.selectedColor,
+         productSize: summary.item.size,
+       }),
+     }));
+   };
+
+   const stageOrder = async () => {
+     try {
+       console.log("formatOrderItems", formatOrderItems());
+       const response = await fetch("/api/orders/stage-order", {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({
+           buyerName: checkoutData.customerInfo.name,
+           buyerEmail: checkoutData.customerInfo.email,
+           buyerPhone: checkoutData.customerInfo.phone,
+           buyerAddress: checkoutData.customerAddress.streetAddress,
+           buyerLga: checkoutData.customerAddress.lga,
+           buyerState: checkoutData.customerAddress.state,
+           buyerDirections: checkoutData.customerAddress.directions || "",
+           buyerInstructions: checkoutData.deliveryInstructions || "",
+           totalAmount: total,
+           deliveryFee,
+           deliveryType,
+           terminalAddress: deliveryType === "terminal" ? selectedTerminal : "",
+           platform: orderSummaries[0]?.platform || platform,
+           subdomain:
+             (orderSummaries[0].platform === "store" &&
+               orderSummaries[0].referralId) ||
+             "",
+           plugId:
+             (orderSummaries[0]?.platform !== "store" &&
+               orderSummaries[0]?.referralId) ||
+             "",
+           orderItems: formatOrderItems(),
+         }),
+       });
+
+       if (!response.ok) {
+         const err = await response.json();
+         errorToast(err.error || "Failed to stage order");
+         return null;
+       }
+
+       const result = await response.json();
+       return result.data; // { reference, orderNumber }
+     } catch (err) {
+       console.error("Error staging order:", err);
+       errorToast("Could not stage order");
+       return null;
+     }
+   };
+
+   const confirmOrder = async (reference: string) => {
+     try {
+       setIsLoading(true);
+       const response = await fetch("/api/orders/confirm-order", {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({ reference }),
+       });
+
+       if (!response.ok) {
+         const err = await response.json();
+         errorToast(err.error || "Failed to confirm order");
+         router.replace("/order-error");
+         return;
+       }
+
+       const result = await response.json();
+       successToast(result.message || "Order placed successfully");
+
+       if (result.data) {
+         sessionStorage.setItem("orderSuccess", JSON.stringify(result.data));
+       }
+
+       clearCheckoutData();
+       clearOrderSummaries();
+       router.replace("/thank-you");
+     } catch (error) {
+       console.error("Error confirming order:", error);
+       errorToast("An error occurred while confirming order");
+     } finally {
+       setIsLoading(false);
+     }
+   };
+
+     const handleStageOrder = async () => {
+    const staged = await stageOrder();
+    if (staged) {
+      setStagedOrder(staged); // ✅ save for PaystackButton
+    }
+  };
 
   // Get values from store
   const currentStep = checkoutData.currentStep;
@@ -246,6 +353,9 @@ export default function CheckoutPage() {
   const watchedEmail = watch("customerInfo.email");
   const watchedPhone = watch("customerInfo.phone");
 
+   
+
+
   // SWR for buyer info fetching
   const buyerInfoKey =
     watchedName &&
@@ -327,126 +437,13 @@ export default function CheckoutPage() {
         // Update the store with the fetched delivery fee
         updateDeliveryFee(price);
         // Store buyer coordinates if available
-       
       }
     } else if (logisticsPricingError) {
       console.error("Logistics pricing error:", logisticsPricingError);
-     
     }
   }, [logisticsPricingData, logisticsPricingError, updateDeliveryFee]);
 
-  const formatOrderItems = () => {
-    if (!orderSummaries.length) return [];
-    return orderSummaries.flatMap((summary) => ({
-      productId: summary.item.productId,
-      quantity: summary.item.quantity,
-      supplierPrice: summary.item.originalPrice,
-      plugPrice: summary.item.price,
-      productName: summary.item.name,
-      supplierId: summary.item.supplierId,
-      ...(summary.item.variationId && {
-        variantId: summary.item.variationId,
-        variantColor: summary.item.selectedColor,
-        variantSize: summary.item.size,
-      }),
-      // For non-variation items, use product-level color and size
-      ...(!summary.item.variationId && {
-        productColor: summary.item.selectedColor,
-        productSize: summary.item.size,
-      }),
-    }));
-  };
-
- const stageOrder = async () => {
-  try {
-    console.log("formatOrderItems", formatOrderItems)
-    const response = await fetch("/api/orders/stage-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        buyerName: checkoutData.customerInfo.name,
-        buyerEmail: checkoutData.customerInfo.email,
-        buyerPhone: checkoutData.customerInfo.phone,
-        buyerAddress: checkoutData.customerAddress.streetAddress,
-        buyerLga: checkoutData.customerAddress.lga,
-        buyerState: checkoutData.customerAddress.state,
-        buyerDirections: checkoutData.customerAddress.directions || "",
-        buyerInstructions: checkoutData.deliveryInstructions || "",
-        totalAmount: total,
-        deliveryFee,
-        deliveryType,
-        terminalAddress: deliveryType === "terminal" ? selectedTerminal : "",
-        platform: orderSummaries[0]?.platform || platform,
-        subdomain:
-          (orderSummaries[0].platform === "store" &&
-            orderSummaries[0].referralId) ||
-          "",
-        plugId:
-          (orderSummaries[0]?.platform !== "store" &&
-            orderSummaries[0]?.referralId) ||
-          "",
-        orderItems: formatOrderItems(),
-      }),
-    });
-
-    if (!response.ok) {
-      const err = await response.json();
-      errorToast(err.error || "Failed to stage order");
-      return null;
-    }
-
-    const result = await response.json();
-    return result.data; // { reference, orderNumber }
-  } catch (err) {
-    console.error("Error staging order:", err);
-    errorToast("Could not stage order");
-    return null;
-  }
-};
-
-const confirmOrder = async (reference: string) => {
-  try {
-    setIsLoading(true);
-    const response = await fetch("/api/orders/confirm-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reference }),
-    });
-
-    if (!response.ok) {
-      const err = await response.json();
-      errorToast(err.error || "Failed to confirm order");
-      router.replace("/order-error");
-      return;
-    }
-
-    const result = await response.json();
-    successToast(result.message || "Order placed successfully");
-
-    if (result.data) {
-      sessionStorage.setItem("orderSuccess", JSON.stringify(result.data));
-    }
-
-    clearCheckoutData();
-    clearOrderSummaries();
-    router.replace("/thank-you");
-  } catch (error) {
-    console.error("Error confirming order:", error);
-    errorToast("An error occurred while confirming order");
-  } finally {
-    setIsLoading(false);
-  }
-}
-
-  const handleStageOrder = async () => {
-  const staged = await stageOrder();
-  if (staged) {
-    setStagedOrder(staged); // ✅ save for PaystackButton
-  }
-};
-
-  
-
+ 
 
 
   const handleBackNavigation = () => {
@@ -472,7 +469,7 @@ const confirmOrder = async (reference: string) => {
             productId: product.originalId,
             quantity: item.qty,
             image: product.image || product.images?.[0] || "/placeholder.svg",
-            
+
             selectedColor: item.color,
             size: item.variation
               ? product.variations?.find((v: any) => v.id === item.variation)
@@ -515,71 +512,47 @@ const confirmOrder = async (reference: string) => {
     }
   }, [platform, productsData, isProductsLoading, ref, setOrderSummaries]);
 
-  
-
   // Initialize states and form data
-useEffect(() => {
-  setIsClient(true);
-
-  // Initialize Nigerian states
-  try {
-    const statesData = NaijaStates.states();
-    if (Array.isArray(statesData)) {
-      const stateNames = statesData
-        .map((state: any) => {
-          return typeof state === "string" ? state : state.state || state.name;
-        })
-        .filter(Boolean);
-      setStates(stateNames);
+  useEffect(() => {
+    setIsClient(true);
+    // Initialize Nigerian states
+    try {
+      const statesData = NaijaStates.states();
+      if (Array.isArray(statesData)) {
+        const stateNames = statesData
+          .map((state: any) => {
+            return typeof state === "string"
+              ? state
+              : state.state || state.name;
+          })
+          .filter(Boolean);
+        setStates(stateNames);
+      }
+    } catch (error) {
+      console.error("Error fetching states:", error);
+      setStates([]);
     }
-  } catch (error) {
-    console.error("Error fetching states:", error);
-    setStates([]);
-  }
-}, []); 
 
-useEffect(() => {
-  if (!isClient) return;
-  
-  // Only set form values if they don't already exist and store has values
-  const currentFormName = watch("customerInfo.name");
-  const currentFormEmail = watch("customerInfo.email");
-  const currentFormPhone = watch("customerInfo.phone");
-  
-  // Prevent circular updates by checking if form is already populated
-  if (!currentFormName && checkoutData.customerInfo.name) {
-    setValue("customerInfo.name", checkoutData.customerInfo.name);
-  }
-  if (!currentFormEmail && checkoutData.customerInfo.email) {
-    setValue("customerInfo.email", checkoutData.customerInfo.email);
-  }
-  if (!currentFormPhone && checkoutData.customerInfo.phone) {
-    setValue("customerInfo.phone", checkoutData.customerInfo.phone);
-  }
-  
-  // Address fields
-  const currentStreetAddress = watch("customerAddress.streetAddress");
-  const currentState = watch("customerAddress.state");
-  const currentLga = watch("customerAddress.lga");
-  
-  if (!currentStreetAddress && checkoutData.customerAddress.streetAddress) {
-    setValue("customerAddress.streetAddress", checkoutData.customerAddress.streetAddress);
-  }
-  if (!currentState && checkoutData.customerAddress.state) {
-    setValue("customerAddress.state", checkoutData.customerAddress.state);
-  }
-  if (!currentLga && checkoutData.customerAddress.lga) {
-    setValue("customerAddress.lga", checkoutData.customerAddress.lga);
-  }
-  if (checkoutData.customerAddress.directions) {
-    setValue("customerAddress.directions", checkoutData.customerAddress.directions);
-  }
-}, [isClient, setValue]);
+    // Initialize form with stored data
+    setValue("customerInfo.name", checkoutData.customerInfo.name || "");
+    setValue("customerInfo.email", checkoutData.customerInfo.email || "");
+    setValue("customerInfo.phone", checkoutData.customerInfo.phone || "");
+    setValue(
+      "customerAddress.streetAddress",
+      checkoutData.customerAddress.streetAddress || ""
+    );
+    setValue("customerAddress.state", checkoutData.customerAddress.state || "");
+    setValue("customerAddress.lga", checkoutData.customerAddress.lga || "");
+    setValue(
+      "customerAddress.directions",
+      checkoutData.customerAddress.directions || ""
+    );
+  }, [setValue, checkoutData]);
 
   useEffect(() => {
     setDeliveryType(checkoutData.deliveryMethod || "terminal");
     setSelectedTerminal(checkoutData.terminalAddress || "");
-  }, []);
+  }, [checkoutData.deliveryMethod, checkoutData.terminalAddress]);
 
   // Watch state changes to update LGAs
   useEffect(() => {
@@ -590,56 +563,23 @@ useEffect(() => {
       // Update the state in the store
       setCustomerAddress({ state: watchedState });
     }
-  }, [watchedState, selectedState, setValue]);
+  }, [watchedState, selectedState, setValue, setCustomerAddress]);
 
   // Watch form values for real-time validation and store updates
   const watchedCustomerInfo = watch("customerInfo");
   const watchedCustomerAddress = watch("customerAddress");
 
   useEffect(() => {
-  if (!watchedCustomerInfo || !isClient) return;
-  
-  // Only update store if values actually changed
-  const currentStoreInfo = checkoutData.customerInfo;
-  const hasChanged = 
-    currentStoreInfo.name !== watchedCustomerInfo.name ||
-    currentStoreInfo.email !== watchedCustomerInfo.email ||
-    currentStoreInfo.phone !== watchedCustomerInfo.phone;
-  
-  if (hasChanged) {
-    // Debounce the update to prevent rapid fires
-    const timeoutId = setTimeout(() => {
+    if (watchedCustomerInfo) {
       setCustomerInfo(watchedCustomerInfo);
-    }, 100);
-    
-    return () => clearTimeout(timeoutId);
-  }
-}, [watchedCustomerInfo, setCustomerInfo, isClient, checkoutData.customerInfo]);
+    }
+  }, [watchedCustomerInfo, setCustomerInfo]);
 
   useEffect(() => {
-    if (!watchedCustomerAddress || !isClient) return;
-
-    const currentStoreAddress = checkoutData.customerAddress;
-    const hasChanged =
-      currentStoreAddress.streetAddress !==
-        watchedCustomerAddress.streetAddress ||
-      currentStoreAddress.state !== watchedCustomerAddress.state ||
-      currentStoreAddress.lga !== watchedCustomerAddress.lga ||
-      currentStoreAddress.directions !== watchedCustomerAddress.directions;
-
-    if (hasChanged) {
-      const timeoutId = setTimeout(() => {
-        setCustomerAddress(watchedCustomerAddress);
-      }, 100);
-
-      return () => clearTimeout(timeoutId);
+    if (watchedCustomerAddress) {
+      setCustomerAddress(watchedCustomerAddress);
     }
-  }, [
-    watchedCustomerAddress,
-    setCustomerAddress,
-    isClient,
-    checkoutData.customerAddress,
-  ]);
+  }, [watchedCustomerAddress, setCustomerAddress]);
 
   // Clear errors when fields become valid
   useEffect(() => {
@@ -678,34 +618,66 @@ useEffect(() => {
     }
   }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors]);
 
-
   const continueToReview = async () => {
-  // Check if terminal is selected when delivery type is terminal
-  if (deliveryType === "terminal" && !selectedTerminal) {
-    setShowTerminalAlert(true);
-    return;
-  }
-
-  // For terminal delivery, validate customer info and check delivery fee
-  if (deliveryType === "terminal") {
-    const customerInfoValid = await trigger([
-      "customerInfo.name",
-      "customerInfo.email",
-      "customerInfo.phone",
-    ]);
-    const stateValid = await trigger("customerAddress.state");
-
-    // Check if delivery fee is available for terminal delivery
-    const terminalDeliveryFee = selectedState 
-      ? TerminalPickupPrices[selectedState as keyof typeof TerminalPickupPrices]
-      : null;
-
-    if (!terminalDeliveryFee) {
-      errorToast("Unable to calculate delivery fee for selected terminal. Please try again.");
+    // Check if terminal is selected when delivery type is terminal
+    if (deliveryType === "terminal" && !selectedTerminal) {
+      setShowTerminalAlert(true);
       return;
     }
 
-    if (customerInfoValid && stateValid) {
+    // For terminal delivery, validate customer info and check delivery fee
+    if (deliveryType === "terminal") {
+      const customerInfoValid = await trigger([
+        "customerInfo.name",
+        "customerInfo.email",
+        "customerInfo.phone",
+      ]);
+      const stateValid = await trigger("customerAddress.state");
+
+      // Check if delivery fee is available for terminal delivery
+      const terminalDeliveryFee = selectedState
+        ? TerminalPickupPrices[
+            selectedState as keyof typeof TerminalPickupPrices
+          ]
+        : null;
+
+      if (!terminalDeliveryFee) {
+        errorToast(
+          "Unable to calculate delivery fee for selected terminal. Please try again."
+        );
+        return;
+      }
+
+      if (customerInfoValid && stateValid) {
+        setCurrentStep("review");
+        if (orderSummaries.length > 0) {
+          orderSummaries.forEach((orderSummary) => {
+            mutate(
+              `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
+            );
+          });
+        }
+      } else {
+        const firstError = document.querySelector(".border-red-500");
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+      return;
+    }
+
+    // For home delivery, validate all fields and check delivery fee
+    const isFormValid = await trigger();
+
+    // Check if delivery fee is available for home delivery
+    if (deliveryFee === null) {
+      errorToast(
+        "Please wait for delivery fee calculation to complete before proceeding."
+      );
+      return;
+    }
+
+    if (isFormValid) {
       setCurrentStep("review");
       if (orderSummaries.length > 0) {
         orderSummaries.forEach((orderSummary) => {
@@ -720,41 +692,13 @@ useEffect(() => {
         firstError.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     }
-    return;
-  }
-
-  // For home delivery, validate all fields and check delivery fee
-  const isFormValid = await trigger();
-  
-  // Check if delivery fee is available for home delivery
-  if (deliveryFee === null) {
-    errorToast("Please wait for delivery fee calculation to complete before proceeding.");
-    return;
-  }
-
-  if (isFormValid) {
-    setCurrentStep("review");
-    if (orderSummaries.length > 0) {
-      orderSummaries.forEach((orderSummary) => {
-        mutate(
-          `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
-        );
-      });
-    }
-  } else {
-    const firstError = document.querySelector(".border-red-500");
-    if (firstError) {
-      firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }
-};
+  };
 
   const showPaymentCancelledModal = () => {
     // You could use a toast library or custom modal
     setShowCancelledModal(true);
   };
 
- 
   const formatPrice = (price?: string | number) => {
     return `₦${price?.toLocaleString()}`;
   };
@@ -784,53 +728,57 @@ useEffect(() => {
     setDeliveryInstructions(instructions);
   };
 
-  const paystackConfig = stagedOrder && {
-  email: watchedCustomerInfo?.email || "",
-  amount: total * 100,
-  reference: stagedOrder.reference, // ✅ backend reference
-  metadata: {
-    name: watchedCustomerInfo?.name || "",
-    phone: watchedCustomerInfo?.phone || "",
-    address: watchedCustomerAddress
-      ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
-      : "",
-    orderNumber: stagedOrder.orderNumber,
-  },
-  publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-  text: isLoading ? "Processing..." : "Place Order",
-  onSuccess: async (ref: { reference: string }) => {
-    await confirmOrder(ref.reference);
-  },
-  onClose: () => {
-    showPaymentCancelledModal();
-  },
-};
+const paystackConfig = useMemo(() => {
+  if (!stagedOrder || !watchedCustomerInfo || !watchedCustomerAddress) return null;
+  
+  return {
+    email: watchedCustomerInfo.email || "",
+    amount: total * 100,
+    reference: stagedOrder.reference,
+    metadata: {
+      name: watchedCustomerInfo.name || "",
+      phone: watchedCustomerInfo.phone || "",
+      address: watchedCustomerAddress
+        ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
+        : "",
+      orderNumber: stagedOrder.orderNumber,
+    },
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+    text: isLoading ? "Processing..." : "Place Order",
+    onSuccess: async (ref: { reference: string }) => {
+      await confirmOrder(ref.reference);
+    },
+    onClose: () => {
+      setShowCancelledModal(true);
+    },
+  };
+}, [stagedOrder, watchedCustomerInfo, watchedCustomerAddress, total, isLoading]);
 
   const renderPlaceOrderButton = () => {
-  if (!isClient) {
-    return <Button className="flex-1">Loading Payment...</Button>;
-  }
+    if (!isClient) {
+      return <Button className="flex-1">Loading Payment...</Button>;
+    }
 
-  if (!stagedOrder) {
-    // Step 1: Stage order first
+    if (!stagedOrder) {
+      // Step 1: Stage order first
+      return (
+        <Button
+          onClick={handleStageOrder}
+          className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
+        >
+          {isLoading ? "Processing..." : "Stage Order"}
+        </Button>
+      );
+    }
+
+    // Step 2: Payment button (once stagedOrder exists)
     return (
-      <Button
-        onClick={handleStageOrder}
+      <PaystackButton
+        {...paystackConfig}
         className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
-      >
-        {isLoading ? "Processing..." : "Stage Order"}
-      </Button>
+      />
     );
-  }
-
-  // Step 2: Payment button (once stagedOrder exists)
-  return (
-    <PaystackButton
-      {...paystackConfig}
-      className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
-    />
-  );
-};
+  };
 
   return (
     <div className="flex flex-col min-h-screen pb-16 md:pb-0">
