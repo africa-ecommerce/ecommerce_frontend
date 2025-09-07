@@ -472,10 +472,7 @@ const confirmOrder = async (reference: string) => {
             productId: product.originalId,
             quantity: item.qty,
             image: product.image || product.images?.[0] || "/placeholder.svg",
-            // selectedColor: item.variation
-            //   ? product.variations?.find((v: any) => v.id === item.variation)
-            //       ?.color
-            //   : undefined,
+            
             selectedColor: item.color,
             size: item.variation
               ? product.variations?.find((v: any) => v.id === item.variation)
@@ -521,46 +518,68 @@ const confirmOrder = async (reference: string) => {
   
 
   // Initialize states and form data
-  useEffect(() => {
-    setIsClient(true);
-    // Initialize Nigerian states
-    try {
-      const statesData = NaijaStates.states();
-      if (Array.isArray(statesData)) {
-        const stateNames = statesData
-          .map((state: any) => {
-            return typeof state === "string"
-              ? state
-              : state.state || state.name;
-          })
-          .filter(Boolean);
-        setStates(stateNames);
-      }
-    } catch (error) {
-      console.error("Error fetching states:", error);
-      setStates([]);
-    }
+useEffect(() => {
+  setIsClient(true);
 
-    // Initialize form with stored data
-    setValue("customerInfo.name", checkoutData.customerInfo.name || "");
-    setValue("customerInfo.email", checkoutData.customerInfo.email || "");
-    setValue("customerInfo.phone", checkoutData.customerInfo.phone || "");
-    setValue(
-      "customerAddress.streetAddress",
-      checkoutData.customerAddress.streetAddress || ""
-    );
-    setValue("customerAddress.state", checkoutData.customerAddress.state || "");
-    setValue("customerAddress.lga", checkoutData.customerAddress.lga || "");
-    setValue(
-      "customerAddress.directions",
-      checkoutData.customerAddress.directions || ""
-    );
-  }, [setValue, checkoutData]);
+  // Initialize Nigerian states
+  try {
+    const statesData = NaijaStates.states();
+    if (Array.isArray(statesData)) {
+      const stateNames = statesData
+        .map((state: any) => {
+          return typeof state === "string" ? state : state.state || state.name;
+        })
+        .filter(Boolean);
+      setStates(stateNames);
+    }
+  } catch (error) {
+    console.error("Error fetching states:", error);
+    setStates([]);
+  }
+}, []); 
+
+useEffect(() => {
+  if (!isClient) return;
+  
+  // Only set form values if they don't already exist and store has values
+  const currentFormName = watch("customerInfo.name");
+  const currentFormEmail = watch("customerInfo.email");
+  const currentFormPhone = watch("customerInfo.phone");
+  
+  // Prevent circular updates by checking if form is already populated
+  if (!currentFormName && checkoutData.customerInfo.name) {
+    setValue("customerInfo.name", checkoutData.customerInfo.name);
+  }
+  if (!currentFormEmail && checkoutData.customerInfo.email) {
+    setValue("customerInfo.email", checkoutData.customerInfo.email);
+  }
+  if (!currentFormPhone && checkoutData.customerInfo.phone) {
+    setValue("customerInfo.phone", checkoutData.customerInfo.phone);
+  }
+  
+  // Address fields
+  const currentStreetAddress = watch("customerAddress.streetAddress");
+  const currentState = watch("customerAddress.state");
+  const currentLga = watch("customerAddress.lga");
+  
+  if (!currentStreetAddress && checkoutData.customerAddress.streetAddress) {
+    setValue("customerAddress.streetAddress", checkoutData.customerAddress.streetAddress);
+  }
+  if (!currentState && checkoutData.customerAddress.state) {
+    setValue("customerAddress.state", checkoutData.customerAddress.state);
+  }
+  if (!currentLga && checkoutData.customerAddress.lga) {
+    setValue("customerAddress.lga", checkoutData.customerAddress.lga);
+  }
+  if (checkoutData.customerAddress.directions) {
+    setValue("customerAddress.directions", checkoutData.customerAddress.directions);
+  }
+}, [isClient, setValue]);
 
   useEffect(() => {
     setDeliveryType(checkoutData.deliveryMethod || "terminal");
     setSelectedTerminal(checkoutData.terminalAddress || "");
-  }, [checkoutData.deliveryMethod, checkoutData.terminalAddress]);
+  }, []);
 
   // Watch state changes to update LGAs
   useEffect(() => {
@@ -571,23 +590,56 @@ const confirmOrder = async (reference: string) => {
       // Update the state in the store
       setCustomerAddress({ state: watchedState });
     }
-  }, [watchedState, selectedState, setValue, setCustomerAddress]);
+  }, [watchedState, selectedState, setValue]);
 
   // Watch form values for real-time validation and store updates
   const watchedCustomerInfo = watch("customerInfo");
   const watchedCustomerAddress = watch("customerAddress");
 
   useEffect(() => {
-    if (watchedCustomerInfo) {
+  if (!watchedCustomerInfo || !isClient) return;
+  
+  // Only update store if values actually changed
+  const currentStoreInfo = checkoutData.customerInfo;
+  const hasChanged = 
+    currentStoreInfo.name !== watchedCustomerInfo.name ||
+    currentStoreInfo.email !== watchedCustomerInfo.email ||
+    currentStoreInfo.phone !== watchedCustomerInfo.phone;
+  
+  if (hasChanged) {
+    // Debounce the update to prevent rapid fires
+    const timeoutId = setTimeout(() => {
       setCustomerInfo(watchedCustomerInfo);
-    }
-  }, [watchedCustomerInfo, setCustomerInfo]);
+    }, 100);
+    
+    return () => clearTimeout(timeoutId);
+  }
+}, [watchedCustomerInfo, setCustomerInfo, isClient, checkoutData.customerInfo]);
 
   useEffect(() => {
-    if (watchedCustomerAddress) {
-      setCustomerAddress(watchedCustomerAddress);
+    if (!watchedCustomerAddress || !isClient) return;
+
+    const currentStoreAddress = checkoutData.customerAddress;
+    const hasChanged =
+      currentStoreAddress.streetAddress !==
+        watchedCustomerAddress.streetAddress ||
+      currentStoreAddress.state !== watchedCustomerAddress.state ||
+      currentStoreAddress.lga !== watchedCustomerAddress.lga ||
+      currentStoreAddress.directions !== watchedCustomerAddress.directions;
+
+    if (hasChanged) {
+      const timeoutId = setTimeout(() => {
+        setCustomerAddress(watchedCustomerAddress);
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [watchedCustomerAddress, setCustomerAddress]);
+  }, [
+    watchedCustomerAddress,
+    setCustomerAddress,
+    isClient,
+    checkoutData.customerAddress,
+  ]);
 
   // Clear errors when fields become valid
   useEffect(() => {
@@ -626,58 +678,6 @@ const confirmOrder = async (reference: string) => {
     }
   }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors]);
 
-  // const continueToReview = async () => {
-  //   // Check if terminal is selected when delivery type is terminal
-  //   if (deliveryType === "terminal" && !selectedTerminal) {
-  //     setShowTerminalAlert(true);
-  //     return;
-  //   }
-
-  //   // For terminal delivery, only validate customer info
-  //   if (deliveryType === "terminal") {
-  //     const customerInfoValid = await trigger([
-  //       "customerInfo.name",
-  //       "customerInfo.email",
-  //       "customerInfo.phone",
-  //     ]);
-  //     const stateValid = await trigger("customerAddress.state");
-
-  //     if (customerInfoValid && stateValid) {
-  //       setCurrentStep("review");
-  //       if (orderSummaries.length > 0) {
-  //         orderSummaries.forEach((orderSummary) => {
-  //           mutate(
-  //             `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
-  //           );
-  //         });
-  //       }
-  //     } else {
-  //       const firstError = document.querySelector(".border-red-500");
-  //       if (firstError) {
-  //         firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-  //       }
-  //     }
-  //     return;
-  //   }
-
-  //   // For home delivery, validate all fields
-  //   const isFormValid = await trigger();
-  //   if (isFormValid) {
-  //     setCurrentStep("review");
-  //     if (orderSummaries.length > 0) {
-  //       orderSummaries.forEach((orderSummary) => {
-  //         mutate(
-  //           `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
-  //         );
-  //       });
-  //     }
-  //   } else {
-  //     const firstError = document.querySelector(".border-red-500");
-  //     if (firstError) {
-  //       firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-  //     }
-  //   }
-  // };
 
   const continueToReview = async () => {
   // Check if terminal is selected when delivery type is terminal
