@@ -113,6 +113,10 @@ export default function CheckoutPage() {
   const [selectedTerminal, setSelectedTerminal] = useState("");
   const [showTerminalAlert, setShowTerminalAlert] = useState(false);
   const router = useRouter();
+  const [stagedOrder, setStagedOrder] = useState<null | {
+    reference: string;
+    orderNumber: string;
+  }>(null);
 
   // Get values from store
   const currentStep = checkoutData.currentStep;
@@ -186,6 +190,53 @@ export default function CheckoutPage() {
       ) || 0
     );
   }, [platform, orderSummaries]);
+
+  // Calculate delivery fee based on method and logistics pricing
+  const getDeliveryFee = () => {
+    // For terminal pickup, use the fixed state pricing
+    if (deliveryType === "terminal" && selectedState) {
+      const terminalPrice =
+        TerminalPickupPrices[
+          selectedState as keyof typeof TerminalPickupPrices
+        ];
+      if (terminalPrice) {
+        return terminalPrice;
+      }
+    }
+
+    // Check if we have the required data to fetch logistics pricing
+    const hasRequiredAddressData =
+      watchedState && watchedLga && watchedStreetAddress;
+
+    // If we don't have required address data, don't show any delivery fee yet
+    if (!hasRequiredAddressData) {
+      return null;
+    }
+
+    // If we're currently loading logistics pricing, don't show fee yet
+    if (isLogisticsPricingLoading) {
+      return null;
+    }
+
+    // If logistics pricing was successfully fetched, use that price
+    if (
+      logisticsPricingData?.data?.price !== undefined &&
+      !logisticsPricingError
+    ) {
+      return logisticsPricingData.data.price;
+    }
+
+    // If there was an error fetching logistics pricing, fallback to 1500
+    if (logisticsPricingError) {
+      return 1500;
+    }
+
+    // Default case - should not reach here, but fallback to null
+    return null;
+  };
+
+  const deliveryFee = getDeliveryFee();
+  const total = subtotal + (deliveryFee || 0);
 
   // Watch address fields for SWR key generation
   const watchedState = watch("customerAddress.state");
@@ -306,82 +357,97 @@ export default function CheckoutPage() {
     }));
   };
 
-  const prepareOrderData = (paymentReference: string) => {
-    const orderData = {
-      // Buyer information
-      buyerName: checkoutData.customerInfo.name,
-      buyerEmail: checkoutData.customerInfo.email,
-      buyerPhone: checkoutData.customerInfo.phone,
-      buyerAddress: checkoutData.customerAddress.streetAddress,
-      buyerLga: checkoutData.customerAddress.lga,
-      buyerState: checkoutData.customerAddress.state,
-      buyerDirections: checkoutData.customerAddress.directions || "",
-      buyerInstructions: checkoutData.deliveryInstructions || "",
-      paymentMethod: "online",
-      totalAmount: total,
-      deliveryFee: deliveryFee,
-      platform: orderSummaries[0]?.platform || platform,
-      subdomain:
-        (orderSummaries[0].platform === "store" &&
-          orderSummaries[0].referralId) ||
-        "",
-      plugId:
-        (orderSummaries[0]?.platform !== "store" &&
-          orderSummaries[0]?.referralId) ||
-        "",
-      orderItems: formatOrderItems(),
-      // Payment reference for online payments
-      paymentReference,
-      deliveryType: deliveryType,
-      terminalAddress: deliveryType === "terminal" ? selectedTerminal : "",
-    };
-    return orderData;
-  };
+ const stageOrder = async () => {
+  try {
+    console.log("formatOrderItems", formatOrderItems)
+    const response = await fetch("/api/orders/stage-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        buyerName: checkoutData.customerInfo.name,
+        buyerEmail: checkoutData.customerInfo.email,
+        buyerPhone: checkoutData.customerInfo.phone,
+        buyerAddress: checkoutData.customerAddress.streetAddress,
+        buyerLga: checkoutData.customerAddress.lga,
+        buyerState: checkoutData.customerAddress.state,
+        buyerDirections: checkoutData.customerAddress.directions || "",
+        buyerInstructions: checkoutData.deliveryInstructions || "",
+        totalAmount: total,
+        deliveryFee,
+        deliveryType,
+        terminalAddress: deliveryType === "terminal" ? selectedTerminal : "",
+        platform: orderSummaries[0]?.platform || platform,
+        subdomain:
+          (orderSummaries[0].platform === "store" &&
+            orderSummaries[0].referralId) ||
+          "",
+        plugId:
+          (orderSummaries[0]?.platform !== "store" &&
+            orderSummaries[0]?.referralId) ||
+          "",
+        orderItems: formatOrderItems(),
+      }),
+    });
 
-  const placeOrder = async (paymentReference: string) => {
-    try {
-      setIsLoading(true);
-      const orderData = prepareOrderData(paymentReference);
-      console.log("orderData", orderData.orderItems)
-      const response = await fetch("/api/orders/place-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(orderData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        errorToast(errorData.error || "Failed to place order");
-        clearCheckoutData();
-        clearOrderSummaries();
-        router.replace("/order-error");
-        return;
-      }
-
-      const result = await response.json();
-      successToast(result.message || "Order placed successfully");
-
-      // Store order success data for thank you page
-      if (result.data) {
-        sessionStorage.setItem("orderSuccess", JSON.stringify(result.data));
-      }
-
-      // Clear all checkout data and order summary
-      clearCheckoutData();
-      clearOrderSummaries();
-
-      // Navigate to thank you page
-      router.replace("/thank-you");
-      return result;
-    } catch (error) {
-      console.error("Error placing order:", error);
-      errorToast("An error occurred while placing the order");
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      const err = await response.json();
+      errorToast(err.error || "Failed to stage order");
+      return null;
     }
-  };
+
+    const result = await response.json();
+    return result.data; // { reference, orderNumber }
+  } catch (err) {
+    console.error("Error staging order:", err);
+    errorToast("Could not stage order");
+    return null;
+  }
+};
+
+const confirmOrder = async (reference: string) => {
+  try {
+    setIsLoading(true);
+    const response = await fetch("/api/orders/confirm-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reference }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      errorToast(err.error || "Failed to confirm order");
+      router.replace("/order-error");
+      return;
+    }
+
+    const result = await response.json();
+    successToast(result.message || "Order placed successfully");
+
+    if (result.data) {
+      sessionStorage.setItem("orderSuccess", JSON.stringify(result.data));
+    }
+
+    clearCheckoutData();
+    clearOrderSummaries();
+    router.replace("/thank-you");
+  } catch (error) {
+    console.error("Error confirming order:", error);
+    errorToast("An error occurred while confirming order");
+  } finally {
+    setIsLoading(false);
+  }
+}
+
+  const handleStageOrder = async () => {
+  const staged = await stageOrder();
+  if (staged) {
+    setStagedOrder(staged); // ✅ save for PaystackButton
+  }
+};
+
+  
+
+
 
   const handleBackNavigation = () => {
     if (platform !== "store") {
@@ -452,52 +518,7 @@ export default function CheckoutPage() {
     }
   }, [platform, productsData, isProductsLoading, ref, setOrderSummaries]);
 
-  // Calculate delivery fee based on method and logistics pricing
-  const getDeliveryFee = () => {
-    // For terminal pickup, use the fixed state pricing
-    if (deliveryType === "terminal" && selectedState) {
-      const terminalPrice =
-        TerminalPickupPrices[
-          selectedState as keyof typeof TerminalPickupPrices
-        ];
-      if (terminalPrice) {
-        return terminalPrice;
-      }
-    }
-
-    // Check if we have the required data to fetch logistics pricing
-    const hasRequiredAddressData =
-      watchedState && watchedLga && watchedStreetAddress;
-
-    // If we don't have required address data, don't show any delivery fee yet
-    if (!hasRequiredAddressData) {
-      return null;
-    }
-
-    // If we're currently loading logistics pricing, don't show fee yet
-    if (isLogisticsPricingLoading) {
-      return null;
-    }
-
-    // If logistics pricing was successfully fetched, use that price
-    if (
-      logisticsPricingData?.data?.price !== undefined &&
-      !logisticsPricingError
-    ) {
-      return logisticsPricingData.data.price;
-    }
-
-    // If there was an error fetching logistics pricing, fallback to 1500
-    if (logisticsPricingError) {
-      return 1500;
-    }
-
-    // Default case - should not reach here, but fallback to null
-    return null;
-  };
-
-  const deliveryFee = getDeliveryFee();
-  const total = subtotal + (deliveryFee || 0);
+  
 
   // Initialize states and form data
   useEffect(() => {
@@ -733,39 +754,7 @@ export default function CheckoutPage() {
     setShowCancelledModal(true);
   };
 
-  const paystackConfig = {
-    email: watchedCustomerInfo?.email || "",
-    amount: total * 100, // Paystack expects amount in kobo
-    metadata: {
-      name: watchedCustomerInfo?.name || "",
-      phone: watchedCustomerInfo?.phone || "",
-      address: watchedCustomerAddress
-        ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
-        : "",
-      custom_fields: [
-        {
-          display_name: "Order Items",
-          variable_name: "order_items",
-          value: cartItems
-            ?.map((item) => `${item.name} x${item.quantity}`)
-            .join(", "),
-        },
-      ],
-    },
-    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
-    text: isLoading ? "Processing..." : "Place Order",
-    onSuccess: async (reference) => {
-      try {
-        await placeOrder(reference.reference);
-      } catch (error) {
-        console.error("Error placing order after successful payment:", error);
-      }
-    },
-    onClose: () => {
-      showPaymentCancelledModal();
-    },
-  };
-
+ 
   const formatPrice = (price?: string | number) => {
     return `₦${price?.toLocaleString()}`;
   };
@@ -795,19 +784,53 @@ export default function CheckoutPage() {
     setDeliveryInstructions(instructions);
   };
 
-  const renderPlaceOrderButton = () => {
-    // Only render PaystackButton on client side
-    if (!isClient) {
-      return <Button className="flex-1">Loading Payment...</Button>;
-    }
+  const paystackConfig = stagedOrder && {
+  email: watchedCustomerInfo?.email || "",
+  amount: total * 100,
+  reference: stagedOrder.reference, // ✅ backend reference
+  metadata: {
+    name: watchedCustomerInfo?.name || "",
+    phone: watchedCustomerInfo?.phone || "",
+    address: watchedCustomerAddress
+      ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
+      : "",
+    orderNumber: stagedOrder.orderNumber,
+  },
+  publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+  text: isLoading ? "Processing..." : "Place Order",
+  onSuccess: async (ref: { reference: string }) => {
+    await confirmOrder(ref.reference);
+  },
+  onClose: () => {
+    showPaymentCancelledModal();
+  },
+};
 
+  const renderPlaceOrderButton = () => {
+  if (!isClient) {
+    return <Button className="flex-1">Loading Payment...</Button>;
+  }
+
+  if (!stagedOrder) {
+    // Step 1: Stage order first
     return (
-      <PaystackButton
-        {...paystackConfig}
+      <Button
+        onClick={handleStageOrder}
         className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
-      />
+      >
+        {isLoading ? "Processing..." : "Stage Order"}
+      </Button>
     );
-  };
+  }
+
+  // Step 2: Payment button (once stagedOrder exists)
+  return (
+    <PaystackButton
+      {...paystackConfig}
+      className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
+    />
+  );
+};
 
   return (
     <div className="flex flex-col min-h-screen pb-16 md:pb-0">
