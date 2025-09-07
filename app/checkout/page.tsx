@@ -363,6 +363,7 @@ export default function CheckoutPage() {
   }
 };
 
+
 const confirmOrder = async (reference: string) => {
   try {
     setIsLoading(true);
@@ -378,7 +379,6 @@ const confirmOrder = async (reference: string) => {
       router.replace("/order-error");
       return;
     }
-
     const result = await response.json();
     successToast(result.message || "Order placed successfully");
 
