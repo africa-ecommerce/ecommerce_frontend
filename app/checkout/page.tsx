@@ -356,6 +356,8 @@ export default function CheckoutPage() {
   }
 };
 
+// Utility delay helper
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 const confirmOrder = async (reference: string) => {
   try {
@@ -387,21 +389,19 @@ const confirmOrder = async (reference: string) => {
   } finally {
     setIsLoading(false);
   }
-}
+};
+
 const handleStageOrder = async () => {
-   setIsLoading(true);
+  setIsLoading(true);
   const staged = await stageOrder();
   if (!staged) return;
 
   setStagedOrder(staged);
 
-  // Only initialize Paystack on the client side
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
-  // Import Paystack dynamically to avoid SSR issues
-  const { usePaystackPayment } = await import('react-paystack');
+  const { usePaystackPayment } = await import("react-paystack");
 
-  // Build Paystack config
   const config = {
     email: watchedCustomerInfo?.email || "",
     amount: total * 100,
@@ -435,12 +435,12 @@ const handleStageOrder = async () => {
     },
   };
 
-  // Initialize Paystack
   const initializePayment = usePaystackPayment(config);
 
-  // Initialize payment
   initializePayment({
     onSuccess: async (ref: { reference: string }) => {
+      // 👇 Wait 2 seconds before confirming
+      await delay(3000);
       await confirmOrder(ref.reference);
     },
     onClose: () => {
