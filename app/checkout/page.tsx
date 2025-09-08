@@ -42,7 +42,6 @@ import { getVariationDisplayName, parseCheckoutUrl } from "@/lib/url-parser";
 import { useProductFetching } from "@/hooks/use-product-fetcher";
 import { useProductStore } from "@/hooks/product-store";
 import { terminalAddresses, TerminalPickupPrices } from "../constant";
-import { usePaystackPayment } from "react-paystack";
 
 
 
@@ -390,14 +389,19 @@ const confirmOrder = async (reference: string) => {
     setIsLoading(false);
   }
 }
-
 const handleStageOrder = async () => {
   const staged = await stageOrder();
   if (!staged) return;
 
   setStagedOrder(staged);
 
-  // Build Paystack config correctly
+  // Only initialize Paystack on the client side
+  if (typeof window === 'undefined') return;
+
+  // Import Paystack dynamically to avoid SSR issues
+  const { usePaystackPayment } = await import('react-paystack');
+
+  // Build Paystack config
   const config = {
     email: watchedCustomerInfo?.email || "",
     amount: total * 100,
@@ -434,7 +438,7 @@ const handleStageOrder = async () => {
   // Initialize Paystack
   const initializePayment = usePaystackPayment(config);
 
-  // ✅ New correct usage (single object with callbacks)
+  // Initialize payment
   initializePayment({
     onSuccess: async (ref: { reference: string }) => {
       await confirmOrder(ref.reference);
@@ -444,8 +448,6 @@ const handleStageOrder = async () => {
     },
   });
 };
-
-
 
 
 
@@ -837,27 +839,7 @@ useEffect(() => {
     setDeliveryInstructions(instructions);
   };
 
-  const paystackConfig = stagedOrder && {
-  email: watchedCustomerInfo?.email || "",
-  amount: total * 100,
-  reference: stagedOrder.reference, // ✅ backend reference
-  metadata: {
-    name: watchedCustomerInfo?.name || "",
-    phone: watchedCustomerInfo?.phone || "",
-    address: watchedCustomerAddress
-      ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
-      : "",
-    orderNumber: stagedOrder.orderNumber,
-  },
-  publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-  text: isLoading ? "Processing..." : "Place Order",
-  onSuccess: async (ref: { reference: string }) => {
-    await confirmOrder(ref.reference);
-  },
-  onClose: () => {
-    showPaymentCancelledModal();
-  },
-};
+
 
   const renderPlaceOrderButton = () => (
     <Button
