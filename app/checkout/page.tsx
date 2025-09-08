@@ -359,7 +359,6 @@ export default function CheckoutPage() {
 
 const confirmOrder = async (reference: string) => {
   try {
-    setIsLoading(true);
     const response = await fetch("/api/orders/confirm-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -390,6 +389,7 @@ const confirmOrder = async (reference: string) => {
   }
 }
 const handleStageOrder = async () => {
+   setIsLoading(true);
   const staged = await stageOrder();
   if (!staged) return;
 
