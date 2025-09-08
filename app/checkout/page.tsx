@@ -1,7 +1,7 @@
 
 
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -43,14 +43,17 @@ import { useProductFetching } from "@/hooks/use-product-fetcher";
 import { useProductStore } from "@/hooks/product-store";
 import { terminalAddresses, TerminalPickupPrices } from "../constant";
 
-// Dynamic import of PaystackButton to prevent SSR issues
-const PaystackButton = dynamic(
-  () => import("react-paystack").then((mod) => mod.PaystackButton),
-  {
-    ssr: false,
-    loading: () => <Button className="flex-1">Loading Payment...</Button>,
+
+
+declare global {
+  interface Window {
+    PaystackPop: {
+      setup: (config: any) => {
+        openIframe: () => void;
+      };
+    };
   }
-);
+}
 
 // SWR fetcher function
 const fetcher = async (url: string) => {
@@ -117,6 +120,8 @@ export default function CheckoutPage() {
     reference: string;
     orderNumber: string;
   }>(null);
+
+  const hasTriggeredPaystack = useRef(false);
 
   // Get values from store
   const currentStep = checkoutData.currentStep;
@@ -366,7 +371,7 @@ export default function CheckoutPage() {
 
 const confirmOrder = async (reference: string) => {
   try {
-    setIsLoading(true);
+    // Don't set loading here as it's already set
     const response = await fetch("/api/orders/confirm-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -379,6 +384,7 @@ const confirmOrder = async (reference: string) => {
       router.replace("/order-error");
       return;
     }
+    
     const result = await response.json();
     successToast(result.message || "Order placed successfully");
 
@@ -392,15 +398,24 @@ const confirmOrder = async (reference: string) => {
   } catch (error) {
     console.error("Error confirming order:", error);
     errorToast("An error occurred while confirming order");
+    router.replace("/order-error");
   } finally {
     setIsLoading(false);
+    hasTriggeredPaystack.current = false;
+    setStagedOrder(null);
   }
-}
+};
 
-  const handleStageOrder = async () => {
-  const staged = await stageOrder();
-  if (staged) {
-    setStagedOrder(staged); // ✅ save for PaystackButton
+const handleStageOrder = async () => {
+  try {
+    setIsLoading(true); // Set loading state
+    const staged = await stageOrder();
+    if (staged) {
+      setStagedOrder(staged); // This will trigger the useEffect below
+    }
+  } catch (error) {
+    console.error("Error in handleStageOrder:", error);
+    setIsLoading(false);
   }
 };
 
@@ -782,6 +797,60 @@ useEffect(() => {
     }
   };
 
+  useEffect(() => {
+  if (stagedOrder && !hasTriggeredPaystack.current && isClient) {
+    hasTriggeredPaystack.current = true;
+    
+    // Small delay to ensure DOM is ready
+    setTimeout(() => {
+      try {
+        const paystackConfig = {
+          email: watchedCustomerInfo?.email || "",
+          amount: total * 100,
+          reference: stagedOrder.reference,
+          metadata: {
+            name: watchedCustomerInfo?.name || "",
+            phone: watchedCustomerInfo?.phone || "",
+            address: watchedCustomerAddress
+              ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
+              : "",
+            orderNumber: stagedOrder.orderNumber,
+          },
+          publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
+          onSuccess: async (ref) => {
+            console.log("Payment successful:", ref);
+            await confirmOrder(ref.reference);
+          },
+          onClose: () => {
+            console.log("Payment modal closed");
+            showPaymentCancelledModal();
+            // Reset flags so user can try again
+            hasTriggeredPaystack.current = false;
+            setStagedOrder(null); // Reset staged order
+            setIsLoading(false);
+          },
+        };
+
+        // Check if PaystackPop is available
+        if (window.PaystackPop) {
+          const handler = window.PaystackPop.setup(paystackConfig);
+          handler.openIframe();
+        } else {
+          console.error("PaystackPop not available");
+          errorToast("Payment system not ready. Please try again.");
+          hasTriggeredPaystack.current = false;
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error opening Paystack:", error);
+        errorToast("Failed to open payment. Please try again.");
+        hasTriggeredPaystack.current = false;
+        setIsLoading(false);
+      }
+    }, 100);
+  }
+}, [stagedOrder, watchedCustomerInfo, watchedCustomerAddress, total, isClient]);
+
   const goToPreviousStep = () => {
     if (currentStep === "review") setCurrentStep("delivery");
   };
@@ -791,53 +860,23 @@ useEffect(() => {
     setDeliveryInstructions(instructions);
   };
 
-  const paystackConfig = stagedOrder && {
-  email: watchedCustomerInfo?.email || "",
-  amount: total * 100,
-  reference: stagedOrder.reference, // ✅ backend reference
-  metadata: {
-    name: watchedCustomerInfo?.name || "",
-    phone: watchedCustomerInfo?.phone || "",
-    address: watchedCustomerAddress
-      ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
-      : "",
-    orderNumber: stagedOrder.orderNumber,
-  },
-  publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-  text: isLoading ? "Processing..." : "Place Order",
-  onSuccess: async (ref: { reference: string }) => {
-    await confirmOrder(ref.reference);
-  },
-  onClose: () => {
-    showPaymentCancelledModal();
-  },
-};
 
   const renderPlaceOrderButton = () => {
   if (!isClient) {
-    return <Button className="flex-1">Loading Payment...</Button>;
+    return <Button className="flex-1">Loading...</Button>;
   }
 
-  if (!stagedOrder) {
-    // Step 1: Stage order first
-    return (
-      <Button
-        onClick={handleStageOrder}
-        className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
-      >
-        {isLoading ? "Processing..." : "Stage Order"}
-      </Button>
-    );
-  }
-
-  // Step 2: Payment button (once stagedOrder exists)
   return (
-    <PaystackButton
-      {...paystackConfig}
-      className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
-    />
+    <Button
+      onClick={handleStageOrder}
+      disabled={isLoading}
+      className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50"
+    >
+      {isLoading ? "Processing..." : "Place Order"}
+    </Button>
   );
 };
+
 
   return (
     <div className="flex flex-col min-h-screen pb-16 md:pb-0">
