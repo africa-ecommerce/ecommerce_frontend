@@ -1,7 +1,7 @@
 
 
 "use client";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -42,18 +42,9 @@ import { getVariationDisplayName, parseCheckoutUrl } from "@/lib/url-parser";
 import { useProductFetching } from "@/hooks/use-product-fetcher";
 import { useProductStore } from "@/hooks/product-store";
 import { terminalAddresses, TerminalPickupPrices } from "../constant";
+import { usePaystackPayment } from "react-paystack";
 
 
-
-declare global {
-  interface Window {
-    PaystackPop: {
-      setup: (config: any) => {
-        openIframe: () => void;
-      };
-    };
-  }
-}
 
 // SWR fetcher function
 const fetcher = async (url: string) => {
@@ -120,8 +111,6 @@ export default function CheckoutPage() {
     reference: string;
     orderNumber: string;
   }>(null);
-
-  const hasTriggeredPaystack = useRef(false);
 
   // Get values from store
   const currentStep = checkoutData.currentStep;
@@ -371,7 +360,7 @@ export default function CheckoutPage() {
 
 const confirmOrder = async (reference: string) => {
   try {
-    // Don't set loading here as it's already set
+    setIsLoading(true);
     const response = await fetch("/api/orders/confirm-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -384,7 +373,6 @@ const confirmOrder = async (reference: string) => {
       router.replace("/order-error");
       return;
     }
-    
     const result = await response.json();
     successToast(result.message || "Order placed successfully");
 
@@ -398,26 +386,65 @@ const confirmOrder = async (reference: string) => {
   } catch (error) {
     console.error("Error confirming order:", error);
     errorToast("An error occurred while confirming order");
-    router.replace("/order-error");
   } finally {
     setIsLoading(false);
-    hasTriggeredPaystack.current = false;
-    setStagedOrder(null);
   }
-};
+}
 
 const handleStageOrder = async () => {
-  try {
-    setIsLoading(true); // Set loading state
-    const staged = await stageOrder();
-    if (staged) {
-      setStagedOrder(staged); // This will trigger the useEffect below
-    }
-  } catch (error) {
-    console.error("Error in handleStageOrder:", error);
-    setIsLoading(false);
-  }
+  const staged = await stageOrder();
+  if (!staged) return;
+
+  setStagedOrder(staged);
+
+  // Build Paystack config correctly
+  const config = {
+    email: watchedCustomerInfo?.email || "",
+    amount: total * 100,
+    reference: staged.reference,
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+    metadata: {
+      custom_fields: [
+        {
+          display_name: "Name",
+          variable_name: "name",
+          value: watchedCustomerInfo?.name || "",
+        },
+        {
+          display_name: "Phone",
+          variable_name: "phone",
+          value: watchedCustomerInfo?.phone || "",
+        },
+        {
+          display_name: "Address",
+          variable_name: "address",
+          value: watchedCustomerAddress
+            ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
+            : "",
+        },
+        {
+          display_name: "Order Number",
+          variable_name: "orderNumber",
+          value: staged.orderNumber,
+        },
+      ],
+    },
+  };
+
+  // Initialize Paystack
+  const initializePayment = usePaystackPayment(config);
+
+  // ✅ New correct usage (single object with callbacks)
+  initializePayment({
+    onSuccess: async (ref: { reference: string }) => {
+      await confirmOrder(ref.reference);
+    },
+    onClose: () => {
+      showPaymentCancelledModal();
+    },
+  });
 };
+
 
 
 
@@ -797,84 +824,6 @@ useEffect(() => {
     }
   };
 
-const waitForPaystack = (maxAttempts = 10): Promise<boolean> => {
-  return new Promise((resolve) => {
-    let attempts = 0;
-    const checkPaystack = () => {
-      attempts++;
-      if (window.PaystackPop) {
-        resolve(true);
-      } else if (attempts < maxAttempts) {
-        setTimeout(checkPaystack, 200); // Check every 200ms
-      } else {
-        resolve(false);
-      }
-    };
-    checkPaystack();
-  });
-};
-
-// UPDATE your useEffect to wait for Paystack:
-useEffect(() => {
-  if (stagedOrder && !hasTriggeredPaystack.current && isClient) {
-    hasTriggeredPaystack.current = true;
-    
-    const initializePayment = async () => {
-      try {
-        // Wait for Paystack to be available
-        const paystackReady = await waitForPaystack();
-        
-        if (!paystackReady) {
-          console.error("Paystack failed to load after waiting");
-          errorToast("Payment system not ready. Please refresh and try again.");
-          hasTriggeredPaystack.current = false;
-          setIsLoading(false);
-          return;
-        }
-
-        const paystackConfig = {
-          email: watchedCustomerInfo?.email || "",
-          amount: total * 100,
-          reference: stagedOrder.reference,
-          metadata: {
-            name: watchedCustomerInfo?.name || "",
-            phone: watchedCustomerInfo?.phone || "",
-            address: watchedCustomerAddress
-              ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
-              : "",
-            orderNumber: stagedOrder.orderNumber,
-          },
-          publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
-          onSuccess: async (ref: { reference: string }) => {
-            console.log("Payment successful:", ref);
-            await confirmOrder(ref.reference);
-          },
-          onClose: () => {
-            console.log("Payment modal closed");
-            showPaymentCancelledModal();
-            hasTriggeredPaystack.current = false;
-            setStagedOrder(null);
-            setIsLoading(false);
-          },
-        };
-
-        console.log("Opening Paystack with config:", paystackConfig);
-        const handler = window.PaystackPop.setup(paystackConfig);
-        handler.openIframe();
-        
-      } catch (error) {
-        console.error("Error in payment initialization:", error);
-        errorToast("Failed to initialize payment. Please try again.");
-        hasTriggeredPaystack.current = false;
-        setIsLoading(false);
-      }
-    };
-
-    // Small delay to ensure everything is ready
-    setTimeout(initializePayment, 300);
-  }
-}, [stagedOrder, watchedCustomerInfo, watchedCustomerAddress, total, isClient]);
-
   const goToPreviousStep = () => {
     if (currentStep === "review") setCurrentStep("delivery");
   };
@@ -884,23 +833,36 @@ useEffect(() => {
     setDeliveryInstructions(instructions);
   };
 
+  const paystackConfig = stagedOrder && {
+  email: watchedCustomerInfo?.email || "",
+  amount: total * 100,
+  reference: stagedOrder.reference, // ✅ backend reference
+  metadata: {
+    name: watchedCustomerInfo?.name || "",
+    phone: watchedCustomerInfo?.phone || "",
+    address: watchedCustomerAddress
+      ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
+      : "",
+    orderNumber: stagedOrder.orderNumber,
+  },
+  publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+  text: isLoading ? "Processing..." : "Place Order",
+  onSuccess: async (ref: { reference: string }) => {
+    await confirmOrder(ref.reference);
+  },
+  onClose: () => {
+    showPaymentCancelledModal();
+  },
+};
 
-  const renderPlaceOrderButton = () => {
-  if (!isClient) {
-    return <Button className="flex-1">Loading...</Button>;
-  }
-
-  return (
+  const renderPlaceOrderButton = () => (
     <Button
       onClick={handleStageOrder}
-      disabled={isLoading}
-      className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50"
+      className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
     >
       {isLoading ? "Processing..." : "Place Order"}
     </Button>
   );
-};
-
 
   return (
     <div className="flex flex-col min-h-screen pb-16 md:pb-0">
