@@ -10,7 +10,13 @@ export default function CheckoutLayout({
     <>
       <Script
         src="https://js.paystack.co/v1/inline.js"
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
+        onLoad={() => {
+          console.log("Paystack script loaded successfully");
+        }}
+        onError={(e) => {
+          console.error("Failed to load Paystack script:", e);
+        }}
       />
       {children}
     </>

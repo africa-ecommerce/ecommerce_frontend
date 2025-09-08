@@ -797,13 +797,41 @@ useEffect(() => {
     }
   };
 
-  useEffect(() => {
+const waitForPaystack = (maxAttempts = 10): Promise<boolean> => {
+  return new Promise((resolve) => {
+    let attempts = 0;
+    const checkPaystack = () => {
+      attempts++;
+      if (window.PaystackPop) {
+        resolve(true);
+      } else if (attempts < maxAttempts) {
+        setTimeout(checkPaystack, 200); // Check every 200ms
+      } else {
+        resolve(false);
+      }
+    };
+    checkPaystack();
+  });
+};
+
+// UPDATE your useEffect to wait for Paystack:
+useEffect(() => {
   if (stagedOrder && !hasTriggeredPaystack.current && isClient) {
     hasTriggeredPaystack.current = true;
     
-    // Small delay to ensure DOM is ready
-    setTimeout(() => {
+    const initializePayment = async () => {
       try {
+        // Wait for Paystack to be available
+        const paystackReady = await waitForPaystack();
+        
+        if (!paystackReady) {
+          console.error("Paystack failed to load after waiting");
+          errorToast("Payment system not ready. Please refresh and try again.");
+          hasTriggeredPaystack.current = false;
+          setIsLoading(false);
+          return;
+        }
+
         const paystackConfig = {
           email: watchedCustomerInfo?.email || "",
           amount: total * 100,
@@ -817,37 +845,33 @@ useEffect(() => {
             orderNumber: stagedOrder.orderNumber,
           },
           publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
-          onSuccess: async (ref) => {
+          onSuccess: async (ref: { reference: string }) => {
             console.log("Payment successful:", ref);
             await confirmOrder(ref.reference);
           },
           onClose: () => {
             console.log("Payment modal closed");
             showPaymentCancelledModal();
-            // Reset flags so user can try again
             hasTriggeredPaystack.current = false;
-            setStagedOrder(null); // Reset staged order
+            setStagedOrder(null);
             setIsLoading(false);
           },
         };
 
-        // Check if PaystackPop is available
-        if (window.PaystackPop) {
-          const handler = window.PaystackPop.setup(paystackConfig);
-          handler.openIframe();
-        } else {
-          console.error("PaystackPop not available");
-          errorToast("Payment system not ready. Please try again.");
-          hasTriggeredPaystack.current = false;
-          setIsLoading(false);
-        }
+        console.log("Opening Paystack with config:", paystackConfig);
+        const handler = window.PaystackPop.setup(paystackConfig);
+        handler.openIframe();
+        
       } catch (error) {
-        console.error("Error opening Paystack:", error);
-        errorToast("Failed to open payment. Please try again.");
+        console.error("Error in payment initialization:", error);
+        errorToast("Failed to initialize payment. Please try again.");
         hasTriggeredPaystack.current = false;
         setIsLoading(false);
       }
-    }, 100);
+    };
+
+    // Small delay to ensure everything is ready
+    setTimeout(initializePayment, 300);
   }
 }, [stagedOrder, watchedCustomerInfo, watchedCustomerAddress, total, isClient]);
 
