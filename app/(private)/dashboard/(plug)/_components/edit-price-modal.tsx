@@ -97,7 +97,6 @@ export function EditPriceModal({
   const maxPrice = productData?.maxPrice || 0;
   const supplierPrice = productData?.originalPrice || 0;
 
-  console.log("productData", productData)
 
   // Calculate commission data whenever price changes
   useEffect(() => {
@@ -190,7 +189,7 @@ export function EditPriceModal({
       const result = await response.json();
       successToast("Price has been updated successfully");
       mutate("/api/plug/products/");
-
+      mutate("/api/plug/products/outdated")
       // Reset form
       setPrice("");
       setCommissionData(null);

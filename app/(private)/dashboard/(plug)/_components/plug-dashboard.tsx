@@ -583,50 +583,19 @@ export default function PlugDashboard() {
     return [...outOfStockItems, ...lowStockItems].slice(0, 3)
   }, [products])
 
-  const priceAlerts = useMemo(() => {
-    // Demo data for price alerts
-    return [
-      {
-        id: "1",
-        product: "Samsung Galaxy S24 Ultra 256GB Smartphone with Advanced Camera",
-       
-        newSupplierPrice: 920000,
-        
-      },
-      {
-        id: "2",
-        product: "Apple MacBook Pro 14-inch M3 Chip with 16GB RAM",
-       
-        newSupplierPrice: 1050000,
-       
-      },
-      {
-        id: "3",
-        product: "Sony WH-1000XM5 Wireless Noise Canceling Headphones",
-        
-        newSupplierPrice: 210000,
-       
-      },
-      {
-        id: "4",
-        product: "Dell XPS 13 Laptop Intel Core i7 with 32GB RAM and 1TB SSD",
-       
-        newSupplierPrice: 890000,
-        
-      },
-    ]
-  }, [])
+
 
   const [selectedPriceAlertId, setSelectedPriceAlertId] = useState<string>("")
   const [openPriceModal, setOpenPriceModal] = useState(false)
+  const [selectedItemData, setSelectedItemData] = useState(null)
 
-  const handlePriceModalOpen = (alertId: string) => {
-    setSelectedPriceAlertId(alertId)
+  const handlePriceModalOpen = (alert) => {
+    setSelectedPriceAlertId(alert.id)
+    setSelectedItemData(alert)
     setOpenPriceModal(true)
   }
 
 
-  const selectedPriceAlert = priceAlerts.find((alert) => alert.id === selectedPriceAlertId)
 
   return (
     <TooltipProvider>
@@ -838,63 +807,74 @@ export default function PlugDashboard() {
             <h2 className="text-sm sm:text-base font-semibold">Price Alerts</h2>
           </div>
 
-          <Card className="border rounded-lg">
-            <CardHeader className="p-3 sm:p-4 pb-1">
-              <CardTitle className="text-xs sm:text-sm font-medium">
-                Price Alerts
-              </CardTitle>
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
-                Some products have supplier price changes and are currently
-                unavailable to your customer. Please update your prices to
-                restore availability.
-              </p>
-            </CardHeader>
-            <CardContent className="p-3 sm:p-4 pt-0">
-              <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                {priceAlerts.map((alert) => (
-                  <div
-                    key={alert.id}
-                    className="flex items-center gap-2 sm:gap-3"
-                  >
+          {outdatedLoading ? (
+            <StockLoadingSkeleton />
+          ) : outdatedError ? (
+            <ErrorState onRetry={() => outdatedMutate()} />
+          ) : outdatedData.length === 0 ? (
+            <EmptyState
+              message="No price alerts at this time"
+              icon={AlertCircle}
+            />
+          ) : (
+            <Card className="border rounded-lg">
+              <CardHeader className="p-3 sm:p-4 pb-1">
+                <CardTitle className="text-xs sm:text-sm font-medium">
+                  Price Alerts
+                </CardTitle>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
+                  Some products have supplier price changes and are currently
+                  unavailable to your customer. Please update your prices to
+                  restore availability.
+                </p>
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 pt-0">
+                <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                  {outdatedData.data.map((alert) => (
                     <div
-                      className={
-                        "w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-red-100"
-                      }
+                      key={alert.id}
+                      className="flex items-center gap-2 sm:gap-3"
                     >
-                      <TriangleAlert
-                        className={"h-4 w-4 sm:h-5 sm:w-5 text-red-600"}
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center gap-1">
-                        <p className="text-xs sm:text-sm font-medium truncate capitalize">
-                          {truncateText(alert.product, 20)}
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-[10px] sm:text-xs h-6 px-2 bg-transparent"
-                          onClick={() => handlePriceModalOpen(alert.id)}
-                        >
-                          Add Price
-                        </Button>
+                      <div
+                        className={
+                          "w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-red-100"
+                        }
+                      >
+                        <TriangleAlert
+                          className={"h-4 w-4 sm:h-5 sm:w-5 text-red-600"}
+                        />
                       </div>
-                      <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
-                        <p>{formatPrice(alert.newSupplierPrice)}</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center gap-1">
+                          <p className="text-xs sm:text-sm font-medium truncate capitalize">
+                            {truncateText(alert.name, 20)}
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-[10px] sm:text-xs h-6 px-2 bg-transparent"
+                            onClick={() => handlePriceModalOpen(alert)}
+                          >
+                            Add Price
+                          </Button>
+                        </div>
+                        <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
+                          <p>{formatPrice(alert.originalPrice)}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </section>
 
         <EditPriceModal
           open={openPriceModal}
           onOpenChange={setOpenPriceModal}
           itemId={selectedPriceAlertId}
-          itemData={selectedPriceAlert?.product || ""}
+          itemData={selectedItemData}
         />
 
         {/* Order Management Section - Now showing shipped orders */}
