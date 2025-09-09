@@ -811,7 +811,7 @@ export default function PlugDashboard() {
             <StockLoadingSkeleton />
           ) : outdatedError ? (
             <ErrorState onRetry={() => outdatedMutate()} />
-          ) : outdatedData.length === 0 ? (
+          ) : outdatedData.data.length === 0 ? (
             <EmptyState
               message="No price alerts at this time"
               icon={AlertCircle}
