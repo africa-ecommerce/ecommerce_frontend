@@ -308,7 +308,7 @@ const OrderCard = ({ order }: { order: any }) => {
         </div>
       </CardContent>
 
-      <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
+      {/* <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
           <Dialog open={delayModalOpen} onOpenChange={setDelayModalOpen}>
             <DialogTrigger asChild>
               <Button
@@ -345,7 +345,7 @@ const OrderCard = ({ order }: { order: any }) => {
             <PackageCheck className="h-3 w-3 mr-1" />
             Accept
           </Button>
-        </CardFooter>
+        </CardFooter> */}
     </Card>
   );
 };

@@ -74,7 +74,7 @@ const faqCategories = [
         id: "return-policy",
         question: "What is your return policy?",
         answer:
-          "You can return most items within 3 days of delivery. The item must be in its original condition and packaging.",
+          "You can return most items within 3 days of delivery, provided they meet our return policy",
       },
      
       {

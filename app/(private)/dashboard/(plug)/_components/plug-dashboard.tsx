@@ -34,7 +34,6 @@ import WithdrawalModal from "../../_components/withdrawal-modal"
 import { successToast } from "@/components/ui/use-toast-advanced"
 import { useRouter } from "next/navigation"
 import { FacebookIcon, InstagramIcon, TikTokIcon, TwitterIcon, WhatsAppIcon } from "@/app/icons"
-import { PriceModal } from "@/app/_components/provider/shoppingCartProvider"
 import { EditPriceModal } from "./edit-price-modal"
 
 function getProductPerformanceByAverage(productsArray: any) {

@@ -2,7 +2,6 @@
 
 "use client";
 import { useState, useEffect, useMemo } from "react";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CreditCard, MapPin, ArrowLeft, Loader2, Info } from "lucide-react";
@@ -845,6 +844,7 @@ useEffect(() => {
     <Button
       onClick={handleStageOrder}
       className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
+      disabled={isLoading}
     >
       {isLoading ? "Processing..." : "Place Order"}
     </Button>
