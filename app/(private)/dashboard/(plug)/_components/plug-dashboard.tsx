@@ -316,7 +316,7 @@ export default function PlugDashboard() {
     error: outdatedError,
     isLoading: outdatedLoading,
     mutate: outdatedMutate,
-  } = useSWR("//api/plug/products/outdated", {
+  } = useSWR("/api/plug/products/outdated", {
     refreshInterval: 300000, // Refresh every 5 minutes
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
