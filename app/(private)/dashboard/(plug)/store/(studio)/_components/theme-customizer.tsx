@@ -67,11 +67,11 @@ const defaultConfig = {
     PRODUCTS_TITLE: "Featured Products",
     ABOUT_TEXT:
       "<p>We are a modern fashion boutique dedicated to bringing you the latest trends at affordable prices.</p>",
-    INSTAGRAM_LINK: "https://instagram.com/fashionboutique",
-    FACEBOOK_LINK: "https://facebook.com/fashionboutique",
-    TWITTER_LINK: "https://twitter.com/fashionboutique",
-    PHONE_NUMBER: "+1234567890",
-    MAIL: "contact@fashionboutique.com",
+    INSTAGRAM_LINK: "https://instagram.com/pluggnhq",
+    FACEBOOK_LINK: "https://facebook.com/pluggnhq",
+    TWITTER_LINK: "https://twitter.com/pluggnhq",
+    PHONE_NUMBER: "+2349151425001",
+    MAIL: "support@pluggn.com.ng",
   },
   metadata: {
     title: "Fashion Boutique - Modern Clothing Store",
