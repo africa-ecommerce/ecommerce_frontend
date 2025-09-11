@@ -19,57 +19,96 @@ export const PRODUCT_CATEGORIES = [
 
 
 export const categoryRecommendations = {
-  skincare: [
-    "Include skin type compatibility",
-    "List key ingredients",
-    "Specify product volume/weight",
-  ],
-  haircare: [
-    "Include hair type compatibility",
-    "List key ingredients",
-    "Specify product volume",
-  ],
-  bodycare: [
-    "Include product volume/weight",
-    "List key ingredients",
-    "Specify usage instructions",
-  ],
-  makeup: [
-    "Include shades/variants",
-    "List key ingredients",
-    "Specify product weight",
-  ],
-  fragrance: [
-    "Include scent notes",
-    "Specify bottle size",
-    "Indicate concentration",
-  ],
-  accessories: [
-    "Include dimensions",
-    "Specify materials used",
-    "Add color variations",
-  ],
-  electronics: [
-    "Include technical specifications",
-    "List compatible devices",
-    "Specify warranty information",
-  ],
-  fashion: [
-    "Include size guide",
-    "Specify fabric/material",
-    "Add care instructions",
-  ],
-  beauty_skincare: [
-    "Include skin type compatibility",
-    "List key ingredients",
-    "Specify product volume/weight",
-  ],
   all: [
     "Include detailed description",
     "Add high-quality images",
-    "Specify product dimensions",
+    "Specify product dimensions or weight where applicable",
+  ],
+
+  footwears: [
+    "Include size guide (EU/US/UK sizing)",
+    "Specify material (leather, canvas, synthetic, etc.)",
+    "Add available color options",
+    "Include fit type (regular, wide, narrow)",
+  ],
+
+  bags: [
+    "Include dimensions (height, width, depth)",
+    "Specify material (leather, fabric, synthetic, etc.)",
+    "Add color variations",
+    "Mention compartments or capacity (in liters if relevant)",
+  ],
+
+  accessories: [
+    "Include product dimensions (length, width, thickness)",
+    "Specify materials used (metal, leather, fabric, etc.)",
+    "Add available color options",
+    "Mention variations (e.g., styles, sizes)",
+  ],
+
+  curated_fashion: [
+    "Include size guide (S/M/L or numeric)",
+    "Specify fabric/material",
+    "Add color and pattern options",
+    "Include care instructions",
+  ],
+
+  home_decor: [
+    "Include product size (height, width, depth)",
+    "Specify material (wood, metal, ceramic, etc.)",
+    "Add color options if available",
+    "Mention if product has variations (designs, styles)",
+  ],
+
+  beauty_and_fragrance: [
+    "Include scent notes (floral, woody, citrus, etc.)",
+    "Specify bottle size (ml/oz)",
+    "Indicate fragrance concentration (EDT, EDP, etc.)",
+    "For beauty products: mention skin type compatibility and key ingredients",
+  ],
+
+  fitness_and_sports: [
+    "Include size/weight (kg, lbs, or dimensions)",
+    "Specify material or build quality",
+    "Add usage instructions",
+    "Mention variations (weight levels, colors, sizes)",
+  ],
+
+  books: [
+    "Include book format (hardcover, paperback, ebook)",
+    "Specify author and edition",
+    "Mention number of pages",
+    "Add genre or target audience",
+  ],
+
+  toys_and_games: [
+    "Include recommended age group",
+    "Specify dimensions or weight if relevant",
+    "Mention materials used (plastic, wood, etc.)",
+    "Add variations (colors, characters, editions)",
+  ],
+
+  pet_supplies: [
+    "Specify suitable pet type (dog, cat, bird, etc.)",
+    "Mention material or ingredients (if food/consumable)",
+    "Add size variations (S, M, L for apparel or accessories)",
+  ],
+
+  art_and_crafts: [
+    "Specify materials included (paper, paints, brushes, etc.)",
+    "Mention color options or variants",
+    "Add usage instructions or compatibility (e.g., oil paint, watercolor paper)",
+  ],
+
+  baby_products: [
+    "Include age range suitability",
+    "Specify dimensions/weight in description",
+    "Mention material or fabric type (cotton, BPA-free plastic, etc.)",
+    "Add safety certifications or standards",
+    "Include size variations if applicable (diapers, clothes)",
   ],
 };
+
 
 export const NICHE_CATEGORIES = [
     { value: "footwears", label: "Footwears" },
