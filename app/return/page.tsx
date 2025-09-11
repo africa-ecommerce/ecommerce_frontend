@@ -113,7 +113,7 @@ export default function ReturnPolicy() {
             Return Policy
           </h1>
           <p className="text-sm sm:text-base lg:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            At Pluggn Store, we want you to shop with confidence. This Return
+            At Pluggn, we want you to shop with confidence. This Return
             Policy explains when and how you can return products purchased from
             us.
           </p>
@@ -197,7 +197,7 @@ export default function ReturnPolicy() {
           <Separator className="mb-4 sm:mb-6" />
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
             This return policy applies only to purchases made directly from a pluggn seller using the
-            <strong>Pluggn Checkout</strong>{" "}
+            <strong>{" "}Pluggn Checkout</strong>
           </p>
         </div>
       </div>
