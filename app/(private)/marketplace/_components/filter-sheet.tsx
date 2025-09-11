@@ -1,20 +1,22 @@
-
-
-
-
-
 // components/filter-sheet.tsx
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Slider } from "@/components/ui/slider";
 import { PRODUCT_CATEGORIES } from "@/app/constant";
 import { Filter } from "lucide-react";
 import { ProductsFilter } from "@/hooks/use-products";
 import { useState, useEffect } from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface FilterSheetProps {
   isOpen: boolean;
@@ -46,7 +48,7 @@ export const FilterSheet = ({
 
   const handleMinPriceChange = (value: string) => {
     setMinPrice(value);
-    const numValue = parseInt(value.replace(/,/g, '')) || 1000;
+    const numValue = parseInt(value.replace(/,/g, "")) || 1000;
     if (numValue >= 1000 && numValue <= filters.priceRange[1]) {
       onPriceChange([numValue, filters.priceRange[1]]);
     }
@@ -54,15 +56,15 @@ export const FilterSheet = ({
 
   const handleMaxPriceChange = (value: string) => {
     setMaxPrice(value);
-    const numValue = parseInt(value.replace(/,/g, '')) || 9999999;
+    const numValue = parseInt(value.replace(/,/g, "")) || 9999999;
     if (numValue <= 9999999 && numValue >= filters.priceRange[0]) {
       onPriceChange([filters.priceRange[0], numValue]);
     }
   };
 
   const formatPriceInput = (value: string) => {
-    const numValue = parseInt(value.replace(/[^0-9]/g, ''));
-    return isNaN(numValue) ? '' : numValue.toLocaleString();
+    const numValue = parseInt(value.replace(/[^0-9]/g, ""));
+    return isNaN(numValue) ? "" : numValue.toLocaleString();
   };
 
   const handleMinPriceBlur = () => {
@@ -84,121 +86,132 @@ export const FilterSheet = ({
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-full sm:w-[400px] z-[200]">
-        <SheetHeader className="m-4">
-          <SheetTitle className="flex items-center justify-between">
-            <span>Filters</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onResetFilters}
-              className="text-sm"
-            >
-              Reset
-            </Button>
-          </SheetTitle>
-        </SheetHeader>
+        <ScrollArea className="max-h-[calc(100vh-224px)]">
+          <SheetHeader className="m-4">
+            <SheetTitle className="flex items-center justify-between">
+              <span>Filters</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onResetFilters}
+                className="text-sm"
+              >
+                Reset
+              </Button>
+            </SheetTitle>
+          </SheetHeader>
 
-        <div className="space-y-6">
-          {/* Price Range Filter */}
-          <div>
-            <h3 className="text-sm font-medium mb-4">Price Range</h3>
-            
-            {/* Price Input Fields */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <div className="space-y-2">
-                <Label htmlFor="min-price" className="text-xs text-muted-foreground">
-                  Min Price
-                </Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
-                    ₦
-                  </span>
-                  <Input
-                    id="min-price"
-                    value={minPrice}
-                    onChange={(e) => handleMinPriceChange(e.target.value)}
-                    onBlur={handleMinPriceBlur}
-                    placeholder="1,000"
-                    className="pl-8 text-sm h-9"
-                  />
+          <div className="space-y-6">
+            {/* Price Range Filter */}
+            <div>
+              <h3 className="text-sm font-medium mb-4">Price Range</h3>
+
+              {/* Price Input Fields */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="min-price"
+                    className="text-xs text-muted-foreground"
+                  >
+                    Min Price
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                      ₦
+                    </span>
+                    <Input
+                      id="min-price"
+                      value={minPrice}
+                      onChange={(e) => handleMinPriceChange(e.target.value)}
+                      onBlur={handleMinPriceBlur}
+                      placeholder="1,000"
+                      className="pl-8 text-sm h-9"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="max-price"
+                    className="text-xs text-muted-foreground"
+                  >
+                    Max Price
+                  </Label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
+                      ₦
+                    </span>
+                    <Input
+                      id="max-price"
+                      value={maxPrice}
+                      onChange={(e) => handleMaxPriceChange(e.target.value)}
+                      onBlur={handleMaxPriceBlur}
+                      placeholder="9,999,999"
+                      className="pl-8 text-sm h-9"
+                    />
+                  </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="max-price" className="text-xs text-muted-foreground">
-                  Max Price
-                </Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
-                    ₦
-                  </span>
-                  <Input
-                    id="max-price"
-                    value={maxPrice}
-                    onChange={(e) => handleMaxPriceChange(e.target.value)}
-                    onBlur={handleMaxPriceBlur}
-                    placeholder="9,999,999"
-                    className="pl-8 text-sm h-9"
-                  />
-                </div>
-              </div>
-            </div>
 
-            {/* Price Slider */}
-            <div className="px-2">
-              <div className="mb-2">
-                <Label className="text-xs text-muted-foreground">Or use slider</Label>
-              </div>
-              <Slider
-                value={filters.priceRange}
-                onValueChange={onPriceChange}
-                max={9999999}
-                min={1000}
-                step={25000}
-                minStepsBetweenThumbs={1}
-                className="mb-4"
-              />
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>₦{filters.priceRange[0].toLocaleString()}</span>
-                <span>₦{filters.priceRange[1].toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Categories Filter */}
-          <div>
-            <h3 className="text-sm font-medium mb-3">Categories</h3>
-            <div className="space-y-2">
-              {PRODUCT_CATEGORIES.map((category) => (
-                <div
-                  key={category.value}
-                  className="flex items-center space-x-2"
-                >
-                  <Checkbox
-                    id={`cat-${category.value}`}
-                    checked={filters.selectedCategories.includes(
-                      category.value
-                    )}
-                    onCheckedChange={() => onToggleCategory(category.value)}
-                  />
-                  <Label htmlFor={`cat-${category.value}`} className="text-sm">
-                    {category.label}
+              {/* Price Slider */}
+              <div className="px-2">
+                <div className="mb-2">
+                  <Label className="text-xs text-muted-foreground">
+                    Or use slider
                   </Label>
                 </div>
-              ))}
+                <Slider
+                  value={filters.priceRange}
+                  onValueChange={onPriceChange}
+                  max={9999999}
+                  min={1000}
+                  step={25000}
+                  minStepsBetweenThumbs={1}
+                  className="mb-4"
+                />
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>₦{filters.priceRange[0].toLocaleString()}</span>
+                  <span>₦{filters.priceRange[1].toLocaleString()}</span>
+                </div>
+              </div>
             </div>
+
+            <Separator />
+
+            {/* Categories Filter */}
+            <div>
+              <h3 className="text-sm font-medium mb-3">Categories</h3>
+              <div className="space-y-2">
+                {PRODUCT_CATEGORIES.map((category) => (
+                  <div
+                    key={category.value}
+                    className="flex items-center space-x-2"
+                  >
+                    <Checkbox
+                      id={`cat-${category.value}`}
+                      checked={filters.selectedCategories.includes(
+                        category.value
+                      )}
+                      onCheckedChange={() => onToggleCategory(category.value)}
+                    />
+                    <Label
+                      htmlFor={`cat-${category.value}`}
+                      className="text-sm"
+                    >
+                      {category.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Apply Button */}
+            <Button className="w-full" onClick={onApplyFilters}>
+              Apply Filters
+            </Button>
           </div>
-
-          
-
-          <Separator />
-
-          {/* Apply Button */}
-          <Button className="w-full" onClick={onApplyFilters}>
-            Apply Filters
-          </Button>
-        </div>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );
