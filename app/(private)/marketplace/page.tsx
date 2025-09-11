@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -57,18 +55,18 @@ const SellerCTA = () => {
                 <Plus className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
-            
+
             {/* Content */}
             <div className="flex-1 min-w-0">
               <h3 className="text-xs sm:text-sm md:text-base font-semibold text-gray-900 dark:text-gray-100 mb-1">
                 Want to sell or promote a product?
               </h3>
               <p className="text-xs sm:text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                Can't find the product you wish to sell or promote? Message us and
-                let's see what we can do.
+                Can't find the product you wish to sell or promote? Message us
+                and let's see what we can do.
               </p>
             </div>
-            
+
             {/* Button on larger screens */}
             <div className="hidden md:block flex-shrink-0">
               <Button
@@ -82,7 +80,7 @@ const SellerCTA = () => {
               </Button>
             </div>
           </div>
-          
+
           {/* Button on mobile - below text */}
           <div className="md:hidden">
             <Button
@@ -115,8 +113,9 @@ export default function MarketplacePage() {
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-    const { userData: {user} } = useUser();
-  
+  const {
+    userData: { user },
+  } = useUser();
 
   // Flag to prevent URL sync on initial load
   const [isInitialized, setIsInitialized] = useState(false);
@@ -132,8 +131,6 @@ export default function MarketplacePage() {
     search: searchQuery,
     priceRange,
     selectedCategories,
-    selectedRatings,
-    sortBy: "createdAt",
     order: "desc",
   };
 
@@ -341,7 +338,7 @@ export default function MarketplacePage() {
               filters={filters}
               onPriceChange={setPriceRange}
               onToggleCategory={toggleCategory}
-              onToggleRating={toggleRating}
+              
               onResetFilters={resetFilters}
               onApplyFilters={applyFilters}
             />
@@ -349,6 +346,15 @@ export default function MarketplacePage() {
         </div>
 
         <main className="flex-1 pb-16 sm:pb-4">
+          <div className="px-4 sm:px-6 mt-2">
+            <Alert className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <AlertDescription className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">
+                What you see here is a <strong>personalized view</strong> based
+                on your preferences, activity and others.
+              </AlertDescription>
+            </Alert>
+          </div>
           {/* Discovery Mode Button */}
           <div className="px-4 py-3 sm:px-6">
             <Button

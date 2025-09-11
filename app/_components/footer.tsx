@@ -200,6 +200,14 @@ export function Footer() {
                   Privacy Policy
                 </Link>
               </li>
+               <li>
+                <Link
+                  href="/return"
+                  className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
+                >
+                  Return Policy
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
