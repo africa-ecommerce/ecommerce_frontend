@@ -127,7 +127,7 @@ export function SubscribersPopover({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="relative h-9 px-2 hover:bg-accent/50 transition-colors">
+        <Button variant="ghost" size="sm" className="relative h-9 px-2">
           <div className="flex items-center gap-2">
             <div className="relative">
               <Users className="h-5 w-5 text-muted-foreground" />
@@ -173,7 +173,7 @@ export function SubscribersPopover({
                 {currentSubscriptions.slice(0, 3).map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50 transition-colors"
+                    className="flex items-center gap-3 p-2 rounded-lg transition-colors"
                   >
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={item.profileImage || item.brandLogo} />
@@ -183,9 +183,7 @@ export function SubscribersPopover({
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{item.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.userType === "SUPPLIER" ? "Supplier" : "Plug"}
-                      </p>
+                     
                     </div>
                     {userType === "PLUG" && (
                       <Button
@@ -226,7 +224,7 @@ export function SubscribersPopover({
                     {filteredSuppliers.map((supplier) => (
                       <div
                         key={supplier.id}
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50 transition-colors"
+                        className="flex items-center gap-3 p-2 rounded-lg transition-colors"
                       >
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={supplier.brandLogo || "/placeholder.svg"} />
@@ -235,8 +233,7 @@ export function SubscribersPopover({
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{supplier.name}</p>
-                          <p className="text-xs text-muted-foreground">Supplier</p>
+                          <p className="text-xs md:text-sm font-medium truncate">{supplier.name}</p>
                         </div>
                         <Button
                           variant={supplier.isSubscribed ? "outline" : "default"}
