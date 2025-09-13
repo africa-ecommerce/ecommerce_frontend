@@ -788,15 +788,7 @@ export default function MarketplacePage() {
           <div className="flex items-center">
             <SubscribersPopover
               userType={user?.userType || "PLUG"}
-              subscriberCount={getSubscriberCount()}
-              onSubscribe={(userId) => {
-                console.log("Subscribe to:", userId)
-                // Implement your subscribe logic here
-              }}
-              onUnsubscribe={(userId) => {
-                console.log("Unsubscribe from:", userId)
-                // Implement your unsubscribe logic here
-              }}
+             
             />
           </div>
         </header>
