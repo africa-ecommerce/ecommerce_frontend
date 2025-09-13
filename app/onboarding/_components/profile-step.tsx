@@ -2,13 +2,417 @@
 
 
 
+// "use client";
+
+// import { ArrowLeft, Upload } from "lucide-react";
+// import { useFormResolver } from "@/hooks/useFormResolver";
+// import { profileSchema } from "@/zod/schema";
+// import { FormData } from "../page";
+// import { useEffect, useState, useRef } from "react";
+
+// import { Button } from "@/components/ui/button";
+// import { Label } from "@/components/ui/label";
+// import { Input } from "@/components/ui/input";
+// import { Textarea } from "@/components/ui/textarea";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
+// import { Card } from "@/components/ui/card";
+// import {
+//   Form,
+//   FormControl,
+//   FormField,
+//   FormItem,
+//   FormLabel,
+//   FormMessage,
+// } from "@/components/ui/form";
+// import { Controller } from "react-hook-form";
+// import PlugSuccess from "./plug-success";
+// import Image from "next/image";
+// import { errorToast } from "@/components/ui/use-toast-advanced";
+
+// interface ProfileProps {
+//   onSubmit: (data: FormData) => Promise<any>;
+//   onPrev: () => void;
+//   formData: FormData; // Add this line to receive existing form data
+//   initialData?: {
+//     businessName?: string;
+//     phone?: string;
+//     state?: string;
+//     aboutBusiness?: string;
+//     avatar?: File;
+//   };
+// }
+
+// export default function ProfileStep({
+//   onSubmit,
+//   onPrev,
+//   formData, // Add this parameter
+//   initialData,
+// }: ProfileProps) {
+//   const [isSuccess, setIsSuccess] = useState(false);
+
+//   // Professional photo upload state
+//   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+//   const [uploading, setUploading] = useState(false);
+//   const photoInputRef = useRef<HTMLInputElement>(null);
+//   const photoDropAreaRef = useRef<HTMLDivElement>(null);
+
+//   const {
+//     form,
+//     form: { register, submit, control, errors, isSubmitting, setValue },
+//   } = useFormResolver(
+//     async (data) => {
+//       // Merge existing formData with new supplier info
+//       const result = await onSubmit({
+//         ...formData,
+//         profile: data,
+//       } as FormData);
+//       return result;
+//     },
+//     profileSchema,
+//     () => setIsSuccess(true)
+//   );
+
+//   useEffect(() => {
+//     // Set initial values if provided
+//     if (initialData?.businessName) {
+//       setValue("businessName", initialData.businessName);
+//     }
+//     if (initialData?.phone) {
+//       setValue("phone", initialData.phone);
+//     }
+//     if (initialData?.state) {
+//       setValue("state", initialData.state);
+//     }
+//     if (initialData?.aboutBusiness) {
+//       setValue("aboutBusiness", initialData.aboutBusiness);
+//     }
+
+//     // Initialize professional photo if provided
+//     if (
+//       initialData?.avatar &&
+//       initialData.avatar instanceof File
+//     ) {
+//       setValue("avatar", initialData.avatar);
+//       setPhotoUrl(URL.createObjectURL(initialData.avatar));
+//     }
+//   }, [initialData, setValue]);
+
+//   // Handle drag and drop for professional photo
+//   const handleDragOver = (e: React.DragEvent) => {
+//     e.preventDefault();
+//     e.stopPropagation();
+//     if (photoDropAreaRef.current) {
+//       photoDropAreaRef.current.classList.add("border-primary");
+//     }
+//   };
+
+//   const handleDragLeave = (e: React.DragEvent) => {
+//     e.preventDefault();
+//     e.stopPropagation();
+//     if (photoDropAreaRef.current) {
+//       photoDropAreaRef.current.classList.remove("border-primary");
+//     }
+//   };
+
+//   const handleDrop = (e: React.DragEvent) => {
+//     e.preventDefault();
+//     e.stopPropagation();
+//     if (photoDropAreaRef.current) {
+//       photoDropAreaRef.current.classList.remove("border-primary");
+//     }
+
+//     if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+//       handlePhotoFile(e.dataTransfer.files[0]);
+//     }
+//   };
+
+//   const handlePhotoFile = (file: File) => {
+//     if (file.size > 5 * 1024 * 1024) {
+//       errorToast("Photo size must be less than 5MB");
+//       return;
+//     }
+
+//     // Check file type
+//     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+//     if (!allowedTypes.includes(file.type)) {
+//       errorToast("Only JPEG, PNG, and WEBP formats are allowed");
+//       return;
+//     }
+
+//     // Create object URL for preview
+//     const objectUrl = URL.createObjectURL(file);
+//     setPhotoUrl(objectUrl);
+//     setValue("avatar", file);
+
+//     setUploading(true);
+//     setTimeout(() => {
+//       setUploading(false);
+//     }, 1000);
+//   };
+
+//   const handlePhotoInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     if (e.target.files && e.target.files.length > 0) {
+//       handlePhotoFile(e.target.files[0]);
+//     }
+//   };
+
+//   const triggerPhotoInput = () => {
+//     photoInputRef.current?.click();
+//   };
+
+//   const removePhoto = (e: React.MouseEvent) => {
+//     e.stopPropagation();
+//     if (photoUrl) {
+//       URL.revokeObjectURL(photoUrl);
+//     }
+//     setPhotoUrl(null);
+//     setValue("avatar", undefined);
+//     if (photoInputRef.current) {
+//       photoInputRef.current.value = "";
+//     }
+//   };
+
+//   if (isSuccess) {
+//     return <PlugSuccess />;
+//   }
+
+//   return (
+//     <>
+//       <h1 className="mb-2 text-2xl font-bold tracking-tight text-center text-gray-900">
+//         Create Your Profile
+//       </h1>
+//       <p className="mb-8 text-center text-gray-600">
+//         Tell us about yourself and your business to personalize your experience.
+//       </p>
+
+//       <Card className="p-6 mb-8">
+//         <Form {...form}>
+//           <form onSubmit={submit} method={"POST"}>
+//             <div className="space-y-6">
+//               {/* Professional Photo Upload */}
+//               <FormField
+//                 control={control}
+//                 name="avatar"
+//                 render={({ field }) => (
+//                   <FormItem>
+//                     <FormLabel className="text-gray-700">
+//                       Professional Photo
+//                     </FormLabel>
+//                     <div className="mb-3 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-200">
+//                       <p className="font-medium text-blue-800 mb-1">📸 Photo Guidelines:</p>
+//                       <ul className="text-blue-700 space-y-1 text-xs">
+//                         <li>• Upload a clear, high-quality face shot of yourself</li>
+//                         <li>• Ensure good lighting and a clean background</li>
+//                         <li>• Show your face clearly - this helps build trust with buyers.</li>
+//                       </ul>
+//                     </div>
+//                     <FormControl>
+//                       <div
+//                         ref={photoDropAreaRef}
+//                         onDragOver={handleDragOver}
+//                         onDragLeave={handleDragLeave}
+//                         onDrop={handleDrop}
+//                         className="flex cursor-pointer flex-col items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/30 bg-muted/30 w-40 h-40 mx-auto transition-colors hover:border-primary hover:bg-muted/50"
+//                         onClick={triggerPhotoInput}
+//                       >
+//                         <input
+//                           ref={photoInputRef}
+//                           type="file"
+//                           id="avatar"
+//                           className="hidden"
+//                           accept="image/jpeg,image/png,image/webp"
+//                           onChange={handlePhotoInputChange}
+//                         />
+
+//                         {photoUrl ? (
+//                           <div className="relative flex flex-col items-center w-full h-full">
+//                             <div className="relative w-full h-full overflow-hidden rounded-full">
+//                               <Image
+//                                 src={photoUrl}
+//                                 alt="Professional Photo Preview"
+//                                 className="object-cover"
+//                                 fill
+//                               />
+//                             </div>
+//                           </div>
+//                         ) : (
+//                           <div className="flex flex-col items-center justify-center h-full">
+//                             <div className="rounded-full bg-primary/10 p-2 text-primary">
+//                               <Upload className="h-5 w-5" />
+//                             </div>
+//                             <div className="mt-2 text-center">
+//                               <p className="text-sm font-medium">
+//                                 Upload Your Photo
+//                               </p>
+//                               <p className="text-[10px] text-muted-foreground">
+//                                 JPEG, PNG, WEBP (max 5MB)
+//                               </p>
+//                             </div>
+//                           </div>
+//                         )}
+//                       </div>
+//                     </FormControl>
+//                     {photoUrl && (
+//                       <div className="flex justify-center mt-2">
+//                         <button
+//                           type="button"
+//                           onClick={removePhoto}
+//                           className="flex items-center gap-1 rounded-lg bg-destructive px-3 py-1 text-sm font-medium text-destructive-foreground"
+//                         >
+//                           Remove Photo
+//                         </button>
+//                       </div>
+//                     )}
+//                     <FormMessage />
+//                   </FormItem>
+//                 )}
+//               />
+
+//               {/* Business Name */}
+//               <div className="space-y-2">
+//                 <Label htmlFor="businessName">Business Name</Label>
+//                 <Input
+//                   id="businessName"
+//                   placeholder="Enter your business name"
+//                   {...register("businessName")}
+//                 />
+//                 {errors.businessName && (
+//                   <p className="text-red-500 text-sm">
+//                     {errors.businessName.message}
+//                   </p>
+//                 )}
+//               </div>
+
+//               {/* Phone Number */}
+//               <div className="space-y-2">
+//                 <Label htmlFor="phone">
+//                   Phone Number<span className="text-gray-500"> (Optional)</span>
+//                 </Label>
+//                 <Input
+//                   id="phone"
+//                   placeholder="Enter your phone number"
+//                   {...register("phone")}
+//                 />
+//                 {errors.phone && (
+//                   <p className="text-red-500 text-sm">{errors.phone.message}</p>
+//                 )}
+//               </div>
+
+//               <div className="space-y-2">
+//                 <Label htmlFor="state">State</Label>
+//                 <Controller
+//                   name="state"
+//                   control={control}
+//                   render={({ field }) => (
+//                     <Select value={field.value} onValueChange={field.onChange}>
+//                       <SelectTrigger id="state">
+//                         <SelectValue placeholder="Select your state" />
+//                       </SelectTrigger>
+//                       <SelectContent>
+//                         {[
+//                           "Abia",
+//                           "Adamawa",
+//                           "Akwa Ibom",
+//                           "Anambra",
+//                           "Bauchi",
+//                           "Bayelsa",
+//                           "Benue",
+//                           "Borno",
+//                           "Cross River",
+//                           "Delta",
+//                           "Ebonyi",
+//                           "Edo",
+//                           "Ekiti",
+//                           "Enugu",
+//                           "Gombe",
+//                           "Imo",
+//                           "Jigawa",
+//                           "Kaduna",
+//                           "Kano",
+//                           "Katsina",
+//                           "Kebbi",
+//                           "Kogi",
+//                           "Kwara",
+//                           "Lagos",
+//                           "Nasarawa",
+//                           "Niger",
+//                           "Ogun",
+//                           "Ondo",
+//                           "Osun",
+//                           "Oyo",
+//                           "Plateau",
+//                           "Rivers",
+//                           "Sokoto",
+//                           "Taraba",
+//                           "Yobe",
+//                           "Zamfara",
+//                           "FCT",
+//                         ].map((state) => (
+//                           <SelectItem key={state} value={state}>
+//                             {state}
+//                           </SelectItem>
+//                         ))}
+//                       </SelectContent>
+//                     </Select>
+//                   )}
+//                 />
+//                 {errors.state && (
+//                   <p className="text-red-500 text-sm">{errors.state.message}</p>
+//                 )}
+//               </div>
+
+//               {/* About Business */}
+//               <div className="space-y-2">
+//                 <Label htmlFor="bio">
+//                   About Your Business
+//                   <span className="text-gray-500"> (Optional)</span>
+//                 </Label>
+//                 <Textarea
+//                   id="bio"
+//                   placeholder="Tell us about your business and goals"
+//                   rows={3}
+//                   {...register("aboutBusiness")}
+//                 />
+//               </div>
+//             </div>
+//           </form>
+//         </Form>
+//       </Card>
+
+//       <div className="flex justify-between">
+//         <Button variant="outline" className="px-6" onClick={onPrev}>
+//           <ArrowLeft className="mr-2 h-5 w-5" /> Back
+//         </Button>
+//         <Button
+//           onClick={submit}
+//           disabled={uploading || isSubmitting}
+//           className="bg-orange-500 hover:bg-orange-600 px-6"
+//         >
+//           {isSubmitting ? "Submitting..." : "Submit"}
+//         </Button>
+//       </div>
+//     </>
+//   );
+// }
+
+
+
+
+
+
 "use client";
 
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { useFormResolver } from "@/hooks/useFormResolver";
 import { profileSchema } from "@/zod/schema";
 import { FormData } from "../page";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -38,7 +442,7 @@ import { errorToast } from "@/components/ui/use-toast-advanced";
 interface ProfileProps {
   onSubmit: (data: FormData) => Promise<any>;
   onPrev: () => void;
-  formData: FormData; // Add this line to receive existing form data
+  formData: FormData;
   initialData?: {
     businessName?: string;
     phone?: string;
@@ -48,10 +452,16 @@ interface ProfileProps {
   };
 }
 
+interface BusinessNameValidation {
+  isChecking: boolean;
+  isAvailable: boolean | null;
+  message: string;
+}
+
 export default function ProfileStep({
   onSubmit,
   onPrev,
-  formData, // Add this parameter
+  formData,
   initialData,
 }: ProfileProps) {
   const [isSuccess, setIsSuccess] = useState(false);
@@ -62,11 +472,26 @@ export default function ProfileStep({
   const photoInputRef = useRef<HTMLInputElement>(null);
   const photoDropAreaRef = useRef<HTMLDivElement>(null);
 
+  // Business name validation state
+  const [businessNameValidation, setBusinessNameValidation] = useState<BusinessNameValidation>({
+    isChecking: false,
+    isAvailable: null,
+    message: ''
+  });
+
+ const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+ 
   const {
     form,
-    form: { register, submit, control, errors, isSubmitting, setValue },
+    form: { register, submit, control, errors, isSubmitting, setValue, watch },
   } = useFormResolver(
     async (data) => {
+      // Check if business name is available before submitting
+      if (businessNameValidation.isAvailable === false) {
+        errorToast("Please choose an available business name before submitting");
+        return;
+      }
+
       // Merge existing formData with new supplier info
       const result = await onSubmit({
         ...formData,
@@ -77,6 +502,86 @@ export default function ProfileStep({
     profileSchema,
     () => setIsSuccess(true)
   );
+
+  // Watch business name field for changes
+  const watchedBusinessName = watch("businessName");
+
+  // Debounced business name validation function
+  const validateBusinessName = useCallback(async (businessName: string) => {
+    if (!businessName || businessName.trim().length < 2) {
+      setBusinessNameValidation({
+        isChecking: false,
+        isAvailable: null,
+        message: ''
+      });
+      return;
+    }
+
+    setBusinessNameValidation(prev => ({
+      ...prev,
+      isChecking: true,
+      message: 'Checking availability...'
+    }));
+
+    try {
+      const response = await fetch('/api/onboarding/plug/businessName', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          businessName: businessName.trim()
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setBusinessNameValidation({
+          isChecking: false,
+          isAvailable: data.available,
+          message: data.available 
+            ? '✓ Great! This business name is available.'
+            : '✗ This business name is already taken. Please try another one.'
+        });
+      } else {
+        setBusinessNameValidation({
+          isChecking: false,
+          isAvailable: null,
+          message: 'Unable to check availability. Please try again.'
+        });
+      }
+    } catch (error) {
+      console.error('Error checking business name:', error);
+      setBusinessNameValidation({
+        isChecking: false,
+        isAvailable: null,
+        message: 'Unable to check availability. Please try again.'
+      });
+    }
+  }, []);
+
+  // Effect to handle debounced business name validation
+  useEffect(() => {
+    if (watchedBusinessName) {
+      // Clear existing timeout
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+
+      // Set new timeout for debounced validation
+      debounceTimeoutRef.current = setTimeout(() => {
+        validateBusinessName(watchedBusinessName);
+      }, 800); // 800ms delay
+    }
+
+    // Cleanup timeout on component unmount
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, [watchedBusinessName, validateBusinessName]);
 
   useEffect(() => {
     // Set initial values if provided
@@ -178,6 +683,16 @@ export default function ProfileStep({
     }
   };
 
+  // Check if form can be submitted
+  const canSubmit = () => {
+    return (
+      !businessNameValidation.isChecking &&
+      (businessNameValidation.isAvailable === true || !watchedBusinessName) &&
+      !uploading &&
+      !isSubmitting
+    );
+  };
+
   if (isSuccess) {
     return <PlugSuccess />;
   }
@@ -274,14 +789,50 @@ export default function ProfileStep({
                 )}
               />
 
-              {/* Business Name */}
+              {/* Business Name with Validation */}
               <div className="space-y-2">
                 <Label htmlFor="businessName">Business Name</Label>
-                <Input
-                  id="businessName"
-                  placeholder="Enter your business name"
-                  {...register("businessName")}
-                />
+                <div className="relative">
+                  <Input
+                    id="businessName"
+                    placeholder="Enter your business name"
+                    {...register("businessName")}
+                    className={`pr-10 ${
+                      businessNameValidation.isAvailable === false
+                        ? 'border-red-500 focus:border-red-500'
+                        : businessNameValidation.isAvailable === true
+                        ? 'border-green-500 focus:border-green-500'
+                        : ''
+                    }`}
+                  />
+                  {/* Validation Icons */}
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    {businessNameValidation.isChecking && (
+                      <Loader2 className="h-4 w-4 text-gray-400 animate-spin" />
+                    )}
+                    {!businessNameValidation.isChecking && businessNameValidation.isAvailable === true && (
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                    )}
+                    {!businessNameValidation.isChecking && businessNameValidation.isAvailable === false && (
+                      <XCircle className="h-4 w-4 text-red-500" />
+                    )}
+                  </div>
+                </div>
+                
+                {/* Validation Message */}
+                {businessNameValidation.message && (
+                  <p className={`text-sm flex items-center gap-1 ${
+                    businessNameValidation.isAvailable === false
+                      ? 'text-red-600'
+                      : businessNameValidation.isAvailable === true
+                      ? 'text-green-600'
+                      : 'text-gray-500'
+                  }`}>
+                    {businessNameValidation.message}
+                  </p>
+                )}
+                
+                {/* Form validation errors */}
                 {errors.businessName && (
                   <p className="text-red-500 text-sm">
                     {errors.businessName.message}
@@ -391,8 +942,12 @@ export default function ProfileStep({
         </Button>
         <Button
           onClick={submit}
-          disabled={uploading || isSubmitting}
-          className="bg-orange-500 hover:bg-orange-600 px-6"
+          disabled={!canSubmit()}
+          className={`px-6 ${
+            canSubmit() 
+              ? "bg-orange-500 hover:bg-orange-600" 
+              : "bg-gray-400 cursor-not-allowed"
+          }`}
         >
           {isSubmitting ? "Submitting..." : "Submit"}
         </Button>
