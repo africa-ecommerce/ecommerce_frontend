@@ -272,13 +272,11 @@
 // }
 
 
-
-
 "use client"
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import useSWR, { mutate as globalMutate } from "swr"
-import { Users, Search, X, UserPlus, UserMinus } from "lucide-react"
+import { Users, Search, X, UserPlus, UserMinus, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -320,6 +318,7 @@ const capitalizeBusiness = (s: string) =>
 export function SubscribersPopover({ userType }: SubscribersPopoverProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [loadingSubscriptions, setLoadingSubscriptions] = useState<Set<string>>(new Set())
   const searchTimer = useRef<number | null>(null)
 
   const plugKey = "/api/subscribe/plug"
@@ -328,10 +327,17 @@ export function SubscribersPopover({ userType }: SubscribersPopoverProps) {
 
   const { data: plugRaw } = useSWR(userType === "SUPPLIER" ? supplierKey : plugKey, fetcher)
   const { data: mySubscriptionsRaw } = useSWR(userType === "PLUG" ? plugKey : null, fetcher)
-  const { data: searchRaw, error: searchError } = useSWR(searchKey(searchQuery), fetcher, {
-    revalidateOnFocus: false,
-    shouldRetryOnError: false,
-  })
+  
+  // Only search if query length > 1
+  const shouldSearch = searchQuery.trim().length > 1
+  const { data: searchRaw, error: searchError } = useSWR(
+    shouldSearch ? searchKey(searchQuery) : null, 
+    fetcher, 
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    }
+  )
 
   const plugs: PlugOrSupplier[] = useMemo(
     () =>
@@ -373,50 +379,53 @@ export function SubscribersPopover({ userType }: SubscribersPopoverProps) {
       const url = `/api/subscribe/${encodeURIComponent(supplierId)}`
       const method = subscribe ? "POST" : "DELETE"
 
-      const sKey = searchKey(searchQuery)
-      globalMutate(
-        sKey,
-        (current: any) => {
-          if (!current?.data) return current
-          return {
-            ...current,
-            data: current.data.map((item: any) =>
-              String(item.supplierId ?? item.id) === supplierId ? { ...item, isSubscribed: subscribe } : item,
-            ),
-          }
-        },
-        false,
-      )
+      // Add to loading state
+      setLoadingSubscriptions(prev => new Set([...prev, supplierId]))
 
-      if (userType === "PLUG") {
+      const sKey = searchKey(searchQuery)
+      
+      // Update search results optimistically
+      if (shouldSearch) {
         globalMutate(
-          plugKey,
+          sKey,
           (current: any) => {
             if (!current?.data) return current
-            if (subscribe) {
-              return {
-                ...current,
-                data: [...current.data, { id: supplierId, businessName: supplierId, avatar: null }],
-              }
+            return {
+              ...current,
+              data: current.data.map((item: any) =>
+                String(item.supplierId ?? item.id) === supplierId ? { ...item, isSubscribed: subscribe } : item,
+              ),
             }
-            return { ...current, data: current.data.filter((d: any) => String(d.id) !== supplierId) }
           },
           false,
         )
       }
 
       try {
-        await fetch(url, { method })
-        globalMutate(sKey)
+        const response = await fetch(url, { method })
+        if (response.ok) {
+          // Revalidate all relevant data after successful request
+          if (shouldSearch) globalMutate(sKey)
+          if (userType === "PLUG") globalMutate(plugKey)
+          globalMutate(supplierKey)
+        } else {
+          throw new Error('Request failed')
+        }
+      } catch (err) {
+        // Revert optimistic updates on error
+        if (shouldSearch) globalMutate(sKey)
         if (userType === "PLUG") globalMutate(plugKey)
         globalMutate(supplierKey)
-      } catch (err) {
-        globalMutate(sKey)
-        globalMutate(plugKey)
-        globalMutate(supplierKey)
+      } finally {
+        // Remove from loading state
+        setLoadingSubscriptions(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(supplierId)
+          return newSet
+        })
       }
     },
-    [userType, searchQuery],
+    [userType, searchQuery, shouldSearch],
   )
 
   useEffect(() => {
@@ -471,14 +480,15 @@ export function SubscribersPopover({ userType }: SubscribersPopoverProps) {
         </div>
 
         <div className="max-h-[560px] overflow-hidden">
+          {/* Current subscriptions/subscribers section */}
           <div className="p-4">
             <h4 className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wide">
               {userType === "SUPPLIER" ? "Recent Subscribers" : "Currently Following"}
             </h4>
-            <ScrollArea className="h-36">
-              <div className="space-y-2">
-                {currentDisplay.length ? (
-                  currentDisplay.slice(0, 6).map((item) => (
+            {currentDisplay.length > 0 ? (
+              <ScrollArea className="max-h-36">
+                <div className="space-y-2">
+                  {currentDisplay.slice(0, 6).map((item) => (
                     <div key={item.id} className="flex items-center gap-3 p-2 rounded-lg">
                       <Avatar className="h-9 w-9">
                         {item.avatar ? <AvatarImage src={item.avatar} /> : <AvatarFallback>{getInitials(item.businessName)}</AvatarFallback>}
@@ -503,27 +513,35 @@ export function SubscribersPopover({ userType }: SubscribersPopoverProps) {
                           size="sm"
                           className="h-8 px-2 text-xs"
                           onClick={() => optimisticToggle(item.id, false)}
+                          disabled={loadingSubscriptions.has(item.id)}
                         >
-                          <UserMinus className="h-3 w-3 mr-1" />
+                          {loadingSubscriptions.has(item.id) ? (
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          ) : (
+                            <UserMinus className="h-3 w-3 mr-1" />
+                          )}
                           Unsubscribe
                         </Button>
                       )}
                     </div>
-                  ))
-                ) : (
-                  <div className="text-xs text-muted-foreground">
-                    No {userType === "SUPPLIER" ? "subscribers yet." : "subscriptions yet."}
-                  </div>
-                )}
+                  ))}
+                </div>
+              </ScrollArea>
+            ) : (
+              <div className="text-xs text-muted-foreground py-2">
+                No {userType === "SUPPLIER" ? "subscribers yet." : "subscriptions yet."}
               </div>
-            </ScrollArea>
+            )}
           </div>
 
+          {/* Search section - only for PLUG users */}
           {userType === "PLUG" && (
             <>
               <Separator />
               <div className="p-4">
-                <h4 className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wide">Discover Suppliers</h4>
+                <h4 className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wide">
+                  Discover Suppliers
+                </h4>
                 <div className="relative mb-3">
                   <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
@@ -533,52 +551,73 @@ export function SubscribersPopover({ userType }: SubscribersPopoverProps) {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <div className="h-44 overflow-auto space-y-2">
-                  {searchError && <div className="text-xs text-destructive">Search failed</div>}
-                  {!searchResults.length && !searchError ? (
-                    <div className="text-xs text-muted-foreground p-3">No suppliers found.</div>
-                  ) : (
-                    searchResults.map((supplier) => (
-                      <div key={supplier.supplierId} className="flex items-center gap-3 p-2 rounded-lg">
-                        <Avatar className="h-9 w-9">
-                          {supplier.avatar ? <AvatarImage src={supplier.avatar} /> : <AvatarFallback>{getInitials(supplier.businessName)}</AvatarFallback>}
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className="font-medium text-sm"
-                            style={{
-                              display: "-webkit-box",
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
-                            {capitalizeBusiness(supplier.businessName)}
-                          </p>
-                        </div>
-                        <Button
-                          variant={supplier.isSubscribed ? "outline" : "default"}
-                          size="sm"
-                          className="h-9 px-3 text-sm font-medium"
-                          onClick={() => optimisticToggle(supplier.supplierId, !supplier.isSubscribed)}
-                        >
-                          {supplier.isSubscribed ? (
-                            <>
-                              <UserMinus className="h-4 w-4 mr-2" />
-                              Unsubscribe
-                            </>
-                          ) : (
-                            <>
-                              <UserPlus className="h-4 w-4 mr-2" />
-                              Subscribe
-                            </>
-                          )}
-                        </Button>
+                
+                {/* Only show search results section if there's a valid search query */}
+                {shouldSearch && (
+                  <div className="max-h-44 overflow-auto">
+                    {searchError ? (
+                      <div className="text-xs text-destructive py-2">Search failed</div>
+                    ) : searchResults.length === 0 ? (
+                      <div className="text-xs text-muted-foreground py-2">No suppliers found.</div>
+                    ) : (
+                      <div className="space-y-2">
+                        {searchResults.map((supplier) => (
+                          <div key={supplier.supplierId} className="flex items-center gap-3 p-2 rounded-lg">
+                            <Avatar className="h-9 w-9">
+                              {supplier.avatar ? (
+                                <AvatarImage src={supplier.avatar} />
+                              ) : (
+                                <AvatarFallback>{getInitials(supplier.businessName)}</AvatarFallback>
+                              )}
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p
+                                className="font-medium text-sm"
+                                style={{
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                {capitalizeBusiness(supplier.businessName)}
+                              </p>
+                            </div>
+                            <Button
+                              variant={supplier.isSubscribed ? "outline" : "default"}
+                              size="sm"
+                              className="h-8 px-2 text-xs font-medium"
+                              onClick={() => optimisticToggle(supplier.supplierId, !supplier.isSubscribed)}
+                              disabled={loadingSubscriptions.has(supplier.supplierId)}
+                            >
+                              {loadingSubscriptions.has(supplier.supplierId) ? (
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              ) : supplier.isSubscribed ? (
+                                <>
+                                  <UserMinus className="h-3 w-3 mr-1" />
+                                  Unsubscribe
+                                </>
+                              ) : (
+                                <>
+                                  <UserPlus className="h-3 w-3 mr-1" />
+                                  Subscribe
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        ))}
                       </div>
-                    ))
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* Show instruction text when search query is too short */}
+                {searchQuery.trim().length > 0 && searchQuery.trim().length <= 1 && (
+                  <div className="text-xs text-muted-foreground py-2">
+                    Type at least 2 characters to search...
+                  </div>
+                )}
               </div>
             </>
           )}
