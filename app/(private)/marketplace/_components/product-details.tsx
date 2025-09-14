@@ -295,7 +295,7 @@ export default function ProductDetail() {
               <ArrowLeft className="h-5 w-5" />
               <span className="sr-only">Back</span>
             </Button>
-            <h1 className="text-lg font-semibold truncate capitalize max-w-[200px] md:max-w-md">
+            <h1 className="text-sm md:text-lg font-semibold truncate capitalize max-w-[200px] md:max-w-md">
               {product?.name}
             </h1>
           </div>
@@ -355,7 +355,7 @@ export default function ProductDetail() {
           <section className="px-4 space-y-6">
             <div>
               <div className="flex items-start justify-between">
-                <h2 className="text-base md:text-lg font-bold capitalize">
+                <h2 className="text-sm md:text-lg font-bold capitalize">
                   {truncateText(product?.name)}
                 </h2>
                 <div className="font-semibold">
@@ -393,10 +393,10 @@ export default function ProductDetail() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold capitalize break-words">
+                    <div className="font-semibold text-xs md:text-sm capitalize break-words">
                       {product?.supplier?.businessName}
                     </div>
-                    <div className="text-sm text-muted-foreground capitalize">
+                    <div className="text-xs md:text-sm text-muted-foreground capitalize">
                       {product?.supplier?.pickupLocation.lga},{" "}
                       {product?.supplier?.pickupLocation.state}
                     </div>
