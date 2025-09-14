@@ -295,8 +295,8 @@ export default function ProductDetail() {
               <ArrowLeft className="h-5 w-5" />
               <span className="sr-only">Back</span>
             </Button>
-            <h1 className="text-sm md:text-lg font-semibold truncate capitalize max-w-[200px] md:max-w-md">
-              {product?.name}
+            <h1 className="text-sm md:text-lg font-semibold capitalize">
+              {truncateText(product?.name, 25)}
             </h1>
           </div>
           <div>
