@@ -1,7 +1,3 @@
-
-
-
-
 "use client";
 
 import { useState } from "react";
@@ -439,7 +435,6 @@ export default function ProductDetail() {
                 </div>
               </CardContent>
             </Card>
-
             {/* Delivery & Stock Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* <div className="flex items-center justify-between p-3 rounded-lg bg-muted">
