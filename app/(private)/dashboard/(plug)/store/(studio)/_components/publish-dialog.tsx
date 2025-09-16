@@ -831,7 +831,6 @@ export default function PublishDialog({
   const [publishProgress, setPublishProgress] = useState(0);
   const [copied, setCopied] = useState(false);
 
-  console.log("publishResult", publishResult)
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -1061,7 +1060,7 @@ export default function PublishDialog({
                         variant="ghost"
                         className="h-7 sm:h-8 px-1 sm:px-2"
                         onClick={() =>
-                          copyToClipboard(getDisplayUrl(publishResult?.siteUrl))
+                          copyToClipboard(getDisplayUrl(publishResult?.result.siteUrl))
                         }
                       >
                         {copied ? (
@@ -1080,11 +1079,11 @@ export default function PublishDialog({
                           try {
                             navigator.share({
                               title: "Check out my new website!",
-                              url: getDisplayUrl(publishResult?.siteUrl),
+                              url: getDisplayUrl(publishResult?.result.siteUrl),
                             });
                           } catch (err) {
                             copyToClipboard(
-                              getDisplayUrl(publishResult?.siteUrl)
+                              getDisplayUrl(publishResult?.result.siteUrl)
                             );
                           }
                         }}
@@ -1098,7 +1097,7 @@ export default function PublishDialog({
                       <Globe className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-blue-600" />
                     </div>
                     <code className="text-xs sm:text-sm font-medium text-slate-700 flex-1 min-w-0 break-all">
-                      {getDisplayUrl(publishResult?.siteUrl && truncateText(publishResult.siteUrl, 10))}
+                      {getDisplayUrl(publishResult?.result.siteUrl && truncateText(publishResult.result.siteUrl, 10))}
                     </code>
                   </div>
                 </div>
@@ -1108,7 +1107,7 @@ export default function PublishDialog({
                     className="flex-1 min-w-0 text-xs sm:text-sm h-9 sm:h-10 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                     onClick={(e) => {
                       window.open(
-                        getDisplayUrl(publishResult?.siteUrl),
+                        getDisplayUrl(publishResult?.result.siteUrl),
                         "_blank"
                       );
                     }}
