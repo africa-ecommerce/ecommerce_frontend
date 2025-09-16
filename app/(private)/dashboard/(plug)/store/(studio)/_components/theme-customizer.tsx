@@ -1,6 +1,3 @@
-
-
-
 "use client";
 
 import type React from "react";
@@ -43,40 +40,6 @@ import { useSwrUser } from "@/hooks/use-current-user";
 import { errorToast } from "@/components/ui/use-toast-advanced";
 
 // Default template configuration
-const defaultConfig = {
-  templateId: "primary",
-  styles: {
-    PRIMARY_COLOR: "#000000",
-    SECONDARY_COLOR: "#f5f5f5",
-    ACCENT_COLOR: "#666666",
-    TEXT_COLOR: "#333333",
-    BACKGROUND_COLOR: "#ffffff",
-   
-    FONT_FAMILY: "Inter, sans-serif",
-  },
-
-  content: {
-    BRAND_NAME: "Fashion Boutique",
-    HEADER_TEXT: "Fashion Boutique",
-    HERO_TITLE: "Spring Collection 2025",
-    HERO_DESCRIPTION:
-      "Discover our latest fashion pieces designed for the modern lifestyle",
-    PRIMARY_CTA_TEXT: "Discover",
-    SECONDARY_CTA_TEXT: "Learn more",
-    PRODUCTS_TITLE: "Featured Products",
-    ABOUT_TEXT:
-      "<p>We are a modern fashion boutique dedicated to bringing you the latest trends at affordable prices.</p>",
-    INSTAGRAM_LINK: "https://instagram.com/pluggnhq",
-    FACEBOOK_LINK: "https://facebook.com/pluggnhq",
-    TWITTER_LINK: "https://twitter.com/pluggnhq",
-    PHONE_NUMBER: "+2349151425001",
-    MAIL: "support@pluggn.com.ng",
-  },
-  metadata: {
-    title: "Fashion Boutique - Modern Clothing Store",
-    description: "Shop the latest fashion trends at Fashion Boutique",
-  },
-};
 
 // Custom hook for debounced saving
 function useDebounce(callback: Function, delay: number) {
@@ -104,9 +67,7 @@ export default function ThemeCustomizer() {
   const [viewMode, setViewMode] = useState<"desktop" | "tablet" | "mobile">(
     "mobile"
   );
-  const [config, setConfig] = useState({ ...defaultConfig });
-  const [selectedPage, setSelectedPage] = useState("index");
-  const [history, setHistory] = useState<any[]>([{ ...defaultConfig }]);
+
   const [historyIndex, setHistoryIndex] = useState(0);
   const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -122,12 +83,49 @@ export default function ThemeCustomizer() {
   const { userData } = useUser();
   const { user } = userData || { user: null };
 
+  const defaultConfig = {
+    templateId: "primary",
+    styles: {
+      PRIMARY_COLOR: "#000000",
+      SECONDARY_COLOR: "#f5f5f5",
+      ACCENT_COLOR: "#666666",
+      TEXT_COLOR: "#333333",
+      BACKGROUND_COLOR: "#ffffff",
 
-  console.log("user", user)
+      FONT_FAMILY: "Inter, sans-serif",
+    },
+
+    content: {
+      BRAND_NAME: "Fashion Boutique",
+      HEADER_TEXT: "Fashion Boutique",
+      HERO_TITLE: "Spring Collection 2025",
+      HERO_DESCRIPTION:
+        "Discover our latest fashion pieces designed for the modern lifestyle",
+      PRIMARY_CTA_TEXT: "Discover",
+      SECONDARY_CTA_TEXT: "Learn more",
+      PRODUCTS_TITLE: "Featured Products",
+      ABOUT_TEXT:
+        "<p>We are a modern fashion boutique dedicated to bringing you the latest trends at affordable prices.</p>",
+      INSTAGRAM_LINK: "https://instagram.com/pluggnhq",
+      FACEBOOK_LINK: "https://facebook.com/pluggnhq",
+      TWITTER_LINK: "https://twitter.com/pluggnhq",
+      PHONE_NUMBER: user.plug.phone || "09151425001",
+      MAIL: user.email,
+    },
+    metadata: {
+      title: "Fashion Boutique - Modern Clothing Store",
+      description: "Shop the latest fashion trends at Fashion Boutique",
+    },
+  };
+
+  const [config, setConfig] = useState({ ...defaultConfig });
+  const [selectedPage, setSelectedPage] = useState("index");
+  const [history, setHistory] = useState<any[]>([{ ...defaultConfig }]);
+
   const close = () => {
-    setPublishResult(null)
-    setIsPublishDialogOpen(false)
-  }
+    setPublishResult(null);
+    setIsPublishDialogOpen(false);
+  };
 
   // Initialize loading state
   const [isLoading, setIsLoading] = useState(true);
@@ -137,16 +135,13 @@ export default function ThemeCustomizer() {
 
   // Track whether initial load has completed
   const initialLoadRef = useRef(false);
-    const {mutate}  = useSwrUser()
-  
+  const { mutate } = useSwrUser();
 
   useEffect(() => {
-    if(user){
-    setSubdomain(user?.plug?.subdomain || "");
+    if (user) {
+      setSubdomain(user?.plug?.subdomain || "");
     }
-  }, [user])
-
-  
+  }, [user]);
 
   const {
     data: userConfig,
@@ -186,7 +181,6 @@ export default function ThemeCustomizer() {
     },
   });
 
-
   useEffect(() => {
     if (userConfigError) {
       errorToast("Could not load your site configuration");
@@ -211,7 +205,6 @@ export default function ThemeCustomizer() {
         }
       } catch (error) {
         console.error("Error saving to localStorage:", error);
-       
       } finally {
         setIsSaving(false);
       }
@@ -224,7 +217,11 @@ export default function ThemeCustomizer() {
   // Load saved data from localStorage on initial render
   useEffect(() => {
     // Only run in browser environment and only once
-    if (typeof window !== "undefined" && !initialLoadRef.current && !user?.plug?.configUrl) {
+    if (
+      typeof window !== "undefined" &&
+      !initialLoadRef.current &&
+      !user?.plug?.configUrl
+    ) {
       try {
         const loadedData = loadThemeCustomizerData(defaultConfig);
 
@@ -324,7 +321,6 @@ export default function ThemeCustomizer() {
       // Force a small config update to trigger rerender
       const triggerUpdate = { ...config };
       setConfig(triggerUpdate);
-
     }
   };
 
@@ -336,7 +332,6 @@ export default function ThemeCustomizer() {
       setHistory([{ ...defaultConfig }]);
       setHistoryIndex(0);
       setSelectedPage("index");
-     
     }
   }, []);
 
@@ -348,10 +343,10 @@ export default function ThemeCustomizer() {
     try {
       setIsPublishing(true);
       const data = { config, subdomain };
-      
+
       // Use PUT method if editing, POST if creating new
       const method = isEditing ? "PUT" : "POST";
-      
+
       // Call the publish API
       const response = await fetch("/api/site", {
         method,
@@ -368,13 +363,13 @@ export default function ThemeCustomizer() {
 
       const result = await response.json();
 
-      console.log("result", result)
+      console.log("result", result);
 
       setPublishResult({ result, success: true });
-     
+
       clearSavedData();
-      mutate()
-      mutateConfig()
+      mutate();
+      mutateConfig();
     } catch (error) {
       console.error("Error publishing site:", error);
 
@@ -530,7 +525,7 @@ export default function ThemeCustomizer() {
               <ArrowLeft className="h-5 w-5" />
               <span className="sr-only">Back</span>
             </Button>
-            
+
             {/* Mobile sidebar toggle */}
             {!sidebarOpen && (
               <Button
