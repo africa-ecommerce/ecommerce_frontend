@@ -109,8 +109,8 @@ export default function ThemeCustomizer() {
       INSTAGRAM_LINK: "https://instagram.com/pluggnhq",
       FACEBOOK_LINK: "https://facebook.com/pluggnhq",
       TWITTER_LINK: "https://twitter.com/pluggnhq",
-      PHONE_NUMBER: "09151425001",
-      MAIL: user.email,
+      PHONE_NUMBER: user?.plug?.phone || "09151425001",
+      MAIL: user?.email,
     },
     metadata: {
       title: "Fashion Boutique - Modern Clothing Store",
