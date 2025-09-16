@@ -831,6 +831,8 @@ export default function PublishDialog({
   const [publishProgress, setPublishProgress] = useState(0);
   const [copied, setCopied] = useState(false);
 
+  console.log("publishResult", publishResult)
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
@@ -838,8 +840,8 @@ export default function PublishDialog({
     });
   };
 
-  const getDisplayUrl = (url?: string) => {
-    return url || "your-generated-url.pluggn.store"; // Fallback for display
+  const getDisplayUrl = (url: string) => {
+    return url; // Fallback for display
   };
 
   // View state management

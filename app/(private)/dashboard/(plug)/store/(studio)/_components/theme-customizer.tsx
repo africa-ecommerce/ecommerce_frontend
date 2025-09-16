@@ -367,6 +367,8 @@ export default function ThemeCustomizer() {
 
       const result = await response.json();
 
+      console.log("result", result)
+
       setPublishResult({ result, success: true });
      
       clearSavedData();
@@ -629,8 +631,8 @@ export default function ThemeCustomizer() {
       {/* Publish Dialog */}
       <PublishDialog
         isOpen={isPublishDialogOpen}
-        subdomain={subdomain}
-        onSubdomainChange={setSubdomain}
+        // subdomain={subdomain}
+        // onSubdomainChange={setSubdomain}
         onClose={close}
         onConfirm={handleConfirmPublish}
         isPublishing={isPublishing}
