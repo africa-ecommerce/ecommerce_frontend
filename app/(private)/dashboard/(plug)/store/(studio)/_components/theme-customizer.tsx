@@ -8,7 +8,6 @@ import type React from "react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Save,
@@ -123,6 +122,8 @@ export default function ThemeCustomizer() {
   const { userData } = useUser();
   const { user } = userData || { user: null };
 
+
+  console.log("user", user)
   const close = () => {
     setPublishResult(null)
     setIsPublishDialogOpen(false)
