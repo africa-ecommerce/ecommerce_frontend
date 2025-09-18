@@ -395,7 +395,7 @@ const SupplierOrder = () => {
           ) : (
             <>
               {orders.length === 0 ? (
-                <EmptyState message="No orders found" icon={PackageCheck} />
+                <EmptyState message="No order to be fulfilled as of now" icon={PackageCheck} />
               ) : (
                 <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
                   {orders.map((order: any) => (

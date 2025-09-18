@@ -721,7 +721,7 @@ export default function SupplierDashboard() {
               <>
                 {orders.length === 0 ? (
                   <EmptyState
-                    message="No orders found"
+                    message="No order to be fulfilled as of now"
                     icon={PackageCheck}
                     actionText="View All Orders"
                     onAction={() => console.log("View all orders clicked")}

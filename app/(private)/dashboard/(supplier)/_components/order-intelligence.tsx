@@ -20,7 +20,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import useSWR from "swr";
 
-type MetricState = "loading" | "empty" | "error" | "loaded";
+type MetricState = "loading" | "error" | "loaded";
 
 interface MetricData {
   totalOrders: number;
@@ -80,10 +80,7 @@ export function IntelligenceSection({
       }
 
       // If no orders data, show empty state
-      if (!ordersData || ordersData.length === 0) {
-        setMetrics((prev) => ({ ...prev, state: "empty" }));
-        return;
-      }
+     
 
       // Calculate metrics
       const totalOrders = ordersData.length;
@@ -131,8 +128,7 @@ export function IntelligenceSection({
     switch (metrics.state) {
       case "loading":
         return <LoadingState />;
-      case "empty":
-        return <EmptyState onRetry={calculateMetrics} />;
+     
       case "error":
         return (
           <ErrorState
@@ -164,26 +160,6 @@ function LoadingState() {
           </Card>
         ))}
     </div>
-  );
-}
-
-function EmptyState({ onRetry }: { onRetry: () => void }) {
-  return (
-    <Card className="p-4 sm:p-6 text-center">
-      <div className="flex flex-col items-center justify-center space-y-2 sm:space-y-3">
-        <Package className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
-        <h3 className="text-base sm:text-lg font-semibold">
-          No Order Data Available
-        </h3>
-        <p className="text-muted-foreground max-w-md mx-auto text-xs sm:text-sm">
-          There is currently no order data available. This could be because you
-          haven't processed any orders yet.
-        </p>
-        <Button size="sm" onClick={onRetry} className="mt-2">
-          Refresh Data
-        </Button>
-      </div>
-    </Card>
   );
 }
 
@@ -223,7 +199,7 @@ function LoadedState({ metrics }: { metrics: MetricData }) {
   return (
     <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
       <MetricCard
-        title="Total Orders"
+        title="Total Orders to be fulfilled"
         value={metrics.totalOrders.toString()}
         icon={<Package className="h-4 w-4 text-orange-500" />}
       />
