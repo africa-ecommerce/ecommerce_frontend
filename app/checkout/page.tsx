@@ -443,6 +443,7 @@ const handleStageOrder = async () => {
       await confirmOrder(ref.reference);
     },
     onClose: () => {
+      setIsLoading(false);
       showPaymentCancelledModal();
     },
   });
