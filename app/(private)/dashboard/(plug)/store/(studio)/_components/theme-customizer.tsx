@@ -134,6 +134,7 @@ export default function ThemeCustomizer() {
   const prevPageRef = useRef(selectedPage);
 
   // Track whether initial load has completed
+  const [hasInitializedSidebar, setHasInitializedSidebar] = useState(false);
   const initialLoadRef = useRef(false);
   const { mutate } = useSwrUser();
 
@@ -243,28 +244,37 @@ export default function ThemeCustomizer() {
   }, [user]);
 
   // Setup mobile detection and sidebar state
+  
+
+
   useEffect(() => {
-    const checkScreenSize = () => {
-      const isMobileView = window.innerWidth < 768;
-      setIsMobile(isMobileView);
-      // Only auto-close when FIRST switching to mobile view
-      // Don't auto-open/close during resize to avoid interfering with user interactions
-      if (isMobileView !== isMobile) {
-        if (isMobileView) {
-          setSidebarOpen(false);
-        } else {
-          setSidebarOpen(true);
-        }
+  const checkScreenSize = () => {
+    const isMobileView = window.innerWidth < 768;
+    const wasMobile = isMobile;
+    setIsMobile(isMobileView);
+    
+    // On initial load, keep sidebar open for mobile users
+    if (!hasInitializedSidebar) {
+      setSidebarOpen(true); // Always start with sidebar open
+      setHasInitializedSidebar(true);
+    } else {
+      // Only auto-close when switching FROM desktop TO mobile (not on initial load)
+      if (isMobileView && !wasMobile) {
+        // Don't auto-close anymore - let user control it
+        // setSidebarOpen(false);
+      } else if (!isMobileView && wasMobile) {
+        setSidebarOpen(true);
       }
-    };
+    }
+  };
 
-    checkScreenSize();
-    window.addEventListener("resize", checkScreenSize);
+  checkScreenSize();
+  window.addEventListener("resize", checkScreenSize);
 
-    return () => {
-      window.removeEventListener("resize", checkScreenSize);
-    };
-  }, [isMobile]);
+  return () => {
+    window.removeEventListener("resize", checkScreenSize);
+  };
+}, [isMobile, hasInitializedSidebar])
 
   // Trigger debounced save whenever config, history, historyIndex, or selectedPage changes
   // Don't save during initial load
