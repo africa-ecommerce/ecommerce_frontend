@@ -136,14 +136,7 @@ export default function Home() {
       {/* Modals */}
      
 
-      <ProductDetailModal
-        product={selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-        onAddToCart={(product) => {
-          // setCartItems((prev) => [...prev, product])
-          setSelectedProduct(null)
-        }}
-      />
+    
 
       <SharePrompt isOpen={showSharePrompt} onClose={() => setShowSharePrompt(false)} cartCount={items.length} />
     </main>
