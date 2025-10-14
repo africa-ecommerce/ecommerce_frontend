@@ -1,21 +1,27 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { DiscoveryStack } from "./components/discovery-stack"
+import { useState, useEffect, useRef } from "react";
+import { DiscoveryStack } from "./components/discovery-stack";
 
-import { SharePrompt } from "./components/share-prompt"
-import { useProducts, type ProductsFilter } from "@/hooks/use-products"
-import { useUser } from "@/app/_components/provider/UserContext"
-import { useSearchParams } from "next/navigation"
-import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider"
-import { DailyShareModal } from "./components/daily-share-modal"
-import { shouldShowTour, markTourSeen, shouldShowSharePrompt, markSharePromptShown } from "@/lib/tour-storage"
-import { DiscoveryTourOverlay } from "./components/discovery-tour-overlay"
+import { SharePrompt } from "./components/share-prompt";
+import { useProducts, type ProductsFilter } from "@/hooks/use-products";
+import { useUser } from "@/app/_components/provider/UserContext";
+import { useSearchParams } from "next/navigation";
+import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
+import { DailyShareModal } from "./components/daily-share-modal";
+import {
+  shouldShowTour,
+  markTourSeen,
+  shouldShowSharePrompt,
+  markSharePromptShown,
+  shouldShowDailyShare,
+  markDailyShareShown,
+} from "@/lib/tour-storage";
+import { DiscoveryTourOverlay } from "./components/discovery-tour-overlay";
 
 export default function Home() {
-  const [showSharePrompt, setShowSharePrompt] = useState(false)
-  const [hasSeenSharePrompt, setHasSeenSharePrompt] = useState(false)
-  const [product, setProduct] = useState<any[]>([])
+  const [showSharePrompt, setShowSharePrompt] = useState(false);
+  const [hasSeenSharePrompt, setHasSeenSharePrompt] = useState(false);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
@@ -24,125 +30,167 @@ export default function Home() {
   const [hasShownDailyShare, setHasShownDailyShare] = useState(false);
   const [firstSwipeOfDay, setFirstSwipeOfDay] = useState(true);
 
+  const searchParams = useSearchParams();
 
-  const searchParams = useSearchParams()
-  
-    // Search and filter states
-    const [searchQuery, setSearchQuery] = useState("")
-   
-    const [priceRange, setPriceRange] = useState<[number, number]>([0, 9999999])
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-    const [selectedRatings, setSelectedRatings] = useState<number[]>([])
-    const {
-      userData: { user },
-    } = useUser()
-  
-    // Mock subscriber data - replace with real data from your API
-    const getSubscriberCount = () => {
-      if (user?.userType === "SUPPLIER") {
-        return 1247 // Number of people subscribed to this supplier
-      } else if (user?.userType === "PLUG") {
-        return 23 // Number of suppliers this plug is subscribed to
+  // Search and filter states
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 9999999]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
+  const {
+    userData: { user },
+  } = useUser();
+
+  // Mock subscriber data - replace with real data from your API
+  const getSubscriberCount = () => {
+    if (user?.userType === "SUPPLIER") {
+      return 1247; // Number of people subscribed to this supplier
+    } else if (user?.userType === "PLUG") {
+      return 23; // Number of suppliers this plug is subscribed to
+    }
+    return 0;
+  };
+
+  // Flag to prevent URL sync on initial load
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // IntersectionObserver for infinite scroll
+  // const { ref: loadingRef, inView } = useInView({
+  //   threshold: 0.5,
+  //   triggerOnce: false,
+  // })
+
+  // Combine filters for products hook
+  const filters: ProductsFilter = {
+    search: searchQuery,
+    priceRange,
+    selectedCategories,
+    selectedRatings,
+    sortBy: "createdAt",
+    order: "desc",
+  };
+
+  useEffect(() => {
+    const checkTour = async () => {
+      const shouldShow = await shouldShowTour();
+      if (shouldShow) {
+        setShowTour(true);
       }
-      return 0
-    }
-  
-    // Flag to prevent URL sync on initial load
-    const [isInitialized, setIsInitialized] = useState(false)
-  
-    // IntersectionObserver for infinite scroll
-    // const { ref: loadingRef, inView } = useInView({
-    //   threshold: 0.5,
-    //   triggerOnce: false,
-    // })
-  
-    // Combine filters for products hook
-    const filters: ProductsFilter = {
-      search: searchQuery,
-      priceRange,
-      selectedCategories,
-      selectedRatings,
-      sortBy: "createdAt",
-      order: "desc",
-    }
-
-    useEffect(() => {
-      const checkTour = async () => {
-        const shouldShow = await shouldShowTour();
-        if (shouldShow) {
-          setShowTour(true);
-        }
-      };
-      checkTour();
-    }, []);
-
-    const handleTourComplete = async () => {
-      setShowTour(false);
-      await markTourSeen();
     };
-  
-    // Use the products hook for data fetching
-    const { products, error, isLoading, isLoadingMore, hasNextPage, isEmpty, size, setSize, clearCache, refreshData } =
-      useProducts(filters, 20)
+    checkTour();
+  }, []);
 
-      
-    const { addItem, items } = useShoppingCart()
-  
+  const handleTourComplete = async () => {
+    setShowTour(false);
+    await markTourSeen();
+  };
 
+  // Use the products hook for data fetching
+  const {
+    products,
+    error,
+    isLoading,
+    isLoadingMore,
+    hasNextPage,
+    isEmpty,
+    size,
+    setSize,
+    clearCache,
+    refreshData,
+  } = useProducts(filters, 20);
 
-
+  const { addItem, items } = useShoppingCart();
 
   const handleSwipeRight = async (product: any) => {
-    setCurrentIndex((prev) => prev + 1)
+    setCurrentIndex((prev) => prev + 1);
 
     const cartItem = {
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    minPrice: product.minPrice,
-    maxPrice: product.maxPrice,
-    image:
-      product.images && product.images.length > 0
-        ? product.images[0]
-        : "/placeholder.svg",
-  }
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      minPrice: product.minPrice,
+      maxPrice: product.maxPrice,
+      image:
+        product.images && product.images.length > 0
+          ? product.images[0]
+          : "/placeholder.svg",
+    };
 
-  // 2️⃣ Add to store
-  addItem(cartItem, false)
+    addItem(cartItem, false);
 
-   if (firstSwipeOfDay && !hasShownDailyShare) {
-      setFirstSwipeOfDay(false)
-      const shouldShow = await shouldShowSharePrompt()
+    // Check if we should show daily share modal
+    if (firstSwipeOfDay && !hasShownDailyShare) {
+      setFirstSwipeOfDay(false);
+      const shouldShow = await shouldShowDailyShare(); // Use the new function
       if (shouldShow) {
         setTimeout(() => {
-          setShowDailyShare(true)
-          setHasShownDailyShare(true)
-        }, 500)
+          setShowDailyShare(true);
+          setHasShownDailyShare(true);
+        }, 500);
       }
     }
 
-  // 3️⃣ Optionally: show share prompt logic
-  if (items.length + 1 === 10 && !hasSeenSharePrompt) {
-    setTimeout(() => {
-      setShowSharePrompt(true)
-      setHasSeenSharePrompt(true)
-    }, 500)
-  }
-  }
+    // Show share prompt logic
+    if (items.length + 1 === 10 && !hasSeenSharePrompt) {
+      setTimeout(() => {
+        setShowSharePrompt(true);
+        setHasSeenSharePrompt(true);
+      }, 500);
+    }
+  };
+
+  // const handleSwipeRight = async (product: any) => {
+  //   setCurrentIndex((prev) => prev + 1)
+
+  //   const cartItem = {
+  //   id: product.id,
+  //   name: product.name,
+  //   price: product.price,
+  //   minPrice: product.minPrice,
+  //   maxPrice: product.maxPrice,
+  //   image:
+  //     product.images && product.images.length > 0
+  //       ? product.images[0]
+  //       : "/placeholder.svg",
+  // }
+
+  // // 2️⃣ Add to store
+  // addItem(cartItem, false)
+
+  //  if (firstSwipeOfDay && !hasShownDailyShare) {
+  //     setFirstSwipeOfDay(false)
+  //     const shouldShow = await shouldShowSharePrompt()
+  //     if (shouldShow) {
+  //       setTimeout(() => {
+  //         setShowDailyShare(true)
+  //         setHasShownDailyShare(true)
+  //       }, 500)
+  //     }
+  //   }
+
+  // // 3️⃣ Optionally: show share prompt logic
+  // if (items.length + 1 === 10 && !hasSeenSharePrompt) {
+  //   setTimeout(() => {
+  //     setShowSharePrompt(true)
+  //     setHasSeenSharePrompt(true)
+  //   }, 500)
+  // }
+  // }
 
   const handleSwipeLeft = () => {
-    setCurrentIndex((prev) => prev + 1)
-  }
+    setCurrentIndex((prev) => prev + 1);
+  };
 
-   const handleShare = async () => {
-    await markSharePromptShown()
-    // Implement your share logic here
-    console.log("Share functionality triggered")
-  }
+  const handleShare = async () => {
+    await markSharePromptShown();
+    await markDailyShareShown(); // Add this line
+    console.log("Share functionality triggered");
+  };
 
   const handleSwipeUp = (product: any) => {
-    setSelectedProduct(product)
-  }
+    setSelectedProduct(product);
+  };
 
   // const handleDeckEnd = () => {
   //   // Shuffle and restart
@@ -154,10 +202,7 @@ export default function Home() {
   return (
     <main className="max-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 relative overflow-hidden font-sans">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
-        
-       
-      </header>
+      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between"></header>
 
       {/* Discovery Stack */}
       <div className="h-screen flex items-start md:items-center justify-center">
@@ -172,14 +217,23 @@ export default function Home() {
       </div>
 
       {/* Modals */}
-     
 
-     <DiscoveryTourOverlay isOpen={showTour} onComplete={handleTourComplete} />
+      <DiscoveryTourOverlay isOpen={showTour} onComplete={handleTourComplete} />
 
       {/* Daily Share Modal */}
-      <DailyShareModal isOpen={showDailyShare} onClose={() => setShowDailyShare(false)} onShare={handleShare} />
-
-      <SharePrompt isOpen={showSharePrompt} onClose={() => setShowSharePrompt(false)} cartCount={items.length} />
+      <DailyShareModal
+        isOpen={showDailyShare}
+        onClose={async () => {
+          setShowDailyShare(false);
+          await markDailyShareShown(); // Mark as shown even if dismissed
+        }}
+        onShare={handleShare}
+      />
+      <SharePrompt
+        isOpen={showSharePrompt}
+        onClose={() => setShowSharePrompt(false)}
+        cartCount={items.length}
+      />
     </main>
-  )
+  );
 }
