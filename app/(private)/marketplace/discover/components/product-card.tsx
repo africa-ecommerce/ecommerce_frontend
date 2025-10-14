@@ -1,0 +1,114 @@
+"use client"
+
+import { useState } from "react"
+import { Share2 } from "lucide-react"
+import Image from "next/image"
+
+interface ProductCardProps {
+  product: any
+  onSwipeUp: () => void
+}
+
+export function ProductCard({ product, onSwipeUp }: ProductCardProps) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  const handleImageClick = () => {
+    if (product.images.length > 1) {
+      setCurrentImageIndex((prev) => (prev + 1) % product.images.length)
+    }
+  }
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product.name,
+          text: `Check out ${product.name} on Pluggn!`,
+          url: window.location.href,
+        })
+      } catch (err) {
+        console.log("Share cancelled")
+      }
+    }
+  }
+
+  return (
+    <div className="w-[90vw] max-w-md aspect-[4/5] bg-gradient-to-br from-orange-50 to-amber-50 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4">
+        <span className="text-xs font-medium text-orange-600 bg-orange-100 px-3 py-1 rounded-full uppercase tracking-wide">
+          {product.category}
+        </span>
+        <button
+          onClick={handleShare}
+          className="p-2 hover:bg-orange-100 rounded-full transition-colors"
+          aria-label="Share product"
+        >
+          <Share2 className="w-5 h-5 text-orange-600" />
+        </button>
+      </div>
+
+      {/* Product Image */}
+      <div className="flex-1 relative cursor-pointer group" onClick={handleImageClick} onDoubleClick={onSwipeUp}>
+        <Image
+          src={product.images[currentImageIndex] || "/placeholder.svg"}
+          alt={product.name}
+          fill
+          className="object-cover"
+          priority
+        />
+
+        {/* Image indicators */}
+        {product.images.length > 1 && (
+          <div className="absolute top-4 left-0 right-0 flex justify-center gap-1.5">
+            {product.images.map((_, index) => (
+              <div
+                key={index}
+                className={`h-1.5 rounded-full transition-all ${
+                  index === currentImageIndex ? "w-6 bg-white" : "w-1.5 bg-white/50"
+                }`}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Tap hint */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+          <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-4 py-2 rounded-full">
+            Tap to see more
+          </span>
+        </div>
+      </div>
+
+      {/* Product Info */}
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50 px-6 py-5 space-y-3">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 leading-tight text-balance">{product.name}</h2>
+          <p className="text-sm text-orange-600 font-medium uppercase tracking-wide mt-1">Beauty</p>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="text-2xl font-bold text-gray-900">#25000</div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span className="font-medium">25 plugs</span>
+          </div>
+        </div>
+
+        {/* Curator */}
+        {/* <div className="flex items-center gap-3 pt-2 border-t border-orange-100">
+          <Image
+            src={product.curator.avatar || "/placeholder.svg"}
+            alt={product.curator.name}
+            width={40}
+            height={40}
+            className="rounded-full"
+          />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-900 truncate">{product.curator.name}</p>
+            <p className="text-xs text-gray-500 truncate">Curated by {product.curator.handle}</p>
+          </div>
+        </div> */}
+      </div>
+    </div>
+  )
+}
