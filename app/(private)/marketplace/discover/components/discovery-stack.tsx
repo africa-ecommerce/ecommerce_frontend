@@ -1001,7 +1001,7 @@ interface DiscoveryStackProps {
   onSwipeRight: (product: any) => void
   onSwipeLeft: () => void
   onSwipeUp: (product: any) => void
-  onDeckEnd: () => void
+  // onDeckEnd: () => void
 }
 
 export function DiscoveryStack({
@@ -1010,7 +1010,7 @@ export function DiscoveryStack({
   onSwipeRight,
   onSwipeLeft,
   onSwipeUp,
-  onDeckEnd,
+  // onDeckEnd,
 }: DiscoveryStackProps) {
   const [showTip, setShowTip] = useState(true)
   const [toast, setToast] = useState<{ message: string; type: "success" | "info" } | null>(null)
@@ -1030,11 +1030,11 @@ export function DiscoveryStack({
     if (currentIndex >= products.length && products.length > 0) {
       setToast({ message: "You reached the end — refreshing new items", type: "info" })
       setTimeout(() => {
-        onDeckEnd()
+        // onDeckEnd()
         setToast(null)
       }, 1500)
     }
-  }, [currentIndex, products.length, onDeckEnd])
+  }, [currentIndex, products.length])
 
   // Keyboard controls
   useEffect(() => {
