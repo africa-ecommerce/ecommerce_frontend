@@ -63,7 +63,7 @@ export function ProductCard({ product, onSwipeUp }: ProductCardProps) {
     <div className="w-[90vw] max-w-md aspect-[4/5] bg-gradient-to-br from-orange-50 to-amber-50 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2">
-        <span className="text-xs font-medium text-orange-600 bg-orange-100 px-3 py-1 rounded-full uppercase tracking-wide">
+        <span className="text-[12px] font-medium text-orange-600 bg-orange-100 px-3 py-1 rounded-full uppercase tracking-wide">
           {product.category}
         </span>
         <button
@@ -131,7 +131,7 @@ export function ProductCard({ product, onSwipeUp }: ProductCardProps) {
             ₦{product?.price?.toLocaleString()}
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span className="font-medium text-sm md:text-base">{formatQuantity(product?.plugsCount)} {product?.plugsCount === 1 ? "plug" : "plugs"}</span>
+            <span className="font-medium text-sm md:text-base">{formatQuantity(product?.plugsCount)} {product?.plugsCount === 1 ? "Plug" : "Plugs"}</span>
           </div>
         </div>
       </div>

@@ -2,21 +2,27 @@
 
 import { useState, useEffect, useRef } from "react"
 import { DiscoveryStack } from "./components/discovery-stack"
-import { CartModal } from "./components/cart-modal"
-import { ProductDetailModal } from "./components/product-detail-modal"
+
 import { SharePrompt } from "./components/share-prompt"
-import { ShoppingCart } from "lucide-react"
 import { useProducts, type ProductsFilter } from "@/hooks/use-products"
 import { useUser } from "@/app/_components/provider/UserContext"
 import { useSearchParams } from "next/navigation"
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider"
+import { DailyShareModal } from "./components/daily-share-modal"
+import { shouldShowTour, markTourSeen, shouldShowSharePrompt, markSharePromptShown } from "@/lib/tour-storage"
+import { DiscoveryTourOverlay } from "./components/discovery-tour-overlay"
 
 export default function Home() {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [selectedProduct, setSelectedProduct] = useState<any | null>(null)
   const [showSharePrompt, setShowSharePrompt] = useState(false)
   const [hasSeenSharePrompt, setHasSeenSharePrompt] = useState(false)
   const [product, setProduct] = useState<any[]>([])
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+  const [showTour, setShowTour] = useState(false);
+  const [showDailyShare, setShowDailyShare] = useState(false);
+  const [hasShownDailyShare, setHasShownDailyShare] = useState(false);
+  const [firstSwipeOfDay, setFirstSwipeOfDay] = useState(true);
 
 
   const searchParams = useSearchParams()
@@ -59,6 +65,21 @@ export default function Home() {
       sortBy: "createdAt",
       order: "desc",
     }
+
+    useEffect(() => {
+      const checkTour = async () => {
+        const shouldShow = await shouldShowTour();
+        if (shouldShow) {
+          setShowTour(true);
+        }
+      };
+      checkTour();
+    }, []);
+
+    const handleTourComplete = async () => {
+      setShowTour(false);
+      await markTourSeen();
+    };
   
     // Use the products hook for data fetching
     const { products, error, isLoading, isLoadingMore, hasNextPage, isEmpty, size, setSize, clearCache, refreshData } =
@@ -71,7 +92,7 @@ export default function Home() {
 
 
 
-  const handleSwipeRight = (product: any) => {
+  const handleSwipeRight = async (product: any) => {
     setCurrentIndex((prev) => prev + 1)
 
     const cartItem = {
@@ -89,6 +110,17 @@ export default function Home() {
   // 2️⃣ Add to store
   addItem(cartItem, false)
 
+   if (firstSwipeOfDay && !hasShownDailyShare) {
+      setFirstSwipeOfDay(false)
+      const shouldShow = await shouldShowSharePrompt()
+      if (shouldShow) {
+        setTimeout(() => {
+          setShowDailyShare(true)
+          setHasShownDailyShare(true)
+        }, 500)
+      }
+    }
+
   // 3️⃣ Optionally: show share prompt logic
   if (items.length + 1 === 10 && !hasSeenSharePrompt) {
     setTimeout(() => {
@@ -100,6 +132,12 @@ export default function Home() {
 
   const handleSwipeLeft = () => {
     setCurrentIndex((prev) => prev + 1)
+  }
+
+   const handleShare = async () => {
+    await markSharePromptShown()
+    // Implement your share logic here
+    console.log("Share functionality triggered")
   }
 
   const handleSwipeUp = (product: any) => {
@@ -136,7 +174,10 @@ export default function Home() {
       {/* Modals */}
      
 
-    
+     <DiscoveryTourOverlay isOpen={showTour} onComplete={handleTourComplete} />
+
+      {/* Daily Share Modal */}
+      <DailyShareModal isOpen={showDailyShare} onClose={() => setShowDailyShare(false)} onShare={handleShare} />
 
       <SharePrompt isOpen={showSharePrompt} onClose={() => setShowSharePrompt(false)} cartCount={items.length} />
     </main>

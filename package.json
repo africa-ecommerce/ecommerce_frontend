@@ -48,6 +48,7 @@
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.5.1",
     "framer-motion": "^12.6.2",
+    "idb-keyval": "^6.2.2",
     "input-otp": "1.4.1",
     "jose": "^6.0.10",
     "leaflet": "^1.9.4",
