@@ -18,6 +18,7 @@ import {
   markDailyShareShown,
 } from "@/lib/tour-storage";
 import { DiscoveryTourOverlay } from "./components/discovery-tour-overlay";
+import { SubscribersPopover } from "../_components/subscribers-popover";
 
 export default function Home() {
   const [showSharePrompt, setShowSharePrompt] = useState(false);
@@ -202,7 +203,17 @@ export default function Home() {
   return (
     <main className="max-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 relative overflow-hidden font-sans">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between"></header>
+      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
+        
+
+          {/* Subscribers Icon - positioned on the right */}
+          <div className="flex items-center">
+            <SubscribersPopover
+              userType={user?.userType || "PLUG"}
+             
+            />
+          </div>
+      </header>
 
       {/* Discovery Stack */}
       <div className="h-screen flex items-start md:items-center justify-center">

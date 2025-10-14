@@ -127,7 +127,7 @@ export function DiscoveryTourOverlay({ isOpen, onComplete }: DiscoveryTourOverla
                   >
                     <div className="text-2xl mb-2">❌</div>
                     <p className="font-semibold text-lg">Swipe Left</p>
-                    <p className="text-sm text-gray-600 mt-1">Skip this product</p>
+                    <p className="text-sm text-gray-600 mt-1">Pass on this product</p>
                   </motion.div>
                 </div>
               </motion.div>

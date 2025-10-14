@@ -300,11 +300,14 @@ export function DiscoveryStack({ products, currentIndex, onSwipeRight, onSwipeLe
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!currentProduct) return
       if (e.key === "ArrowRight") {
-        setToast({ message: "Added to My Picks — set your resale price in Cart", type: "success" })
+        setToast({
+          message: "Added to your Picks — set your resale price in Cart",
+          type: "success",
+        });
         setTimeout(() => {
           onSwipeRight(currentProduct)
           setToast(null)
-        }, 250)
+        }, 1000)
       } else if (e.key === "ArrowLeft") {
         onSwipeLeft()
       } else if (e.key === "ArrowUp") {
@@ -322,14 +325,14 @@ export function DiscoveryStack({ products, currentIndex, onSwipeRight, onSwipeLe
     if (info.offset.x > threshold || info.velocity.x > 800) {
       setLeaving(true)
       setToast({
-        message: "Added to My Picks — set your resale price in Cart",
+        message: "Added to your Picks — set your resale price in Cart",
         type: "success",
       })
       setTimeout(() => {
         onSwipeRight(product)
         setToast(null)
         setLeaving(false)
-      }, 300)
+      }, 1000)
     } else if (info.offset.x < -threshold || info.velocity.x < -800) {
       setLeaving(true)
       setTimeout(() => {
@@ -406,13 +409,13 @@ export function DiscoveryStack({ products, currentIndex, onSwipeRight, onSwipeLe
         <button
           onClick={() => {
             setToast({
-              message: "Added to your picks",
+              message: "Added to your Picks — set your resale price in Cart",
               type: "success",
             })
             setTimeout(() => {
               onSwipeRight(currentProduct)
               setToast(null)
-            }, 500)
+            }, 1000)
           }}
           className="md:p-4 p-3 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
         >
@@ -420,23 +423,7 @@ export function DiscoveryStack({ products, currentIndex, onSwipeRight, onSwipeLe
         </button>
       </div>
 
-      {/* Tip */}
-      <AnimatePresence>
-        {showTip && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute bottom-28 left-0 right-0 px-6 z-30"
-          >
-            <div className="bg-black/80 text-white text-sm text-center py-3 px-4 rounded-full mx-auto max-w-sm">
-              Swipe → Add • Swipe ← Skip • Swipe ↑ for details
-              <br />
-              or use keyboard arrows ↑ ← →
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      
 
       {/* Toast */}
       {toast && <Toast message={toast.message} type={toast.type} />}
