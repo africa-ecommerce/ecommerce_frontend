@@ -150,13 +150,10 @@ export default function Discover() {
   return (
     <main className="max-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 relative overflow-hidden font-sans">
       {/* Header */}
-      <header className="fixed top-0 z-50 px-6 py-4 flex items-center justify-between">
-        <h1 className="text-lg font-bold sm:text-xl md:text-2xl"></h1>
-
+      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
+        <div className="flex-1" /> {/* Spacer to push content right */}
         {/* Subscribers Icon - positioned on the right */}
-        <SubscribersPopover
-          userType={user?.userType || "PLUG"}
-        />
+        <SubscribersPopover userType={user?.userType || "PLUG"} />
       </header>
 
       {/* Discovery Stack */}
