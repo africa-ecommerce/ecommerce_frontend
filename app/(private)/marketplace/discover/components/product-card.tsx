@@ -110,7 +110,7 @@ export function ProductCard({ product, onSwipeUp }: ProductCardProps) {
         {/* Tap hint */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
           <span className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 px-4 py-2 rounded-full">
-            Tap to see more
+            Share your discovery
           </span>
         </div>
       </div>
