@@ -152,7 +152,7 @@ export default function Discover() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
         <div className="flex-1">
-            <h1 className="text-lg font-bold sm:text-xl md:text-2xl"></h1>
+            <h1 className="text-lg font-bold sm:text-xl md:text-2xl">Discover</h1>
           </div>
 
           {/* Subscribers Icon - positioned on the right */}

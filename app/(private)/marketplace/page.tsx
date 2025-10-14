@@ -493,6 +493,7 @@ import { FilterSheet } from "./_components/filter-sheet";
 import { useUser } from "@/app/_components/provider/UserContext";
 import { SubscribersPopover } from "./_components/subscribers-popover";
 import Discover from "./discover/components/discover";
+import { getUserFromHeaders } from "@/lib/auth-utils";
 
 // Seller CTA Component
 const SellerCTA = () => {
@@ -557,24 +558,28 @@ const SellerCTA = () => {
   );
 };
 
-export default function MarketplacePage() {
+export default async function MarketplacePage() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const {
-    userData: { user },
-  } = useUser();
+  // const {
+  //   userData: { user },
+  // } = useUser();
+
+  const userData = await getUserFromHeaders();
+
+  const userType = userData?.userType || null;
 
   // If user is PLUG, show simple Hello World
-  if (user?.userType === "PLUG") {
+  if (userType === "PLUG") {
     return (
      <Discover/>
     );
   }
 
   // Rest of the component only renders for SUPPLIER users
-  return <SupplierMarketplace user={user} />;
+  return <SupplierMarketplace user={userData} />;
 }
 
 // Separate component for supplier marketplace
