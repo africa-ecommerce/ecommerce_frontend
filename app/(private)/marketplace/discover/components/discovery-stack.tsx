@@ -116,14 +116,18 @@ export function DiscoveryStack({
   }
 
   return (
-   <div className="relative w-full max-w-md mx-auto h-[calc(95vh-4rem)]">
-
+    <div className="relative w-full max-w-md mx-auto h-[calc(90vh-4rem)] md:h-[calc(100vh-4rem)]">
       {/* Background stacked cards with slant */}
       <div className="absolute inset-0 flex items-center justify-center">
         {nextProducts.map((product, index) => (
           <motion.div
             key={product.id}
-            initial={{ scale: 0.9 - index * 0.05, y: index * 15, rotate: index === 0 ? -7 : 7, opacity: 0 }}
+            initial={{
+              scale: 0.9 - index * 0.05,
+              y: index * 15,
+              rotate: index === 0 ? -7 : 7,
+              opacity: 0,
+            }}
             animate={{
               scale: 1 - index * 0.05,
               y: index * 15,
@@ -150,35 +154,45 @@ export function DiscoveryStack({
       </AnimatePresence>
 
       {/* Action buttons */}
-      <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-6 z-30">
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 md:gap-6 z-30">
         <button
           onClick={() => onSwipeLeft()}
-          className="p-4 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
+          className="md:p-4 p-3 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
         >
-          <X className="w-6 h-6 text-red-500" />
+          <X className="md:w-6 md:h-6 w-5 h-5 text-red-500" />
         </button>
         <button
           onClick={() => onSwipeUp(currentProduct)}
-          className="p-4 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
+          className="md:p-4 p-3 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
         >
-         <svg className="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
-         </svg>
+          <svg
+            className="md:w-6 md:h-6 w-5 h-5 text-gray-700"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2.5}
+              d="M5 15l7-7 7 7"
+            />
+          </svg>
         </button>
         <button
           onClick={() => {
             setToast({
               message: "Added to your picks",
               type: "success",
-            })
+            });
             setTimeout(() => {
-              onSwipeRight(currentProduct)
-              setToast(null)
-            }, 500)
+              onSwipeRight(currentProduct);
+              setToast(null);
+            }, 500);
           }}
-          className="p-4 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
+          className="md:p-4 p-3 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
         >
-          <Heart className="w-6 h-6 text-green-500" />
+          <Heart className="md:w-6 md:h-6 w-5 h-5 text-green-500" />
         </button>
       </div>
 
@@ -192,8 +206,9 @@ export function DiscoveryStack({
             className="absolute bottom-28 left-0 right-0 px-6 z-30"
           >
             <div className="bg-black/80 text-white text-sm text-center py-3 px-4 rounded-full mx-auto max-w-sm">
-              Swipe → Add • Swipe ← Skip • Swipe ↑ for details  
-              <br />or use keyboard arrows ↑ ← →
+              Swipe → Add • Swipe ← Skip • Swipe ↑ for details
+              <br />
+              or use keyboard arrows ↑ ← →
             </div>
           </motion.div>
         )}
@@ -202,7 +217,7 @@ export function DiscoveryStack({
       {/* Toast */}
       {toast && <Toast message={toast.message} type={toast.type} />}
     </div>
-  )
+  );
 }
 
 function SwipeCard({ product, handleDragEnd, onSwipeUp }: any) {
