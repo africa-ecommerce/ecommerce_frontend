@@ -1,12 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { DiscoveryStack } from "./components/discovery-stack"
 import { CartModal } from "./components/cart-modal"
 import { ProductDetailModal } from "./components/product-detail-modal"
 import { SharePrompt } from "./components/share-prompt"
 import { ShoppingCart } from "lucide-react"
 import { useProducts, type ProductsFilter } from "@/hooks/use-products"
+import { useUser } from "@/app/_components/provider/UserContext"
+import { useSearchParams } from "next/navigation"
 
 export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -15,20 +17,57 @@ export default function Home() {
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null)
   const [showSharePrompt, setShowSharePrompt] = useState(false)
   const [hasSeenSharePrompt, setHasSeenSharePrompt] = useState(false)
+  const [product, setProduct] = useState<any[]>([])
 
 
+  const searchParams = useSearchParams()
+  
+    // Search and filter states
+    const [searchQuery, setSearchQuery] = useState("")
+    const [isSearchFocused, setIsSearchFocused] = useState(false)
+    const [showDiscoveryMode, setShowDiscoveryMode] = useState(false)
+    const [priceRange, setPriceRange] = useState<[number, number]>([0, 9999999])
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+    const [selectedRatings, setSelectedRatings] = useState<number[]>([])
+    const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
+    const searchInputRef = useRef<HTMLInputElement>(null)
+    const {
+      userData: { user },
+    } = useUser()
+  
+    // Mock subscriber data - replace with real data from your API
+    const getSubscriberCount = () => {
+      if (user?.userType === "SUPPLIER") {
+        return 1247 // Number of people subscribed to this supplier
+      } else if (user?.userType === "PLUG") {
+        return 23 // Number of suppliers this plug is subscribed to
+      }
+      return 0
+    }
+  
+    // Flag to prevent URL sync on initial load
+    const [isInitialized, setIsInitialized] = useState(false)
+  
+    // IntersectionObserver for infinite scroll
+    // const { ref: loadingRef, inView } = useInView({
+    //   threshold: 0.5,
+    //   triggerOnce: false,
+    // })
+  
+    // Combine filters for products hook
     const filters: ProductsFilter = {
-    search: searchQuery,
-    priceRange,
-    selectedCategories,
-    selectedRatings,
-    sortBy: "createdAt",
-    order: "desc",
-  }
-
-  // Use the products hook for data fetching
-  const { products, error, isLoading, isLoadingMore, hasNextPage, isEmpty, size, setSize, clearCache, refreshData } =
-    useProducts(filters, 20)
+      search: searchQuery,
+      priceRange,
+      selectedCategories,
+      selectedRatings,
+      sortBy: "createdAt",
+      order: "desc",
+    }
+  
+    // Use the products hook for data fetching
+    const { products, error, isLoading, isLoadingMore, hasNextPage, isEmpty, size, setSize, clearCache, refreshData } =
+      useProducts(filters, 20)
+  
 
 
 
@@ -56,8 +95,8 @@ export default function Home() {
 
   const handleDeckEnd = () => {
     // Shuffle and restart
-    const shuffled = [...mockProducts].sort(() => Math.random() - 0.5)
-    setProducts(shuffled)
+    const shuffled = [...products].sort(() => Math.random() - 0.5)
+    setProduct(shuffled)
     setCurrentIndex(0)
   }
 
