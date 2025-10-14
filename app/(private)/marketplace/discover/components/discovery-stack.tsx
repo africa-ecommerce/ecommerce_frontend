@@ -115,10 +115,12 @@ export function DiscoveryStack({
     )
   }
 
-  return (
-   <div className="relative w-full max-w-md mx-auto h-[calc(100vh-4rem)]">
-
-      {/* Background stacked cards with slant */}
+return (
+  <div className="relative w-full max-w-md mx-auto h-[calc(95vh-4rem)] overflow-hidden flex flex-col items-center justify-center">
+    
+    {/* Cards stack container */}
+    <div className="relative flex justify-center items-center flex-1">
+      {/* Background stacked cards */}
       <div className="absolute inset-0 flex items-center justify-center">
         {nextProducts.map((product, index) => (
           <motion.div
@@ -148,61 +150,69 @@ export function DiscoveryStack({
           onSwipeUp={onSwipeUp}
         />
       </AnimatePresence>
-
-      {/* Action buttons */}
-      <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-6 z-30">
-        <button
-          onClick={() => onSwipeLeft()}
-          className="p-4 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
-        >
-          <X className="w-6 h-6 text-red-500" />
-        </button>
-        <button
-          onClick={() => onSwipeUp(currentProduct)}
-          className="p-4 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
-        >
-         <svg className="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
-         </svg>
-        </button>
-        <button
-          onClick={() => {
-            setToast({
-              message: "Added to your picks",
-              type: "success",
-            })
-            setTimeout(() => {
-              onSwipeRight(currentProduct)
-              setToast(null)
-            }, 500)
-          }}
-          className="p-4 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
-        >
-          <Heart className="w-6 h-6 text-green-500" />
-        </button>
-      </div>
-
-      {/* Tip */}
-      <AnimatePresence>
-        {showTip && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute bottom-28 left-0 right-0 px-6 z-30"
-          >
-            <div className="bg-black/80 text-white text-sm text-center py-3 px-4 rounded-full mx-auto max-w-sm">
-              Swipe → Add • Swipe ← Skip • Swipe ↑ for details  
-              <br />or use keyboard arrows ↑ ← →
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Toast */}
-      {toast && <Toast message={toast.message} type={toast.type} />}
     </div>
-  )
+
+    {/* Action buttons — now directly under the cards */}
+    <div className="mt-[3px] md:mt[6px] flex justify-center gap-6 z-30">
+      <button
+        onClick={() => onSwipeLeft()}
+        className="p-4 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
+      >
+        <X className="w-6 h-6 text-red-500" />
+      </button>
+
+      <button
+        onClick={() => onSwipeUp(currentProduct)}
+        className="p-4 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
+      >
+        <svg
+          className="w-6 h-6 text-gray-700"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M5 15l7-7 7 7"
+          />
+        </svg>
+      </button>
+
+      <button
+        onClick={() => {
+          setToast({
+            message: "Added to your picks",
+            type: "success",
+          })
+          setTimeout(() => {
+            onSwipeRight(currentProduct)
+            setToast(null)
+          }, 500)
+        }}
+        className="p-4 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
+      >
+        <Heart className="w-6 h-6 text-green-500" />
+      </button>
+    </div>
+
+    {/* Tip */}
+    {showTip && (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="mt-4 text-center text-sm text-white bg-black/80 rounded-full py-3 px-4"
+      >
+        Swipe → Add • Swipe ← Skip • Swipe ↑ for details  
+        <br />or use keyboard arrows ↑ ← →
+      </motion.div>
+    )}
+
+    {toast && <Toast message={toast.message} type={toast.type} />}
+  </div>
+)
 }
 
 function SwipeCard({ product, handleDragEnd, onSwipeUp }: any) {
