@@ -633,26 +633,32 @@ export function DiscoveryStack({
       {/* Stack of cards behind */}
       <div className="absolute inset-0 flex items-center justify-center">
         {nextProducts.map((product, index) => {
-          const scale = 0.98 - index * 0.03;
-          const translateY = -10 * (index + 1);
-          const rotation = index % 2 === 0 ? -2 : 2;
+          const scale = 1 - index * 0.05;
+          const translateY = index * 8;
 
           return (
             <motion.div
               key={`${product.id}-${index}`}
               className="absolute"
-              style={{
+              initial={{ scale: 0.9, y: 30, opacity: 0 }}
+              animate={{
                 scale,
                 y: translateY,
-                rotate: rotation,
+                opacity: 1 - index * 0.2,
+                rotate: 0,
+                transition: { type: "spring", stiffness: 180, damping: 22 },
+              }}
+              exit={{ opacity: 0 }}
+              style={{
                 zIndex: 10 - index,
-                opacity: 1 - index * 0.25,
               }}
             >
               <div className="w-[90vw] max-w-md aspect-[4/5] bg-white rounded-3xl shadow-xl" />
             </motion.div>
           );
         })}
+
+        
       </div>
 
       {/* Active card */}
