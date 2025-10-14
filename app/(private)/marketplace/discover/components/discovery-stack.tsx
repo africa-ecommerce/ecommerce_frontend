@@ -272,7 +272,6 @@ interface DiscoveryStackProps {
 }
 
 export function DiscoveryStack({ products, currentIndex, onSwipeRight, onSwipeLeft, onSwipeUp }: DiscoveryStackProps) {
-  const [showTip, setShowTip] = useState(true)
   const [toast, setToast] = useState<{ message: string; type: "success" | "info" } | null>(null)
   const [leaving, setLeaving] = useState(false)
 
@@ -280,10 +279,6 @@ export function DiscoveryStack({ products, currentIndex, onSwipeRight, onSwipeLe
   const nextProducts = products.slice(currentIndex + 1, currentIndex + 3)
 
   // Hide swipe tip after few seconds
-  useEffect(() => {
-    const timer = setTimeout(() => setShowTip(false), 4000)
-    return () => clearTimeout(timer)
-  }, [])
 
   // Handle deck end
   useEffect(() => {
@@ -307,7 +302,7 @@ export function DiscoveryStack({ products, currentIndex, onSwipeRight, onSwipeLe
         setTimeout(() => {
           onSwipeRight(currentProduct)
           setToast(null)
-        }, 1000)
+        }, 2000)
       } else if (e.key === "ArrowLeft") {
         onSwipeLeft()
       } else if (e.key === "ArrowUp") {
@@ -332,7 +327,7 @@ export function DiscoveryStack({ products, currentIndex, onSwipeRight, onSwipeLe
         onSwipeRight(product)
         setToast(null)
         setLeaving(false)
-      }, 1000)
+      }, 2000)
     } else if (info.offset.x < -threshold || info.velocity.x < -800) {
       setLeaving(true)
       setTimeout(() => {
@@ -415,7 +410,7 @@ export function DiscoveryStack({ products, currentIndex, onSwipeRight, onSwipeLe
             setTimeout(() => {
               onSwipeRight(currentProduct)
               setToast(null)
-            }, 1000)
+            }, 2000)
           }}
           className="md:p-4 p-3 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
         >

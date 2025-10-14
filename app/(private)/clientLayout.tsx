@@ -254,7 +254,7 @@ function DesktopNavigation({
             <NavItem
               href="/marketplace"
               icon={<Store className="w-5 h-5" />}
-              tip="Marketplace"
+              tip="Discover"
               isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
               closeMorePage={closeMorePage}
               showTooltip
@@ -387,7 +387,7 @@ function MobileNavigation({
             <NavItem
               href="/marketplace"
               icon={<Store className="w-5 h-5" />}
-              label="Marketplace"
+              label="Discover"
               isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
               compact
               closeMorePage={closeMorePage}
