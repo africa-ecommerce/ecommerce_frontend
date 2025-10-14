@@ -122,7 +122,7 @@ export default function Home() {
       </header>
 
       {/* Discovery Stack */}
-      <div className="h-screen flex items-center justify-center">
+      <div className="h-screen flex items-start md:items-center justify-center">
         <DiscoveryStack
           products={products}
           currentIndex={currentIndex}
