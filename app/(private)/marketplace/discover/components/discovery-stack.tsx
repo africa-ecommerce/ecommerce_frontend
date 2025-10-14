@@ -1101,11 +1101,11 @@ export function DiscoveryStack({
         {nextProducts.map((product, index) => (
           <motion.div
             key={product.id}
-            initial={{ scale: 0.9 - index * 0.05, y: index * 15, rotate: index === 0 ? -6 : 6, opacity: 0 }}
+            initial={{ scale: 0.9 - index * 0.05, y: index * 15, rotate: index === 0 ? -7 : 7, opacity: 0 }}
             animate={{
               scale: 1 - index * 0.05,
               y: index * 15,
-              rotate: index === 0 ? -6 : 6,
+              rotate: index === 0 ? -7 : 7,
               opacity: 1 - index * 0.2,
             }}
             transition={{ type: "spring", stiffness: 200, damping: 25 }}
@@ -1139,18 +1139,20 @@ export function DiscoveryStack({
           onClick={() => onSwipeUp(currentProduct)}
           className="p-4 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
         >
-          <ArrowUp className="w-6 h-6 text-blue-500" />
+         <svg className="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 15l7-7 7 7" />
+         </svg>
         </button>
         <button
           onClick={() => {
             setToast({
-              message: "Added to My Picks — set your resale price in Cart",
+              message: "Added to your picks",
               type: "success",
             })
             setTimeout(() => {
               onSwipeRight(currentProduct)
               setToast(null)
-            }, 250)
+            }, 500)
           }}
           className="p-4 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
         >
