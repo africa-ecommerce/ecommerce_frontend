@@ -7,6 +7,7 @@
 import { useState, useEffect } from "react"
 import { Share2 } from "lucide-react"
 import Image from "next/image"
+import { formatQuantity } from "@/lib/utils"
 
 interface ProductCardProps {
   product: any
@@ -61,7 +62,7 @@ export function ProductCard({ product, onSwipeUp }: ProductCardProps) {
   return (
     <div className="w-[90vw] max-w-md aspect-[4/5] bg-gradient-to-br from-orange-50 to-amber-50 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4">
+      <div className="flex items-center justify-between px-4 py-2">
         <span className="text-xs font-medium text-orange-600 bg-orange-100 px-3 py-1 rounded-full uppercase tracking-wide">
           {product.category}
         </span>
@@ -70,12 +71,16 @@ export function ProductCard({ product, onSwipeUp }: ProductCardProps) {
           className="p-2 hover:bg-orange-100 rounded-full transition-colors"
           aria-label="Share product"
         >
-          <Share2 className="w-5 h-5 text-orange-600" />
+          <Share2 className="md:w-5 md:h-5 h-4 w-4 text-orange-600" />
         </button>
       </div>
 
       {/* Product Image */}
-      <div className="flex-1 relative cursor-pointer group" onClick={handleImageClick} onDoubleClick={onSwipeUp}>
+      <div
+        className="flex-1 relative cursor-pointer group"
+        onClick={handleImageClick}
+        onDoubleClick={onSwipeUp}
+      >
         <Image
           key={currentImageIndex} // Force re-render on image change
           src={currentImageSrc}
@@ -93,7 +98,9 @@ export function ProductCard({ product, onSwipeUp }: ProductCardProps) {
               <div
                 key={index}
                 className={`h-1.5 rounded-full transition-all ${
-                  index === currentImageIndex ? "w-6 bg-white" : "w-1.5 bg-white/50"
+                  index === currentImageIndex
+                    ? "w-6 bg-white"
+                    : "w-1.5 bg-white/50"
                 }`}
               />
             ))}
@@ -111,17 +118,23 @@ export function ProductCard({ product, onSwipeUp }: ProductCardProps) {
       {/* Product Info */}
       <div className="bg-gradient-to-br from-amber-50 to-orange-50 px-6 py-5 space-y-3">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 leading-tight text-balance">{product.name}</h2>
-          <p className="text-sm text-orange-600 font-medium uppercase tracking-wide mt-1">Beauty</p>
+          <h2 className="md:text-base text-xs font-bold text-gray-900 leading-tight text-balance truncate capitalize">
+            {product.name}
+          </h2>
+          <p className="text-sm text-orange-600 font-medium uppercase tracking-wide mt-1">
+            Beauty
+          </p>
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold text-gray-900">#25000</div>
+          <div className="text-[12px] font-semibold md:text-base">
+            ₦{product?.price?.toLocaleString()}
+          </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span className="font-medium">25 plugs</span>
+            <span className="font-medium text-sm md:text-base">{formatQuantity(product?.plugsCount)} {product?.plugsCount === 1 ? "plug" : "plugs"}</span>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
