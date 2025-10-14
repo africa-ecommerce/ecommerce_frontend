@@ -24,13 +24,10 @@ export default function Home() {
   
     // Search and filter states
     const [searchQuery, setSearchQuery] = useState("")
-    const [isSearchFocused, setIsSearchFocused] = useState(false)
-    const [showDiscoveryMode, setShowDiscoveryMode] = useState(false)
+   
     const [priceRange, setPriceRange] = useState<[number, number]>([0, 9999999])
     const [selectedCategories, setSelectedCategories] = useState<string[]>([])
     const [selectedRatings, setSelectedRatings] = useState<number[]>([])
-    const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false)
-    const searchInputRef = useRef<HTMLInputElement>(null)
     const {
       userData: { user },
     } = useUser()
