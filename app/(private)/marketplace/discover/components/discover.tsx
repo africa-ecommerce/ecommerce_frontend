@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { DiscoveryStack } from "./components/discovery-stack";
+import { DiscoveryStack } from "./discovery-stack";
 
-import { SharePrompt } from "./components/share-prompt";
+import { SharePrompt } from "./share-prompt";
 import { useProducts, type ProductsFilter } from "@/hooks/use-products";
 import { useUser } from "@/app/_components/provider/UserContext";
 import { useSearchParams } from "next/navigation";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
-import { DailyShareModal } from "./components/daily-share-modal";
+import { DailyShareModal } from "./daily-share-modal";
 import {
   shouldShowTour,
   markTourSeen,
@@ -17,10 +17,10 @@ import {
   shouldShowDailyShare,
   markDailyShareShown,
 } from "@/lib/tour-storage";
-import { DiscoveryTourOverlay } from "./components/discovery-tour-overlay";
-import { SubscribersPopover } from "../_components/subscribers-popover";
+import { DiscoveryTourOverlay } from "./discovery-tour-overlay";
+import { SubscribersPopover } from "../../_components/subscribers-popover";
 
-export default function Home() {
+export default function Discover() {
   const [showSharePrompt, setShowSharePrompt] = useState(false);
   const [hasSeenSharePrompt, setHasSeenSharePrompt] = useState(false);
 
@@ -43,24 +43,8 @@ export default function Home() {
     userData: { user },
   } = useUser();
 
-  // Mock subscriber data - replace with real data from your API
-  const getSubscriberCount = () => {
-    if (user?.userType === "SUPPLIER") {
-      return 1247; // Number of people subscribed to this supplier
-    } else if (user?.userType === "PLUG") {
-      return 23; // Number of suppliers this plug is subscribed to
-    }
-    return 0;
-  };
 
-  // Flag to prevent URL sync on initial load
-  const [isInitialized, setIsInitialized] = useState(false);
 
-  // IntersectionObserver for infinite scroll
-  // const { ref: loadingRef, inView } = useInView({
-  //   threshold: 0.5,
-  //   triggerOnce: false,
-  // })
 
   // Combine filters for products hook
   const filters: ProductsFilter = {
@@ -141,43 +125,6 @@ export default function Home() {
     }
   };
 
-  // const handleSwipeRight = async (product: any) => {
-  //   setCurrentIndex((prev) => prev + 1)
-
-  //   const cartItem = {
-  //   id: product.id,
-  //   name: product.name,
-  //   price: product.price,
-  //   minPrice: product.minPrice,
-  //   maxPrice: product.maxPrice,
-  //   image:
-  //     product.images && product.images.length > 0
-  //       ? product.images[0]
-  //       : "/placeholder.svg",
-  // }
-
-  // // 2️⃣ Add to store
-  // addItem(cartItem, false)
-
-  //  if (firstSwipeOfDay && !hasShownDailyShare) {
-  //     setFirstSwipeOfDay(false)
-  //     const shouldShow = await shouldShowSharePrompt()
-  //     if (shouldShow) {
-  //       setTimeout(() => {
-  //         setShowDailyShare(true)
-  //         setHasShownDailyShare(true)
-  //       }, 500)
-  //     }
-  //   }
-
-  // // 3️⃣ Optionally: show share prompt logic
-  // if (items.length + 1 === 10 && !hasSeenSharePrompt) {
-  //   setTimeout(() => {
-  //     setShowSharePrompt(true)
-  //     setHasSeenSharePrompt(true)
-  //   }, 500)
-  // }
-  // }
 
   const handleSwipeLeft = () => {
     setCurrentIndex((prev) => prev + 1);
@@ -205,7 +152,7 @@ export default function Home() {
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
         <div className="flex-1">
-            <h1 className="text-lg font-bold sm:text-xl md:text-2xl">Discover</h1>
+            <h1 className="text-lg font-bold sm:text-xl md:text-2xl"></h1>
           </div>
 
           {/* Subscribers Icon - positioned on the right */}
