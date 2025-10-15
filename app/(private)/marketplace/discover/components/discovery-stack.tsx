@@ -544,7 +544,7 @@ interface DiscoveryStackProps {
   products: any[];
   currentIndex: number;
   onSwipeRight: (product: any) => void;
-  onSwipeLeft: () => void;
+  onSwipeLeft: (product: any) => void;
   onSwipeUp: (product: any) => void;
 }
 
@@ -609,7 +609,7 @@ export function DiscoveryStack({
           clearTimeout(toastTimeout);
         };
       } else if (e.key === "ArrowLeft") {
-        const swipeTimeout = setTimeout(() => onSwipeLeft(), 250);
+        const swipeTimeout = setTimeout(() => onSwipeLeft(currentProduct), 250);
         return () => {
           clearTimeout(swipeTimeout);
         };
@@ -657,7 +657,7 @@ export function DiscoveryStack({
     } else if (info.offset.x < -threshold || info.velocity.x < -800) {
       setLeaving(true);
       setTimeout(() => {
-        onSwipeLeft();
+        onSwipeLeft(currentProduct);
         setLeaving(false);
       }, 250);
     } else if (info.offset.y < -threshold) {
@@ -710,7 +710,7 @@ export function DiscoveryStack({
       {/* Action buttons */}
       <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4 md:gap-6 z-30">
         <button
-          onClick={() => onSwipeLeft()}
+          onClick={() => onSwipeLeft(currentProduct)}
           className="md:p-4 p-3 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
         >
           <X className="md:w-6 md:h-6 w-5 h-5 text-red-500" />

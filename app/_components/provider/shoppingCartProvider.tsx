@@ -200,22 +200,57 @@ export function ShoppingCartProvider({
     setIsOpen(true);
   };
 
+  // const addItem = (newItem: CartItem, openCart = false) => {
+  //   if (isCartFull) {
+  //     setShowLimitAlert(true);
+  //     setIsOpen(true);
+  //     setTimeout(() => setShowLimitAlert(false), 10000);
+  //     return false;
+  //   }
+
+  //   setItems((prevItems) => {
+  //     const existingItemIndex = prevItems.findIndex(
+  //       (item) => item.id === newItem.id
+  //     );
+  //     if (existingItemIndex >= 0) {
+  //       const updatedItems = [...prevItems];
+  //       return updatedItems;
+  //     } else {
+  //       return [...prevItems, { ...newItem, profit: 0 }];
+  //     }
+  //   });
+
+  //   if (openCart) {
+  //     setIsOpen(true);
+  //   }
+  //   return true;
+  // };
+
+
   const addItem = (newItem: CartItem, openCart = false) => {
-    if (isCartFull) {
-      setShowLimitAlert(true);
-      setIsOpen(true);
-      setTimeout(() => setShowLimitAlert(false), 10000);
-      return false;
-    }
+    let wasAdded = false;
 
     setItems((prevItems) => {
+      // Check cart limit with current state
+      if (prevItems.length >= MAX_CART_ITEMS) {
+        setShowLimitAlert(true);
+        setIsOpen(true);
+        setTimeout(() => setShowLimitAlert(false), 10000);
+        wasAdded = false;
+        return prevItems; // Don't modify if at limit
+      }
+
       const existingItemIndex = prevItems.findIndex(
         (item) => item.id === newItem.id
       );
+
       if (existingItemIndex >= 0) {
-        const updatedItems = [...prevItems];
-        return updatedItems;
+        // Item already exists, don't add again
+        wasAdded = false;
+        return prevItems;
       } else {
+        // Add new item
+        wasAdded = true;
         return [...prevItems, { ...newItem, profit: 0 }];
       }
     });
@@ -223,9 +258,9 @@ export function ShoppingCartProvider({
     if (openCart) {
       setIsOpen(true);
     }
-    return true;
-  };
 
+    return wasAdded;
+  };
   const removeItem = (itemId: string) => {
     setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
     if (showLimitAlert && itemCount <= MAX_CART_ITEMS) {

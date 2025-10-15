@@ -115,16 +115,30 @@ export function ProductDetailsModal({
   } = useUser();
 
   // Use SWR for data fetching with caching
-  const {
-    data: product,
-    error,
-    isLoading,
-  } = useSWR(productId ? `/api/products/${productId}` : null, fetcher, {
-    revalidateOnFocus: false,
-    revalidateIfStale: false,
-    dedupingInterval: 600000,
-    shouldRetryOnError: false,
-  });
+  // const {
+  //   data: product,
+  //   error,
+  //   isLoading,
+  // } = useSWR(productId ? `/api/products/${productId}` : null, fetcher, {
+  //   revalidateOnFocus: false,
+  //   revalidateIfStale: false,
+  //   dedupingInterval: 600000,
+  //   shouldRetryOnError: false,
+  // });
+
+  const hasValidId = typeof productId === "string" && productId.trim().length > 0;
+
+const {
+  data: product,
+  error,
+  isLoading,
+} = useSWR(hasValidId ? `/api/products/${productId}` : null, fetcher, {
+  revalidateOnFocus: false,
+  revalidateIfStale: false,
+  dedupingInterval: 600000,
+  shouldRetryOnError: false,
+});
+
 
   // Handle ESC key to close modal
   useEffect(() => {
@@ -287,6 +301,9 @@ export function ProductDetailsModal({
     },
   };
 
+  if (!isOpen || !hasValidId) return null;
+
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -324,7 +341,6 @@ export function ProductDetailsModal({
             </div>
 
             {/* Close Button */}
-           
 
             {/* Scrollable Content */}
             <div className="h-full overflow-y-auto pb-24 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
@@ -555,13 +571,12 @@ export function ProductDetailsModal({
           </motion.div>
 
           {/* Modal - Desktop */}
-         <motion.div
+          <motion.div
             variants={modalVariantsDesktop}
             initial="hidden"
             animate="visible"
             exit="exit"
             className="hidden md:flex fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-background rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex-col"
-            style={{ transform: 'translate(-50%, -50%)' }}
           >
             {/* Close Button */}
             <button

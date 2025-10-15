@@ -388,6 +388,7 @@
 // }
 
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -478,6 +479,7 @@ export default function Discover() {
   const productsRemaining = Math.max(0, products.length - currentIndex);
 
   // const handleSwipeRight = async (product: any) => {
+  //   if (!product) return;
   //   setCurrentIndex((prev) => prev + 1);
 
   //   const cartItem = {
@@ -515,10 +517,11 @@ export default function Discover() {
   //   }
   // };
 
+
+
+
   const handleSwipeRight = async (product: any) => {
-    // ✅ If product is undefined or no more products, stop
     if (!product) return;
-    if (currentIndex >= products.length) return;
 
     setCurrentIndex((prev) => prev + 1);
 
@@ -536,10 +539,7 @@ export default function Discover() {
 
     addItem(cartItem, false);
 
-    // ✅ Avoid continuing logic if no more products after this swipe
-    if (currentIndex + 1 >= products.length) return;
-
-    // Show daily share modal if needed
+    // Check if we should show daily share modal
     if (firstSwipeOfDay && !hasShownDailyShare) {
       setFirstSwipeOfDay(false);
       const shouldShow = await shouldShowDailyShare();
@@ -551,31 +551,33 @@ export default function Discover() {
       }
     }
 
-    // Show share prompt
-    if (items.length + 1 === 10 && !hasSeenSharePrompt) {
+    // Show share prompt logic - check count after state update
+    // We need to check the actual current cart count, not the stale items.length
+    // Option: Check items.length + 1, or use a ref, or check in useEffect
+    if (!hasSeenSharePrompt) {
+      // Access current items count using functional update just to read
       setTimeout(() => {
-        setShowSharePrompt(true);
-        setHasSeenSharePrompt(true);
-      }, 500);
+        if (items.length >= 10) {
+          setShowSharePrompt(true);
+          setHasSeenSharePrompt(true);
+        }
+      }, 100); // Small delay to ensure state has updated
     }
   };
-
-  // const handleSwipeLeft = () => {
-  //   setCurrentIndex((prev) => prev + 1);
-  // };
+  
 
   const handleSwipeLeft = (product: any) => {
-  // ✅ Same safety checks
-  if (!product) return;
-  if (currentIndex >= products.length) return;
+    if (!product) return;
+    setCurrentIndex((prev) => prev + 1);
+  };
 
-  setCurrentIndex((prev) => prev + 1);
+
+const handleSwipeUp = (product: any) => {
+  if (!product || !product.id) return; // ✅ prevents undefined crashes
+  setSelectedProduct(product);
+  setIsModalOpen(true);
 };
 
-  const handleSwipeUp = (product: any) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
-  };
 
   const handleShare = async () => {
     await markSharePromptShown();
@@ -620,7 +622,7 @@ export default function Discover() {
           <SubscribersPopover userType={user?.userType || "PLUG"} />
 
           {/* Products Counter */}
-          <div className="flex items-center gap-2 px-4 md:py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
+          <div className="flex items-center gap-2 px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
             <div className="relative">
               <Layers
                 className="md:w-5 md:h-5 w-4 h-4 text-orange-600"
@@ -672,12 +674,12 @@ export default function Discover() {
       />
 
       <ProductDetailsModal
-        isOpen={isModalOpen}
+        isOpen={!!isModalOpen && !!selectedProduct?.id} // ✅ only open when valid product
         onClose={() => {
           setIsModalOpen(false);
           setSelectedProduct(null);
         }}
-        productId={selectedProduct?.id || null}
+        productId={selectedProduct?.id ?? null}
       />
     </main>
   );
