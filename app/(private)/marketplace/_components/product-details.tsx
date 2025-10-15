@@ -143,7 +143,6 @@ export default function ProductDetail() {
     userData: { user },
   } = useUser();
 
-  console.log("product", product);
 
   const getInitials = (name: string) =>
     name
