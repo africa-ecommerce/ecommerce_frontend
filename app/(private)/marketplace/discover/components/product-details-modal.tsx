@@ -324,13 +324,7 @@ export function ProductDetailsModal({
             </div>
 
             {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 z-10 p-2 bg-background/80 backdrop-blur-sm rounded-full shadow-md hover:bg-muted transition"
-              aria-label="Close modal"
-            >
-              <X className="h-5 w-5" />
-            </button>
+           
 
             {/* Scrollable Content */}
             <div className="h-full overflow-y-auto pb-24 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
@@ -561,12 +555,13 @@ export function ProductDetailsModal({
           </motion.div>
 
           {/* Modal - Desktop */}
-          <motion.div
+         <motion.div
             variants={modalVariantsDesktop}
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="hidden md:block fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-background rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh]"
+            className="hidden md:flex fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-background rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex-col"
+            style={{ transform: 'translate(-50%, -50%)' }}
           >
             {/* Close Button */}
             <button

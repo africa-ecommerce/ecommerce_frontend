@@ -490,10 +490,7 @@ import { ProductCardSkeleton } from "./product-card-skeleton";
 import { NoResults } from "./no-results";
 import { ActiveFilters } from "./active-filters";
 import { FilterSheet } from "./filter-sheet";
-import { useUser } from "@/app/_components/provider/UserContext";
 import { SubscribersPopover } from "./subscribers-popover";
-import Discover from "../discover/components/discover";
-import { getUserFromHeaders } from "@/lib/auth-utils";
 
 // Seller CTA Component
 const SellerCTA = () => {
