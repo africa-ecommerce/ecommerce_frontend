@@ -392,6 +392,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Toast } from "./toast";
+
 import { DiscoveryStack } from "./discovery-stack";
 import { Layers, ChevronRight } from "lucide-react";
 import { SharePrompt } from "./share-prompt";

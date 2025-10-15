@@ -814,6 +814,7 @@ import { preload } from "swr";
 import { ProductCard } from "./product-card";
 import { Toast } from "./toast";
 import { X, Heart } from "lucide-react";
+import { DiscoveryEndOfStack } from "./discovery-end-of-stack";
 
 const fetcher = async (url: string) => {
   const res = await fetch(url, { credentials: "include" });
@@ -853,7 +854,7 @@ export function DiscoveryStack({
   // ✅ Handle end of deck
   useEffect(() => {
     if (currentIndex >= products.length && products.length > 0) {
-      setToast({ message: "You reached the end — refreshing new items", type: "info" });
+      setToast({ message: "You reached the end — add retail price and share", type: "info" });
       const t = setTimeout(() => setToast(null), 1500);
       return () => clearTimeout(t);
     }
@@ -979,9 +980,7 @@ export function DiscoveryStack({
             onSwipeUp={onSwipeUp}
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            No more products
-          </div>
+          <DiscoveryEndOfStack />
         )}
       </AnimatePresence>
 
@@ -1017,7 +1016,10 @@ export function DiscoveryStack({
           <button
             onClick={() => {
               if (!currentProduct) return;
-              setToast({ message: "Added to your Picks — set your resale price in Cart", type: "success" });
+              setToast({
+                message: "Added to your Picks — set your resale price in Cart",
+                type: "success",
+              });
               const swipe = setTimeout(() => onSwipeRight(currentProduct), 250);
               const toast = setTimeout(() => setToast(null), 1500);
               return () => {
