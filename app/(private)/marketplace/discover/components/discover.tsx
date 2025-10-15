@@ -436,7 +436,9 @@ export default function Discover() {
     userData: { user },
   } = useUser();
 
-  const [isUpdating, setIsUpdating] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: "success" | "info" } | null>(null);
+  
+  
 
   useEffect(() => {
     console.log("Current index:", currentIndex, "of", products.length);
@@ -486,67 +488,75 @@ export default function Discover() {
   const productsRemaining = Math.max(0, products.length - currentIndex);
 
  
-const handleSwipe = async (
-  direction: "left" | "right" | "up",
-  product: any
-) => {
-  // ✅ Skip if currently processing another swipe
-  if (isUpdating) return;
 
-  // ✅ Guard against missing or undefined product
+const handleSwipeRight = async (product: any) => {
+  // ✅ Guard against undefined product
   if (!product || !product.id) return;
 
-  setIsUpdating(true);
-  try {
-    if (direction === "right") {
-      const cartItem = {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        minPrice: product.minPrice,
-        maxPrice: product.maxPrice,
-        image: product.images?.[0] ?? "/placeholder.svg",
-      };
-      addItem(cartItem, false);
-
-      // Optional modals logic (unchanged)
-      if (firstSwipeOfDay && !hasShownDailyShare) {
-        setFirstSwipeOfDay(false);
-        const shouldShow = await shouldShowDailyShare();
-        if (shouldShow) {
-          setTimeout(() => {
-            setShowDailyShare(true);
-            setHasShownDailyShare(true);
-          }, 500);
-        }
-      }
-
-      if (!hasSeenSharePrompt) {
-        setTimeout(() => {
-          if (items.length >= 10) {
-            setShowSharePrompt(true);
-            setHasSeenSharePrompt(true);
-          }
-        }, 100);
-      }
-    }
-
-    if (direction === "up") {
-      setSelectedProduct(product);
-      setIsModalOpen(true);
-      setIsUpdating(false);
-      return;
-    }
-
-    // ✅ Move to next product safely
-    setCurrentIndex((prev) => {
-      const next = prev + 1;
-      return next >= products.length ? products.length - 1 : next;
-    });
-  } finally {
-    // ✅ Small delay to prevent overlapping swipes
-    setTimeout(() => setIsUpdating(false), 250);
+  if(items.length >= 20) {
+ setToast({ message: "You have 20 items in your cart - submit or remove item in your cart", type: "info" });
+      const t = setTimeout(() => setToast(null), 1500);
+      return () => clearTimeout(t);
   }
+
+  // ✅ Prevent index overflow
+  setCurrentIndex((prev) => {
+    const next = prev + 1;
+    return next >= products.length ? products.length : next;
+  });
+
+  const cartItem = {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    minPrice: product.minPrice,
+    maxPrice: product.maxPrice,
+    image: product.images?.[0] ?? "/placeholder.svg",
+  };
+
+  addItem(cartItem, false);
+
+  // ✅ Optional: prevent showing modals if deck is over
+  if (currentIndex + 1 >= products.length) return;
+
+  if (firstSwipeOfDay && !hasShownDailyShare) {
+    setFirstSwipeOfDay(false);
+    const shouldShow = await shouldShowDailyShare();
+    if (shouldShow) {
+      setTimeout(() => {
+        setShowDailyShare(true);
+        setHasShownDailyShare(true);
+      }, 500);
+    }
+  }
+
+  if (!hasSeenSharePrompt) {
+    setTimeout(() => {
+      if (items.length >= 10) {
+        setShowSharePrompt(true);
+        setHasSeenSharePrompt(true);
+      }
+    }, 100);
+  }
+};
+
+const handleSwipeLeft = (product: any) => {
+  // ✅ Guard against undefined product
+  if (!product || !product.id) return;
+
+   
+
+  setCurrentIndex((prev) => {
+    const next = prev + 1;
+    return next >= products.length ? products.length : next;
+  });
+};
+
+const handleSwipeUp = (product: any) => {
+  // ✅ Guard before opening modal
+  if (!product || !product.id) return;
+  setSelectedProduct(product);
+  setIsModalOpen(true);
 };
 
 
@@ -628,9 +638,15 @@ const handleSwipe = async (
         <DiscoveryStack
           products={products}
           currentIndex={currentIndex}
-          onSwipeRight={(p) => handleSwipe("right", p)}
-          onSwipeLeft={(p) => handleSwipe("left", p)}
-          onSwipeUp={(p) => handleSwipe("up", p)}
+          onSwipeRight={(p) => {
+            if (p && p.id) handleSwipeRight(p);
+          }}
+          onSwipeLeft={(p) => {
+            if (p && p.id) handleSwipeLeft(p);
+          }}
+          onSwipeUp={(p) => {
+            if (p && p.id) handleSwipeUp(p);
+          }}
         />
       </div>
 
@@ -661,6 +677,8 @@ const handleSwipe = async (
         }}
         productId={selectedProduct?.id ?? null}
       />
+
+      {toast && <Toast message={toast.message} type={toast.type} />}
     </main>
   );
 }
