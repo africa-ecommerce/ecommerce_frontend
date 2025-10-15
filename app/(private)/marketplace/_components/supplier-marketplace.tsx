@@ -750,20 +750,20 @@ export default function SupplierMarketplace({
       <div className="flex flex-col min-h-screen bg-background animate-fade-in">
         <header className="sticky top-0 z-30 flex items-center justify-between bg-background/95 backdrop-blur-sm border-b px-4 py-3 sm:px-6">
           {user.userType == "PLUG" ? (
-            <>
+            <div className="flex items-center gap-3">
               <Button variant="ghost" size="icon" onClick={onBack}>
                 <ArrowLeft className="h-5 w-5" />
                 <span className="sr-only">Back</span>
               </Button>
               <h1 className="text-sm md:text-lg font-semibold">Discover</h1>
-            </>
+            </div>
           ) : (
             <div className="flex-1">
               <h1 className="text-lg font-bold sm:text-xl md:text-2xl">
                 Marketplace
               </h1>
             </div>
-          )}         
+          )}
           <div className="flex items-center">
             <SubscribersPopover userType={user?.userType || "SUPPLIER"} />
           </div>

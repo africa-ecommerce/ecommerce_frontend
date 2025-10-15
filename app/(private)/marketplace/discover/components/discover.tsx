@@ -387,6 +387,7 @@
 //   );
 // }
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -476,7 +477,49 @@ export default function Discover() {
 
   const productsRemaining = Math.max(0, products.length - currentIndex);
 
+  // const handleSwipeRight = async (product: any) => {
+  //   setCurrentIndex((prev) => prev + 1);
+
+  //   const cartItem = {
+  //     id: product.id,
+  //     name: product.name,
+  //     price: product.price,
+  //     minPrice: product.minPrice,
+  //     maxPrice: product.maxPrice,
+  //     image:
+  //       product.images && product.images.length > 0
+  //         ? product.images[0]
+  //         : "/placeholder.svg",
+  //   };
+
+  //   addItem(cartItem, false);
+
+  //   // Check if we should show daily share modal
+  //   if (firstSwipeOfDay && !hasShownDailyShare) {
+  //     setFirstSwipeOfDay(false);
+  //     const shouldShow = await shouldShowDailyShare(); // Use the new function
+  //     if (shouldShow) {
+  //       setTimeout(() => {
+  //         setShowDailyShare(true);
+  //         setHasShownDailyShare(true);
+  //       }, 500);
+  //     }
+  //   }
+
+  //   // Show share prompt logic
+  //   if (items.length + 1 === 10 && !hasSeenSharePrompt) {
+  //     setTimeout(() => {
+  //       setShowSharePrompt(true);
+  //       setHasSeenSharePrompt(true);
+  //     }, 500);
+  //   }
+  // };
+
   const handleSwipeRight = async (product: any) => {
+    // ✅ If product is undefined or no more products, stop
+    if (!product) return;
+    if (currentIndex >= products.length) return;
+
     setCurrentIndex((prev) => prev + 1);
 
     const cartItem = {
@@ -493,10 +536,13 @@ export default function Discover() {
 
     addItem(cartItem, false);
 
-    // Check if we should show daily share modal
+    // ✅ Avoid continuing logic if no more products after this swipe
+    if (currentIndex + 1 >= products.length) return;
+
+    // Show daily share modal if needed
     if (firstSwipeOfDay && !hasShownDailyShare) {
       setFirstSwipeOfDay(false);
-      const shouldShow = await shouldShowDailyShare(); // Use the new function
+      const shouldShow = await shouldShowDailyShare();
       if (shouldShow) {
         setTimeout(() => {
           setShowDailyShare(true);
@@ -505,7 +551,7 @@ export default function Discover() {
       }
     }
 
-    // Show share prompt logic
+    // Show share prompt
     if (items.length + 1 === 10 && !hasSeenSharePrompt) {
       setTimeout(() => {
         setShowSharePrompt(true);
@@ -514,9 +560,17 @@ export default function Discover() {
     }
   };
 
-  const handleSwipeLeft = () => {
-    setCurrentIndex((prev) => prev + 1);
-  };
+  // const handleSwipeLeft = () => {
+  //   setCurrentIndex((prev) => prev + 1);
+  // };
+
+  const handleSwipeLeft = (product: any) => {
+  // ✅ Same safety checks
+  if (!product) return;
+  if (currentIndex >= products.length) return;
+
+  setCurrentIndex((prev) => prev + 1);
+};
 
   const handleSwipeUp = (product: any) => {
     setSelectedProduct(product);
@@ -548,7 +602,7 @@ export default function Discover() {
     <main className="max-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 relative overflow-hidden font-sans">
       {/* Header */}
 
-      <header className="fixed top-0 left-0 md:left-[280px] right-0 z-50 px-6 md:py-4 py-3 flex items-center justify-between">
+      <header className="fixed top-0 left-0 md:left-[180px] right-0 z-50 px-6 md:py-4 py-3 flex items-center justify-between">
         {/* View More Button */}
         <button
           onClick={viewMore}
@@ -561,12 +615,12 @@ export default function Discover() {
         </button>
 
         {/* Right side container for popover and counter */}
-        <div className="flex flex-col items-end gap-2 md:gap-3">
+        <div className="flex flex-col items-end gap-1 md:gap-3">
           {/* Subscribers Popover */}
           <SubscribersPopover userType={user?.userType || "PLUG"} />
 
           {/* Products Counter */}
-          <div className="flex items-center gap-2 px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
+          <div className="flex items-center gap-2 px-4 md:py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
             <div className="relative">
               <Layers
                 className="md:w-5 md:h-5 w-4 h-4 text-orange-600"
