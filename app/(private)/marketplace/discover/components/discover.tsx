@@ -436,6 +436,11 @@ export default function Discover() {
     userData: { user },
   } = useUser();
 
+  useEffect(() => {
+  console.log("Current index:", currentIndex, "of", products.length);
+  console.log("Current product:", products[currentIndex]);
+}, [currentIndex]);
+
   // Combine filters for products hook
   const filters: ProductsFilter = {
     search: searchQuery,
@@ -478,105 +483,69 @@ export default function Discover() {
 
   const productsRemaining = Math.max(0, products.length - currentIndex);
 
-  // const handleSwipeRight = async (product: any) => {
-  //   if (!product) return;
-  //   setCurrentIndex((prev) => prev + 1);
+ 
 
-  //   const cartItem = {
-  //     id: product.id,
-  //     name: product.name,
-  //     price: product.price,
-  //     minPrice: product.minPrice,
-  //     maxPrice: product.maxPrice,
-  //     image:
-  //       product.images && product.images.length > 0
-  //         ? product.images[0]
-  //         : "/placeholder.svg",
-  //   };
+const handleSwipeRight = async (product: any) => {
+  // ✅ Guard against undefined product
+  if (!product || !product.id || items.length >= 20) return;
 
-  //   addItem(cartItem, false);
+  // ✅ Prevent index overflow
+  setCurrentIndex((prev) => {
+    const next = prev + 1;
+    return next >= products.length ? products.length : next;
+  });
 
-  //   // Check if we should show daily share modal
-  //   if (firstSwipeOfDay && !hasShownDailyShare) {
-  //     setFirstSwipeOfDay(false);
-  //     const shouldShow = await shouldShowDailyShare(); // Use the new function
-  //     if (shouldShow) {
-  //       setTimeout(() => {
-  //         setShowDailyShare(true);
-  //         setHasShownDailyShare(true);
-  //       }, 500);
-  //     }
-  //   }
+  const cartItem = {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    minPrice: product.minPrice,
+    maxPrice: product.maxPrice,
+    image: product.images?.[0] ?? "/placeholder.svg",
+  };
 
-  //   // Show share prompt logic
-  //   if (items.length + 1 === 10 && !hasSeenSharePrompt) {
-  //     setTimeout(() => {
-  //       setShowSharePrompt(true);
-  //       setHasSeenSharePrompt(true);
-  //     }, 500);
-  //   }
-  // };
+  addItem(cartItem, false);
 
+  // ✅ Optional: prevent showing modals if deck is over
+  if (currentIndex + 1 >= products.length) return;
 
-
-
-  const handleSwipeRight = async (product: any) => {
-    if (!product) return;
-
-    setCurrentIndex((prev) => prev + 1);
-
-    const cartItem = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      minPrice: product.minPrice,
-      maxPrice: product.maxPrice,
-      image:
-        product.images && product.images.length > 0
-          ? product.images[0]
-          : "/placeholder.svg",
-    };
-
-    addItem(cartItem, false);
-
-    // Check if we should show daily share modal
-    if (firstSwipeOfDay && !hasShownDailyShare) {
-      setFirstSwipeOfDay(false);
-      const shouldShow = await shouldShowDailyShare();
-      if (shouldShow) {
-        setTimeout(() => {
-          setShowDailyShare(true);
-          setHasShownDailyShare(true);
-        }, 500);
-      }
-    }
-
-    // Show share prompt logic - check count after state update
-    // We need to check the actual current cart count, not the stale items.length
-    // Option: Check items.length + 1, or use a ref, or check in useEffect
-    if (!hasSeenSharePrompt) {
-      // Access current items count using functional update just to read
+  if (firstSwipeOfDay && !hasShownDailyShare) {
+    setFirstSwipeOfDay(false);
+    const shouldShow = await shouldShowDailyShare();
+    if (shouldShow) {
       setTimeout(() => {
-        if (items.length >= 10) {
-          setShowSharePrompt(true);
-          setHasSeenSharePrompt(true);
-        }
-      }, 100); // Small delay to ensure state has updated
+        setShowDailyShare(true);
+        setHasShownDailyShare(true);
+      }, 500);
     }
-  };
-  
+  }
 
-  const handleSwipeLeft = (product: any) => {
-    if (!product) return;
-    setCurrentIndex((prev) => prev + 1);
-  };
+  if (!hasSeenSharePrompt) {
+    setTimeout(() => {
+      if (items.length >= 10) {
+        setShowSharePrompt(true);
+        setHasSeenSharePrompt(true);
+      }
+    }, 100);
+  }
+};
 
+const handleSwipeLeft = (product: any) => {
+  // ✅ Guard against undefined product
+  if (!product || !product.id || items.length >= 20) return;
+  setCurrentIndex((prev) => {
+    const next = prev + 1;
+    return next >= products.length ? products.length : next;
+  });
+};
 
 const handleSwipeUp = (product: any) => {
-  if (!product || !product.id) return; // ✅ prevents undefined crashes
+  // ✅ Guard before opening modal
+  if (!product || !product.id) return;
   setSelectedProduct(product);
   setIsModalOpen(true);
 };
+
 
 
   const handleShare = async () => {
@@ -644,13 +613,27 @@ const handleSwipeUp = (product: any) => {
 
       {/* Discovery Stack */}
       <div className="h-screen flex items-start md:items-center justify-center">
-        <DiscoveryStack
+        {/* <DiscoveryStack
           products={products}
           currentIndex={currentIndex}
           onSwipeRight={handleSwipeRight}
           onSwipeLeft={handleSwipeLeft}
           onSwipeUp={handleSwipeUp}
           // onDeckEnd={handleDeckEnd}
+        /> */}
+
+        <DiscoveryStack
+          products={products}
+          currentIndex={currentIndex}
+          onSwipeRight={(p) => {
+            if (p && p.id) handleSwipeRight(p);
+          }}
+          onSwipeLeft={(p) => {
+            if (p && p.id) handleSwipeLeft(p);
+          }}
+          onSwipeUp={(p) => {
+            if (p && p.id) handleSwipeUp(p);
+          }}
         />
       </div>
 
@@ -674,7 +657,7 @@ const handleSwipeUp = (product: any) => {
       />
 
       <ProductDetailsModal
-        isOpen={!!isModalOpen && !!selectedProduct?.id} // ✅ only open when valid product
+        isOpen={!!isModalOpen && !!selectedProduct?.id}
         onClose={() => {
           setIsModalOpen(false);
           setSelectedProduct(null);

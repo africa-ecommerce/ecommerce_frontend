@@ -543,31 +543,7 @@ const {
               ) : null}
             </div>
 
-            {/* Sticky Add to Store Button */}
-            {/* {product && (
-              <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t">
-                <Button
-                  onClick={handleAddToStore}
-                  disabled={isAdding || isInCart}
-                  className="w-full"
-                  size="lg"
-                >
-                  {isAdding ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Adding...
-                    </>
-                  ) : isInCart ? (
-                    <>
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      In Your Picks
-                    </>
-                  ) : (
-                    "Add to Store"
-                  )}
-                </Button>
-              </div>
-            )} */}
+           
           </motion.div>
 
           {/* Modal - Desktop */}
@@ -788,30 +764,7 @@ const {
             </div>
 
             {/* Sticky Add to Store Button */}
-            {/* {product && (
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-background border-t rounded-b-3xl">
-                <Button
-                  onClick={handleAddToStore}
-                  disabled={isAdding || isInCart}
-                  className="w-full"
-                  size="lg"
-                >
-                  {isAdding ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Adding...
-                    </>
-                  ) : isInCart ? (
-                    <>
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      In Your Picks
-                    </>
-                  ) : (
-                    "Add to Store"
-                  )}
-                </Button>
-              </div>
-            )} */}
+            
           </motion.div>
           </div>
         </>
