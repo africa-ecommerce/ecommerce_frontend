@@ -1,7 +1,3 @@
-
-
-
-
 // "use client"
 
 // import type React from "react"
@@ -279,7 +275,7 @@
 //           <div className="flex items-center">
 //             <SubscribersPopover
 //               userType={user?.userType || "PLUG"}
-             
+
 //             />
 //           </div>
 //         </header>
@@ -463,16 +459,21 @@
 //   )
 // }
 
-
-
-
 "use client";
 
 import type React from "react";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useInView } from "react-intersection-observer";
-import { Search, X, Zap, AlertCircle, MessageCircle, Plus } from "lucide-react";
+import {
+  Search,
+  X,
+  Zap,
+  AlertCircle,
+  MessageCircle,
+  Plus,
+  ArrowLeft,
+} from "lucide-react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -491,6 +492,7 @@ import { NoResults } from "./no-results";
 import { ActiveFilters } from "./active-filters";
 import { FilterSheet } from "./filter-sheet";
 import { SubscribersPopover } from "./subscribers-popover";
+import { Supplier } from "@/types/product";
 
 // Seller CTA Component
 const SellerCTA = () => {
@@ -555,10 +557,16 @@ const SellerCTA = () => {
   );
 };
 
-
+interface SupplierMarketplaceProps {
+  user: any;
+  onBack?: () => void;
+}
 
 // Separate component for supplier marketplace
-export default function SupplierMarketplace({ user }: { user: any }) {
+export default function SupplierMarketplace({
+  user,
+  onBack,
+}: SupplierMarketplaceProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -741,12 +749,21 @@ export default function SupplierMarketplace({ user }: { user: any }) {
     <TooltipProvider>
       <div className="flex flex-col min-h-screen bg-background animate-fade-in">
         <header className="sticky top-0 z-30 flex items-center justify-between bg-background/95 backdrop-blur-sm border-b px-4 py-3 sm:px-6">
-          <div className="flex-1">
-            <h1 className="text-lg font-bold sm:text-xl md:text-2xl">
-              Marketplace
-            </h1>
-          </div>
-
+          {user.userType == "PLUG" ? (
+            <>
+              <Button variant="ghost" size="icon" onClick={onBack}>
+                <ArrowLeft className="h-5 w-5" />
+                <span className="sr-only">Back</span>
+              </Button>
+              <h1 className="text-sm md:text-lg font-semibold">Discover</h1>
+            </>
+          ) : (
+            <div className="flex-1">
+              <h1 className="text-lg font-bold sm:text-xl md:text-2xl">
+                Marketplace
+              </h1>
+            </div>
+          )}         
           <div className="flex items-center">
             <SubscribersPopover userType={user?.userType || "SUPPLIER"} />
           </div>
@@ -797,30 +814,6 @@ export default function SupplierMarketplace({ user }: { user: any }) {
         </div>
 
         <main className="flex-1 pb-16 sm:pb-4">
-          <div className="px-4 sm:px-6 mt-2">
-            <Alert className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 rounded-lg">
-              <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              <AlertDescription className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">
-                What you see here is a <strong>personalized view</strong> based
-                on your preferences, activity and others.
-              </AlertDescription>
-            </Alert>
-          </div>
-
-          <div className="px-4 py-3 sm:px-6">
-            <Button
-              variant="default"
-              className="w-full bg-gradient-to-r from-primary to-primary/80 text-sm sm:text-base"
-              onClick={() => setShowDiscoveryMode(true)}
-            >
-              <Zap className="mr-2 h-4 w-4" />
-              Discovery Mode
-              <span className="ml-1 text-xs opacity-80 hidden sm:inline">
-                (TikTok-style browsing)
-              </span>
-            </Button>
-          </div>
-
           <section className="px-4 py-2 sm:px-6">
             <ScrollArea className="w-full whitespace-nowrap pb-2">
               <div className="flex gap-2">

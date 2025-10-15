@@ -298,7 +298,7 @@ export default function ProductDetail() {
               {truncateText(product?.name, 25)}
             </h1>
           </div>
-          <div>
+          {/* <div>
             {user?.userType === "PLUG" && (
               <Button
                 className={`${
@@ -332,7 +332,7 @@ export default function ProductDetail() {
                 )}
               </Button>
             )}
-          </div>
+          </div> */}
         </header>
 
         <main className="flex-1">
@@ -357,9 +357,9 @@ export default function ProductDetail() {
                 <h2 className="text-sm md:text-lg font-bold capitalize">
                   {truncateText(product?.name)}
                 </h2>
-                <div className="font-semibold">
+                {/* <div className="font-semibold">
                   {formatPrice(product?.price)}
-                </div>
+                </div> */}
               </div>
               <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
                 <div className="flex items-center">
