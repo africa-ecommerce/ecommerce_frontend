@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
   useEffect,
+  useRef,
 } from "react";
 import type React from "react";
 
@@ -81,7 +82,7 @@ interface ShoppingCartContextType {
   totalProfit: number;
   totalTakeHome: number;
   isCartFull: boolean;
-  addItem: (item: CartItem, openCart?: boolean) => boolean;
+  addItem: (item: CartItem, openCart?: boolean) => void;
   removeItem: (itemId: string) => void;
   updateItemPrice: (
     itemId: string,
@@ -163,6 +164,9 @@ export function ShoppingCartProvider({
   const [selectedItemId, setSelectedItemId] = useState<string>("");
   const [isMutate, setIsMutate] = useState(false);
 
+  const queueRef = useRef<CartItem[]>([]);
+  const isUpdating = useRef(false);
+
   useEffect(() => {
     const handleResetMutate = () => {
       setIsMutate(false);
@@ -183,6 +187,7 @@ export function ShoppingCartProvider({
 
   const itemCount = items.length;
   const isCartFull = itemCount >= MAX_CART_ITEMS;
+
 
   // Calculate total profit and total take home across all items
   const totalProfit = items.reduce((sum, item) => sum + (item.profit || 0), 0);
@@ -227,40 +232,49 @@ export function ShoppingCartProvider({
   // };
 
 
-  const addItem = (newItem: CartItem, openCart = false) => {
-    let wasAdded = false;
+  const processQueue = () => {
+    if (isUpdating.current) return;
+    if (queueRef.current.length === 0) return;
 
-    setItems((prevItems) => {
-      // Check cart limit with current state
-      if (prevItems.length >= MAX_CART_ITEMS) {
+    isUpdating.current = true;
+    const nextItem = queueRef.current.shift()!;
+
+    setItems((prev) => {
+      if (prev.length >= MAX_CART_ITEMS) {
         setShowLimitAlert(true);
         setIsOpen(true);
         setTimeout(() => setShowLimitAlert(false), 10000);
-        wasAdded = false;
-        return prevItems; // Don't modify if at limit
+        isUpdating.current = false;
+        processQueue(); // continue processing others
+        return prev;
       }
 
-      const existingItemIndex = prevItems.findIndex(
-        (item) => item.id === newItem.id
-      );
-
-      if (existingItemIndex >= 0) {
-        // Item already exists, don't add again
-        wasAdded = false;
-        return prevItems;
-      } else {
-        // Add new item
-        wasAdded = true;
-        return [...prevItems, { ...newItem, profit: 0 }];
+      // Prevent duplicates
+      if (prev.some((i) => i.id === nextItem.id)) {
+        isUpdating.current = false;
+        processQueue();
+        return prev;
       }
+
+      const updated = [...prev, { ...nextItem, profit: 0 }];
+
+      // Simulate async update completion
+      setTimeout(() => {
+        isUpdating.current = false;
+        processQueue(); // process next in line
+      }, 0);
+
+      return updated;
     });
-
-    if (openCart) {
-      setIsOpen(true);
-    }
-
-    return wasAdded;
   };
+
+
+
+const addItem = (item: CartItem, openCart = false) => {
+  queueRef.current.push(item);
+  processQueue();
+  if (openCart) setIsOpen(true);
+};
   const removeItem = (itemId: string) => {
     setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
     if (showLimitAlert && itemCount <= MAX_CART_ITEMS) {

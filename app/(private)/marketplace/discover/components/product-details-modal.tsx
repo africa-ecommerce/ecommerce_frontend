@@ -544,7 +544,7 @@ const {
             </div>
 
             {/* Sticky Add to Store Button */}
-            {product && (
+            {/* {product && (
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t">
                 <Button
                   onClick={handleAddToStore}
@@ -567,17 +567,18 @@ const {
                   )}
                 </Button>
               </div>
-            )}
+            )} */}
           </motion.div>
 
           {/* Modal - Desktop */}
-          <motion.div
-            variants={modalVariantsDesktop}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="hidden md:flex fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-background rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex-col"
-          >
+        <div className="hidden md:fixed md:inset-0 md:z-50 md:flex md:justify-center md:items-center">
+  <motion.div
+    variants={modalVariantsDesktop}
+    initial="hidden"
+    animate="visible"
+    exit="exit"
+    className="bg-background rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col relative"
+  >
             {/* Close Button */}
             <button
               onClick={onClose}
@@ -787,7 +788,7 @@ const {
             </div>
 
             {/* Sticky Add to Store Button */}
-            {product && (
+            {/* {product && (
               <div className="absolute bottom-0 left-0 right-0 p-6 bg-background border-t rounded-b-3xl">
                 <Button
                   onClick={handleAddToStore}
@@ -810,8 +811,9 @@ const {
                   )}
                 </Button>
               </div>
-            )}
+            )} */}
           </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
