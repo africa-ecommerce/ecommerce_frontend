@@ -392,7 +392,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Toast } from "./toast";
 
 import { DiscoveryStack } from "./discovery-stack";
 import { Layers, ChevronRight } from "lucide-react";
@@ -438,8 +437,7 @@ export default function Discover() {
     userData: { user },
   } = useUser();
 
-    const [toast, setToast] = useState<{ message: string; type: "success" | "info" } | null>(null);
-  
+    
   
 
   useEffect(() => {
@@ -495,11 +493,7 @@ const handleSwipeRight = async (product: any) => {
   // ✅ Guard against undefined product
   if (!product || !product.id) return;
 
-  if(items.length >= 20) {
- setToast({ message: "You have 20 items in your cart - submit or remove item in your cart", type: "info" });
-      const t = setTimeout(() => setToast(null), 1500);
-      return () => clearTimeout(t);
-  }
+
 
   // ✅ Prevent index overflow
   setCurrentIndex((prev) => {
@@ -680,7 +674,7 @@ const handleSwipeUp = (product: any) => {
         productId={selectedProduct?.id ?? null}
       />
 
-      {toast && <Toast message={toast.message} type={toast.type} />}
+     
     </main>
   );
 }
