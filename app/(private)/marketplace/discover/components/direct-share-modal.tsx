@@ -232,7 +232,6 @@ const handleSubmit = async (e: React.FormEvent) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-md max-h-[95vh] overflow-y-auto p-4 sm:p-6">
-
         <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-2 border-b flex-shrink-0">
           <DialogTitle className="text-base sm:text-lg leading-tight">
             Set Price & Share: {product.name}
@@ -377,13 +376,15 @@ const handleSubmit = async (e: React.FormEvent) => {
         </DialogFooter>
       </DialogContent>
 
-      <ShareModal
-        open={shareModalOpen}
-        onOpenChange={setShareModalOpen}
-        productName={sharedProduct?.name || product?.name || ""}
-        productId={sharedProduct?.id || product?.id || ""}
-        plugId={user?.plug.id}
-      />
+      {sharedProduct && (
+        <ShareModal
+          open={shareModalOpen}
+          onOpenChange={setShareModalOpen}
+          productName={sharedProduct.name}
+          productId={sharedProduct.id}
+          plugId={user?.plug.id}
+        />
+      )}
     </Dialog>
   );
 }
