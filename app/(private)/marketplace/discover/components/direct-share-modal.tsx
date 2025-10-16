@@ -16,6 +16,8 @@ import { TrendingUp, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import { mutate } from "swr";
+import { ShareModal } from "@/app/(private)/dashboard/(plug)/_components/share-modal";
+import { useUser } from "@/app/_components/provider/UserContext";
 
 interface CommissionData {
   sellingPrice: number;
@@ -83,6 +85,12 @@ export function DirectShareModal({
     null
   );
   const [isLoading, setIsLoading] = useState(false);
+
+    const [shareModalOpen, setShareModalOpen] = useState(false);
+
+     const { userData } = useUser();
+      const { user } = userData || { user: null };
+  
 
   // Calculate commission data whenever price changes
   useEffect(() => {
@@ -180,7 +188,6 @@ export function DirectShareModal({
       // Mutate to refresh data
       mutate("/api/plug/products/");
 
-      successToast(result.message || "Product added successfully!");
 
       // Reset form and close
       setPrice("");
@@ -190,6 +197,7 @@ export function DirectShareModal({
 
       // Call success callback if provided
       if (onSuccess) {
+        setShareModalOpen(true);
         onSuccess();
       }
     } catch (error) {
@@ -358,6 +366,14 @@ export function DirectShareModal({
           </div>
         </DialogFooter>
       </DialogContent>
+
+      <ShareModal
+                open={shareModalOpen}
+                onOpenChange={setShareModalOpen}
+                productName={product?.name || ""}
+                productId={product?.id || ""}
+                plugId={user?.plug.id}
+              />
     </Dialog>
   );
 }
