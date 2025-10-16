@@ -86,11 +86,13 @@ export function DirectShareModal({
   );
   const [isLoading, setIsLoading] = useState(false);
 
-    const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
-     const { userData } = useUser();
-      const { user } = userData || { user: null };
-  
+  const [sharedProduct, setSharedProduct] = useState<any | null>(null);
+
+
+  const { userData } = useUser();
+  const { user } = userData || { user: null };
 
   // Calculate commission data whenever price changes
   useEffect(() => {
@@ -142,71 +144,78 @@ export function DirectShareModal({
     if (!touched) setTouched(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!product) return;
 
-    if (!product) return;
+  const numericPrice = Number.parseFloat(price.replace(/,/g, "")) || 0;
 
-    const numericPrice = Number.parseFloat(price.replace(/,/g, "")) || 0;
+  if (
+    !price ||
+    numericPrice < product.minPrice ||
+    (product.maxPrice > 0 && numericPrice > product.maxPrice)
+  ) {
+    setTouched(true);
+    return;
+  }
 
-    if (
-      !price ||
-      numericPrice < product.minPrice ||
-      (product.maxPrice > 0 && numericPrice > product.maxPrice)
-    ) {
-      setTouched(true);
+  if (!commissionData) return;
+
+  setIsLoading(true);
+  try {
+    const products = [
+      {
+        id: product.id,
+        price: numericPrice,
+        commissionRate: commissionData.commissionRate,
+      },
+    ];
+
+    const response = await fetch("/api/plug/products/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(products),
+      credentials: "include",
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      errorToast(result.error);
       return;
     }
 
-    if (!commissionData) return;
+    // ✅ Mutate to refresh your store list
+    mutate("/api/plug/products/");
 
-    setIsLoading(true);
-    try {
-      // API call to submit the product directly
-      const products = [
-        {
-          id: product.id,
-          price: numericPrice,
-          commissionRate: commissionData.commissionRate,
-        },
-      ];
+    // ✅ Save this product locally to use in ShareModal
+    const finalizedProduct = {
+      ...product,
+      price: numericPrice,
+      commissionRate: commissionData.commissionRate,
+    };
+    setSharedProduct(finalizedProduct);
 
-      const response = await fetch("/api/plug/products/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(products),
-        credentials: "include",
-      });
+    // Reset form
+    setPrice("");
+    setCommissionData(null);
+    setTouched(false);
+    onOpenChange(false);
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        errorToast(result.error);
-        return;
-      }
-
-      // Mutate to refresh data
-      mutate("/api/plug/products/");
-
-
-      // Reset form and close
-      setPrice("");
-      setCommissionData(null);
-      setTouched(false);
-      onOpenChange(false);
-
-      // Call success callback if provided
-      if (onSuccess) {
-        setShareModalOpen(true);
-        onSuccess();
-      }
-    } catch (error) {
-      console.error(error);
-      errorToast("Something went wrong");
-    } finally {
-      setIsLoading(false);
+    // ✅ Only open share modal after successful store add
+    if (onSuccess) {
+      onSuccess();
+      // Wait a bit to ensure product is synced in the backend
+      setTimeout(() => setShareModalOpen(true), 1000);
     }
-  };
+  } catch (error) {
+    console.error(error);
+    errorToast("Something went wrong");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   // Reset form when modal opens/closes or product changes
   useEffect(() => {
@@ -222,7 +231,8 @@ export function DirectShareModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-md mx-auto max-h-[90vh] flex flex-col p-0 gap-0">
+      <DialogContent className="w-[95vw] max-w-md max-h-[95vh] overflow-y-auto p-4 sm:p-6">
+
         <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-2 border-b flex-shrink-0">
           <DialogTitle className="text-base sm:text-lg leading-tight">
             Set Price & Share: {product.name}
@@ -368,12 +378,12 @@ export function DirectShareModal({
       </DialogContent>
 
       <ShareModal
-                open={shareModalOpen}
-                onOpenChange={setShareModalOpen}
-                productName={product?.name || ""}
-                productId={product?.id || ""}
-                plugId={user?.plug.id}
-              />
+        open={shareModalOpen}
+        onOpenChange={setShareModalOpen}
+        productName={sharedProduct?.name || product?.name || ""}
+        productId={sharedProduct?.id || product?.id || ""}
+        plugId={user?.plug.id}
+      />
     </Dialog>
   );
 }

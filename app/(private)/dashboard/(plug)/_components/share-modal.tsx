@@ -183,8 +183,9 @@ export function ShareModal({
     {
       revalidateOnFocus: false,
       revalidateIfStale: false,
-      dedupingInterval: 60000,
-      shouldRetryOnError: false,
+      shouldRetryOnError: (err) => err.message.includes("404"),
+      errorRetryCount: 3,
+      errorRetryInterval: 1000,
     }
   );
 
@@ -595,7 +596,8 @@ export function ShareModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] p-4 sm:p-6">
+      <DialogContent className="w-[95vw] max-w-md max-h-[95vh] overflow-y-auto p-4 sm:p-6">
+
         <DialogHeader className="pb-4">
           <DialogTitle className="text-base">Share Product</DialogTitle>
           <DialogDescription className="text-sm">
