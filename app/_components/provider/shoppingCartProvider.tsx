@@ -205,33 +205,7 @@ export function ShoppingCartProvider({
     setIsOpen(true);
   };
 
-  // const addItem = (newItem: CartItem, openCart = false) => {
-  //   if (isCartFull) {
-  //     setShowLimitAlert(true);
-  //     setIsOpen(true);
-  //     setTimeout(() => setShowLimitAlert(false), 10000);
-  //     return false;
-  //   }
-
-  //   setItems((prevItems) => {
-  //     const existingItemIndex = prevItems.findIndex(
-  //       (item) => item.id === newItem.id
-  //     );
-  //     if (existingItemIndex >= 0) {
-  //       const updatedItems = [...prevItems];
-  //       return updatedItems;
-  //     } else {
-  //       return [...prevItems, { ...newItem, profit: 0 }];
-  //     }
-  //   });
-
-  //   if (openCart) {
-  //     setIsOpen(true);
-  //   }
-  //   return true;
-  // };
-
-
+ 
   const processQueue = () => {
     if (isUpdating.current) return;
     if (queueRef.current.length === 0) return;

@@ -66,13 +66,13 @@ export function ProductCard({ product, onSwipeUp }: ProductCardProps) {
         <span className="text-[12px] font-medium text-orange-600 bg-orange-100 px-3 py-1 rounded-full uppercase tracking-wide">
           {product.category}
         </span>
-        <button
+        {/* <button
           onClick={handleShare}
           className="p-2 hover:bg-orange-100 rounded-full transition-colors"
           aria-label="Share product"
         >
           <Share2 className="md:w-5 md:h-5 h-4 w-4 text-orange-600" />
-        </button>
+        </button> */}
       </div>
 
       {/* Product Image */}

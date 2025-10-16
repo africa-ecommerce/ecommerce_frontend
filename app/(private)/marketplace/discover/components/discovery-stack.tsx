@@ -14,6 +14,7 @@ import { Toast } from "./toast";
 import { X, Heart, Share2 } from "lucide-react";
 import { DiscoveryEndOfStack } from "./discovery-end-of-stack";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
+import { DirectShareModal } from "./direct-share-modal";
 
 const fetcher = async (url: string) => {
   const res = await fetch(url, { credentials: "include" });
@@ -25,7 +26,7 @@ const fetcher = async (url: string) => {
 interface DiscoveryStackProps {
   products: any[];
   currentIndex: number;
-  onSwipeRight: (product: any) => void;
+  onSwipeRight: (product: any, skipCart?: boolean) => void;
   onSwipeLeft: (product: any) => void;
   onSwipeUp: (product: any) => void;
 }
@@ -42,6 +43,9 @@ export function DiscoveryStack({
     type: "success" | "info";
   } | null>(null);
   const [leaving, setLeaving] = useState(false);
+
+   const [showDirectShareModal, setShowDirectShareModal] = useState(false);
+   const [shareProduct, setShareProduct] = useState<any | null>(null);
 
   const currentProduct = products?.[currentIndex];
   const nextProducts =
@@ -282,7 +286,14 @@ export function DiscoveryStack({
             <Heart className="md:w-6 md:h-6 w-5 h-5 text-green-500" />
           </button>
 
-          <button className="md:p-4 p-3 bg-white/90 rounded-full shadow-md hover:scale-105 transition">
+          <button
+            onClick={() => {
+              if (!currentProduct) return;
+              setShareProduct(currentProduct);
+              setShowDirectShareModal(true);
+            }}
+            className="md:p-4 p-3 bg-white/90 rounded-full shadow-md hover:scale-105 transition"
+          >
             <Share2 className="md:w-6 md:h-6 w-5 h-5 text-orange-600" />
           </button>
         </div>
@@ -290,6 +301,35 @@ export function DiscoveryStack({
 
       {/* Toast message */}
       {toast && <Toast message={toast.message} type={toast.type} />}
+
+      <DirectShareModal
+        open={showDirectShareModal}
+        onOpenChange={setShowDirectShareModal}
+        product={
+          shareProduct
+            ? {
+                id: shareProduct.id,
+                name: shareProduct.name,
+                price: shareProduct.price,
+                minPrice: shareProduct.minPrice,
+                maxPrice: shareProduct.maxPrice,
+              }
+            : null
+        }
+        onSuccess={() => {
+          // Show success toast
+          setToast({
+            message: "Product added to your store successfully!",
+            type: "success",
+          });
+
+          // Trigger swipe animation after short delay
+          setTimeout(() => {
+            onSwipeRight(shareProduct, true); // Pass true to skip cart
+            setToast(null);
+          }, 1000);
+        }}
+      />
     </div>
   );
 }

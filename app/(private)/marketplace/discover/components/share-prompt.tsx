@@ -7,9 +7,10 @@ interface SharePromptProps {
   isOpen: boolean
   onClose: () => void
   cartCount: number
+  onConfirm: () => void
 }
 
-export function SharePrompt({ isOpen, onClose, cartCount }: SharePromptProps) {
+export function SharePrompt({ isOpen, onClose, cartCount, onConfirm }: SharePromptProps) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -49,7 +50,9 @@ export function SharePrompt({ isOpen, onClose, cartCount }: SharePromptProps) {
               </div>
 
               <div className="space-y-3">
-                <button className="w-full bg-gradient-to-r from-orange-400 to-orange-500 text-white font-semibold py-4 rounded-2xl hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all">
+                <button 
+                onClick={onConfirm}
+                className="w-full bg-gradient-to-r from-orange-400 to-orange-500 text-white font-semibold py-4 rounded-2xl hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all">
                   Set Prices & Go Live
                 </button>
                 <button
