@@ -173,6 +173,8 @@ const handleSubmit = async (e: React.FormEvent) => {
       },
     ];
 
+    console.log("products", products)
+
     const response = await fetch("/api/plug/products/single", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -187,6 +189,8 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
+    console.log("result", result)
+
     // ✅ Mutate to refresh your store list
     mutate("/api/plug/products/");
 
@@ -196,6 +200,8 @@ const handleSubmit = async (e: React.FormEvent) => {
       price: numericPrice,
       commissionRate: commissionData.commissionRate,
     };
+
+    console.log("finalizedProduct", finalizedProduct)
     setSharedProduct(finalizedProduct);
 
     setSharedProductId(result?.id)
