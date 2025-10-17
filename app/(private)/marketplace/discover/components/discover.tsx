@@ -513,43 +513,7 @@ export default function Discover() {
     <main className="max-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 relative overflow-hidden font-sans">
       {/* Header */}
 
-      <header className="fixed top-0 z-50">
-        <div className="right-0 px-6 md:py-4 py-3 flex items-center justify-end">
-          {/* View More Button */}
-          {/* <button
-          onClick={viewMore}
-          className="group flex items-center gap-2 px-4 md:px-5 md:py-2.5 py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
-        >
-          <span className="text-sm font-semibold text-orange-600">
-            View More
-          </span>
-          <ChevronRight className="w-3 h-3 md:w-4 md:h-4 text-orange-600 group-hover:translate-x-0.5 transition-transform" />
-        </button> */}
-
-          {/* Right side container for popover and counter */}
-          <div className="flex justify-end w-full">
-            <SubscribersPopover userType={user?.userType || "PLUG"} />
-
-            {/* <div className="flex items-center gap-2 px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
-            <div className="relative">
-              <Layers
-                className="md:w-5 md:h-5 w-4 h-4 text-orange-600"
-                strokeWidth={2.5}
-              />
-              <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="md:text-2xl text-base font-bold text-orange-600 tabular-nums">
-                {productsRemaining}
-              </span>
-              <span className="text-xs font-medium text-orange-500/80">
-                left
-              </span>
-            </div>
-          </div> */}
-          </div>
-        </div>
-      </header>
+     
 
       {/* Discovery Stack */}
       <div className="h-screen flex items-start md:items-center justify-center">
