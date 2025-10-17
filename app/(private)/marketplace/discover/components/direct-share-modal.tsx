@@ -165,13 +165,12 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   setIsLoading(true);
   try {
-    const products = [
-      {
+    const products = {
         id: product.id,
         price: numericPrice,
         commissionRate: commissionData.commissionRate,
-      },
-    ];
+      };
+    
 
     console.log("products", products)
 

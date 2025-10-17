@@ -515,8 +515,8 @@ export default function Discover() {
 
       <header className="fixed top-0 z-50">
         <div className="right-0 px-6 md:py-4 py-3 flex items-center justify-end">
-        {/* View More Button */}
-        {/* <button
+          {/* View More Button */}
+          {/* <button
           onClick={viewMore}
           className="group flex items-center gap-2 px-4 md:px-5 md:py-2.5 py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
         >
@@ -526,11 +526,11 @@ export default function Discover() {
           <ChevronRight className="w-3 h-3 md:w-4 md:h-4 text-orange-600 group-hover:translate-x-0.5 transition-transform" />
         </button> */}
 
-        {/* Right side container for popover and counter */}
-        <div className="flex flex-col items-end gap-1 md:gap-3">
-          <SubscribersPopover userType={user?.userType || "PLUG"} />
+          {/* Right side container for popover and counter */}
+          <div className="flex justify-end w-full">
+            <SubscribersPopover userType={user?.userType || "PLUG"} />
 
-          {/* <div className="flex items-center gap-2 px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
+            {/* <div className="flex items-center gap-2 px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
             <div className="relative">
               <Layers
                 className="md:w-5 md:h-5 w-4 h-4 text-orange-600"
@@ -547,7 +547,7 @@ export default function Discover() {
               </span>
             </div>
           </div> */}
-        </div>
+          </div>
         </div>
       </header>
 
