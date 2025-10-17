@@ -127,11 +127,11 @@ export function ProductCard({ product, onSwipeUp }: ProductCardProps) {
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="text-[12px] font-semibold md:text-base">
+          <div className="font-semibold text-base">
             ₦{product?.price?.toLocaleString()}
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span className="font-medium text-sm md:text-base">{formatQuantity(product?.plugsCount)} {product?.plugsCount === 1 ? "Plug" : "Plugs"}</span>
+            <span className="font-medium text-[12px] md:text-base">{formatQuantity(product?.plugsCount)} {product?.plugsCount === 1 ? "Plug" : "Plugs"}</span>
           </div>
         </div>
       </div>

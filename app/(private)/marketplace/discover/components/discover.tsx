@@ -373,10 +373,7 @@ export default function Discover() {
     userData: { user },
   } = useUser();
 
-  useEffect(() => {
-    console.log("Current index:", currentIndex, "of", products.length);
-    console.log("Current product:", products[currentIndex]);
-  }, [currentIndex]);
+ 
 
   // Combine filters for products hook
   const filters: ProductsFilter = {

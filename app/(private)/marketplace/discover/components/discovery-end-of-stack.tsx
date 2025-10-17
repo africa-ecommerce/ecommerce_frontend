@@ -104,7 +104,7 @@ export function DiscoveryEndOfStack() {
             transition={{ delay: 0.7 }}
             className="text-sm md:text-lg text-gray-600 leading-relaxed md:mb-10 mb-6 text-pretty max-w-sm"
           >
-            Come back after 12 hours to receive your new stack. In the meantime, visit your product dashboard and share
+            Come back to get the latest stack. In the meantime, visit your product dashboard and share
             a stunning image of your product, you'll love it.
           </motion.p>
 

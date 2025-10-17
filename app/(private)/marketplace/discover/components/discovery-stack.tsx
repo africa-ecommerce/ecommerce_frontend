@@ -79,18 +79,10 @@ export function DiscoveryStack({
       const product = currentProduct;
 
       if (e.key === "ArrowRight") {
-        if (items.length >= 20) {
-          setToast({
-            message:
-              "You have 20 items in your cart — submit or remove an item first",
-            type: "info",
-          });
-          const t = setTimeout(() => setToast(null), 3000);
-          return () => clearTimeout(t);
-        }
+        
 
         setToast({
-          message: "Added to your Picks — set your resale price in Cart",
+          message: "Added to your cart — add to store or share what you found",
           type: "success",
         });
         const swipe = setTimeout(() => onSwipeRight(product), 250);
@@ -131,18 +123,10 @@ export function DiscoveryStack({
 
     if (info.offset.x > threshold || info.velocity.x > 800) {
       setLeaving(true);
-      if (items.length >= 20) {
-        setToast({
-          message:
-            "You have 20 items in your cart — submit or remove an item first",
-          type: "info",
-        });
-        const t = setTimeout(() => setToast(null), 3000);
-        return () => clearTimeout(t);
-      }
+      
 
       setToast({
-        message: "Added to your Picks — set your resale price in Cart",
+        message: "Added to your cart — add to store or share what you found",
         type: "success",
       });
       const swipe = setTimeout(() => onSwipeRight(product), 250);
@@ -260,18 +244,9 @@ export function DiscoveryStack({
             onClick={() => {
               if (!currentProduct) return;
 
-              if (items.length >= 20) {
-                setToast({
-                  message:
-                    "You have 20 items in your cart — submit or remove an item first",
-                  type: "info",
-                });
-                const t = setTimeout(() => setToast(null), 3000);
-                return () => clearTimeout(t);
-              }
 
               setToast({
-                message: "Added to your Picks — set your resale price in Cart",
+                message: "Added to your cart — add to store or share what you found",
                 type: "success",
               });
               const swipe = setTimeout(() => onSwipeRight(currentProduct), 250);

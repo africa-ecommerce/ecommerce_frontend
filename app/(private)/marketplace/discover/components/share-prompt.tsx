@@ -44,8 +44,8 @@ export function SharePrompt({ isOpen, onClose, cartCount, onConfirm }: ShareProm
               <div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">You're on fire! 🔥</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  You've added {cartCount} amazing products to your picks. Ready to set your prices and share your
-                  store?
+                  You've added {cartCount} amazing products to your cart. Ready to set your prices and share
+                  what you found?
                 </p>
               </div>
 
