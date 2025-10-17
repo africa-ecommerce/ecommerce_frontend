@@ -422,7 +422,7 @@ const {
                           </div>
                         </div>
 
-                        {user?.userType === "PLUG" && product?.supplierId && (
+                        {/* {user?.userType === "PLUG" && product?.supplierId && (
                           <div className="flex-shrink-0">
                             <Button
                               variant={
@@ -450,7 +450,7 @@ const {
                               )}
                             </Button>
                           </div>
-                        )}
+                        )} */}
                       </div>
                     </CardContent>
                   </Card>

@@ -402,7 +402,7 @@ export default function ProductDetail() {
                   </div>
 
                   {/* Subscribe/Unsubscribe Button - Only for PLUG users */}
-                  {user?.userType === "PLUG" && product?.supplierId && (
+                  {/* {user?.userType === "PLUG" && product?.supplierId && (
                     <div className="flex-shrink-0">
                       <Button
                         variant={
@@ -430,7 +430,7 @@ export default function ProductDetail() {
                         )}
                       </Button>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </CardContent>
             </Card>

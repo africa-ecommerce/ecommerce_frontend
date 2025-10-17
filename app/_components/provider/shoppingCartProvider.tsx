@@ -1,6 +1,3 @@
-
-
-
 // "use client";
 // import {
 //   createContext,
@@ -188,7 +185,6 @@
 //   const itemCount = items.length;
 //   const isCartFull = itemCount >= MAX_CART_ITEMS;
 
-
 //   // Calculate total profit and total take home across all items
 //   const totalProfit = items.reduce((sum, item) => sum + (item.profit || 0), 0);
 //   const totalTakeHome = items.reduce(
@@ -205,7 +201,6 @@
 //     setIsOpen(true);
 //   };
 
- 
 //   const processQueue = () => {
 //     if (isUpdating.current) return;
 //     if (queueRef.current.length === 0) return;
@@ -241,8 +236,6 @@
 //       return updated;
 //     });
 //   };
-
-
 
 // const addItem = (item: CartItem, openCart = false) => {
 //   queueRef.current.push(item);
@@ -861,11 +854,6 @@
 //   );
 // }
 
-
-
-
-
-
 "use client";
 import {
   createContext,
@@ -876,6 +864,17 @@ import {
   useRef,
 } from "react";
 import type React from "react";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import {
   X,
@@ -911,6 +910,50 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { truncateText } from "@/lib/utils";
+import { DirectShareModal } from "@/app/(private)/marketplace/discover/components/direct-share-modal";
+
+interface ClearCartModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onConfirm: () => void;
+  itemCount: number;
+}
+
+function ClearCartModal({
+  open,
+  onOpenChange,
+  onConfirm,
+  itemCount,
+}: ClearCartModalProps) {
+  const handleConfirm = () => {
+    onConfirm();
+    onOpenChange(false);
+  };
+
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Clear All Products?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to remove all {itemCount} curated product
+            {itemCount !== 1 ? "s" : ""} from your list? This action cannot be
+            undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleConfirm}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Clear All
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 // IndexedDB utilities
 const DB_NAME = "CuratedProductsDB";
@@ -1081,6 +1124,12 @@ export function ShoppingCartProvider({
   const [openAddPrice, setOpenAddPrice] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string>("");
   const [isMutate, setIsMutate] = useState(false);
+  const [openDirectShare, setOpenDirectShare] = useState(false);
+  const [selectedProductForShare, setSelectedProductForShare] = useState<
+    any | null
+  >(null);
+
+  const [openClearConfirm, setOpenClearConfirm] = useState(false);
 
   const queueRef = useRef<CartItem[]>([]);
   const isUpdating = useRef(false);
@@ -1111,6 +1160,18 @@ export function ShoppingCartProvider({
     (sum, item) => sum + (item.commissionData?.plugTakeHome || 0),
     0
   );
+
+  const removeFromIndexedDB = async (itemId: string) => {
+    const db = await openDB();
+    const transaction = db.transaction([STORE_NAME], "readwrite");
+    const store = transaction.objectStore(STORE_NAME);
+    store.delete(itemId);
+    await new Promise((resolve, reject) => {
+      transaction.oncomplete = resolve;
+      transaction.onerror = reject;
+    });
+    setItems((prev) => prev.filter((item) => item.id !== itemId));
+  };
 
   const openCart = () => {
     setIsOpen(true);
@@ -1149,8 +1210,9 @@ export function ShoppingCartProvider({
     if (openCart) setIsOpen(true);
   };
 
-  const removeItem = (itemId: string) => {
+  const removeItem = async (itemId: string) => {
     setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
+    await removeFromIndexedDB(itemId);
   };
 
   const updateItemPrice = (
@@ -1195,28 +1257,19 @@ export function ShoppingCartProvider({
     updateItemPrice(selectedItemId, price, commissionData);
   };
 
-  const handleShare = async (item: CartItem) => {
-    const shareData = {
-      title: item.name,
-      text: `Check out ${item.name} - ${formatPrice(item.price)}`,
-      url: `${window.location.origin}/marketplace/${item.id}`,
-    };
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        successToast("Shared successfully!");
-      } else {
-        await navigator.clipboard.writeText(shareData.url);
-        successToast("Link copied to clipboard!");
-      }
-    } catch (error) {
-      console.error("Error sharing:", error);
-    }
+  const handleShare = (item: CartItem) => {
+    setSelectedProductForShare({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      minPrice: item.minPrice || 0,
+      maxPrice: item.maxPrice || 0,
+    });
+    setOpenDirectShare(true);
   };
 
   const handleProductClick = (itemId: string) => {
-    router.push(`/marketplace/${itemId}`);
+    router.push(`/marketplace/product/${itemId}`);
   };
 
   // Load items from IndexedDB on mount
@@ -1286,7 +1339,7 @@ export function ShoppingCartProvider({
                   variant="ghost"
                   size="sm"
                   className="h-8 gap-1"
-                  onClick={clearCart}
+                  onClick={() => setOpenClearConfirm(true)}
                 >
                   <Trash2 className="h-4 w-4" />
                   Clear All
@@ -1350,22 +1403,6 @@ export function ShoppingCartProvider({
                             <p className="text-sm text-muted-foreground">
                               Cost Price: {formatPrice(item.price)}
                             </p>
-                            {item.sellingPrice && (
-                              <div className="flex flex-col space-y-1">
-                                <p className="text-sm font-medium">
-                                  Selling Price:{" "}
-                                  {formatPrice(item.sellingPrice)}
-                                </p>
-                                {item.commissionData && (
-                                  <p className="text-sm text-blue-600">
-                                    Take Home:{" "}
-                                    {formatPrice(
-                                      item.commissionData.plugTakeHome
-                                    )}
-                                  </p>
-                                )}
-                              </div>
-                            )}
                           </div>
                           <div className="mt-2 flex gap-2">
                             <Button
@@ -1374,10 +1411,7 @@ export function ShoppingCartProvider({
                               className="h-8 px-2 bg-transparent"
                               onClick={() => handlePriceModalOpen(item.id)}
                             >
-                              {item.sellingPrice && (
-                                <Pencil className="h-3 w-3 mr-1" />
-                              )}
-                              {item.sellingPrice ? "Edit Price" : "Add Price"}
+                              Add
                             </Button>
                             <Button
                               variant="outline"
@@ -1399,6 +1433,24 @@ export function ShoppingCartProvider({
           </SheetContent>
         </Sheet>
       )}
+
+      <ClearCartModal
+        open={openClearConfirm}
+        onOpenChange={setOpenClearConfirm}
+        onConfirm={clearCart}
+        itemCount={itemCount}
+      />
+
+      <DirectShareModal
+        open={openDirectShare}
+        onOpenChange={setOpenDirectShare}
+        product={selectedProductForShare}
+        onSuccess={async () => {
+          if (selectedProductForShare?.id) {
+            await removeItem(selectedProductForShare.id);
+          }
+        }}
+      />
 
       <PriceModal
         open={openAddPrice}
@@ -1440,6 +1492,8 @@ export function PriceModal({
   const [commissionData, setCommissionData] = useState<CommissionData | null>(
     null
   );
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Calculate commission data whenever price changes
   useEffect(() => {
@@ -1487,8 +1541,33 @@ export function PriceModal({
     if (!touched) setTouched(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   const numericPrice = Number.parseFloat(price.replace(/,/g, "")) || 0;
+
+  //   if (
+  //     !price ||
+  //     numericPrice < minPrice ||
+  //     (maxPrice > 0 && numericPrice > maxPrice)
+  //   ) {
+  //     setTouched(true);
+  //     return;
+  //   }
+
+  //   if (!commissionData) return;
+
+  //   onSubmit(numericPrice, commissionData.plugMargin, commissionData);
+
+  //   // Reset form
+  //   setPrice("");
+  //   setCommissionData(null);
+  //   setTouched(false);
+  //   onOpenChange(false);
+  // };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const numericPrice = Number.parseFloat(price.replace(/,/g, "")) || 0;
 
     if (
@@ -1502,13 +1581,50 @@ export function PriceModal({
 
     if (!commissionData) return;
 
-    onSubmit(numericPrice, commissionData.plugMargin, commissionData);
+    setIsLoading(true);
+    try {
+      const products = {
+        id: itemId,
+        price: numericPrice,
+        commissionRate: commissionData.commissionRate,
+      };
 
-    // Reset form
-    setPrice("");
-    setCommissionData(null);
-    setTouched(false);
-    onOpenChange(false);
+      console.log("products", products);
+
+      const response = await fetch("/api/plug/products/single", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(products),
+        credentials: "include",
+      });
+
+      const result = await response.json();
+
+      successToast("You have added this product");
+
+      if (!response.ok) {
+        errorToast(result.error);
+        return;
+      }
+
+      // ✅ Mutate to refresh your store list
+      mutate("/api/plug/products/");
+
+      // ✅ Save this product locally to use in ShareModal
+
+      // Reset form
+      setPrice("");
+      setCommissionData(null);
+      setTouched(false);
+      onOpenChange(false);
+
+      // ✅ Only open share modal after successful store add
+    } catch (error) {
+      console.error(error);
+      errorToast("Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -1528,9 +1644,14 @@ export function PriceModal({
             Set Price for {itemName}
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm mt-1">
-            Set a selling price between ₦{minPrice.toLocaleString()} and{" "}
-            {maxPrice > 0 ? `₦${maxPrice.toLocaleString()}` : "no upper limit"}.
-            Higher margins result in lower commission rates.
+            Set a selling price between{" "}
+            <span className="font-bold">₦{minPrice.toLocaleString()}</span> and{" "}
+            {maxPrice > 0 ? (
+              <span className="font-bold">₦{maxPrice.toLocaleString()}</span>
+            ) : (
+              <span className="font-bold">no upper limit</span>
+            )}
+            . Higher margins result in lower commission rates.
           </DialogDescription>
         </DialogHeader>
 
@@ -1650,15 +1771,16 @@ export function PriceModal({
               variant="outline"
               onClick={() => onOpenChange(false)}
               className="flex-1 sm:flex-none"
+              disabled={isLoading}
             >
               Cancel
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!!error || !commissionData}
+              disabled={!!error || !commissionData || isLoading}
               className="flex-1 sm:flex-none"
             >
-              Save Price
+              {isLoading ? "Saving" : "Save Price"}
             </Button>
           </div>
         </DialogFooter>
