@@ -380,9 +380,7 @@ export default function Discover() {
     search: searchQuery,
     priceRange,
     selectedCategories,
-    selectedRatings,
-    sortBy: "createdAt",
-    order: "desc",
+   
   };
 
   useEffect(() => {
@@ -401,7 +399,9 @@ export default function Discover() {
   };
 
   // Use the products hook for data fetching
-  const { products, error, isLoading } = useProducts(filters, 50);
+  const { products, error, isLoading } = useProducts(filters, 20, true);
+
+  console.log("products", products)
 
   const { addItem, items, openCart } = useShoppingCart();
 

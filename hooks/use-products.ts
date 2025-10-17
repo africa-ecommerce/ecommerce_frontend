@@ -25,7 +25,7 @@ export interface ProductsFilter {
   
 }
 
-export function useProducts(filters: ProductsFilter, limit: number = 20) {
+export function useProducts(filters: ProductsFilter, limit: number = 20, discover?: boolean) {
   const debouncedSearch = useDebounce(filters.search, 300);
   const { isMutate } = useShoppingCart();
 
@@ -64,54 +64,55 @@ export function useProducts(filters: ProductsFilter, limit: number = 20) {
   }, [filterKey]);
 
   // Convert filters to query params
-  const getKey = (
-    pageIndex: number,
-    previousPageData: ProductsResponse | null
-  ) => {
-    // If filters changed, reset to first page
-    if (hasFilterChanged && pageIndex > 0) {
-      return null;
-    }
+ const getKey = (
+   pageIndex: number,
+   previousPageData: ProductsResponse | null
+ ) => {
+   // If filters changed, reset to first page
+   if (hasFilterChanged && pageIndex > 0) {
+     return null;
+   }
 
-    // Reached the end
-    if (previousPageData && !previousPageData.meta.hasNextPage) return null;
+   // Reached the end
+   if (previousPageData && !previousPageData.meta.hasNextPage) return null;
 
-    // First page or with cursor for pagination
-    const cursor =
-      pageIndex > 0 && previousPageData
-        ? previousPageData.meta.nextCursor
-        : undefined;
+   // First page or with cursor for pagination
+   const cursor =
+     pageIndex > 0 && previousPageData
+       ? previousPageData.meta.nextCursor
+       : undefined;
 
-    // Build query parameters
-    const params: ProductQueryParams = {
-      limit,
-      cursor,
-      search: debouncedSearch || undefined,
-      minPrice: filters.priceRange[0] > 0 ? filters.priceRange[0] : undefined,
-      maxPrice:
-        filters.priceRange[1] < 9999999 ? filters.priceRange[1] : undefined,
+   // Build query parameters
+   const params: ProductQueryParams = {
+     limit,
+     cursor,
+     search: debouncedSearch || undefined,
+     minPrice: filters.priceRange[0] > 0 ? filters.priceRange[0] : undefined,
+     maxPrice:
+       filters.priceRange[1] < 9999999 ? filters.priceRange[1] : undefined,
+     order: filters.order,
+   };
 
-      order: filters.order,
-    };
+   if (filters.selectedCategories.length === 1) {
+     params.category = filters.selectedCategories[0];
+   } else if (filters.selectedCategories.length > 1) {
+     params.category = filters.selectedCategories.join(",");
+   }
 
-    // Add category filter if any selected
-    if (filters.selectedCategories.length === 1) {
-      params.category = filters.selectedCategories[0];
-    } else if (filters.selectedCategories.length > 1) {
-      params.category = filters.selectedCategories.join(",");
-    }
+   const queryString = Object.entries(params)
+     .filter(
+       ([_, value]) => value !== undefined && value !== null && value !== ""
+     )
+     .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
+     .join("&");
 
-   
-    // Build the URL with query parameters
-    const queryString = Object.entries(params)
-      .filter(
-        ([_, value]) => value !== undefined && value !== null && value !== ""
-      )
-      .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
-      .join("&");
+   const baseUrl = discover
+     ? "/api/discover/products"
+     : "/api/marketplace/products";
 
-    return `/api/marketplace/products?${queryString}`;
-  };
+   return `${baseUrl}?${queryString}`;
+ };
+
 
   const { data, error, size, setSize, isValidating, mutate } =
     useSWRInfinite<ProductsResponse>(getKey, fetcher, {
