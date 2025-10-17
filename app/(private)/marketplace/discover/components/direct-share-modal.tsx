@@ -246,11 +246,14 @@ const handleSubmit = async (e: React.FormEvent) => {
             Set Price & Share: {product.name}
           </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm mt-1">
-            Set a selling price between ₦{product.minPrice.toLocaleString()} and{" "}
-            {product.maxPrice > 0
-              ? `₦${product.maxPrice.toLocaleString()}`
-              : "no upper limit"}
-            . This will be added directly to your store and also share.
+            Set a selling price between{" "}
+            <span className="font-bold">₦{product.minPrice.toLocaleString()}</span> and{" "}
+            {product.maxPrice > 0 ? (
+              <span className="font-bold">₦{product.maxPrice.toLocaleString()}</span>
+            ) : (
+              <span className="font-bold">no upper limit</span>
+            )}
+            . Higher margins result in lower commission rates.
           </DialogDescription>
         </DialogHeader>
 

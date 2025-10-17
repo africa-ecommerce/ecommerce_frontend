@@ -936,7 +936,7 @@ function ClearCartModal({
         <AlertDialogHeader>
           <AlertDialogTitle>Clear All Products?</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to remove all {itemCount} curated product
+            Are you sure you want to remove {itemCount} curated product
             {itemCount !== 1 ? "s" : ""} from your list? This action cannot be
             undone.
           </AlertDialogDescription>
@@ -1060,11 +1060,7 @@ interface ShoppingCartContextType {
 interface PriceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (
-    price: number,
-    profit: number,
-    commissionData: CommissionData
-  ) => void;
+  onSubmit: (itemId: string) => Promise<void>
   minPrice: number;
   maxPrice: number;
   supplierPrice: number;
@@ -1177,6 +1173,10 @@ export function ShoppingCartProvider({
     setIsOpen(true);
   };
 
+  const closeCart = () => {
+    setIsOpen(false)
+  };
+
   const processQueue = () => {
     if (isUpdating.current) return;
     if (queueRef.current.length === 0) return;
@@ -1249,13 +1249,6 @@ export function ShoppingCartProvider({
     setOpenAddPrice(true);
   };
 
-  const handlePriceSubmit = (
-    price: number,
-    profit: number,
-    commissionData: CommissionData
-  ) => {
-    updateItemPrice(selectedItemId, price, commissionData);
-  };
 
   const handleShare = (item: CartItem) => {
     setSelectedProductForShare({
@@ -1269,6 +1262,7 @@ export function ShoppingCartProvider({
   };
 
   const handleProductClick = (itemId: string) => {
+    closeCart();
     router.push(`/marketplace/product/${itemId}`);
   };
 
@@ -1455,7 +1449,7 @@ export function ShoppingCartProvider({
       <PriceModal
         open={openAddPrice}
         onOpenChange={setOpenAddPrice}
-        onSubmit={handlePriceSubmit}
+        onSubmit={removeItem}
         minPrice={selectedItem?.minPrice || 0}
         maxPrice={selectedItem?.maxPrice || 0}
         supplierPrice={selectedItem?.price || 0}
@@ -1611,6 +1605,8 @@ export function PriceModal({
       mutate("/api/plug/products/");
 
       // ✅ Save this product locally to use in ShareModal
+
+      await onSubmit(itemId)
 
       // Reset form
       setPrice("");
