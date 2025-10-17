@@ -90,6 +90,8 @@ export function DirectShareModal({
 
   const [sharedProduct, setSharedProduct] = useState<any | null>(null);
 
+  const [ sharedProductId, setSharedProductId] = useState("")
+
 
   const { userData } = useUser();
   const { user } = userData || { user: null };
@@ -171,7 +173,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       },
     ];
 
-    const response = await fetch("/api/plug/products/", {
+    const response = await fetch("/api/plug/products/single", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(products),
@@ -195,6 +197,8 @@ const handleSubmit = async (e: React.FormEvent) => {
       commissionRate: commissionData.commissionRate,
     };
     setSharedProduct(finalizedProduct);
+
+    setSharedProductId(result?.id)
 
     // Reset form
     setPrice("");
@@ -376,12 +380,12 @@ const handleSubmit = async (e: React.FormEvent) => {
         </DialogFooter>
       </DialogContent>
 
-      {sharedProduct && (
+      {sharedProductId && (
         <ShareModal
           open={shareModalOpen}
           onOpenChange={setShareModalOpen}
           productName={sharedProduct.name}
-          productId={sharedProduct.id}
+          productId={sharedProductId}
           plugId={user?.plug.id}
         />
       )}

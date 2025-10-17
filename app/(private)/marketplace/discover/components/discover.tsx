@@ -103,51 +103,7 @@ export default function Discover() {
 
   const productsRemaining = Math.max(0, products.length - currentIndex);
 
-  // const handleSwipeRight = async (product: any) => {
-  //   // ✅ Guard against undefined product
-  //   if (!product || !product.id) return;
-
-  //   // ✅ Prevent index overflow
-  //   setCurrentIndex((prev) => {
-  //     const next = prev + 1;
-  //     return next >= products.length ? products.length : next;
-  //   });
-
-  //   const cartItem = {
-  //     id: product.id,
-  //     name: product.name,
-  //     price: product.price,
-  //     minPrice: product.minPrice,
-  //     maxPrice: product.maxPrice,
-  //     image: product.images?.[0] ?? "/placeholder.svg",
-  //   };
-
-  //   addItem(cartItem, false);
-
-  //   // ✅ Optional: prevent showing modals if deck is over
-  //   if (currentIndex + 1 >= products.length) return;
-
-  //   if (firstSwipeOfDay && !hasShownDailyShare) {
-  //     setFirstSwipeOfDay(false);
-  //     const shouldShow = await shouldShowDailyShare();
-  //     if (shouldShow) {
-  //       setTimeout(() => {
-  //         setShowDailyShare(true);
-  //         setHasShownDailyShare(true);
-  //       }, 500);
-  //     }
-  //   }
-
-  //   if (!hasSeenSharePrompt) {
-  //     setTimeout(() => {
-  //       if (items.length >= 10) {
-  //         setShowSharePrompt(true);
-  //         setHasSeenSharePrompt(true);
-  //       }
-  //     }, 100);
-  //   }
-  // };
-
+ 
   const handleSwipeRight = async (product: any, skipCart: boolean = false) => {
     if (!product || !product.id) return;
 
@@ -222,12 +178,7 @@ export default function Discover() {
     setShowDirectShareModal(true);
   };
 
-  // const handleDeckEnd = () => {
-  //   // Shuffle and restart
-  //   const shuffled = [...products].sort(() => Math.random() - 0.5)
-  //   setProduct(shuffled)
-  //   setCurrentIndex(0)
-  // }
+ 
 
   const viewMore = () => {
     setIsViewMore(true);
@@ -245,7 +196,7 @@ export default function Discover() {
 
       <header className="fixed top-0 left-0 md:left-[180px] right-0 z-50 px-6 md:py-4 py-3 flex items-center justify-between">
         {/* View More Button */}
-        <button
+        {/* <button
           onClick={viewMore}
           className="group flex items-center gap-2 px-4 md:px-5 md:py-2.5 py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
         >
@@ -253,15 +204,15 @@ export default function Discover() {
             View More
           </span>
           <ChevronRight className="w-3 h-3 md:w-4 md:h-4 text-orange-600 group-hover:translate-x-0.5 transition-transform" />
-        </button>
+        </button> */}
 
         {/* Right side container for popover and counter */}
         <div className="flex flex-col items-end gap-1 md:gap-3">
-          {/* Subscribers Popover */}
+         
           <SubscribersPopover userType={user?.userType || "PLUG"} />
 
-          {/* Products Counter */}
-          <div className="flex items-center gap-2 px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
+          
+          {/* <div className="flex items-center gap-2 px-4 py-2 bg-white/95 backdrop-blur-sm rounded-full shadow-lg">
             <div className="relative">
               <Layers
                 className="md:w-5 md:h-5 w-4 h-4 text-orange-600"
@@ -277,35 +228,13 @@ export default function Discover() {
                 left
               </span>
             </div>
-          </div>
+          </div> */}
         </div>
       </header>
 
       {/* Discovery Stack */}
       <div className="h-screen flex items-start md:items-center justify-center">
-        {/* <DiscoveryStack
-          products={products}
-          currentIndex={currentIndex}
-          onSwipeRight={handleSwipeRight}
-          onSwipeLeft={handleSwipeLeft}
-          onSwipeUp={handleSwipeUp}
-          // onDeckEnd={handleDeckEnd}
-        /> */}
-
-        {/* <DiscoveryStack
-          products={products}
-          currentIndex={currentIndex}
-          onSwipeRight={(p) => {
-            if (p && p.id) handleSwipeRight(p);
-          }}
-          onSwipeLeft={(p) => {
-            if (p && p.id) handleSwipeLeft(p);
-          }}
-          onSwipeUp={(p) => {
-            if (p && p.id) handleSwipeUp(p);
-          }}
-        /> */}
-
+        
         <DiscoveryStack
           products={products}
           currentIndex={currentIndex}
