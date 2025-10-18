@@ -128,11 +128,13 @@ export function ProductDetailsModal({
 
   const hasValidId = typeof productId === "string" && productId.trim().length > 0;
 
+  const shouldFetch = isOpen && hasValidId;
+
 const {
   data: product,
   error,
   isLoading,
-} = useSWR(hasValidId ? `/api/products/${productId}` : null, fetcher, {
+} = useSWR(shouldFetch  ? `/api/products/${productId}` : null, fetcher, {
   revalidateOnFocus: false,
   revalidateIfStale: false,
   dedupingInterval: 600000,

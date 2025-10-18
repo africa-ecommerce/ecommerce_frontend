@@ -41,16 +41,9 @@ export function useDiscoverProducts(limit: number = 20) {
   console.log("discover data:", data);
 
   // ✅ Flatten pages into one list
-  //   const products = data ? data.flatMap((page) => page.data || []) : [];
+    const products = data ? data.flatMap((page) => page.data || []) : [];
 
   // This ensures no repeated products across pages.
-  const products = data
-    ? Array.from(
-        new Map(
-          data.flatMap((page) => page.data || []).map((p) => [p.id, p])
-        ).values()
-      )
-    : [];
 
   // ✅ Get hasNextPage from the last page
   const hasNextPage = data?.[data.length - 1]?.meta?.hasNextPage ?? false;
