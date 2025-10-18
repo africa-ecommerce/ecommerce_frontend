@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { DiscoveryStack } from "./discovery-stack";
 import { SharePrompt } from "./share-prompt";
@@ -82,33 +82,33 @@ export default function Discover() {
   };
 
   // Use the products hook for data fetching
-const { products, error, isLoading, hasNextPage, setSize, size } = useDiscoverProducts(20);
+const { products, error, isLoading, hasNextPage, setSize, size, isValidating } =
+  useDiscoverProducts(20);
 
   console.log("products", products)
 
 
-    // Prefetch next page safely
+// Prevent refetch spam
+const prefetchedPage = useRef<number | null>(null);
+
 useEffect(() => {
-  if (!hasNextPage || hasPrefetched) return;
+  if (!hasNextPage) return; // no more pages
+  if (isValidating) return; // already fetching, don't trigger
+  if (prefetchedPage.current === size) return; // already prefetched this page
 
   const remaining = products.length - currentIndex;
 
-  // Prefetch when about to reach end of list
+  // When nearing end of the list
   if (remaining <= 5 && remaining >= 0) {
-    const timer = setTimeout(() => {
-      console.log("Prefetching next page...");
-      setHasPrefetched(true);
+    console.log("⚡ Prefetching next page...");
+    prefetchedPage.current = size; // remember that we've prefetched this page
+
+    setTimeout(() => {
       setSize((prev) => prev + 1);
-    }, 1000); // debounce slightly to avoid spam
-
-    return () => clearTimeout(timer);
+    }, 500); // debounce slight delay for UX
   }
-}, [currentIndex, products.length, hasNextPage, hasPrefetched, setSize]);
+}, [currentIndex, products.length, hasNextPage, isValidating, setSize, size]);
 
-// Reset flag once new data has arrived
-useEffect(() => {
-  setHasPrefetched(false);
-}, [size]);
 
 
 

@@ -16,7 +16,7 @@ export function useDiscoverProducts(limit: number = 20) {
   const getKey = (pageIndex: number, previousPageData: any) => {
     if (previousPageData && !previousPageData.meta?.hasNextPage) return null;
     const page = pageIndex + 1;
-    return `/api/discover/products?page=${page}&limit=${limit}`;
+    return `/api/discover/products?limit=${limit}`;
   };
 
   const { data, error, size, setSize, mutate, isValidating } = useSWRInfinite(
