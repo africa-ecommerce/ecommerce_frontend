@@ -108,7 +108,7 @@ useEffect(() => {
 // Reset flag once new data has arrived
 useEffect(() => {
   setHasPrefetched(false);
-}, [data]);
+}, [size]);
 
 
 
