@@ -362,13 +362,13 @@ export default function Discover() {
   const [hasShownDailyShare, setHasShownDailyShare] = useState(false);
   const [firstSwipeOfDay, setFirstSwipeOfDay] = useState(true);
   const [isViewMore, setIsViewMore] = useState(false);
+  const [hasPrefetched, setHasPrefetched] = useState(false);
+
 
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 9999999]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
   const {
     userData: { user },
   } = useUser();
@@ -376,12 +376,13 @@ export default function Discover() {
  
 
   // Combine filters for products hook
-  const filters: ProductsFilter = {
+  const filters = {
     search: searchQuery,
-    priceRange,
     selectedCategories,
    
   };
+
+
 
   useEffect(() => {
     const checkTour = async () => {
@@ -399,9 +400,41 @@ export default function Discover() {
   };
 
   // Use the products hook for data fetching
-  const { products, error, isLoading } = useProducts(filters, 20, true);
+const { products, error, isLoading, hasNextPage, setSize, size } = useProducts(
+  filters,
+  20,
+  true
+);
 
   console.log("products", products)
+
+
+    useEffect(() => {
+      if (!hasNextPage || hasPrefetched) return;
+
+      const remaining = products.length - currentIndex;
+
+      if (
+        (currentIndex >= 15 && currentIndex <= 17) ||
+        (remaining <= 5 && remaining >= 3)
+      ) {
+        console.log("Prefetching next page...");
+        setHasPrefetched(true);
+        setSize(size + 1);
+      }
+    }, [
+      currentIndex,
+      products.length,
+      hasNextPage,
+      hasPrefetched,
+      setSize,
+      size,
+    ]);
+
+
+    useEffect(() => {
+      setHasPrefetched(false);
+    }, [size]);
 
   const { addItem, items, openCart } = useShoppingCart();
 

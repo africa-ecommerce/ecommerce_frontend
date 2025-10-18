@@ -74,7 +74,7 @@ export function useProducts(filters: ProductsFilter, limit: number = 20, discove
    }
 
    // Reached the end
-   if (previousPageData && !previousPageData.meta.hasNextPage) return null;
+if (previousPageData && !previousPageData?.meta?.hasNextPage) return null;
 
    // First page or with cursor for pagination
    const cursor =
