@@ -30,6 +30,7 @@ import { useDiscoverProducts } from "@/hooks/use-discoverProducts";
 import { useDiscoverSync } from "@/hooks/use-discoverSync";
 
 
+
 export default function Discover() {
   const [showSharePrompt, setShowSharePrompt] = useState(false);
   const [hasSeenSharePrompt, setHasSeenSharePrompt] = useState(false);
