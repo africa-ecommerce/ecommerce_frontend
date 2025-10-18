@@ -100,18 +100,22 @@ useEffect(() => {
 
   const remaining = products.length - currentIndex;
 
-  if (remaining <= 5) {
-    // ✅ Sync before fetching next 20
-    (async () => {
-      if (hasChanges) await sync();
-      prefetchedPage.current = size;
-      console.log("⚡ Prefetching next page...");
-      setTimeout(() => {
-        setSize((prev) => prev + 1);
-      }, 400);
-    })();
-  }
+if (remaining <= 5) {
+  (async () => {
+    if (hasChanges) {
+      console.log("🔄 Syncing before prefetch...");
+      await sync();
+      await new Promise((r) => setTimeout(r, 400)); // ⏳ small wait before fetching
+    }
+
+    prefetchedPage.current = size;
+    console.log("⚡ Prefetching next page...");
+    setSize((prev) => prev + 1);
+  })();
+}
 }, [currentIndex, products.length, hasNextPage, isValidating, setSize, size, sync, hasChanges]);
+
+
 
 
 
