@@ -16,7 +16,7 @@ export function useDiscoverProducts(limit: number = 20) {
   const getKey = (pageIndex: number, previousPageData: any) => {
     if (previousPageData && !previousPageData.meta?.hasNextPage) return null;
     const page = pageIndex + 1;
-    return `/api/discover/products?limit=${limit}`;
+    return `/api/discover/products?page=${page}&limit=${limit}`;
   };
 
   const { data, error, size, setSize, mutate, isValidating } = useSWRInfinite(
@@ -41,13 +41,23 @@ export function useDiscoverProducts(limit: number = 20) {
   console.log("discover data:", data);
 
   // ✅ Flatten pages into one list
-  const products = data ? data.flatMap((page) => page.data || []) : [];
+  //   const products = data ? data.flatMap((page) => page.data || []) : [];
+
+  // This ensures no repeated products across pages.
+  const products = data
+    ? Array.from(
+        new Map(
+          data.flatMap((page) => page.data || []).map((p) => [p.id, p])
+        ).values()
+      )
+    : [];
 
   // ✅ Get hasNextPage from the last page
   const hasNextPage = data?.[data.length - 1]?.meta?.hasNextPage ?? false;
 
   const isLoading = !data && !error;
-  const isLoadingMore = size > 0 && data && typeof data[size - 1] === "undefined";
+  const isLoadingMore =
+    size > 0 && data && typeof data[size - 1] === "undefined";
   const isEmpty = !isLoading && !isLoadingMore && products.length === 0;
 
   const refreshData = useCallback(() => mutate(), [mutate]);

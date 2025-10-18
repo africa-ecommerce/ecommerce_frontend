@@ -92,20 +92,16 @@ const { products, error, isLoading, hasNextPage, setSize, size, isValidating } =
 const prefetchedPage = useRef<number | null>(null);
 
 useEffect(() => {
-  if (!hasNextPage) return; // no more pages
-  if (isValidating) return; // already fetching, don't trigger
-  if (prefetchedPage.current === size) return; // already prefetched this page
+  if (!hasNextPage || isValidating || prefetchedPage.current === size) return;
 
   const remaining = products.length - currentIndex;
 
-  // When nearing end of the list
-  if (remaining <= 5 && remaining >= 0) {
+  if (remaining <= 5) {
+    prefetchedPage.current = size;
     console.log("⚡ Prefetching next page...");
-    prefetchedPage.current = size; // remember that we've prefetched this page
-
     setTimeout(() => {
       setSize((prev) => prev + 1);
-    }, 500); // debounce slight delay for UX
+    }, 400);
   }
 }, [currentIndex, products.length, hasNextPage, isValidating, setSize, size]);
 
