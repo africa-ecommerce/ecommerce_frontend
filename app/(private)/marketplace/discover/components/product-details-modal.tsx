@@ -141,6 +141,8 @@ const {
   shouldRetryOnError: false,
 });
 
+if (!isOpen || !shouldFetch) return null;
+
 
   // Handle ESC key to close modal
   useEffect(() => {

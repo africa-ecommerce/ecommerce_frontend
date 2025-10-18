@@ -286,15 +286,18 @@ useEffect(() => {
         cartCount={items.length}
         onConfirm={openCart}
       />
+     
+      {isModalOpen && selectedProduct?.id && (
+  <ProductDetailsModal
+    isOpen={isModalOpen}
+    onClose={() => {
+      setIsModalOpen(false);
+      setSelectedProduct(null);
+    }}
+    productId={selectedProduct.id}
+  />
+)}
 
-      <ProductDetailsModal
-        isOpen={!!isModalOpen && !!selectedProduct?.id}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedProduct(null);
-        }}
-        productId={selectedProduct?.id ?? null}
-      />
     </main>
   );
 }
