@@ -87,32 +87,32 @@ const { products, error, isLoading, hasNextPage, setSize, size } = useDiscoverPr
   console.log("products", products)
 
 
-    useEffect(() => {
-      if (!hasNextPage || hasPrefetched) return;
+    // Prefetch next page safely
+useEffect(() => {
+  if (!hasNextPage || hasPrefetched) return;
 
-      const remaining = products.length - currentIndex;
+  const remaining = products.length - currentIndex;
 
-      if (
-        (currentIndex >= 15 && currentIndex <= 17) ||
-        (remaining <= 5 && remaining >= 3)
-      ) {
-        console.log("Prefetching next page...");
-        setHasPrefetched(true);
-        setSize(size + 1);
-      }
-    }, [
-      currentIndex,
-      products.length,
-      hasNextPage,
-      hasPrefetched,
-      setSize,
-      size,
-    ]);
+  // Prefetch when about to reach end of list
+  if (remaining <= 5 && remaining >= 0) {
+    const timer = setTimeout(() => {
+      console.log("Prefetching next page...");
+      setHasPrefetched(true);
+      setSize((prev) => prev + 1);
+    }, 1000); // debounce slightly to avoid spam
+
+    return () => clearTimeout(timer);
+  }
+}, [currentIndex, products.length, hasNextPage, hasPrefetched, setSize]);
+
+// Reset flag once new data has arrived
+useEffect(() => {
+  setHasPrefetched(false);
+}, [data]);
 
 
-    useEffect(() => {
-      setHasPrefetched(false);
-    }, [size]);
+
+   
 
   const { addItem, items, openCart } = useShoppingCart();
 
