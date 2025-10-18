@@ -1,7 +1,7 @@
 "use client";
 
 import useSWRInfinite from "swr/infinite";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
 
 const fetcher = async (url: string) => {
@@ -36,7 +36,9 @@ export function useDiscoverProducts(limit: number = 20) {
     }
   );
 
+useEffect(() => {
   if (isMutate) mutate();
+}, [isMutate, mutate]);
 
   console.log("discover data:", data);
 

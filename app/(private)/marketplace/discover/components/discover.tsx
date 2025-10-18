@@ -85,6 +85,7 @@ const { products, error, isLoading, hasNextPage, setSize, size, isValidating } =
   recordSwipeLeft,
   sync,
   hasChanges,
+  syncPending,
   isSyncing,
 } = useDiscoverSync();
 
@@ -96,24 +97,24 @@ const { products, error, isLoading, hasNextPage, setSize, size, isValidating } =
 const prefetchedPage = useRef<number | null>(null);
 
 useEffect(() => {
-  if (!hasNextPage || isValidating || prefetchedPage.current === size) return;
-
   const remaining = products.length - currentIndex;
+  if (!hasNextPage || isValidating || prefetchedPage.current === size) return;
+  if (remaining > 5) return;
 
-if (remaining <= 5) {
-  (async () => {
-    if (hasChanges) {
-      console.log("🔄 Syncing before prefetch...");
+  const doPrefetch = async () => {
+    // only sync once per batch
+    if (hasChanges && !syncPending.current) {
       await sync();
-      await new Promise((r) => setTimeout(r, 400)); // ⏳ small wait before fetching
+      await new Promise((r) => setTimeout(r, 400));
     }
-
     prefetchedPage.current = size;
-    console.log("⚡ Prefetching next page...");
     setSize((prev) => prev + 1);
-  })();
-}
-}, [currentIndex, products.length, hasNextPage, isValidating, setSize, size, sync, hasChanges]);
+  };
+
+  doPrefetch();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [currentIndex]);
+
 
 
 
