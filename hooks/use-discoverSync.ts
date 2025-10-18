@@ -22,7 +22,6 @@ async function syncFetcher(url: string, { arg }: { arg: SyncPayload }) {
   return res.json();
 }
 
-// Utility to generate a unique key for queued syncs
 const generateKey = () =>
   `sync-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
@@ -32,6 +31,13 @@ export function useDiscoverSync() {
   const [swipesCount, setSwipesCount] = useState(0);
   const [lastSynced, setLastSynced] = useState(0);
 
+  // Track last synced snapshot to detect changes
+  const lastSyncedData = useRef<SyncPayload>({
+    accepted: [],
+    rejected: [],
+    swipesCount: 0,
+  });
+
   const { trigger, isMutating } = useSWRMutation(
     "/api/discover/sync",
     syncFetcher
@@ -39,6 +45,10 @@ export function useDiscoverSync() {
 
   const hasChanges =
     accepted.length > 0 || rejected.length > 0 || swipesCount > 0;
+
+  // --- Helper to compare arrays shallowly ---
+  const arraysEqual = (a: string[], b: string[]) =>
+    a.length === b.length && a.every((x, i) => x === b[i]);
 
   // --- Store sync in IndexedDB if offline or failed ---
   const queueSync = async (payload: SyncPayload) => {
@@ -54,13 +64,11 @@ export function useDiscoverSync() {
     console.log("🕓 Queued sync:", payload);
   };
 
-  // --- Check if any pending syncs exist ---
   const hasPendingSyncs = async () => {
     const pending = await keys();
     return pending.length > 0;
   };
 
-  // --- Process queued syncs ---
   const processQueuedSyncs = async () => {
     const allKeys = await keys();
     for (const key of allKeys) {
@@ -72,28 +80,45 @@ export function useDiscoverSync() {
         console.log("✅ Processed queued sync:", data);
       } catch (err) {
         console.error("❌ Failed queued sync:", err);
-        // Stop here; keep remaining for next retry
-        break;
+        break; // keep remaining for next retry
       }
     }
   };
 
-  // --- Sync function ---
+  // --- Main sync function ---
   const sync = useCallback(async () => {
     const pendingExists = await hasPendingSyncs();
-    if (!hasChanges && !pendingExists) return;
+
+    const changed =
+      !arraysEqual(accepted, lastSyncedData.current.accepted) ||
+      !arraysEqual(rejected, lastSyncedData.current.rejected) ||
+      swipesCount !== lastSyncedData.current.swipesCount;
+
+    // ⛔ Skip if no new changes and no pending syncs
+    if (!changed && !pendingExists) return;
 
     try {
-      await processQueuedSyncs();
+      // process queued syncs first
+      if (pendingExists) await processQueuedSyncs();
 
-      if (hasChanges) {
+      if (changed && hasChanges) {
         const payload: SyncPayload = {
           accepted,
           rejected,
           swipesCount,
           timestamp: Date.now(),
         };
+
         await trigger(payload);
+
+        // Update last synced snapshot
+        lastSyncedData.current = {
+          accepted: [...accepted],
+          rejected: [...rejected],
+          swipesCount,
+        };
+
+        // reset current state
         setAccepted([]);
         setRejected([]);
         setSwipesCount(0);
@@ -111,21 +136,19 @@ export function useDiscoverSync() {
     }
   }, [accepted, rejected, swipesCount, hasChanges, trigger]);
 
-  // --- Inactivity debounce (sync after 10s of no swipes) ---
+  // --- Debounce inactivity sync ---
   const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
-
   const resetInactivityTimer = useCallback(() => {
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
-    inactivityTimer.current = setTimeout(() => {
-      sync();
-    }, 10000);
-  }, [sync]);
+    if (!hasChanges) return;
+    inactivityTimer.current = setTimeout(() => sync(), 10000);
+  }, [sync, hasChanges]);
 
   useEffect(() => {
     if (hasChanges) resetInactivityTimer();
   }, [accepted, rejected, swipesCount, hasChanges, resetInactivityTimer]);
 
-  // --- Sync on reconnect (when back online) ---
+  // --- Sync on reconnect ---
   useEffect(() => {
     const handleOnline = () => {
       console.log("🌐 Back online — syncing queued data...");
@@ -135,7 +158,7 @@ export function useDiscoverSync() {
     return () => window.removeEventListener("online", handleOnline);
   }, [sync]);
 
-  // --- Sync on tab close / page reload ---
+  // --- Sync on tab close / hide ---
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (!hasChanges) return;
@@ -146,7 +169,7 @@ export function useDiscoverSync() {
     };
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "hidden") sync();
+      if (document.visibilityState === "hidden" && hasChanges) sync();
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -156,7 +179,7 @@ export function useDiscoverSync() {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [sync, accepted, rejected, swipesCount, hasChanges]);
+  }, [sync, hasChanges, accepted, rejected, swipesCount]);
 
   // --- Record swipe events ---
   const recordSwipeRight = (id: string) => {
