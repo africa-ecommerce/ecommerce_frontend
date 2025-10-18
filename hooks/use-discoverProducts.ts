@@ -60,8 +60,12 @@ export function useDiscoverProducts(limit: number = 20) {
     mutate();
   }
 
+  console.log("data", data)
+
   // Flatten all pages into one product list
   const products = data ? data.flatMap((page) => page.products) : [];
+
+
 
   const hasNextPage = data ? data[data.length - 1]?.meta?.hasNextPage : false;
   const isLoading = !data && !error;
