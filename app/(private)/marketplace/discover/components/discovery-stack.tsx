@@ -53,12 +53,7 @@ export function DiscoveryStack({
 
   const { items } = useShoppingCart();
 
-  // ✅ Preload upcoming products
-  useEffect(() => {
-    nextProducts?.forEach((product) => {
-      if (product?.id) preload(`/api/products/${product.id}`, fetcher);
-    });
-  }, [nextProducts]);
+  
 
   // ✅ Handle end of deck
   useEffect(() => {
@@ -67,7 +62,7 @@ export function DiscoveryStack({
         message: "You reached the end — add retail price and share",
         type: "info",
       });
-      const t = setTimeout(() => setToast(null), 1500);
+      const t = setTimeout(() => setToast(null), 3000);
       return () => clearTimeout(t);
     }
   }, [currentIndex, products.length]);
