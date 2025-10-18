@@ -51,7 +51,6 @@ export function DiscoveryStack({
   const nextProducts =
     products?.slice(currentIndex + 1, currentIndex + 3) || [];
 
-  const { items } = useShoppingCart();
 
   
 

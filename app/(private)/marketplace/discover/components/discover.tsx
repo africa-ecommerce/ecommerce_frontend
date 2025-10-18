@@ -27,6 +27,8 @@ import { ProductDetailsModal } from "./product-details-modal";
 import SupplierMarketplace from "../../_components/supplier-marketplace";
 import { DirectShareModal } from "./direct-share-modal";
 import { useDiscoverProducts } from "@/hooks/use-discoverProducts";
+import { useDiscoverSync } from "@/hooks/use-discoverSync";
+
 
 export default function Discover() {
   const [showSharePrompt, setShowSharePrompt] = useState(false);
@@ -55,14 +57,6 @@ export default function Discover() {
     userData: { user },
   } = useUser();
 
- 
-
-  // Combine filters for products hook
-  const filters = {
-    search: searchQuery,
-    selectedCategories,
-   
-  };
 
 
 
@@ -85,6 +79,15 @@ export default function Discover() {
 const { products, error, isLoading, hasNextPage, setSize, size, isValidating } =
   useDiscoverProducts(20);
 
+  const {
+  recordSwipeRight,
+  recordSwipeLeft,
+  sync,
+  hasChanges,
+  isSyncing,
+} = useDiscoverSync();
+
+
   console.log("products", products)
 
 
@@ -97,13 +100,18 @@ useEffect(() => {
   const remaining = products.length - currentIndex;
 
   if (remaining <= 5) {
-    prefetchedPage.current = size;
-    console.log("⚡ Prefetching next page...");
-    setTimeout(() => {
-      setSize((prev) => prev + 1);
-    }, 400);
+    // ✅ Sync before fetching next 20
+    (async () => {
+      if (hasChanges) await sync();
+      prefetchedPage.current = size;
+      console.log("⚡ Prefetching next page...");
+      setTimeout(() => {
+        setSize((prev) => prev + 1);
+      }, 400);
+    })();
   }
-}, [currentIndex, products.length, hasNextPage, isValidating, setSize, size]);
+}, [currentIndex, products.length, hasNextPage, isValidating, setSize, size, sync, hasChanges]);
+
 
 
 
@@ -131,6 +139,7 @@ useEffect(() => {
 
   const handleSwipeRight = async (product: any, skipCart: boolean = false) => {
     if (!product || !product.id) return;
+     recordSwipeRight(product.id);
 
     // Move to next product
     setCurrentIndex((prev) => {
@@ -181,6 +190,7 @@ useEffect(() => {
   const handleSwipeLeft = (product: any) => {
     // ✅ Guard against undefined product
     if (!product || !product.id) return;
+    recordSwipeLeft(product.id);
 
     setCurrentIndex((prev) => {
       const next = prev + 1;
