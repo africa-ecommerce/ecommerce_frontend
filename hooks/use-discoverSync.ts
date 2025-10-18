@@ -545,8 +545,8 @@ export function useDiscoverSync() {
       if (pendingExists) await processQueuedSyncs();
 
       if (changed && hasChanges) {
-        const acceptedChunks = chunkArray(accepted, 5);
-        const rejectedChunks = chunkArray(rejected, 5);
+        const acceptedChunks = chunkArray(accepted, 20);
+        const rejectedChunks = chunkArray(rejected, 20);
 
         console.log(
           `📦 Sending ${acceptedChunks.length} accepted batches and ${rejectedChunks.length} rejected batches`
