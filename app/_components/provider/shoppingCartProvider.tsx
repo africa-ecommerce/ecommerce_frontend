@@ -862,6 +862,7 @@ import {
   type ReactNode,
   useEffect,
   useRef,
+  useCallback,
 } from "react";
 import type React from "react";
 
@@ -897,7 +898,7 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
-import { mutate } from "swr";
+import useSWR, { mutate } from "swr";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -936,7 +937,7 @@ function ClearCartModal({
         <AlertDialogHeader>
           <AlertDialogTitle>Clear All Products?</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to remove {itemCount} curated product
+            Are you sure you want to remove all {itemCount} curated product
             {itemCount !== 1 ? "s" : ""} from your list? This action cannot be
             undone.
           </AlertDialogDescription>
@@ -981,10 +982,8 @@ const saveToIndexedDB = async (items: CartItem[]): Promise<void> => {
   const transaction = db.transaction([STORE_NAME], "readwrite");
   const store = transaction.objectStore(STORE_NAME);
 
-  // Clear existing items
+  // Clear existing items then add all items (preserve order via addedAt)
   store.clear();
-
-  // Add all items
   items.forEach((item) => store.add(item));
 
   return new Promise((resolve, reject) => {
@@ -1017,6 +1016,20 @@ const clearIndexedDB = async (): Promise<void> => {
   });
 };
 
+const removeFromIndexedDBById = async (itemId: string): Promise<void> => {
+  const db = await openDB();
+  const transaction = db.transaction([STORE_NAME], "readwrite");
+  const store = transaction.objectStore(STORE_NAME);
+  store.delete(itemId);
+  return new Promise((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+};
+
+/* ------------------------------
+   Types
+   ------------------------------*/
 interface CartItem {
   id: string;
   name: string;
@@ -1027,6 +1040,7 @@ interface CartItem {
   minPrice?: number;
   maxPrice?: number;
   commissionData?: CommissionData;
+  addedAt?: number; // epoch ms for ordering (newest first)
 }
 
 interface CommissionData {
@@ -1060,7 +1074,11 @@ interface ShoppingCartContextType {
 interface PriceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (itemId: string) => Promise<void>
+  onSubmit: (
+    price: number,
+    profit: number,
+    commissionData: CommissionData
+  ) => void;
   minPrice: number;
   maxPrice: number;
   supplierPrice: number;
@@ -1073,7 +1091,6 @@ interface ShoppingCartProviderProps {
   excludePaths?: string[];
   exclude?: boolean;
 }
-
 // Commission calculation function
 function calculateCommission(
   supplierPrice: number,
@@ -1103,10 +1120,17 @@ function calculateCommission(
     plugTakeHome,
   };
 }
-
 const ShoppingCartContext = createContext<ShoppingCartContextType | undefined>(
   undefined
 );
+
+const fetcher = (input: RequestInfo, init?: RequestInit) =>
+  fetch(input, { ...init, credentials: "include" }).then(async (res) => {
+    const json = await res.json().catch(() => null);
+    if (!res.ok) throw json || new Error("Fetch error");
+    return json;
+  });
+
 
 export function ShoppingCartProvider({
   children,
@@ -1126,6 +1150,10 @@ export function ShoppingCartProvider({
   >(null);
 
   const [openClearConfirm, setOpenClearConfirm] = useState(false);
+
+  // loading states
+  const [loadingIds, setLoadingIds] = useState<Record<string, boolean>>({});
+  const [isClearing, setIsClearing] = useState(false);
 
   const queueRef = useRef<CartItem[]>([]);
   const isUpdating = useRef(false);
@@ -1150,33 +1178,116 @@ export function ShoppingCartProvider({
 
   const itemCount = items.length;
 
-  // Calculate total profit and total take home across all items
   const totalProfit = items.reduce((sum, item) => sum + (item.profit || 0), 0);
   const totalTakeHome = items.reduce(
     (sum, item) => sum + (item.commissionData?.plugTakeHome || 0),
     0
   );
 
-  const removeFromIndexedDB = async (itemId: string) => {
-    const db = await openDB();
-    const transaction = db.transaction([STORE_NAME], "readwrite");
-    const store = transaction.objectStore(STORE_NAME);
-    store.delete(itemId);
-    await new Promise((resolve, reject) => {
-      transaction.oncomplete = resolve;
-      transaction.onerror = reject;
-    });
-    setItems((prev) => prev.filter((item) => item.id !== itemId));
-  };
+  /* ------------------------------
+     SWR: fetch backend curated products
+     ------------------------------*/
+  const {
+    data: backendData,
+    error: backendError,
+    isLoading: backendLoading,
+  } = useSWR("/api/discover/products/accepted", fetcher, {
+    revalidateOnFocus: true,
+    // no automatic refreshInterval, backend data is likely updated by user actions
+  });
 
-  const openCart = () => {
-    setIsOpen(true);
-  };
+  /* ------------------------------
+     Utility: normalize backend product -> CartItem
+     - uses images[0] if available
+     - sets addedAt if provided by backend or fallback
+     ------------------------------*/
+  const normalizeBackendProduct = useCallback(
+    (p: any, fallbackAddedAt: number) => {
+      // expected backend shape: { id, name, price, images: string[], minPrice, maxPrice, ... }
+      const image =
+        (Array.isArray(p.images) && p.images.length > 0 && p.images[0]) ||
+        p.image ||
+        "/placeholder.svg";
+      const id = String(p.id || p._id || p.productId || p.sku);
+      return {
+        id,
+        name: p.name || p.title || "Product",
+        price: Number(p.price || p.cost || 0),
+        image,
+       
+        minPrice: p.minPrice,
+        maxPrice: p.maxPrice,
+        
+        addedAt: p.lastAt ? Number(p.addedAt) : fallbackAddedAt,
+      } as CartItem;
+    },
+    []
+  );
 
-  const closeCart = () => {
-    setIsOpen(false)
-  };
+  /* ------------------------------
+     Merge local IndexedDB with backend items and setItems
+     Logic:
+       - Load local saved items (may have addedAt)
+       - Map backend items -> CartItem, using fallback addedAt that preserves backend order
+       - Combine sets with dedupe (id), prefer local item fields where appropriate (prices)
+       - Sort by addedAt desc (newest first)
+     ------------------------------*/
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const local = (await loadFromIndexedDB()) || [];
+        // backendData may be an array; determine fallback addedAt values based on reverse index
+        const backendItems: CartItem[] = Array.isArray(backendData.products)
+          ? backendData.products.map((p: any, idx: number) =>
+              normalizeBackendProduct(
+                p,
+                Date.now() - (Array.isArray(backendData.products) ? idx * 1000 : 0)
+              )
+            )
+          : [];
 
+        // create a map where key = id; prefer local entry (as it may contain commissionData, sellingPrice)
+        const mergedMap = new Map<string, CartItem>();
+
+        // Add backend items first (so they appear earlier if no local overrides)
+        for (const b of backendItems) mergedMap.set(b.id, b);
+
+        // Merge local items - override backend for same id and preserve local addedAt if present
+        for (const l of local) {
+          if (l.id) {
+            mergedMap.set(l.id, {
+              ...(mergedMap.get(l.id) || {}),
+              ...l, // local data takes precedence (including addedAt)
+            });
+          }
+        }
+
+        // Convert to array and sort newest first
+        const mergedArr = Array.from(mergedMap.values()).sort(
+          (a, b) => (b.addedAt || 0) - (a.addedAt || 0)
+        );
+
+        if (mounted) {
+          setItems(mergedArr);
+          // persist merged arrangement (so addedAt ordering is stored)
+          await saveToIndexedDB(mergedArr);
+        }
+      } catch (err) {
+        console.error("Sync error:", err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [backendData.products, normalizeBackendProduct]);
+
+  /* ------------------------------
+     Queue processing & addItem
+     - addItem stamps addedAt, pushes to queue, then processQueue adds into items (dedupe) with newest-first
+     - save to indexedDB on every items change (done in useEffect below)
+     ------------------------------*/
   const processQueue = () => {
     if (isUpdating.current) return;
     if (queueRef.current.length === 0) return;
@@ -1192,7 +1303,7 @@ export function ShoppingCartProvider({
         return prev;
       }
 
-      const updated = [...prev, { ...nextItem, profit: 0 }];
+      const updated = [nextItem, ...prev]; // newest first
 
       // Simulate async update completion
       setTimeout(() => {
@@ -1205,16 +1316,71 @@ export function ShoppingCartProvider({
   };
 
   const addItem = (item: CartItem, openCart = false) => {
-    queueRef.current.push(item);
+    const withTimestamp: CartItem = {
+      ...item,
+      addedAt: Date.now(),
+      image:
+        (item.image &&
+          (Array.isArray((item as any).images)
+            ? (item as any).images[0]
+            : item.image)) ||
+        "/placeholder.svg",
+    };
+
+    queueRef.current.push(withTimestamp);
     processQueue();
+
+    // persist later when items state changes (handled in useEffect)
     if (openCart) setIsOpen(true);
   };
 
+  /* ------------------------------
+     removeItem
+     - optimistic UI removal; call DELETE /api/discover/products/accepted with [id]
+     - disable the remove button while request pending
+     ------------------------------*/
   const removeItem = async (itemId: string) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
-    await removeFromIndexedDB(itemId);
+    // Optimistic remove locally
+    setLoadingIds((s) => ({ ...s, [itemId]: true }));
+    const prev = items;
+
+    setItems((p) => p.filter((it) => it.id !== itemId));
+
+    try {
+      const res = await fetch("/api/discover/products/accepted", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify([itemId]),
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw json || new Error("Failed to remove item");
+      }
+
+      // remove from indexedDB
+      await removeFromIndexedDBById(itemId);
+      successToast("Removed product");
+      // revalidate backend cache
+      mutate("/api/discover/products/accepted");
+    } catch (err) {
+      console.error("Failed removing item:", err);
+      errorToast("Failed to remove product");
+      // rollback UI
+      setItems(prev);
+    } finally {
+      setLoadingIds((s) => {
+        const copy = { ...s };
+        delete copy[itemId];
+        return copy;
+      });
+    }
   };
 
+  /* ------------------------------
+     updateItemPrice (unchanged)
+     ------------------------------*/
   const updateItemPrice = (
     itemId: string,
     sellingPrice: number,
@@ -1231,10 +1397,59 @@ export function ShoppingCartProvider({
     );
   };
 
+  /* ------------------------------
+     clearCart
+     - calls DELETE with [] body per your requirement
+     ------------------------------*/
   const clearCart = async () => {
-    await clearIndexedDB();
+    setIsClearing(true);
+    const prev = items;
+
+    // optimistic UI
     setItems([]);
+
+    try {
+      const res = await fetch("/api/discover/products/accepted", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify([]), // empty array => clear all
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw json || new Error("Failed to clear cart");
+      }
+
+      await clearIndexedDB();
+      successToast("Cleared curated products");
+      mutate("/api/discover/products/accepted");
+    } catch (err) {
+      console.error("Clear error:", err);
+      errorToast("Failed to clear curated products");
+      // rollback
+      setItems(prev);
+    } finally {
+      setIsClearing(false);
+    }
   };
+
+  /* ------------------------------
+     openCart
+     ------------------------------*/
+  const openCart = () => {
+    setIsOpen(true);
+  };
+
+  /* ------------------------------
+     Save items to IndexedDB whenever they change
+     ------------------------------*/
+  useEffect(() => {
+    // save items to IndexedDB (persist order and addedAt)
+    saveToIndexedDB(items).catch((err) => {
+      console.error("Failed to save items to IndexedDB:", err);
+    });
+  }, [items]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-NG", {
@@ -1249,6 +1464,13 @@ export function ShoppingCartProvider({
     setOpenAddPrice(true);
   };
 
+  const handlePriceSubmit = (
+    price: number,
+    profit: number,
+    commissionData: CommissionData
+  ) => {
+    updateItemPrice(selectedItemId, price, commissionData);
+  };
 
   const handleShare = (item: CartItem) => {
     setSelectedProductForShare({
@@ -1262,36 +1484,15 @@ export function ShoppingCartProvider({
   };
 
   const handleProductClick = (itemId: string) => {
-    closeCart();
     router.push(`/marketplace/product/${itemId}`);
   };
 
-  // Load items from IndexedDB on mount
-  useEffect(() => {
-    const loadItems = async () => {
-      try {
-        const storedItems = await loadFromIndexedDB();
-        if (storedItems && storedItems.length > 0) {
-          setItems(storedItems);
-        }
-      } catch (error) {
-        console.error("Failed to load items from IndexedDB:", error);
-      }
-    };
-    loadItems();
-  }, []);
-
-  // Save items to IndexedDB whenever they change
-  useEffect(() => {
-    if (items.length >= 0) {
-      saveToIndexedDB(items).catch((error) => {
-        console.error("Failed to save items to IndexedDB:", error);
-      });
-    }
-  }, [items]);
-
+  // selected item for price modal
   const selectedItem = items.find((item) => item.id === selectedItemId);
 
+  /* ------------------------------
+     Render (mostly preserved, with small changes to disable buttons)
+     ------------------------------*/
   return (
     <ShoppingCartContext.Provider
       value={{
@@ -1334,9 +1535,10 @@ export function ShoppingCartProvider({
                   size="sm"
                   className="h-8 gap-1"
                   onClick={() => setOpenClearConfirm(true)}
+                  disabled={isClearing}
                 >
                   <Trash2 className="h-4 w-4" />
-                  Clear All
+                  {isClearing ? "Clearing..." : "Clear All"}
                 </Button>
               )}
             </SheetHeader>
@@ -1388,9 +1590,12 @@ export function ShoppingCartProvider({
                               size="icon"
                               className="h-6 w-6"
                               onClick={() => removeItem(item.id)}
+                              disabled={!!loadingIds[item.id]}
                             >
                               <X className="h-4 w-4" />
-                              <span className="sr-only">Remove</span>
+                              <span className="sr-only">
+                                {loadingIds[item.id] ? "Removing" : "Remove"}
+                              </span>
                             </Button>
                           </div>
                           <div className="space-y-1">
@@ -1431,7 +1636,10 @@ export function ShoppingCartProvider({
       <ClearCartModal
         open={openClearConfirm}
         onOpenChange={setOpenClearConfirm}
-        onConfirm={clearCart}
+        onConfirm={() => {
+          setOpenClearConfirm(false);
+          clearCart();
+        }}
         itemCount={itemCount}
       />
 
@@ -1449,7 +1657,7 @@ export function ShoppingCartProvider({
       <PriceModal
         open={openAddPrice}
         onOpenChange={setOpenAddPrice}
-        onSubmit={removeItem}
+        onSubmit={handlePriceSubmit}
         minPrice={selectedItem?.minPrice || 0}
         maxPrice={selectedItem?.maxPrice || 0}
         supplierPrice={selectedItem?.price || 0}
@@ -1605,8 +1813,6 @@ export function PriceModal({
       mutate("/api/plug/products/");
 
       // ✅ Save this product locally to use in ShareModal
-
-      await onSubmit(itemId)
 
       // Reset form
       setPrice("");
