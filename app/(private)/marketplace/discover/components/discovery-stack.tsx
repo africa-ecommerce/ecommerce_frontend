@@ -15,20 +15,18 @@ import { X, Heart, Share2 } from "lucide-react";
 import { DiscoveryEndOfStack } from "./discovery-end-of-stack";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
 import { DirectShareModal } from "./direct-share-modal";
+import { DiscoveryLoading } from "./discovery-loading";
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url, { credentials: "include" });
-  if (!res.ok) throw new Error("Failed to fetch product data");
-  const { data } = await res.json();
-  return data;
-};
+
 
 interface DiscoveryStackProps {
   products: any[];
   currentIndex: number;
   onSwipeRight: (product: any, skipCart?: boolean) => void;
   onSwipeLeft: (product: any) => void;
+  hasNextPage: boolean;
   onSwipeUp: (product: any) => void;
+  isPrefetching: boolean
 }
 
 export function DiscoveryStack({
@@ -36,7 +34,9 @@ export function DiscoveryStack({
   currentIndex,
   onSwipeRight,
   onSwipeLeft,
+  hasNextPage,
   onSwipeUp,
+  isPrefetching
 }: DiscoveryStackProps) {
   const [toast, setToast] = useState<{
     message: string;
@@ -192,18 +192,23 @@ export function DiscoveryStack({
       </div>
 
       {/* Foreground swipeable card */}
-      <AnimatePresence mode="popLayout">
-        {currentProduct ? (
-          <SwipeCard
-            key={currentProduct.id}
-            product={currentProduct}
-            handleDragEnd={handleDragEnd}
-            onSwipeUp={onSwipeUp}
-          />
-        ) : (
-          <DiscoveryEndOfStack />
-        )}
-      </AnimatePresence>
+     <AnimatePresence mode="popLayout">
+  {currentProduct ? (
+    <SwipeCard
+      key={currentProduct.id}
+      product={currentProduct}
+      handleDragEnd={handleDragEnd}
+      onSwipeUp={onSwipeUp}
+    />
+  ) : !hasNextPage && products.length === 0 ? (
+    <DiscoveryEndOfStack />
+  ) : isPrefetching && !currentProduct ? (
+    <DiscoveryLoading />
+  ) : (
+    <DiscoveryLoading />
+  )}
+</AnimatePresence>
+
 
       {/* Action buttons */}
       {currentProduct && (

@@ -434,14 +434,15 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import useSWRMutation from "swr/mutation";
-import { set, get, del, keys } from "idb-keyval";
-
+import { set, get, del, keys, createStore } from "idb-keyval";
 interface SyncPayload {
   accepted: string[];
   rejected: string[];
   swipesCount: number;
   timestamp?: number;
 }
+
+const discoverStore = createStore("pluggn-discover-sync", "sync-store");
 
 async function syncFetcher(url: string, { arg }: { arg: SyncPayload }) {
   const res = await fetch(url, {
@@ -499,30 +500,30 @@ export function useDiscoverSync() {
     )
       return;
     const key = generateKey();
-    await set(key, payload);
+await set(key, payload, discoverStore);
     console.log("🕓 Queued sync:", payload);
   };
 
   const hasPendingSyncs = async () => {
-    const pending = await keys();
+    const pending = await keys(discoverStore); // ✅
     return pending.length > 0;
   };
 
   const processQueuedSyncs = async () => {
-    const allKeys = await keys();
-    for (const key of allKeys) {
-      const data = await get(key);
-      if (!data) continue;
-      try {
-        await trigger(data);
-        await del(key);
-        console.log("✅ Processed queued sync:", data);
-      } catch (err) {
-        console.error("❌ Failed queued sync:", err);
-        break;
-      }
+  const allKeys = await keys(discoverStore); // ✅
+  for (const key of allKeys) {
+    const data = await get(key, discoverStore); // ✅
+    if (!data) continue;
+    try {
+      await trigger(data);
+      await del(key, discoverStore); // ✅
+      console.log("✅ Processed queued sync:", data);
+    } catch (err) {
+      console.error("❌ Failed queued sync:", err);
+      break;
     }
-  };
+  }
+};
 
   // 🧠 MAIN SYNC FUNCTION WITH BATCHING
   const sync = useCallback(async () => {

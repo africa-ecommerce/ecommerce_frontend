@@ -252,9 +252,11 @@ useEffect(() => {
         <DiscoveryStack
           products={products}
           currentIndex={currentIndex}
+          hasNextPage={hasNextPage}
           onSwipeRight={(p, skipCart) => {
             if (p && p.id) handleSwipeRight(p, skipCart);
           }}
+          isPrefetching={isPrefetching.current}
           onSwipeLeft={(p) => {
             if (p && p.id) handleSwipeLeft(p);
           }}
