@@ -854,6 +854,8 @@
 //   );
 // }
 
+
+
 "use client";
 import {
   createContext,
@@ -1196,6 +1198,8 @@ export function ShoppingCartProvider({
     // no automatic refreshInterval, backend data is likely updated by user actions
   });
 
+  console.log("backendData", backendData)
+
   /* ------------------------------
      Utility: normalize backend product -> CartItem
      - uses images[0] if available
@@ -1232,56 +1236,54 @@ export function ShoppingCartProvider({
        - Combine sets with dedupe (id), prefer local item fields where appropriate (prices)
        - Sort by addedAt desc (newest first)
      ------------------------------*/
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const local = (await loadFromIndexedDB()) || [];
-        // backendData may be an array; determine fallback addedAt values based on reverse index
-        const backendItems: CartItem[] = Array.isArray(backendData.products)
-          ? backendData.products.map((p: any, idx: number) =>
-              normalizeBackendProduct(
-                p,
-                Date.now() - (Array.isArray(backendData.products) ? idx * 1000 : 0)
-              )
-            )
-          : [];
+useEffect(() => {
+  let mounted = true;
+  (async () => {
+    try {
+      const local = (await loadFromIndexedDB()) || [];
 
-        // create a map where key = id; prefer local entry (as it may contain commissionData, sellingPrice)
-        const mergedMap = new Map<string, CartItem>();
+      // ✅ Handle both shapes: array or { products: [] }
+      const backendProducts = Array.isArray(backendData)
+        ? backendData
+        : Array.isArray(backendData?.products)
+        ? backendData.products
+        : [];
 
-        // Add backend items first (so they appear earlier if no local overrides)
-        for (const b of backendItems) mergedMap.set(b.id, b);
+      const backendItems: CartItem[] = backendProducts.map(
+        (p: any, idx: number) =>
+          normalizeBackendProduct(p, Date.now() - idx * 1000)
+      );
 
-        // Merge local items - override backend for same id and preserve local addedAt if present
-        for (const l of local) {
-          if (l.id) {
-            mergedMap.set(l.id, {
-              ...(mergedMap.get(l.id) || {}),
-              ...l, // local data takes precedence (including addedAt)
-            });
-          }
+      // 🧩 Merge logic (unchanged)
+      const mergedMap = new Map<string, CartItem>();
+      for (const b of backendItems) mergedMap.set(b.id, b);
+      for (const l of local) {
+        if (l.id) {
+          mergedMap.set(l.id, {
+            ...(mergedMap.get(l.id) || {}),
+            ...l,
+          });
         }
-
-        // Convert to array and sort newest first
-        const mergedArr = Array.from(mergedMap.values()).sort(
-          (a, b) => (b.addedAt || 0) - (a.addedAt || 0)
-        );
-
-        if (mounted) {
-          setItems(mergedArr);
-          // persist merged arrangement (so addedAt ordering is stored)
-          await saveToIndexedDB(mergedArr);
-        }
-      } catch (err) {
-        console.error("Sync error:", err);
       }
-    })();
-    return () => {
-      mounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [backendData.products, normalizeBackendProduct]);
+
+      const mergedArr = Array.from(mergedMap.values()).sort(
+        (a, b) => (b.addedAt || 0) - (a.addedAt || 0)
+      );
+
+      if (mounted) {
+        setItems(mergedArr);
+        await saveToIndexedDB(mergedArr);
+      }
+    } catch (err) {
+      console.error("Sync error:", err);
+    }
+  })();
+
+  return () => {
+    mounted = false;
+  };
+}, [backendData, normalizeBackendProduct]);
+
 
   /* ------------------------------
      Queue processing & addItem
