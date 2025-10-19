@@ -96,23 +96,35 @@ const { products, error, isLoading, hasNextPage, setSize, size, isValidating } =
 // Prevent refetch spam
 const prefetchedPage = useRef<number | null>(null);
 
+const isPrefetching = useRef(false);
+
 useEffect(() => {
   const remaining = products.length - currentIndex;
-  if (!hasNextPage || isValidating || prefetchedPage.current === size) return;
+  if (!hasNextPage || isValidating || isPrefetching.current || prefetchedPage.current === size) return;
   if (remaining > 5) return;
 
   const doPrefetch = async () => {
-    // only sync once per batch
-    if (hasChanges && !syncPending.current) {
+    isPrefetching.current = true;
+
+    if (hasChanges) {
       await sync();
-      await new Promise((r) => setTimeout(r, 400));
+      let retries = 0;
+      while (syncPending.current && retries < 20) {
+        await new Promise((r) => setTimeout(r, 200));
+        retries++;
+      }
     }
+
     prefetchedPage.current = size;
-    setSize((prev) => prev + 1);
+    await setSize((prev) => prev + 1);
+
+    // Cooldown
+    setTimeout(() => {
+      isPrefetching.current = false;
+    }, 1000);
   };
 
   doPrefetch();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [currentIndex]);
 
 
