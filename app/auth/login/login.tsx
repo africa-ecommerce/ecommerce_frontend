@@ -64,7 +64,7 @@ export default function Login() {
 
       successToast(result.message);
 
-      let redirectUrl = "/dashboard";
+      let redirectUrl = "/marketplace";
       if (
         callbackUrl &&
         typeof callbackUrl === "string" &&

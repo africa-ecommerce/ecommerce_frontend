@@ -4,7 +4,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const { provider } = req.query;
   const callbackUrl = Array.isArray(req.query.callbackUrl)
     ? req.query.callbackUrl[0]
-    : req.query.callbackUrl || "/dashboard";
+    : req.query.callbackUrl || "/marketplace";
 
   // build the real backend OAuth URL
   const target = new URL(

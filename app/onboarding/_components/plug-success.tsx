@@ -161,8 +161,8 @@ export default function PlugSuccess() {
             asChild
             className="w-full md:w-[85%] md:flex-1 bg-[#FF7A29] py-3 text-sm md:text-base group transition-all duration-200 hover:scale-[1.02]"
           >
-            <Link href="/dashboard">
-              Go to Your Dashboard
+            <Link href="/marketplace">
+              Discover
               <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>

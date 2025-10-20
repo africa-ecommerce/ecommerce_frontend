@@ -2,7 +2,7 @@
   "name": "Pluggn - Social Commerce Platform",
   "short_name": "Pluggn",
   "description": "Africa's fastest-growing social commerce platform where anyone can build a business without inventory or logistics.",
-  "start_url": "/dashboard",
+  "start_url": "/marketplace",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#ffffff",

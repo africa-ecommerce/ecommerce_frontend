@@ -18,7 +18,7 @@ import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 export const handleOAuthLogin = (provider: "google") => {
   try {
     const urlParams = new URLSearchParams(window.location.search);
-    const nestedCallback = urlParams.get("callbackUrl") || "/dashboard";
+    const nestedCallback = urlParams.get("callbackUrl") || "/marketplace";
 
     const finalCallback = encodeURIComponent(nestedCallback);
     const redirectUrl = `/api/auth/${provider}?callbackUrl=${finalCallback}`;
