@@ -1070,6 +1070,7 @@ interface ShoppingCartContextType {
   setIsMutate: (mutate: boolean) => void;
   clearCart: () => void;
   openCart: () => void;
+  closeCart: () => void;
   isMutate: boolean;
 }
 
@@ -1363,7 +1364,7 @@ useEffect(() => {
 
       // remove from indexedDB
       await removeFromIndexedDBById(itemId);
-      successToast("Removed product");
+      successToast("Product removed successfully");
       // revalidate backend cache
       mutate("/api/discover/products/accepted");
     } catch (err) {
@@ -1424,7 +1425,7 @@ useEffect(() => {
       }
 
       await clearIndexedDB();
-      successToast("Cleared curated products");
+      successToast("Products cleared successfully");
       mutate("/api/discover/products/accepted");
     } catch (err) {
       console.error("Clear error:", err);
@@ -1442,6 +1443,10 @@ useEffect(() => {
   const openCart = () => {
     setIsOpen(true);
   };
+
+  const closeCart = () => {
+    setIsOpen(false)
+  }
 
   /* ------------------------------
      Save items to IndexedDB whenever they change
@@ -1486,6 +1491,7 @@ useEffect(() => {
   };
 
   const handleProductClick = (itemId: string) => {
+     closeCart()
     router.push(`/marketplace/product/${itemId}`);
   };
 
@@ -1508,6 +1514,7 @@ useEffect(() => {
         updateItemPrice,
         clearCart,
         openCart,
+        closeCart,
         isMutate,
       }}
     >
