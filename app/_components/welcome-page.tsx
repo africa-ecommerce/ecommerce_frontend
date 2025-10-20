@@ -220,7 +220,7 @@ export default function Home() {
                   <span className="bg-[#FF7A21] bg-clip-text text-transparent">Sell Online</span> Without Inventory,
                   Logistics, or Technical Hassles
                   <br />
-                  <span className="text-xl md:text-2xl">Just Sell and Earn</span>
+                  <span className="text-xl md:text-2xl">Just Pluggn</span>
                 </h1>
                 <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
                   Africa’s fastest-growing social commerce platform—where anyone can build a business without inventory upfront
@@ -279,7 +279,7 @@ export default function Home() {
                     </div>
                     <h3 className="text-lg font-bold mb-2">I Want to Sell Online</h3>
                     <p className="text-white/90 text-sm">
-                      Start earning without inventory, logistics issues, or upfront costs
+                      Start selling without inventory, logistics issues, or upfront costs
                     </p>
                     <ArrowRight className="h-5 w-5 absolute top-4 right-4 text-white" />
                   </button>
@@ -304,87 +304,8 @@ export default function Home() {
             </div>
           </div>
         </section>
+               {/* Plugs Section - Detailed & Expansive */}
 
-        {/* Suppliers Section - Concise & Benefit-Focused */}
-        <section id="suppliers-section" className="w-full py-16 md:py-20 bg-white scroll-mt-16">
-          <div className="container px-4 md:px-6">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 bg-orange-100 rounded-full px-4 py-2 mb-4">
-                  <Store className="h-5 w-5 text-[#FF7A21]" />
-                  <span className="text-[#FF7A21] font-semibold">For Suppliers</span>
-                </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Multiply Your Sales Channels</h2>
-                <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                  Access thousands of motivated social sellers who promote your products across Nigeria—while you focus
-                  on what you do best.
-                </p>
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
-                  <div className="w-16 h-16 bg-[#FF7A21] rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <TrendingUp className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-base md:text-lg font-bold mb-2">Multiply Sales Channels</h3>
-                  <p className="text-gray-600 text-sm">Access thousands of social sellers promoting your products</p>
-                </div>
-                <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
-                  <div className="w-16 h-16 bg-[#FF7A21] rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Zap className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-base md:text-lg font-bold mb-2">Zero Marketing Effort</h3>
-                  <p className="text-gray-600 text-sm">Others promote your products while you focus on quality</p>
-                </div>
-                <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
-                  <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Award className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-base md:text-lg font-bold mb-2">Professional Presentation</h3>
-                  <p className="text-gray-600 text-sm">We handle photos, listings</p>
-                </div>
-                <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
-                  <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Shield className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-base md:text-lg font-bold mb-2">Guaranteed Payments</h3>
-                  <p className="text-gray-600 text-sm">Secure, timely payouts</p>
-                </div>
-              </div>
-              {/* Quick Process */}
-              <div className="bg-[#FF7A21]  rounded-3xl p-8 md:p-12 text-white text-center">
-                <h3 className="text-xl md:text-2xl font-bold mb-6">Simple 3-Step Process</h3>
-                <div className="grid md:grid-cols-3 gap-8">
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
-                      <span className="text-xl font-bold">1</span>
-                    </div>
-                    <h4 className="font-semibold mb-2">List Your Products</h4>
-                    <p className="text-white/90 text-sm">Upload your inventory with our help</p>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
-                      <span className="text-xl font-bold">2</span>
-                    </div>
-                    <h4 className="font-semibold mb-2">Get Promoted</h4>
-                    <p className="text-white/90 text-sm">Social sellers share your products</p>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
-                      <span className="text-xl font-bold">3</span>
-                    </div>
-                    <h4 className="font-semibold mb-2">Get Paid</h4>
-                    <p className="text-white/90 text-sm">Automatic payouts</p>
-                  </div>
-                </div>
-                <Button className="mt-8 bg-white text-[#FF7A21] hover:bg-gray-100 font-semibold px-8 py-3">
-                  <Link href="/auth/register">Start as Supplier</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Plugs Section - Detailed & Expansive */}
         <section
           id="plugs-section"
           className="w-full py-16 md:py-20 bg-gradient-to-br from-orange-50 to-pink-50 scroll-mt-16"
@@ -398,7 +319,7 @@ export default function Home() {
                 </div>
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Start Your Online Business Today</h2>
                 <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                  Earn money selling products online without inventory, logistics issues, or technical skills. Join
+                  Start selling products online without inventory, logistics issues, or technical skills. Join
                   thousands making ₦100K+ monthly.
                 </p>
               </div>
@@ -412,7 +333,7 @@ export default function Home() {
                       <ShoppingBag className="h-8 w-8 text-white" />
                     </div>
                     <h4 className="font-bold mb-2">Choose Products</h4>
-                    <p className="text-gray-600 text-sm">Browse our marketplace and select products you want to sell</p>
+                    <p className="text-gray-600 text-sm">Discover and select products you want to sell</p>
                   </div>
                   <div className="text-center">
                     <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -420,15 +341,15 @@ export default function Home() {
                     </div>
                     <h4 className="font-bold mb-2">Set Your Prices</h4>
                     <p className="text-gray-600 text-sm">
-                      Add your profit margin to each product—you control your earnings
+                      Add your profit margin to each product—you control your profit
                     </p>
                   </div>
                   <div className="text-center">
                     <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
                       <MessageCircle className="h-8 w-8 text-white" />
                     </div>
-                    <h4 className="font-bold mb-2">Share & Earn</h4>
-                    <p className="text-gray-600 text-sm">Share on social media or your store and earn on every sale</p>
+                    <h4 className="font-bold mb-2">Share</h4>
+                    <p className="text-gray-600 text-sm">Share on social media or your store and withdraw your margin when you make a sale</p>
                   </div>
                 </div>
               </div>
@@ -533,7 +454,7 @@ export default function Home() {
 
               {/* Earning Process */}
               <div className="bg-[#FF7A21]  rounded-3xl p-8 md:p-12 text-white mb-12">
-                <h3 className="text-2xl md:text-3xl font-bold text-center mb-8">How You Earn Money</h3>
+                <h3 className="text-2xl md:text-3xl font-bold text-center mb-8">How You make sales and money</h3>
                 <div className="grid md:grid-cols-4 gap-6">
                   <div className="text-center">
                     <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -547,7 +468,7 @@ export default function Home() {
                       <Users className="h-8 w-8 text-white" />
                     </div>
                     <h4 className="font-bold mb-2">Customer Orders</h4>
-                    <p className="text-white/90 text-sm">Buyers purchase through your links</p>
+                    <p className="text-white/90 text-sm">Share your product on social media and Buyers purchase through your links</p>
                   </div>
                   <div className="text-center">
                     <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -561,14 +482,14 @@ export default function Home() {
                       <CreditCard className="h-8 w-8 text-white" />
                     </div>
                     <h4 className="font-bold mb-2">Get Paid</h4>
-                    <p className="text-white/90 text-sm">Withdraw earnings after delivery</p>
+                    <p className="text-white/90 text-sm">Withdraw your margin after delivery</p>
                   </div>
                 </div>
               </div>
 
               <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-lg mb-8 sm:mb-10 md:mb-12">
                 <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-4 sm:mb-6 md:mb-8">
-                  Real Earning Example
+                  Real Example
                 </h3>
                 <div className="max-w-xl mx-auto">
                   <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
@@ -603,7 +524,7 @@ export default function Home() {
                       Sell just 10 per month = <span className="font-bold">₦45,000 profit!</span>
                     </p>
                     <p className="text-xs sm:text-sm text-gray-500 leading-snug">
-                      Many of our top Plugs earn ₦200,000+ monthly by promoting multiple products
+                      Many of our top Plugs make ₦200,000+ monthly by sharing multiple products
                     </p>
                   </div>
                 </div>
@@ -629,12 +550,93 @@ export default function Home() {
               </div>
               <div className="text-center mt-12">
                 <Button className="bg-[#FF7A21]  text-white px-8 py-4 text-lg font-semibold shadow-lg">
-                  <Link href="/auth/register">Start Earning as a Plug</Link>
+                  <Link href="/auth/register">Start as a Plug</Link>
                 </Button>
               </div>
             </div>
           </div>
         </section>
+
+        {/* Suppliers Section - Concise & Benefit-Focused */}
+        <section id="suppliers-section" className="w-full py-16 md:py-20 bg-white scroll-mt-16">
+          <div className="container px-4 md:px-6">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center gap-2 bg-orange-100 rounded-full px-4 py-2 mb-4">
+                  <Store className="h-5 w-5 text-[#FF7A21]" />
+                  <span className="text-[#FF7A21] font-semibold">For Suppliers</span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Multiply Your Sales Channels</h2>
+                <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                  Access thousands of motivated social sellers who promote your products across Nigeria—while you focus
+                  on what you do best.
+                </p>
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
+                  <div className="w-16 h-16 bg-[#FF7A21] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <TrendingUp className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-base md:text-lg font-bold mb-2">Multiply Sales Channels</h3>
+                  <p className="text-gray-600 text-sm">Access thousands of social sellers promoting your products</p>
+                </div>
+                <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
+                  <div className="w-16 h-16 bg-[#FF7A21] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Zap className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-base md:text-lg font-bold mb-2">Zero Marketing Effort</h3>
+                  <p className="text-gray-600 text-sm">Others promote your products while you focus on quality</p>
+                </div>
+                <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
+                  <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Award className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-base md:text-lg font-bold mb-2">Professional Presentation</h3>
+                  <p className="text-gray-600 text-sm">We handle photos, listings</p>
+                </div>
+                <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 text-center hover:shadow-lg transition-shadow">
+                  <div className="w-16 h-16 bg-[#FF7A21]  rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <Shield className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-base md:text-lg font-bold mb-2">Guaranteed Payments</h3>
+                  <p className="text-gray-600 text-sm">Secure, timely payouts</p>
+                </div>
+              </div>
+              {/* Quick Process */}
+              <div className="bg-[#FF7A21]  rounded-3xl p-8 md:p-12 text-white text-center">
+                <h3 className="text-xl md:text-2xl font-bold mb-6">Simple 3-Step Process</h3>
+                <div className="grid md:grid-cols-3 gap-8">
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
+                      <span className="text-xl font-bold">1</span>
+                    </div>
+                    <h4 className="font-semibold mb-2">List Your Products</h4>
+                    <p className="text-white/90 text-sm">Upload your inventory with our help</p>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
+                      <span className="text-xl font-bold">2</span>
+                    </div>
+                    <h4 className="font-semibold mb-2">Get Promoted</h4>
+                    <p className="text-white/90 text-sm">Social sellers share your products</p>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-4">
+                      <span className="text-xl font-bold">3</span>
+                    </div>
+                    <h4 className="font-semibold mb-2">Get Paid</h4>
+                    <p className="text-white/90 text-sm">Automatic payouts</p>
+                  </div>
+                </div>
+                <Button className="mt-8 bg-white text-[#FF7A21] hover:bg-gray-100 font-semibold px-8 py-3">
+                  <Link href="/auth/register">Start as Supplier</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        
 
         {/* How It Works - Unified Process */}
         <section id="how-it-works" className="w-full py-16 md:py-20 bg-white scroll-mt-16">
@@ -808,7 +810,7 @@ export default function Home() {
                       <Link href="/auth/register">Join as Supplier</Link>
                     </Button>
                     <Button className="bg-white/10 border border-white text-white hover:bg-white/20 font-semibold px-6 py-3">
-                      <Link href="/auth/register">Join as Plug</Link>
+                      <Link href="/auth/register">Join as a Plug</Link>
                     </Button>
                   </div>
                 </div>
@@ -826,7 +828,7 @@ export default function Home() {
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Success Stories</h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto">Real people earning real money with Pluggn</p>
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto">Real people making real money with Pluggn</p>
               </div>
               <div className="grid md:grid-cols-3 gap-8">
                 {/* Supplier Success */}
@@ -879,7 +881,7 @@ export default function Home() {
                     </div>
                     <div className="text-right">
                       <div className="text-lg font-bold text-[#FF7A21]">₦100K+</div>
-                      <div className="text-xs text-gray-500">Monthly Earnings</div>
+                      <div className="text-xs text-gray-500">Monthly</div>
                     </div>
                   </div>
                 </div>
@@ -895,7 +897,7 @@ export default function Home() {
                     </div>
                   </div>
                   <p className="text-gray-700 mb-4">
-                    "University student earning more than my lecturers! Pluggn helped me become financially independent
+                    "University student making more money than my lecturers! Pluggn helped me become financially independent
                     while studying."
                   </p>
                   <div className="flex items-center justify-between">
@@ -906,7 +908,7 @@ export default function Home() {
                     </div>
                     <div className="text-right">
                       <div className="text-lg font-bold text-[#FF7A21]">₦90K+</div>
-                      <div className="text-xs text-gray-500">Monthly Earnings</div>
+                      <div className="text-xs text-gray-500">Monthly</div>
                     </div>
                   </div>
                 </div>
@@ -923,7 +925,7 @@ export default function Home() {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-[#FF7A21]">₦150K</div>
-                  <div className="text-gray-600">Avg. Monthly Earnings</div>
+                  <div className="text-gray-600">Avg. Monthly amount made</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-[#FF7A21]">99%</div>
@@ -1035,7 +1037,7 @@ export default function Home() {
                     <div>
                       <h4 className="font-semibold mb-2">How much money can I realistically make?</h4>
                       <p className="text-gray-600 text-sm">
-                        Our top Plugs earn ₦150K-250K+ monthly. Beginners typically start with ₦50K-100K in their first
+                        Our top Plugs makes ₦150K-250K+ monthly. Beginners typically start with ₦50K-100K in their first
                         month. Your earnings depend on your effort and audience size.
                       </p>
                     </div>
@@ -1141,7 +1143,7 @@ export default function Home() {
                   <Smartphone className="h-12 w-12 mx-auto mb-4 text-white" />
                   <h3 className="text-xl font-bold mb-4">I'm a Plug</h3>
                   <p className="text-white/90 mb-6 text-sm">
-                    Start earning money online without inventory or upfront costs
+                    Start selling money online without inventory or upfront costs
                   </p>
                   <Button className="w-full bg-white text-[#FF7A21] hover:bg-gray-100 font-semibold">
                     <Link href="/auth/register">Start as Plug</Link>
