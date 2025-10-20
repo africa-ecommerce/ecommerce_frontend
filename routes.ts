@@ -27,7 +27,10 @@ export const authRoutes = [
   "/auth/reset-password",
   "/auth/forgot-password",
   "/auth/resend-email-verification",
+  "/"
 ];
+
+
 
 /**@type {string[]}*/
 export const supplierRoutes = ["/dashboard/inventory", "/dashboard/order"];
