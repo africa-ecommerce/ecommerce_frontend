@@ -122,7 +122,7 @@ export function ProductCard({ product, onSwipeUp }: ProductCardProps) {
             {product.name}
           </h2>
           <p className="text-sm text-orange-600 font-medium uppercase tracking-wide mt-1">
-            Beauty
+            {""}
           </p>
         </div>
 
