@@ -77,60 +77,59 @@ export default function Discover() {
   };
 
   // Use the products hook for data fetching
-const { products, error, isLoading, hasNextPage, setSize, size, isValidating } =
-  useDiscoverProducts(20);
+const { products, error, isLoading } =
+  useDiscoverProducts(100);
 
   const {
   recordSwipeRight,
   recordSwipeLeft,
-  sync,
-  hasChanges,
-  syncPending,
-  isSyncing,
 } = useDiscoverSync();
 
 
   console.log("products", products)
 
 
-// Prevent refetch spam
-const prefetchedPage = useRef<number | null>(null);
-
-const isPrefetching = useRef(false);
 
 useEffect(() => {
-  const remaining = products.length - currentIndex;
-  if (!hasNextPage || isValidating || isPrefetching.current || prefetchedPage.current === size) return;
-  if (remaining > 5) return;
+  // Don’t run if products not yet loaded
+  if (!products || products.length === 0) return;
 
-  const doPrefetch = async () => {
-    isPrefetching.current = true;
+  const savedIndex = localStorage.getItem("discover_current_index");
+  const stackTime = localStorage.getItem("discover_stack_timestamp");
+  const now = Date.now();
 
-    if (hasChanges) {
-      await sync();
-      let retries = 0;
-      while (syncPending.current && retries < 20) {
-        await new Promise((r) => setTimeout(r, 200));
-        retries++;
+  if (stackTime && now - Number(stackTime) < 21_600_000) {
+    // restore only if within 6-hour window and index is valid
+    if (savedIndex) {
+      const index = Number(savedIndex);
+      if (index < products.length) {
+        setCurrentIndex(index);
+      } else {
+        // fallback if saved index > available products
+        setCurrentIndex(0);
       }
     }
+  } else {
+    // expired session
+    localStorage.removeItem("discover_current_index");
+    localStorage.removeItem("discover_stack_timestamp");
+    setCurrentIndex(0);
+    localStorage.setItem("discover_stack_timestamp", String(now));
+  }
+}, [products]);
 
-    prefetchedPage.current = size;
-    await setSize((prev) => prev + 1);
 
-    // Cooldown
-    setTimeout(() => {
-      isPrefetching.current = false;
-    }, 1000);
-  };
-
-  doPrefetch();
+useEffect(() => {
+  localStorage.setItem("discover_current_index", String(currentIndex));
 }, [currentIndex]);
 
 
-
-
-
+useEffect(() => {
+  const stackTime = localStorage.getItem("discover_stack_timestamp");
+  if (!stackTime) {
+    localStorage.setItem("discover_stack_timestamp", String(Date.now()));
+  }
+}, []);
 
 
 
@@ -252,11 +251,10 @@ useEffect(() => {
         <DiscoveryStack
           products={products}
           currentIndex={currentIndex}
-          hasNextPage={hasNextPage}
+         
           onSwipeRight={(p, skipCart) => {
             if (p && p.id) handleSwipeRight(p, skipCart);
           }}
-          isPrefetching={isPrefetching.current}
           onSwipeLeft={(p) => {
             if (p && p.id) handleSwipeLeft(p);
           }}

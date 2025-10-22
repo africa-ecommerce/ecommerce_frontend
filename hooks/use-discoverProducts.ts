@@ -1,8 +1,83 @@
+// "use client";
+
+// import useSWRInfinite from "swr/infinite";
+// import { useCallback, useEffect } from "react";
+// import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
+
+// const fetcher = async (url: string) => {
+//   const response = await fetch(url, { credentials: "include" });
+//   if (!response.ok) throw new Error("Failed to fetch discover products");
+//   return response.json();
+// };
+
+// export function useDiscoverProducts(limit: number = 100) {
+//   const { isMutate } = useShoppingCart();
+
+//   const getKey = () => {
+//     return `/api/discover/products?limit=${limit}`;
+//   };
+
+//   const { data, error, size, setSize, mutate, isValidating } = useSWRInfinite(
+//     getKey,
+//     fetcher,
+//     {
+//       revalidateFirstPage: false,
+//       revalidateOnFocus: false,
+//       persistSize: false,
+//       revalidateOnReconnect: true,
+//       dedupingInterval: 2000,
+//       errorRetryCount: 2,
+//       errorRetryInterval: 1000,
+//       onError: (error, key) => {
+//         console.error("Discover fetch error:", error.message, "Key:", key);
+//       },
+//     }
+//   );
+
+// useEffect(() => {
+//   if (isMutate) mutate();
+// }, [isMutate, mutate]);
+
+//   console.log("discover data:", data);
+
+//   // ✅ Flatten pages into one list
+//     const products = data ? data.flatMap((page) => page.data || []) : [];
+
+//   // This ensures no repeated products across pages.
+
+//   // ✅ Get hasNextPage from the last page
+
+//   const isLoading = !data && !error;
+//   const isLoadingMore =
+//     size > 0 && data && typeof data[size - 1] === "undefined";
+//   const isEmpty = !isLoading && !isLoadingMore && products.length === 0;
+
+//   const refreshData = useCallback(() => mutate(), [mutate]);
+
+//   return {
+//     products,
+//     error,
+//     isLoading,
+//     isLoadingMore,
+//     isValidating,
+//     isEmpty,
+//     size,
+//     setSize,
+//     mutate,
+//     refreshData,
+//   };
+// }
+
+
+
+
 "use client";
 
-import useSWRInfinite from "swr/infinite";
-import { useCallback, useEffect } from "react";
+import useSWR from "swr";
+import { useEffect } from "react";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
+
+const SIX_HOURS = 21_600_000; // 6 hours in ms
 
 const fetcher = async (url: string) => {
   const response = await fetch(url, { credentials: "include" });
@@ -10,24 +85,17 @@ const fetcher = async (url: string) => {
   return response.json();
 };
 
-export function useDiscoverProducts(limit: number = 20) {
+export function useDiscoverProducts(limit: number = 100) {
   const { isMutate } = useShoppingCart();
 
-  const getKey = (pageIndex: number, previousPageData: any) => {
-    if (previousPageData && !previousPageData.meta?.hasNextPage) return null;
-    const page = pageIndex + 1;
-    return `/api/discover/products?page=${page}&limit=${limit}`;
-  };
-
-  const { data, error, size, setSize, mutate, isValidating } = useSWRInfinite(
-    getKey,
+  const { data, error, mutate, isValidating } = useSWR(
+    `/api/discover/products?limit=${limit}`,
     fetcher,
     {
-      revalidateFirstPage: false,
       revalidateOnFocus: false,
-      persistSize: false,
       revalidateOnReconnect: true,
-      dedupingInterval: 2000,
+      dedupingInterval: SIX_HOURS,
+      refreshInterval: 0,
       errorRetryCount: 2,
       errorRetryInterval: 1000,
       onError: (error, key) => {
@@ -36,38 +104,31 @@ export function useDiscoverProducts(limit: number = 20) {
     }
   );
 
-useEffect(() => {
-  if (isMutate) mutate();
-}, [isMutate, mutate]);
+  // 🔸 Store stack timestamp when new data arrives
+  useEffect(() => {
+    if (data) {
+      const stored = localStorage.getItem("discover_stack_timestamp");
+      const now = Date.now();
 
-  console.log("discover data:", data);
+      if (!stored || now - Number(stored) > SIX_HOURS) {
+        localStorage.setItem("discover_stack_timestamp", String(now));
+        // Reset index since new stack
+        localStorage.removeItem("discover_current_index");
+      }
+    }
+  }, [data]);
 
-  // ✅ Flatten pages into one list
-    const products = data ? data.flatMap((page) => page.data || []) : [];
+  useEffect(() => {
+    if (isMutate) mutate();
+  }, [isMutate, mutate]);
 
-  // This ensures no repeated products across pages.
-
-  // ✅ Get hasNextPage from the last page
-  const hasNextPage = data?.[data.length - 1]?.meta?.hasNextPage ?? false;
-
-  const isLoading = !data && !error;
-  const isLoadingMore =
-    size > 0 && data && typeof data[size - 1] === "undefined";
-  const isEmpty = !isLoading && !isLoadingMore && products.length === 0;
-
-  const refreshData = useCallback(() => mutate(), [mutate]);
+  const products = data?.data || [];
 
   return {
     products,
     error,
-    isLoading,
-    isLoadingMore,
+    isLoading: !data && !error,
     isValidating,
-    isEmpty,
-    size,
-    setSize,
-    hasNextPage,
-    mutate,
-    refreshData,
+    refreshData: () => mutate(),
   };
 }
