@@ -24,9 +24,7 @@ interface DiscoveryStackProps {
   currentIndex: number;
   onSwipeRight: (product: any, skipCart?: boolean) => void;
   onSwipeLeft: (product: any) => void;
-  hasNextPage: boolean;
   onSwipeUp: (product: any) => void;
-  isPrefetching: boolean
 }
 
 export function DiscoveryStack({
@@ -34,9 +32,8 @@ export function DiscoveryStack({
   currentIndex,
   onSwipeRight,
   onSwipeLeft,
-  hasNextPage,
+ 
   onSwipeUp,
-  isPrefetching
 }: DiscoveryStackProps) {
   const [toast, setToast] = useState<{
     message: string;
@@ -54,17 +51,6 @@ export function DiscoveryStack({
 
   
 
-  // ✅ Handle end of deck
-  useEffect(() => {
-    if (currentIndex >= products.length && products.length > 0) {
-      setToast({
-        message: "You reached the end — add retail price and share",
-        type: "info",
-      });
-      const t = setTimeout(() => setToast(null), 3000);
-      return () => clearTimeout(t);
-    }
-  }, [currentIndex, products.length]);
 
   // ✅ Keyboard controls
   useEffect(() => {
@@ -200,11 +186,9 @@ export function DiscoveryStack({
       handleDragEnd={handleDragEnd}
       onSwipeUp={onSwipeUp}
     />
-  ) : !hasNextPage && products.length === 0 ? (
+  ) :  products.length === 0 ? (
     <DiscoveryEndOfStack />
-  ) : isPrefetching && !currentProduct ? (
-    <DiscoveryLoading />
-  ) : (
+  )  : (
     <DiscoveryLoading />
   )}
 </AnimatePresence>
