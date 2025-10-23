@@ -40,7 +40,6 @@ export default function Discover() {
   const [hasShownDailyShare, setHasShownDailyShare] = useState(false);
   const [firstSwipeOfDay, setFirstSwipeOfDay] = useState(true);
   const [isViewMore, setIsViewMore] = useState(false);
-  const [hasPrefetched, setHasPrefetched] = useState(false);
 
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,64 +67,11 @@ export default function Discover() {
   // Use the products hook for data fetching
   const { products, error, isLoading } = useDiscoverProducts(100);
 
-  const { recordSwipeRight, recordSwipeLeft } = useDiscoverSync();
+  const { recordSwipeRight, recordSwipeLeft } = useDiscoverSync(user.plug.id);
 
   console.log("products", products);
 
-useEffect(() => {
-  if (!products || products.length === 0) return;
 
-  const now = Date.now();
-  const storedTimestamp = Number(
-    localStorage.getItem("discover_stack_timestamp")
-  );
-  const storedKey = localStorage.getItem("discover_stack_key");
-  const currentKey = `/api/discover/products?limit=100`; // match your SWR key (or use the actual key if dynamic)
-
-  // 1️⃣ No stored timestamp → new session
-  if (!storedTimestamp || !storedKey) {
-    localStorage.setItem("discover_stack_timestamp", String(now));
-    localStorage.setItem("discover_stack_key", currentKey);
-    return;
-  }
-
-  // 2️⃣ Expired session (6h passed)
-  if (now - storedTimestamp > 21_600_000) {
-    localStorage.setItem("discover_stack_timestamp", String(now));
-    localStorage.setItem("discover_stack_key", currentKey);
-    localStorage.removeItem("discover_current_index");
-    setCurrentIndex(0);
-    return;
-  }
-
-  // 3️⃣ Different dataset (limit or params changed)
-  if (storedKey !== currentKey) {
-    localStorage.setItem("discover_stack_timestamp", String(now));
-    localStorage.setItem("discover_stack_key", currentKey);
-    localStorage.removeItem("discover_current_index");
-    setCurrentIndex(0);
-    return;
-  }
-
-  // 4️⃣ Restore previous index if valid
-  const savedIndex = localStorage.getItem("discover_current_index");
-  if (savedIndex) {
-    const index = Number(savedIndex);
-    setCurrentIndex(index < products.length ? index : 0);
-  }
-}, [products]);
-
-
-  useEffect(() => {
-    localStorage.setItem("discover_current_index", String(currentIndex));
-  }, [currentIndex]);
-
-  useEffect(() => {
-    const stackTime = localStorage.getItem("discover_stack_timestamp");
-    if (!stackTime) {
-      localStorage.setItem("discover_stack_timestamp", String(Date.now()));
-    }
-  }, []);
 
   const { addItem, items, openCart } = useShoppingCart();
 

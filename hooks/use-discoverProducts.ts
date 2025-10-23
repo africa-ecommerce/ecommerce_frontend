@@ -77,7 +77,6 @@ import useSWR from "swr";
 import { useEffect } from "react";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
 
-const SIX_HOURS = 21_600_000; // 6 hours in ms
 
 const fetcher = async (url: string) => {
   const response = await fetch(url, { credentials: "include" });
@@ -92,9 +91,10 @@ export function useDiscoverProducts(limit: number = 100) {
     `/api/discover/products?limit=${limit}`,
     fetcher,
     {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: true,
-      dedupingInterval: SIX_HOURS,
+      staleTime: 6 * 60 * 60 * 1000, // ✅ Data is "fresh" for 6 hours
+      dedupingInterval: 5 * 60 * 1000, // ✅ Prevents duplicate fetches for 5 min
+      revalidateOnFocus: true, // ✅ Refresh if user refocuses (after data becomes stale)
+      revalidateOnReconnect: true, // ✅ Refresh on reconnect
       refreshInterval: 0,
       errorRetryCount: 2,
       errorRetryInterval: 1000,
@@ -104,19 +104,7 @@ export function useDiscoverProducts(limit: number = 100) {
     }
   );
 
-  // 🔸 Store stack timestamp when new data arrives
-  useEffect(() => {
-    if (data) {
-      const stored = localStorage.getItem("discover_stack_timestamp");
-      const now = Date.now();
 
-      if (!stored || now - Number(stored) > SIX_HOURS) {
-        localStorage.setItem("discover_stack_timestamp", String(now));
-        // Reset index since new stack
-        localStorage.removeItem("discover_current_index");
-      }
-    }
-  }, [data]);
 
   useEffect(() => {
     if (isMutate) mutate();

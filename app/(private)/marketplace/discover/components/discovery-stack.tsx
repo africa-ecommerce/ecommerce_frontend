@@ -138,14 +138,7 @@ export function DiscoveryStack({
     y.set(0);
   };
 
-  // ✅ Defensive: handle empty or loading states
-  if (!Array.isArray(products) || products.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-full text-gray-400">
-        Loading products...
-      </div>
-    );
-  }
+  
 
   return (
     <div className="relative w-full max-w-md mx-auto h-[calc(90vh-4rem)] md:h-[calc(100vh-4rem)]">
@@ -186,7 +179,7 @@ export function DiscoveryStack({
       handleDragEnd={handleDragEnd}
       onSwipeUp={onSwipeUp}
     />
-  ) :  products.length === 0 ? (
+  ) :  !currentProduct || products.length === 0 ? (
     <DiscoveryEndOfStack />
   )  : (
     <DiscoveryLoading />
