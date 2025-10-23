@@ -77,11 +77,10 @@ import useSWR from "swr";
 import { useEffect } from "react";
 import { useShoppingCart } from "@/app/_components/provider/shoppingCartProvider";
 
-
 const fetcher = async (url: string) => {
-  const response = await fetch(url, { credentials: "include" });
-  if (!response.ok) throw new Error("Failed to fetch discover products");
-  return response.json();
+  const res = await fetch(url, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch discover products");
+  return res.json();
 };
 
 export function useDiscoverProducts(limit: number = 100) {
@@ -91,37 +90,32 @@ export function useDiscoverProducts(limit: number = 100) {
     `/api/discover/products?limit=${limit}`,
     fetcher,
     {
-     
-      dedupingInterval: 3000, // ✅ Prevents duplicate fetches for 5 min
-      revalidateOnFocus: true, // ✅ Refresh if user refocuses (after data becomes stale)
-      revalidateOnReconnect: true, // ✅ Refresh on reconnect
-      refreshInterval: 30 * 1000,
+      dedupingInterval: 3000,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      refreshInterval: 30_000,
       errorRetryCount: 2,
       errorRetryInterval: 1000,
-      onError: (error, key) => {
-        console.error("Discover fetch error:", error.message, "Key:", key);
+      onError: (err, key) => {
+        console.error("Discover fetch error:", err.message, "Key:", key);
       },
     }
   );
-
-
-  console.log("data",data)
-
 
   useEffect(() => {
     if (isMutate) mutate();
   }, [isMutate, mutate]);
 
-  const products = data?.data || [];
+  const products = Array.isArray(data?.data) ? data.data : [];
 
-return {
-  products,
-  // count: data?.meta?.returnedCount ?? products.length ?? 0,
-  // createdAt: data?.meta?.cacheCreatedAt ?? null,
-  error,
-  isLoading: !data && !error,
-  isValidating,
-  refreshData: () => mutate(),
-};
-
+  return {
+    products,
+    count: data?.meta?.returnedCount ?? products.length,
+    total: data?.meta?.totalCount ?? 0,
+    createdAt: data?.meta?.cacheCreatedAt ?? null,
+    error,
+    isLoading: !data && !error,
+    isValidating,
+    refreshData: mutate,
+  };
 }
