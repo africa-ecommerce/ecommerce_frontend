@@ -49,6 +49,8 @@ export default function Discover() {
     userData: { user },
   } = useUser();
 
+  console.log("user", user)
+
   useEffect(() => {
     const checkTour = async () => {
       const shouldShow = await shouldShowTour();
