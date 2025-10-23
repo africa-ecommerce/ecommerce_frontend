@@ -122,6 +122,12 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, [createdAt]);
 
+const [hydrated, setHydrated] = useState(false);
+useEffect(() => {
+  setHydrated(true);
+}, []);
+
+
 
   const handleSwipeRight = async (product: any, skipCart: boolean = false) => {
     if (!product || !product.id) return;
@@ -224,7 +230,9 @@ useEffect(() => {
             <span>{remainingCount ?? 0} left</span>{" "}
           </div>
           <span className="text-sm md:text-base text-gray-600">
-            Next drop in {timeLeft ?? "calculating..."}
+            {hydrated
+              ? `Next drop in ${timeLeft ?? "calculating..."}`
+              : "Next drop in ..."}
           </span>
         </div>
       </header>
