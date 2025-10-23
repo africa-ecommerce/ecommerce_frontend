@@ -67,7 +67,7 @@ export default function Discover() {
   };
 
   // Use the products hook for data fetching
-  const { products, error, isLoading, count, createdAt } = useDiscoverProducts(100);
+  const { products, error, isLoading} = useDiscoverProducts(100);
 
   const { recordSwipeRight, recordSwipeLeft } = useDiscoverSync();
 
@@ -78,7 +78,7 @@ export default function Discover() {
 
   const [showDirectShareModal, setShowDirectShareModal] = useState(false);
   const [shareProduct, setShareProduct] = useState<any | null>(null);
-  const [timeLeft, setTimeLeft] = useState("");
+  // const [timeLeft, setTimeLeft] = useState("");
 
   const currentProduct = products?.[currentIndex];
 
@@ -92,31 +92,31 @@ export default function Discover() {
     );
   }
 
-const remainingCount = Math.max(0, (count ?? products.length) - currentIndex);
+// const remainingCount = Math.max(0, (count ?? products.length) - currentIndex);
 
 
-  useEffect(() => {
-    if (!createdAt) return;
+//   useEffect(() => {
+//     if (!createdAt) return;
 
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const nextDropTime = Number(createdAt) + 6 * 60 * 60 * 1000;
-      const diff = nextDropTime - now;
+//     const interval = setInterval(() => {
+//       const now = Date.now();
+//       const nextDropTime = Number(createdAt) + 6 * 60 * 60 * 1000;
+//       const diff = nextDropTime - now;
 
-      if (diff <= 0) {
-        setTimeLeft("soon");
-        clearInterval(interval);
-        return;
-      }
+//       if (diff <= 0) {
+//         setTimeLeft("soon");
+//         clearInterval(interval);
+//         return;
+//       }
 
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+//       const hours = Math.floor(diff / (1000 * 60 * 60));
+//       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-      setTimeLeft(`${hours}h:${minutes}m`);
-    }, 60 * 1000); // every minute
+//       setTimeLeft(`${hours}h:${minutes}m`);
+//     }, 60 * 1000); // every minute
 
-    return () => clearInterval(interval);
-  }, [createdAt]);
+//     return () => clearInterval(interval);
+//   }, [createdAt]);
 
 
   const handleSwipeRight = async (product: any, skipCart: boolean = false) => {
@@ -214,7 +214,7 @@ const remainingCount = Math.max(0, (count ?? products.length) - currentIndex);
           Today’s Drop
         </h1>
 
-        <div className="flex items-center gap-4 mt-2 md:mt-0 text-gray-700">
+        {/* <div className="flex items-center gap-4 mt-2 md:mt-0 text-gray-700">
           <div className="flex items-center gap-1 text-sm md:text-base font-medium">
             <Layers className="w-4 h-4 text-gray-500" />
             <span>{remainingCount} left</span>
@@ -222,7 +222,7 @@ const remainingCount = Math.max(0, (count ?? products.length) - currentIndex);
           <span className="text-sm md:text-base text-gray-600">
             Next drop in {timeLeft}
           </span>
-        </div>
+        </div> */}
       </header>
 
       {/* Discovery Stack */}
