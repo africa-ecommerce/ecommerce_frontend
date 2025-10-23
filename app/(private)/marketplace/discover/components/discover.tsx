@@ -1,8 +1,3 @@
-
-
-
-
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -29,8 +24,6 @@ import { DirectShareModal } from "./direct-share-modal";
 import { useDiscoverProducts } from "@/hooks/use-discoverProducts";
 import { useDiscoverSync } from "@/hooks/use-discoverSync";
 
-
-
 export default function Discover() {
   const [showSharePrompt, setShowSharePrompt] = useState(false);
   const [hasSeenSharePrompt, setHasSeenSharePrompt] = useState(false);
@@ -49,7 +42,6 @@ export default function Discover() {
   const [isViewMore, setIsViewMore] = useState(false);
   const [hasPrefetched, setHasPrefetched] = useState(false);
 
-
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -57,9 +49,6 @@ export default function Discover() {
   const {
     userData: { user },
   } = useUser();
-
-
-
 
   useEffect(() => {
     const checkTour = async () => {
@@ -77,63 +66,66 @@ export default function Discover() {
   };
 
   // Use the products hook for data fetching
-const { products, error, isLoading } =
-  useDiscoverProducts(100);
+  const { products, error, isLoading } = useDiscoverProducts(100);
 
-  const {
-  recordSwipeRight,
-  recordSwipeLeft,
-} = useDiscoverSync();
+  const { recordSwipeRight, recordSwipeLeft } = useDiscoverSync();
 
-
-  console.log("products", products)
-
-
+  console.log("products", products);
 
 useEffect(() => {
-  // Don’t run if products not yet loaded
   if (!products || products.length === 0) return;
 
-  const savedIndex = localStorage.getItem("discover_current_index");
-  const stackTime = localStorage.getItem("discover_stack_timestamp");
   const now = Date.now();
+  const storedTimestamp = Number(
+    localStorage.getItem("discover_stack_timestamp")
+  );
+  const storedKey = localStorage.getItem("discover_stack_key");
+  const currentKey = `/api/discover/products?limit=100`; // match your SWR key (or use the actual key if dynamic)
 
-  if (stackTime && now - Number(stackTime) < 21_600_000) {
-    // restore only if within 6-hour window and index is valid
-    if (savedIndex) {
-      const index = Number(savedIndex);
-      if (index < products.length) {
-        setCurrentIndex(index);
-      } else {
-        // fallback if saved index > available products
-        setCurrentIndex(0);
-      }
-    }
-  } else {
-    // expired session
-    localStorage.removeItem("discover_current_index");
-    localStorage.removeItem("discover_stack_timestamp");
-    setCurrentIndex(0);
+  // 1️⃣ No stored timestamp → new session
+  if (!storedTimestamp || !storedKey) {
     localStorage.setItem("discover_stack_timestamp", String(now));
+    localStorage.setItem("discover_stack_key", currentKey);
+    return;
+  }
+
+  // 2️⃣ Expired session (6h passed)
+  if (now - storedTimestamp > 21_600_000) {
+    localStorage.setItem("discover_stack_timestamp", String(now));
+    localStorage.setItem("discover_stack_key", currentKey);
+    localStorage.removeItem("discover_current_index");
+    setCurrentIndex(0);
+    return;
+  }
+
+  // 3️⃣ Different dataset (limit or params changed)
+  if (storedKey !== currentKey) {
+    localStorage.setItem("discover_stack_timestamp", String(now));
+    localStorage.setItem("discover_stack_key", currentKey);
+    localStorage.removeItem("discover_current_index");
+    setCurrentIndex(0);
+    return;
+  }
+
+  // 4️⃣ Restore previous index if valid
+  const savedIndex = localStorage.getItem("discover_current_index");
+  if (savedIndex) {
+    const index = Number(savedIndex);
+    setCurrentIndex(index < products.length ? index : 0);
   }
 }, [products]);
 
 
-useEffect(() => {
-  localStorage.setItem("discover_current_index", String(currentIndex));
-}, [currentIndex]);
+  useEffect(() => {
+    localStorage.setItem("discover_current_index", String(currentIndex));
+  }, [currentIndex]);
 
-
-useEffect(() => {
-  const stackTime = localStorage.getItem("discover_stack_timestamp");
-  if (!stackTime) {
-    localStorage.setItem("discover_stack_timestamp", String(Date.now()));
-  }
-}, []);
-
-
-
-   
+  useEffect(() => {
+    const stackTime = localStorage.getItem("discover_stack_timestamp");
+    if (!stackTime) {
+      localStorage.setItem("discover_stack_timestamp", String(Date.now()));
+    }
+  }, []);
 
   const { addItem, items, openCart } = useShoppingCart();
 
@@ -156,7 +148,7 @@ useEffect(() => {
 
   const handleSwipeRight = async (product: any, skipCart: boolean = false) => {
     if (!product || !product.id) return;
-     recordSwipeRight(product.id);
+    recordSwipeRight(product.id);
 
     // Move to next product
     setCurrentIndex((prev) => {
@@ -244,14 +236,11 @@ useEffect(() => {
     <main className="max-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 relative overflow-hidden font-sans">
       {/* Header */}
 
-     
-
       {/* Discovery Stack */}
       <div className="h-screen flex items-start md:items-center justify-center">
         <DiscoveryStack
           products={products}
           currentIndex={currentIndex}
-         
           onSwipeRight={(p, skipCart) => {
             if (p && p.id) handleSwipeRight(p, skipCart);
           }}
@@ -314,18 +303,17 @@ useEffect(() => {
         cartCount={items.length}
         onConfirm={openCart}
       />
-     
-      {isModalOpen && selectedProduct?.id && (
-  <ProductDetailsModal
-    isOpen={isModalOpen}
-    onClose={() => {
-      setIsModalOpen(false);
-      setSelectedProduct(null);
-    }}
-    productId={selectedProduct.id}
-  />
-)}
 
+      {isModalOpen && selectedProduct?.id && (
+        <ProductDetailsModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedProduct(null);
+          }}
+          productId={selectedProduct.id}
+        />
+      )}
     </main>
   );
 }

@@ -1105,9 +1105,9 @@ function calculateCommission(
 
   // Scale commission based on margin
   if (marginPercent >= 60) {
-    commissionRate = 0.15; // Reward high margin
+    commissionRate = 0.10; // Reward high margin
   } else if (marginPercent >= 30) {
-    commissionRate = 0.175;
+    commissionRate = 0.15;
   }
 
   const platformCommission = plugMargin * commissionRate;
@@ -1966,7 +1966,7 @@ export function PriceModal({
                   </div>
                 </div>
                 <div className="mt-3 p-2 bg-blue-100 rounded text-xs text-blue-800">
-                  💡 Higher margins (30%+ = 17.5% fee, 60%+ = 15% fee) get
+                  💡 Higher margins (30%+ = 15% fee, 60%+ = 10% fee) get
                   better rates!
                 </div>
               </div>
