@@ -108,11 +108,13 @@ export function useDiscoverProducts(limit: number = 100) {
 
   const products = Array.isArray(data?.data) ? data.data : [];
 
+  console.log("data", data)
+
   return {
     products,
-    count: data?.meta?.returnedCount ?? products.length,
-    total: data?.meta?.totalCount ?? 0,
-    createdAt: data?.meta?.cacheCreatedAt ?? null,
+    // count: data?.meta?.returnedCount ?? products.length,
+    // total: data?.meta?.totalCount ?? 0,
+    // createdAt: data?.meta?.cacheCreatedAt ?? null,
     error,
     isLoading: !data && !error,
     isValidating,

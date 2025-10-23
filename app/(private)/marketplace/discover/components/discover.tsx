@@ -42,7 +42,7 @@ export default function Discover() {
   const [firstSwipeOfDay, setFirstSwipeOfDay] = useState(true);
   const [isViewMore, setIsViewMore] = useState(false);
   const [hasPrefetched, setHasPrefetched] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<string>("calculating...");
+  // const [timeLeft, setTimeLeft] = useState<string>("calculating...");
 
 
   // Search and filter states
@@ -69,7 +69,7 @@ export default function Discover() {
   };
 
   // Use the products hook for data fetching
-  const { products, error, isLoading, count, createdAt} = useDiscoverProducts(100);
+  const { products, error, isLoading} = useDiscoverProducts(100);
 
   const { recordSwipeRight, recordSwipeLeft } = useDiscoverSync();
 
@@ -93,39 +93,39 @@ export default function Discover() {
     );
   }
 
-const safeCount = Number.isFinite(count) ? count : products.length ?? 0;
-const remainingCount = Math.max(0, safeCount - currentIndex);
+// const safeCount = Number.isFinite(count) ? count : products.length ?? 0;
+// const remainingCount = Math.max(0, safeCount - currentIndex);
 
-useEffect(() => {
-  if (typeof createdAt !== "number" || !Number.isFinite(createdAt)) {
-    setTimeLeft("unknown");
-    return;
-  }
+// useEffect(() => {
+//   if (typeof createdAt !== "number" || !Number.isFinite(createdAt)) {
+//     setTimeLeft("unknown");
+//     return;
+//   }
 
-  const updateTime = () => {
-    const now = Date.now();
-    const nextDropTime = createdAt + 6 * 60 * 60 * 1000;
-    const diff = nextDropTime - now;
+//   const updateTime = () => {
+//     const now = Date.now();
+//     const nextDropTime = createdAt + 6 * 60 * 60 * 1000;
+//     const diff = nextDropTime - now;
 
-    if (diff <= 0) {
-      setTimeLeft("soon");
-      return;
-    }
+//     if (diff <= 0) {
+//       setTimeLeft("soon");
+//       return;
+//     }
 
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    setTimeLeft(`${hours}h:${minutes}m`);
-  };
+//     const hours = Math.floor(diff / (1000 * 60 * 60));
+//     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+//     setTimeLeft(`${hours}h:${minutes}m`);
+//   };
 
-  updateTime(); // run immediately
-  const interval = setInterval(updateTime, 60 * 1000);
-  return () => clearInterval(interval);
-}, [createdAt]);
+//   updateTime(); // run immediately
+//   const interval = setInterval(updateTime, 60 * 1000);
+//   return () => clearInterval(interval);
+// }, [createdAt]);
 
-const [hydrated, setHydrated] = useState(false);
-useEffect(() => {
-  setHydrated(true);
-}, []);
+// const [hydrated, setHydrated] = useState(false);
+// useEffect(() => {
+//   setHydrated(true);
+// }, []);
 
 
 
@@ -219,7 +219,7 @@ useEffect(() => {
     <main className="max-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 relative overflow-hidden font-sans">
       {/* Header */}
 
-      <header className="w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-8 py-4">
+      {/* <header className="w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-8 py-4">
         <h1 className="text-lg md:text-xl font-semibold text-gray-900">
           Today’s Drop
         </h1>
@@ -235,7 +235,7 @@ useEffect(() => {
               : "Next drop in ..."}
           </span>
         </div>
-      </header>
+      </header> */}
 
       {/* Discovery Stack */}
       <div className="h-screen flex items-start md:items-center justify-center">
