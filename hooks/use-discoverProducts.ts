@@ -114,13 +114,14 @@ export function useDiscoverProducts(limit: number = 100) {
 
   const products = data?.data || [];
 
-  return {
-    products,
-    count: data.meta.returnedCount,
-    createdAt: data.meta.cacheCreatedAt,
-    error,
-    isLoading: !data && !error,
-    isValidating,
-    refreshData: () => mutate(),
-  };
+return {
+  products,
+  count: data?.meta?.returnedCount ?? products.length ?? 0,
+  createdAt: data?.meta?.cacheCreatedAt ?? null,
+  error,
+  isLoading: !data && !error,
+  isValidating,
+  refreshData: () => mutate(),
+};
+
 }
