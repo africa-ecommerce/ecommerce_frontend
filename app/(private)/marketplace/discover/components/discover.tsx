@@ -23,6 +23,7 @@ import SupplierMarketplace from "../../_components/supplier-marketplace";
 import { DirectShareModal } from "./direct-share-modal";
 import { useDiscoverProducts } from "@/hooks/use-discoverProducts";
 import { useDiscoverSync } from "@/hooks/use-discoverSync";
+import { Layers } from "lucide-react";
 
 export default function Discover() {
   const [showSharePrompt, setShowSharePrompt] = useState(false);
@@ -66,7 +67,7 @@ export default function Discover() {
   };
 
   // Use the products hook for data fetching
-  const { products, error, isLoading } = useDiscoverProducts(100);
+  const { products, error, isLoading, count, createdAt } = useDiscoverProducts(100);
 
   const { recordSwipeRight, recordSwipeLeft } = useDiscoverSync();
 
@@ -77,6 +78,7 @@ export default function Discover() {
 
   const [showDirectShareModal, setShowDirectShareModal] = useState(false);
   const [shareProduct, setShareProduct] = useState<any | null>(null);
+  const [timeLeft, setTimeLeft] = useState("");
 
   const currentProduct = products?.[currentIndex];
 
@@ -90,7 +92,32 @@ export default function Discover() {
     );
   }
 
-  const productsRemaining = Math.max(0, products.length - currentIndex);
+const remainingCount = Math.max(0, (count ?? products.length) - currentIndex);
+
+
+  useEffect(() => {
+    if (!createdAt) return;
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const nextDropTime = Number(createdAt) + 6 * 60 * 60 * 1000;
+      const diff = nextDropTime - now;
+
+      if (diff <= 0) {
+        setTimeLeft("soon");
+        clearInterval(interval);
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+      setTimeLeft(`${hours}h:${minutes}m`);
+    }, 60 * 1000); // every minute
+
+    return () => clearInterval(interval);
+  }, [createdAt]);
+
 
   const handleSwipeRight = async (product: any, skipCart: boolean = false) => {
     if (!product || !product.id) return;
@@ -181,6 +208,22 @@ export default function Discover() {
   return (
     <main className="max-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 relative overflow-hidden font-sans">
       {/* Header */}
+
+       <header className="w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-8 py-4 border-b border-gray-200 bg-white">
+        <h1 className="text-lg md:text-xl font-semibold text-gray-900">
+          Today’s Drop
+        </h1>
+
+        <div className="flex items-center gap-4 mt-2 md:mt-0 text-gray-700">
+          <div className="flex items-center gap-1 text-sm md:text-base font-medium">
+            <Layers className="w-4 h-4 text-gray-500" />
+            <span>{remainingCount} left</span>
+          </div>
+          <span className="text-sm md:text-base text-gray-600">
+            Next drop in {timeLeft}
+          </span>
+        </div>
+      </header>
 
       {/* Discovery Stack */}
       <div className="h-screen flex items-start md:items-center justify-center">
