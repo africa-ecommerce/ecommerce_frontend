@@ -607,7 +607,7 @@ await set(key, payload, discoverStore);
     inactivityTimer.current = setTimeout(() => {
       console.log("⌛ Auto sync after inactivity");
       sync();
-    }, 5000);
+    }, 3000);
   }, [sync, hasChanges]);
 
   useEffect(() => {
