@@ -1077,11 +1077,7 @@ interface ShoppingCartContextType {
 interface PriceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (
-    price: number,
-    profit: number,
-    commissionData: CommissionData
-  ) => void;
+  onSubmit: (itemId: string) => Promise<void>;
   minPrice: number;
   maxPrice: number;
   supplierPrice: number;
@@ -1660,7 +1656,7 @@ useEffect(() => {
       <PriceModal
         open={openAddPrice}
         onOpenChange={setOpenAddPrice}
-        onSubmit={handlePriceSubmit}
+        onSubmit={removeItem}
         minPrice={selectedItem?.minPrice || 0}
         maxPrice={selectedItem?.maxPrice || 0}
         supplierPrice={selectedItem?.price || 0}
@@ -1815,6 +1811,9 @@ export function PriceModal({
       // ✅ Mutate to refresh your store list
       mutate("/api/plug/products/");
 
+   await onSubmit(products.id);
+
+
       // ✅ Save this product locally to use in ShareModal
 
       // Reset form
@@ -1856,7 +1855,7 @@ export function PriceModal({
             ) : (
               <span className="font-bold">no upper limit</span>
             )}
-            . Higher margins result in lower commission rates.
+            .
           </DialogDescription>
         </DialogHeader>
 
