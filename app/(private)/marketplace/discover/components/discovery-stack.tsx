@@ -171,20 +171,21 @@ export function DiscoveryStack({
       </div>
 
       {/* Foreground swipeable card */}
-     <AnimatePresence mode="popLayout">
-  {currentProduct ? (
+ <AnimatePresence mode="wait">
+  {products?.length === 0 ? (
+    <DiscoveryEndOfStack key="end" />
+  ) : currentProduct ? (
     <SwipeCard
       key={currentProduct.id}
       product={currentProduct}
       handleDragEnd={handleDragEnd}
       onSwipeUp={onSwipeUp}
     />
-  ) :  !currentProduct || products.length === 0 ? (
-    <DiscoveryEndOfStack />
-  )  : (
-    <DiscoveryLoading />
+  ) : (
+    <DiscoveryLoading key="loading" />
   )}
 </AnimatePresence>
+
 
 
       {/* Action buttons */}

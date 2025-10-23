@@ -209,7 +209,7 @@ const remainingCount = Math.max(0, (count ?? products.length) - currentIndex);
     <main className="max-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 relative overflow-hidden font-sans">
       {/* Header */}
 
-       <header className="w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-8 py-4 border-b border-gray-200 bg-white">
+      <header className="w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-8 py-4 border-b border-gray-200 bg-white">
         <h1 className="text-lg md:text-xl font-semibold text-gray-900">
           Today’s Drop
         </h1>
@@ -261,17 +261,15 @@ const remainingCount = Math.max(0, (count ?? products.length) - currentIndex);
             : null
         }
         onSuccess={() => {
-          // Show success toast
           setToast({
             message: "Product added to your store successfully!",
             type: "success",
           });
 
-          // Trigger swipe animation after short delay
           setTimeout(() => {
-            (p) => {
-              if (p && p.id) handleSwipeRight(p, true);
-            }; // Pass true to skip cart
+            if (shareProduct && shareProduct.id) {
+              handleSwipeRight(shareProduct, true);
+            }
             setToast(null);
           }, 1000);
         }}
