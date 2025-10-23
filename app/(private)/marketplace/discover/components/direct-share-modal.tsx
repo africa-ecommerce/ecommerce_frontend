@@ -49,14 +49,9 @@ function calculateCommission(
 ): CommissionData {
   const plugMargin = sellingPrice - supplierPrice;
   const marginPercent = (plugMargin / supplierPrice) * 100;
-  let commissionRate = 0.2; // Default to 20%
+  let commissionRate = 0.1; // Default to 20%
 
-  // Scale commission based on margin
-  if (marginPercent >= 60) {
-    commissionRate = 0.10; // Reward high margin
-  } else if (marginPercent >= 30) {
-    commissionRate = 0.15;
-  }
+ 
 
   const platformCommission = plugMargin * commissionRate;
   const plugTakeHome = plugMargin - platformCommission;
@@ -253,7 +248,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             ) : (
               <span className="font-bold">no upper limit</span>
             )}
-            . Higher margins result in lower commission rates.
+            .
           </DialogDescription>
         </DialogHeader>
 
@@ -356,10 +351,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     </div>
                   </div>
                 </div>
-                <div className="mt-3 p-2 bg-blue-100 rounded text-xs text-blue-800">
-                  💡 Higher margins (30%+ = 15% fee, 60%+ = 10% fee) get
-                  better rates!
-                </div>
+                
               </div>
             )}
           </form>
