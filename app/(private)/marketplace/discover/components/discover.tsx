@@ -69,7 +69,7 @@ export default function Discover() {
   // Use the products hook for data fetching
   const { products, error, isLoading } = useDiscoverProducts(100);
 
-  const { recordSwipeRight, recordSwipeLeft } = useDiscoverSync(user.plug.id);
+const { recordSwipeRight, recordSwipeLeft } = useDiscoverSync(user?.plug?.id);
 
   console.log("products", products);
 

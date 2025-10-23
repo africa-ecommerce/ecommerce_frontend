@@ -25,7 +25,6 @@ async function syncFetcher(url: string, { arg }: { arg: SyncPayload }) {
 const generateKey = () =>
   `sync-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-// ✅ helper: break large arrays into smaller chunks
 function chunkArray<T>(arr: T[], size: number): T[][] {
   const chunks: T[][] = [];
   for (let i = 0; i < arr.length; i += size) {
@@ -34,9 +33,22 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
   return chunks;
 }
 
-// ✅ hook now takes plugId
-export function useDiscoverSync(plugId: string) {
-  // 👇 Create store tied to this plugId
+// ✅ Safe version of useDiscoverSync
+export function useDiscoverSync(plugId?: string) {
+  // 🧩 Guard: if no plugId yet, return dummy handlers
+  if (!plugId) {
+    return {
+      recordSwipeRight: () => {},
+      recordSwipeLeft: () => {},
+      syncPending: { current: false },
+      sync: async () => {},
+      isSyncing: false,
+      lastSynced: 0,
+      hasChanges: false,
+    };
+  }
+
+  // ✅ Create store tied to this plugId
   const discoverStore = useRef(
     createStore(`pluggn-discover-sync-${plugId}`, "sync-store")
   ).current;
@@ -98,7 +110,6 @@ export function useDiscoverSync(plugId: string) {
     }
   };
 
-  // 🧠 MAIN SYNC FUNCTION WITH BATCHING
   const sync = useCallback(async () => {
     if (syncPending.current) {
       console.log("⚠️ Sync skipped — already in progress");
@@ -185,7 +196,6 @@ export function useDiscoverSync(plugId: string) {
     if (hasChanges) resetInactivityTimer();
   }, [accepted, rejected, swipesCount, hasChanges, resetInactivityTimer]);
 
-  // 🌐 Sync when online
   useEffect(() => {
     const handleOnline = () => {
       console.log(`🌐 [${plugId}] Back online — syncing queued data...`);
@@ -195,7 +205,6 @@ export function useDiscoverSync(plugId: string) {
     return () => window.removeEventListener("online", handleOnline);
   }, [sync, plugId]);
 
-  // 🧭 Sync on tab close or hidden
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (!hasChanges) return;
