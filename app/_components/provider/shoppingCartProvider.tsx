@@ -854,8 +854,6 @@
 //   );
 // }
 
-
-
 "use client";
 import {
   createContext,
@@ -914,8 +912,6 @@ import {
 import { cn } from "@/lib/utils";
 import { truncateText } from "@/lib/utils";
 import { DirectShareModal } from "@/app/(private)/marketplace/discover/components/direct-share-modal";
-
-
 
 interface ClearCartModalProps {
   open: boolean;
@@ -1101,7 +1097,6 @@ function calculateCommission(
   const marginPercent = (plugMargin / supplierPrice) * 100;
   let commissionRate = 0.1; // Default to 20%
 
- 
   const platformCommission = plugMargin * commissionRate;
   const plugTakeHome = plugMargin - platformCommission;
 
@@ -1125,7 +1120,6 @@ const fetcher = (input: RequestInfo, init?: RequestInit) =>
     if (!res.ok) throw json || new Error("Fetch error");
     return json;
   });
-
 
 export function ShoppingCartProvider({
   children,
@@ -1152,8 +1146,6 @@ export function ShoppingCartProvider({
 
   const queueRef = useRef<CartItem[]>([]);
   const isUpdating = useRef(false);
-
-
 
   useEffect(() => {
     const handleResetMutate = () => {
@@ -1193,7 +1185,7 @@ export function ShoppingCartProvider({
     // no automatic refreshInterval, backend data is likely updated by user actions
   });
 
-  console.log("backendData", backendData)
+  console.log("backendData", backendData);
 
   /* ------------------------------
      Utility: normalize backend product -> CartItem
@@ -1213,10 +1205,10 @@ export function ShoppingCartProvider({
         name: p.name || p.title || "Product",
         price: Number(p.price || p.cost || 0),
         image,
-       
+
         minPrice: p.minPrice,
         maxPrice: p.maxPrice,
-        
+
         addedAt: p.lastAt ? Number(p.addedAt) : fallbackAddedAt,
       } as CartItem;
     },
@@ -1231,54 +1223,53 @@ export function ShoppingCartProvider({
        - Combine sets with dedupe (id), prefer local item fields where appropriate (prices)
        - Sort by addedAt desc (newest first)
      ------------------------------*/
-useEffect(() => {
-  let mounted = true;
-  (async () => {
-    try {
-      const local = (await loadFromIndexedDB()) || [];
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const local = (await loadFromIndexedDB()) || [];
 
-      // ✅ Handle both shapes: array or { products: [] }
-      const backendProducts = Array.isArray(backendData)
-        ? backendData
-        : Array.isArray(backendData?.products)
-        ? backendData.products
-        : [];
+        // ✅ Handle both shapes: array or { products: [] }
+        const backendProducts = Array.isArray(backendData)
+          ? backendData
+          : Array.isArray(backendData?.products)
+          ? backendData.products
+          : [];
 
-      const backendItems: CartItem[] = backendProducts.map(
-        (p: any, idx: number) =>
-          normalizeBackendProduct(p, Date.now() - idx * 1000)
-      );
+        const backendItems: CartItem[] = backendProducts.map(
+          (p: any, idx: number) =>
+            normalizeBackendProduct(p, Date.now() - idx * 1000)
+        );
 
-      // 🧩 Merge logic (unchanged)
-      const mergedMap = new Map<string, CartItem>();
-      for (const b of backendItems) mergedMap.set(b.id, b);
-      for (const l of local) {
-        if (l.id) {
-          mergedMap.set(l.id, {
-            ...(mergedMap.get(l.id) || {}),
-            ...l,
-          });
+        // 🧩 Merge logic (unchanged)
+        const mergedMap = new Map<string, CartItem>();
+        for (const b of backendItems) mergedMap.set(b.id, b);
+        for (const l of local) {
+          if (l.id) {
+            mergedMap.set(l.id, {
+              ...(mergedMap.get(l.id) || {}),
+              ...l,
+            });
+          }
         }
+
+        const mergedArr = Array.from(mergedMap.values()).sort(
+          (a, b) => (b.addedAt || 0) - (a.addedAt || 0)
+        );
+
+        if (mounted) {
+          setItems(mergedArr);
+          await saveToIndexedDB(mergedArr);
+        }
+      } catch (err) {
+        console.error("Sync error:", err);
       }
+    })();
 
-      const mergedArr = Array.from(mergedMap.values()).sort(
-        (a, b) => (b.addedAt || 0) - (a.addedAt || 0)
-      );
-
-      if (mounted) {
-        setItems(mergedArr);
-        await saveToIndexedDB(mergedArr);
-      }
-    } catch (err) {
-      console.error("Sync error:", err);
-    }
-  })();
-
-  return () => {
-    mounted = false;
-  };
-}, [backendData, normalizeBackendProduct]);
-
+    return () => {
+      mounted = false;
+    };
+  }, [backendData, normalizeBackendProduct]);
 
   /* ------------------------------
      Queue processing & addItem
@@ -1438,8 +1429,8 @@ useEffect(() => {
   };
 
   const closeCart = () => {
-    setIsOpen(false)
-  }
+    setIsOpen(false);
+  };
 
   /* ------------------------------
      Save items to IndexedDB whenever they change
@@ -1484,7 +1475,7 @@ useEffect(() => {
   };
 
   const handleProductClick = (itemId: string) => {
-     closeCart()
+    closeCart();
     router.push(`/marketplace/product/${itemId}`);
   };
 
@@ -1814,8 +1805,7 @@ export function PriceModal({
       // ✅ Mutate to refresh your store list
       mutate("/api/plug/products/");
 
-   await onSubmit(products.id);
-
+      await onSubmit(products.id);
 
       // ✅ Save this product locally to use in ShareModal
 
@@ -1961,7 +1951,6 @@ export function PriceModal({
                     </div>
                   </div>
                 </div>
-               
               </div>
             )}
           </form>
