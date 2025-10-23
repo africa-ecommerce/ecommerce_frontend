@@ -91,11 +91,11 @@ export function useDiscoverProducts(limit: number = 100) {
     `/api/discover/products?limit=${limit}`,
     fetcher,
     {
-      staleTime: 6 * 60 * 60 * 1000, // ✅ Data is "fresh" for 6 hours
-      dedupingInterval: 5 * 60 * 1000, // ✅ Prevents duplicate fetches for 5 min
+     
+      dedupingInterval: 3000, // ✅ Prevents duplicate fetches for 5 min
       revalidateOnFocus: true, // ✅ Refresh if user refocuses (after data becomes stale)
       revalidateOnReconnect: true, // ✅ Refresh on reconnect
-      refreshInterval: 0,
+      refreshInterval: 30 * 1000,
       errorRetryCount: 2,
       errorRetryInterval: 1000,
       onError: (error, key) => {
@@ -104,6 +104,8 @@ export function useDiscoverProducts(limit: number = 100) {
     }
   );
 
+
+  console.log("data",data)
 
 
   useEffect(() => {
