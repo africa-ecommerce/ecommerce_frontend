@@ -1354,7 +1354,6 @@ useEffect(() => {
 
       // remove from indexedDB
       await removeFromIndexedDBById(itemId);
-      successToast("Product removed successfully");
       // revalidate backend cache
       mutate("/api/discover/products/accepted");
     } catch (err) {
