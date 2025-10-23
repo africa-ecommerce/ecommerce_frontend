@@ -914,7 +914,6 @@ import {
 import { cn } from "@/lib/utils";
 import { truncateText } from "@/lib/utils";
 import { DirectShareModal } from "@/app/(private)/marketplace/discover/components/direct-share-modal";
-import { useUser } from "./UserContext";
 
 interface ClearCartModalProps {
   open: boolean;
@@ -1152,9 +1151,7 @@ export function ShoppingCartProvider({
   const queueRef = useRef<CartItem[]>([]);
   const isUpdating = useRef(false);
 
-    const {
-      userData: { user },
-    } = useUser();
+
 
   useEffect(() => {
     const handleResetMutate = () => {
