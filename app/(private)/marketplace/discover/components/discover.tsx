@@ -117,24 +117,7 @@ export default function Discover() {
   }, [createdAt]);
 
   if (isLoading) {
-    return (
-      <main className="h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 flex flex-col">
-        {/* Fixed Header Skeleton */}
-        <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 md:px-8 py-4z-50">
-          <Skeleton className="h-6 w-32 mx-auto" />{" "}
-          {/* "Today’s Drop" skeleton */}
-          <div className="flex flex-col items-end gap-1">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-3 w-16" />
-          </div>
-        </header>
-
-        {/* Centered Loading Stack */}
-        <div className="flex-1 flex items-center justify-center">
-          <DiscoveryLoading />
-        </div>
-      </main>
-    );
+    return <DiscoveryLoading />;
   }
 
   if (error) {
@@ -233,18 +216,20 @@ export default function Discover() {
     <main className="max-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 relative overflow-hidden font-sans">
       {/* Header */}
 
-      <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 md:px-8 py-4 z-50 backdrop-blur-sm">
-        {/* Left: Title */}
-        <div className="absolute left-1/2 -translate-x-1/2">
-          {" "}
-          <h1 className="text-lg md:text-xl font-semibold text-gray-900">
-            {" "}
-            Today’s Drop{" "}
-          </h1>{" "}
-        </div>
-        {/* Right: Remaining + Time */}
-        <div className="flex flex-col items-end gap-1 text-gray-700">
-          {/* Capsule for remaining count */}
+      <header className="fixed top-0 left-0 w-full flex items-center justify-between px-4 md:px-8 py-4 z-50 backdrop-blur-sm">
+        {/* Title */}
+        <h1
+          className="
+      text-lg md:text-xl font-semibold text-gray-900
+      md:absolute md:left-1/2 md:-translate-x-1/2
+    "
+        >
+          Today’s Drop
+        </h1>
+
+        {/* Right side: Remaining + Time */}
+        <div className="flex flex-col items-end gap-1 text-gray-700 ml-auto">
+          {/* Capsule */}
           <div className="flex items-center gap-1 text-sm md:text-base font-medium bg-white rounded-full px-3 py-1 shadow-md">
             <Layers className="w-4 h-4 text-orange-400" />
             <span className="text-orange-500">{remainingCount ?? 0} left</span>
@@ -253,7 +238,7 @@ export default function Discover() {
           {/* Time left */}
           {timeLeft && (
             <p className="text-xs text-gray-700 drop-shadow-sm">
-              Next drop in {timeLeft}
+              Next drop after {timeLeft}
             </p>
           )}
         </div>
