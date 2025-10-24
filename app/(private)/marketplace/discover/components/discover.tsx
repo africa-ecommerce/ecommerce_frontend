@@ -122,7 +122,7 @@ export default function Discover() {
   return (
     <main className="h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 flex flex-col">
       {/* Fixed Header Skeleton */}
-      <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 md:px-8 py-4 bg-white/80 backdrop-blur-md shadow-sm z-50">
+      <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 md:px-8 py-4z-50">
         <Skeleton className="h-6 w-32 mx-auto" /> {/* "Today’s Drop" skeleton */}
         <div className="flex flex-col items-end gap-1">
           <Skeleton className="h-4 w-20" />
@@ -236,21 +236,26 @@ export default function Discover() {
     <main className="max-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 relative overflow-hidden font-sans">
       {/* Header */}
 
-      <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 md:px-8 py-4 bg-white/80 backdrop-blur-md shadow-sm z-50">
-        <div className="absolute left-1/2 -translate-x-1/2">
-          <h1 className="text-lg md:text-xl font-semibold text-gray-900">
-            Today’s Drop
-          </h1>
-        </div>
+     <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 md:px-8 py-4 z-50 backdrop-blur-sm">
 
-        <div className="ml-auto flex flex-col items-end gap-1 text-gray-700">
-          <div className="flex items-center gap-1 text-sm md:text-base font-medium">
-            <Layers className="w-4 h-4 text-gray-500" />
-            <span>{remainingCount ?? 0} left</span>
+        {/* Left: Title */}
+        <h1 className="text-lg md:text-xl font-semibold text-gray-900">
+          Today’s Drop
+        </h1>
+
+        {/* Right: Remaining + Time */}
+        <div className="flex flex-col items-end gap-1 text-gray-700">
+          {/* Capsule for remaining count */}
+          <div className="flex items-center gap-1 text-sm md:text-base font-medium bg-white rounded-full px-3 py-1 shadow-md">
+            <Layers className="w-4 h-4 text-orange-400" />
+            <span className="text-orange-500">{remainingCount ?? 0} left</span>
           </div>
 
+          {/* Time left */}
           {timeLeft && (
-            <p className="text-xs text-gray-600">Next drop in {timeLeft}</p>
+            <p className="text-xs text-gray-700 drop-shadow-sm">
+              Next drop in {timeLeft}
+            </p>
           )}
         </div>
       </header>
