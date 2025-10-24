@@ -42,7 +42,6 @@ export default function Discover() {
   const [firstSwipeOfDay, setFirstSwipeOfDay] = useState(true);
   const [isViewMore, setIsViewMore] = useState(false);
   const [hasPrefetched, setHasPrefetched] = useState(false);
-  // const [timeLeft, setTimeLeft] = useState<string>("calculating...");
 
 
   // Search and filter states
@@ -69,7 +68,7 @@ export default function Discover() {
   };
 
   // Use the products hook for data fetching
-  const { products, error, isLoading} = useDiscoverProducts(100);
+  const { products, error, isLoading, count, createdAt} = useDiscoverProducts(100);
 
   const { recordSwipeRight, recordSwipeLeft } = useDiscoverSync();
 
@@ -93,8 +92,7 @@ export default function Discover() {
     );
   }
 
-// const safeCount = Number.isFinite(count) ? count : products.length ?? 0;
-// const remainingCount = Math.max(0, safeCount - currentIndex);
+const remainingCount = Math.max(0, (count ?? products.length) - currentIndex);
 
 // useEffect(() => {
 //   if (typeof createdAt !== "number" || !Number.isFinite(createdAt)) {
@@ -219,7 +217,7 @@ export default function Discover() {
     <main className="max-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 relative overflow-hidden font-sans">
       {/* Header */}
 
-      {/* <header className="w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-8 py-4">
+      <header className="w-full flex flex-col md:flex-row items-center justify-between px-4 md:px-8 py-4">
         <h1 className="text-lg md:text-xl font-semibold text-gray-900">
           Today’s Drop
         </h1>
@@ -229,13 +227,13 @@ export default function Discover() {
             <Layers className="w-4 h-4 text-gray-500" />
             <span>{remainingCount ?? 0} left</span>{" "}
           </div>
-          <span className="text-sm md:text-base text-gray-600">
+          {/* <span className="text-sm md:text-base text-gray-600">
             {hydrated
               ? `Next drop in ${timeLeft ?? "calculating..."}`
               : "Next drop in ..."}
-          </span>
+          </span> */}
         </div>
-      </header> */}
+      </header>
 
       {/* Discovery Stack */}
       <div className="h-screen flex items-start md:items-center justify-center">

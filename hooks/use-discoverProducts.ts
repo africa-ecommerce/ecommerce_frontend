@@ -112,9 +112,8 @@ export function useDiscoverProducts(limit: number = 100) {
 
   return {
     products,
-    // count: data?.meta?.returnedCount ?? products.length,
-    // total: data?.meta?.totalCount ?? 0,
-    // createdAt: data?.meta?.cacheCreatedAt ?? null,
+    count: data?.meta?.returnedCount ?? products.length,
+    createdAt: data?.meta?.cacheCreatedAt ?? null,
     error,
     isLoading: !data && !error,
     isValidating,
