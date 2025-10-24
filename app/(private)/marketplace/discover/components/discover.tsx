@@ -44,7 +44,6 @@ export default function Discover() {
   const [hasPrefetched, setHasPrefetched] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
 
-
   // Search and filter states
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -69,12 +68,12 @@ export default function Discover() {
   };
 
   // Use the products hook for data fetching
-  const { products, error, isLoading, count, createdAt} = useDiscoverProducts(100);
+  const { products, error, isLoading, count, createdAt } =
+    useDiscoverProducts(100);
 
   const { recordSwipeRight, recordSwipeLeft } = useDiscoverSync();
 
   console.log("products", products);
-
 
   const { addItem, items, openCart } = useShoppingCart();
 
@@ -82,6 +81,44 @@ export default function Discover() {
   const [shareProduct, setShareProduct] = useState<any | null>(null);
 
   const currentProduct = products?.[currentIndex];
+
+  // -------------------- TIME LEFT CALCULATION --------------------
+  const remainingCount = Math.max(0, (count ?? products.length) - currentIndex);
+
+  useEffect(() => {
+    if (!createdAt || typeof createdAt !== "number") return;
+
+    let timerId: number | null = null;
+
+    const updateTime = () => {
+      const now = Date.now();
+      const nextDropTime = createdAt + 6 * 60 * 60 * 1000; // +6 hours
+      const diff = nextDropTime - now;
+
+      if (diff <= 0) {
+        setTimeLeft("Available now");
+        if (timerId !== null) clearInterval(timerId);
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      setTimeLeft(
+        `${hours}h:${minutes.toString().padStart(2, "0")}m:${seconds
+          .toString()
+          .padStart(2, "0")}s`
+      );
+    };
+
+    updateTime(); // initial run
+    timerId = window.setInterval(updateTime, 1000); // every 1s
+
+    return () => {
+      if (timerId !== null) clearInterval(timerId);
+    };
+  }, [createdAt]);
 
   if (isLoading) {
     return <DiscoveryLoading />;
@@ -92,33 +129,6 @@ export default function Discover() {
       <DiscoveryError error={error} onRetry={() => window.location.reload()} />
     );
   }
-
-const remainingCount = Math.max(0, (count ?? products.length) - currentIndex);
-
-useEffect(() => {
-  if (!createdAt) return;
-
-  const interval = setInterval(() => {
-    const now = Date.now();
-    const nextDropTime = createdAt + 6 * 60 * 60 * 1000; // createdAt + 6 hours
-    const diff = nextDropTime - now;
-
-    if (diff <= 0) {
-      setTimeLeft("Available now");
-      clearInterval(interval);
-      return;
-    }
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-    setTimeLeft(`${hours}h:${minutes.toString().padStart(2, "0")}m`);
-  }, 1000 * 30); // update every 30s
-
-  return () => clearInterval(interval);
-}, [createdAt]);
-
-
 
 
 
