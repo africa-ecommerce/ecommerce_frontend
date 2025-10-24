@@ -42,6 +42,7 @@ export default function Discover() {
   const [firstSwipeOfDay, setFirstSwipeOfDay] = useState(true);
   const [isViewMore, setIsViewMore] = useState(false);
   const [hasPrefetched, setHasPrefetched] = useState(false);
+  const [timeLeft, setTimeLeft] = useState("");
 
 
   // Search and filter states
@@ -94,36 +95,30 @@ export default function Discover() {
 
 const remainingCount = Math.max(0, (count ?? products.length) - currentIndex);
 
-// useEffect(() => {
-//   if (typeof createdAt !== "number" || !Number.isFinite(createdAt)) {
-//     setTimeLeft("unknown");
-//     return;
-//   }
+useEffect(() => {
+  if (!createdAt) return;
 
-//   const updateTime = () => {
-//     const now = Date.now();
-//     const nextDropTime = createdAt + 6 * 60 * 60 * 1000;
-//     const diff = nextDropTime - now;
+  const interval = setInterval(() => {
+    const now = Date.now();
+    const nextDropTime = createdAt + 6 * 60 * 60 * 1000; // createdAt + 6 hours
+    const diff = nextDropTime - now;
 
-//     if (diff <= 0) {
-//       setTimeLeft("soon");
-//       return;
-//     }
+    if (diff <= 0) {
+      setTimeLeft("Available now");
+      clearInterval(interval);
+      return;
+    }
 
-//     const hours = Math.floor(diff / (1000 * 60 * 60));
-//     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-//     setTimeLeft(`${hours}h:${minutes}m`);
-//   };
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-//   updateTime(); // run immediately
-//   const interval = setInterval(updateTime, 60 * 1000);
-//   return () => clearInterval(interval);
-// }, [createdAt]);
+    setTimeLeft(`${hours}h:${minutes.toString().padStart(2, "0")}m`);
+  }, 1000 * 30); // update every 30s
 
-// const [hydrated, setHydrated] = useState(false);
-// useEffect(() => {
-//   setHydrated(true);
-// }, []);
+  return () => clearInterval(interval);
+}, [createdAt]);
+
+
 
 
 
@@ -222,16 +217,15 @@ const remainingCount = Math.max(0, (count ?? products.length) - currentIndex);
           Today’s Drop
         </h1>
 
-        <div className="flex items-center gap-4 mt-2 md:mt-0 text-gray-700">
+        <div className="flex flex-col items-end md:items-center gap-1 mt-2 md:mt-0 text-gray-700">
           <div className="flex items-center gap-1 text-sm md:text-base font-medium">
             <Layers className="w-4 h-4 text-gray-500" />
-            <span>{remainingCount ?? 0} left</span>{" "}
+            <span>{remainingCount ?? 0} left</span>
           </div>
-          {/* <span className="text-sm md:text-base text-gray-600">
-            {hydrated
-              ? `Next drop in ${timeLeft ?? "calculating..."}`
-              : "Next drop in ..."}
-          </span> */}
+
+          {timeLeft && (
+            <p className="text-xs text-gray-600">Next drop in {timeLeft}</p>
+          )}
         </div>
       </header>
 
