@@ -105,13 +105,11 @@ export default function Discover() {
       const hours = Math.floor(diff / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-      setTimeLeft(
-        `${hours}h:${minutes.toString().padStart(2, "0")}m`
-      );
+      setTimeLeft(`${hours}h:${minutes.toString().padStart(2, "0")}m`);
     };
 
     updateTime(); // initial run
-    timerId = window.setInterval(updateTime, 1000 * 60); 
+    timerId = window.setInterval(updateTime, 1000 * 60);
 
     return () => {
       if (timerId !== null) clearInterval(timerId);
@@ -119,32 +117,31 @@ export default function Discover() {
   }, [createdAt]);
 
   if (isLoading) {
-  return (
-    <main className="h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 flex flex-col">
-      {/* Fixed Header Skeleton */}
-      <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 md:px-8 py-4z-50">
-        <Skeleton className="h-6 w-32 mx-auto" /> {/* "Today’s Drop" skeleton */}
-        <div className="flex flex-col items-end gap-1">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-3 w-16" />
-        </div>
-      </header>
+    return (
+      <main className="h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 flex flex-col">
+        {/* Fixed Header Skeleton */}
+        <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 md:px-8 py-4z-50">
+          <Skeleton className="h-6 w-32 mx-auto" />{" "}
+          {/* "Today’s Drop" skeleton */}
+          <div className="flex flex-col items-end gap-1">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-3 w-16" />
+          </div>
+        </header>
 
-      {/* Centered Loading Stack */}
-      <div className="flex-1 flex items-center justify-center">
-        <DiscoveryLoading />
-      </div>
-    </main>
-  );
-}
+        {/* Centered Loading Stack */}
+        <div className="flex-1 flex items-center justify-center">
+          <DiscoveryLoading />
+        </div>
+      </main>
+    );
+  }
 
   if (error) {
     return (
       <DiscoveryError error={error} onRetry={() => window.location.reload()} />
     );
   }
-
-
 
   const handleSwipeRight = async (product: any, skipCart: boolean = false) => {
     if (!product || !product.id) return;
@@ -236,13 +233,15 @@ export default function Discover() {
     <main className="max-h-screen bg-gradient-to-br from-orange-400 via-orange-300 to-orange-200 relative overflow-hidden font-sans">
       {/* Header */}
 
-     <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 md:px-8 py-4 z-50 backdrop-blur-sm">
-
+      <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 md:px-8 py-4 z-50 backdrop-blur-sm">
         {/* Left: Title */}
-        <h1 className="text-lg md:text-xl font-semibold text-gray-900">
-          Today’s Drop
-        </h1>
-
+        <div className="absolute left-1/2 -translate-x-1/2">
+          {" "}
+          <h1 className="text-lg md:text-xl font-semibold text-gray-900">
+            {" "}
+            Today’s Drop{" "}
+          </h1>{" "}
+        </div>
         {/* Right: Remaining + Time */}
         <div className="flex flex-col items-end gap-1 text-gray-700">
           {/* Capsule for remaining count */}
@@ -261,7 +260,7 @@ export default function Discover() {
       </header>
 
       {/* Discovery Stack */}
-      <div className="h-[calc(100vh-5rem)] flex items-start md:items-center justify-center">
+      <div className="h-screen flex items-start md:items-center justify-center">
         <DiscoveryStack
           products={products}
           currentIndex={currentIndex}
