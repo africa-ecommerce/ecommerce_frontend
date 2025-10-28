@@ -305,7 +305,7 @@ function DesktopNavigation({
 
             {/* 🆕 Updated Marketplace Icon */}
             <NavItem
-              href="/channel"
+              href="/dashboard/channel"
               icon={
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -326,7 +326,7 @@ function DesktopNavigation({
                 </svg>
               }
               tip="Channel"
-              isActive={isPathActive(pathname, "/channel") && !isMoreActive}
+              isActive={isPathActive(pathname, "/dashboard/channel") && !isMoreActive}
               closeMorePage={closeMorePage}
               showTooltip
             />
@@ -463,7 +463,7 @@ function MobileNavigation({
 
             {/* 🆕 Updated Marketplace Icon */}
             <NavItem
-              href="/channel"
+              href="/dashboard/channel"
               icon={
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -484,7 +484,7 @@ function MobileNavigation({
                 </svg>
               }
               label="Channel"
-              isActive={isPathActive(pathname, "/channel") && !isMoreActive}
+              isActive={isPathActive(pathname, "/dashboard/channel") && !isMoreActive}
               compact
               closeMorePage={closeMorePage}
             />
