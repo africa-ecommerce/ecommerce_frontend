@@ -11,6 +11,7 @@ import {
   CircleEllipsis,
   Boxes,
   Globe,
+  Ship,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GlobalLoadingIndicatorAdvanced } from "@/components/ui/loading-indicator-advanced";
@@ -216,7 +217,6 @@ interface DesktopNavigationProps {
   closeMorePage: () => void;
 }
 
-// Desktop sidebar navigation
 function DesktopNavigation({
   pathname,
   userType,
@@ -280,11 +280,12 @@ function DesktopNavigation({
           </div>
         </>
       ) : (
+        // Supplier side
         <>
           <div className="flex flex-col p-3 gap-5 flex-grow overflow-y-auto">
             <NavItem
               href="/dashboard"
-              icon={<Home className="w-5 h-5" />}
+              icon={<Home className="w-4 h-4" />}
               tip="Dashboard"
               isActive={isPathActive(pathname, "/dashboard") && !isMoreActive}
               closeMorePage={closeMorePage}
@@ -293,8 +294,8 @@ function DesktopNavigation({
 
             <NavItem
               href="/dashboard/order"
-              icon={<PackageOpen className="w-5 h-5" />}
-              tip="Order"
+              icon={<Globe className="w-4 h-4" />}
+              tip="Store"
               isActive={
                 isPathActive(pathname, "/dashboard/order") && !isMoreActive
               }
@@ -302,9 +303,28 @@ function DesktopNavigation({
               showTooltip
             />
 
+            {/* 🆕 Updated Marketplace Icon */}
             <NavItem
               href="/marketplace"
-              icon={<Store className="w-5 h-5" />}
+              icon={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-4 h-4"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M3 15m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
+                  <path d="M15 15m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
+                  <path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
+                  <path d="M6 15v-1a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v1" />
+                  <path d="M12 9l0 3" />
+                </svg>
+              }
               tip="Marketplace"
               isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
               closeMorePage={closeMorePage}
@@ -313,7 +333,7 @@ function DesktopNavigation({
 
             <NavItem
               href="/dashboard/inventory"
-              icon={<Boxes className="w-5 h-5" />}
+              icon={<Boxes className="w-4 h-4" />}
               tip="Inventory"
               isActive={
                 isPathActive(pathname, "/dashboard/inventory") && !isMoreActive
@@ -321,7 +341,20 @@ function DesktopNavigation({
               closeMorePage={closeMorePage}
               showTooltip
             />
+
+            {/* 🆕 Ship NavItem */}
+            <NavItem
+              href="/dashboard/shipping"
+              icon={<Ship className="w-4 h-4" />}
+              tip="preorder"
+              isActive={
+                isPathActive(pathname, "/dashboard/shipping") && !isMoreActive
+              }
+              closeMorePage={closeMorePage}
+              showTooltip
+            />
           </div>
+
           <div className="mt-auto border-t p-3">
             <MoreButton
               isActive={isMoreActive}
@@ -343,7 +376,6 @@ interface MobileNavigationProps {
   closeMorePage: () => void;
 }
 
-// Mobile bottom navigation
 function MobileNavigation({
   pathname,
   userType,
@@ -392,6 +424,7 @@ function MobileNavigation({
               compact
               closeMorePage={closeMorePage}
             />
+
             <NavItem
               href="/dashboard/product"
               icon={<Package className="w-5 h-5" />}
@@ -402,32 +435,54 @@ function MobileNavigation({
               compact
               closeMorePage={closeMorePage}
             />
+
             <MoreButton isActive={isMoreActive} onClick={onMoreClick} compact />
           </>
         ) : (
+          // Supplier view
           <>
             <NavItem
               href="/dashboard"
-              icon={<Home className="w-5 h-5" />}
+              icon={<Home className="w-4 h-4" />}
               label="Dashboard"
               isActive={isPathActive(pathname, "/dashboard") && !isMoreActive}
               compact
               closeMorePage={closeMorePage}
             />
-           
+
             <NavItem
               href="/dashboard/order"
-              icon={<PackageOpen className="w-5 h-5" />}
-              label="Orders"
+              icon={<Globe className="w-4 h-4" />}
+              label="Store"
               isActive={
                 isPathActive(pathname, "/dashboard/order") && !isMoreActive
               }
               compact
               closeMorePage={closeMorePage}
             />
-             <NavItem
+
+            {/* 🆕 Updated Marketplace Icon */}
+            <NavItem
               href="/marketplace"
-              icon={<Store className="w-5 h-5" />}
+              icon={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-4 h-4"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M3 15m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
+                  <path d="M15 15m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
+                  <path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
+                  <path d="M6 15v-1a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v1" />
+                  <path d="M12 9l0 3" />
+                </svg>
+              }
               label="Marketplace"
               isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
               compact
@@ -436,7 +491,7 @@ function MobileNavigation({
 
             <NavItem
               href="/dashboard/inventory"
-              icon={<Boxes className="w-5 h-5" />}
+              icon={<Boxes className="w-4 h-4" />}
               label="Inventory"
               isActive={
                 isPathActive(pathname, "/dashboard/inventory") && !isMoreActive
@@ -444,6 +499,19 @@ function MobileNavigation({
               compact
               closeMorePage={closeMorePage}
             />
+
+            {/* 🆕 Shipping item */}
+            <NavItem
+              href="/dashboard/shipping"
+              icon={<Ship className="w-4 h-4" />}
+              label="Preorder"
+              isActive={
+                isPathActive(pathname, "/dashboard/shipping") && !isMoreActive
+              }
+              compact
+              closeMorePage={closeMorePage}
+            />
+
             <MoreButton isActive={isMoreActive} onClick={onMoreClick} compact />
           </>
         )}
