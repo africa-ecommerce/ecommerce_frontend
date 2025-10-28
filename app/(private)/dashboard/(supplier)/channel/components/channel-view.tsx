@@ -23,7 +23,7 @@ export default function ChannelView() {
         <div className="max-w-md w-full text-center space-y-8 animate-in fade-in duration-700">
           <div className="space-y-4">
             <h1 className="text-3xl md:text-4xl font-semibold text-neutral-800 leading-snug">
-              Let's create your distribution channel
+              Let's create your channel
             </h1>
             <p className="text-base md:text-lg text-neutral-600">
               Connect, manage, and grow your supplier community.
@@ -32,11 +32,11 @@ export default function ChannelView() {
 
           <Button
             onClick={onCreateChannel}
-            size="lg"
-            className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-6 text-lg rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 group"
+            size="sm"
+            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 text-base rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 group"
           >
             Create Channel
-            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
       </main>

@@ -28,7 +28,7 @@ export default function CreateChannelModal({
           <motion.div
             className="
               relative bg-white w-full sm:max-w-lg
-              h-[90vh] sm:h-auto flex flex-col 
+              h-[70vh] sm:h-auto flex flex-col 
               sm:shadow-xl 
               rounded-t-3xl sm:rounded-2xl
             "
