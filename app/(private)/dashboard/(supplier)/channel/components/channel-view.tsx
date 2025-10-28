@@ -1,7 +1,10 @@
 "use client";
-import ChannelHeader from "./components/channel-header";
-import RulesSection from "./components/rules-section";
-import SocialsSection from "./components/socials-section";
+import ChannelHeader from "./channel-header";
+import RulesSection from "./rules-section";
+import SocialsSection from "./socials-section";
+
+
+
 
 export default function ChannelView() {
   return (
