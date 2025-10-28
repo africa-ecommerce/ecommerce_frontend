@@ -5,7 +5,7 @@ export default function Page() {
     <div className="min-h-screen bg-white relative overflow-hidden">
       {" "}
       {/* WhatsApp-style soft doodle background */}{" "}
-      <div className="absolute inset-0 opacity-[0.045] pointer-events-none">
+      <div className="absolute inset-0 opacity-[0.1] pointer-events-none">
         {" "}
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
           {" "}
@@ -15,8 +15,8 @@ export default function Page() {
               id="doodles"
               x="0"
               y="0"
-              width="180"
-              height="180"
+              width="250"
+              height="250"
               patternUnits="userSpaceOnUse"
             >
               {" "}

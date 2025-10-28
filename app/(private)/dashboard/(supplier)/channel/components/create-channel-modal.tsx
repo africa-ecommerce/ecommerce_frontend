@@ -26,7 +26,7 @@ export default function CreateChannelModal({
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="relative bg-white rounded-2xl w-full max-w-lg h-[90vh] flex flex-col shadow-xl"
+              className="relative bg-white rounded-2xl w-full max-w-lg h-[75vh] md:h-[80vh] flex flex-col shadow-xl"
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
@@ -34,7 +34,7 @@ export default function CreateChannelModal({
             >
               {/* HEADER */}
               <div className="sticky top-0 z-10 bg-white px-5 py-4 border-b flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-neutral-800">
+                <h2 className="text-base font-semibold text-neutral-800">
                   Create your channel
                 </h2>
                 <button
