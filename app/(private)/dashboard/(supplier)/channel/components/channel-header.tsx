@@ -17,7 +17,7 @@ export default function ChannelHeader() {
           <h2 className="font-semibold text-neutral-800">
             My Supplier Channel
           </h2>
-          <p className="text-xs text-neutral-500">Distribution Channel</p>
+          <p className="text-xs text-neutral-500">Channel</p>
         </div>
       </div>
     </header>
