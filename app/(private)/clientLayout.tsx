@@ -162,7 +162,7 @@ function MoreButton({
       )}
     >
       <div className={cn("relative", isActive && "animate-pulse-gentle")}>
-        <CircleEllipsis className="w-5 h-5" />
+        <CircleEllipsis className="w-4 h-4" />
       </div>
 
       {compact && <span className="text-[10px] mt-0.5">More</span>}
@@ -293,11 +293,11 @@ function DesktopNavigation({
             />
 
             <NavItem
-              href="/dashboard/order"
+              href="/dashboard/store"
               icon={<Globe className="w-4 h-4" />}
               tip="Store"
               isActive={
-                isPathActive(pathname, "/dashboard/order") && !isMoreActive
+                isPathActive(pathname, "/dashboard/store") && !isMoreActive
               }
               closeMorePage={closeMorePage}
               showTooltip
@@ -325,7 +325,7 @@ function DesktopNavigation({
                   <path d="M12 9l0 3" />
                 </svg>
               }
-              tip="Marketplace"
+              tip="Channel"
               isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
               closeMorePage={closeMorePage}
               showTooltip
@@ -451,11 +451,11 @@ function MobileNavigation({
             />
 
             <NavItem
-              href="/dashboard/order"
+              href="/dashboard/store"
               icon={<Globe className="w-4 h-4" />}
               label="Store"
               isActive={
-                isPathActive(pathname, "/dashboard/order") && !isMoreActive
+                isPathActive(pathname, "/dashboard/store") && !isMoreActive
               }
               compact
               closeMorePage={closeMorePage}
@@ -483,7 +483,7 @@ function MobileNavigation({
                   <path d="M12 9l0 3" />
                 </svg>
               }
-              label="Marketplace"
+              label="Channel"
               isActive={isPathActive(pathname, "/marketplace") && !isMoreActive}
               compact
               closeMorePage={closeMorePage}

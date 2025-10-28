@@ -33,10 +33,10 @@ export const authRoutes = [
 
 
 /**@type {string[]}*/
-export const supplierRoutes = ["/dashboard/inventory", "/dashboard/order"];
+export const supplierRoutes = ["/dashboard/inventory"];
 
 /**@type {string[]}*/
-export const plugRoutes = ["/dashboard/store", "/dashboard/product", "/studio"];
+export const plugRoutes = ["/dashboard/product"];
 
 
 

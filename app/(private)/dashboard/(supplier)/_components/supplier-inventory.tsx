@@ -19,12 +19,17 @@ import {
   FilterX,
   Users,
   Sliders,
+  Share2,
+  Truck,
+  Phone,
+  PackageCheck,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -65,6 +70,8 @@ import { formatPrice, getTotalStock, truncateText } from "@/lib/utils";
 import { StockPriceModal } from "./update-modal";
 import { AddProductModal } from "./add-product-modal";
 import { UpdateProductModal } from "./update-product-modal";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRouter } from "next/navigation";
 
 const LoadingSkeleton = () => (
   <Card>
@@ -130,6 +137,50 @@ const ErrorState = ({ onRetry }: { onRetry?: () => void }) => (
     onAction={onRetry}
   />
 );
+
+
+const EmptyOrdersState = ({ status }: { status: string }) => {
+  const statusConfig = {
+    active: {
+      icon: <Package className="h-12 w-12 text-muted-foreground" />,
+      title: "No Active Orders",
+      description: "You don't have any active orders at the moment.",
+    },
+    pending: {
+      icon: <PackageCheck className="h-12 w-12 text-muted-foreground" />,
+      title: "No Pending Orders",
+      description: "All your orders are either active or completed.",
+    },
+    shipped: {
+      icon: <Truck className="h-12 w-12 text-muted-foreground" />,
+      title: "No Shipped Orders",
+      description: "You don't have any orders that have been shipped yet.",
+    },
+    delivered: {
+      icon: <PackageCheck className="h-12 w-12 text-muted-foreground" />,
+      title: "No Delivered Orders",
+      description: "Your delivered orders will appear here once completed.",
+    },
+    cancelled: {
+      icon: <X className="h-12 w-12 text-muted-foreground" />,
+      title: "No Cancelled Orders",
+      description: "You don't have any cancelled order yet.",
+    },
+  };
+
+  const config =
+    statusConfig[status as keyof typeof statusConfig] || statusConfig.active;
+
+  return (
+    <EmptyState
+      icon={config.icon}
+      title={config.title}
+      description={config.description}
+      showBorder={false}
+    />
+  );
+};
+
 
 const EmptyFilterState = ({
   onResetFilters,
@@ -208,6 +259,8 @@ export default function Inventory() {
   const [currentItemData, setCurrentItemData] = useState(null);
   const [addProductModalOpen, setAddProductModalOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("all");
+    const [activeOrderTab, setActiveOrderTab] = useState("active"); // Add this state
+  
 
   const handleEdit = (productId: string, item: any) => {
     setSelectedProductId(productId);
@@ -218,6 +271,28 @@ export default function Inventory() {
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
+
+    const getOrdersUrl = (status: string) => {
+    if (status === "active") status = "pending"; // Map active to pending for API
+    return `/api/orders/plug?orderStatus=${status.toUpperCase()}`;
+  };
+
+  const {
+    data: ordersData,
+    error: ordersError,
+    isLoading: ordersLoading,
+    mutate: ordersMutate,
+  } = useSWR(getOrdersUrl(activeOrderTab), {
+    refreshInterval: 30000, // Poll every 30 seconds
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+    dedupingInterval: 10000, // Prevent duplicate requests within  10 seconds
+    errorRetryCount: 3,
+    errorRetryInterval: 5000,
+  });
+
+    const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];
+
 
   const { deleteResource } = useDeleteResource(
     "/api/products/supplier/",
@@ -234,6 +309,9 @@ export default function Inventory() {
   const {
     userData: { user },
   } = useUser();
+
+    const router = useRouter();
+  
 
   // Fetch data
   const { data, error, isLoading, mutate } = useSWR("/api/products/supplier/");
@@ -278,6 +356,269 @@ export default function Inventory() {
 
     return true;
   });
+
+
+  const ErrorOrdersState = ({ onRetry }: { onRetry?: () => void }) => (
+    <EmptyState
+      icon={<AlertCircle className="h-12 w-12 text-destructive" />}
+      title="Failed to load orders"
+      description="There was an error loading your orders. Please try again."
+      actionText="Try Again"
+      onAction={onRetry}
+    />
+  );
+
+  const scrollableClasses = "max-h-[calc(100vh-400px)] overflow-y-auto pr-2";
+
+  
+
+
+  const OrderCard = ({ order }: { order: any }) => {
+      const getStatusBadge = (status: string) => {
+        // If no status is provided, determine from activeOrderTab or other context
+        const currentStatus = status || activeOrderTab;
+  
+        switch (currentStatus?.toLowerCase()) {
+          case "pending":
+          case "active":
+            return (
+              <Badge
+                variant="default"
+                className="bg-orange-500 hover:bg-orange-600"
+              >
+                Pending
+              </Badge>
+            );
+          case "shipped":
+            return (
+              <Badge
+                variant="secondary"
+                className="bg-orange-500 hover:bg-orange-600"
+              >
+                Shipped
+              </Badge>
+            );
+          case "delivered":
+            return (
+              <Badge
+                variant="outline"
+                className="bg-orange-500 hover:bg-orange-600"
+              >
+                Delivered
+              </Badge>
+            );
+          case "cancelled":
+            return <Badge variant="destructive">Cancelled</Badge>;
+          default:
+            return (
+              <Badge
+                variant="default"
+                className="bg-orange-500 hover:bg-orange-600"
+              >
+                Pending
+              </Badge>
+            );
+        }
+      };
+  
+      // Calculate total amount from order items
+      const totalAmount =
+        order.orderItems?.reduce((total: number, item: any) => {
+          return total + (item.plugPrice || 0) * item.quantity;
+        }, 0) || 0;
+  
+      const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+      };
+  
+      const capitalizeWords = (str: string) => {
+        return (
+          str
+            ?.split(" ")
+            .map(
+              (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+            )
+            .join(" ") || ""
+        );
+      };
+  
+      // Handle track order navigation
+      const handleTrackOrder = () => {
+        router.push(`/track-order/${order.orderId}`);
+      };
+  
+      // Handle native sharing
+      const handleShareTracking = async () => {
+        const trackingUrl = `${process.env.NEXT_PUBLIC_APP_URL}/track-order/${order.orderId}`;
+  
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: `Track Order ${order.orderId}`,
+              text: `Track your order ${order.orderId} from pluggn`,
+              url: trackingUrl,
+            });
+          } catch (error) {
+            fallbackShare(trackingUrl);
+          }
+        } else {
+          fallbackShare(trackingUrl);
+        }
+      };
+  
+      // Fallback sharing method
+      const fallbackShare = async (url: string) => {
+        try {
+          await navigator.clipboard.writeText(url);
+          successToast("Tracking link copied to clipboard!");
+        } catch (error) {
+          console.error("Failed to copy to clipboard:", error);
+          // Final fallback: open in new window/tab
+          window.open(url, "_blank");
+        }
+      };
+  
+      return (
+        <Card className="mb-3 sm:mb-4 last:mb-0">
+          <CardHeader className="p-3 sm:p-4 pb-2">
+            <div className="flex justify-between items-start gap-2">
+              <div className="min-w-0">
+                <CardTitle className="sm:text-sm text-xs font-medium">
+                  {order.orderId}
+                </CardTitle>
+                <CardDescription className="text-xs mt-1">
+                  {formatDate(order.createdAt)}
+                </CardDescription>
+              </div>
+              {getStatusBadge(activeOrderTab)}
+            </div>
+          </CardHeader>
+  
+          <CardContent className="p-3 sm:p-4 pt-0 space-y-3">
+            {/* Customer Info */}
+            <div className="flex items-center gap-2 text-sm">
+              <Users className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium sm:text-base text-sm">
+                {truncateText(capitalizeWords(order.buyerName), 30)}
+              </span>
+            </div>
+  
+            {/* Phone Number */}
+            <div className="flex items-center gap-2 sm:text-sm text-xs text-muted-foreground">
+              <Phone className="h-4 w-4" />
+              <span>{order.buyerPhone}</span>
+            </div>
+  
+            {/* Products */}
+            <div className="space-y-2">
+              {order.orderItems?.map((item: any, index: number) => (
+                <div key={item.id} className="flex justify-between items-center">
+                  <div className="flex-1">
+                    <div className="sm:text-sm text-xs font-medium capitalize">
+                      {truncateText(item.productName, 37)}{" "}
+                      <span className="lowercase">x</span> {item.quantity}
+                    </div>
+                    {/* Show variant details if available */}
+                    {item.variantId &&
+                      (item.variantColor || item.variantSize) && (
+                        <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+                          {item.variantColor && (
+                            <span className="capitalize">
+                              {item.variantColor}
+                            </span>
+                          )}
+                          {item.variantSize && (
+                            <span className="capitalize">
+                              ({item.variantSize})
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    {/* Show product color/size if no variant but has product color/size */}
+                    {!item.variantId &&
+                      (item.productColor || item.productSize) && (
+                        <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+                          {item.productColor && (
+                            <span className="capitalize">
+                              {item.productColor}
+                            </span>
+                          )}
+                          {item.productSize && (
+                            <span className="capitalize">
+                              ({item.productSize})
+                            </span>
+                          )}
+                        </div>
+                      )}
+                  </div>
+                  <div className="text-sm font-medium">
+                    ₦{((item.plugPrice || 0) * item.quantity).toLocaleString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+  
+            {/* Total */}
+            <div className="flex justify-between items-center text-sm pt-2 border-t">
+              <span className="font-medium">Total</span>
+              <span className="font-bold">₦{totalAmount.toLocaleString()}</span>
+            </div>
+          </CardContent>
+  
+          {/* Action Buttons */}
+          <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
+            {activeOrderTab === "shipped" && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-8 text-xs"
+                  onClick={handleShareTracking}
+                >
+                  <Share2 className="h-3 w-3 mr-1" />
+                  Share Tracking
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1 h-8 text-xs"
+                  onClick={handleTrackOrder}
+                >
+                  <Truck className="h-3 w-3 mr-1" />
+                  Track Order
+                </Button>
+              </>
+            )}
+  
+            {activeOrderTab === "active" && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-8 text-xs"
+                  onClick={handleShareTracking}
+                >
+                  <Share2 className="h-3 w-3 mr-1" />
+                  Share Tracking
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1 h-8 text-xs"
+                  onClick={handleTrackOrder}
+                >
+                  <Truck className="h-3 w-3 mr-1" />
+                  Track Order
+                </Button>
+              </>
+            )}
+          </CardFooter>
+        </Card>
+      );
+    };
 
   const getStatusColor = (status: string) => {
   switch (status?.toUpperCase()) {
@@ -419,6 +760,38 @@ const getStatusBadge = (status: string) => {
   const clearSearch = () => {
     setSearchQuery("");
   };
+
+  const LoadingOrdersSkeleton = () => (
+    <div className="space-y-3 sm:space-y-4">
+      {[...Array(3)].map((_, i) => (
+        <Card key={i}>
+          <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+            <div className="flex justify-between items-start gap-2">
+              <div className="min-w-0 space-y-1">
+                <Skeleton className="h-4 w-[120px]" />
+                <Skeleton className="h-3 w-[80px]" />
+              </div>
+              <Skeleton className="h-5 w-[60px]" />
+            </div>
+          </CardHeader>
+          <CardContent className="p-3 sm:p-4 pt-0 pb-1 sm:pb-2 space-y-2">
+            <Skeleton className="h-3 w-[100px]" />
+            <Skeleton className="h-1 w-full" />
+            <div className="flex justify-between">
+              <Skeleton className="h-2 w-[40px]" />
+              <Skeleton className="h-2 w-[40px]" />
+              <Skeleton className="h-2 w-[40px]" />
+            </div>
+          </CardContent>
+          <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
+            <Skeleton className="h-7 w-full" />
+            <Skeleton className="h-7 w-full" />
+          </CardFooter>
+        </Card>
+      ))}
+    </div>
+  );
+
 
   // Pagination controls
   const nextPage = () => {
@@ -1054,6 +1427,131 @@ const getStatusBadge = (status: string) => {
             </Card>
           </div>
         </section>
+
+
+ {isLoading ? (
+          <TipSkeleton />
+        ) : (
+          <Card className="bg-blue-50 border-blue-200 mb-3 sm:mb-4">
+            <CardContent className="p-3 sm:p-4 flex gap-2 sm:gap-3 items-center">
+              <div className="rounded-full bg-blue-100 p-1.5 flex-shrink-0">
+                <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-xs sm:text-sm text-blue-800">
+                  Don't Forget to Call!
+                </h3>
+                <p className="text-[10px] sm:text-xs text-blue-600">
+                  After delivery, call your customer to check their
+                  satisfaction. This personal touch creates loyal customers and
+                  repeat business.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+
+        <section className="space-y-3 sm:space-y-4">
+                  <div>
+                    <h2 className="text-base sm:text-lg font-semibold">
+                      Order Management
+                    </h2>
+                  </div>
+        
+                  <Tabs value={activeOrderTab} onValueChange={setActiveOrderTab}>
+                    <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10 overflow-x-auto">
+                      <TabsTrigger
+                        value="active"
+                        className="text-[10px] sm:text-xs whitespace-nowrap"
+                      >
+                        Pending
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="shipped"
+                        className="text-[10px] sm:text-xs whitespace-nowrap"
+                      >
+                        Shipped
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="delivered"
+                        className="text-[10px] sm:text-xs whitespace-nowrap"
+                      >
+                        Delivered
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="cancelled"
+                        className="text-[10px] sm:text-xs whitespace-nowrap"
+                      >
+                        Cancelled
+                      </TabsTrigger>
+                    </TabsList>
+        
+                    <TabsContent value="active" className="mt-3 sm:mt-4">
+                      {ordersLoading ? (
+                        <LoadingOrdersSkeleton />
+                      ) : ordersError ? (
+                        <ErrorOrdersState onRetry={() => ordersMutate()} />
+                      ) : orders.length === 0 ? (
+                        <EmptyOrdersState status="active" />
+                      ) : (
+                        <div className={scrollableClasses}>
+                          {orders.map((order: any) => (
+                            <OrderCard key={order.id} order={order} />
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+        
+                    <TabsContent value="shipped" className="mt-3 sm:mt-4">
+                      {ordersLoading ? (
+                        <LoadingOrdersSkeleton />
+                      ) : ordersError ? (
+                        <ErrorOrdersState onRetry={() => ordersMutate()} />
+                      ) : orders.length === 0 ? (
+                        <EmptyOrdersState status="shipped" />
+                      ) : (
+                        <div className={scrollableClasses}>
+                          {orders.map((order: any) => (
+                            <OrderCard key={order.id} order={order} />
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+        
+                    <TabsContent value="delivered" className="mt-3 sm:mt-4">
+                      {ordersLoading ? (
+                        <LoadingOrdersSkeleton />
+                      ) : ordersError ? (
+                        <ErrorOrdersState onRetry={() => ordersMutate()} />
+                      ) : orders.length === 0 ? (
+                        <EmptyOrdersState status="delivered" />
+                      ) : (
+                        <div className={scrollableClasses}>
+                          {orders.map((order: any) => (
+                            <OrderCard key={order.id} order={order} />
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+        
+                    <TabsContent value="cancelled" className="mt-3 sm:mt-4">
+                      {ordersLoading ? (
+                        <LoadingOrdersSkeleton />
+                      ) : ordersError ? (
+                        <ErrorOrdersState onRetry={() => ordersMutate()} />
+                      ) : orders.length === 0 ? (
+                        <EmptyOrdersState status="cancelled" />
+                      ) : (
+                        <div className={scrollableClasses}>
+                          {orders.map((order: any) => (
+                            <OrderCard key={order.id} order={order} />
+                          ))}
+                        </div>
+                      )}
+                    </TabsContent>
+                  </Tabs>
+                </section>
 
         <AddProductModal
           open={addProductModalOpen}
