@@ -1,113 +1,101 @@
 "use client";
-
 import ChannelView from "./components/channel-view";
-
 export default function Page() {
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
-      {/* WhatsApp-style doodle background */}
-      <div className="absolute inset-0 pointer-events-none">
-        <svg
-          className="w-full h-full"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="xMidYMid slice"
-        >
+      {" "}
+      {/* WhatsApp-style soft doodle background */}{" "}
+      <div className="absolute inset-0 opacity-[0.045] pointer-events-none">
+        {" "}
+        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          {" "}
           <defs>
+            {" "}
             <pattern
               id="doodles"
               x="0"
               y="0"
-              width="200"
-              height="200"
+              width="180"
+              height="180"
               patternUnits="userSpaceOnUse"
             >
-              {/* Chat bubble */}
+              {" "}
+              {/* Chat bubble */}{" "}
               <path
-                d="M40 60 Q40 40 60 40 L100 40 Q120 40 120 60 L120 90 Q120 110 100 110 L80 110 L65 125 L65 110 Q40 110 40 90 Z"
-                fill="none"
-                stroke="#f79034"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* Star */}
-              <path
-                d="M130 40 L136 56 L154 58 L141 70 L145 86 L130 78 L115 86 L119 70 L106 58 L124 56 Z"
-                fill="none"
-                stroke="#f79034"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* Heart */}
-              <path
-                d="M60 140 Q60 120 75 120 Q85 120 90 130 Q95 120 105 120 Q120 120 120 140 Q120 155 90 175 Q60 155 60 140 Z"
-                fill="none"
-                stroke="#f79034"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-
-              {/* Circle with dots */}
-              <circle
-                cx="140"
-                cy="120"
-                r="18"
+                d="M50 80 Q50 50 80 50 L120 50 Q150 50 150 80 L150 120 Q150 150 120 150 L90 150 L70 170 L70 150 Q50 150 50 120 Z"
                 fill="none"
                 stroke="#f79034"
                 strokeWidth="2.2"
-              />
-              <circle cx="130" cy="115" r="2" fill="#f79034" />
-              <circle cx="140" cy="120" r="2" fill="#f79034" />
-              <circle cx="150" cy="125" r="2" fill="#f79034" />
-
-              {/* Lightning bolt */}
-              <path
-                d="M30 150 L24 170 L38 170 L28 190 L45 165 L32 165 Z"
-                fill="none"
-                stroke="#f79034"
-                strokeWidth="2.4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-              />
-
-              {/* Wavy line */}
+              />{" "}
+              {/* Star */}{" "}
               <path
-                d="M100 160 Q110 150 120 160 T140 160 T160 160"
+                d="M250 60 L260 85 L287 89 L268 107 L273 134 L250 121 L227 134 L232 107 L213 89 L240 85 Z"
                 fill="none"
                 stroke="#f79034"
-                strokeWidth="2.4"
+                strokeWidth="2.2"
                 strokeLinecap="round"
-              />
-
-              {/* Plus sign */}
+                strokeLinejoin="round"
+              />{" "}
+              {/* Heart */}{" "}
               <path
-                d="M70 20 L70 34 M63 27 L77 27"
-                stroke="#f79034"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-              />
-
-              {/* Smile */}
-              <path
-                d="M150 160 Q155 170 165 160"
+                d="M340 90 Q340 70 355 70 Q370 70 370 90 Q370 70 385 70 Q400 70 400 90 Q400 120 370 140 Q340 120 340 90 Z"
                 fill="none"
                 stroke="#f79034"
-                strokeWidth="2.4"
+                strokeWidth="2.2"
                 strokeLinecap="round"
-              />
-              <circle cx="147" cy="155" r="1.5" fill="#f79034" />
-              <circle cx="168" cy="155" r="1.5" fill="#f79034" />
+                strokeLinejoin="round"
+              />{" "}
+              {/* Circle with dots */}{" "}
+              <circle
+                cx="80"
+                cy="250"
+                r="28"
+                fill="none"
+                stroke="#f79034"
+                strokeWidth="2.2"
+              />{" "}
+              <circle cx="70" cy="245" r="3" fill="#f79034" />{" "}
+              <circle cx="80" cy="250" r="3" fill="#f79034" />{" "}
+              <circle cx="90" cy="255" r="3" fill="#f79034" />{" "}
+              {/* Lightning bolt */}{" "}
+              <path
+                d="M230 220 L220 250 L235 250 L225 280 L245 245 L230 245 Z"
+                fill="none"
+                stroke="#f79034"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />{" "}
+              {/* Wavy line */}{" "}
+              <path
+                d="M320 230 Q330 220 340 230 T360 230 T380 230"
+                fill="none"
+                stroke="#f79034"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+              />{" "}
+              {/* Plus signs */}{" "}
+              <path
+                d="M60 360 L60 380 M50 370 L70 370"
+                stroke="#f79034"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+              />{" "}
+              <path
+                d="M280 340 L280 360 M270 350 L290 350"
+                stroke="#f79034"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+              />{" "}
 
-              {/* Triangle */}
+               {/* Triangle */}
               <path
                 d="M20 20 L35 40 L5 40 Z"
                 fill="none"
                 stroke="#f79034"
-                strokeWidth="2.4"
+                strokeWidth="2.2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -117,43 +105,20 @@ export default function Page() {
                 d="M110 30 L170 50 L110 70 L120 50 Z"
                 fill="none"
                 stroke="#f79034"
-                strokeWidth="2.4"
+                strokeWidth="2.2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-            </pattern>
-          </defs>
-
-          {/* Layered variation for richer texture */}
-          <rect
-            width="100%"
-            height="100%"
-            fill="url(#doodles)"
-            opacity="0.12"
-          />
-          <g transform="rotate(8)">
-            <rect
-              width="100%"
-              height="100%"
-              fill="url(#doodles)"
-              opacity="0.05"
-            />
-          </g>
-          <g transform="rotate(-8)">
-            <rect
-              width="100%"
-              height="100%"
-              fill="url(#doodles)"
-              opacity="0.05"
-            />
-          </g>
-        </svg>
-      </div>
-
-      {/* Content */}
+            </pattern>{" "}
+          </defs>{" "}
+          <rect width="100%" height="100%" fill="url(#doodles)" />{" "}
+        </svg>{" "}
+      </div>{" "}
+      {/* Content */}{" "}
       <div className="relative z-10">
-        <ChannelView />
-      </div>
+        {" "}
+        <ChannelView />{" "}
+      </div>{" "}
     </div>
   );
 }
