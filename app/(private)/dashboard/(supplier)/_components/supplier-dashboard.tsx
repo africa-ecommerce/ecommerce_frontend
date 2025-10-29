@@ -11,6 +11,8 @@ import {
   Package,
   PackageCheck,
   RefreshCw,
+  ShoppingBag,
+  Truck,
   Users,
   Wallet,
   X,
@@ -49,6 +51,8 @@ import {
   truncateText,
 } from "@/lib/utils";
 import WithdrawalModal from "../../_components/withdrawal-modal";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { FacebookIcon, InstagramIcon, TikTokIcon, TwitterIcon, WhatsAppIcon } from "@/app/icons";
 
 
 const DelayOrderModal = ({
@@ -100,6 +104,8 @@ const DelayOrderModal = ({
     </Dialog>
   );
 };
+
+
 
 
 const OrderCard = ({ order }: { order: any }) => {
@@ -286,6 +292,29 @@ const LoadingSkeleton = () => (
   </div>
 );
 
+
+const SocialLoadingSkeleton = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    {[...Array(4)].map((_, i) => (
+      <Card key={i}>
+        <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+          <Skeleton className="h-5 w-[120px]" />
+        </CardHeader>
+        <CardContent className="p-3 sm:p-4 pt-0">
+          <Skeleton className="h-6 w-[50px] mb-2" />
+          <Skeleton className="h-3 w-full mb-3" />
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-1 w-full" />
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-1 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+)
+
 // Error State remains the same
 const ErrorState = ({ onRetry }: { onRetry?: () => void }) => (
   <Card className="border rounded-lg">
@@ -318,31 +347,28 @@ const EmptyState = ({
   icon: Icon = Package,
   actionText,
   onAction,
+  className = "",
 }: {
-  message: string;
-  icon?: React.ComponentType<{ className?: string }>;
-  actionText?: string;
-  onAction?: () => void;
+  message: string
+  icon?: React.ComponentType<{ className?: string }>
+  actionText?: string
+  onAction?: () => void
+  className?: string
 }) => (
-  <Card className="border rounded-lg">
+  <Card className={`border rounded-lg ${className}`}>
     <CardContent className="p-4 text-center">
       <div className="flex flex-col items-center justify-center space-y-2">
         <Icon className="h-6 w-6 text-muted-foreground" />
         <p className="text-muted-foreground text-xs">{message}</p>
         {actionText && onAction && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onAction}
-            className="mt-1"
-          >
+          <Button variant="outline" size="sm" onClick={onAction} className="mt-1 bg-transparent">
             {actionText}
           </Button>
         )}
       </div>
     </CardContent>
   </Card>
-);
+)
 
 const WelcomeSkeleton = () => (
   <div className="flex-1 min-w-0">
@@ -379,6 +405,59 @@ const EducationalTipSkeleton = () => (
   </Card>
 );
 
+
+const OrderLoadingSkeleton = () => (
+  <div className="space-y-3">
+    {[...Array(2)].map((_, i) => (
+      <Card key={i} className="border rounded-lg">
+        <CardContent className="p-3">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[100px]" />
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-6 w-6 rounded-full" />
+              <div className="space-y-1 flex-1">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-2/3" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Skeleton className="h-3 w-full" />
+              <Skeleton className="h-3 w-3/4" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+)
+
+
+const ProductLoadingSkeleton = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+    {[...Array(2)].map((_, i) => (
+      <Card key={i}>
+        <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+          <Skeleton className="h-5 w-[150px]" />
+        </CardHeader>
+        <CardContent className="p-3 sm:p-4 pt-0">
+          <div className="space-y-3 sm:space-y-4">
+            {[...Array(3)].map((_, j) => (
+              <div key={j} className="flex items-center gap-2 sm:gap-3">
+                <Skeleton className="w-10 h-10 sm:w-12 sm:h-12 rounded-md" />
+                <div className="flex-1 min-w-0 space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-3 w-3/4" />
+                  <Skeleton className="h-1 w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+);
+
 export default function SupplierDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -394,6 +473,53 @@ export default function SupplierDashboard() {
   } = useSWR("/api/products/supplier/");
 
   const products = Array.isArray(data?.data) ? data?.data : [];
+
+  function getProductPerformanceByAverage(productsArray: any) {
+    const productsWithSales = productsArray.filter(
+      (product: any) => product.sold > 0
+    );
+
+    if (productsWithSales.length === 0) {
+      return {
+        topProducts: [],
+        bottomProducts: [],
+        averageProducts: [],
+        averageSales: 0,
+      };
+    }
+
+    const totalSales = productsWithSales.reduce(
+      (sum: any, product: any) => sum + product.sold,
+      0
+    );
+    const averageSales = totalSales / productsWithSales.length;
+    const threshold = averageSales * 0.5; // 50% below average = low performing
+
+    const topProducts = productsWithSales
+      .filter((product: any) => product.sold >= averageSales)
+      .sort((a: any, b: any) => b.sold - a.sold)
+      .slice(0, 5);
+
+    const bottomProducts = productsWithSales
+      .filter((product: any) => product.sold < threshold)
+      .sort((a: any, b: any) => a.sold - b.sold)
+      .slice(0, 5);
+
+    const averageProducts = productsWithSales
+      .filter(
+        (product: any) =>
+          product.sold >= threshold && product.sold < averageSales
+      )
+      .sort((a: any, b: any) => b.sold - a.sold)
+      .slice(0, 5);
+
+    return {
+      topProducts,
+      bottomProducts,
+      averageProducts,
+      averageSales: Math.round(averageSales),
+    };
+  }
 
   const stats = useMemo(() => {
     if (!products.length)
@@ -431,6 +557,22 @@ export default function SupplierDashboard() {
     errorRetryCount: 2,
     errorRetryInterval: 5000,
   });
+
+
+
+    const {
+      data: analyticsData,
+      error: analyticsError,
+      isLoading: analyticsLoading,
+      mutate: analyticsMutate,
+    } = useSWR("/api/analytics/links", {
+      refreshInterval: 300000, // Refresh every 5 minutes
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 60000, // Prevent duplicate requests within 1 minute
+      errorRetryCount: 3,
+      errorRetryInterval: 5000,
+    })
 
   const stockAlerts = useMemo(() => {
     if (!products.length) return [];
@@ -480,6 +622,63 @@ export default function SupplierDashboard() {
 
   // Process orders data
   const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];
+
+    const { topProducts, bottomProducts, averageProducts, averageSales } =
+      getProductPerformanceByAverage(products);
+
+     const processAnalyticsData = useMemo(() => {
+       if (!analyticsData || !Array.isArray(analyticsData)) {
+         return [];
+       }
+
+       const data = analyticsData;
+
+       const totalOrdersObj = analyticsData.find(
+         (item) => "totalOrders" in item
+       );
+       const totalOrders = totalOrdersObj?.totalOrders;
+
+       // Filter out "store" platform from display
+       const socialPlatforms = data.filter(
+         (item: any) => item.platform && item.platform.toLowerCase() !== "store"
+       );
+
+       // Platform image mapping
+
+       // Platform color mapping
+       const platformColors: { [key: string]: string } = {
+         whatsapp: "text-green-600",
+         instagram: "text-pink-600",
+         twitter: "text-black",
+         facebook: "text-blue-600",
+         tiktok: "text-black",
+       };
+
+       return socialPlatforms.map((item: any) => {
+         const platformName = item.platform;
+         const salesPercentage =
+           totalOrders > 0 ? Math.round((item.orders / totalOrders) * 100) : 0;
+
+         return {
+           platform: platformName,
+           percentage: `${salesPercentage}%`,
+           description: `Of your sales come from ${platformName}`,
+           color: platformColors[platformName.toLowerCase()] || "text-gray-600",
+
+           stats: [
+             {
+               label: "Visits",
+               value: item.clicks.toString(),
+             },
+             {
+               label: "Conversions",
+               value: `${item.orders} (${item.conversionRate}%)`,
+             },
+           ],
+         };
+       });
+     }, [analyticsData]);
+
 
   return (
     <TooltipProvider>
@@ -704,38 +903,313 @@ export default function SupplierDashboard() {
 
         
           <section className="space-y-3 sm:space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-              <h2 className="text-sm sm:text-base font-semibold">
-                Order Fulfillment
-              </h2>
-              <Button variant="outline" size="sm" asChild className="text-xs">
-                <Link href="/dashboard/order">View All Orders</Link>
-              </Button>
-            </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+            <h2 className="text-sm sm:text-base font-semibold">
+              Shipped Orders
+            </h2>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="text-xs bg-transparent"
+            >
+              <Link href="/dashboard/product">View All Orders</Link>
+            </Button>
+          </div>
 
-            {ordersError ? (
-              <ErrorState onRetry={() => ordersMutate()} />
-            ) : ordersLoading ? (
-              <LoadingSkeleton />
-            ) : (
-              <>
-                {orders.length === 0 ? (
-                  <EmptyState
-                    message="No order to be fulfilled as of now"
-                    icon={PackageCheck}
-                    actionText="View All Orders"
-                    onAction={() => console.log("View all orders clicked")}
-                  />
-                ) : (
-                  <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
-                    {orders.slice(0, 3).map((order: any) => (
-                      <OrderCard key={order.id} order={order} />
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-          </section>
+          {ordersLoading ? (
+            <OrderLoadingSkeleton />
+          ) : ordersError ? (
+            <ErrorState onRetry={() => ordersMutate()} />
+          ) : orders.length === 0 ? (
+            <EmptyState message="No shipped orders found" icon={Truck} />
+          ) : (
+            <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
+              {orders.map((order: any) => (
+                <OrderCard key={order.id} order={order} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Product Performance */}
+
+        <section className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <h2 className="text-sm sm:text-base font-semibold">
+                Product Performance
+              </h2>
+              {!isLoading && !errorData && averageSales > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Average sales: {averageSales} units per product
+                </p>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="text-xs bg-transparent"
+            >
+              <Link href="/dashboard/product">View All Products</Link>
+            </Button>
+          </div>
+
+          {isLoading ? (
+            <ProductLoadingSkeleton />
+          ) : errorData ? (
+            <ErrorState
+              onRetry={() => {
+                mutate();
+              }}
+            />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+              {/* Top Performing Products */}
+              <Card>
+                <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+                  <CardTitle className="text-sm sm:text-base font-medium flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    High Performers
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {averageSales}+ units (above average)
+                  </p>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <ScrollArea className="max-h-[250px]">
+                    <div className="space-y-3 sm:space-y-4 pr-3">
+                      {topProducts.length === 0 ? (
+                        <EmptyState
+                          message="No high performing products"
+                          icon={ShoppingBag}
+                        />
+                      ) : (
+                        topProducts.map((product: any) => (
+                          <div
+                            key={product.id}
+                            className="flex items-center gap-2 sm:gap-3"
+                          >
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-green-50 flex items-center justify-center flex-shrink-0">
+                              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between gap-1">
+                                <p className="text-xs sm:text-sm font-medium capitalize">
+                                  {truncateText(product.name, 30)}
+                                </p>
+                                <p className="text-xs sm:text-sm font-medium whitespace-nowrap">
+                                  {formatPrice(product.price)}
+                                </p>
+                              </div>
+                              <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
+                                <p>{product.sold || 0} units sold</p>
+                                <p className="text-green-600 font-medium">
+                                  {Math.round(
+                                    (product.sold / averageSales) * 100
+                                  )}
+                                  % of avg
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Average Performing Products */}
+              <Card>
+                <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+                  <CardTitle className="text-sm sm:text-base font-medium flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    Average Performers
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {Math.round(averageSales * 0.5)}-{averageSales - 1} units
+                  </p>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <ScrollArea className="max-h-[250px]">
+                    <div className="space-y-3 sm:space-y-4 pr-3">
+                      {averageProducts.length === 0 ? (
+                        <EmptyState
+                          message="No average performing products"
+                          icon={ShoppingBag}
+                        />
+                      ) : (
+                        averageProducts.map((product: any) => (
+                          <div
+                            key={product.id}
+                            className="flex items-center gap-2 sm:gap-3"
+                          >
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-blue-50 flex items-center justify-center flex-shrink-0">
+                              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between gap-1">
+                                <p className="text-xs sm:text-sm font-medium capitalize">
+                                  {truncateText(product.name, 30)}
+                                </p>
+                                <p className="text-xs sm:text-sm font-medium whitespace-nowrap">
+                                  {formatPrice(product.price)}
+                                </p>
+                              </div>
+                              <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
+                                <p>{product.sold || 0} units sold</p>
+                                <p className="text-blue-600 font-medium">
+                                  {Math.round(
+                                    (product.sold / averageSales) * 100
+                                  )}
+                                  % of avg
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Low Performing Products */}
+              <Card>
+                <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+                  <CardTitle className="text-sm sm:text-base font-medium flex items-center gap-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    Low Performers
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    Under {Math.round(averageSales * 0.5)} units
+                  </p>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <ScrollArea className="max-h-[250px]">
+                    <div className="space-y-3 sm:space-y-4 pr-3">
+                      {bottomProducts.length === 0 ? (
+                        <EmptyState
+                          message="No low performing products"
+                          icon={ShoppingBag}
+                        />
+                      ) : (
+                        bottomProducts.map((product: any) => (
+                          <div
+                            key={product.id}
+                            className="flex items-center gap-2 sm:gap-3"
+                          >
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-red-50 flex items-center justify-center flex-shrink-0">
+                              <ShoppingBag className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between gap-1">
+                                <p className="text-xs sm:text-sm font-medium capitalize">
+                                  {truncateText(product.name, 30)}
+                                </p>
+                                <p className="text-xs sm:text-sm font-medium whitespace-nowrap">
+                                  {formatPrice(product.price)}
+                                </p>
+                              </div>
+                              <div className="flex justify-between text-[10px] xs:text-xs text-muted-foreground">
+                                <p>
+                                  {formatQuantity(product.sold) || 0} units sold
+                                </p>
+                                <p className="text-red-600 font-medium">
+                                  {Math.round(
+                                    (product.sold / averageSales) * 100
+                                  )}
+                                  % of avg
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </section>
+
+        <section className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <h2 className="text-sm sm:text-base font-semibold">
+              Social Analytics
+            </h2>
+          </div>
+
+          {analyticsLoading ? (
+            <SocialLoadingSkeleton />
+          ) : analyticsError ? (
+            <ErrorState onRetry={() => analyticsMutate()} />
+          ) : processAnalyticsData.length === 0 ? (
+            <EmptyState
+              message="No social analytics data"
+              icon={Users}
+              className="col-span-full"
+            />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              {processAnalyticsData.map((platform) => {
+                // Get the right icon component based on platform
+                const PlatformIcon = () => {
+                  switch (platform.platform.toLowerCase()) {
+                    case "twitter":
+                      return <TwitterIcon />;
+                    case "facebook":
+                      return <FacebookIcon />;
+                    case "whatsapp":
+                      return <WhatsAppIcon />;
+                    case "tiktok":
+                      return <TikTokIcon />;
+                    case "instagram":
+                      return <InstagramIcon />;
+                    default:
+                      return null;
+                  }
+                };
+
+                return (
+                  <Card key={platform.platform}>
+                    <CardHeader className="p-3 sm:p-4 pb-1 sm:pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm sm:text-base font-medium capitalize">
+                          {platform.platform}
+                        </CardTitle>
+                        <div className={platform.color}>
+                          <PlatformIcon />
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-4 pt-0">
+                      <div className="text-xl font-bold">
+                        {platform.percentage}
+                      </div>
+                      <p className="text-[10px] md:text-xs text-muted-foreground">
+                        {platform.description}
+                      </p>
+                      <div className="mt-3 space-y-2">
+                        {platform.stats.map((stat: any, i: number) => (
+                          <div key={i}>
+                            <div className="flex justify-between text-[10px] md:text-xs">
+                              <span>{stat.label}</span>
+                              <span className="font-medium">{stat.value}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </section>
         {/* )} */}
 
         {/* Educational Tip */}
