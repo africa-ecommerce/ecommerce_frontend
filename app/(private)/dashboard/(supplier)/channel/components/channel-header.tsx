@@ -13,6 +13,8 @@ export default function ChannelHeader() {
   } = useUser();
 
     const { data: subscriber } = useSWR("/api/subscribe/supplier", fetcher)
+
+    console.log("subscriber", subscriber)
   
 
 
@@ -38,7 +40,7 @@ export default function ChannelHeader() {
             {user?.supplier?.businessName}
           </h2>
           <p className="text-xs text-neutral-500">
-            {formatSubscribers(subscriber.data.length)} subscribers
+            {/* {formatSubscribers(subscriber.data.length)} subscribers */}
           </p>
         </div>
       </div>

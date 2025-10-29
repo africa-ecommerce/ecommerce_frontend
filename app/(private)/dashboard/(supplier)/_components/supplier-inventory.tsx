@@ -72,6 +72,7 @@ import { AddProductModal } from "./add-product-modal";
 import { UpdateProductModal } from "./update-product-modal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
+import { ShareModal } from "../../(plug)/_components/share-modal";
 
 const LoadingSkeleton = () => (
   <Card>
@@ -260,6 +261,12 @@ export default function Inventory() {
   const [addProductModalOpen, setAddProductModalOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("all");
     const [activeOrderTab, setActiveOrderTab] = useState("active"); // Add this state
+      // Add these state variables inside the Products component, near the other state variables
+      const [shareModalOpen, setShareModalOpen] = useState(false);
+      const [productToShare, setProductToShare] = useState<{
+        id: string;
+        name: string;
+      } | null>(null);
   
 
   const handleEdit = (productId: string, item: any) => {
@@ -1375,6 +1382,20 @@ const getStatusBadge = (status: string) => {
                                       Manage
                                     </DropdownMenuItem>
 
+                                    <DropdownMenuItem
+                                      className="text-xs sm:text-sm"
+                                      onClick={() => {
+                                        setProductToShare({
+                                          id: item.id,
+                                          name: item.name,
+                                        });
+                                        setShareModalOpen(true);
+                                      }}
+                                    >
+                                      <Share2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-2" />{" "}
+                                      Share
+                                    </DropdownMenuItem>
+
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                       className="text-destructive text-xs sm:text-sm"
@@ -1557,6 +1578,14 @@ const getStatusBadge = (status: string) => {
           open={addProductModalOpen}
           onOpenChange={setAddProductModalOpen}
         />
+
+        <ShareModal
+                  open={shareModalOpen}
+                  onOpenChange={setShareModalOpen}
+                  productName={productToShare?.name || ""}
+                  productId={productToShare?.id || ""}
+                  plugId={user?.supplier.id}
+                />
 
         <UpdateProductModal
           itemData={currentItemData}
