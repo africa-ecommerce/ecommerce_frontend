@@ -36,11 +36,12 @@ export default function ChannelHeader() {
         </Avatar>
 
         <div className="flex flex-col">
-          <h2 className="font-semibold text-neutral-800 capitalize">
+          <h2 className="font-bold text-neutral-800 capitalize">
             {user?.supplier?.businessName}
           </h2>
-          <p className="text-xs text-neutral-500">
-            {/* {formatSubscribers(subscriber.data.length)} subscribers */}
+          <p className="text-xs text-neutral-500 font-semibold">Channel</p>
+          <p className="text-[10px] text-neutral-500">
+            {formatSubscribers(subscriber?.data?.length)} subscribers
           </p>
         </div>
       </div>
