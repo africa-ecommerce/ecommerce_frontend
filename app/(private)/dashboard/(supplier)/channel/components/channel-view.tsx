@@ -12,7 +12,7 @@ export default function ChannelView() {
   const onCloseChannel = () => setShowCreateChannel(false);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen flex flex-col">
       {/* Sticky Header */}
       <header className="sticky top-0 z-20 bg-white border-b border-neutral-100">
         <ChannelHeader />
