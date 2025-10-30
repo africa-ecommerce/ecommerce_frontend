@@ -105,9 +105,11 @@ export default function StorePage() {
 
   // Function to copy store URL to clipboard
   const copyStoreUrl = () => {
-    if (!user?.plug?.subdomain) return;
+    if (!user?.plug?.subdomain && !user?.supplier?.subdomain) return;
 
-    const storeUrl = `https://${user.plug.subdomain}.pluggn.store`;
+    const storeUrl = user?.plug?.subdomain
+      ? `https://${user.plug.subdomain}.pluggn.store`
+      : `https://${user.supplier.subdomain}.pluggn.store`;
     navigator.clipboard.writeText(storeUrl);
 
     setCopied(true);
@@ -133,7 +135,7 @@ export default function StorePage() {
           </p>
         </div>
 
-        {user?.plug?.subdomain && (
+        {(user?.plug?.subdomain || user?.supplier?.subdomain) && (
           <div className="flex w-full md:w-auto flex-wrap gap-2">
             <Button
               asChild
@@ -153,7 +155,11 @@ export default function StorePage() {
               className="h-9 flex-1 sm:flex-auto"
             >
               <a
-                href={`https://${user?.plug?.subdomain}.pluggn.store`}
+                href={
+                  user?.plug?.subdomain
+                    ? `https://${user.plug.subdomain}.pluggn.store`
+                    : `https://${user.supplier.subdomain}.pluggn.store`
+                }
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -165,12 +171,16 @@ export default function StorePage() {
         )}
       </div>
 
-      {user && !user?.plug?.subdomain ? (
+      {user && !user?.plug?.subdomain && !user?.supplier?.subdomain ? (
         <NoStoreView />
       ) : (
         <StoreView
           analyticsData={processedAnalytics}
-          storeSubdomain={user?.plug?.subdomain}
+          storeSubdomain={
+            user?.plug?.subdomain
+              ? user.plug.subdomain
+              : user.supplier.subdomain
+          }
           copyStoreUrl={copyStoreUrl}
           copied={copied}
           isLoading={analyticsLoading}
