@@ -150,7 +150,7 @@ export default function RuleToggle({
                 </Label>
                 <Textarea
                   id="refund-terms"
-                  placeholder="Describe your refund conditions..."
+                  placeholder="Example: Refunds are accepted within 7 days of delivery if the product is defective, missing parts, or not as described. Buyers must provide proof (images or video) before a refund can be approved. Refunds are processed within 3 business days after approval."
                   rows={3}
                   className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
                 />
@@ -170,7 +170,7 @@ export default function RuleToggle({
                 </Label>
                 <Textarea
                   id="return-policy"
-                  placeholder="Describe your return policy..."
+                  placeholder="Example: Returns are accepted only for damaged or incorrect items. Products must remain unused, in original packaging, and returned within 7 days. Buyer is responsible for return shipping cost unless otherwise agreed."
                   rows={3}
                   className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
                 />

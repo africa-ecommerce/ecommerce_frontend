@@ -3,9 +3,12 @@ import { useState } from "react";
 import RuleToggle from "./rule-toggle";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ChevronsUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -21,9 +24,7 @@ const daysOfWeek = [
 ];
 
 export default function RulesSection() {
-
   const [refundEnabled, setRefundEnabled] = useState(false);
-   
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   const toggleDay = (day: string) => {
@@ -34,14 +35,14 @@ export default function RulesSection() {
 
   const selectedText =
     selectedDays.length === 0
-      ? "Select days"
+      ? "Select operating days"
       : selectedDays.length === 7
       ? "All days"
       : selectedDays.join(", ");
 
   return (
     <section className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
-      <h3 className="text-xl font-semibold text-neutral-800">
+      <h3 className="text-lg font-semibold text-neutral-800">
         Rules & Policies
       </h3>
 
@@ -49,30 +50,29 @@ export default function RulesSection() {
         {/* PAYMENT & FULFILMENT */}
         <RuleToggle
           name="Pay on Delivery (COD)"
-          description="Allow buyers to pay when items are delivered."
+          description="Allow your channel buyers or customers to pay for items only when they receive them at delivery."
           type="switch"
         />
 
         <Card className="p-4 border transition-colors duration-200 border-neutral-200 hover:border-orange-300">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-1">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium text-neutral-800">
-                  Fulfilment Time
-                </h4>
-              </div>
+              <h4 className="font-medium text-neutral-800">Fulfilment Time</h4>
               <p className="text-sm text-neutral-500">
-                Set your estimated fulfilment duration and operating days.
+                Define how long it takes you to prepare or dispatch an order
+                after it has been placed, and select which days of the week you
+                operate.
               </p>
             </div>
           </div>
-          <div className="space-y-3">
+
+          <div className="space-y-3 mt-3">
             <div>
               <Label
                 htmlFor="fulfilment-time"
                 className="text-sm text-neutral-700"
               >
-                Fulfilment time (hours or days)
+                Fulfilment time (hours or days from when the order was placed)
               </Label>
               <Input
                 id="fulfilment-time"
@@ -81,6 +81,7 @@ export default function RulesSection() {
                 className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
               />
             </div>
+
             <div className="space-y-2">
               <Label className="text-sm text-neutral-700">Operating days</Label>
               <Popover>
@@ -98,7 +99,7 @@ export default function RulesSection() {
                   {daysOfWeek.map((day) => (
                     <div
                       key={day}
-                      className="flex items-center space-x-2"
+                      className="flex items-center space-x-2 cursor-pointer rounded-md hover:bg-neutral-100 px-2 py-1"
                       onClick={() => toggleDay(day)}
                     >
                       <Checkbox
@@ -120,19 +121,19 @@ export default function RulesSection() {
         {/* REFUND & RETURN POLICY */}
         <RuleToggle
           name="Refund Policy"
-          description="Set refund window and terms"
+          description="Define if buyers are eligible for refunds and within how many days after product delivery they can request one."
           type="refund"
           onToggle={setRefundEnabled}
         />
 
         <RuleToggle
           name="Return Policy"
-          description="Define how returns are handled"
+          description="Explain your return process and who covers the return shipping cost (you, the buyer, or shared)."
           type="return"
           disabled={!refundEnabled}
         />
 
-        {/* PACKAGE PREFERENCE */}
+        {/* PACKAGE PREFERENCE — add later if needed */}
       </div>
     </section>
   );

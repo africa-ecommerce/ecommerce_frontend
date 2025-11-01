@@ -59,7 +59,7 @@ export default function SocialsSection() {
 
   return (
     <section className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
-      <h3 className="text-xl font-semibold text-neutral-800">Socials & Contact</h3>
+      <h3 className="text-lg font-semibold text-neutral-800">Socials & Contact</h3>
 
       <Card className="p-4 border border-neutral-200">
         <div className="space-y-3">
