@@ -13,7 +13,7 @@ import {
 
 export default function RulesSection() {
   const [returnEnabled, setReturnEnabled] = useState(false);
-  const [fulfilmentTime, setFulfilmentTime] = useState<string>("");
+  const [fulfilmentTime, setFulfilmentTime] = useState<string>("same-day"); // ✅ default to same-day
 
   return (
     <section className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
@@ -29,7 +29,7 @@ export default function RulesSection() {
           type="switch"
         />
 
-        {/* FULFILMENT TIME CARD */}
+        {/* FULFILMENT TIME */}
         <Card className="p-4 border transition-colors duration-200 border-neutral-200 hover:border-orange-300">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-1">
@@ -51,7 +51,7 @@ export default function RulesSection() {
               </Label>
               <Select value={fulfilmentTime} onValueChange={setFulfilmentTime}>
                 <SelectTrigger className="mt-2 w-full border-neutral-300">
-                  <SelectValue placeholder="Choose your fulfilment time" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="same-day">Same day</SelectItem>
@@ -67,6 +67,7 @@ export default function RulesSection() {
           </div>
         </Card>
 
+        {/* RETURN POLICY */}
         <RuleToggle
           name="Return Policy"
           description="Explain your return process and who covers the return shipping cost (you, the buyer, or shared)."
@@ -74,10 +75,10 @@ export default function RulesSection() {
           onToggle={setReturnEnabled}
         />
 
-        {/* REFUND & RETURN POLICY */}
+        {/* REFUND POLICY */}
         <RuleToggle
           name="Refund Policy"
-          description="Define if buyers are eligible for refunds and within how many days after product delivery they can request one."
+          description="Define if buyers are eligible for refunds."
           type="refund"
           disabled={!returnEnabled}
         />

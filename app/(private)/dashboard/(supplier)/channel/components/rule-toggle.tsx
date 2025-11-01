@@ -31,16 +31,35 @@ export default function RuleToggle({
 }: RuleToggleProps) {
   const [enabled, setEnabled] = useState(false);
   const [returnCostType, setReturnCostType] = useState<string>("buyer");
+  const [returnWindow, setReturnWindow] = useState<number>(7);
+  const [sharedPercentage, setSharedPercentage] = useState<number>(50);
+
+  // Error states for red borders
+  const [returnWindowError, setReturnWindowError] = useState(false);
+  const [sharedError, setSharedError] = useState(false);
 
   // Notify parent whenever toggle changes
   useEffect(() => {
     if (onToggle) onToggle(enabled);
   }, [enabled]);
 
-  // If disabled externally, turn it off
+  // Reset if disabled externally
   useEffect(() => {
     if (disabled && enabled) setEnabled(false);
   }, [disabled]);
+
+  // Validation handlers
+  const validateReturnWindow = (val: number) => {
+    const valid = val >= 1;
+    setReturnWindowError(!valid);
+    setReturnWindow(valid ? val : 1);
+  };
+
+  const validateShared = (val: number) => {
+    const valid = val >= 1 && val <= 100;
+    setSharedError(!valid);
+    setSharedPercentage(valid ? val : 50);
+  };
 
   return (
     <Card
@@ -68,13 +87,9 @@ export default function RuleToggle({
       {/* CONDITIONAL SECTIONS */}
       {enabled && !disabled && (
         <div className="mt-4 space-y-3 animate-in slide-in-from-top-2 duration-300">
-          
-
-      
-
           {type === "return" && (
             <div className="space-y-3">
-
+              {/* RETURN WINDOW */}
               <div>
                 <Label
                   htmlFor="refund-window"
@@ -85,12 +100,28 @@ export default function RuleToggle({
                 <Input
                   id="refund-window"
                   type="number"
-                  placeholder="e.g., 7"
-                  className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
-                  min="1"
-                  defaultValue={7}
+                  required
+                  min={1}
+                  value={returnWindow}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    validateReturnWindow(val);
+                  }}
+                  onBlur={() => setReturnWindowError(returnWindow < 1)}
+                  className={`mt-2 border ${
+                    returnWindowError
+                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                      : "border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
+                  }`}
                 />
+                {returnWindowError && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Return window must be at least 1 day.
+                  </p>
+                )}
               </div>
+
+              {/* RETURN TERMS */}
               <div>
                 <Label
                   htmlFor="return-policy"
@@ -100,19 +131,23 @@ export default function RuleToggle({
                 </Label>
                 <Textarea
                   id="return-policy"
-                  placeholder="Example: Returns are accepted only for damaged or incorrect items. Products must remain unused, in original packaging, and returned within 7 days. Buyer is responsible for return shipping cost unless otherwise agreed."
+                  placeholder="Example: Returns are accepted only for damaged or incorrect items. Products must remain unused, in original packaging, and returned within 7 days."
                   rows={3}
                   className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
                 />
               </div>
 
+              {/* RETURN COST TYPE */}
               <div>
                 <Label className="text-sm text-neutral-700">
                   Who pays return shipping?
                 </Label>
                 <Select
                   value={returnCostType}
-                  onValueChange={setReturnCostType}
+                  onValueChange={(val) => {
+                    setReturnCostType(val);
+                    if (val !== "shared") setSharedError(false);
+                  }}
                 >
                   <SelectTrigger className="mt-2 w-full border-neutral-300">
                     <SelectValue placeholder="Select" />
@@ -125,6 +160,7 @@ export default function RuleToggle({
                 </Select>
               </div>
 
+              {/* SHARED PERCENTAGE */}
               {returnCostType === "shared" && (
                 <div>
                   <Label
@@ -136,37 +172,52 @@ export default function RuleToggle({
                   <Input
                     id="shared-percentage"
                     type="number"
-                    placeholder="e.g., 50"
-                    className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
+                    required
+                    min={1}
+                    max={100}
+                    value={sharedPercentage}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      validateShared(val);
+                    }}
+                    onBlur={() =>
+                      setSharedError(
+                        sharedPercentage < 1 || sharedPercentage > 100
+                      )
+                    }
+                    className={`mt-2 border ${
+                      sharedError
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                        : "border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
+                    }`}
                   />
+                  {sharedError && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Percentage must be between 1 and 100.
+                    </p>
+                  )}
                 </div>
               )}
             </div>
           )}
 
-          {/* Refund Policy */}
+          {/* REFUND POLICY */}
           {type === "refund" && (
             <div className="space-y-3">
-              
-              <div>
-                <Label
-                  htmlFor="refund-terms"
-                  className="text-sm text-neutral-700"
-                >
-                  Refund policy terms
-                </Label>
-                <Textarea
-                  id="refund-terms"
-                  placeholder="Example: Refunds of cash if the product is defective, missing parts, or not as described. Buyers must provide proof before a refund can be approved."
-                  rows={3}
-                  className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
-                />
-              </div>
+              <Label
+                htmlFor="refund-terms"
+                className="text-sm text-neutral-700"
+              >
+                Refund policy terms
+              </Label>
+              <Textarea
+                id="refund-terms"
+                placeholder="Explain when and how refunds are processed for eligible orders."
+                rows={3}
+                className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
+              />
             </div>
           )}
-
-         
-          
         </div>
       )}
     </Card>
