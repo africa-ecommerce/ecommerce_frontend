@@ -41,11 +41,7 @@ export default function RulesSection() {
         />
 
         {/* PACKAGE PREFERENCE */}
-        <RuleToggle
-          name="Package Preference"
-          description="Choose whether your packages are branded or neutral."
-          type="packaging"
-        />
+       
       </div>
     </section>
   );
