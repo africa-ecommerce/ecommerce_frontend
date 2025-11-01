@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 
 export default function RulesSection() {
-  const [refundEnabled, setRefundEnabled] = useState(false);
+  const [returnEnabled, setReturnEnabled] = useState(false);
   const [fulfilmentTime, setFulfilmentTime] = useState<string>("");
 
   return (
@@ -67,19 +67,19 @@ export default function RulesSection() {
           </div>
         </Card>
 
+        <RuleToggle
+          name="Return Policy"
+          description="Explain your return process and who covers the return shipping cost (you, the buyer, or shared)."
+          type="return"
+          onToggle={setReturnEnabled}
+        />
+
         {/* REFUND & RETURN POLICY */}
         <RuleToggle
           name="Refund Policy"
           description="Define if buyers are eligible for refunds and within how many days after product delivery they can request one."
           type="refund"
-          onToggle={setRefundEnabled}
-        />
-
-        <RuleToggle
-          name="Return Policy"
-          description="Explain your return process and who covers the return shipping cost (you, the buyer, or shared)."
-          type="return"
-          disabled={!refundEnabled}
+          disabled={!returnEnabled}
         />
       </div>
     </section>

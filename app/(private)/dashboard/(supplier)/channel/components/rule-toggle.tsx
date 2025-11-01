@@ -124,15 +124,15 @@ export default function RuleToggle({
             </div>
           )}
 
-          {/* Refund Policy */}
-          {type === "refund" && (
+          {type === "return" && (
             <div className="space-y-3">
+
               <div>
                 <Label
                   htmlFor="refund-window"
                   className="text-sm text-neutral-700"
                 >
-                  Refund window (days)
+                  Return window (days)
                 </Label>
                 <Input
                   id="refund-window"
@@ -141,26 +141,6 @@ export default function RuleToggle({
                   className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
                 />
               </div>
-              <div>
-                <Label
-                  htmlFor="refund-terms"
-                  className="text-sm text-neutral-700"
-                >
-                  Refund policy terms
-                </Label>
-                <Textarea
-                  id="refund-terms"
-                  placeholder="Example: Refunds are accepted within 7 days of delivery if the product is defective, missing parts, or not as described. Buyers must provide proof (images or video) before a refund can be approved. Refunds are processed within 3 business days after approval."
-                  rows={3}
-                  className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Return Policy */}
-          {type === "return" && (
-            <div className="space-y-3">
               <div>
                 <Label
                   htmlFor="return-policy"
@@ -213,6 +193,30 @@ export default function RuleToggle({
               )}
             </div>
           )}
+
+          {/* Refund Policy */}
+          {type === "refund" && (
+            <div className="space-y-3">
+              
+              <div>
+                <Label
+                  htmlFor="refund-terms"
+                  className="text-sm text-neutral-700"
+                >
+                  Refund policy terms
+                </Label>
+                <Textarea
+                  id="refund-terms"
+                  placeholder="Example: Refunds are accepted within 7 days of delivery if the product is defective, missing parts, or not as described. Buyers must provide proof (images or video) before a refund can be approved. Refunds are processed within 3 business days after approval."
+                  rows={3}
+                  className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
+                />
+              </div>
+            </div>
+          )}
+
+         
+          
         </div>
       )}
     </Card>
