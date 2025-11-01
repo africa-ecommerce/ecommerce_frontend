@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RuleToggle from "./rule-toggle";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
@@ -11,76 +11,89 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-export default function RulesSection() {
-  const [returnEnabled, setReturnEnabled] = useState(false);
-  const [fulfilmentTime, setFulfilmentTime] = useState<string>("same-day"); // ✅ default to same-day
+interface RulesSectionProps {
+  onChange?: (data: any) => void;
+}
+
+export default function RulesSection({ onChange }: RulesSectionProps) {
+  const [payOnDelivery, setPayOnDelivery] = useState(true);
+  const [fulfillmentTime, setFulfillmentTime] = useState("SAME_DAY");
+  const [returnPolicy, setReturnPolicy] = useState(false);
+  const [returnWindow, setReturnWindow] = useState(7);
+  const [returnPolicyTerms, setReturnPolicyTerms] = useState("");
+  const [refundPolicy, setRefundPolicy] = useState(false);
+  const [returnShippingFee, setReturnShippingFee] = useState("BUYER");
+  const [supplierShare, setSupplierShare] = useState(50);
+
+  useEffect(() => {
+    onChange?.({
+      payOnDelivery,
+      fulfillmentTime,
+      returnPolicy,
+      returnWindow,
+      returnPolicyTerms,
+      refundPolicy,
+      returnShippingFee,
+      supplierShare,
+    });
+  }, [
+    payOnDelivery,
+    fulfillmentTime,
+    returnPolicy,
+    returnWindow,
+    returnPolicyTerms,
+    refundPolicy,
+    returnShippingFee,
+    supplierShare,
+  ]);
 
   return (
-    <section className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
+    <section className="space-y-4">
       <h3 className="text-lg font-semibold text-neutral-800">
         Rules & Policies
       </h3>
 
       <div className="space-y-3">
-        {/* PAYMENT & FULFILMENT */}
         <RuleToggle
           name="Pay on Delivery (COD)"
-          description="Allow your channel buyers or customers to pay for items only when they receive them at delivery."
+          description="Allow buyers to pay upon delivery."
           type="switch"
+          onToggle={setPayOnDelivery}
         />
 
-        {/* FULFILMENT TIME */}
-        <Card className="p-4 border transition-colors duration-200 border-neutral-200 hover:border-orange-300">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 space-y-1">
-              <h4 className="font-medium text-neutral-800">Fulfilment Time</h4>
-              <p className="text-sm text-neutral-500">
-                Define how long it takes you to prepare or dispatch an order
-                after it has been placed.
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-3 mt-3">
-            <div>
-              <Label
-                htmlFor="fulfilment-time"
-                className="text-sm text-neutral-700"
-              >
-                Select fulfilment time
-              </Label>
-              <Select value={fulfilmentTime} onValueChange={setFulfilmentTime}>
-                <SelectTrigger className="mt-2 w-full border-neutral-300">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="same-day">Same day</SelectItem>
-                  <SelectItem value="next-day">Next day</SelectItem>
-                  <SelectItem value="2-days">2 days</SelectItem>
-                  <SelectItem value="3-days-plus">3 days +</SelectItem>
-                  <SelectItem value="weekend-saturday">
-                    Weekend (Saturday)
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+        {/* Fulfillment Time */}
+        <Card className="p-4 border border-neutral-200 hover:border-orange-300">
+          <Label className="text-sm text-neutral-700">Fulfilment Time</Label>
+          <Select
+            value={fulfillmentTime}
+            onValueChange={(val) => setFulfillmentTime(val.toUpperCase())}
+          >
+            <SelectTrigger className="mt-2 w-full border-neutral-300">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="SAME_DAY">Same day</SelectItem>
+              <SelectItem value="NEXT_DAY">Next day</SelectItem>
+              <SelectItem value="TWO_DAYS">2 days</SelectItem>
+              <SelectItem value="THREE_PLUS_DAYS">3 days +</SelectItem>
+              <SelectItem value="WEEKEND">Weekend</SelectItem>
+            </SelectContent>
+          </Select>
         </Card>
 
-        {/* RETURN POLICY */}
         <RuleToggle
           name="Return Policy"
-          description="Explain your return process and who covers the return shipping cost (you, the buyer, or shared)."
+          description="Explain your return process."
           type="return"
-          onToggle={setReturnEnabled}
+          onToggle={setReturnPolicy}
         />
 
-        {/* REFUND POLICY */}
         <RuleToggle
           name="Refund Policy"
-          description="if buyers are eligible for refunds or not."
+          description="Enable refunds for returned items."
           type="refund"
-          disabled={!returnEnabled}
+          onToggle={setRefundPolicy}
+          disabled={!returnPolicy}
         />
       </div>
     </section>
