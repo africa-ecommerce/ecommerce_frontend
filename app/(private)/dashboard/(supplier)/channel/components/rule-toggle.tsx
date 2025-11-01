@@ -68,61 +68,9 @@ export default function RuleToggle({
       {/* CONDITIONAL SECTIONS */}
       {enabled && !disabled && (
         <div className="mt-4 space-y-3 animate-in slide-in-from-top-2 duration-300">
-          {/* Percentage for Partial Payment */}
-          {type === "percentage" && (
-            <div>
-              <Label
-                htmlFor="partial-payment"
-                className="text-sm text-neutral-700"
-              >
-                Partial payment percentage (%)
-              </Label>
-              <Input
-                id="partial-payment"
-                type="number"
-                placeholder="e.g., 30"
-                className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
-              />
-            </div>
-          )}
+          
 
-          {/* Fulfilment Rules */}
-          {type === "fulfilment" && (
-            <div className="space-y-3">
-              <div>
-                <Label
-                  htmlFor="fulfilment-time"
-                  className="text-sm text-neutral-700"
-                >
-                  Fulfilment time (hours or days)
-                </Label>
-                <Input
-                  id="fulfilment-time"
-                  type="text"
-                  placeholder="e.g., 2 days"
-                  className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
-                />
-              </div>
-              <div>
-                <Label
-                  htmlFor="operating-days"
-                  className="text-sm text-neutral-700"
-                >
-                  Operating days
-                </Label>
-                <Select>
-                  <SelectTrigger className="mt-2 w-full border-neutral-300">
-                    <SelectValue placeholder="Select days" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="weekdays">Weekdays only</SelectItem>
-                    <SelectItem value="weekends">Weekends included</SelectItem>
-                    <SelectItem value="custom">Custom days</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
+      
 
           {type === "return" && (
             <div className="space-y-3">
@@ -139,6 +87,8 @@ export default function RuleToggle({
                   type="number"
                   placeholder="e.g., 7"
                   className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
+                  min="1"
+                  defaultValue={7}
                 />
               </div>
               <div>
@@ -169,7 +119,7 @@ export default function RuleToggle({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="buyer">Buyer</SelectItem>
-                    <SelectItem value="supplier">Supplier</SelectItem>
+                    <SelectItem value="supplier">You</SelectItem>
                     <SelectItem value="shared">Shared</SelectItem>
                   </SelectContent>
                 </Select>
@@ -181,7 +131,7 @@ export default function RuleToggle({
                     htmlFor="shared-percentage"
                     className="text-sm text-neutral-700"
                   >
-                    Supplier's share of return cost (%)
+                    Your share of return cost (%)
                   </Label>
                   <Input
                     id="shared-percentage"
@@ -207,7 +157,7 @@ export default function RuleToggle({
                 </Label>
                 <Textarea
                   id="refund-terms"
-                  placeholder="Example: Refunds are accepted within 7 days of delivery if the product is defective, missing parts, or not as described. Buyers must provide proof (images or video) before a refund can be approved. Refunds are processed within 3 business days after approval."
+                  placeholder="Example: Refunds of cash if the product is defective, missing parts, or not as described. Buyers must provide proof before a refund can be approved."
                   rows={3}
                   className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
                 />
