@@ -78,7 +78,7 @@ export default function RulesSection() {
         {/* REFUND POLICY */}
         <RuleToggle
           name="Refund Policy"
-          description="Define if buyers are eligible for refunds."
+          description="if buyers are eligible for refunds or not."
           type="refund"
           disabled={!returnEnabled}
         />

@@ -22,7 +22,7 @@ const socialLinks: SocialLink[] = [
     id: "whatsapp",
     icon: <MessageCircle className="h-5 w-5" />,
     label: "WhatsApp",
-    placeholder: "WhatsApp group or business link",
+    placeholder: "WhatsApp group or community",
   },
   {
     id: "telegram",
@@ -34,7 +34,7 @@ const socialLinks: SocialLink[] = [
     id: "instagram",
     icon: <Instagram className="h-5 w-5" />,
     label: "Instagram",
-    placeholder: "@yourbusiness",
+    placeholder: "https://instagram.com/yourbusiness",
   },
 ];
 

@@ -204,18 +204,8 @@ export default function RuleToggle({
           {/* REFUND POLICY */}
           {type === "refund" && (
             <div className="space-y-3">
-              <Label
-                htmlFor="refund-terms"
-                className="text-sm text-neutral-700"
-              >
-                Refund policy terms
-              </Label>
-              <Textarea
-                id="refund-terms"
-                placeholder="Explain when and how refunds are processed for eligible orders."
-                rows={3}
-                className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
-              />
+             
+              
             </div>
           )}
         </div>
