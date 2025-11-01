@@ -2,43 +2,18 @@
 import { useState } from "react";
 import RuleToggle from "./rule-toggle";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { ChevronsUpDown } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-
-const daysOfWeek = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 export default function RulesSection() {
   const [refundEnabled, setRefundEnabled] = useState(false);
-  const [selectedDays, setSelectedDays] = useState<string[]>([]);
-
-  const toggleDay = (day: string) => {
-    setSelectedDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-    );
-  };
-
-  const selectedText =
-    selectedDays.length === 0
-      ? "Select operating days"
-      : selectedDays.length === 7
-      ? "All days"
-      : selectedDays.join(", ");
+  const [fulfilmentTime, setFulfilmentTime] = useState<string>("");
 
   return (
     <section className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
@@ -54,14 +29,14 @@ export default function RulesSection() {
           type="switch"
         />
 
+        {/* FULFILMENT TIME CARD */}
         <Card className="p-4 border transition-colors duration-200 border-neutral-200 hover:border-orange-300">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 space-y-1">
               <h4 className="font-medium text-neutral-800">Fulfilment Time</h4>
               <p className="text-sm text-neutral-500">
                 Define how long it takes you to prepare or dispatch an order
-                after it has been placed, and select which days of the week you
-                operate.
+                after it has been placed.
               </p>
             </div>
           </div>
@@ -72,48 +47,22 @@ export default function RulesSection() {
                 htmlFor="fulfilment-time"
                 className="text-sm text-neutral-700"
               >
-                Fulfilment time (hours or days from when the order was placed)
+                Select fulfilment time
               </Label>
-              <Input
-                id="fulfilment-time"
-                type="text"
-                placeholder="e.g., 2 days"
-                className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm text-neutral-700">Operating days</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className="w-full justify-between border-neutral-300 text-sm"
-                  >
-                    {selectedText}
-                    <ChevronsUpDown className="h-4 w-4 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[220px] p-3 space-y-2">
-                  {daysOfWeek.map((day) => (
-                    <div
-                      key={day}
-                      className="flex items-center space-x-2 cursor-pointer rounded-md hover:bg-neutral-100 px-2 py-1"
-                      onClick={() => toggleDay(day)}
-                    >
-                      <Checkbox
-                        id={day}
-                        checked={selectedDays.includes(day)}
-                        onCheckedChange={() => toggleDay(day)}
-                      />
-                      <Label htmlFor={day} className="text-sm cursor-pointer">
-                        {day}
-                      </Label>
-                    </div>
-                  ))}
-                </PopoverContent>
-              </Popover>
+              <Select value={fulfilmentTime} onValueChange={setFulfilmentTime}>
+                <SelectTrigger className="mt-2 w-full border-neutral-300">
+                  <SelectValue placeholder="Choose your fulfilment time" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="same-day">Same day</SelectItem>
+                  <SelectItem value="next-day">Next day</SelectItem>
+                  <SelectItem value="2-days">2 days</SelectItem>
+                  <SelectItem value="3-days-plus">3 days +</SelectItem>
+                  <SelectItem value="weekend-saturday">
+                    Weekend (Saturday)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </Card>
@@ -132,8 +81,6 @@ export default function RulesSection() {
           type="return"
           disabled={!refundEnabled}
         />
-
-        {/* PACKAGE PREFERENCE — add later if needed */}
       </div>
     </section>
   );
