@@ -79,7 +79,7 @@ export default function CreateChannelModal({
       };
 
       const res = await fetch("/api/channel", {
-        method: defaultData ? "PUT" : "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });

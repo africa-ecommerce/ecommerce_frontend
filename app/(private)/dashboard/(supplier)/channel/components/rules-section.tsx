@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useState } from "react";
 import RuleToggle from "./rule-toggle";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
@@ -13,43 +12,35 @@ import {
 
 interface RulesSectionProps {
   onChange?: (data: any) => void;
-  defaultData: any
+  defaultData?: {
+    payOnDelivery?: boolean;
+    fulfillmentTime?: string;
+    returnPolicy?: boolean;
+    returnWindow?: number;
+    returnPolicyTerms?: string;
+    refundPolicy?: boolean;
+    returnShippingFee?: string;
+    supplierShare?: number;
+  };
 }
 
-export default function RulesSection({ onChange, defaultData }: RulesSectionProps) {
-  const [payOnDelivery, setPayOnDelivery] = useState(true);
-  const [fulfillmentTime, setFulfillmentTime] = useState("SAME_DAY");
-  const [returnPolicy, setReturnPolicy] = useState(false);
-  const [returnWindow, setReturnWindow] = useState(7);
-  const [returnPolicyTerms, setReturnPolicyTerms] = useState("");
-  const [refundPolicy, setRefundPolicy] = useState(false);
-  const [returnShippingFee, setReturnShippingFee] = useState("BUYER");
-  const [supplierShare, setSupplierShare] = useState(50);
-
-    console.log("rulesSectiondefaultData", defaultData)
-
-
-  useEffect(() => {
-    onChange?.({
-      payOnDelivery,
-      fulfillmentTime,
-      returnPolicy,
-      returnWindow,
-      returnPolicyTerms,
-      refundPolicy,
-      returnShippingFee,
-      supplierShare,
-    });
-  }, [
-    payOnDelivery,
-    fulfillmentTime,
-    returnPolicy,
-    returnWindow,
-    returnPolicyTerms,
-    refundPolicy,
-    returnShippingFee,
-    supplierShare,
-  ]);
+export default function RulesSection({
+  onChange,
+  defaultData = {
+    payOnDelivery: true,
+    fulfillmentTime: "SAME_DAY",
+    returnPolicy: false,
+    returnWindow: 7,
+    returnPolicyTerms: "",
+    refundPolicy: false,
+    returnShippingFee: "BUYER",
+    supplierShare: 50,
+  },
+}: RulesSectionProps) {
+  const handleChange = (key: string, value: any) => {
+    const updated = { ...defaultData, [key]: value };
+    onChange?.(updated);
+  };
 
   return (
     <section className="space-y-4">
@@ -62,15 +53,18 @@ export default function RulesSection({ onChange, defaultData }: RulesSectionProp
           name="Pay on Delivery (COD)"
           description="Allow buyers to pay upon delivery."
           type="switch"
-          onToggle={setPayOnDelivery}
+          enabled={defaultData.payOnDelivery ?? true}
+          onToggle={(val) => handleChange("payOnDelivery", val)}
         />
 
         {/* Fulfillment Time */}
         <Card className="p-4 border border-neutral-200 hover:border-orange-300">
           <Label className="text-sm text-neutral-700">Fulfilment Time</Label>
           <Select
-            value={fulfillmentTime}
-            onValueChange={(val) => setFulfillmentTime(val.toUpperCase())}
+            value={defaultData.fulfillmentTime || "SAME_DAY"}
+            onValueChange={(val) =>
+              handleChange("fulfillmentTime", val.toUpperCase())
+            }
           >
             <SelectTrigger className="mt-2 w-full border-neutral-300">
               <SelectValue placeholder="Select" />
@@ -89,18 +83,29 @@ export default function RulesSection({ onChange, defaultData }: RulesSectionProp
           name="Return Policy"
           description="Explain your return process."
           type="return"
-          onToggle={setReturnPolicy}
+          enabled={defaultData.returnPolicy ?? false}
+          returnWindow={defaultData.returnWindow ?? 7}
+          returnPolicyTerms={defaultData.returnPolicyTerms || ""}
+          returnShippingFee={defaultData.returnShippingFee || "BUYER"}
+          supplierShare={defaultData.supplierShare ?? 50}
+          onToggle={(val) => handleChange("returnPolicy", val)}
+          onReturnWindowChange={(val) => handleChange("returnWindow", val)}
+          onReturnTermsChange={(val) => handleChange("returnPolicyTerms", val)}
+          onReturnShippingChange={(val) =>
+            handleChange("returnShippingFee", val)
+          }
+          onSupplierShareChange={(val) => handleChange("supplierShare", val)}
         />
 
         <RuleToggle
           name="Refund Policy"
           description="Enable refunds for returned items."
           type="refund"
-          onToggle={setRefundPolicy}
-          disabled={!returnPolicy}
+          enabled={defaultData.refundPolicy ?? false}
+          onToggle={(val) => handleChange("refundPolicy", val)}
+          disabled={!defaultData.returnPolicy}
         />
       </div>
     </section>
   );
 }
-

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -18,47 +18,57 @@ interface RuleToggleProps {
   name: string;
   description: string;
   type?: "switch" | "percentage" | "fulfilment" | "refund" | "return";
+  enabled?: boolean;
   onToggle?: (value: boolean) => void;
   disabled?: boolean;
+  
+  // Return policy specific props
+  returnWindow?: number;
+  returnPolicyTerms?: string;
+  returnShippingFee?: string;
+  supplierShare?: number;
+  onReturnWindowChange?: (value: number) => void;
+  onReturnTermsChange?: (value: string) => void;
+  onReturnShippingChange?: (value: string) => void;
+  onSupplierShareChange?: (value: number) => void;
 }
 
 export default function RuleToggle({
   name,
   description,
   type = "switch",
+  enabled = false,
   onToggle,
   disabled = false,
+  returnWindow = 7,
+  returnPolicyTerms = "",
+  returnShippingFee = "BUYER",
+  supplierShare = 50,
+  onReturnWindowChange,
+  onReturnTermsChange,
+  onReturnShippingChange,
+  onSupplierShareChange,
 }: RuleToggleProps) {
-  const [enabled, setEnabled] = useState(false);
-  const [returnCostType, setReturnCostType] = useState<string>("buyer");
-  const [returnWindow, setReturnWindow] = useState<number>(7);
-  const [sharedPercentage, setSharedPercentage] = useState<number>(50);
-
+  
   // Error states for red borders
   const [returnWindowError, setReturnWindowError] = useState(false);
   const [sharedError, setSharedError] = useState(false);
-
-  // Notify parent whenever toggle changes
-  useEffect(() => {
-    if (onToggle) onToggle(enabled);
-  }, [enabled]);
-
-  // Reset if disabled externally
-  useEffect(() => {
-    if (disabled && enabled) setEnabled(false);
-  }, [disabled]);
 
   // Validation handlers
   const validateReturnWindow = (val: number) => {
     const valid = val >= 1;
     setReturnWindowError(!valid);
-    setReturnWindow(valid ? val : 1);
+    if (valid && onReturnWindowChange) {
+      onReturnWindowChange(val);
+    }
   };
 
   const validateShared = (val: number) => {
     const valid = val >= 1 && val <= 100;
     setSharedError(!valid);
-    setSharedPercentage(valid ? val : 50);
+    if (valid && onSupplierShareChange) {
+      onSupplierShareChange(val);
+    }
   };
 
   return (
@@ -76,7 +86,7 @@ export default function RuleToggle({
             <Switch
               checked={enabled}
               disabled={disabled}
-              onCheckedChange={setEnabled}
+              onCheckedChange={(checked) => onToggle?.(checked)}
               className="data-[state=checked]:bg-orange-500"
             />
           </div>
@@ -133,6 +143,8 @@ export default function RuleToggle({
                   id="return-policy"
                   placeholder="Example: Returns are accepted only for damaged or incorrect items. Products must remain unused, in original packaging, and returned within 7 days."
                   rows={3}
+                  value={returnPolicyTerms}
+                  onChange={(e) => onReturnTermsChange?.(e.target.value)}
                   className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
                 />
               </div>
@@ -143,9 +155,9 @@ export default function RuleToggle({
                   Who pays return shipping?
                 </Label>
                 <Select
-                  value={returnCostType}
+                  value={returnShippingFee.toLowerCase()}
                   onValueChange={(val) => {
-                    setReturnCostType(val);
+                    onReturnShippingChange?.(val.toUpperCase());
                     if (val !== "shared") setSharedError(false);
                   }}
                 >
@@ -161,7 +173,7 @@ export default function RuleToggle({
               </div>
 
               {/* SHARED PERCENTAGE */}
-              {returnCostType === "shared" && (
+              {returnShippingFee.toLowerCase() === "shared" && (
                 <div>
                   <Label
                     htmlFor="shared-percentage"
@@ -175,14 +187,14 @@ export default function RuleToggle({
                     required
                     min={1}
                     max={100}
-                    value={sharedPercentage}
+                    value={supplierShare}
                     onChange={(e) => {
                       const val = Number(e.target.value);
                       validateShared(val);
                     }}
                     onBlur={() =>
                       setSharedError(
-                        sharedPercentage < 1 || sharedPercentage > 100
+                        supplierShare < 1 || supplierShare > 100
                       )
                     }
                     className={`mt-2 border ${
@@ -223,5 +235,3 @@ export default function RuleToggle({
     </Card>
   );
 }
-
-
