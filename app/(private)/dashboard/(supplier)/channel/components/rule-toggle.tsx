@@ -227,7 +227,7 @@
 
 
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -248,10 +248,6 @@ interface RuleToggleProps {
   onToggle?: (value: boolean) => void;
   disabled?: boolean;
   defaultChecked?: boolean;
-  defaultWindow?: number;
-  defaultTerms?: string;
-  defaultReturnCost?: string;
-  defaultSupplierShare?: number;
 }
 
 export default function RuleToggle({
@@ -261,53 +257,24 @@ export default function RuleToggle({
   onToggle,
   disabled = false,
   defaultChecked = false,
-  defaultWindow = 7,
-  defaultTerms = "",
-  defaultReturnCost = "BUYER",
-  defaultSupplierShare = 50,
 }: RuleToggleProps) {
   const [enabled, setEnabled] = useState(defaultChecked);
-  const [returnCostType, setReturnCostType] = useState(defaultReturnCost.toLowerCase());
-  const [returnWindow, setReturnWindow] = useState(defaultWindow);
-  const [sharedPercentage, setSharedPercentage] = useState(defaultSupplierShare);
-  const [returnTerms, setReturnTerms] = useState(defaultTerms);
-
-  const [returnWindowError, setReturnWindowError] = useState(false);
-  const [sharedError, setSharedError] = useState(false);
 
   useEffect(() => {
     setEnabled(defaultChecked);
-    setReturnCostType(defaultReturnCost.toLowerCase());
-    setReturnWindow(defaultWindow);
-    setSharedPercentage(defaultSupplierShare);
-    setReturnTerms(defaultTerms);
-  }, [defaultChecked, defaultWindow, defaultTerms, defaultReturnCost, defaultSupplierShare]);
+  }, [defaultChecked]);
 
   useEffect(() => {
     onToggle?.(enabled);
   }, [enabled]);
 
-  const validateReturnWindow = (val: number) => {
-    const valid = val >= 1;
-    setReturnWindowError(!valid);
-    setReturnWindow(valid ? val : 1);
-  };
-
-  const validateShared = (val: number) => {
-    const valid = val >= 1 && val <= 100;
-    setSharedError(!valid);
-    setSharedPercentage(valid ? val : 50);
-  };
-
   return (
     <Card
-      className={`p-4 border transition-colors duration-200 ${
-        disabled
-          ? "border-neutral-200 opacity-60 cursor-not-allowed"
-          : "border-neutral-200 hover:border-orange-300"
+      className={`p-4 border transition-colors ${
+        disabled ? "opacity-60" : "hover:border-orange-300"
       }`}
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between">
         <div className="flex-1 space-y-1">
           <div className="flex items-center justify-between">
             <h4 className="font-medium text-neutral-800">{name}</h4>
@@ -321,95 +288,6 @@ export default function RuleToggle({
           <p className="text-sm text-neutral-500">{description}</p>
         </div>
       </div>
-
-      {enabled && !disabled && (
-        <div className="mt-4 space-y-3 animate-in slide-in-from-top-2 duration-300">
-          {type === "return" && (
-            <div className="space-y-3">
-              <div>
-                <Label className="text-sm text-neutral-700">
-                  Return window (days)
-                </Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={returnWindow}
-                  onChange={(e) => validateReturnWindow(Number(e.target.value))}
-                  className={`mt-2 border ${
-                    returnWindowError
-                      ? "border-red-500 focus:border-red-500"
-                      : "border-neutral-300 focus:border-orange-500"
-                  }`}
-                />
-              </div>
-
-              <div>
-                <Label className="text-sm text-neutral-700">
-                  Return policy terms
-                </Label>
-                <Textarea
-                  value={returnTerms}
-                  onChange={(e) => setReturnTerms(e.target.value)}
-                  rows={3}
-                  className="mt-2 border-neutral-300 focus:border-orange-500"
-                />
-              </div>
-
-              <div>
-                <Label className="text-sm text-neutral-700">
-                  Who pays return shipping?
-                </Label>
-                <Select
-                  value={returnCostType}
-                  onValueChange={(val) => setReturnCostType(val)}
-                >
-                  <SelectTrigger className="mt-2 w-full border-neutral-300">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="buyer">Buyer</SelectItem>
-                    <SelectItem value="supplier">You</SelectItem>
-                    <SelectItem value="shared">Shared</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {returnCostType === "shared" && (
-                <div>
-                  <Label className="text-sm text-neutral-700">
-                    Your share of return cost (%)
-                  </Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={100}
-                    value={sharedPercentage}
-                    onChange={(e) => validateShared(Number(e.target.value))}
-                    className={`mt-2 border ${
-                      sharedError
-                        ? "border-red-500 focus:border-red-500"
-                        : "border-neutral-300 focus:border-orange-500"
-                    }`}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {type === "refund" && (
-            <div>
-              <Label className="text-sm text-neutral-700">
-                Refund policy terms
-              </Label>
-              <Textarea
-                placeholder="Explain when and how refunds are processed for eligible orders."
-                rows={3}
-                className="mt-2 border-neutral-300 focus:border-orange-500"
-              />
-            </div>
-          )}
-        </div>
-      )}
     </Card>
   );
 }

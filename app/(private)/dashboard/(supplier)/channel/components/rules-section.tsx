@@ -103,6 +103,7 @@
 
 
 
+
 "use client";
 import { useEffect, useState } from "react";
 import RuleToggle from "./rule-toggle";
@@ -118,80 +119,37 @@ import {
 
 interface RulesSectionProps {
   onChange?: (data: any) => void;
-  defaultData?: Record<string, any> | null;
+  defaultData: any;
 }
 
 export default function RulesSection({
   onChange,
-  defaultData = {},
+  defaultData,
 }: RulesSectionProps) {
-  // ✅ Safe defaults in case defaultData is empty or undefined
-  const safeData = {
-    payOnDelivery: !!defaultData?.payOnDelivery,
-    fulfillmentTime: defaultData?.fulfillmentTime ?? "SAME_DAY",
-    returnPolicy: !!defaultData?.returnPolicy,
-    returnWindow: Number(defaultData?.returnWindow ?? 7),
-    returnPolicyTerms: defaultData?.returnPolicyTerms ?? "",
-    refundPolicy: !!defaultData?.refundPolicy,
-    returnShippingFee: defaultData?.returnShippingFee ?? "BUYER",
-    supplierShare: Number(defaultData?.supplierShare ?? 50),
-  };
-
-  // ✅ Local states with safe initialization
-  const [payOnDelivery, setPayOnDelivery] = useState(safeData.payOnDelivery);
+  const [payOnDelivery, setPayOnDelivery] = useState(
+    defaultData?.payOnDelivery ?? true
+  );
   const [fulfillmentTime, setFulfillmentTime] = useState(
-    safeData.fulfillmentTime
+    defaultData?.fulfillmentTime ?? "SAME_DAY"
   );
-  const [returnPolicy, setReturnPolicy] = useState(safeData.returnPolicy);
-  const [returnWindow, setReturnWindow] = useState(safeData.returnWindow);
-  const [returnPolicyTerms, setReturnPolicyTerms] = useState(
-    safeData.returnPolicyTerms
+  const [returnPolicy, setReturnPolicy] = useState(
+    defaultData?.returnPolicy ?? false
   );
-  const [refundPolicy, setRefundPolicy] = useState(safeData.refundPolicy);
-  const [returnShippingFee, setReturnShippingFee] = useState(
-    safeData.returnShippingFee
+  const [refundPolicy, setRefundPolicy] = useState(
+    defaultData?.refundPolicy ?? false
   );
-  const [supplierShare, setSupplierShare] = useState(safeData.supplierShare);
 
-  // ✅ Sync updates when defaultData changes dynamically
+  // keep parent in sync
   useEffect(() => {
-    if (!defaultData) return; // ignore null
-    setPayOnDelivery(!!defaultData.payOnDelivery);
-    setFulfillmentTime(defaultData.fulfillmentTime ?? "SAME_DAY");
-    setReturnPolicy(!!defaultData.returnPolicy);
-    setReturnWindow(Number(defaultData.returnWindow ?? 7));
-    setReturnPolicyTerms(defaultData.returnPolicyTerms ?? "");
-    setRefundPolicy(!!defaultData.refundPolicy);
-    setReturnShippingFee(defaultData.returnShippingFee ?? "BUYER");
-    setSupplierShare(Number(defaultData.supplierShare ?? 50));
-  }, [defaultData]);
-
-  // ✅ Emit upward changes
-  useEffect(() => {
-    if (!onChange) return;
-    onChange({
+    onChange?.({
+      ...defaultData,
       payOnDelivery,
       fulfillmentTime,
       returnPolicy,
-      returnWindow,
-      returnPolicyTerms,
       refundPolicy,
-      returnShippingFee,
-      supplierShare,
     });
-  }, [
-    payOnDelivery,
-    fulfillmentTime,
-    returnPolicy,
-    returnWindow,
-    returnPolicyTerms,
-    refundPolicy,
-    returnShippingFee,
-    supplierShare,
-    onChange,
-  ]);
+  }, [payOnDelivery, fulfillmentTime, returnPolicy, refundPolicy]);
 
-  // ✅ Safe rendering — never crashes even if RuleToggle or props break
   return (
     <section className="space-y-4">
       <h3 className="text-lg font-semibold text-neutral-800">
@@ -203,17 +161,15 @@ export default function RulesSection({
           name="Pay on Delivery (COD)"
           description="Allow buyers to pay upon delivery."
           type="switch"
-          onToggle={(val) => setPayOnDelivery(Boolean(val))}
-          defaultChecked={Boolean(payOnDelivery)}
+          onToggle={setPayOnDelivery}
+          defaultChecked={payOnDelivery}
         />
 
         <Card className="p-4 border border-neutral-200 hover:border-orange-300">
           <Label className="text-sm text-neutral-700">Fulfilment Time</Label>
           <Select
             value={fulfillmentTime}
-            onValueChange={(val) =>
-              setFulfillmentTime(val?.toUpperCase() || "SAME_DAY")
-            }
+            onValueChange={(val) => setFulfillmentTime(val)}
           >
             <SelectTrigger className="mt-2 w-full border-neutral-300">
               <SelectValue placeholder="Select" />
@@ -232,20 +188,16 @@ export default function RulesSection({
           name="Return Policy"
           description="Explain your return process."
           type="return"
-          onToggle={(val) => setReturnPolicy(Boolean(val))}
-          defaultChecked={Boolean(returnPolicy)}
-          defaultWindow={Number(returnWindow)}
-          defaultTerms={String(returnPolicyTerms)}
-          defaultReturnCost={String(returnShippingFee)}
-          defaultSupplierShare={Number(supplierShare)}
+          onToggle={setReturnPolicy}
+          defaultChecked={returnPolicy}
         />
 
         <RuleToggle
           name="Refund Policy"
           description="Enable refunds for returned items."
           type="refund"
-          onToggle={(val) => setRefundPolicy(Boolean(val))}
-          defaultChecked={Boolean(refundPolicy)}
+          onToggle={setRefundPolicy}
+          defaultChecked={refundPolicy}
           disabled={!returnPolicy}
         />
       </div>

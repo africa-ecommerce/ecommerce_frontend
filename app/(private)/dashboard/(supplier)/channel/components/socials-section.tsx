@@ -72,6 +72,7 @@
 
 
 
+
 "use client";
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
@@ -95,14 +96,7 @@ export default function SocialsSection({
   });
 
   useEffect(() => {
-    if (defaultData && Object.keys(defaultData).length) {
-      setSocials({
-        phone: defaultData.phone || "",
-        whatsapp: defaultData.whatsapp || "",
-        telegram: defaultData.telegram || "",
-        instagram: defaultData.instagram || "",
-      });
-    }
+    if (defaultData) setSocials(defaultData);
   }, [defaultData]);
 
   useEffect(() => {
@@ -117,6 +111,7 @@ export default function SocialsSection({
       <h3 className="text-lg font-semibold text-neutral-800">
         Socials & Contact
       </h3>
+
       <Card className="p-4 border border-neutral-200">
         <div className="space-y-4">
           <div className="flex items-center gap-3">

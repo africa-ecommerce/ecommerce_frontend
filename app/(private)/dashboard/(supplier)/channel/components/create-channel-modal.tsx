@@ -159,8 +159,8 @@
 
 
 
-
 "use client";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -183,9 +183,10 @@ export default function CreateChannelModal({
   onUpdated,
 }: CreateChannelModalProps) {
   const [loading, setLoading] = useState(false);
-  const [rules, setRules] = useState<any>({});
-  const [socials, setSocials] = useState<any>({});
+  const [rules, setRules] = useState<any>(null);
+  const [socials, setSocials] = useState<any>(null);
 
+  // preload defaults from backend
   useEffect(() => {
     if (defaultData) {
       setRules({
@@ -194,7 +195,8 @@ export default function CreateChannelModal({
         returnPolicy: !!defaultData.returnPolicy,
         returnWindow: defaultData.returnWindow ?? 7,
         returnPolicyTerms:
-          defaultData.returnPolicyTerms || "Item must be unused and in original packaging.",
+          defaultData.returnPolicyTerms ||
+          "Item must be unused and in original packaging.",
         refundPolicy: !!defaultData.refundPolicy,
         returnShippingFee: defaultData.returnShippingFee || "BUYER",
         supplierShare: defaultData.supplierShare ?? 50,
@@ -204,6 +206,24 @@ export default function CreateChannelModal({
         whatsapp: defaultData.whatsapp || "",
         telegram: defaultData.telegram || "",
         instagram: defaultData.instagram || "",
+      });
+    } else {
+      // initialize empty for create mode
+      setRules({
+        payOnDelivery: true,
+        fulfillmentTime: "SAME_DAY",
+        returnPolicy: false,
+        returnWindow: 7,
+        returnPolicyTerms: "",
+        refundPolicy: false,
+        returnShippingFee: "BUYER",
+        supplierShare: 50,
+      });
+      setSocials({
+        phone: "",
+        whatsapp: "",
+        telegram: "",
+        instagram: "",
       });
     }
   }, [defaultData]);
@@ -215,21 +235,18 @@ export default function CreateChannelModal({
     try {
       setLoading(true);
       const payload = {
-        payOnDelivery: !!rules.payOnDelivery,
-        fulfillmentTime: rules.fulfillmentTime?.toUpperCase() ?? "SAME_DAY",
+        payOnDelivery: rules.payOnDelivery ?? false,
+        fulfillmentTime: rules.fulfillmentTime ?? "SAME_DAY",
         returnPolicy: !!rules.returnPolicy,
         returnWindow: rules.returnWindow ?? 7,
         returnPolicyTerms:
           rules.returnPolicyTerms ||
           "Item must be unused and in original packaging.",
         refundPolicy: !!rules.refundPolicy,
-        returnShippingFee: (rules.returnShippingFee || "BUYER").toUpperCase(),
+        returnShippingFee: rules.returnShippingFee ?? "BUYER",
         supplierShare:
           rules.returnShippingFee === "SHARED" ? rules.supplierShare ?? 50 : 0,
-        phone: socials.phone || "",
-        whatsapp: socials.whatsapp || "",
-        telegram: socials.telegram || "",
-        instagram: socials.instagram || "",
+        ...socials,
       };
 
       const res = await fetch("/api/channel", {
@@ -240,8 +257,12 @@ export default function CreateChannelModal({
 
       if (!res.ok) throw new Error("Failed to save channel");
 
+      successToast(
+        defaultData
+          ? "Channel updated successfully"
+          : "Channel created successfully"
+      );
       onUpdated?.();
-      successToast(`${defaultData ? "Channel updated successfully" : "Channel created successfully"}`);
       close();
     } catch (err) {
       console.error(err);
@@ -251,9 +272,11 @@ export default function CreateChannelModal({
     }
   };
 
+  if (!open) return null;
+
   return (
     <AnimatePresence>
-      {open && (
+      {open && rules && socials && (
         <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
           initial={{ opacity: 0 }}
@@ -267,9 +290,8 @@ export default function CreateChannelModal({
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: "spring", duration: 0.4 }}
           >
-             {defaultData ? (
-        <>
-            <div className="sticky top-0 bg-white px-5 py-4 border-b flex flex-col gap-1">
+            {/* HEADER */}
+            <div className="sticky top-0 z-10 bg-white px-5 py-4 border-b flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-semibold text-neutral-800">
                   {defaultData ? "Update your channel" : "Create your channel"}
@@ -277,7 +299,7 @@ export default function CreateChannelModal({
                 <button
                   onClick={close}
                   className="p-1 rounded-full hover:bg-neutral-100 transition"
-                > 
+                >
                   <X className="h-5 w-5 text-neutral-600" />
                 </button>
               </div>
@@ -286,11 +308,16 @@ export default function CreateChannelModal({
               </p>
             </div>
 
+            {/* CONTENT */}
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
               <RulesSection onChange={handleRulesChange} defaultData={rules} />
-              <SocialsSection onChange={handleSocialsChange} defaultData={socials} />
+              <SocialsSection
+                onChange={handleSocialsChange}
+                defaultData={socials}
+              />
             </div>
 
+            {/* FOOTER */}
             <div className="sticky bottom-0 bg-white px-5 py-4 border-t">
               <Button
                 onClick={handleSubmit}
@@ -306,16 +333,9 @@ export default function CreateChannelModal({
                   : "Create Channel"}
               </Button>
             </div>
-             </>
-      ) : (
-        <div className="p-6 text-center text-neutral-500">
-          Loading channel info...
-        </div>
-      )}
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
   );
 }
-
