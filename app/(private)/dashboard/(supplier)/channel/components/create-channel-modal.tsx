@@ -1,10 +1,11 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import RulesSection from "./rules-section";
 import SocialsSection from "./socials-section";
-import { useEffect, useState } from "react";
 import { successToast, errorToast } from "@/components/ui/use-toast-advanced";
 
 interface CreateChannelModalProps {
@@ -20,34 +21,38 @@ export default function CreateChannelModal({
   defaultData,
   onUpdated,
 }: CreateChannelModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rules, setRules] = useState<any>({});
   const [socials, setSocials] = useState<any>({});
 
-  // preload defaults from backend
+  // 🧩 Only render once mounted (prevents hydration mismatch)
+  useEffect(() => setMounted(true), []);
+
+  // 🔹 Preload defaults from backend
   useEffect(() => {
     if (defaultData) {
       setRules({
-        payOnDelivery: defaultData.payOnDelivery,
-        fulfillmentTime: defaultData.fulfillmentTime,
-        returnPolicy: defaultData.returnPolicy,
-        returnWindow: defaultData.returnWindow,
-        returnPolicyTerms: defaultData.returnPolicyTerms,
-        refundPolicy: defaultData.refundPolicy,
-        returnShippingFee: defaultData.returnShippingFee,
-        supplierShare: defaultData.supplierShare,
+        payOnDelivery: defaultData.payOnDelivery ?? false,
+        fulfillmentTime: defaultData.fulfillmentTime ?? "SAME_DAY",
+        returnPolicy: defaultData.returnPolicy ?? false,
+        returnWindow: defaultData.returnWindow ?? 7,
+        returnPolicyTerms:
+          defaultData.returnPolicyTerms ||
+          "Item must be unused and in original packaging.",
+        refundPolicy: defaultData.refundPolicy ?? false,
+        returnShippingFee: defaultData.returnShippingFee ?? "BUYER",
+        supplierShare: defaultData.supplierShare ?? 0,
       });
+
       setSocials({
-        phone: defaultData.phone || "",
-        whatsapp: defaultData.whatsapp || "",
-        telegram: defaultData.telegram || "",
-        instagram: defaultData.instagram || "",
+        phone: defaultData.phone ?? "",
+        whatsapp: defaultData.whatsapp ?? "",
+        telegram: defaultData.telegram ?? "",
+        instagram: defaultData.instagram ?? "",
       });
     }
   }, [defaultData]);
-
-  console.log("rules", rules)
-  console.log("socials", socials)
 
   const handleRulesChange = (data: any) => setRules(data);
   const handleSocialsChange = (data: any) => setSocials(data);
@@ -56,7 +61,7 @@ export default function CreateChannelModal({
     try {
       setLoading(true);
       const payload = {
-        payOnDelivery: rules.payOnDelivery ?? false,
+        payOnDelivery: !!rules.payOnDelivery,
         fulfillmentTime: rules.fulfillmentTime?.toUpperCase() ?? "SAME_DAY",
         returnPolicy: !!rules.returnPolicy,
         returnWindow: rules.returnWindow ?? 7,
@@ -64,8 +69,7 @@ export default function CreateChannelModal({
           rules.returnPolicyTerms ||
           "Item must be unused and in original packaging.",
         refundPolicy: !!rules.refundPolicy,
-        returnShippingFee:
-          (rules.returnShippingFee || "BUYER").toUpperCase(),
+        returnShippingFee: (rules.returnShippingFee || "BUYER").toUpperCase(),
         supplierShare:
           rules.returnShippingFee === "SHARED" ? rules.supplierShare ?? 50 : 0,
         phone: socials.phone || "",
@@ -82,20 +86,28 @@ export default function CreateChannelModal({
 
       if (!res.ok) throw new Error("Failed to save channel");
 
-      onUpdated?.(); // revalidate SWR cache
-      successToast(`${defaultData ? "Channel updated successfully" : "Created channel successfully"}`);
+      onUpdated?.();
+      successToast(
+        `${
+          defaultData
+            ? "Channel updated successfully"
+            : "Created channel successfully"
+        }`
+      );
       close();
     } catch (err) {
       console.error(err);
-      errorToast("Something went wrong. Try again")
+      errorToast("Something went wrong. Try again");
     } finally {
       setLoading(false);
     }
   };
 
+  if (!mounted) return null; // 👈 Prevent hydration mismatch
+
   return (
     <AnimatePresence>
-      {open && (
+      {mounted && open && (
         <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
           initial={{ opacity: 0 }}
@@ -130,7 +142,10 @@ export default function CreateChannelModal({
             {/* CONTENT */}
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
               <RulesSection onChange={handleRulesChange} defaultData={rules} />
-              <SocialsSection onChange={handleSocialsChange} defaultData={socials} />
+              <SocialsSection
+                onChange={handleSocialsChange}
+                defaultData={socials}
+              />
             </div>
 
             {/* FOOTER BUTTON */}
@@ -155,7 +170,3 @@ export default function CreateChannelModal({
     </AnimatePresence>
   );
 }
-
-
-
-

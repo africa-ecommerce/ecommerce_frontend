@@ -16,8 +16,9 @@ interface SocialsSectionProps {
 
 export default function SocialsSection({
   onChange,
-  defaultData,
+  defaultData = {},
 }: SocialsSectionProps) {
+  const [mounted, setMounted] = useState(false);
   const [socials, setSocials] = useState({
     phone: "",
     whatsapp: "",
@@ -25,17 +26,12 @@ export default function SocialsSection({
     instagram: "",
   });
 
-  // 🔹 Prepopulate when defaultData is available or changes
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
-    if (defaultData) {
-      setSocials((prev) => ({
-        ...prev,
-        ...defaultData,
-      }));
-    }
+    setSocials((prev) => ({ ...prev, ...defaultData }));
   }, [defaultData]);
 
-  // 🔹 Notify parent whenever socials change
   useEffect(() => {
     onChange?.(socials);
   }, [socials, onChange]);
@@ -43,6 +39,8 @@ export default function SocialsSection({
   const handleChange = (key: string, value: string) => {
     setSocials((prev) => ({ ...prev, [key]: value }));
   };
+
+  if (!mounted) return null;
 
   return (
     <section className="space-y-4">
