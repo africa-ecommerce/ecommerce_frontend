@@ -84,10 +84,10 @@ export default function RulesSection({
           description="Explain your return process."
           type="return"
           enabled={defaultData.returnPolicy ?? false}
-          returnWindow={defaultData.returnWindow ?? 7}
+          returnWindow={defaultData.returnWindow}
           returnPolicyTerms={defaultData.returnPolicyTerms || ""}
           returnShippingFee={defaultData.returnShippingFee || "BUYER"}
-          supplierShare={defaultData.supplierShare ?? 50}
+          supplierShare={defaultData.supplierShare}
           onToggle={(val) => handleChange("returnPolicy", val)}
           onReturnWindowChange={(val) => handleChange("returnWindow", val)}
           onReturnTermsChange={(val) => handleChange("returnPolicyTerms", val)}
@@ -98,7 +98,7 @@ export default function RulesSection({
         />
 
         <RuleToggle
-          name="Refund Policy"
+          name="Refund"
           description="Enable refunds for returned items."
           type="refund"
           enabled={defaultData.refundPolicy ?? false}

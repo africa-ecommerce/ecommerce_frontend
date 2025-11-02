@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ import {
 interface RuleToggleProps {
   name: string;
   description: string;
-  type?: "switch" | "percentage" | "fulfilment" | "refund" | "return";
+  type?: "switch" | "return" | "refund";
   enabled?: boolean;
   onToggle?: (value: boolean) => void;
   disabled?: boolean;
@@ -27,10 +27,11 @@ interface RuleToggleProps {
   returnPolicyTerms?: string;
   returnShippingFee?: string;
   supplierShare?: number;
-  onReturnWindowChange?: (value: number) => void;
+  onReturnWindowChange?: (value: number | null) => void;
   onReturnTermsChange?: (value: string) => void;
   onReturnShippingChange?: (value: string) => void;
-  onSupplierShareChange?: (value: number) => void;
+  onSupplierShareChange?: (value: number | null) => void;
+  onValidationChange?: (isValid: boolean) => void;
 }
 
 export default function RuleToggle({
@@ -40,34 +41,58 @@ export default function RuleToggle({
   enabled = false,
   onToggle,
   disabled = false,
-  returnWindow = 7,
+  returnWindow,
   returnPolicyTerms = "",
   returnShippingFee = "BUYER",
-  supplierShare = 50,
+  supplierShare,
   onReturnWindowChange,
   onReturnTermsChange,
   onReturnShippingChange,
   onSupplierShareChange,
+  onValidationChange,
 }: RuleToggleProps) {
   
-  // Error states for red borders
   const [returnWindowError, setReturnWindowError] = useState(false);
-  const [sharedError, setSharedError] = useState(false);
+  const [supplierShareError, setSupplierShareError] = useState(false);
 
-  // Validation handlers
-  const validateReturnWindow = (val: number) => {
-    const valid = val >= 1;
-    setReturnWindowError(!valid);
-    if (valid && onReturnWindowChange) {
-      onReturnWindowChange(val);
+  // Validate and notify parent of validation state
+  useEffect(() => {
+    if (enabled && type === "return") {
+      const isReturnWindowValid = returnWindow !== null && returnWindow !== undefined && returnWindow >= 1;
+      const isSupplierShareValid = returnShippingFee.toLowerCase() !== "shared" || 
+        (supplierShare !== null && supplierShare !== undefined && supplierShare >= 1 && supplierShare <= 100);
+      
+      const isValid = isReturnWindowValid && isSupplierShareValid;
+      onValidationChange?.(isValid);
+      
+      setReturnWindowError(!isReturnWindowValid);
+      setSupplierShareError(returnShippingFee.toLowerCase() === "shared" && !isSupplierShareValid);
+    } else {
+      onValidationChange?.(true);
+      setReturnWindowError(false);
+      setSupplierShareError(false);
+    }
+  }, [enabled, type, returnWindow, supplierShare, returnShippingFee, onValidationChange]);
+
+  const handleReturnWindowChange = (value: string) => {
+    if (value === "") {
+      onReturnWindowChange?.(null);
+    } else {
+      const num = Number(value);
+      if (!isNaN(num)) {
+        onReturnWindowChange?.(num);
+      }
     }
   };
 
-  const validateShared = (val: number) => {
-    const valid = val >= 1 && val <= 100;
-    setSharedError(!valid);
-    if (valid && onSupplierShareChange) {
-      onSupplierShareChange(val);
+  const handleSupplierShareChange = (value: string) => {
+    if (value === "") {
+      onSupplierShareChange?.(null);
+    } else {
+      const num = Number(value);
+      if (!isNaN(num)) {
+        onSupplierShareChange?.(num);
+      }
     }
   };
 
@@ -94,140 +119,104 @@ export default function RuleToggle({
         </div>
       </div>
 
-      {/* CONDITIONAL SECTIONS */}
-      {enabled && !disabled && (
+      {enabled && !disabled && type === "return" && (
         <div className="mt-4 space-y-3 animate-in slide-in-from-top-2 duration-300">
-          {type === "return" && (
-            <div className="space-y-3">
-              {/* RETURN WINDOW */}
-              <div>
-                <Label
-                  htmlFor="refund-window"
-                  className="text-sm text-neutral-700"
-                >
-                  Return window (days)
-                </Label>
-                <Input
-                  id="refund-window"
-                  type="number"
-                  required
-                  min={1}
-                  value={returnWindow}
-                  onChange={(e) => {
-                    const val = Number(e.target.value);
-                    validateReturnWindow(val);
-                  }}
-                  onBlur={() => setReturnWindowError(returnWindow < 1)}
-                  className={`mt-2 border ${
-                    returnWindowError
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                      : "border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
-                  }`}
-                />
-                {returnWindowError && (
-                  <p className="text-xs text-red-500 mt-1">
-                    Return window must be at least 1 day.
-                  </p>
-                )}
-              </div>
+          {/* RETURN WINDOW */}
+          <div>
+            <Label
+              htmlFor="return-window"
+              className="text-sm text-neutral-700"
+            >
+              Return window (days) <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="return-window"
+              type="number"
+              min={1}
+              value={returnWindow ?? ""}
+              onChange={(e) => handleReturnWindowChange(e.target.value)}
+              placeholder="Enter number of days"
+              className={`mt-2 border ${
+                returnWindowError
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                  : "border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
+              }`}
+            />
+            {returnWindowError && (
+              <p className="text-xs text-red-500 mt-1">
+                Return window must be at least 1 day
+              </p>
+            )}
+          </div>
 
-              {/* RETURN TERMS */}
-              <div>
-                <Label
-                  htmlFor="return-policy"
-                  className="text-sm text-neutral-700"
-                >
-                  Return policy terms
-                </Label>
-                <Textarea
-                  id="return-policy"
-                  placeholder="Example: Returns are accepted only for damaged or incorrect items. Products must remain unused, in original packaging, and returned within 7 days."
-                  rows={3}
-                  value={returnPolicyTerms}
-                  onChange={(e) => onReturnTermsChange?.(e.target.value)}
-                  className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
-                />
-              </div>
+          {/* RETURN TERMS */}
+          <div>
+            <Label
+              htmlFor="return-policy"
+              className="text-sm text-neutral-700"
+            >
+              Return policy terms
+            </Label>
+            <Textarea
+              id="return-policy"
+              placeholder="Example: Returns are accepted only for damaged or incorrect items. Products must remain unused, in original packaging."
+              rows={3}
+              value={returnPolicyTerms}
+              onChange={(e) => onReturnTermsChange?.(e.target.value)}
+              className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
+            />
+          </div>
 
-              {/* RETURN COST TYPE */}
-              <div>
-                <Label className="text-sm text-neutral-700">
-                  Who pays return shipping?
-                </Label>
-                <Select
-                  value={returnShippingFee.toLowerCase()}
-                  onValueChange={(val) => {
-                    onReturnShippingChange?.(val.toUpperCase());
-                    if (val !== "shared") setSharedError(false);
-                  }}
-                >
-                  <SelectTrigger className="mt-2 w-full border-neutral-300">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="buyer">Buyer</SelectItem>
-                    <SelectItem value="supplier">You</SelectItem>
-                    <SelectItem value="shared">Shared</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          {/* RETURN SHIPPING FEE */}
+          <div>
+            <Label className="text-sm text-neutral-700">
+              Who pays return shipping?
+            </Label>
+            <Select
+              value={returnShippingFee.toLowerCase()}
+              onValueChange={(val) => {
+                onReturnShippingChange?.(val.toUpperCase());
+              }}
+            >
+              <SelectTrigger className="mt-2 w-full border-neutral-300">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="buyer">Buyer</SelectItem>
+                <SelectItem value="supplier">You</SelectItem>
+                <SelectItem value="shared">Shared</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-              {/* SHARED PERCENTAGE */}
-              {returnShippingFee.toLowerCase() === "shared" && (
-                <div>
-                  <Label
-                    htmlFor="shared-percentage"
-                    className="text-sm text-neutral-700"
-                  >
-                    Your share of return cost (%)
-                  </Label>
-                  <Input
-                    id="shared-percentage"
-                    type="number"
-                    required
-                    min={1}
-                    max={100}
-                    value={supplierShare}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      validateShared(val);
-                    }}
-                    onBlur={() =>
-                      setSharedError(
-                        supplierShare < 1 || supplierShare > 100
-                      )
-                    }
-                    className={`mt-2 border ${
-                      sharedError
-                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                        : "border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
-                    }`}
-                  />
-                  {sharedError && (
-                    <p className="text-xs text-red-500 mt-1">
-                      Percentage must be between 1 and 100.
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* REFUND POLICY */}
-          {type === "refund" && (
-            <div className="space-y-3">
+          {/* SHARED PERCENTAGE */}
+          {returnShippingFee.toLowerCase() === "shared" && (
+            <div>
               <Label
-                htmlFor="refund-terms"
+                htmlFor="shared-percentage"
                 className="text-sm text-neutral-700"
               >
-                Refund policy terms
+                Your share of return cost (%) <span className="text-red-500">*</span>
               </Label>
-              <Textarea
-                id="refund-terms"
-                placeholder="Explain when and how refunds are processed for eligible orders."
-                rows={3}
-                className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
+              <Input
+                id="shared-percentage"
+                type="number"
+                min={1}
+                max={100}
+                value={supplierShare ?? ""}
+                onChange={(e) => handleSupplierShareChange(e.target.value)}
+                placeholder="Enter percentage (1-100)"
+                className={`mt-2 border ${
+                  supplierShareError
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                    : "border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
+                }`}
               />
+              {supplierShareError && (
+                <p className="text-xs text-red-500 mt-1">
+                  Percentage must be between 1 and 100
+                </p>
+              )}
             </div>
           )}
         </div>
