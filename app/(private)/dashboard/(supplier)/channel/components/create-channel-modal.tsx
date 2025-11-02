@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import RulesSection from "./rules-section";
 import SocialsSection from "./socials-section";
 import { useEffect, useState } from "react";
+import { successToast, errorToast } from "@/components/ui/use-toast-advanced";
 
 interface CreateChannelModalProps {
   open: boolean;
@@ -45,6 +46,9 @@ export default function CreateChannelModal({
     }
   }, [defaultData]);
 
+  console.log("rules", rules)
+  console.log("socials", socials)
+
   const handleRulesChange = (data: any) => setRules(data);
   const handleSocialsChange = (data: any) => setSocials(data);
 
@@ -52,7 +56,7 @@ export default function CreateChannelModal({
     try {
       setLoading(true);
       const payload = {
-        payOnDelivery: rules.payOnDelivery ?? true,
+        payOnDelivery: rules.payOnDelivery ?? false,
         fulfillmentTime: rules.fulfillmentTime?.toUpperCase() ?? "SAME_DAY",
         returnPolicy: !!rules.returnPolicy,
         returnWindow: rules.returnWindow ?? 7,
@@ -79,10 +83,11 @@ export default function CreateChannelModal({
       if (!res.ok) throw new Error("Failed to save channel");
 
       onUpdated?.(); // revalidate SWR cache
+      successToast(`${defaultData ? "Channel updated successfully" : "Created channel successfully"}`);
       close();
     } catch (err) {
       console.error(err);
-      alert("Error saving channel. Please try again.");
+      errorToast("Something went wrong. Try again")
     } finally {
       setLoading(false);
     }
@@ -123,24 +128,10 @@ export default function CreateChannelModal({
             </div>
 
             {/* CONTENT */}
-            {defaultData && Object.keys(rules).length === 0 ? (
-              <div className="flex-1 flex items-center justify-center">
-                <p className="text-neutral-500 text-sm animate-pulse">
-                  Loading channel...
-                </p>
-              </div>
-            ) : (
-              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
-                <RulesSection
-                  onChange={handleRulesChange}
-                  defaultData={rules}
-                />
-                <SocialsSection
-                  onChange={handleSocialsChange}
-                  defaultData={socials}
-                />
-              </div>
-            )}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
+              <RulesSection onChange={handleRulesChange} defaultData={rules} />
+              <SocialsSection onChange={handleSocialsChange} defaultData={socials} />
+            </div>
 
             {/* FOOTER BUTTON */}
             <div className="sticky bottom-0 bg-white px-5 py-4 border-t">

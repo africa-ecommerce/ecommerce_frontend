@@ -13,13 +13,10 @@ import {
 
 interface RulesSectionProps {
   onChange?: (data: any) => void;
-  defaultData?: any;
+  defaultData: any
 }
 
-export default function RulesSection({
-  onChange,
-  defaultData,
-}: RulesSectionProps) {
+export default function RulesSection({ onChange, defaultData }: RulesSectionProps) {
   const [payOnDelivery, setPayOnDelivery] = useState(true);
   const [fulfillmentTime, setFulfillmentTime] = useState("SAME_DAY");
   const [returnPolicy, setReturnPolicy] = useState(false);
@@ -28,21 +25,6 @@ export default function RulesSection({
   const [refundPolicy, setRefundPolicy] = useState(false);
   const [returnShippingFee, setReturnShippingFee] = useState("BUYER");
   const [supplierShare, setSupplierShare] = useState(50);
-
-  // 🟧 Preload values from defaultData
-  useEffect(() => {
-    if (defaultData) {
-      setPayOnDelivery(defaultData?.payOnDelivery ?? true);
-      setFulfillmentTime(defaultData?.fulfillmentTime ?? "SAME_DAY");
-
-      setReturnPolicy(!!defaultData.returnPolicy);
-      setReturnWindow(defaultData?.returnWindow ?? 7);
-      setReturnPolicyTerms(defaultData?.returnPolicyTerms ?? "");
-      setRefundPolicy(!!defaultData?.refundPolicy);
-      setReturnShippingFee(defaultData?.returnShippingFee ?? "BUYER");
-      setSupplierShare(defaultData?.supplierShare ?? 50);
-    }
-  }, [defaultData]);
 
   useEffect(() => {
     onChange?.({
@@ -78,8 +60,6 @@ export default function RulesSection({
           description="Allow buyers to pay upon delivery."
           type="switch"
           onToggle={setPayOnDelivery}
-          // 👇 prefilled
-          defaultEnabled={payOnDelivery}
         />
 
         {/* Fulfillment Time */}
@@ -107,13 +87,6 @@ export default function RulesSection({
           description="Explain your return process."
           type="return"
           onToggle={setReturnPolicy}
-          defaultEnabled={returnPolicy}
-          defaultValues={{
-            returnWindow,
-            returnPolicyTerms,
-            returnShippingFee,
-            supplierShare,
-          }}
         />
 
         <RuleToggle
@@ -121,7 +94,6 @@ export default function RulesSection({
           description="Enable refunds for returned items."
           type="refund"
           onToggle={setRefundPolicy}
-          defaultEnabled={refundPolicy}
           disabled={!returnPolicy}
         />
       </div>
