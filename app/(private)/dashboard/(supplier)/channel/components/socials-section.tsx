@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Phone, MessageCircle, Send, Instagram } from "lucide-react";
@@ -26,15 +26,25 @@ export default function SocialsSection({
     instagram: "",
   });
 
+  const isInitialMount = useRef(true);
+
   useEffect(() => setMounted(true), []);
 
+  // Only update from defaultData, don't trigger onChange
   useEffect(() => {
-    setSocials((prev) => ({ ...prev, ...defaultData }));
+    if (defaultData && Object.keys(defaultData).length > 0) {
+      setSocials((prev) => ({ ...prev, ...defaultData }));
+    }
   }, [defaultData]);
 
+  // Only call onChange when user makes changes (skip initial mount)
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     onChange?.(socials);
-  }, [socials, onChange]);
+  }, [socials]); // Remove onChange from deps
 
   const handleChange = (key: string, value: string) => {
     setSocials((prev) => ({ ...prev, [key]: value }));
