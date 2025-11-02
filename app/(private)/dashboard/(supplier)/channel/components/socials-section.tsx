@@ -6,15 +6,21 @@ import { Phone, MessageCircle, Send, Instagram } from "lucide-react";
 
 interface SocialsSectionProps {
   onChange?: (data: any) => void;
+  defaultData?: any;
 }
 
-export default function SocialsSection({ onChange }: SocialsSectionProps) {
+export default function SocialsSection({ onChange, defaultData }: SocialsSectionProps) {
   const [socials, setSocials] = useState({
     phone: "",
     whatsapp: "",
     telegram: "",
     instagram: "",
   });
+
+  // 🟧 Preload defaults
+  useEffect(() => {
+    if (defaultData) setSocials(defaultData);
+  }, [defaultData]);
 
   useEffect(() => {
     onChange?.(socials);

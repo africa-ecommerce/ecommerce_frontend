@@ -20,6 +20,8 @@ interface RuleToggleProps {
   type?: "switch" | "percentage" | "fulfilment" | "refund" | "return";
   onToggle?: (value: boolean) => void;
   disabled?: boolean;
+  defaultEnabled?: boolean;
+  defaultValues?: any;
 }
 
 export default function RuleToggle({
@@ -28,25 +30,29 @@ export default function RuleToggle({
   type = "switch",
   onToggle,
   disabled = false,
+  defaultEnabled = false,
+  defaultValues = {},
 }: RuleToggleProps) {
-  const [enabled, setEnabled] = useState(false);
-  const [returnCostType, setReturnCostType] = useState<string>("buyer");
-  const [returnWindow, setReturnWindow] = useState<number>(7);
-  const [sharedPercentage, setSharedPercentage] = useState<number>(50);
-
-  // Error states for red borders
+  const [enabled, setEnabled] = useState(defaultEnabled);
+  const [returnCostType, setReturnCostType] = useState(defaultValues.returnShippingFee?.toLowerCase() || "buyer");
+  const [returnWindow, setReturnWindow] = useState(defaultValues.returnWindow || 7);
+  const [sharedPercentage, setSharedPercentage] = useState(defaultValues.supplierShare || 50);
+  const [returnPolicyTerms, setReturnPolicyTerms] = useState(defaultValues.returnPolicyTerms || "");
+      // Error states for red borders
   const [returnWindowError, setReturnWindowError] = useState(false);
   const [sharedError, setSharedError] = useState(false);
 
-  // Notify parent whenever toggle changes
+  // update toggle
   useEffect(() => {
     if (onToggle) onToggle(enabled);
   }, [enabled]);
-
-  // Reset if disabled externally
+  
   useEffect(() => {
-    if (disabled && enabled) setEnabled(false);
-  }, [disabled]);
+    setEnabled(defaultEnabled);
+  }, [defaultEnabled]);
+
+
+
 
   // Validation handlers
   const validateReturnWindow = (val: number) => {
@@ -133,6 +139,8 @@ export default function RuleToggle({
                   id="return-policy"
                   placeholder="Example: Returns are accepted only for damaged or incorrect items. Products must remain unused, in original packaging, and returned within 7 days."
                   rows={3}
+                  value={returnPolicyTerms}
+                  onChange={(e) => setReturnPolicyTerms(e.target.value)}
                   className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
                 />
               </div>
@@ -202,12 +210,7 @@ export default function RuleToggle({
           )}
 
           {/* REFUND POLICY */}
-          {type === "refund" && (
-            <div className="space-y-3">
-             
-              
-            </div>
-          )}
+          {type === "refund" && <div className="space-y-3"></div>}
         </div>
       )}
     </Card>
