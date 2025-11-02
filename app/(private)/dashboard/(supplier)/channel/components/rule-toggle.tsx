@@ -18,8 +18,15 @@ interface RuleToggleProps {
   name: string;
   description: string;
   type?: "switch" | "percentage" | "fulfilment" | "refund" | "return";
-  onToggle?: (value: boolean) => void;
+  onToggle?: (value: boolean, extras?: any) => void;
   disabled?: boolean;
+  defaultChecked?: boolean;
+  defaultValues?: {
+    returnWindow?: number;
+    returnPolicyTerms?: string;
+    returnShippingFee?: string;
+    supplierShare?: number;
+  };
 }
 
 export default function RuleToggle({
@@ -28,27 +35,64 @@ export default function RuleToggle({
   type = "switch",
   onToggle,
   disabled = false,
+  defaultChecked = false,
+  defaultValues = {},
 }: RuleToggleProps) {
-  const [enabled, setEnabled] = useState(false);
-  const [returnCostType, setReturnCostType] = useState<string>("buyer");
-  const [returnWindow, setReturnWindow] = useState<number>(7);
-  const [sharedPercentage, setSharedPercentage] = useState<number>(50);
+  const [enabled, setEnabled] = useState(defaultChecked);
+  const [returnCostType, setReturnCostType] = useState(
+    defaultValues.returnShippingFee?.toLowerCase() || "buyer"
+  );
+  const [returnWindow, setReturnWindow] = useState(
+    defaultValues.returnWindow ?? 7
+  );
+  const [returnTerms, setReturnTerms] = useState(
+    defaultValues.returnPolicyTerms ?? ""
+  );
+  const [sharedPercentage, setSharedPercentage] = useState(
+    defaultValues.supplierShare ?? 50
+  );
 
-  // Error states for red borders
+  // validation
   const [returnWindowError, setReturnWindowError] = useState(false);
   const [sharedError, setSharedError] = useState(false);
 
-  // Notify parent whenever toggle changes
+  // Sync default data on mount
   useEffect(() => {
-    if (onToggle) onToggle(enabled);
-  }, [enabled]);
+    setEnabled(defaultChecked);
+    if (defaultValues) {
+      setReturnCostType(
+        defaultValues.returnShippingFee?.toLowerCase() || "buyer"
+      );
+      setReturnWindow(defaultValues.returnWindow ?? 7);
+      setReturnTerms(defaultValues.returnPolicyTerms ?? "");
+      setSharedPercentage(defaultValues.supplierShare ?? 50);
+    }
+  }, [defaultChecked, defaultValues]);
 
-  // Reset if disabled externally
+  // Notify parent when toggle or nested data changes
+  useEffect(() => {
+    if (onToggle) {
+      onToggle(enabled, {
+        returnWindow,
+        returnPolicyTerms: returnTerms,
+        returnShippingFee: returnCostType.toUpperCase(),
+        supplierShare: sharedPercentage,
+      });
+    }
+  }, [
+    enabled,
+    returnWindow,
+    returnTerms,
+    returnCostType,
+    sharedPercentage,
+    onToggle,
+  ]);
+
+  // Reset if disabled
   useEffect(() => {
     if (disabled && enabled) setEnabled(false);
   }, [disabled]);
 
-  // Validation handlers
   const validateReturnWindow = (val: number) => {
     const valid = val >= 1;
     setReturnWindowError(!valid);
@@ -84,60 +128,48 @@ export default function RuleToggle({
         </div>
       </div>
 
-      {/* CONDITIONAL SECTIONS */}
       {enabled && !disabled && (
         <div className="mt-4 space-y-3 animate-in slide-in-from-top-2 duration-300">
           {type === "return" && (
             <div className="space-y-3">
-              {/* RETURN WINDOW */}
               <div>
                 <Label
-                  htmlFor="refund-window"
+                  htmlFor="return-window"
                   className="text-sm text-neutral-700"
                 >
                   Return window (days)
                 </Label>
                 <Input
-                  id="refund-window"
+                  id="return-window"
                   type="number"
-                  required
                   min={1}
                   value={returnWindow}
-                  onChange={(e) => {
-                    const val = Number(e.target.value);
-                    validateReturnWindow(val);
-                  }}
-                  onBlur={() => setReturnWindowError(returnWindow < 1)}
+                  onChange={(e) => validateReturnWindow(Number(e.target.value))}
                   className={`mt-2 border ${
                     returnWindowError
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                      : "border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
+                      ? "border-red-500"
+                      : "border-neutral-300 focus:border-orange-500"
                   }`}
                 />
-                {returnWindowError && (
-                  <p className="text-xs text-red-500 mt-1">
-                    Return window must be at least 1 day.
-                  </p>
-                )}
               </div>
 
-              {/* RETURN TERMS */}
               <div>
                 <Label
-                  htmlFor="return-policy"
+                  htmlFor="return-terms"
                   className="text-sm text-neutral-700"
                 >
                   Return policy terms
                 </Label>
                 <Textarea
-                  id="return-policy"
-                  placeholder="Example: Returns are accepted only for damaged or incorrect items. Products must remain unused, in original packaging, and returned within 7 days."
+                  id="return-terms"
+                  placeholder="Describe your return policy"
                   rows={3}
-                  className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
+                  value={returnTerms}
+                  onChange={(e) => setReturnTerms(e.target.value)}
+                  className="mt-2 border-neutral-300 focus:border-orange-500"
                 />
               </div>
 
-              {/* RETURN COST TYPE */}
               <div>
                 <Label className="text-sm text-neutral-700">
                   Who pays return shipping?
@@ -160,7 +192,6 @@ export default function RuleToggle({
                 </Select>
               </div>
 
-              {/* SHARED PERCENTAGE */}
               {returnCostType === "shared" && (
                 <div>
                   <Label
@@ -172,36 +203,21 @@ export default function RuleToggle({
                   <Input
                     id="shared-percentage"
                     type="number"
-                    required
                     min={1}
                     max={100}
                     value={sharedPercentage}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      validateShared(val);
-                    }}
-                    onBlur={() =>
-                      setSharedError(
-                        sharedPercentage < 1 || sharedPercentage > 100
-                      )
-                    }
+                    onChange={(e) => validateShared(Number(e.target.value))}
                     className={`mt-2 border ${
                       sharedError
-                        ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                        : "border-neutral-300 focus:border-orange-500 focus:ring-orange-500"
+                        ? "border-red-500"
+                        : "border-neutral-300 focus:border-orange-500"
                     }`}
                   />
-                  {sharedError && (
-                    <p className="text-xs text-red-500 mt-1">
-                      Percentage must be between 1 and 100.
-                    </p>
-                  )}
                 </div>
               )}
             </div>
           )}
 
-          {/* REFUND POLICY */}
           {type === "refund" && (
             <div className="space-y-3">
               <Label
@@ -212,9 +228,9 @@ export default function RuleToggle({
               </Label>
               <Textarea
                 id="refund-terms"
-                placeholder="Explain when and how refunds are processed for eligible orders."
+                placeholder="Explain when refunds are processed"
                 rows={3}
-                className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
+                className="mt-2 border-neutral-300 focus:border-orange-500"
               />
             </div>
           )}
@@ -223,5 +239,3 @@ export default function RuleToggle({
     </Card>
   );
 }
-
-

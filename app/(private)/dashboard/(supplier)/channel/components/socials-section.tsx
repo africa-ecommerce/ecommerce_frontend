@@ -6,12 +6,18 @@ import { Phone, MessageCircle, Send, Instagram } from "lucide-react";
 
 interface SocialsSectionProps {
   onChange?: (data: any) => void;
-  defaultData: any
+  defaultData?: {
+    phone?: string;
+    whatsapp?: string;
+    telegram?: string;
+    instagram?: string;
+  };
 }
 
-export default function SocialsSection({ onChange, defaultData }: SocialsSectionProps) {
-
-  console.log("defaultData", defaultData)
+export default function SocialsSection({
+  onChange,
+  defaultData,
+}: SocialsSectionProps) {
   const [socials, setSocials] = useState({
     phone: "",
     whatsapp: "",
@@ -19,9 +25,20 @@ export default function SocialsSection({ onChange, defaultData }: SocialsSection
     instagram: "",
   });
 
+  // 🔹 Prepopulate when defaultData is available or changes
+  useEffect(() => {
+    if (defaultData) {
+      setSocials((prev) => ({
+        ...prev,
+        ...defaultData,
+      }));
+    }
+  }, [defaultData]);
+
+  // 🔹 Notify parent whenever socials change
   useEffect(() => {
     onChange?.(socials);
-  }, [socials]);
+  }, [socials, onChange]);
 
   const handleChange = (key: string, value: string) => {
     setSocials((prev) => ({ ...prev, [key]: value }));
@@ -29,7 +46,9 @@ export default function SocialsSection({ onChange, defaultData }: SocialsSection
 
   return (
     <section className="space-y-4">
-      <h3 className="text-lg font-semibold text-neutral-800">Socials & Contact</h3>
+      <h3 className="text-lg font-semibold text-neutral-800">
+        Socials & Contact
+      </h3>
 
       <Card className="p-4 border border-neutral-200">
         <div className="space-y-4">
@@ -70,5 +89,3 @@ export default function SocialsSection({ onChange, defaultData }: SocialsSection
     </section>
   );
 }
-
-
