@@ -123,10 +123,24 @@ export default function CreateChannelModal({
             </div>
 
             {/* CONTENT */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
-              <RulesSection onChange={handleRulesChange} defaultData={rules} />
-              <SocialsSection onChange={handleSocialsChange} defaultData={socials} />
-            </div>
+            {defaultData && Object.keys(rules).length === 0 ? (
+              <div className="flex-1 flex items-center justify-center">
+                <p className="text-neutral-500 text-sm animate-pulse">
+                  Loading channel...
+                </p>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
+                <RulesSection
+                  onChange={handleRulesChange}
+                  defaultData={rules}
+                />
+                <SocialsSection
+                  onChange={handleSocialsChange}
+                  defaultData={socials}
+                />
+              </div>
+            )}
 
             {/* FOOTER BUTTON */}
             <div className="sticky bottom-0 bg-white px-5 py-4 border-t">

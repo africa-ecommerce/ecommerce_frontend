@@ -32,14 +32,15 @@ export default function RulesSection({
   // 🟧 Preload values from defaultData
   useEffect(() => {
     if (defaultData) {
-      setPayOnDelivery(defaultData.payOnDelivery ?? true);
-      setFulfillmentTime(defaultData.fulfillmentTime ?? "SAME_DAY");
+      setPayOnDelivery(defaultData?.payOnDelivery ?? true);
+      setFulfillmentTime(defaultData?.fulfillmentTime ?? "SAME_DAY");
+
       setReturnPolicy(!!defaultData.returnPolicy);
-      setReturnWindow(defaultData.returnWindow ?? 7);
-      setReturnPolicyTerms(defaultData.returnPolicyTerms ?? "");
-      setRefundPolicy(!!defaultData.refundPolicy);
-      setReturnShippingFee(defaultData.returnShippingFee ?? "BUYER");
-      setSupplierShare(defaultData.supplierShare ?? 50);
+      setReturnWindow(defaultData?.returnWindow ?? 7);
+      setReturnPolicyTerms(defaultData?.returnPolicyTerms ?? "");
+      setRefundPolicy(!!defaultData?.refundPolicy);
+      setReturnShippingFee(defaultData?.returnShippingFee ?? "BUYER");
+      setSupplierShare(defaultData?.supplierShare ?? 50);
     }
   }, [defaultData]);
 

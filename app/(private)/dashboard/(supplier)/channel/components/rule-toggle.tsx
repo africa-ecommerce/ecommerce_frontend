@@ -34,7 +34,12 @@ export default function RuleToggle({
   defaultValues = {},
 }: RuleToggleProps) {
   const [enabled, setEnabled] = useState(defaultEnabled);
-  const [returnCostType, setReturnCostType] = useState(defaultValues.returnShippingFee?.toLowerCase() || "buyer");
+  const [returnCostType, setReturnCostType] = useState(
+    defaultValues?.returnShippingFee
+      ? defaultValues.returnShippingFee.toLowerCase()
+      : "buyer"
+  );
+
   const [returnWindow, setReturnWindow] = useState(defaultValues.returnWindow || 7);
   const [sharedPercentage, setSharedPercentage] = useState(defaultValues.supplierShare || 50);
   const [returnPolicyTerms, setReturnPolicyTerms] = useState(defaultValues.returnPolicyTerms || "");
