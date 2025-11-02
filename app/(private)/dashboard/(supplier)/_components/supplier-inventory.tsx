@@ -1255,7 +1255,7 @@ const getStatusBadge = (status: string) => {
                         <th className="p-2 sm:p-3 w-[70px] text-left">
                           Status
                         </th>
-                        <th className="p-2 sm:p-3 w-[70px] text-left">State</th>{" "}
+                        
                         {/* NEW COLUMN */}
                         <th className="p-2 sm:p-3 text-left">Plugs</th>
                         <th className="p-2 sm:p-3 text-left">Sales</th>
@@ -1344,9 +1344,7 @@ const getStatusBadge = (status: string) => {
                               <td className="p-2 sm:p-3">
                                 {getStockStatusBadge(stockStatus)}
                               </td>
-                              <td className="p-2 sm:p-3">
-                                {getStatusBadge(item.status)}
-                              </td>
+                              
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
                                 <div className="flex items-center gap-1">
                                   <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground" />
