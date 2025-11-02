@@ -267,6 +267,8 @@ export default function CreateChannelModal({
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: "spring", duration: 0.4 }}
           >
+             {defaultData ? (
+        <>
             <div className="sticky top-0 bg-white px-5 py-4 border-b flex flex-col gap-1">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-semibold text-neutral-800">
@@ -275,7 +277,7 @@ export default function CreateChannelModal({
                 <button
                   onClick={close}
                   className="p-1 rounded-full hover:bg-neutral-100 transition"
-                >
+                > 
                   <X className="h-5 w-5 text-neutral-600" />
                 </button>
               </div>
@@ -304,6 +306,12 @@ export default function CreateChannelModal({
                   : "Create Channel"}
               </Button>
             </div>
+             </>
+      ) : (
+        <div className="p-6 text-center text-neutral-500">
+          Loading channel info...
+        </div>
+      )}
           </motion.div>
         </motion.div>
       )}
