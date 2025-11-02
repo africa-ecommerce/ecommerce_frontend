@@ -21,7 +21,7 @@ interface RuleToggleProps {
   enabled?: boolean;
   onToggle?: (value: boolean) => void;
   disabled?: boolean;
-  
+
   // Return policy specific props
   returnWindow?: number;
   returnPolicyTerms?: string;
@@ -51,28 +51,43 @@ export default function RuleToggle({
   onSupplierShareChange,
   onValidationChange,
 }: RuleToggleProps) {
-  
   const [returnWindowError, setReturnWindowError] = useState(false);
   const [supplierShareError, setSupplierShareError] = useState(false);
 
   // Validate and notify parent of validation state
   useEffect(() => {
     if (enabled && type === "return") {
-      const isReturnWindowValid = returnWindow !== null && returnWindow !== undefined && returnWindow >= 1;
-      const isSupplierShareValid = returnShippingFee.toLowerCase() !== "shared" || 
-        (supplierShare !== null && supplierShare !== undefined && supplierShare >= 1 && supplierShare <= 100);
-      
+      const isReturnWindowValid =
+        returnWindow !== null &&
+        returnWindow !== undefined &&
+        returnWindow >= 1;
+      const isSupplierShareValid =
+        returnShippingFee.toLowerCase() !== "shared" ||
+        (supplierShare !== null &&
+          supplierShare !== undefined &&
+          supplierShare >= 1 &&
+          supplierShare <= 100);
+
       const isValid = isReturnWindowValid && isSupplierShareValid;
       onValidationChange?.(isValid);
-      
+
       setReturnWindowError(!isReturnWindowValid);
-      setSupplierShareError(returnShippingFee.toLowerCase() === "shared" && !isSupplierShareValid);
+      setSupplierShareError(
+        returnShippingFee.toLowerCase() === "shared" && !isSupplierShareValid
+      );
     } else {
       onValidationChange?.(true);
       setReturnWindowError(false);
       setSupplierShareError(false);
     }
-  }, [enabled, type, returnWindow, supplierShare, returnShippingFee, onValidationChange]);
+  }, [
+    enabled,
+    type,
+    returnWindow,
+    supplierShare,
+    returnShippingFee,
+    onValidationChange,
+  ]);
 
   const handleReturnWindowChange = (value: string) => {
     if (value === "") {
@@ -123,10 +138,7 @@ export default function RuleToggle({
         <div className="mt-4 space-y-3 animate-in slide-in-from-top-2 duration-300">
           {/* RETURN WINDOW */}
           <div>
-            <Label
-              htmlFor="return-window"
-              className="text-sm text-neutral-700"
-            >
+            <Label htmlFor="return-window" className="text-sm text-neutral-700">
               Return window (days) <span className="text-red-500">*</span>
             </Label>
             <Input
@@ -151,10 +163,7 @@ export default function RuleToggle({
 
           {/* RETURN TERMS */}
           <div>
-            <Label
-              htmlFor="return-policy"
-              className="text-sm text-neutral-700"
-            >
+            <Label htmlFor="return-policy" className="text-sm text-neutral-700">
               Return policy terms
             </Label>
             <Textarea
@@ -196,7 +205,8 @@ export default function RuleToggle({
                 htmlFor="shared-percentage"
                 className="text-sm text-neutral-700"
               >
-                Your share of return cost (%) <span className="text-red-500">*</span>
+                Your share of return cost (%){" "}
+                <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="shared-percentage"
