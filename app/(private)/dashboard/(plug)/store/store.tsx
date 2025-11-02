@@ -25,6 +25,7 @@ import {
   TrendingUp,
   RefreshCw,
   AlertCircle,
+  Pencil,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import { useSwrUser } from "@/hooks/use-current-user";
 import { clearThemeCustomizerData } from "@/lib/storage-helpers";
+import StoreSettingsModal from "./(studio)/_components/store-settings-modal";
 
 export default function StorePage() {
   const {
@@ -59,6 +61,8 @@ export default function StorePage() {
   } = useUser();
 
   const [copied, setCopied] = useState(false);
+
+  const [isOpen, setIsOpen] = useState(false)
 
   // Fetch analytics data
   const {
@@ -74,6 +78,14 @@ export default function StorePage() {
     errorRetryCount: 3,
     errorRetryInterval: 5000,
   });
+
+  const handleOpen = () => {
+    setIsOpen(true)
+  }
+
+  const handleClose = () => {
+    setIsOpen(false)
+  }
 
   // Process analytics data
   const processedAnalytics = useMemo(() => {
@@ -144,7 +156,8 @@ export default function StorePage() {
               className="h-9 flex-1 sm:flex-auto"
             >
               <Link href="/dashboard/store/studio">
-                <Settings className="mr-2 h-4 w-4" />
+                <Pencil className="mr-2 h-4 w-4" />
+
                 <span>Customize</span>
               </Link>
             </Button>
@@ -153,19 +166,10 @@ export default function StorePage() {
               variant="outline"
               size="sm"
               className="h-9 flex-1 sm:flex-auto"
+              onClick={handleOpen}
             >
-              <a
-                href={
-                  user?.plug?.subdomain
-                    ? `https://${user.plug.subdomain}.pluggn.store`
-                    : `https://${user.supplier.subdomain}.pluggn.store`
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <ExternalLink className="mr-2 h-4 w-4" />
-                <span>View Store</span>
-              </a>
+              {user.supplier && <Settings className="mr-2 h-4 w-4" />}
+              <span>Settings</span>
             </Button>
           </div>
         )}
@@ -188,6 +192,11 @@ export default function StorePage() {
           dataMutate={analyticsMutate}
         />
       )}
+
+      <StoreSettingsModal
+      open={isOpen}
+      close={handleClose}
+      />
     </div>
   );
 }

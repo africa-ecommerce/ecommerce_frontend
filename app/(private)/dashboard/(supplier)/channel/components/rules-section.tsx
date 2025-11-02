@@ -1,21 +1,12 @@
 "use client";
 import RuleToggle from "./rule-toggle";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+
 
 interface RulesSectionProps {
   onChange?: (data: any) => void;
   onValidationChange?: (isValid: boolean) => void; // ✅ added
   defaultData?: {
     payOnDelivery?: boolean;
-    fulfillmentTime?: string;
     returnPolicy?: boolean;
     returnWindow?: number;
     returnPolicyTerms?: string;
@@ -30,7 +21,6 @@ export default function RulesSection({
   onValidationChange,
   defaultData = {
     payOnDelivery: false,
-    fulfillmentTime: "SAME_DAY",
     returnPolicy: false,
     returnWindow: 7,
     returnPolicyTerms: "",
@@ -59,27 +49,7 @@ export default function RulesSection({
           onToggle={(val) => handleChange("payOnDelivery", val)}
         />
 
-        {/* Fulfillment Time */}
-        <Card className="p-4 border border-neutral-200 hover:border-orange-300">
-          <Label className="text-sm text-neutral-700">Fulfilment Time</Label>
-          <Select
-            value={defaultData.fulfillmentTime || "SAME_DAY"}
-            onValueChange={(val) =>
-              handleChange("fulfillmentTime", val.toUpperCase())
-            }
-          >
-            <SelectTrigger className="mt-2 w-full border-neutral-300">
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="SAME_DAY">Same day</SelectItem>
-              <SelectItem value="NEXT_DAY">Next day</SelectItem>
-              <SelectItem value="TWO_DAYS">2 days</SelectItem>
-              <SelectItem value="THREE_PLUS_DAYS">3 days +</SelectItem>
-              <SelectItem value="WEEKEND">Weekend</SelectItem>
-            </SelectContent>
-          </Select>
-        </Card>
+       
 
         <RuleToggle
           name="Return Policy"
