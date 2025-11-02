@@ -25,24 +25,21 @@ export default function CreateChannelModal({
   const [loading, setLoading] = useState(false);
   const [rules, setRules] = useState<any>({});
   const [socials, setSocials] = useState<any>({});
+  const [isRulesValid, setIsRulesValid] = useState(true); // ✅ track validation
 
-  // 🧩 Only render once mounted (prevents hydration mismatch)
   useEffect(() => setMounted(true), []);
 
-  // 🔹 Preload defaults from backend
   useEffect(() => {
     if (defaultData) {
       setRules({
         payOnDelivery: defaultData.payOnDelivery ?? false,
         fulfillmentTime: defaultData.fulfillmentTime ?? "SAME_DAY",
         returnPolicy: defaultData.returnPolicy ?? false,
-        returnWindow: defaultData.returnWindow ?? 7,
-        returnPolicyTerms:
-          defaultData.returnPolicyTerms ||
-          "Item must be unused and in original packaging.",
+        returnWindow: defaultData.returnWindow,
+        returnPolicyTerms: defaultData.returnPolicyTerms,
         refundPolicy: defaultData.refundPolicy ?? false,
         returnShippingFee: defaultData.returnShippingFee ?? "BUYER",
-        supplierShare: defaultData.supplierShare ?? 0,
+        supplierShare: defaultData.supplierShare,
       });
 
       setSocials({
@@ -64,14 +61,12 @@ export default function CreateChannelModal({
         payOnDelivery: !!rules.payOnDelivery,
         fulfillmentTime: rules.fulfillmentTime?.toUpperCase() ?? "SAME_DAY",
         returnPolicy: !!rules.returnPolicy,
-        returnWindow: rules.returnWindow ?? 7,
-        returnPolicyTerms:
-          rules.returnPolicyTerms ||
-          "Item must be unused and in original packaging.",
+        returnWindow: rules.returnWindow,
+        returnPolicyTerms: rules.returnPolicyTerms,
         refundPolicy: !!rules.refundPolicy,
         returnShippingFee: (rules.returnShippingFee || "BUYER").toUpperCase(),
         supplierShare:
-          rules.returnShippingFee === "SHARED" ? rules.supplierShare ?? 50 : 0,
+          rules.returnShippingFee === "SHARED" ? rules.supplierShare : 0,
         phone: socials.phone || "",
         whatsapp: socials.whatsapp || "",
         telegram: socials.telegram || "",
@@ -103,7 +98,14 @@ export default function CreateChannelModal({
     }
   };
 
-  if (!mounted) return null; // 👈 Prevent hydration mismatch
+  if (!mounted) return null;
+
+  const isDisabled =
+    loading ||
+    !isRulesValid || // ✅ block when invalid
+    (rules.returnPolicy &&
+      (!rules.returnWindow ||
+        (rules.returnShippingFee === "SHARED" && !rules.supplierShare)));
 
   return (
     <AnimatePresence>
@@ -141,7 +143,11 @@ export default function CreateChannelModal({
 
             {/* CONTENT */}
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6">
-              <RulesSection onChange={handleRulesChange} defaultData={rules} />
+              <RulesSection
+                onChange={handleRulesChange}
+                defaultData={rules}
+                onValidationChange={setIsRulesValid} // ✅ listen for validation
+              />
               <SocialsSection
                 onChange={handleSocialsChange}
                 defaultData={socials}
@@ -152,8 +158,12 @@ export default function CreateChannelModal({
             <div className="sticky bottom-0 bg-white px-5 py-4 border-t">
               <Button
                 onClick={handleSubmit}
-                disabled={loading}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium"
+                disabled={isDisabled}
+                className={`w-full font-medium text-white ${
+                  isDisabled
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-orange-500 hover:bg-orange-600"
+                }`}
               >
                 {loading
                   ? defaultData

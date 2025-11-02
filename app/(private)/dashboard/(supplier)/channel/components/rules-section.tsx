@@ -12,6 +12,7 @@ import {
 
 interface RulesSectionProps {
   onChange?: (data: any) => void;
+  onValidationChange?: (isValid: boolean) => void; // ✅ added
   defaultData?: {
     payOnDelivery?: boolean;
     fulfillmentTime?: string;
@@ -26,8 +27,9 @@ interface RulesSectionProps {
 
 export default function RulesSection({
   onChange,
+  onValidationChange,
   defaultData = {
-    payOnDelivery: true,
+    payOnDelivery: false,
     fulfillmentTime: "SAME_DAY",
     returnPolicy: false,
     returnWindow: 7,
@@ -95,6 +97,7 @@ export default function RulesSection({
             handleChange("returnShippingFee", val)
           }
           onSupplierShareChange={(val) => handleChange("supplierShare", val)}
+          onValidationChange={onValidationChange} // ✅ forward validation
         />
 
         <RuleToggle
