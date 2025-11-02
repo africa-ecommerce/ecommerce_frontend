@@ -20,6 +20,8 @@ export default function ChannelView() {
 
   const channelData = data?.data || null;
 
+  console.log("channelData", channelData)
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Sticky Header */}
