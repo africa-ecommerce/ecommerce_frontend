@@ -13,39 +13,22 @@ import {
 
 interface RulesSectionProps {
   onChange?: (data: any) => void;
-  defaultData: any;
+  defaultData: any
 }
 
-export default function RulesSection({
-  onChange,
-  defaultData,
-}: RulesSectionProps) {
-  const [payOnDelivery, setPayOnDelivery] = useState(
-    defaultData?.payOnDelivery ?? true
-  );
-  const [fulfillmentTime, setFulfillmentTime] = useState(
-    defaultData?.fulfillmentTime ?? "SAME_DAY"
-  );
-  const [returnPolicy, setReturnPolicy] = useState(
-    defaultData?.returnPolicy ?? false
-  );
-  const [refundPolicy, setRefundPolicy] = useState(
-    defaultData?.refundPolicy ?? false
-  );
-  const [returnWindow, setReturnWindow] = useState(
-    defaultData?.returnWindow ?? 7
-  );
-  const [returnPolicyTerms, setReturnPolicyTerms] = useState(
-    defaultData?.returnPolicyTerms ?? ""
-  );
-  const [returnShippingFee, setReturnShippingFee] = useState(
-    defaultData?.returnShippingFee ?? "BUYER"
-  );
-  const [supplierShare, setSupplierShare] = useState(
-    defaultData?.supplierShare ?? 50
-  );
+export default function RulesSection({ onChange, defaultData }: RulesSectionProps) {
+  const [payOnDelivery, setPayOnDelivery] = useState(true);
+  const [fulfillmentTime, setFulfillmentTime] = useState("SAME_DAY");
+  const [returnPolicy, setReturnPolicy] = useState(false);
+  const [returnWindow, setReturnWindow] = useState(7);
+  const [returnPolicyTerms, setReturnPolicyTerms] = useState("");
+  const [refundPolicy, setRefundPolicy] = useState(false);
+  const [returnShippingFee, setReturnShippingFee] = useState("BUYER");
+  const [supplierShare, setSupplierShare] = useState(50);
 
-  // Sync parent
+    console.log("rulesSectiondefaultData", defaultData)
+
+
   useEffect(() => {
     onChange?.({
       payOnDelivery,
@@ -66,7 +49,6 @@ export default function RulesSection({
     refundPolicy,
     returnShippingFee,
     supplierShare,
-    onChange,
   ]);
 
   return (
@@ -80,10 +62,10 @@ export default function RulesSection({
           name="Pay on Delivery (COD)"
           description="Allow buyers to pay upon delivery."
           type="switch"
-          onToggle={(val) => setPayOnDelivery(val)}
-          defaultChecked={payOnDelivery}
+          onToggle={setPayOnDelivery}
         />
 
+        {/* Fulfillment Time */}
         <Card className="p-4 border border-neutral-200 hover:border-orange-300">
           <Label className="text-sm text-neutral-700">Fulfilment Time</Label>
           <Select
@@ -107,33 +89,18 @@ export default function RulesSection({
           name="Return Policy"
           description="Explain your return process."
           type="return"
-          onToggle={(val, extras) => {
-            setReturnPolicy(val);
-            if (extras) {
-              setReturnWindow(extras.returnWindow);
-              setReturnPolicyTerms(extras.returnPolicyTerms);
-              setReturnShippingFee(extras.returnShippingFee);
-              setSupplierShare(extras.supplierShare);
-            }
-          }}
-          defaultChecked={returnPolicy}
-          defaultValues={{
-            returnWindow,
-            returnPolicyTerms,
-            returnShippingFee,
-            supplierShare,
-          }}
+          onToggle={setReturnPolicy}
         />
 
         <RuleToggle
           name="Refund Policy"
           description="Enable refunds for returned items."
           type="refund"
-          onToggle={(val) => setRefundPolicy(val)}
-          defaultChecked={refundPolicy}
+          onToggle={setRefundPolicy}
           disabled={!returnPolicy}
         />
       </div>
     </section>
   );
 }
+
