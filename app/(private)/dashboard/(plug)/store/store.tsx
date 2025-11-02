@@ -62,7 +62,7 @@ export default function StorePage() {
 
   const [copied, setCopied] = useState(false);
 
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   // Fetch analytics data
   const {
@@ -80,12 +80,12 @@ export default function StorePage() {
   });
 
   const handleOpen = () => {
-    setIsOpen(true)
-  }
+    setIsOpen(true);
+  };
 
   const handleClose = () => {
-    setIsOpen(false)
-  }
+    setIsOpen(false);
+  };
 
   // Process analytics data
   const processedAnalytics = useMemo(() => {
@@ -157,12 +157,12 @@ export default function StorePage() {
             >
               <Link href="/dashboard/store/studio">
                 <Pencil className="mr-2 h-4 w-4" />
-
                 <span>Customize</span>
               </Link>
             </Button>
+
+            {/* ✅ Fix: Remove asChild and use regular button with onClick */}
             <Button
-              asChild
               variant="outline"
               size="sm"
               className="h-9 flex-1 sm:flex-auto"
@@ -193,10 +193,7 @@ export default function StorePage() {
         />
       )}
 
-      <StoreSettingsModal
-      open={isOpen}
-      close={handleClose}
-      />
+      <StoreSettingsModal open={isOpen} close={handleClose} />
     </div>
   );
 }
