@@ -755,8 +755,7 @@ export default function PlugDashboard() {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-3 sm:p-4 pt-0">
-        <ScrollArea className="max-h-[300px]">
-          <div className="space-y-3 pr-3">
+          <div className="space-y-3 pr-3 max-h-[300px] overflow-y-auto">
             {stockAlerts.map((alert) => (
               <div
                 key={alert.id}
@@ -800,7 +799,6 @@ export default function PlugDashboard() {
               </div>
             ))}
           </div>
-        </ScrollArea>
       </CardContent>
     </Card>
           )}
@@ -949,8 +947,8 @@ export default function PlugDashboard() {
                   
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <ScrollArea className="max-h-[230px]">
-                    <div className="space-y-3 sm:space-y-4 pr-3">
+                  
+                    <div className="space-y-3 sm:space-y-4 pr-3 max-h-[230px] overflow-y-auto">
                       {topProducts.length === 0 ? (
                         <EmptyState
                           message="No high performing products"
@@ -988,7 +986,7 @@ export default function PlugDashboard() {
                         ))
                       )}
                     </div>
-                  </ScrollArea>
+                  
                 </CardContent>
               </Card>
 
@@ -1002,8 +1000,8 @@ export default function PlugDashboard() {
                  
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <ScrollArea className="max-h-[230px]">
-                    <div className="space-y-3 sm:space-y-4 pr-3">
+                 
+                    <div className="space-y-3 sm:space-y-4 pr-3 max-h-[230px] overflow-y-auto">
                       {averageProducts.length === 0 ? (
                         <EmptyState
                           message="No average performing products"
@@ -1041,7 +1039,6 @@ export default function PlugDashboard() {
                         ))
                       )}
                     </div>
-                  </ScrollArea>
                 </CardContent>
               </Card>
 
@@ -1055,8 +1052,7 @@ export default function PlugDashboard() {
                   
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <ScrollArea className="max-h-[230px]">
-                    <div className="space-y-3 sm:space-y-4 pr-3">
+                    <div className="space-y-3 sm:space-y-4 pr-3 max-h-[230px] overflow-y-auto">
                       {bottomProducts.length === 0 ? (
                         <EmptyState
                           message="No low performing products"
@@ -1096,7 +1092,6 @@ export default function PlugDashboard() {
                         ))
                       )}
                     </div>
-                  </ScrollArea>
                 </CardContent>
               </Card>
             </div>

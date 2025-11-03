@@ -37,26 +37,29 @@ export default function SocialsSection({
               onChange={(e) => handleChange("phone", e.target.value)}
             />
           </div>
+
           <div className="flex items-center gap-3">
             <MessageCircle className="h-5 w-5 text-neutral-700" />
             <Input
-              placeholder="wa.me/yourchannel"
+              placeholder="https://wa.me/2348100000000"
               value={defaultData.whatsapp || ""}
               onChange={(e) => handleChange("whatsapp", e.target.value)}
             />
           </div>
+
           <div className="flex items-center gap-3">
             <Send className="h-5 w-5 text-neutral-700" />
             <Input
-              placeholder="@telegramchannel"
+              placeholder="https://t.me/yourchannel"
               value={defaultData.telegram || ""}
               onChange={(e) => handleChange("telegram", e.target.value)}
             />
           </div>
+
           <div className="flex items-center gap-3">
             <Instagram className="h-5 w-5 text-neutral-700" />
             <Input
-              placeholder="@instagramhandle"
+              placeholder="https://instagram.com/yourhandle"
               value={defaultData.instagram || ""}
               onChange={(e) => handleChange("instagram", e.target.value)}
             />

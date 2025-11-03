@@ -224,7 +224,7 @@ export default function ChannelView() {
               </div>
             )}
 
-            {returnPolicy && (
+            {returnPolicy && !refundPolicy && (
               <div className="flex items-center">
                 <div className="text-sm font-medium text-neutral-700">
                   Return 

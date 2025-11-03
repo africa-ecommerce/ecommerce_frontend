@@ -854,8 +854,7 @@ const stockAlerts = useMemo(() => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <ScrollArea className="max-h-[300px]">
-                    <div className="space-y-3 pr-3">
+                    <div className="space-y-3 pr-3 max-h-[300px] overflow-y-auto">
                       {stockAlerts.map((alert) => (
                         <div
                           key={alert.id}
@@ -899,7 +898,6 @@ const stockAlerts = useMemo(() => {
                         </div>
                       ))}
                     </div>
-                  </ScrollArea>
                 </CardContent>
               </Card>
             )}
@@ -971,8 +969,7 @@ const stockAlerts = useMemo(() => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <ScrollArea className="max-h-[230px]">
-                    <div className="space-y-3 sm:space-y-4 pr-3">
+                    <div className="space-y-3 sm:space-y-4 pr-3 max-h-[230px] overflow-y-auto">
                       {topProducts.length === 0 ? (
                         <EmptyState
                           message="No high performing products"
@@ -1010,7 +1007,6 @@ const stockAlerts = useMemo(() => {
                         ))
                       )}
                     </div>
-                  </ScrollArea>
                 </CardContent>
               </Card>
 
@@ -1022,8 +1018,7 @@ const stockAlerts = useMemo(() => {
                     Average Performers
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-3 sm:p-4 pt-0">
-                  <ScrollArea className="max-h-[230px]">
+                <CardContent className="p-3 sm:p-4 pt-0 max-h-[230px] overflow-y-auto">
                     <div className="space-y-3 sm:space-y-4 pr-3">
                       {averageProducts.length === 0 ? (
                         <EmptyState
@@ -1062,7 +1057,6 @@ const stockAlerts = useMemo(() => {
                         ))
                       )}
                     </div>
-                  </ScrollArea>
                 </CardContent>
               </Card>
 
@@ -1075,8 +1069,7 @@ const stockAlerts = useMemo(() => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <ScrollArea className="max-h-[230px]">
-                    <div className="space-y-3 sm:space-y-4 pr-3">
+                    <div className="space-y-3 sm:space-y-4 pr-3 max-h-[230px] overflow-y-auto">
                       {bottomProducts.length === 0 ? (
                         <EmptyState
                           message="No low performing products"
@@ -1116,7 +1109,6 @@ const stockAlerts = useMemo(() => {
                         ))
                       )}
                     </div>
-                  </ScrollArea>
                 </CardContent>
               </Card>
             </div>
