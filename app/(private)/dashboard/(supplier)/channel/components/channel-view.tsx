@@ -347,76 +347,80 @@ export default function ChannelView() {
           <div className="mt-8 text-left space-y-6">
             {/* Policies */}
             <PoliciesBlock />
-            {channelData.phone || channelData.whatsapp || channelData.telegram || channelData.instagram && (
-           <Card className="p-4 border border-neutral-200 bg-white/50 backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold text-neutral-800">
-                  Socials
-                </h2>
-                <div className="text-sm text-neutral-500">
-                  Contact & join links
-                </div>
-              </div>
+            {(channelData.phone ||
+  channelData.whatsapp ||
+  channelData.telegram ||
+  channelData.instagram) && (
+  <Card className="p-4 border border-neutral-200 bg-white/50 backdrop-blur-sm">
+    <div className="flex items-center justify-between mb-3">
+      <h2 className="text-lg font-semibold text-neutral-800">
+        Socials
+      </h2>
+      <div className="text-sm text-neutral-500">
+        Contact & join links
+      </div>
+    </div>
 
-              <div className="space-y-3">
-                {/* Phone */}
-                {channelData.phone && (
-                  <div className="flex items-center gap-3">
-                    <div className="flex-none">
-                      <Phone className="w-5 h-5 text-orange-500" />
-                    </div>
-                    <div className="text-sm">
-                      <div className="text-neutral-600 font-medium">
-                        Call us at
-                      </div>
-                      <a
-                        href={`tel:${channelData.phone}`}
-                        className="font-semibold text-blue-500 underline block"
-                      >
-                        {channelData.phone}
-                      </a>
-                    </div>
-                  </div>
-                )}
+    <div className="space-y-3">
+      {/* Phone */}
+      {channelData.phone && (
+        <div className="flex items-center gap-3">
+          <div className="flex-none">
+            <Phone className="w-5 h-5 text-orange-500" />
+          </div>
+          <div className="text-sm">
+            <div className="text-neutral-600 font-medium">
+              Call us at
+            </div>
+            <a
+              href={`tel:${channelData.phone}`}
+              className="font-semibold text-blue-500 underline block"
+            >
+              {channelData.phone}
+            </a>
+          </div>
+        </div>
+      )}
 
-                {/* Instagram */}
-                <SocialRow
-                  icon={<Instagram className="w-5 h-5" />}
-                  label="Follow us at"
-                  href={
-                    channelData.instagram
-                      ? buildInstagramUrl(channelData.instagram)
-                      : null
-                  }
-                  display={channelData.instagram}
-                />
+      {/* Instagram */}
+      <SocialRow
+        icon={<Instagram className="w-5 h-5 text-pink-500" />}
+        label="Follow us at"
+        href={
+          channelData.instagram
+            ? buildInstagramUrl(channelData.instagram)
+            : null
+        }
+        display={channelData.instagram}
+      />
 
-                {/* WhatsApp */}
-                <SocialRow
-                  icon={<MessageCircle className="w-5 h-5" />}
-                  label="Join our WhatsApp community"
-                  href={
-                    channelData.whatsapp
-                      ? buildWhatsAppUrl(channelData.whatsapp)
-                      : null
-                  }
-                  display={channelData.whatsapp}
-                />
+      {/* WhatsApp */}
+      <SocialRow
+        icon={<MessageCircle className="w-5 h-5 text-green-500" />}
+        label="Join our WhatsApp community"
+        href={
+          channelData.whatsapp
+            ? buildWhatsAppUrl(channelData.whatsapp)
+            : null
+        }
+        display={channelData.whatsapp}
+      />
 
-                {/* Telegram */}
-                <SocialRow
-                  icon={<Send className="w-5 h-5" />}
-                  label="Join our Telegram group"
-                  href={
-                    channelData.telegram
-                      ? buildTelegramUrl(channelData.telegram)
-                      : null
-                  }
-                  display={channelData.telegram}
-                />
-              </div>
-            </Card>
-            )}
+      {/* Telegram */}
+      <SocialRow
+        icon={<Send className="w-5 h-5 text-sky-500" />}
+        label="Join our Telegram group"
+        href={
+          channelData.telegram
+            ? buildTelegramUrl(channelData.telegram)
+            : null
+        }
+        display={channelData.telegram}
+      />
+    </div>
+  </Card>
+)}
+
             
           </div>
         )}

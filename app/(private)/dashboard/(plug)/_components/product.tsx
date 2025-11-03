@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -71,7 +71,7 @@ import { EditPriceModal } from "./edit-price-modal";
 import { ShareModal } from "./share-modal";
 import { useUser } from "@/app/_components/provider/UserContext";
 import { WriteReviewModal } from "./write-review-modal";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { SwipeGuide, useSwipeGuide } from "@/app/_components/swipe-guide";
 
 const TipSkeleton = () => (
@@ -299,9 +299,22 @@ export default function Products() {
   const { data, error, isLoading, mutate } = useSWR("/api/plug/products/");
   const products = Array.isArray(data?.data) ? data?.data : [];
 
+
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
+
+    const pathname = usePathname();
+
+  useEffect(() => {
+    if (window.location.hash) {
+      const section = document.querySelector(window.location.hash);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [pathname]);
 
   const deleteProductFn = async (productId: string) => {
     const response = await fetch(`/api/plug/products/${productId}`, {
@@ -1317,7 +1330,7 @@ export default function Products() {
         )}
 
         {/* Order Management Hub - Better mobile tabs */}
-        <section className="space-y-3 sm:space-y-4">
+        <section id="orders" className="space-y-3 sm:space-y-4">
           <div>
             <h2 className="text-base sm:text-lg font-semibold">
               Order Management

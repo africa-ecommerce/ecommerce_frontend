@@ -461,6 +461,8 @@ const ProductLoadingSkeleton = () => (
 export default function SupplierDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  
+
   const {
     userData: { user },
   } = useUser();
@@ -574,37 +576,37 @@ export default function SupplierDashboard() {
       errorRetryInterval: 5000,
     })
 
-  const stockAlerts = useMemo(() => {
-    if (!products.length) return [];
+const stockAlerts = useMemo(() => {
+  if (!products.length) return [];
 
-    const outOfStockItems = products
-      .filter((item: any) => getTotalStock(item) === 0)
-      .map((item: any) => ({
-        id: item.id,
-        product: item.name,
-        status: "Out of Stock",
-        units: "0 units left",
-        salesRate: "Urgent attention needed",
-        progress: 0,
-      }));
+  const outOfStockItems = products
+    .filter((item: any) => getTotalStock(item) === 0)
+    .map((item: any) => ({
+      id: item.id,
+      product: item.name,
+      status: "Out of Stock",
+      units: "0 units left",
+      salesRate: "Urgent attention needed",
+      progress: 0,
+    }));
 
-    const lowStockItems = products
-      .filter(
-        (item: any) =>
-          getTotalStock(item) !== undefined &&
-          getTotalStock(item) > 0 &&
-          getTotalStock(item) <= 5
-      )
-      .map((item: any) => ({
-        id: item.id,
-        product: item.name,
-        status: "Low Stock",
-        units: `Only ${formatQuantity(getTotalStock(item))} units left`,
-        salesRate: "Restock recommended",
-      }));
+  const lowStockItems = products
+    .filter(
+      (item: any) =>
+        getTotalStock(item) !== undefined &&
+        getTotalStock(item) > 0 &&
+        getTotalStock(item) <= 5
+    )
+    .map((item: any) => ({
+      id: item.id,
+      product: item.name,
+      status: "Low Stock",
+      units: `Only ${formatQuantity(getTotalStock(item))} units left`,
+      salesRate: "Restock recommended",
+    }));
 
-    return [...outOfStockItems, ...lowStockItems].slice(0, 3);
-  }, [products]);
+  return [...outOfStockItems, ...lowStockItems]; // Removed .slice(0, 3)
+}, [products]);
 
   const {
     data: ordersData,
@@ -706,132 +708,133 @@ export default function SupplierDashboard() {
               Financial Overview
             </h2>
           </div>
-          { paymentError || errorData ?
-          <ErrorState onRetry={
-            () => {
-            mutate();
-            paymentMutate()
-          }
-        } />
-          :
-          <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            <Card className="h-full border rounded-lg">
-              <CardHeader className="p-2 sm:p-3 pb-0">
-                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Total Earnings
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent className="text-xs">
-                      <p>Total amount earned from sales</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 sm:p-3 pt-0">
-                {paymentLoading || isLoading ? (
-                  <Skeleton className="h-6 w-16" />
-                ) : (
-                  <div className="text-base sm:text-lg font-bold">
-                    {paymentData
-                      ? formatPrice(String(paymentData.data.totalEarnings))
-                      : "₦0"}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          {paymentError || errorData ? (
+            <ErrorState
+              onRetry={() => {
+                mutate();
+                paymentMutate();
+              }}
+            />
+          ) : (
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <Card className="h-full border rounded-lg">
+                <CardHeader className="p-2 sm:p-3 pb-0">
+                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                    Total Earnings
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">
+                        <p>Total amount earned from sales</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 sm:p-3 pt-0">
+                  {paymentLoading || isLoading ? (
+                    <Skeleton className="h-6 w-16" />
+                  ) : (
+                    <div className="text-base sm:text-lg font-bold">
+                      {paymentData
+                        ? formatPrice(String(paymentData.data.totalEarnings))
+                        : "₦0"}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-            <Card className="h-full border rounded-lg">
-              <CardHeader className="p-2 sm:p-3 pb-0">
-                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Inventory Value
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent className="text-xs">
-                      <p>Total inventory value</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 sm:p-3 pt-0">
-                {paymentLoading || isLoading ? (
-                  <Skeleton className="h-6 w-16" />
-                ) : (
-                  <div className="text-base sm:text-lg font-bold text-green-500">
-                    {`₦${stats.inventoryValue.toLocaleString()}`}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+              <Card className="h-full border rounded-lg">
+                <CardHeader className="p-2 sm:p-3 pb-0">
+                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                    Inventory Value
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">
+                        <p>Total inventory value</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 sm:p-3 pt-0">
+                  {paymentLoading || isLoading ? (
+                    <Skeleton className="h-6 w-16" />
+                  ) : (
+                    <div className="text-base sm:text-lg font-bold text-green-500">
+                      {`₦${stats.inventoryValue.toLocaleString()}`}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-            <Card className="h-full border rounded-lg">
-              <CardHeader className="p-2 sm:p-3 pb-0">
-                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Pending Payments
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent className="text-xs">
-                      <p>Money in escrow to be released</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 sm:p-3 pt-0">
-                {paymentLoading || isLoading ? (
-                  <Skeleton className="h-6 w-16" />
-                ) : (
-                  <div className="text-base sm:text-lg font-bold">
-                    {paymentData
-                      ? formatPrice(String(paymentData.data.lockedAmount))
-                      : "₦0"}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+              <Card className="h-full border rounded-lg">
+                <CardHeader className="p-2 sm:p-3 pb-0">
+                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                    Pending Payments
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">
+                        <p>Money in escrow to be released</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 sm:p-3 pt-0">
+                  {paymentLoading || isLoading ? (
+                    <Skeleton className="h-6 w-16" />
+                  ) : (
+                    <div className="text-base sm:text-lg font-bold">
+                      {paymentData
+                        ? formatPrice(String(paymentData.data.lockedAmount))
+                        : "₦0"}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
-            <Card className="h-full border rounded-lg">
-              <CardHeader className="p-2 sm:p-3 pb-0">
-                <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                  Available Balance
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3 w-3 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent className="text-xs">
-                      <p>Money ready for withdrawal</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 sm:p-3 pt-0">
-                {paymentLoading || isLoading ? (
-                  <Skeleton className="h-6 w-16" />
-                ) : (
-                  <div className="text-base sm:text-lg font-bold">
-                    {paymentData
-                      ? formatPrice(String(paymentData.data.unlockedAmount))
-                      : "₦0"}
-                  </div>
-                )}
-              
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full mt-1 h-6 text-xs"
-                  onClick={() => setIsModalOpen(true)}
-                >
-                  <Wallet className="h-2.5 w-2.5 mr-1" /> Withdraw
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-}
+              <Card className="h-full border rounded-lg">
+                <CardHeader className="p-2 sm:p-3 pb-0">
+                  <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
+                    Available Balance
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent className="text-xs">
+                        <p>Money ready for withdrawal</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-2 sm:p-3 pt-0">
+                  {paymentLoading || isLoading ? (
+                    <Skeleton className="h-6 w-16" />
+                  ) : (
+                    <div className="text-base sm:text-lg font-bold">
+                      {paymentData
+                        ? formatPrice(String(paymentData.data.unlockedAmount))
+                        : "₦0"}
+                    </div>
+                  )}
 
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-1 h-6 text-xs"
+                    onClick={() => setIsModalOpen(true)}
+                  >
+                    <Wallet className="h-2.5 w-2.5 mr-1" /> Withdraw
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Stock Alerts Section */}
           {/* Stock Alerts Section */}
           <div className="space-y-3 sm:space-y-4">
             {errorData ? (
@@ -851,58 +854,59 @@ export default function SupplierDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                    {stockAlerts.map((alert) => (
-                      <div
-                        key={alert.id}
-                        className="flex items-center gap-2 sm:gap-3"
-                      >
+                  <ScrollArea className="max-h-[300px]">
+                    <div className="space-y-3 pr-3">
+                      {stockAlerts.map((alert) => (
                         <div
-                          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                            alert.status === "Out of Stock"
-                              ? "bg-red-100"
-                              : "bg-amber-100"
-                          }`}
+                          key={alert.id}
+                          className="flex items-center gap-2 sm:gap-3"
                         >
-                          <AlertCircle
-                            className={`h-4 w-4 sm:h-5 sm:w-5 ${
+                          <div
+                            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                               alert.status === "Out of Stock"
-                                ? "text-red-600"
-                                : "text-amber-600"
+                                ? "bg-red-100"
+                                : "bg-amber-100"
                             }`}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-center gap-1">
-                            <p className="text-xs sm:text-sm font-medium truncate capitalize">
-                              {truncateText(alert.product, 20)}
-                            </p>
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] sm:text-xs ${
+                          >
+                            <AlertCircle
+                              className={`h-4 w-4 sm:h-5 sm:w-5 ${
                                 alert.status === "Out of Stock"
-                                  ? "text-red-600 border-red-200 bg-red-50"
-                                  : "text-amber-600 border-amber-200 bg-amber-50"
+                                  ? "text-red-600"
+                                  : "text-amber-600"
                               }`}
-                            >
-                              {alert.status}
-                            </Badge>
+                            />
                           </div>
-                          <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
-                            <p>{alert.units}</p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex justify-between items-center gap-1">
+                              <p className="text-xs sm:text-sm font-medium truncate capitalize">
+                                {truncateText(alert.product, 20)}
+                              </p>
+                              <Badge
+                                variant="outline"
+                                className={`text-[10px] sm:text-xs ${
+                                  alert.status === "Out of Stock"
+                                    ? "text-red-600 border-red-200 bg-red-50"
+                                    : "text-amber-600 border-amber-200 bg-amber-50"
+                                }`}
+                              >
+                                {alert.status}
+                              </Badge>
+                            </div>
+                            <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
+                              <p>{alert.units}</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </CardContent>
               </Card>
             )}
           </div>
         </section>
 
-        
-          <section className="space-y-3 sm:space-y-4">
+        <section className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
             <h2 className="text-sm sm:text-base font-semibold">
               Shipped Orders
@@ -913,7 +917,7 @@ export default function SupplierDashboard() {
               asChild
               className="text-xs bg-transparent"
             >
-              <Link href="/dashboard/product">View All Orders</Link>
+              <Link href="/dashboard/inventory#orders">View All Orders</Link>
             </Button>
           </div>
 
@@ -946,14 +950,6 @@ export default function SupplierDashboard() {
                 </p>
               )}
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-              className="text-xs bg-transparent"
-            >
-              <Link href="/dashboard/product">View All Products</Link>
-            </Button>
           </div>
 
           {isLoading ? (
@@ -973,12 +969,9 @@ export default function SupplierDashboard() {
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     High Performers
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground">
-                    {averageSales}+ units (above average)
-                  </p>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <ScrollArea className="max-h-[250px]">
+                  <ScrollArea className="max-h-[230px]">
                     <div className="space-y-3 sm:space-y-4 pr-3">
                       {topProducts.length === 0 ? (
                         <EmptyState
@@ -1028,12 +1021,9 @@ export default function SupplierDashboard() {
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     Average Performers
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground">
-                    {Math.round(averageSales * 0.5)}-{averageSales - 1} units
-                  </p>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <ScrollArea className="max-h-[250px]">
+                  <ScrollArea className="max-h-[230px]">
                     <div className="space-y-3 sm:space-y-4 pr-3">
                       {averageProducts.length === 0 ? (
                         <EmptyState
@@ -1083,12 +1073,9 @@ export default function SupplierDashboard() {
                     <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                     Low Performers
                   </CardTitle>
-                  <p className="text-xs text-muted-foreground">
-                    Under {Math.round(averageSales * 0.5)} units
-                  </p>
                 </CardHeader>
                 <CardContent className="p-3 sm:p-4 pt-0">
-                  <ScrollArea className="max-h-[250px]">
+                  <ScrollArea className="max-h-[230px]">
                     <div className="space-y-3 sm:space-y-4 pr-3">
                       {bottomProducts.length === 0 ? (
                         <EmptyState

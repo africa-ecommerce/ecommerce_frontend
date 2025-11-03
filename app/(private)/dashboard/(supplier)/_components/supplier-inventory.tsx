@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -71,7 +71,7 @@ import { StockPriceModal } from "./update-modal";
 import { AddProductModal } from "./add-product-modal";
 import { UpdateProductModal } from "./update-product-modal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ShareModal } from "../../(plug)/_components/share-modal";
 
 const LoadingSkeleton = () => (
@@ -312,6 +312,17 @@ export default function Inventory() {
     },
     deleteProductFn
   );
+
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (window.location.hash) {
+      const section = document.querySelector(window.location.hash);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [pathname]);
 
   const {
     userData: { user },
@@ -627,60 +638,9 @@ export default function Inventory() {
       );
     };
 
-  const getStatusColor = (status: string) => {
-  switch (status?.toUpperCase()) {
-    case "PENDING":
-      return "text-orange-500";
-    case "APPROVED":
-      return "text-green-500";
-    case "QUERIED":
-      return "text-red-500";
-    default:
-      return "text-muted-foreground";
-  }
-};
 
 
-const getStatusBadge = (status: string) => {
-  switch (status?.toUpperCase()) {
-    case "PENDING":
-      return (
-        <Badge
-          variant="outline"
-          className="text-xs py-0 px-2 text-orange-500 border-orange-200 bg-orange-50 whitespace-nowrap"
-        >
-          PENDING
-        </Badge>
-      );
-    case "APPROVED":
-      return (
-        <Badge
-          variant="outline"
-          className="text-xs py-0 px-2 text-green-500 border-green-200 bg-green-50 whitespace-nowrap"
-        >
-          APPROVED
-        </Badge>
-      );
-    case "QUERIED":
-      return (
-        <Badge
-          variant="destructive"
-          className="text-xs py-0 px-2 whitespace-nowrap"
-        >
-          QUERIED
-        </Badge>
-      );
-    default:
-      return (
-        <Badge
-          variant="outline"
-          className="text-xs py-0 px-2 text-muted-foreground border-muted bg-muted/50 whitespace-nowrap"
-        >
-          UNKNOWN
-        </Badge>
-      );
-  }
-};
+
 
   // Get current items for pagination
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -1027,62 +987,7 @@ const getStatusBadge = (status: string) => {
           </div>
         </section>
 
-        {isLoading && <TipSkeleton />}
-
-        {!isLoading && (
-          <Card className="bg-amber-100 border-amber-200 mb-3 sm:mb-4">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex gap-2 sm:gap-3 items-center">
-                <div className="rounded-full bg-amber-200 p-1.5 flex-shrink-0">
-                  <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-xs sm:text-sm">
-                    Looking to Add Products?
-                  </h3>
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">
-                    Want to upload your first product, message us let help you
-                    get started.
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="ml-auto text-xs h-7 sm:h-8 hidden md:flex"
-                  onClick={() => {
-                    const phoneNumber = "09151425001";
-                    const message =
-                      "Hi! I would like to upload/add products to my store. Can you help me get started?";
-                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
-                      message
-                    )}`;
-                    window.open(whatsappUrl, "_blank");
-                  }}
-                >
-                  <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Message Us
-                </Button>
-              </div>
-
-              {/* Mobile button - full width below content */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-xs h-7 mt-3 md:hidden"
-                onClick={() => {
-                  const phoneNumber = "2349151425001";
-                  const message =
-                    "Hi! I’m looking to add products to my store. Please help me get started.";
-                  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
-                    message
-                  )}`;
-                  window.open(whatsappUrl, "_blank");
-                }}
-              >
-                <Users className="h-3 w-3 mr-1" /> Message Us
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+        
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
           {/* Filters and Search */}
@@ -1177,42 +1082,7 @@ const getStatusBadge = (status: string) => {
                 >
                   In Stock
                 </Button>
-                {/* NEW STATUS FILTERS */}
-                <Button
-                  variant={
-                    selectedStatus === "approved" ? "default" : "outline"
-                  }
-                  size="sm"
-                  onClick={() => {
-                    setSelectedStatus("approved");
-                    setCurrentPage(1);
-                  }}
-                  className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
-                >
-                  Approved
-                </Button>
-                <Button
-                  variant={selectedStatus === "pending" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    setSelectedStatus("pending");
-                    setCurrentPage(1);
-                  }}
-                  className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
-                >
-                  Pending
-                </Button>
-                <Button
-                  variant={selectedStatus === "queried" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    setSelectedStatus("queried");
-                    setCurrentPage(1);
-                  }}
-                  className="text-xs h-8 max-w-[360px]:h-7 whitespace-nowrap px-2.5 max-w-[360px]:px-2 min-w-0"
-                >
-                  Queried
-                </Button>
+               
               </div>
               <div className="">
                 <Select
@@ -1255,7 +1125,7 @@ const getStatusBadge = (status: string) => {
                         <th className="p-2 sm:p-3 w-[70px] text-left">
                           Status
                         </th>
-                        
+
                         {/* NEW COLUMN */}
                         <th className="p-2 sm:p-3 text-left">Plugs</th>
                         <th className="p-2 sm:p-3 text-left">Sales</th>
@@ -1344,7 +1214,7 @@ const getStatusBadge = (status: string) => {
                               <td className="p-2 sm:p-3">
                                 {getStockStatusBadge(stockStatus)}
                               </td>
-                              
+
                               <td className="p-2 sm:p-3 text-xs sm:text-sm whitespace-nowrap">
                                 <div className="flex items-center gap-1">
                                   <Users className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-muted-foreground" />
@@ -1447,8 +1317,7 @@ const getStatusBadge = (status: string) => {
           </div>
         </section>
 
-
- {isLoading ? (
+        {isLoading ? (
           <TipSkeleton />
         ) : (
           <Card className="bg-blue-50 border-blue-200 mb-3 sm:mb-4">
@@ -1470,107 +1339,106 @@ const getStatusBadge = (status: string) => {
           </Card>
         )}
 
+        <section id="orders" className="space-y-3 sm:space-y-4">
+          <div>
+            <h2 className="text-base sm:text-lg font-semibold">
+              Order Management
+            </h2>
+          </div>
 
-        <section className="space-y-3 sm:space-y-4">
-                  <div>
-                    <h2 className="text-base sm:text-lg font-semibold">
-                      Order Management
-                    </h2>
-                  </div>
-        
-                  <Tabs value={activeOrderTab} onValueChange={setActiveOrderTab}>
-                    <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10 overflow-x-auto">
-                      <TabsTrigger
-                        value="active"
-                        className="text-[10px] sm:text-xs whitespace-nowrap"
-                      >
-                        Pending
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="shipped"
-                        className="text-[10px] sm:text-xs whitespace-nowrap"
-                      >
-                        Shipped
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="delivered"
-                        className="text-[10px] sm:text-xs whitespace-nowrap"
-                      >
-                        Delivered
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="cancelled"
-                        className="text-[10px] sm:text-xs whitespace-nowrap"
-                      >
-                        Cancelled
-                      </TabsTrigger>
-                    </TabsList>
-        
-                    <TabsContent value="active" className="mt-3 sm:mt-4">
-                      {ordersLoading ? (
-                        <LoadingOrdersSkeleton />
-                      ) : ordersError ? (
-                        <ErrorOrdersState onRetry={() => ordersMutate()} />
-                      ) : orders.length === 0 ? (
-                        <EmptyOrdersState status="active" />
-                      ) : (
-                        <div className={scrollableClasses}>
-                          {orders.map((order: any) => (
-                            <OrderCard key={order.id} order={order} />
-                          ))}
-                        </div>
-                      )}
-                    </TabsContent>
-        
-                    <TabsContent value="shipped" className="mt-3 sm:mt-4">
-                      {ordersLoading ? (
-                        <LoadingOrdersSkeleton />
-                      ) : ordersError ? (
-                        <ErrorOrdersState onRetry={() => ordersMutate()} />
-                      ) : orders.length === 0 ? (
-                        <EmptyOrdersState status="shipped" />
-                      ) : (
-                        <div className={scrollableClasses}>
-                          {orders.map((order: any) => (
-                            <OrderCard key={order.id} order={order} />
-                          ))}
-                        </div>
-                      )}
-                    </TabsContent>
-        
-                    <TabsContent value="delivered" className="mt-3 sm:mt-4">
-                      {ordersLoading ? (
-                        <LoadingOrdersSkeleton />
-                      ) : ordersError ? (
-                        <ErrorOrdersState onRetry={() => ordersMutate()} />
-                      ) : orders.length === 0 ? (
-                        <EmptyOrdersState status="delivered" />
-                      ) : (
-                        <div className={scrollableClasses}>
-                          {orders.map((order: any) => (
-                            <OrderCard key={order.id} order={order} />
-                          ))}
-                        </div>
-                      )}
-                    </TabsContent>
-        
-                    <TabsContent value="cancelled" className="mt-3 sm:mt-4">
-                      {ordersLoading ? (
-                        <LoadingOrdersSkeleton />
-                      ) : ordersError ? (
-                        <ErrorOrdersState onRetry={() => ordersMutate()} />
-                      ) : orders.length === 0 ? (
-                        <EmptyOrdersState status="cancelled" />
-                      ) : (
-                        <div className={scrollableClasses}>
-                          {orders.map((order: any) => (
-                            <OrderCard key={order.id} order={order} />
-                          ))}
-                        </div>
-                      )}
-                    </TabsContent>
-                  </Tabs>
-                </section>
+          <Tabs value={activeOrderTab} onValueChange={setActiveOrderTab}>
+            <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10 overflow-x-auto">
+              <TabsTrigger
+                value="active"
+                className="text-[10px] sm:text-xs whitespace-nowrap"
+              >
+                Pending
+              </TabsTrigger>
+              <TabsTrigger
+                value="shipped"
+                className="text-[10px] sm:text-xs whitespace-nowrap"
+              >
+                Shipped
+              </TabsTrigger>
+              <TabsTrigger
+                value="delivered"
+                className="text-[10px] sm:text-xs whitespace-nowrap"
+              >
+                Delivered
+              </TabsTrigger>
+              <TabsTrigger
+                value="cancelled"
+                className="text-[10px] sm:text-xs whitespace-nowrap"
+              >
+                Cancelled
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="active" className="mt-3 sm:mt-4">
+              {ordersLoading ? (
+                <LoadingOrdersSkeleton />
+              ) : ordersError ? (
+                <ErrorOrdersState onRetry={() => ordersMutate()} />
+              ) : orders.length === 0 ? (
+                <EmptyOrdersState status="active" />
+              ) : (
+                <div className={scrollableClasses}>
+                  {orders.map((order: any) => (
+                    <OrderCard key={order.id} order={order} />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="shipped" className="mt-3 sm:mt-4">
+              {ordersLoading ? (
+                <LoadingOrdersSkeleton />
+              ) : ordersError ? (
+                <ErrorOrdersState onRetry={() => ordersMutate()} />
+              ) : orders.length === 0 ? (
+                <EmptyOrdersState status="shipped" />
+              ) : (
+                <div className={scrollableClasses}>
+                  {orders.map((order: any) => (
+                    <OrderCard key={order.id} order={order} />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="delivered" className="mt-3 sm:mt-4">
+              {ordersLoading ? (
+                <LoadingOrdersSkeleton />
+              ) : ordersError ? (
+                <ErrorOrdersState onRetry={() => ordersMutate()} />
+              ) : orders.length === 0 ? (
+                <EmptyOrdersState status="delivered" />
+              ) : (
+                <div className={scrollableClasses}>
+                  {orders.map((order: any) => (
+                    <OrderCard key={order.id} order={order} />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="cancelled" className="mt-3 sm:mt-4">
+              {ordersLoading ? (
+                <LoadingOrdersSkeleton />
+              ) : ordersError ? (
+                <ErrorOrdersState onRetry={() => ordersMutate()} />
+              ) : orders.length === 0 ? (
+                <EmptyOrdersState status="cancelled" />
+              ) : (
+                <div className={scrollableClasses}>
+                  {orders.map((order: any) => (
+                    <OrderCard key={order.id} order={order} />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </section>
 
         <AddProductModal
           open={addProductModalOpen}
@@ -1578,12 +1446,12 @@ const getStatusBadge = (status: string) => {
         />
 
         <ShareModal
-                  open={shareModalOpen}
-                  onOpenChange={setShareModalOpen}
-                  productName={productToShare?.name || ""}
-                  productId={productToShare?.id || ""}
-                  plugId={user?.supplier.id}
-                />
+          open={shareModalOpen}
+          onOpenChange={setShareModalOpen}
+          productName={productToShare?.name || ""}
+          productId={productToShare?.id || ""}
+          plugId={user?.supplier.id}
+        />
 
         <UpdateProductModal
           itemData={currentItemData}
