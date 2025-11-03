@@ -55,6 +55,9 @@ import { useSwrUser } from "@/hooks/use-current-user";
 import { clearThemeCustomizerData } from "@/lib/storage-helpers";
 import StoreSettingsModal from "./(studio)/_components/store-settings-modal";
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+
 export default function StorePage() {
   const {
     userData: { user },
@@ -63,6 +66,9 @@ export default function StorePage() {
   const [copied, setCopied] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
+
+    const { data, error, isLoading, mutate } = useSWR(`${user.supplier ? "/api/store/policy" : ""}`, fetcher);
+
 
   // Fetch analytics data
   const {
@@ -86,6 +92,9 @@ export default function StorePage() {
   const handleClose = () => {
     setIsOpen(false);
   };
+
+    const policyData = data?.data || null;
+
 
   // Process analytics data
   const processedAnalytics = useMemo(() => {
@@ -193,7 +202,7 @@ export default function StorePage() {
         />
       )}
 
-      <StoreSettingsModal open={isOpen} close={handleClose} />
+      <StoreSettingsModal open={isOpen} close={handleClose} defaultData={policyData} onUpdated={mutate}/>
     </div>
   );
 }

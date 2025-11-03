@@ -14,6 +14,8 @@ interface StoreSettingsModalProps {
   onUpdated?: () => void;
 }
 
+
+
 export default function StoreSettingsModal({
   open,
   close,
@@ -60,7 +62,7 @@ export default function StoreSettingsModal({
         
       };
 
-      const res = await fetch("/api/channel", {
+      const res = await fetch("/api/store/policy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
