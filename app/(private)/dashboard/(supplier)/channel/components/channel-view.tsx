@@ -139,13 +139,13 @@ export default function ChannelView() {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-neutral-900 block truncate"
+              className="font-semibold text-blue-500 underline block truncate"
             >
               {display}
             </a>
           ) : (
             // clickable phone handled separately below
-            <div className="font-semibold text-neutral-900">{display}</div>
+            <div className="font-semibold text-blue-500 underline">{display}</div>
           )}
         </div>
       </div>
@@ -187,9 +187,9 @@ export default function ChannelView() {
       `Pay on Delivery option allows buyers to choose to pay when the item is handed to them at delivery. 
       This is an optional payment method and does not force all buyers to pay on delivery.`,
       `When Pay on Delivery is configured for this channel, the buyer will still pay certain amounts at checkout immediately:`,
-      `• Delivery charge — the cost for the courier to deliver the order (calculated per your checkout settings).`,
+      `• Delivery charge — the cost for the courier to deliver the order.`,
       `• Commitment fee — a non-refundable fee of ₦${COMMITMENT_FEE.toLocaleString()} collected at checkout to secure the buyer's intent. This small fee helps reduce no-shows and covers handling/processing. The buyer may still defer the main item price to pay on delivery if they selected that option.`,
-      `In short: Pay on Delivery gives the buyer the choice to pay the order total on receipt, but delivery costs and the commitment fee are charged up-front at checkout.`,
+      
     ].join(" ");
 
     // Return / Refund combinations
@@ -209,7 +209,7 @@ export default function ChannelView() {
       ].join(" ");
     } else if (!returnPolicy) {
       returnRefundExplanation = [
-        `Returns are disabled — this channel does not accept returns. All sales are final unless otherwise stated. Please ensure buyers understand this before checkout.`,
+        `Returns are disabled — this channel does not accept returns. All sales are final unless otherwise stated.`,
       ].join(" ");
     }
 
@@ -234,12 +234,6 @@ export default function ChannelView() {
           <h2 className="text-lg font-semibold text-neutral-800">
             Policies & Commitments
           </h2>
-          <div className="text-sm text-neutral-600">
-            Commitment fee:{" "}
-            <span className="font-semibold">
-              ₦{COMMITMENT_FEE.toLocaleString()}
-            </span>
-          </div>
         </div>
 
         <div className="mt-3 space-y-4 text-left">
@@ -266,20 +260,22 @@ export default function ChannelView() {
               {returnRefundExplanation}
             </p>
           </div>
-
-          <div>
-            <div className="flex items-center">
-              <div className="text-sm font-medium text-neutral-700">
-                Return shipping responsibility
+          {supplierShare > 0 && (
+            <div>
+              <div className="flex items-center">
+                <div className="text-sm font-medium text-neutral-700">
+                  Return shipping responsibility
+                </div>
               </div>
+              <p className="mt-2 text-sm font-semibold text-neutral-800 leading-relaxed">
+                {returnShippingExplanation}
+              </p>
             </div>
-            <p className="mt-2 text-sm font-semibold text-neutral-800 leading-relaxed">
-              {returnShippingExplanation}
-            </p>
-          </div>
+          )}
 
           {/* Return policy terms shown in a textarea-style box */}
-          <div>
+          {returnPolicy && (
+             <div>
             <div className="flex items-center justify-between">
               <div className="text-sm font-medium text-neutral-700">
                 Your return policy terms
@@ -299,6 +295,8 @@ export default function ChannelView() {
               window.
             </div>
           </div>
+          )}
+         
         </div>
       </Card>
     );
@@ -369,7 +367,7 @@ export default function ChannelView() {
                             </div>
                             <a
                               href={`tel:${channelData.phone}`}
-                              className="font-semibold text-neutral-900 block"
+                              className="font-semibold text-blue-500 underline block"
                             >
                               {channelData.phone}
                             </a>
