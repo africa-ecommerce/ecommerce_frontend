@@ -310,7 +310,7 @@ export default function ChannelView() {
       </header>
 
       {/* Main content. Add top padding so header won't overlap the title */}
-      <main className="flex-1 flex items-center justify-center px-4 pt-36 pb-12">
+      <main className="flex-1 flex items-center justify-center px-4 pt-20 pb-12">
         <div className="w-full max-w-md lg:max-w-lg text-center space-y-8 animate-in fade-in duration-700">
           {isLoading ? (
             <p className="text-neutral-500 text-sm animate-pulse">
@@ -344,6 +344,11 @@ export default function ChannelView() {
               {channelData && (
                 <div className="mt-8 text-left space-y-6">
                   {/* Socials at top */}
+                  
+
+                  {/* Policies */}
+                  <PoliciesBlock />
+
                   <Card className="p-4 border border-neutral-200 bg-white/50 backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-3">
                       <h2 className="text-lg font-semibold text-neutral-800">
@@ -412,9 +417,6 @@ export default function ChannelView() {
                       />
                     </div>
                   </Card>
-
-                  {/* Policies */}
-                  <PoliciesBlock />
                 </div>
               )}
             </>
