@@ -71,8 +71,6 @@
 //   );
 // }
 
-
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -81,8 +79,8 @@ import {
   ArrowRight,
   Instagram,
   Phone,
-  Send,
   MessageCircle,
+  Send,
 } from "lucide-react";
 import { useState } from "react";
 import useSWR from "swr";
@@ -100,58 +98,78 @@ export default function ChannelView() {
   const onOpen = () => setShowModal(true);
   const onClose = () => setShowModal(false);
 
-  const renderSocials = () => {
-    const socials = [];
-
-    if (channelData?.phone)
-      socials.push({
-        icon: <Phone className="w-5 h-5 text-orange-500" />,
-        label: "Call us at",
-        value: channelData.phone,
-      });
-
-    if (channelData?.instagram)
-      socials.push({
-        icon: <Instagram className="w-5 h-5 text-pink-500" />,
-        label: "Follow us at",
-        value: channelData.instagram,
-      });
-
-    if (channelData?.whatsapp)
-      socials.push({
-        icon: <MessageCircle className="w-5 h-5 text-green-500" />,
-        label: "Join our WhatsApp community",
-        value: channelData.whatsapp,
-      });
-
-    if (channelData?.telegram)
-      socials.push({
-        icon: <Send className="w-5 h-5 text-sky-500" />,
-        label: "Join our Telegram group",
-        value: channelData.telegram,
-      });
-
-    return socials.length ? (
-      <Card className="p-4 border border-neutral-200 bg-white/50 backdrop-blur-sm">
-        <h2 className="text-lg font-semibold text-neutral-800 mb-3">Socials</h2>
-        <div className="space-y-2">
-          {socials.map((s, i) => (
-            <div key={i} className="flex items-center gap-3">
-              {s.icon}
-              <p className="text-sm font-medium text-neutral-700">
-                {s.label}:{" "}
-                <span className="font-semibold text-neutral-900">
-                  {s.value}
-                </span>
-              </p>
-            </div>
-          ))}
-        </div>
-      </Card>
-    ) : null;
+  // helpers to build social links (handles either raw handles/numbers or full urls)
+  const buildInstagramUrl = (handle: string) =>
+    handle?.startsWith("http")
+      ? handle
+      : `https://instagram.com/${handle.replace(/^@/, "")}`;
+  const buildTelegramUrl = (handle: string) =>
+    handle?.startsWith("http")
+      ? handle
+      : `https://t.me/${handle.replace(/^@/, "")}`;
+  const buildWhatsAppUrl = (value: string) => {
+    if (!value) return null;
+    // if includes http use as is
+    if (value.startsWith("http")) return value;
+    // if starts with + or digit, strip non-numeric chars for wa.me
+    const digits = value.replace(/\D/g, "");
+    return digits ? `https://wa.me/${digits}` : null;
   };
 
-  const renderPolicies = () => {
+  // Render social items (always included in UI, but only shown if present)
+  const SocialRow = ({
+    icon,
+    label,
+    href,
+    display,
+  }: {
+    icon: React.ReactNode;
+    label: string;
+    href?: string | null;
+    display?: string | null;
+  }) => {
+    if (!display) return null;
+    return (
+      <div className="flex items-center gap-3">
+        <div className="flex-none">{icon}</div>
+        <div className="text-sm">
+          <div className="text-neutral-600 font-medium">{label}</div>
+          {href ? (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-neutral-900 block truncate"
+            >
+              {display}
+            </a>
+          ) : (
+            // clickable phone handled separately below
+            <div className="font-semibold text-neutral-900">{display}</div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  // Policy badge
+  const ActiveBadge = ({ active }: { active: boolean }) => (
+    <span
+      className={`ml-2 inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full ${
+        active
+          ? "bg-green-100 text-green-800"
+          : "bg-neutral-100 text-neutral-600"
+      }`}
+    >
+      {active ? "Active" : "Inactive"}
+    </span>
+  );
+
+  // Commitment fee constant (as requested)
+  const COMMITMENT_FEE = 500;
+
+  // Policy render block (deep explanations)
+  const PoliciesBlock = () => {
     if (!channelData) return null;
 
     const {
@@ -164,65 +182,123 @@ export default function ChannelView() {
       supplierShare,
     } = channelData;
 
-    let policyTexts: string[] = [];
+    // Pay on Delivery deep explanation
+    const payOnDeliveryExplanation = [
+      `Pay on Delivery option allows buyers to choose to pay when the item is handed to them at delivery. 
+      This is an optional payment method and does not force all buyers to pay on delivery.`,
+      `When Pay on Delivery is configured for this channel, the buyer will still pay certain amounts at checkout immediately:`,
+      `• Delivery charge — the cost for the courier to deliver the order (calculated per your checkout settings).`,
+      `• Commitment fee — a non-refundable fee of ₦${COMMITMENT_FEE.toLocaleString()} collected at checkout to secure the buyer's intent. This small fee helps reduce no-shows and covers handling/processing. The buyer may still defer the main item price to pay on delivery if they selected that option.`,
+      `In short: Pay on Delivery gives the buyer the choice to pay the order total on receipt, but delivery costs and the commitment fee are charged up-front at checkout.`,
+    ].join(" ");
 
-    // Pay on delivery explanation
-    if (payOnDelivery) {
-      policyTexts.push(
-        `Pay on Delivery is turned on — buyers can pay only when their order arrives. 
-        A commitment fee of ₦500 is charged at checkout and is non-refundable. 
-        This covers minor delivery or processing costs and ensures the buyer’s commitment.`
-      );
-    }
-
-    // Return/Refund explanation
+    // Return / Refund combinations
+    let returnRefundExplanation = "";
     if (returnPolicy && refundPolicy) {
-      policyTexts.push(
-        `Return & Refund policy is active — buyers can return or exchange items within ${returnWindow} day${
+      returnRefundExplanation = [
+        `Return & Refund both enabled — buyers are allowed to return items and receive a cash refund (or exchange) provided they satisfy the return terms and return window.`,
+        `The return window here is ${returnWindow} day${
           returnWindow > 1 ? "s" : ""
-        }, as long as they meet your return terms. 
-        Returned goods may be refunded in cash or exchanged for another item as specified.`
-      );
+        }. During this period, buyers can initiate returns subject to the specific conditions listed below in "Your return policy terms."`,
+        `Returned items that meet the policy can either be refunded to the original payment method or exchanged for another available item (depending on your store settings).`,
+      ].join(" ");
     } else if (returnPolicy && !refundPolicy) {
-      policyTexts.push(
-        `Return only policy is active — buyers can exchange returned goods for another item within ${returnWindow} day${
-          returnWindow > 1 ? "s" : ""
-        }, but no cash refunds will be issued.`
-      );
+      returnRefundExplanation = [
+        `Return enabled but Refund disabled — buyers may return items within the return window but will not receive a cash refund. Instead, returns are processed as exchanges or store credit (depending on your implementation).`,
+        `This setup is commonly used when you want to allow exchanges for size/variant issues but prevent cash refunds.`,
+      ].join(" ");
     } else if (!returnPolicy) {
-      policyTexts.push(`No returns or refunds — all sales are final.`);
+      returnRefundExplanation = [
+        `Returns are disabled — this channel does not accept returns. All sales are final unless otherwise stated. Please ensure buyers understand this before checkout.`,
+      ].join(" ");
     }
 
     // Return shipping fee explanation
+    let returnShippingExplanation = "";
     if (returnPolicy) {
-      if (returnShippingFee === "BUYER")
-        policyTexts.push(`Buyers bear the cost of return shipping.`);
-      else if (returnShippingFee === "SUPPLIER")
-        policyTexts.push(`You cover the return shipping cost.`);
-      else if (returnShippingFee === "SHARED")
-        policyTexts.push(
-          `Return shipping cost is shared — you cover ${supplierShare}% of the shipping fee.`
-        );
+      if (returnShippingFee === "BUYER") {
+        returnShippingExplanation = `Return shipping paid by buyer — the buyer covers the full cost of sending the item back.`;
+      } else if (returnShippingFee === "SUPPLIER") {
+        returnShippingExplanation = `Return shipping paid by supplier — you (the supplier) cover the return postage/collection cost.`;
+      } else if (returnShippingFee === "SHARED") {
+        const pct = Number(supplierShare) || 0;
+        returnShippingExplanation = `Return shipping fee is shared — you cover ${pct}% of the return shipping cost and the buyer covers the remainder.`;
+      } else {
+        returnShippingExplanation = `Return shipping cost responsibility is not set explicitly; check your channel settings.`;
+      }
     }
-
-    // Return policy terms
-    if (returnPolicyTerms)
-      policyTexts.push(`Return Terms: ${returnPolicyTerms}`);
 
     return (
       <Card className="p-4 border border-neutral-200 bg-white/50 backdrop-blur-sm">
-        <h2 className="text-lg font-semibold text-neutral-800 mb-3">
-          Policies & Commitments
-        </h2>
-        <div className="space-y-3">
-          {policyTexts.map((text, i) => (
-            <p
-              key={i}
-              className="text-sm font-medium text-neutral-700 leading-relaxed"
-            >
-              {text}
+        <div className="flex items-start justify-between">
+          <h2 className="text-lg font-semibold text-neutral-800">
+            Policies & Commitments
+          </h2>
+          <div className="text-sm text-neutral-600">
+            Commitment fee:{" "}
+            <span className="font-semibold">
+              ₦{COMMITMENT_FEE.toLocaleString()}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-3 space-y-4 text-left">
+          <div>
+            <div className="flex items-center">
+              <div className="text-sm font-medium text-neutral-700">
+                Pay on Delivery
+              </div>
+              <ActiveBadge active={!!payOnDelivery} />
+            </div>
+            <p className="mt-2 text-sm font-semibold text-neutral-800 leading-relaxed">
+              {payOnDeliveryExplanation}
             </p>
-          ))}
+          </div>
+
+          <div>
+            <div className="flex items-center">
+              <div className="text-sm font-medium text-neutral-700">
+                Return & Refund
+              </div>
+              <ActiveBadge active={!!returnPolicy && !!refundPolicy} />
+            </div>
+            <p className="mt-2 text-sm font-semibold text-neutral-800 leading-relaxed">
+              {returnRefundExplanation}
+            </p>
+          </div>
+
+          <div>
+            <div className="flex items-center">
+              <div className="text-sm font-medium text-neutral-700">
+                Return shipping responsibility
+              </div>
+            </div>
+            <p className="mt-2 text-sm font-semibold text-neutral-800 leading-relaxed">
+              {returnShippingExplanation}
+            </p>
+          </div>
+
+          {/* Return policy terms shown in a textarea-style box */}
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-medium text-neutral-700">
+                Your return policy terms
+              </div>
+              <div className="text-xs text-neutral-500">Shown as entered</div>
+            </div>
+            <div className="mt-2">
+              <div
+                className="w-full min-h-[84px] p-3 border rounded-md bg-neutral-50 text-sm font-medium text-neutral-800 whitespace-pre-wrap"
+                aria-readonly
+              >
+                {returnPolicyTerms || "No return policy terms provided."}
+              </div>
+            </div>
+            <div className="mt-2 text-xs text-neutral-500">
+              Note: return eligibility depends on the terms above and the return
+              window.
+            </div>
+          </div>
         </div>
       </Card>
     );
@@ -235,9 +311,9 @@ export default function ChannelView() {
         <ChannelHeader channelId={channelData?.channelId} />
       </header>
 
-      {/* Center Content */}
-      <main className="flex-1 flex flex-col items-center justify-start px-4 py-8 space-y-8">
-        <div className="max-w-md w-full text-center space-y-6 animate-in fade-in duration-700">
+      {/* Main content. Add top padding so header won't overlap the title */}
+      <main className="flex-1 flex items-center justify-center px-4 pt-12 pb-12">
+        <div className="w-full max-w-md lg:max-w-lg text-center space-y-8 animate-in fade-in duration-700">
           {isLoading ? (
             <p className="text-neutral-500 text-sm animate-pulse">
               Loading channel data...
@@ -252,7 +328,7 @@ export default function ChannelView() {
                 </h1>
                 <p className="text-base md:text-lg text-neutral-600">
                   {channelData
-                    ? "Here’s a summary of your channel setup and active policies."
+                    ? "Below is a full, easy-to-read summary of your channel's contacts, socials and active policies. Each section shows whether the option is active and explains how it works."
                     : "Connect, manage, and grow your supplier community."}
                 </p>
               </div>
@@ -268,9 +344,79 @@ export default function ChannelView() {
 
               {/* Show detailed info if channelData exists */}
               {channelData && (
-                <div className="space-y-6 text-left mt-8">
-                  {renderSocials()}
-                  {renderPolicies()}
+                <div className="mt-8 text-left space-y-6">
+                  {/* Socials at top */}
+                  <Card className="p-4 border border-neutral-200 bg-white/50 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <h2 className="text-lg font-semibold text-neutral-800">
+                        Socials
+                      </h2>
+                      <div className="text-sm text-neutral-500">
+                        Contact & join links
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {/* Phone: clickable tel: */}
+                      {channelData.phone && (
+                        <div className="flex items-center gap-3">
+                          <div className="flex-none">
+                            <Phone className="w-5 h-5 text-orange-500" />
+                          </div>
+                          <div className="text-sm">
+                            <div className="text-neutral-600 font-medium">
+                              Call us at
+                            </div>
+                            <a
+                              href={`tel:${channelData.phone}`}
+                              className="font-semibold text-neutral-900 block"
+                            >
+                              {channelData.phone}
+                            </a>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Instagram */}
+                      <SocialRow
+                        icon={<Instagram className="w-5 h-5" />}
+                        label="Follow us at"
+                        href={
+                          channelData.instagram
+                            ? buildInstagramUrl(channelData.instagram)
+                            : null
+                        }
+                        display={channelData.instagram}
+                      />
+
+                      {/* WhatsApp */}
+                      <SocialRow
+                        icon={<MessageCircle className="w-5 h-5" />}
+                        label="Join our WhatsApp community"
+                        href={
+                          channelData.whatsapp
+                            ? buildWhatsAppUrl(channelData.whatsapp)
+                            : null
+                        }
+                        display={channelData.whatsapp}
+                      />
+
+                      {/* Telegram */}
+                      <SocialRow
+                        icon={<Send className="w-5 h-5" />}
+                        label="Join our Telegram group"
+                        href={
+                          channelData.telegram
+                            ? buildTelegramUrl(channelData.telegram)
+                            : null
+                        }
+                        display={channelData.telegram}
+                      />
+                    </div>
+                  </Card>
+
+                  {/* Policies */}
+                  <PoliciesBlock />
                 </div>
               )}
             </>
@@ -288,4 +434,3 @@ export default function ChannelView() {
     </div>
   );
 }
-
