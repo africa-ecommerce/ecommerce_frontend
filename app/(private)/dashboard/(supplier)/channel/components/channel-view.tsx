@@ -295,7 +295,7 @@ export default function ChannelView() {
     ) : (
       <>
         <div className="space-y-4">
-          <h1 className="text-3xl md:text-4xl font-semibold text-white leading-snug">
+          <h1 className="text-3xl md:text-4xl font-semibold text-neutral-700 leading-snug">
             {channelData ? "" : "Let's create your channel"}
           </h1>
           <p className="text-base md:text-lg text-neutral-500">
@@ -334,7 +334,7 @@ export default function ChannelView() {
           <Button
             onClick={onOpen}
             size="sm"
-            className="bg-orange-500 text-white px-4 py-3 text-base rounded-xl shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
+            className="bg-orange-500 text-white px-4 py-3 text-base rounded-xl shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-orange-500"
           >
             Create Channel
             <ArrowRight className="ml-2 h-4 w-4" />
