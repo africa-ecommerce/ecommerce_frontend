@@ -67,7 +67,7 @@ export default function StorePage() {
 
   const [isOpen, setIsOpen] = useState(false);
 
-    const { data, error, isLoading, mutate } = useSWR(`${user.supplier ? "/api/store/policy" : ""}`, fetcher);
+    const { data, error, isLoading, mutate } = useSWR(`${user?.supplier ? "/api/store/policy" : ""}`, fetcher);
 
 
   // Fetch analytics data
@@ -140,7 +140,7 @@ export default function StorePage() {
   };
 
   // Show loading state until we have user data
-  if (!user) {
+  if (!user || isLoading) {
     return <LoadingSkeletonView />;
   }
 
