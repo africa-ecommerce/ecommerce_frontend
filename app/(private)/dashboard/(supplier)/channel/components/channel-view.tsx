@@ -260,7 +260,7 @@ export default function ChannelView() {
               {returnRefundExplanation}
             </p>
           </div>
-          {supplierShare > 0 && (
+          {returnPolicy && supplierShare > 0 && (
             <div>
               <div className="flex items-center">
                 <div className="text-sm font-medium text-neutral-700">
@@ -310,7 +310,7 @@ export default function ChannelView() {
       </header>
 
       {/* Main content. Add top padding so header won't overlap the title */}
-      <main className="flex-1 flex items-center justify-center px-4 pt-12 pb-12">
+      <main className="flex-1 flex items-center justify-center px-4 pt-36 pb-12">
         <div className="w-full max-w-md lg:max-w-lg text-center space-y-8 animate-in fade-in duration-700">
           {isLoading ? (
             <p className="text-neutral-500 text-sm animate-pulse">
@@ -321,7 +321,7 @@ export default function ChannelView() {
               <div className="space-y-4">
                 <h1 className="text-3xl md:text-4xl font-semibold text-neutral-800 leading-snug">
                   {channelData
-                    ? "Your Channel Overview"
+                    ? ""
                     : "Let's create your channel"}
                 </h1>
                 <p className="text-base md:text-lg text-neutral-600">
