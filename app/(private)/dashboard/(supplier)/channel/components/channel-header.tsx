@@ -97,7 +97,9 @@ export default function ChannelHeader({ channelId }: ChannelHeaderProps) {
         </div>
 
         {/* Right side: Link icon and text */}
-        <div className="flex flex-col items-center">
+
+        {channelId && (
+              <div className="flex flex-col items-center">
           <button
             type="button"
             onClick={handleShare}
@@ -110,6 +112,8 @@ export default function ChannelHeader({ channelId }: ChannelHeaderProps) {
             Click to invite
           </p>
         </div>
+        )}
+   
       </div>
     </header>
   );
