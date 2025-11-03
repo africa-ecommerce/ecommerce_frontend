@@ -8,7 +8,11 @@ import useSWR from "swr";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export default function ChannelHeader() {
+interface ChannelHeaderProps {
+  channelId: string
+}
+
+export default function ChannelHeader({channelId}: ChannelHeaderProps) {
   const {
     userData: { user },
   } = useUser();
