@@ -287,59 +287,138 @@ export default function ChannelView() {
 
       {/* Main content. Add top padding so header won't overlap the title */}
       <main className="flex-1 flex items-center justify-center px-4 pt-20 pb-12">
-        <div className="w-full max-w-md lg:max-w-lg text-center space-y-8 animate-in fade-in duration-700">
-          {isLoading ? (
-            <p className="text-white text-sm animate-pulse">
-              Loading channel data...
-            </p>
-          ) : (
-            <>
-              <div className="space-y-4">
-                <h1 className="text-3xl md:text-4xl font-semibold text-white leading-snug">
-                  {channelData ? "" : "Let's create your channel"}
-                </h1>
-                <p className="text-base md:text-lg text-white/90">
-                  {channelData
-                    ? "Below is a full, easy-to-read summary of your channel's contacts, socials and active policies."
-                    : "Connect, manage, and grow your supplier community."}
-                </p>
+       <div className="w-full max-w-md lg:max-w-lg text-center space-y-8 animate-in fade-in duration-700">
+    {isLoading ? (
+      <p className="text-white text-sm animate-pulse">
+        Loading channel data...
+      </p>
+    ) : (
+      <>
+        <div className="space-y-4">
+          <h1 className="text-3xl md:text-4xl font-semibold text-white leading-snug">
+            {channelData ? "" : "Let's create your channel"}
+          </h1>
+          <p className="text-base md:text-lg text-white/90">
+            {channelData
+              ? "Below is a full, easy-to-read summary of your channel's contacts, socials and active policies. Each section shows whether the option is active and explains how it works."
+              : "Connect, manage, and grow your supplier community."}
+          </p>
+        </div>
+
+        {/* Buttons section */}
+        {channelData ? (
+          <div className="flex items-center justify-center gap-3">
+            <Button
+              onClick={onOpen}
+              size="sm"
+              className="bg-white text-neutral-800 px-4 py-3 text-base rounded-xl shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
+            >
+              Update Channel
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+
+            <Button
+              onClick={() => setConfirmOpen(true)}
+              size="sm"
+              className="bg-white text-red-600 px-4 py-3 text-base rounded-xl shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
+              disabled={deleting}
+            >
+              <Trash2 className="w-4 h-4" />
+              {deleting ? "Deleting..." : "Delete Channel"}
+            </Button>
+          </div>
+        ) : (
+          <Button
+            onClick={onOpen}
+            size="sm"
+            className="bg-white text-neutral-800 px-4 py-3 text-base rounded-xl shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
+          >
+            Create Channel
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        )}
+
+        {/* Show detailed info if channelData exists */}
+        {channelData && (
+          <div className="mt-8 text-left space-y-6">
+            {/* Policies */}
+            <PoliciesBlock />
+            {channelData.phone || channelData.whatsapp || channelData.telegram || channelData.instagram && (
+           <Card className="p-4 border border-neutral-200 bg-white/50 backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold text-neutral-800">
+                  Socials
+                </h2>
+                <div className="text-sm text-neutral-500">
+                  Contact & join links
+                </div>
               </div>
 
-              {/* Buttons */}
-              {channelData ? (
-                <div className="flex items-center justify-center gap-3">
-                  <Button
-                    onClick={onOpen}
-                    size="sm"
-                    className="bg-white text-neutral-800 px-4 py-3 text-base rounded-xl shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
-                  >
-                    Update Channel
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
+              <div className="space-y-3">
+                {/* Phone */}
+                {channelData.phone && (
+                  <div className="flex items-center gap-3">
+                    <div className="flex-none">
+                      <Phone className="w-5 h-5 text-orange-500" />
+                    </div>
+                    <div className="text-sm">
+                      <div className="text-neutral-600 font-medium">
+                        Call us at
+                      </div>
+                      <a
+                        href={`tel:${channelData.phone}`}
+                        className="font-semibold text-blue-500 underline block"
+                      >
+                        {channelData.phone}
+                      </a>
+                    </div>
+                  </div>
+                )}
 
-                  <Button
-                    onClick={() => setConfirmOpen(true)}
-                    size="sm"
-                    className="bg-white text-red-600 px-4 py-3 text-base rounded-xl shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
-                    disabled={deleting}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    {deleting ? "Deleting..." : "Delete Channel"}
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  onClick={onOpen}
-                  size="sm"
-                  className="bg-white text-neutral-800 px-4 py-3 text-base rounded-xl shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
-                >
-                  Create Channel
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              )}
-            </>
-          )}
-        </div>
+                {/* Instagram */}
+                <SocialRow
+                  icon={<Instagram className="w-5 h-5" />}
+                  label="Follow us at"
+                  href={
+                    channelData.instagram
+                      ? buildInstagramUrl(channelData.instagram)
+                      : null
+                  }
+                  display={channelData.instagram}
+                />
+
+                {/* WhatsApp */}
+                <SocialRow
+                  icon={<MessageCircle className="w-5 h-5" />}
+                  label="Join our WhatsApp community"
+                  href={
+                    channelData.whatsapp
+                      ? buildWhatsAppUrl(channelData.whatsapp)
+                      : null
+                  }
+                  display={channelData.whatsapp}
+                />
+
+                {/* Telegram */}
+                <SocialRow
+                  icon={<Send className="w-5 h-5" />}
+                  label="Join our Telegram group"
+                  href={
+                    channelData.telegram
+                      ? buildTelegramUrl(channelData.telegram)
+                      : null
+                  }
+                  display={channelData.telegram}
+                />
+              </div>
+            </Card>
+            )}
+            
+          </div>
+        )}
+      </>
+    )}
+  </div>
       </main>
 
       {/* Modal */}
