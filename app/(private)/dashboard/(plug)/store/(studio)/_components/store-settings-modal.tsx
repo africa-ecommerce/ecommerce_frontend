@@ -62,7 +62,7 @@ export default function StoreSettingsModal({
         
       };
 
-      const res = await fetch("/api/store/policy", {
+      const res = await fetch("/api/site/policy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

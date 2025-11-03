@@ -67,7 +67,7 @@ export default function StorePage() {
 
   const [isOpen, setIsOpen] = useState(false);
 
-    const { data, error, isLoading, mutate } = useSWR(`${user?.supplier ? "/api/store/policy" : ""}`, fetcher);
+    const { data, error, isLoading, mutate } = useSWR(`${user?.supplier ? "/api/site/policy" : ""}`, fetcher);
 
 
   // Fetch analytics data
@@ -651,8 +651,9 @@ function StoreView({
                 className="w-full justify-start"
                 asChild
               >
+                
                 <Link href="/dashboard/store/studio">
-                  <Settings className="mr-2 h-4 w-4 shrink-0" />
+                  <Pencil className="mr-2 h-4 w-4 shrink-0" />
                   Customize Store
                 </Link>
               </Button>
