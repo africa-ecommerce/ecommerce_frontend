@@ -289,7 +289,7 @@ export default function ChannelView() {
       <main className="flex-1 flex items-center justify-center px-4 pt-20 pb-12">
        <div className="w-full max-w-md lg:max-w-lg text-center space-y-8 animate-in fade-in duration-700">
     {isLoading ? (
-      <p className="text-white text-sm animate-pulse">
+      <p className="text-neutral-500 text-sm animate-pulse">
         Loading channel data...
       </p>
     ) : (
@@ -298,7 +298,7 @@ export default function ChannelView() {
           <h1 className="text-3xl md:text-4xl font-semibold text-white leading-snug">
             {channelData ? "" : "Let's create your channel"}
           </h1>
-          <p className="text-base md:text-lg text-white/90">
+          <p className="text-base md:text-lg text-neutral-500">
             {channelData
               ? "Below is a full, easy-to-read summary of your channel's contacts, socials and active policies. Each section shows whether the option is active and explains how it works."
               : "Connect, manage, and grow your supplier community."}
@@ -306,12 +306,14 @@ export default function ChannelView() {
         </div>
 
         {/* Buttons section */}
+
+         <div className="flex items-center justify-center gap-3">
         {channelData ? (
-          <div className="flex items-center justify-center gap-3">
+         <>
             <Button
               onClick={onOpen}
               size="sm"
-              className="bg-white text-neutral-800 px-4 py-3 text-base rounded-xl shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
+              className="bg-white text-neutral-800 px-4 py-3 text-base rounded-xl border-black shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
             >
               Update Channel
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -320,23 +322,25 @@ export default function ChannelView() {
             <Button
               onClick={() => setConfirmOpen(true)}
               size="sm"
-              className="bg-white text-red-600 px-4 py-3 text-base rounded-xl shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
+              className="bg-white text-red-600 px-4 py-3 text-base rounded-xl border-black shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
               disabled={deleting}
             >
               <Trash2 className="w-4 h-4" />
               {deleting ? "Deleting..." : "Delete Channel"}
             </Button>
-          </div>
+            </>
+          
         ) : (
           <Button
             onClick={onOpen}
             size="sm"
-            className="bg-white text-neutral-800 px-4 py-3 text-base rounded-xl shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
+            className="bg-orange-500 text-white px-4 py-3 text-base rounded-xl shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
           >
             Create Channel
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         )}
+        </div>
 
         {/* Show detailed info if channelData exists */}
         {channelData && (
