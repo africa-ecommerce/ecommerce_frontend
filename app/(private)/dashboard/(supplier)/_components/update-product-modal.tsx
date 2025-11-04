@@ -72,7 +72,7 @@ export function UpdateProductModal({
   const data = itemData;
   const isLoading = !itemData;
 
-  console.log("updateData", data)
+  console.log("updateData", data);
 
   const editProduct = async (data: UpdateFormData) => {
     try {
@@ -82,7 +82,27 @@ export function UpdateProductModal({
       });
 
       const { images, ...jsonData } = data;
-      formData.append("productData", JSON.stringify(jsonData));
+
+      // Clean the data before sending
+      const cleanedData = {
+        ...jsonData,
+        // Filter out undefined/empty MOQ from main product
+        moq: jsonData.moq && jsonData.moq > 0 ? jsonData.moq : undefined,
+      };
+
+      // Filter out undefined/empty MOQ from variations
+      if (cleanedData.variations && cleanedData.variations.length > 0) {
+        cleanedData.variations = cleanedData.variations.map((v: any) => {
+          const { moq, ...rest } = v;
+          // Only include moq if it has a valid value
+          if (moq && moq > 0) {
+            return { ...rest, moq };
+          }
+          return rest;
+        });
+      }
+
+      formData.append("productData", JSON.stringify(cleanedData));
 
       const response = await fetch(`/api/products/${productId}`, {
         method: "PUT",
@@ -143,6 +163,12 @@ export function UpdateProductModal({
             : variation.color
             ? [variation.color]
             : [],
+          // Ensure moq is properly handled
+          moq:
+            variation.moq !== undefined && variation.moq !== null
+              ? variation.moq
+              : undefined,
+          stock: variation.stock,
         }));
         setValue("variations", updatedVariations);
       } else {
@@ -150,18 +176,20 @@ export function UpdateProductModal({
         setValue("size", data.size || "");
         setValue("colors", data.colors || (data.color ? [data.color] : []));
         setValue("stock", data.stock);
+        // Add MOQ for single product
+        setValue(
+          "moq",
+          data.moq !== undefined && data.moq !== null ? data.moq : undefined
+        );
       }
 
-      // Handle existing images - IMPROVED
+      // Handle existing images
       if (data.images && data.images.length > 0) {
         const imageUrls = data.images.map((img: any) => img);
         setValue("imageUrls", imageUrls);
-        setImagePreviews(imageUrls); // Set preview images
-
-        // Ensure images field is initialized as empty array for new images
+        setImagePreviews(imageUrls);
         setValue("images", []);
       } else {
-        // If no existing images, ensure both are empty arrays
         setValue("imageUrls", []);
         setValue("images", []);
         setImagePreviews([]);
@@ -213,63 +241,67 @@ export function UpdateProductModal({
   };
 
   const handleFiles = (files: FileList) => {
-  // First check file types and sizes
-  const newFiles = Array.from(files).filter(
-    (file) =>
-      (file.type === "image/jpeg" ||
-        file.type === "image/png" ||
-        file.type === "image/webp" ||
-        file.type === "image/svg+xml") &&
-      file.size <= 5 * 1024 * 1024
-  );
+    // First check file types and sizes
+    const newFiles = Array.from(files).filter(
+      (file) =>
+        (file.type === "image/jpeg" ||
+          file.type === "image/png" ||
+          file.type === "image/webp" ||
+          file.type === "image/svg+xml") &&
+        file.size <= 5 * 1024 * 1024
+    );
 
-  if (newFiles.length === 0) {
-    errorToast("Only images under 5MB allowed");
-    return;
-  }
+    if (newFiles.length === 0) {
+      errorToast("Only images under 5MB allowed");
+      return;
+    }
 
-  // Get current counts
-  const existingImagesCount = formData.imageUrls?.length || 0;
-  const currentNewImagesCount = formData.images?.length || 0;
-  const totalCurrentCount = existingImagesCount + currentNewImagesCount;
-  
-  // Check if we're already at the limit
-  if (totalCurrentCount >= 3) {
-    errorToast("Maximum 3 images already reached");
-    return;
-  }
-  
-  // Calculate how many more images we can add
-  const spaceRemaining = 3 - totalCurrentCount;
-  
-  // If we're trying to add more than our limit allows
-  if (newFiles.length > spaceRemaining) {
-    errorToast(`Only ${spaceRemaining} more image${spaceRemaining > 1 ? 's' : ''} can be added (max 3 total)`);
-    // Trim array to only include what we can add
-    newFiles.splice(spaceRemaining);
-  }
+    // Get current counts
+    const existingImagesCount = formData.imageUrls?.length || 0;
+    const currentNewImagesCount = formData.images?.length || 0;
+    const totalCurrentCount = existingImagesCount + currentNewImagesCount;
 
-  // Now add the files (which may have been trimmed)
-  const currentImages = formData.images || [];
-  const updatedImages = [...currentImages, ...newFiles];
-  setValue("images", updatedImages);
-  
-  // Generate and update preview URLs for all images
-  updateImagePreviews(updatedImages);
-};
+    // Check if we're already at the limit
+    if (totalCurrentCount >= 3) {
+      errorToast("Maximum 3 images already reached");
+      return;
+    }
+
+    // Calculate how many more images we can add
+    const spaceRemaining = 3 - totalCurrentCount;
+
+    // If we're trying to add more than our limit allows
+    if (newFiles.length > spaceRemaining) {
+      errorToast(
+        `Only ${spaceRemaining} more image${
+          spaceRemaining > 1 ? "s" : ""
+        } can be added (max 3 total)`
+      );
+      // Trim array to only include what we can add
+      newFiles.splice(spaceRemaining);
+    }
+
+    // Now add the files (which may have been trimmed)
+    const currentImages = formData.images || [];
+    const updatedImages = [...currentImages, ...newFiles];
+    setValue("images", updatedImages);
+
+    // Generate and update preview URLs for all images
+    updateImagePreviews(updatedImages);
+  };
 
   const updateImagePreviews = (imageFiles: File[]) => {
-  // Create preview URLs for each new file (no deduplication by name)
-  const newPreviews = imageFiles.map(file => URL.createObjectURL(file));
+    // Create preview URLs for each new file (no deduplication by name)
+    const newPreviews = imageFiles.map((file) => URL.createObjectURL(file));
 
-  // Create merged array of all image URLs for display
-  const allPreviews = [
-    ...(formData.imageUrls || []), // Existing images from backend
-    ...newPreviews, // New images with preview URLs
-  ];
+    // Create merged array of all image URLs for display
+    const allPreviews = [
+      ...(formData.imageUrls || []), // Existing images from backend
+      ...newPreviews, // New images with preview URLs
+    ];
 
-  setImagePreviews(allPreviews);
-};
+    setImagePreviews(allPreviews);
+  };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -322,47 +354,46 @@ export function UpdateProductModal({
       size: "",
       colors: [],
       stock: "",
-      moq: "",
+      moq: undefined, // Changed from "" to undefined
     };
 
     setValue("variations", [...(formData.variations || []), newVariation]);
   };
 
-const updateVariation = (
-  index: number,
-  field: string,
-  value: string | number | string[]
-) => {
-  const updatedVariations = [...(formData.variations || [])] as Variation[];
+  const updateVariation = (
+    index: number,
+    field: string,
+    value: string | number | string[]
+  ) => {
+    const updatedVariations = [...(formData.variations || [])] as Variation[];
 
-  // Handle nested dimensions fields
-  if (field.includes(".")) {
-    const [parent, child] = field.split(".");
-    if (parent === "dimensions") {
+    if (field.includes(".")) {
+      const [parent, child] = field.split(".");
+      if (parent === "dimensions") {
+        updatedVariations[index] = {
+          ...updatedVariations[index],
+          dimensions: {
+            ...(updatedVariations[index].dimensions || {}),
+            [child]: value,
+          },
+        };
+      }
+    } else if (field === "stock" || field === "moq") {
+      // Convert to number only if value is not empty, otherwise undefined
+      const numValue = value === "" ? undefined : Number(value);
       updatedVariations[index] = {
         ...updatedVariations[index],
-        dimensions: {
-          ...(updatedVariations[index].dimensions || {}),
-          [child]: value,
-        },
+        [field]: numValue,
+      };
+    } else {
+      updatedVariations[index] = {
+        ...updatedVariations[index],
+        [field]: value,
       };
     }
-  } else if (field === "stock" || field === "moq") {
-    // Modified this line
-    // Special handling for stock and moq fields to handle empty string
-    updatedVariations[index] = {
-      ...updatedVariations[index],
-      [field]: value === "" ? "" : Number(value),
-    };
-  } else {
-    updatedVariations[index] = {
-      ...updatedVariations[index],
-      [field]: value,
-    };
-  }
 
-  setValue("variations", updatedVariations);
-};
+    setValue("variations", updatedVariations);
+  };
 
   const removeVariation = (index: number) => {
     const updatedVariations = [...(formData.variations || [])];
@@ -934,18 +965,14 @@ const updateVariation = (
                                       type="number"
                                       placeholder="1"
                                       min="1"
-                                      value={
-                                        variation.moq === undefined
-                                          ? ""
-                                          : variation.moq
-                                      }
+                                      value={variation.moq ?? ""} // Use nullish coalescing
                                       onChange={(e) =>
                                         updateVariation(
                                           index,
                                           "moq",
                                           e.target.value === ""
                                             ? ""
-                                            : Number(e.target.value)
+                                            : e.target.value
                                         )
                                       }
                                       className="h-12 text-base"
@@ -1045,11 +1072,14 @@ const updateVariation = (
                         <Input
                           id="moq"
                           type="number"
-                          {...register("moq", {
-                            valueAsNumber: true,
-                          })}
                           placeholder="1"
                           min="1"
+                          {...register("moq", {
+                            setValueAs: (v) =>
+                              v === "" || v === undefined || v === null
+                                ? undefined
+                                : Number(v),
+                          })}
                           className="h-12 text-base"
                         />
                       </div>
@@ -1199,71 +1229,71 @@ const updateVariation = (
                         </div>
                       </div>
 
-                     {!formData.hasVariations && (
-  <div className="rounded-xl border bg-muted/30 p-5">
-    <h4 className="mb-3 text-sm font-medium">
-      Product Specifications
-    </h4>
-    <div className="grid gap-4 grid-cols-2">
-      <div>
-        <p className="text-sm text-muted-foreground">
-          Stock
-        </p>
-        <p className="font-medium">
-          {formData.stock || "0"}
-        </p>
-      </div>
-      <div>
-        <p className="text-sm text-muted-foreground">
-          MOQ
-        </p>
-        <p className="font-medium">
-          {formData.moq || "-"}
-        </p>
-      </div>
-      <div>
-        <p className="text-sm text-muted-foreground">
-          Colors
-        </p>
-        {formData.colors && formData.colors.length > 0 ? (
-          <div className="flex flex-wrap gap-1 mt-1">
-            {formData.colors.map((colorValue) => {
-              const color = PREDEFINED_COLORS.find(
-                (c) => c.value === colorValue
-              );
-              return (
-                <Badge
-                  key={colorValue}
-                  variant="secondary"
-                  className="flex items-center gap-1 text-xs"
-                >
-                  <div
-                    className="h-2 w-2 rounded-full border border-gray-300"
-                    style={{
-                      backgroundColor:
-                        color?.hex || "#gray",
-                    }}
-                  />
-                  {color?.name || colorValue}
-                </Badge>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="font-medium">-</p>
-        )}
-      </div>
-      <div>
-        <p className="text-sm text-muted-foreground">
-          Size
-        </p>
-        <p className="font-medium capitalize ">
-          {formData.size || "-"}
-        </p>
-      </div>
-    </div>
-  </div>
-)}
+                      {!formData.hasVariations && (
+                        <div className="rounded-xl border bg-muted/30 p-5">
+                          <h4 className="mb-3 text-sm font-medium">
+                            Product Specifications
+                          </h4>
+                          <div className="grid gap-4 grid-cols-2">
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                Stock
+                              </p>
+                              <p className="font-medium">
+                                {formData.stock || "0"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                MOQ
+                              </p>
+                              <p className="font-medium">
+                                {formData.moq || "-"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                Colors
+                              </p>
+                              {formData.colors && formData.colors.length > 0 ? (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {formData.colors.map((colorValue) => {
+                                    const color = PREDEFINED_COLORS.find(
+                                      (c) => c.value === colorValue
+                                    );
+                                    return (
+                                      <Badge
+                                        key={colorValue}
+                                        variant="secondary"
+                                        className="flex items-center gap-1 text-xs"
+                                      >
+                                        <div
+                                          className="h-2 w-2 rounded-full border border-gray-300"
+                                          style={{
+                                            backgroundColor:
+                                              color?.hex || "#gray",
+                                          }}
+                                        />
+                                        {color?.name || colorValue}
+                                      </Badge>
+                                    );
+                                  })}
+                                </div>
+                              ) : (
+                                <p className="font-medium">-</p>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">
+                                Size
+                              </p>
+                              <p className="font-medium capitalize ">
+                                {formData.size || "-"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {formData.hasVariations &&
                         (formData.variations?.length || 0) > 0 && (
@@ -1278,86 +1308,86 @@ const updateVariation = (
                                     key={variation.id}
                                     className="rounded-lg border p-3"
                                   >
-                                   <div className="grid grid-cols-2 gap-4">
-  <div>
-    <p className="text-sm text-muted-foreground">
-      Variation
-    </p>
-    <p className="font-medium capitalize">
-      {variation.size ||
-      (variation.colors &&
-        variation.colors.length > 0)
-        ? [
-            variation.size,
-            variation.colors?.join(", "),
-          ]
-            .filter(Boolean)
-            .join(" / ")
-        : `Variation ${index + 1}`}
-    </p>
-  </div>
-  <div>
-    <p className="text-sm text-muted-foreground">
-      Stock
-    </p>
-    <p className="font-medium">
-      {variation.stock}
-    </p>
-  </div>
-  <div>
-    <p className="text-sm text-muted-foreground">
-      MOQ
-    </p>
-    <p className="font-medium">
-      {variation.moq || "-"}
-    </p>
-  </div>
-  <div>
-    <p className="text-sm text-muted-foreground">
-      Size
-    </p>
-    <p className="font-medium capitalize">
-      {variation.size || "-"}
-    </p>
-  </div>
-  <div className="col-span-2">
-    <p className="text-sm text-muted-foreground">
-      Colors
-    </p>
-    {variation.colors &&
-    variation.colors.length > 0 ? (
-      <div className="flex flex-wrap gap-1 mt-1">
-        {variation.colors.map(
-          (colorValue) => {
-            const color =
-              PREDEFINED_COLORS.find(
-                (c) =>
-                  c.value === colorValue
-              );
-            return (
-              <Badge
-                key={colorValue}
-                variant="secondary"
-                className="flex items-center gap-1 text-xs"
-              >
-                <div
-                  className="h-2 w-2 rounded-full border border-gray-300"
-                  style={{
-                    backgroundColor:
-                      color?.hex || "#gray",
-                  }}
-                />
-                {color?.name || colorValue}
-              </Badge>
-            );
-          }
-        )}
-      </div>
-    ) : (
-      <p className="font-medium">-</p>
-    )}
-  </div>
-</div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">
+                                          Variation
+                                        </p>
+                                        <p className="font-medium capitalize">
+                                          {variation.size ||
+                                          (variation.colors &&
+                                            variation.colors.length > 0)
+                                            ? [
+                                                variation.size,
+                                                variation.colors?.join(", "),
+                                              ]
+                                                .filter(Boolean)
+                                                .join(" / ")
+                                            : `Variation ${index + 1}`}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">
+                                          Stock
+                                        </p>
+                                        <p className="font-medium">
+                                          {variation.stock}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">
+                                          MOQ
+                                        </p>
+                                        <p className="font-medium">
+                                          {variation.moq || "-"}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">
+                                          Size
+                                        </p>
+                                        <p className="font-medium capitalize">
+                                          {variation.size || "-"}
+                                        </p>
+                                      </div>
+                                      <div className="col-span-2">
+                                        <p className="text-sm text-muted-foreground">
+                                          Colors
+                                        </p>
+                                        {variation.colors &&
+                                        variation.colors.length > 0 ? (
+                                          <div className="flex flex-wrap gap-1 mt-1">
+                                            {variation.colors.map(
+                                              (colorValue) => {
+                                                const color =
+                                                  PREDEFINED_COLORS.find(
+                                                    (c) =>
+                                                      c.value === colorValue
+                                                  );
+                                                return (
+                                                  <Badge
+                                                    key={colorValue}
+                                                    variant="secondary"
+                                                    className="flex items-center gap-1 text-xs"
+                                                  >
+                                                    <div
+                                                      className="h-2 w-2 rounded-full border border-gray-300"
+                                                      style={{
+                                                        backgroundColor:
+                                                          color?.hex || "#gray",
+                                                      }}
+                                                    />
+                                                    {color?.name || colorValue}
+                                                  </Badge>
+                                                );
+                                              }
+                                            )}
+                                          </div>
+                                        ) : (
+                                          <p className="font-medium">-</p>
+                                        )}
+                                      </div>
+                                    </div>
                                   </div>
                                 )
                               )}

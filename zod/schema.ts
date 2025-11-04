@@ -368,7 +368,7 @@ const variationSchema = z.object({
   size: z.string().optional(),
   colors: z.array(z.string()).optional(),
   stock: z.number().or(z.string()).optional(),
-  moq: z.number().or(z.string()).optional(),
+  moq: z.number().optional(),
 })
 
 // Main product schema with improved validation

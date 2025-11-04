@@ -91,49 +91,67 @@ export function AddProductModal({
 
   const formData = watch();
 
-  const addProduct = async (data: ProductFormData) => {
-    try {
-      setIsSubmitting(true);
-      const formData = new FormData();
-      data.images.forEach((file: File) => {
-        formData.append("images", file);
+const addProduct = async (data: ProductFormData) => {
+  try {
+    setIsSubmitting(true);
+    const formData = new FormData();
+    data.images.forEach((file: File) => {
+      formData.append("images", file);
+    });
+
+    const { images, imageUrls, ...jsonData } = data;
+    
+    // Filter out undefined/empty MOQ from main product
+    const cleanedData = {
+      ...jsonData,
+      moq: jsonData.moq && jsonData.moq > 0 ? jsonData.moq : undefined,
+    };
+    
+    // Filter out undefined/empty MOQ from variations
+    if (cleanedData.variations && cleanedData.variations.length > 0) {
+      cleanedData.variations = cleanedData.variations.map((v: any) => {
+        const { moq, ...rest } = v;
+        // Only include moq if it has a valid value
+        if (moq && moq > 0) {
+          return { ...rest, moq };
+        }
+        return rest;
       });
-
-      const { images, imageUrls, ...jsonData } = data;
-      formData.append("productData", JSON.stringify(jsonData));
-
-      const response = await fetch("/api/products", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const errorResult = await response.json();
-        console.error("Server error:", errorResult);
-        errorToast(errorResult.error || "Server error");
-        return null;
-      }
-
-      mutate("/api/products/supplier/");
-
-      const result = await response.json();
-      successToast(result.message);
-
-      // Close modal and reset form on success
-      onOpenChange(false);
-      reset();
-      setCurrentStep(0);
-
-      return result;
-    } catch (error) {
-      console.error("Submission error:", error);
-      errorToast("Something went wrong");
-      return null;
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+
+    formData.append("productData", JSON.stringify(cleanedData));
+
+    const response = await fetch("/api/products", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorResult = await response.json();
+      console.error("Server error:", errorResult);
+      errorToast(errorResult.error || "Server error");
+      return null;
+    }
+
+    mutate("/api/products/supplier/");
+
+    const result = await response.json();
+    successToast(result.message);
+
+    onOpenChange(false);
+    reset();
+    setCurrentStep(0);
+
+    return result;
+  } catch (error) {
+    console.error("Submission error:", error);
+    errorToast("Something went wrong");
+    return null;
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   // Handle drag and drop for images
   useEffect(() => {
@@ -235,45 +253,46 @@ const addVariation = () => {
     size: "",
     colors: [],
     stock: "",
-    moq: "",  // Add this line
+    moq: undefined, // Set to undefined instead of empty string
   };
 
   setValue("variations", [...(formData.variations || []), newVariation]);
 };
 
- const updateVariation = (
-   index: number,
-   field: string,
-   value: string | number | string[]
- ) => {
-   const updatedVariations = [...(formData.variations || [])] as Variation[];
+const updateVariation = (
+  index: number,
+  field: string,
+  value: string | number | string[]
+) => {
+  const updatedVariations = [...(formData.variations || [])] as Variation[];
 
-   if (field.includes(".")) {
-     const [parent, child] = field.split(".");
-     if (parent === "dimensions") {
-       updatedVariations[index] = {
-         ...updatedVariations[index],
-         dimensions: {
-           ...(updatedVariations[index].dimensions || {}),
-           [child]: value,
-         },
-       };
-     }
-   } else if (field === "stock" || field === "moq") {
-     // Modified this line
-     updatedVariations[index] = {
-       ...updatedVariations[index],
-       [field]: value === "" ? "" : Number(value),
-     };
-   } else {
-     updatedVariations[index] = {
-       ...updatedVariations[index],
-       [field]: value,
-     };
-   }
+  if (field.includes(".")) {
+    const [parent, child] = field.split(".");
+    if (parent === "dimensions") {
+      updatedVariations[index] = {
+        ...updatedVariations[index],
+        dimensions: {
+          ...(updatedVariations[index].dimensions || {}),
+          [child]: value,
+        },
+      };
+    }
+  } else if (field === "stock" || field === "moq") {
+    // Convert to number only if value is not empty
+    const numValue = value === "" ? undefined : Number(value);
+    updatedVariations[index] = {
+      ...updatedVariations[index],
+      [field]: numValue,
+    };
+  } else {
+    updatedVariations[index] = {
+      ...updatedVariations[index],
+      [field]: value,
+    };
+  }
 
-   setValue("variations", updatedVariations);
- };
+  setValue("variations", updatedVariations);
+};
 
   const removeVariation = (index: number) => {
     const updatedVariations = [...(formData.variations || [])];
@@ -794,18 +813,14 @@ const addVariation = () => {
                                       type="number"
                                       placeholder="1"
                                       min="1"
-                                      value={
-                                        variation.moq === undefined
-                                          ? ""
-                                          : variation.moq
-                                      }
+                                      value={variation.moq ?? ""} // Use nullish coalescing
                                       onChange={(e) =>
                                         updateVariation(
                                           index,
                                           "moq",
                                           e.target.value === ""
                                             ? ""
-                                            : Number(e.target.value)
+                                            : e.target.value
                                         )
                                       }
                                       className="h-12 text-base"
@@ -905,11 +920,14 @@ const addVariation = () => {
                         <Input
                           id="moq"
                           type="number"
-                          {...register("moq", {
-                            valueAsNumber: true,
-                          })}
                           placeholder="1"
                           min="1"
+                          {...register("moq", {
+                            setValueAs: (v) =>
+                              v === "" || v === undefined
+                                ? undefined
+                                : Number(v),
+                          })}
                           className="h-12 text-base"
                         />
                       </div>
