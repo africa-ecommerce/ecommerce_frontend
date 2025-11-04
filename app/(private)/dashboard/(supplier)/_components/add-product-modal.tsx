@@ -94,29 +94,26 @@ export function AddProductModal({
 const addProduct = async (data: ProductFormData) => {
   try {
     setIsSubmitting(true);
+
     const formData = new FormData();
     data.images.forEach((file: File) => {
       formData.append("images", file);
     });
 
     const { images, imageUrls, ...jsonData } = data;
-    
-    // Filter out undefined/empty MOQ from main product
+
+    // Always ensure moq exists and defaults to 1
     const cleanedData = {
       ...jsonData,
-      moq: jsonData.moq && jsonData.moq > 0 ? jsonData.moq : undefined,
+      moq: jsonData.moq && jsonData.moq > 0 ? jsonData.moq : 1,
     };
-    
-    // Filter out undefined/empty MOQ from variations
+
+    // Ensure variations each have a valid moq or default to 1
     if (cleanedData.variations && cleanedData.variations.length > 0) {
-      cleanedData.variations = cleanedData.variations.map((v: any) => {
-        const { moq, ...rest } = v;
-        // Only include moq if it has a valid value
-        if (moq && moq > 0) {
-          return { ...rest, moq };
-        }
-        return rest;
-      });
+      cleanedData.variations = cleanedData.variations.map((v: any) => ({
+        ...v,
+        moq: v.moq && v.moq > 0 ? v.moq : 1,
+      }));
     }
 
     formData.append("productData", JSON.stringify(cleanedData));
@@ -152,6 +149,7 @@ const addProduct = async (data: ProductFormData) => {
     setIsSubmitting(false);
   }
 };
+
 
   // Handle drag and drop for images
   useEffect(() => {

@@ -74,56 +74,53 @@ export function UpdateProductModal({
 
   console.log("updateData", data);
 
-  const editProduct = async (data: UpdateFormData) => {
-    try {
-      const formData = new FormData();
-      data.images?.forEach((file: File) => {
-        formData.append("images", file);
-      });
+const editProduct = async (data: UpdateFormData) => {
+  try {
+    const formData = new FormData();
+    data.images?.forEach((file: File) => {
+      formData.append("images", file);
+    });
 
-      const { images, ...jsonData } = data;
+    const { images, ...jsonData } = data;
 
-      // Clean the data before sending
-      const cleanedData = {
-        ...jsonData,
-        // Filter out undefined/empty MOQ from main product
-        moq: jsonData.moq && jsonData.moq > 0 ? jsonData.moq : undefined,
-      };
+    // Always ensure moq exists and defaults to 1
+    const cleanedData = {
+      ...jsonData,
+      moq: jsonData.moq && jsonData.moq > 0 ? jsonData.moq : 1,
+    };
 
-      // Filter out undefined/empty MOQ from variations
-      if (cleanedData.variations && cleanedData.variations.length > 0) {
-        cleanedData.variations = cleanedData.variations.map((v: any) => {
-          const { moq, ...rest } = v;
-          // Only include moq if it has a valid value
-          if (moq && moq > 0) {
-            return { ...rest, moq };
-          }
-          return rest;
-        });
-      }
+    // Ensure variations each have a valid moq or default to 1
+    if (cleanedData.variations && cleanedData.variations.length > 0) {
+      cleanedData.variations = cleanedData.variations.map((v: any) => ({
+        ...v,
+        moq: v.moq && v.moq > 0 ? v.moq : 1,
+      }));
+    }
 
-      formData.append("productData", JSON.stringify(cleanedData));
+    formData.append("productData", JSON.stringify(cleanedData));
 
-      const response = await fetch(`/api/products/${productId}`, {
-        method: "PUT",
-        body: formData,
-        credentials: "include",
-      });
+    const response = await fetch(`/api/products/${productId}`, {
+      method: "PUT",
+      body: formData,
+      credentials: "include",
+    });
 
-      if (!response.ok) {
-        const errorResult = await response.json();
-        errorToast(errorResult.error || "Server error");
-        return null;
-      }
-
-      const result = await response.json();
-      successToast(result.message || "Product updated successfully");
-      return result;
-    } catch (error) {
-      errorToast("Something went wrong");
+    if (!response.ok) {
+      const errorResult = await response.json();
+      errorToast(errorResult.error || "Server error");
       return null;
     }
-  };
+
+    const result = await response.json();
+    successToast(result.message || "Product updated successfully");
+    return result;
+  } catch (error) {
+    console.error("Edit submission error:", error);
+    errorToast("Something went wrong");
+    return null;
+  }
+};
+
 
   const {
     form: { register, submit, errors, setValue, isSubmitting, watch },
