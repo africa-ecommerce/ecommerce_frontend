@@ -755,7 +755,7 @@ export default function PlugDashboard() {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-3 sm:p-4 pt-0">
-          <div className="space-y-3 pr-3 max-h-[300px] overflow-y-auto">
+          <div className="space-y-3 pr-3 max-h-[250px] overflow-y-auto">
             {stockAlerts.map((alert) => (
               <div
                 key={alert.id}

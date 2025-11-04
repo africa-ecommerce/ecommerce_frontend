@@ -21,8 +21,6 @@ interface RuleToggleProps {
   enabled?: boolean;
   onToggle?: (value: boolean) => void;
   disabled?: boolean;
-
-  // Return policy specific props
   returnWindow?: number;
   returnPolicyTerms?: string;
   returnShippingFee?: string;
@@ -53,6 +51,8 @@ export default function RuleToggle({
 }: RuleToggleProps) {
   const [returnWindowError, setReturnWindowError] = useState(false);
   const [supplierShareError, setSupplierShareError] = useState(false);
+  const [wordCount, setWordCount] = useState(0);
+  const MAX_WORDS = 1500;
 
   // Validate and notify parent of validation state
   useEffect(() => {
@@ -90,24 +90,31 @@ export default function RuleToggle({
   ]);
 
   const handleReturnWindowChange = (value: string) => {
-    if (value === "") {
-      onReturnWindowChange?.(null);
-    } else {
+    if (value === "") onReturnWindowChange?.(null);
+    else {
       const num = Number(value);
-      if (!isNaN(num)) {
-        onReturnWindowChange?.(num);
-      }
+      if (!isNaN(num)) onReturnWindowChange?.(num);
     }
   };
 
   const handleSupplierShareChange = (value: string) => {
-    if (value === "") {
-      onSupplierShareChange?.(null);
-    } else {
+    if (value === "") onSupplierShareChange?.(null);
+    else {
       const num = Number(value);
-      if (!isNaN(num)) {
-        onSupplierShareChange?.(num);
-      }
+      if (!isNaN(num)) onSupplierShareChange?.(num);
+    }
+  };
+
+  const handleReturnTermsChange = (value: string) => {
+    const words = value.trim().split(/\s+/).filter(Boolean);
+    if (words.length <= MAX_WORDS) {
+      onReturnTermsChange?.(value);
+      setWordCount(words.length);
+    } else {
+      // prevent typing beyond 1500 words
+      const trimmed = words.slice(0, MAX_WORDS).join(" ");
+      onReturnTermsChange?.(trimmed);
+      setWordCount(MAX_WORDS);
     }
   };
 
@@ -169,11 +176,24 @@ export default function RuleToggle({
             <Textarea
               id="return-policy"
               placeholder="Example: Returns are accepted only for damaged or incorrect items. Products must remain unused, in original packaging."
-              rows={3}
+              rows={4}
               value={returnPolicyTerms}
-              onChange={(e) => onReturnTermsChange?.(e.target.value)}
+              onChange={(e) => handleReturnTermsChange(e.target.value)}
               className="mt-2 border-neutral-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
             />
+            <div className="text-xs mt-1 text-right">
+              <span
+                className={
+                  wordCount >= MAX_WORDS
+                    ? "text-red-500 font-medium"
+                    : wordCount >= MAX_WORDS - 100
+                    ? "text-orange-500 font-medium"
+                    : "text-neutral-500"
+                }
+              >
+                {`Words: ${wordCount} / ${MAX_WORDS}`}
+              </span>
+            </div>
           </div>
 
           {/* RETURN SHIPPING FEE */}
@@ -183,9 +203,9 @@ export default function RuleToggle({
             </Label>
             <Select
               value={returnShippingFee.toLowerCase()}
-              onValueChange={(val) => {
-                onReturnShippingChange?.(val.toUpperCase());
-              }}
+              onValueChange={(val) =>
+                onReturnShippingChange?.(val.toUpperCase())
+              }
             >
               <SelectTrigger className="mt-2 w-full border-neutral-300">
                 <SelectValue placeholder="Select" />

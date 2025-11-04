@@ -44,6 +44,7 @@ import { mutate } from "swr";
 interface Variation {
   id: string;
   stock?: string | number;
+  moq?: string | number;  // Add this line
   size?: string;
   colors?: string[];
   [key: string]: any;
@@ -72,19 +73,20 @@ export function AddProductModal({
     trigger,
   } = useForm<ProductFormData>({
     resolver: zodResolver(productFormSchema),
-    defaultValues: {
-      name: "",
-      category: "",
-      description: "",
-      size: "",
-      price: 0,
-      stock: 0,
-      colors: [],
-      hasVariations: false,
-      variations: [],
-      images: [],
-      imageUrls: [],
-    },
+ defaultValues: {
+  name: "",
+  category: "",
+  description: "",
+  size: "",
+  price: 0,
+  stock: 0,
+  moq: undefined,  // Add this line
+  colors: [],
+  hasVariations: false,
+  variations: [],
+  images: [],
+  imageUrls: [],
+},
   });
 
   const formData = watch();
@@ -227,51 +229,51 @@ export function AddProductModal({
     setValue("imageUrls", newImageUrls);
   };
 
-  const addVariation = () => {
-    const newVariation = {
-      id: `var-${Date.now()}`,
-      size: "",
-      colors: [],
-      stock: "",
-    };
-
-    setValue("variations", [...(formData.variations || []), newVariation]);
+const addVariation = () => {
+  const newVariation = {
+    id: `var-${Date.now()}`,
+    size: "",
+    colors: [],
+    stock: "",
+    moq: "",  // Add this line
   };
 
-  const updateVariation = (
-    index: number,
-    field: string,
-    value: string | number | string[]
-  ) => {
-    const updatedVariations = [...(formData.variations || [])] as Variation[];
+  setValue("variations", [...(formData.variations || []), newVariation]);
+};
 
-    // Handle nested dimensions fields
-    if (field.includes(".")) {
-      const [parent, child] = field.split(".");
-      if (parent === "dimensions") {
-        updatedVariations[index] = {
-          ...updatedVariations[index],
-          dimensions: {
-            ...(updatedVariations[index].dimensions || {}),
-            [child]: value,
-          },
-        };
-      }
-    } else if (field === "stock") {
-      // Special handling for stock field to handle empty string
-      updatedVariations[index] = {
-        ...updatedVariations[index],
-        [field]: value === "" ? "" : Number(value),
-      };
-    } else {
-      updatedVariations[index] = {
-        ...updatedVariations[index],
-        [field]: value,
-      };
-    }
+ const updateVariation = (
+   index: number,
+   field: string,
+   value: string | number | string[]
+ ) => {
+   const updatedVariations = [...(formData.variations || [])] as Variation[];
 
-    setValue("variations", updatedVariations);
-  };
+   if (field.includes(".")) {
+     const [parent, child] = field.split(".");
+     if (parent === "dimensions") {
+       updatedVariations[index] = {
+         ...updatedVariations[index],
+         dimensions: {
+           ...(updatedVariations[index].dimensions || {}),
+           [child]: value,
+         },
+       };
+     }
+   } else if (field === "stock" || field === "moq") {
+     // Modified this line
+     updatedVariations[index] = {
+       ...updatedVariations[index],
+       [field]: value === "" ? "" : Number(value),
+     };
+   } else {
+     updatedVariations[index] = {
+       ...updatedVariations[index],
+       [field]: value,
+     };
+   }
+
+   setValue("variations", updatedVariations);
+ };
 
   const removeVariation = (index: number) => {
     const updatedVariations = [...(formData.variations || [])];
@@ -743,38 +745,70 @@ export function AddProductModal({
                                   </div>
                                 </div>
 
-                                <div className="space-y-3">
-                                  <Label htmlFor={`stock-${index}`}>
-                                    Stock *
-                                  </Label>
-                                  <Input
-                                    id={`stock-${index}`}
-                                    type="number"
-                                    placeholder="1"
-                                    value={
-                                      variation.stock === undefined
-                                        ? ""
-                                        : variation.stock
-                                    }
-                                    onChange={(e) =>
-                                      updateVariation(
-                                        index,
-                                        "stock",
-                                        e.target.value === ""
+                                <div className="grid gap-4 grid-cols-2">
+                                  <div className="space-y-3">
+                                    <Label htmlFor={`stock-${index}`}>
+                                      Stock *
+                                    </Label>
+                                    <Input
+                                      id={`stock-${index}`}
+                                      type="number"
+                                      placeholder="1"
+                                      value={
+                                        variation.stock === undefined
                                           ? ""
-                                          : Number(e.target.value)
-                                      )
-                                    }
-                                    className="h-12 text-base"
-                                    required
-                                  />
-                                  {variation.stock !== "" &&
-                                    variation.stock !== undefined &&
-                                    Number(variation.stock) < 1 && (
-                                      <p className="text-xs text-red-500">
-                                        Stock must be at least 1
-                                      </p>
-                                    )}
+                                          : variation.stock
+                                      }
+                                      onChange={(e) =>
+                                        updateVariation(
+                                          index,
+                                          "stock",
+                                          e.target.value === ""
+                                            ? ""
+                                            : Number(e.target.value)
+                                        )
+                                      }
+                                      className="h-12 text-base"
+                                      required
+                                    />
+                                    {variation.stock !== "" &&
+                                      variation.stock !== undefined &&
+                                      Number(variation.stock) < 1 && (
+                                        <p className="text-xs text-red-500">
+                                          Stock must be at least 1
+                                        </p>
+                                      )}
+                                  </div>
+
+                                  <div className="space-y-3">
+                                    <Label htmlFor={`moq-${index}`}>
+                                      MOQ{" "}
+                                      <span className="text-muted-foreground text-xs">
+                                        (Optional)
+                                      </span>
+                                    </Label>
+                                    <Input
+                                      id={`moq-${index}`}
+                                      type="number"
+                                      placeholder="1"
+                                      min="1"
+                                      value={
+                                        variation.moq === undefined
+                                          ? ""
+                                          : variation.moq
+                                      }
+                                      onChange={(e) =>
+                                        updateVariation(
+                                          index,
+                                          "moq",
+                                          e.target.value === ""
+                                            ? ""
+                                            : Number(e.target.value)
+                                        )
+                                      }
+                                      className="h-12 text-base"
+                                    />
+                                  </div>
                                 </div>
                               </div>
                             )
@@ -840,22 +874,43 @@ export function AddProductModal({
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <Label htmlFor="stock">Stock *</Label>
-                      <Input
-                        id="stock"
-                        type="number"
-                        {...register("stock", {
-                          valueAsNumber: true,
-                        })}
-                        placeholder="0"
-                        className="h-12 text-base"
-                      />
-                      {errors.stock && (
-                        <p className="text-xs text-red-500 mt-1">
-                          Stock must be at least 1
-                        </p>
-                      )}
+                    <div className="grid gap-4 grid-cols-2">
+                      <div className="space-y-3">
+                        <Label htmlFor="stock">Stock *</Label>
+                        <Input
+                          id="stock"
+                          type="number"
+                          {...register("stock", {
+                            valueAsNumber: true,
+                          })}
+                          placeholder="0"
+                          className="h-12 text-base"
+                        />
+                        {errors.stock && (
+                          <p className="text-xs text-red-500 mt-1">
+                            Stock must be at least 1
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="moq">
+                          MOQ{" "}
+                          <span className="text-muted-foreground text-xs">
+                            (Optional)
+                          </span>
+                        </Label>
+                        <Input
+                          id="moq"
+                          type="number"
+                          {...register("moq", {
+                            valueAsNumber: true,
+                          })}
+                          placeholder="1"
+                          min="1"
+                          className="h-12 text-base"
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1029,6 +1084,14 @@ export function AddProductModal({
                             </div>
                             <div>
                               <p className="text-sm text-muted-foreground">
+                                MOQ
+                              </p>
+                              <p className="font-medium">
+                                {formData.moq || "-"}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">
                                 Colors
                               </p>
                               {formData.colors && formData.colors.length > 0 ? (
@@ -1111,13 +1174,21 @@ export function AddProductModal({
                                       </div>
                                       <div>
                                         <p className="text-sm text-muted-foreground">
+                                          MOQ
+                                        </p>
+                                        <p className="font-medium">
+                                          {variation.moq || "-"}
+                                        </p>
+                                      </div>
+                                      <div>
+                                        <p className="text-sm text-muted-foreground">
                                           Size
                                         </p>
                                         <p className="font-medium capitalize">
                                           {variation.size || "-"}
                                         </p>
                                       </div>
-                                      <div>
+                                      <div className="col-span-2">
                                         <p className="text-sm text-muted-foreground">
                                           Colors
                                         </p>

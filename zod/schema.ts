@@ -368,6 +368,7 @@ const variationSchema = z.object({
   size: z.string().optional(),
   colors: z.array(z.string()).optional(),
   stock: z.number().or(z.string()).optional(),
+  moq: z.number().or(z.string()).optional(),
 })
 
 // Main product schema with improved validation
@@ -379,6 +380,7 @@ export const productFormSchema = z
     size: z.string().optional(),
     price: z.number().min(1, "Price is required"),
     stock: z.number().optional(),
+    moq:z.number().optional(),
     colors: z.array(z.string()).optional(),
     hasVariations: z.boolean(),
     variations: z.array(variationSchema),
@@ -405,6 +407,7 @@ export const productFormSchema = z
     size: z.string().optional(),
     price: z.number().min(1, "Price is required"),
     stock: z.number().optional(),
+    moq: z.number().optional(),
     colors: z.array(z.string()).optional(),
     hasVariations: z.boolean(),
     variations: z.array(variationSchema),

@@ -45,6 +45,7 @@ interface Variation {
   id: string;
   stock?: string | number;
   size?: string;
+  moq?: string | number;
   colors?: string[];
   [key: string]: any;
 }
@@ -319,45 +320,47 @@ export function UpdateProductModal({
       size: "",
       colors: [],
       stock: "",
+      moq: "",
     };
 
     setValue("variations", [...(formData.variations || []), newVariation]);
   };
 
-  const updateVariation = (
-    index: number,
-    field: string,
-    value: string | number | string[]
-  ) => {
-    const updatedVariations = [...(formData.variations || [])] as Variation[];
+const updateVariation = (
+  index: number,
+  field: string,
+  value: string | number | string[]
+) => {
+  const updatedVariations = [...(formData.variations || [])] as Variation[];
 
-    // Handle nested dimensions fields
-    if (field.includes(".")) {
-      const [parent, child] = field.split(".");
-      if (parent === "dimensions") {
-        updatedVariations[index] = {
-          ...updatedVariations[index],
-          dimensions: {
-            ...(updatedVariations[index].dimensions || {}),
-            [child]: value,
-          },
-        };
-      }
-    } else if (field === "stock") {
-      // Special handling for stock field to handle empty string
+  // Handle nested dimensions fields
+  if (field.includes(".")) {
+    const [parent, child] = field.split(".");
+    if (parent === "dimensions") {
       updatedVariations[index] = {
         ...updatedVariations[index],
-        [field]: value === "" ? "" : Number(value),
-      };
-    } else {
-      updatedVariations[index] = {
-        ...updatedVariations[index],
-        [field]: value,
+        dimensions: {
+          ...(updatedVariations[index].dimensions || {}),
+          [child]: value,
+        },
       };
     }
+  } else if (field === "stock" || field === "moq") {
+    // Modified this line
+    // Special handling for stock and moq fields to handle empty string
+    updatedVariations[index] = {
+      ...updatedVariations[index],
+      [field]: value === "" ? "" : Number(value),
+    };
+  } else {
+    updatedVariations[index] = {
+      ...updatedVariations[index],
+      [field]: value,
+    };
+  }
 
-    setValue("variations", updatedVariations);
-  };
+  setValue("variations", updatedVariations);
+};
 
   const removeVariation = (index: number) => {
     const updatedVariations = [...(formData.variations || [])];
@@ -760,6 +763,7 @@ export function UpdateProductModal({
                 )}
 
                 {/* Step 2: Variations - Enhanced with price field */}
+                {/* Step 2: Variations - Enhanced with sticky Add button */}
                 {currentStep === 1 && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between rounded-lg bg-muted/30 p-4">
@@ -780,7 +784,7 @@ export function UpdateProductModal({
                           variant="outline"
                           size="sm"
                           onClick={addVariation}
-                          className="h-9 bg-transparent"
+                          className="h-9"
                           type="button"
                         >
                           <Plus className="mr-1 h-4 w-4" /> Add
@@ -811,99 +815,145 @@ export function UpdateProductModal({
                         </Button>
                       </div>
                     ) : (
-                      <div className="space-y-4">
-                        {formData.variations?.map(
-                          (variation: Variation, index) => (
-                            <div
-                              key={variation.id}
-                              className="rounded-xl border bg-muted/30 p-4"
-                            >
-                              <div className="mb-4 flex items-center justify-between">
-                                <h3 className="font-medium">
-                                  Variation {index + 1}
-                                </h3>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => removeVariation(index)}
-                                  className="text-destructive hover:text-destructive/80"
-                                  type="button"
-                                >
-                                  <Trash2 className="h-5 w-5" />
-                                </Button>
-                              </div>
+                      <div className="relative">
+                        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b pb-4 mb-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={addVariation}
+                            className="h-9 w-full"
+                            type="button"
+                          >
+                            <Plus className="mr-1 h-4 w-4" /> Add Variation
+                          </Button>
+                        </div>
 
-                              <div className="grid gap-4 grid-cols-2">
-                                <div className="space-y-3 pb-4">
-                                  <Label htmlFor={`size-${index}`}>
-                                    Size *
-                                  </Label>
-                                  <Input
-                                    id={`size-${index}`}
-                                    placeholder="e.g. XL, 250ml, 32 inches"
-                                    value={variation.size || ""}
-                                    onChange={(e) =>
-                                      updateVariation(
-                                        index,
-                                        "size",
-                                        e.target.value
-                                      )
-                                    }
-                                    className="h-12 text-base"
-                                  />
+                        <div className="space-y-4">
+                          {formData.variations?.map(
+                            (variation: Variation, index) => (
+                              <div
+                                key={variation.id}
+                                className="rounded-xl border bg-muted/30 p-4"
+                              >
+                                <div className="mb-4 flex items-center justify-between">
+                                  <h3 className="font-medium">
+                                    Variation {index + 1}
+                                  </h3>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => removeVariation(index)}
+                                    className="text-destructive hover:text-destructive/80"
+                                    type="button"
+                                  >
+                                    <Trash2 className="h-5 w-5" />
+                                  </Button>
                                 </div>
 
-                                <div className="space-y-3 pb-4">
-                                  <Label htmlFor={`color-${index}`}>
-                                    Colors *
-                                  </Label>
-                                  <ColorPicker
-                                    selectedColors={variation.colors || []}
-                                    onColorsChange={(colors) =>
-                                      updateVariation(index, "colors", colors)
-                                    }
-                                    placeholder="Select colors..."
-                                    className="z-[110]"
-                                  />
+                                <div className="grid gap-4 grid-cols-2">
+                                  <div className="space-y-3 pb-4">
+                                    <Label htmlFor={`size-${index}`}>
+                                      Size *
+                                    </Label>
+                                    <Input
+                                      id={`size-${index}`}
+                                      placeholder="e.g. XL, 250ml, 32 inches"
+                                      value={variation.size || ""}
+                                      onChange={(e) =>
+                                        updateVariation(
+                                          index,
+                                          "size",
+                                          e.target.value
+                                        )
+                                      }
+                                      className="h-12 text-base"
+                                    />
+                                  </div>
+
+                                  <div className="space-y-3 pb-4">
+                                    <Label htmlFor={`color-${index}`}>
+                                      Colors *
+                                    </Label>
+                                    <ColorPicker
+                                      selectedColors={variation.colors || []}
+                                      onColorsChange={(colors) =>
+                                        updateVariation(index, "colors", colors)
+                                      }
+                                      placeholder="Select colors..."
+                                      className="z-[110]"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="grid gap-4 grid-cols-2">
+                                  <div className="space-y-3">
+                                    <Label htmlFor={`stock-${index}`}>
+                                      Stock *
+                                    </Label>
+                                    <Input
+                                      id={`stock-${index}`}
+                                      type="number"
+                                      placeholder="1"
+                                      value={
+                                        variation.stock === undefined
+                                          ? ""
+                                          : variation.stock
+                                      }
+                                      onChange={(e) =>
+                                        updateVariation(
+                                          index,
+                                          "stock",
+                                          e.target.value === ""
+                                            ? ""
+                                            : Number(e.target.value)
+                                        )
+                                      }
+                                      className="h-12 text-base"
+                                      required
+                                    />
+                                    {variation.stock !== "" &&
+                                      variation.stock !== undefined &&
+                                      Number(variation.stock) < 1 && (
+                                        <p className="text-xs text-red-500">
+                                          Stock must be at least 1
+                                        </p>
+                                      )}
+                                  </div>
+
+                                  <div className="space-y-3">
+                                    <Label htmlFor={`moq-${index}`}>
+                                      MOQ{" "}
+                                      <span className="text-muted-foreground text-xs">
+                                        (Optional)
+                                      </span>
+                                    </Label>
+                                    <Input
+                                      id={`moq-${index}`}
+                                      type="number"
+                                      placeholder="1"
+                                      min="1"
+                                      value={
+                                        variation.moq === undefined
+                                          ? ""
+                                          : variation.moq
+                                      }
+                                      onChange={(e) =>
+                                        updateVariation(
+                                          index,
+                                          "moq",
+                                          e.target.value === ""
+                                            ? ""
+                                            : Number(e.target.value)
+                                        )
+                                      }
+                                      className="h-12 text-base"
+                                    />
+                                  </div>
                                 </div>
                               </div>
-
-                              <div className="space-y-3">
-                                <Label htmlFor={`stock-${index}`}>
-                                  Stock *
-                                </Label>
-                                <Input
-                                  id={`stock-${index}`}
-                                  type="number"
-                                  placeholder="1"
-                                  value={
-                                    variation.stock === undefined
-                                      ? ""
-                                      : variation.stock
-                                  }
-                                  onChange={(e) =>
-                                    updateVariation(
-                                      index,
-                                      "stock",
-                                      e.target.value === ""
-                                        ? ""
-                                        : Number(e.target.value)
-                                    )
-                                  }
-                                  className="h-12 text-base"
-                                  required
-                                />
-                                {variation.stock !== "" &&
-                                  variation.stock !== undefined &&
-                                  Number(variation.stock) < 1 && (
-                                    <p className="text-xs text-red-500">
-                                      Stock must be at least 1
-                                    </p>
-                                  )}
-                              </div>
-                            </div>
-                          )
-                        )}
+                            )
+                          )}
+                        </div>
                       </div>
                     )}
 
@@ -922,8 +972,8 @@ export function UpdateProductModal({
                       )}
                   </div>
                 )}
-
                 {/* Step 3: Single Product Details - Price removed, now in step 1 */}
+                {/* Step 3: Single Product Details */}
                 {currentStep === 2 && (
                   <div className="space-y-6">
                     <div className="rounded-lg bg-muted/30 p-4">
@@ -964,22 +1014,43 @@ export function UpdateProductModal({
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <Label htmlFor="stock">Stock *</Label>
-                      <Input
-                        id="stock"
-                        type="number"
-                        {...register("stock", {
-                          valueAsNumber: true, // Convert to number automatically
-                        })}
-                        placeholder="0"
-                        className="h-12 text-base"
-                      />
-                      {errors.stock && (
-                        <p className="text-xs text-red-500 mt-1">
-                          Stock must be at least 1
-                        </p>
-                      )}
+                    <div className="grid gap-4 grid-cols-2">
+                      <div className="space-y-3">
+                        <Label htmlFor="stock">Stock *</Label>
+                        <Input
+                          id="stock"
+                          type="number"
+                          {...register("stock", {
+                            valueAsNumber: true,
+                          })}
+                          placeholder="0"
+                          className="h-12 text-base"
+                        />
+                        {errors.stock && (
+                          <p className="text-xs text-red-500 mt-1">
+                            Stock must be at least 1
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="moq">
+                          MOQ{" "}
+                          <span className="text-muted-foreground text-xs">
+                            (Optional)
+                          </span>
+                        </Label>
+                        <Input
+                          id="moq"
+                          type="number"
+                          {...register("moq", {
+                            valueAsNumber: true,
+                          })}
+                          placeholder="1"
+                          min="1"
+                          className="h-12 text-base"
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1126,63 +1197,71 @@ export function UpdateProductModal({
                         </div>
                       </div>
 
-                      {!formData.hasVariations && (
-                        <div className="rounded-xl border bg-muted/30 p-5">
-                          <h4 className="mb-3 text-sm font-medium">
-                            Product Specifications
-                          </h4>
-                          <div className="grid gap-4 grid-cols-2">
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Stock
-                              </p>
-                              <p className="font-medium">
-                                {formData.stock || "0"}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Colors
-                              </p>
-                              {formData.colors && formData.colors.length > 0 ? (
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {formData.colors.map((colorValue) => {
-                                    const color = PREDEFINED_COLORS.find(
-                                      (c) => c.value === colorValue
-                                    );
-                                    return (
-                                      <Badge
-                                        key={colorValue}
-                                        variant="secondary"
-                                        className="flex items-center gap-1 text-xs"
-                                      >
-                                        <div
-                                          className="h-2 w-2 rounded-full border border-gray-300"
-                                          style={{
-                                            backgroundColor:
-                                              color?.hex || "#gray",
-                                          }}
-                                        />
-                                        {color?.name || colorValue}
-                                      </Badge>
-                                    );
-                                  })}
-                                </div>
-                              ) : (
-                                <p className="font-medium">-</p>
-                              )}
-                            </div>
-                            <div>
-                              <p className="text-sm text-muted-foreground">
-                                Size
-                              </p>
-                              <p className="font-medium capitalize ">
-                                {formData.size || "-"}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                     {!formData.hasVariations && (
+  <div className="rounded-xl border bg-muted/30 p-5">
+    <h4 className="mb-3 text-sm font-medium">
+      Product Specifications
+    </h4>
+    <div className="grid gap-4 grid-cols-2">
+      <div>
+        <p className="text-sm text-muted-foreground">
+          Stock
+        </p>
+        <p className="font-medium">
+          {formData.stock || "0"}
+        </p>
+      </div>
+      <div>
+        <p className="text-sm text-muted-foreground">
+          MOQ
+        </p>
+        <p className="font-medium">
+          {formData.moq || "-"}
+        </p>
+      </div>
+      <div>
+        <p className="text-sm text-muted-foreground">
+          Colors
+        </p>
+        {formData.colors && formData.colors.length > 0 ? (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {formData.colors.map((colorValue) => {
+              const color = PREDEFINED_COLORS.find(
+                (c) => c.value === colorValue
+              );
+              return (
+                <Badge
+                  key={colorValue}
+                  variant="secondary"
+                  className="flex items-center gap-1 text-xs"
+                >
+                  <div
+                    className="h-2 w-2 rounded-full border border-gray-300"
+                    style={{
+                      backgroundColor:
+                        color?.hex || "#gray",
+                    }}
+                  />
+                  {color?.name || colorValue}
+                </Badge>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="font-medium">-</p>
+        )}
+      </div>
+      <div>
+        <p className="text-sm text-muted-foreground">
+          Size
+        </p>
+        <p className="font-medium capitalize ">
+          {formData.size || "-"}
+        </p>
+      </div>
+    </div>
+  </div>
+)}
 
                       {formData.hasVariations &&
                         (formData.variations?.length || 0) > 0 && (
@@ -1197,62 +1276,86 @@ export function UpdateProductModal({
                                     key={variation.id}
                                     className="rounded-lg border p-3"
                                   >
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div>
-                                        <p className="text-sm text-muted-foreground">
-                                          Variation
-                                        </p>
-                                        <p className="font-medium capitalize">
-                                          {variation.size ||
-                                          (variation.colors &&
-                                            variation.colors.length > 0)
-                                            ? [
-                                                variation.size,
-                                                variation.colors?.join(", "),
-                                              ]
-                                                .filter(Boolean)
-                                                .join(" / ")
-                                            : `Variation ${index + 1}`}
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <p className="text-sm text-muted-foreground">
-                                          Colors
-                                        </p>
-                                        {variation.colors &&
-                                        variation.colors.length > 0 ? (
-                                          <div className="flex flex-wrap gap-1 mt-1">
-                                            {variation.colors.map(
-                                              (colorValue) => {
-                                                const color =
-                                                  PREDEFINED_COLORS.find(
-                                                    (c) =>
-                                                      c.value === colorValue
-                                                  );
-                                                return (
-                                                  <Badge
-                                                    key={colorValue}
-                                                    variant="secondary"
-                                                    className="flex items-center gap-1 text-xs"
-                                                  >
-                                                    <div
-                                                      className="h-2 w-2 rounded-full border border-gray-300"
-                                                      style={{
-                                                        backgroundColor:
-                                                          color?.hex || "#gray",
-                                                      }}
-                                                    />
-                                                    {color?.name || colorValue}
-                                                  </Badge>
-                                                );
-                                              }
-                                            )}
-                                          </div>
-                                        ) : (
-                                          <p className="font-medium">-</p>
-                                        )}
-                                      </div>
-                                    </div>
+                                   <div className="grid grid-cols-2 gap-4">
+  <div>
+    <p className="text-sm text-muted-foreground">
+      Variation
+    </p>
+    <p className="font-medium capitalize">
+      {variation.size ||
+      (variation.colors &&
+        variation.colors.length > 0)
+        ? [
+            variation.size,
+            variation.colors?.join(", "),
+          ]
+            .filter(Boolean)
+            .join(" / ")
+        : `Variation ${index + 1}`}
+    </p>
+  </div>
+  <div>
+    <p className="text-sm text-muted-foreground">
+      Stock
+    </p>
+    <p className="font-medium">
+      {variation.stock}
+    </p>
+  </div>
+  <div>
+    <p className="text-sm text-muted-foreground">
+      MOQ
+    </p>
+    <p className="font-medium">
+      {variation.moq || "-"}
+    </p>
+  </div>
+  <div>
+    <p className="text-sm text-muted-foreground">
+      Size
+    </p>
+    <p className="font-medium capitalize">
+      {variation.size || "-"}
+    </p>
+  </div>
+  <div className="col-span-2">
+    <p className="text-sm text-muted-foreground">
+      Colors
+    </p>
+    {variation.colors &&
+    variation.colors.length > 0 ? (
+      <div className="flex flex-wrap gap-1 mt-1">
+        {variation.colors.map(
+          (colorValue) => {
+            const color =
+              PREDEFINED_COLORS.find(
+                (c) =>
+                  c.value === colorValue
+              );
+            return (
+              <Badge
+                key={colorValue}
+                variant="secondary"
+                className="flex items-center gap-1 text-xs"
+              >
+                <div
+                  className="h-2 w-2 rounded-full border border-gray-300"
+                  style={{
+                    backgroundColor:
+                      color?.hex || "#gray",
+                  }}
+                />
+                {color?.name || colorValue}
+              </Badge>
+            );
+          }
+        )}
+      </div>
+    ) : (
+      <p className="font-medium">-</p>
+    )}
+  </div>
+</div>
                                   </div>
                                 )
                               )}
