@@ -91,11 +91,12 @@ const editProduct = async (data: UpdateFormData) => {
 
     // Ensure variations each have a valid moq or default to 1
     if (cleanedData.variations && cleanedData.variations.length > 0) {
-      cleanedData.variations = cleanedData.variations.map((v: any) => ({
-        ...v,
-        moq: v.moq && v.moq > 0 ? v.moq : 1,
-      }));
-    }
+  cleanedData.variations = cleanedData.variations.map((v: any) => ({
+    ...v,
+    colors: Array.isArray(v.colors) ? v.colors : [], // <-- Explicitly ensure it's an array
+    moq: v.moq && v.moq > 0 ? v.moq : 1,
+  }));
+}
 
     formData.append("productData", JSON.stringify(cleanedData));
 
@@ -376,11 +377,17 @@ const editProduct = async (data: UpdateFormData) => {
         };
       }
     } else if (field === "stock" || field === "moq") {
-      // Convert to number only if value is not empty, otherwise undefined
+      // Convert to number only if value is not empty
       const numValue = value === "" ? undefined : Number(value);
       updatedVariations[index] = {
         ...updatedVariations[index],
         [field]: numValue,
+      };
+    } else if (field === "colors") {
+      // Explicitly handle colors to ensure it's always an array
+      updatedVariations[index] = {
+        ...updatedVariations[index],
+        colors: Array.isArray(value) ? value : [],
       };
     } else {
       updatedVariations[index] = {
@@ -391,7 +398,7 @@ const editProduct = async (data: UpdateFormData) => {
 
     setValue("variations", updatedVariations);
   };
-
+  
   const removeVariation = (index: number) => {
     const updatedVariations = [...(formData.variations || [])];
     updatedVariations.splice(index, 1);

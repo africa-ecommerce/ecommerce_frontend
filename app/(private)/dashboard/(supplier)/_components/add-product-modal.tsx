@@ -109,12 +109,13 @@ const addProduct = async (data: ProductFormData) => {
     };
 
     // Ensure variations each have a valid moq or default to 1
-    if (cleanedData.variations && cleanedData.variations.length > 0) {
-      cleanedData.variations = cleanedData.variations.map((v: any) => ({
-        ...v,
-        moq: v.moq && v.moq > 0 ? v.moq : 1,
-      }));
-    }
+   if (cleanedData.variations && cleanedData.variations.length > 0) {
+     cleanedData.variations = cleanedData.variations.map((v: any) => ({
+       ...v,
+       colors: Array.isArray(v.colors) ? v.colors : [], // <-- Explicitly ensure it's an array
+       moq: v.moq && v.moq > 0 ? v.moq : 1,
+     }));
+   }
 
     formData.append("productData", JSON.stringify(cleanedData));
 
@@ -281,6 +282,12 @@ const updateVariation = (
     updatedVariations[index] = {
       ...updatedVariations[index],
       [field]: numValue,
+    };
+  } else if (field === "colors") {
+    // Explicitly handle colors to ensure it's always an array
+    updatedVariations[index] = {
+      ...updatedVariations[index],
+      colors: Array.isArray(value) ? value : [],
     };
   } else {
     updatedVariations[index] = {
