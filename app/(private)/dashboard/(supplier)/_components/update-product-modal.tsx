@@ -72,6 +72,8 @@ export function UpdateProductModal({
   const data = itemData;
   const isLoading = !itemData;
 
+  console.log("updateData", data)
+
   const editProduct = async (data: UpdateFormData) => {
     try {
       const formData = new FormData();

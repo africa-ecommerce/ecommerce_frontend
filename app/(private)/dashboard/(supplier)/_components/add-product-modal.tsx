@@ -385,24 +385,70 @@ const addVariation = () => {
   };
 
   // Ensure we have valid data before submitting
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   // If hasVariations is false, make sure variations is an empty array
+  //   if (!formData.hasVariations) {
+  //     setValue("variations", []);
+  //   }
+
+  //   if (formData.hasVariations) {
+  //     // When variations are enabled, reset single product fields
+  //     setValue("size", "");
+  //     setValue("colors", []);
+  //     setValue("stock", undefined);
+  //   }
+
+  //   // Force validation using the submit function from your form hook
+  //   try {
+  //     await formSubmit(addProduct)(formData);
+  //   } catch (error) {
+  //     console.error("Form submission error:", error);
+  //     errorToast("Please check all required fields");
+  //   }
+  // };
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // If hasVariations is false, make sure variations is an empty array
-    if (!formData.hasVariations) {
-      setValue("variations", []);
-    }
+    // Prepare data based on variation mode
+    let dataToSubmit = { ...formData };
 
     if (formData.hasVariations) {
-      // When variations are enabled, reset single product fields
-      setValue("size", "");
-      setValue("colors", []);
-      setValue("stock", undefined);
+      // When variations are enabled, remove single product fields
+      dataToSubmit.size = "";
+      dataToSubmit.colors = [];
+      delete dataToSubmit.stock;
+      delete dataToSubmit.moq;
+      
+      // Clean up variation data - remove empty moq fields
+      if (dataToSubmit.variations) {
+        dataToSubmit.variations = dataToSubmit.variations.map((v: Variation) => {
+          const cleanedVariation: any = {
+            id: v.id,
+            size: v.size || "",
+            colors: v.colors || [],
+            stock: v.stock,
+          };
+          
+          // Only include moq if it has a value
+          if (v.moq !== "" && v.moq !== undefined && v.moq !== null) {
+            cleanedVariation.moq = Number(v.moq);
+          }
+          
+          return cleanedVariation;
+        });
+      }
+    } else {
+      // When no variations, ensure variations is empty
+      dataToSubmit.variations = [];
     }
 
     // Force validation using the submit function from your form hook
     try {
-      await formSubmit(addProduct)(formData);
+      await formSubmit(addProduct)(dataToSubmit);
     } catch (error) {
       console.error("Form submission error:", error);
       errorToast("Please check all required fields");
