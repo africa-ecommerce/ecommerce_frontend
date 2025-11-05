@@ -173,7 +173,7 @@ export function BuyerGuardWidget({ productData }: BuyerGuardWidgetProps) {
           </div>
 
           {/* Content */}
-          <div className="overflow-y-auto px-6 py-4 space-y-4">
+          <div className="overflow-y-auto px-6 py-4 pb-6 space-y-4">
             {sections.map((section, index) => {
               const IconComponent = section.icon
               return (
