@@ -198,11 +198,7 @@ export function BuyerGuardWidget({ productData }: BuyerGuardWidgetProps) {
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 bg-muted/30 border-t border-border px-6 py-4">
-            <Button onClick={() => setIsOpen(false)} variant="outline" className="w-full">
-              Close
-            </Button>
-          </div>
+         
         </dialog>
       )}
     </>
