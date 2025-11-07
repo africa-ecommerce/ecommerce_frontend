@@ -2014,8 +2014,7 @@ import {
   CheckCircle2,
 } from "lucide-react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import AnimatedCounter from "./animated-counter"
-import InteractiveDemo from "./interactive-demo"
+
 import ArchitectureDiagram from "./architecture-diagram"
 
 export default function PluggnLanding() {
@@ -2135,7 +2134,7 @@ policy = pluggn.policies.create(
             >
               Sign in
             </Link>
-            <Button className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transition-shadow">
+            <Button className="bg-orange-500 hover:bg-orange-700  text-white shadow-lg hover:shadow-xl transition-shadow">
               <Link href="/auth/register">Join Waitlist</Link>
             </Button>
             <button className="md:hidden" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">
@@ -2218,21 +2217,21 @@ policy = pluggn.policies.create(
                 </span>
               </div>
 
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-b from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent leading-tight">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent leading-tight">
                 If Stripe made payments work,
                 <br />
-                <span className="text-orange-600">Pluggn makes fulfillment work</span>
+                <span className="text-orange-500">We make fulfillment work</span>
               </h1>
 
               <p className="text-lg md:text-xl text-gray-600 max-w-2xl leading-relaxed">
-                The programmable logistics and fulfillment layer that powers commerce across Africa. Embed delivery
+                The logistics and fulfillment layer that powers commerce. Embed delivery,
                 policies, buyer protection, and smart logistics coordination directly into your checkout.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white px-8 shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                  className="bg-orange-500 hover:bg-orange-700  text-white px-8 shadow-lg hover:shadow-xl transition-all hover:scale-105"
                 >
                   <Link href="/auth/register" className="flex items-center gap-2">
                     Join Waitlist
@@ -2266,33 +2265,7 @@ policy = pluggn.policies.create(
           </div>
         </section>
 
-        {/* Trust Bar */}
-        <section className="w-full py-12 bg-white border-y border-orange-100">
-          <div className="container px-4 md:px-6 max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
-              <div className="flex-1">
-                <div className="text-3xl md:text-4xl font-bold text-orange-600">
-                  <AnimatedCounter end={10000} duration={2} />+
-                </div>
-                <p className="text-sm text-gray-600 mt-1">Orders coordinated daily</p>
-              </div>
-              <div className="w-px h-12 bg-orange-200 hidden md:block" />
-              <div className="flex-1">
-                <div className="text-3xl md:text-4xl font-bold text-orange-600">
-                  98.5<span className="text-2xl">%</span>
-                </div>
-                <p className="text-sm text-gray-600 mt-1">On-time delivery rate</p>
-              </div>
-              <div className="w-px h-12 bg-orange-200 hidden md:block" />
-              <div className="flex-1">
-                <div className="text-3xl md:text-4xl font-bold text-orange-600">
-                  70<span className="text-2xl">%</span>
-                </div>
-                <p className="text-sm text-gray-600 mt-1">Average cost reduction</p>
-              </div>
-            </div>
-          </div>
-        </section>
+      
 
         {/* Why Now Section */}
         <section id="why-now" className="w-full py-20 scroll-mt-16 bg-gradient-to-b from-white to-orange-50">
@@ -2524,7 +2497,7 @@ policy = pluggn.policies.create(
                 },
               ].map((step) => (
                 <div key={step.num} className="flex gap-6 items-start group">
-                  <div className="w-10 h-10 bg-gradient-to-r from-orange-600 to-orange-500 text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold shadow-lg group-hover:scale-110 transition-transform">
+                  <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold shadow-lg group-hover:scale-110 transition-transform">
                     {step.num}
                   </div>
                   <div className="flex-1">
@@ -2538,18 +2511,7 @@ policy = pluggn.policies.create(
         </section>
 
         {/* Interactive Demo */}
-        <section className="w-full py-20 bg-white border-y border-orange-100">
-          <div className="container px-4 md:px-6 max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">See fulfillment in action</h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Walk through a complete fulfillment workflow in real-time
-              </p>
-            </div>
-            <InteractiveDemo />
-          </div>
-        </section>
-
+       
         {/* Architecture Diagram */}
         <section className="w-full py-20 bg-gradient-to-b from-white to-orange-50">
           <div className="container px-4 md:px-6 max-w-7xl mx-auto">
