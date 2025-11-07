@@ -25,8 +25,7 @@ export function Footer() {
               />
             </Link>
             <p className="text-gray-400 mb-4 max-w-xs text-sm md:text-base">
-              Empowering entrepreneurs across Africa to build successful
-              businesses without the headaches of running one.
+              The fulfillment infrastructure layer for emerging markets
             </p>
             <div className="flex gap-4">
               <Link
@@ -119,7 +118,7 @@ export function Footer() {
                   onClick={() => scrollToSection("features")}
                   className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
                 >
-                  For Suppliers
+                  Merchants
                 </button>
               </li>
               <li>
@@ -136,6 +135,22 @@ export function Footer() {
                   className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
                 >
                   Contact
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
+                >
+                  Documentation
+                </Link>
+              </li>
+               <li>
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
+                >
+                  API reference
                 </Link>
               </li>
             </ul>
@@ -200,7 +215,7 @@ export function Footer() {
                   Privacy Policy
                 </Link>
               </li>
-               <li>
+              <li>
                 <Link
                   href="/return"
                   className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
@@ -216,8 +231,7 @@ export function Footer() {
             © {new Date().getFullYear()} Pluggn. All rights reserved.
           </p>
           <p className="text-gray-500 text-xs md:text-sm text-center">
-           A brand of{" "}
-            <span className="font-semibold">PLUGGN INNOVATIONS</span>
+            A brand of <span className="font-semibold">PLUGGN INNOVATIONS</span>
           </p>
         </div>
       </div>
