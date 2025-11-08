@@ -634,10 +634,7 @@ useEffect(() => {
   }
 }, [isClient, setValue]);
 
-  useEffect(() => {
-    setDeliveryType(checkoutData.deliveryMethod || "terminal");
-    setSelectedTerminal(checkoutData.terminalAddress || "");
-  }, []);
+
 
   // Watch state changes to update LGAs
   useEffect(() => {
@@ -753,15 +750,7 @@ useEffect(() => {
     ]);
     const stateValid = await trigger("customerAddress.state");
 
-    // Check if delivery fee is available for terminal delivery
-    const terminalDeliveryFee = selectedState 
-      ? TerminalPickupPrices[selectedState as keyof typeof TerminalPickupPrices]
-      : null;
-
-    if (!terminalDeliveryFee) {
-      errorToast("Unable to calculate delivery fee for selected terminal. Please try again.");
-      return;
-    }
+ 
 
     if (customerInfoValid && stateValid) {
       setCurrentStep("review");
@@ -1076,157 +1065,15 @@ useEffect(() => {
                             )}
                           </div>
 
-                          {selectedState &&
-                            (selectedState === "Lagos" ||
-                              selectedState === "Ogun") && (
-                              <div className="space-y-2">
-                                <Label>
-                                  Delivery Type{" "}
-                                  <span className="text-red-500">*</span>
-                                </Label>
-                                <div className="flex gap-4">
-                                  <div className="flex items-center space-x-2">
-                                    <input
-                                      type="radio"
-                                      id="terminal"
-                                      name="deliveryType"
-                                      value="terminal"
-                                      checked={deliveryType === "terminal"}
-                                      onChange={(e) => {
-                                        const newDeliveryType = e.target
-                                          .value as "terminal" | "home";
-                                        setDeliveryType(newDeliveryType);
-                                        setDeliveryMethod(newDeliveryType);
-                                      }}
-                                      className="w-4 h-4 text-blue-600"
-                                    />
-                                    <Label
-                                      htmlFor="terminal"
-                                      className="font-normal"
-                                    >
-                                      Terminal Pickup
-                                    </Label>
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                                    <input
-                                      type="radio"
-                                      id="home"
-                                      name="deliveryType"
-                                      value="home"
-                                      checked={deliveryType === "home"}
-                                      onChange={(e) => {
-                                        const newDeliveryType = e.target
-                                          .value as "terminal" | "home";
-                                        setDeliveryType(newDeliveryType);
-                                        setDeliveryMethod(newDeliveryType);
-                                      }}
-                                      className="w-4 h-4 text-blue-600"
-                                    />
-                                    <Label
-                                      htmlFor="home"
-                                      className="font-normal"
-                                    >
-                                      Home Delivery
-                                    </Label>
-                                  </div>
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                  Terminal pickup locations are GIG Logistics
-                                  pickup offices where you can collect your
-                                  order.
-                                </p>
-                              </div>
-                            )}
+                          
+                         
 
-                          {selectedState &&
-                            deliveryType === "terminal" &&
-                            terminalAddresses[
-                              selectedState as keyof typeof terminalAddresses
-                            ] && (
-                              <div className="space-y-2">
-                                <Label>
-                                  Select Terminal{" "}
-                                  <span className="text-red-500">*</span>
-                                </Label>
-                                <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mb-3">
-                                  <div className="flex items-center justify-between">
-                                    <p className="text-xs text-blue-800">
-                                      <strong>Terminal Pickup Price</strong>
-                                    </p>
-                                    <span className="text-lg font-bold text-blue-900">
-                                      {formatPrice(
-                                        TerminalPickupPrices[
-                                          selectedState as keyof typeof TerminalPickupPrices
-                                        ] || 0
-                                      )}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm text-blue-700 mt-1">
-                                    All pickup locations in {selectedState} have
-                                    the same price
-                                  </p>
-                                </div>
-                                <p className="text-sm text-muted-foreground mb-2">
-                                  Scroll to choose a GIG Logistics office near
-                                  you for pickup:
-                                </p>
-                                <div className="border rounded-md max-h-48 overflow-y-auto">
-                                  {terminalAddresses[
-                                    selectedState as keyof typeof terminalAddresses
-                                  ].map((terminal, index) => (
-                                    <div
-                                      key={index}
-                                      className={`p-3 border-b last:border-b-0 cursor-pointer hover:bg-muted/50 ${
-                                        selectedTerminal === terminal
-                                          ? "bg-blue-50 border-blue-200"
-                                          : ""
-                                      }`}
-                                      onClick={() => {
-                                        setSelectedTerminal(terminal);
-                                        setTerminalAddress(terminal);
-                                      }}
-                                    >
-                                      <div className="flex items-start space-x-2">
-                                        <input
-                                          type="radio"
-                                          name="terminal"
-                                          value={terminal}
-                                          checked={
-                                            selectedTerminal === terminal
-                                          }
-                                          onChange={() => {
-                                            setSelectedTerminal(terminal);
-                                            setTerminalAddress(terminal);
-                                          }}
-                                          className="w-4 h-4 text-blue-600 mt-1"
-                                        />
-                                        <span className="text-xs whitespace-normal break-words">
-                                          {terminal}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                          {selectedState && deliveryType === "home" && (
-                            <>
-                              {/* Address Specificity Message */}
-                              <Alert className="mb-4">
-                                <Info className="h-4 w-4" />
-                                <AlertDescription>
-                                  <strong>💡 Pro Tip:</strong> Providing a very
-                                  specific and detailed address helps our
-                                  logistics partners optimize delivery routes,
-                                  which can potentially reduce your delivery
-                                  costs. Include landmarks, building
-                                  descriptions, and clear directions.
-                                </AlertDescription>
-                              </Alert>
+                          
+                            
+                             
 
                               {/* LGA Selection */}
-                              {selectedState && deliveryType === "home" && (
+                            
                                 <div className="space-y-2">
                                   <Label htmlFor="lga">
                                     Local Government Area{" "}
@@ -1291,7 +1138,7 @@ useEffect(() => {
                                     </p>
                                   )}
                                 </div>
-                              )}
+                             
 
                               {/* Street Address */}
                               {selectedState && deliveryType === "home" && (
@@ -1382,8 +1229,7 @@ useEffect(() => {
                                   )}
                                 </div>
                               )}
-                            </>
-                          )}
+                           
 
                           {/* Delivery Pricing Status */}
                           {(isLogisticsPricingLoading ||
@@ -1509,53 +1355,33 @@ useEffect(() => {
                       <Separator />
 
                       <div>
-                        <h3 className="font-medium mb-3">
-                          Delivery Information
-                        </h3>
-                        <div className="flex items-start space-x-2">
-                          <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm">
-                              {checkoutData.customerInfo.name ||
-                                "Customer Name"}
-                              <br />
-                              {checkoutData.deliveryMethod === "terminal" ? (
-                                <>
-                                  <span className="font-medium">
-                                    Terminal Pickup:
-                                  </span>
-                                  <br />
-                                  {checkoutData.terminalAddress ||
-                                    "No terminal selected"}
-                                </>
-                              ) : (
-                                <>
-                                  {checkoutData.customerAddress.streetAddress ||
-                                    "Street Address"}
-                                  {checkoutData.customerAddress.directions && (
-                                    <>
-                                      <br />
-                                      <span className="text-muted-foreground">
-                                        Directions:{" "}
-                                        {
-                                          checkoutData.customerAddress
-                                            .directions
-                                        }
-                                      </span>
-                                    </>
-                                  )}
-                                  <br />
-                                  {checkoutData.customerAddress.lga},{" "}
-                                  {checkoutData.customerAddress.state}
-                                </>
-                              )}
-                              <br />
-                              {checkoutData.customerInfo.phone ||
-                                "Phone Number"}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+  <h3 className="font-medium mb-3">Delivery Information</h3>
+  <div className="flex items-start space-x-2">
+    <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+    <div className="flex-1 min-w-0">
+      <p className="text-sm">
+        {checkoutData.customerInfo.name || "Customer Name"}
+        <br />
+
+        {checkoutData.customerAddress.streetAddress || "Street Address"}
+        <br />
+
+        {checkoutData.customerAddress.directions && (
+          <span className="text-muted-foreground">
+            Directions: {checkoutData.customerAddress.directions}
+          </span>
+        )}
+        <br />
+
+        {checkoutData.customerAddress.lga}, {checkoutData.customerAddress.state}
+        <br />
+
+        {checkoutData.customerInfo.phone || "Phone Number"}
+      </p>
+    </div>
+  </div>
+</div>
+
 
                       <Separator />
 
@@ -1607,23 +1433,7 @@ useEffect(() => {
                             <Loader2 className="h-3 w-3 animate-spin ml-1 inline" />
                           )}
                         </span>
-                        <span className="text-sm">
-                          {deliveryType === "terminal" && selectedState
-                            ? formatPrice(
-                                TerminalPickupPrices[
-                                  selectedState as keyof typeof TerminalPickupPrices
-                                ] || 0
-                              )
-                            : !watchedState ||
-                              !watchedLga ||
-                              !watchedStreetAddress
-                            ? "Enter address to calculate"
-                            : deliveryFee === null
-                            ? "Calculating..."
-                            : deliveryFee === 0
-                            ? "Free"
-                            : formatPrice(deliveryFee)}
-                        </span>
+                      
                       </div>
                       {logisticsPricingError && (
                         <div className="text-xs text-red-600 mt-1">

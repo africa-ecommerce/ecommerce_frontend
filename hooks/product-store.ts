@@ -26,13 +26,21 @@ interface OrderProduct {
   item: ProductItem // Changed from items array to single item
   subtotal: number
   total: number
-
+  
   referralId: string | null
   platform: string | null
   pickupLocation?: PickupLocation
-  deliveryFee?: number
+  deliveryFee?: number,
+   deliveryLocations?: DeliveryLocation[]
 }
 
+type DeliveryLocation = {
+  id: string;
+  state: string;
+  lgas: string[];
+  fee: number;
+  duration: string;
+};
 interface ProductStore {
   orderSummaries: OrderProduct[]
   setOrderSummaries: (summaries: OrderProduct[]) => void
@@ -41,7 +49,7 @@ interface ProductStore {
   updateDeliveryFee: (fee: number, orderIndex?: number) => void
   addProductToOrder: (
     product: ProductItem,
-
+    deliveryLocations: DeliveryLocation[],
     referralId: string | null,
     platform: string | null,
     pickupLocation?: PickupLocation,
@@ -92,7 +100,7 @@ export const useProductStore = create<ProductStore>()(
 
       addProductToOrder: (
         product,
-
+        deliveryLocations,      
         referralId,
         platform,
         pickupLocation,
@@ -105,7 +113,7 @@ export const useProductStore = create<ProductStore>()(
           item: product, // Single item instead of array
           subtotal,
           total,
-
+          deliveryLocations,
           referralId,
           platform,
           pickupLocation,

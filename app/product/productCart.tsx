@@ -70,7 +70,16 @@ interface ProductData {
   returnShippingFee?: "BUYER" | "SUPPLIER" | "SHARED";
   supplierShare?: number;
   returnPolicyTerms?: string;
+  deliveryLocations?: DeliveryLocation[]
 }
+
+type DeliveryLocation = {
+  id: string;
+  state: string;
+  lgas: string[];
+  fee: number;
+  duration: string;
+};
 
 interface SingleProductCartProps {
   productId?: string
@@ -554,7 +563,7 @@ export const SingleProduct = ({
           item: productItem, // Single item instead of array
           subtotal,
           total: subtotal,
-
+          deliveryLocations: productData.deliveryLocations,
           referralId: currentReferralId,
           platform: currentPlatform,
           pickupLocation,
@@ -584,10 +593,11 @@ export const SingleProduct = ({
         item: productItem, // Single item instead of array
         subtotal,
         total: subtotal,
+        deliveryLocations: productData.deliveryLocations,
 
         referralId: currentReferralId,
         platform: currentPlatform,
-        
+
         pickupLocation,
         deliveryFee: 0,
       });
