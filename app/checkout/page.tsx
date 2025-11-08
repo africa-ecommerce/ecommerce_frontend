@@ -153,6 +153,9 @@ export default function CheckoutPage() {
     isLoading: isProductsLoading,
   } = useProductFetching(items, ref, platform, true);
 
+
+  console.log("checkoutProductsData", productsData)
+
   const {
     orderSummaries,
     setOrderSummaries,

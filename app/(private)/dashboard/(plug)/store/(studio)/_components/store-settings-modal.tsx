@@ -20,6 +20,8 @@ interface DeliveryLocation {
   state: string;
   lgas: string[]; // "ALL" means all LGAs in that state
   fee: number;
+    duration: string; // ✅ new field
+
 }
 
 
@@ -102,11 +104,11 @@ const [isDeliveryValid, setIsDeliveryValid] = useState(true);
 const isDisabled =
   loading ||
   !isRulesValid ||
-  !isDeliveryValid || // ✅ Add this
+  !isDeliveryValid ||
+  deliveryLocations.length === 0 ||
   (rules.returnPolicy &&
     (!rules.returnWindow ||
       (rules.returnShippingFee === "SHARED" && !rules.supplierShare)));
-
   return (
     <AnimatePresence>
     {open ? (

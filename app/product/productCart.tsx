@@ -193,6 +193,8 @@ export const SingleProduct = ({
 
   const productData: ProductData = data?.data || null;
 
+  console.log("productData", productData)
+
   // Get MOQ for simple products
   const productMOQ = useMemo(() => {
     return productData?.moq || 1;

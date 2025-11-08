@@ -23,6 +23,8 @@ interface DeliveryLocation {
   state: string;
   lgas: string[]; // "ALL" means all LGAs in that state
   fee: number;
+    duration: string; // ✅ new field
+
 }
 
 export default function CreateChannelModal({
@@ -116,14 +118,14 @@ const [isDeliveryValid, setIsDeliveryValid] = useState(true);
 
   if (!mounted) return null;
 
-  const isDisabled =
-    loading ||
-    
+const isDisabled =
+  loading ||
+  !isRulesValid ||
   !isDeliveryValid ||
-    !isRulesValid || // ✅ block when invalid
-    (rules.returnPolicy &&
-      (!rules.returnWindow ||
-        (rules.returnShippingFee === "SHARED" && !rules.supplierShare)));
+  deliveryLocations.length === 0 ||
+  (rules.returnPolicy &&
+    (!rules.returnWindow ||
+      (rules.returnShippingFee === "SHARED" && !rules.supplierShare)));
 
   return (
     <AnimatePresence>

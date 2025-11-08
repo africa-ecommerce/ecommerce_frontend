@@ -8,8 +8,9 @@ import { getLgasForState, getStatesAsStrings } from "@/lib/utils";
 interface DeliveryLocation {
   id: string;
   state: string;
-  lgas: string[]; // "ALL" means all LGAs in that state
+  lgas: string[];
   fee: number;
+  duration: string; // ✅ new field
 }
 
 interface DeliveryLocationSectionProps {
@@ -17,8 +18,6 @@ interface DeliveryLocationSectionProps {
   defaultData?: DeliveryLocation[];
   onValidationChange?: (isValid: boolean) => void;
 }
-
-
 
 export default function DeliveryLocationSection({
   onChange,
@@ -30,16 +29,24 @@ export default function DeliveryLocationSection({
   const [selectedState, setSelectedState] = useState("");
   const [selectedLgas, setSelectedLgas] = useState<string[]>([]);
   const [deliveryFee, setDeliveryFee] = useState("");
+  const [deliveryDuration, setDeliveryDuration] = useState(""); // ✅
   const [expandedStates, setExpandedStates] = useState<Set<string>>(new Set());
 
   const states = getStatesAsStrings();
 
+  // ✅ Validate delivery locations
   useEffect(() => {
     onChange(locations);
-    // Validate: all locations must have at least one LGA and a fee > 0
     const isValid =
-      locations.length === 0 ||
-      locations.every((loc) => loc.lgas.length > 0 && loc.fee > 0);
+      locations.length > 0 &&
+      locations.every(
+        (loc) =>
+          loc.state &&
+          loc.lgas.length > 0 &&
+          loc.fee > 0 &&
+          typeof loc.duration === "string" &&
+          loc.duration.trim() !== ""
+      );
     onValidationChange?.(isValid);
   }, [locations, onChange, onValidationChange]);
 
@@ -50,7 +57,6 @@ export default function DeliveryLocationSection({
 
   const toggleLga = (lga: string) => {
     if (lga === "ALL") {
-      // Toggle all LGAs
       const allLgas = getLgasForState(selectedState);
       if (selectedLgas.includes("ALL")) {
         setSelectedLgas([]);
@@ -58,12 +64,10 @@ export default function DeliveryLocationSection({
         setSelectedLgas(["ALL", ...allLgas]);
       }
     } else {
-      // Toggle individual LGA
       const newLgas = selectedLgas.includes(lga)
         ? selectedLgas.filter((l) => l !== lga && l !== "ALL")
         : [...selectedLgas.filter((l) => l !== "ALL"), lga];
 
-      // Check if all LGAs are now selected
       const allLgas = getLgasForState(selectedState);
       if (newLgas.length === allLgas.length) {
         setSelectedLgas(["ALL", ...allLgas]);
@@ -74,29 +78,28 @@ export default function DeliveryLocationSection({
   };
 
   const handleAddLocation = () => {
-    if (!selectedState || selectedLgas.length === 0 || !deliveryFee) {
+    if (
+      !selectedState ||
+      selectedLgas.length === 0 ||
+      !deliveryFee ||
+      !deliveryDuration
+    ) {
       return;
     }
 
     const fee = parseFloat(deliveryFee);
-    if (isNaN(fee) || fee <= 0) {
-      return;
-    }
+    if (isNaN(fee) || fee <= 0) return;
 
-    // Check if state already exists
     const existingStateIndex = locations.findIndex(
       (loc) => loc.state === selectedState
     );
 
     if (existingStateIndex !== -1) {
-      // Update existing state
       const updatedLocations = [...locations];
       const existingLgas = new Set(updatedLocations[existingStateIndex].lgas);
 
       selectedLgas.forEach((lga) => {
-        if (lga !== "ALL") {
-          existingLgas.add(lga);
-        }
+        if (lga !== "ALL") existingLgas.add(lga);
       });
 
       updatedLocations[existingStateIndex] = {
@@ -105,24 +108,27 @@ export default function DeliveryLocationSection({
         fee: selectedLgas.includes("ALL")
           ? fee
           : updatedLocations[existingStateIndex].fee,
+        duration:
+          deliveryDuration || updatedLocations[existingStateIndex].duration, // ✅
       };
 
       setLocations(updatedLocations);
     } else {
-      // Add new location
       const newLocation: DeliveryLocation = {
         id: Date.now().toString(),
         state: selectedState,
         lgas: selectedLgas.filter((lga) => lga !== "ALL"),
         fee,
+        duration: deliveryDuration, // ✅
       };
       setLocations([...locations, newLocation]);
     }
 
-    // Reset form
+    // ✅ Reset form
     setSelectedState("");
     setSelectedLgas([]);
     setDeliveryFee("");
+    setDeliveryDuration("");
     setShowAddForm(false);
   };
 
@@ -132,11 +138,8 @@ export default function DeliveryLocationSection({
 
   const toggleStateExpansion = (state: string) => {
     const newExpanded = new Set(expandedStates);
-    if (newExpanded.has(state)) {
-      newExpanded.delete(state);
-    } else {
-      newExpanded.add(state);
-    }
+    if (newExpanded.has(state)) newExpanded.delete(state);
+    else newExpanded.add(state);
     setExpandedStates(newExpanded);
   };
 
@@ -145,13 +148,14 @@ export default function DeliveryLocationSection({
 
   return (
     <div className="space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold text-neutral-800">
             Delivery Locations & Fees
           </h3>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Set delivery fees for different locations
+            Set delivery fees, durations, and locations
           </p>
         </div>
         {!showAddForm && (
@@ -167,7 +171,7 @@ export default function DeliveryLocationSection({
         )}
       </div>
 
-      {/* Add Location Form */}
+      {/* Add Form */}
       {showAddForm && (
         <div className="border border-neutral-200 rounded-lg p-4 space-y-4 bg-neutral-50">
           <div className="flex items-center justify-between">
@@ -180,6 +184,7 @@ export default function DeliveryLocationSection({
                 setSelectedState("");
                 setSelectedLgas([]);
                 setDeliveryFee("");
+                setDeliveryDuration("");
               }}
               className="p-1 hover:bg-neutral-200 rounded-full transition"
             >
@@ -187,7 +192,7 @@ export default function DeliveryLocationSection({
             </button>
           </div>
 
-          {/* State Selection */}
+          {/* State */}
           <div>
             <label className="block text-xs font-medium text-neutral-700 mb-1.5">
               Select State
@@ -206,14 +211,13 @@ export default function DeliveryLocationSection({
             </select>
           </div>
 
-          {/* LGA Selection */}
+          {/* LGAs */}
           {selectedState && (
             <div>
               <label className="block text-xs font-medium text-neutral-700 mb-1.5">
                 Select LGAs
               </label>
               <div className="border border-neutral-300 rounded-lg bg-white max-h-48 overflow-y-auto">
-                {/* All Option */}
                 <label className="flex items-center px-3 py-2.5 hover:bg-neutral-50 cursor-pointer border-b border-neutral-200">
                   <input
                     type="checkbox"
@@ -228,8 +232,6 @@ export default function DeliveryLocationSection({
                     ({availableLgas.length} LGAs)
                   </span>
                 </label>
-
-                {/* Individual LGAs */}
                 {availableLgas.map((lga) => (
                   <label
                     key={lga}
@@ -251,7 +253,7 @@ export default function DeliveryLocationSection({
             </div>
           )}
 
-          {/* Delivery Fee */}
+          {/* Fee */}
           {selectedState && selectedLgas.length > 0 && (
             <div>
               <label className="block text-xs font-medium text-neutral-700 mb-1.5">
@@ -269,6 +271,22 @@ export default function DeliveryLocationSection({
             </div>
           )}
 
+          {/* ✅ Duration */}
+          {selectedState && selectedLgas.length > 0 && (
+            <div>
+              <label className="block text-xs font-medium text-neutral-700 mb-1.5">
+                Delivery Duration
+              </label>
+              <input
+                type="text"
+                value={deliveryDuration}
+                onChange={(e) => setDeliveryDuration(e.target.value)}
+                placeholder="1 - 2 days"
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+          )}
+
           {/* Add Button */}
           <Button
             type="button"
@@ -277,7 +295,8 @@ export default function DeliveryLocationSection({
               !selectedState ||
               selectedLgas.length === 0 ||
               !deliveryFee ||
-              parseFloat(deliveryFee) <= 0
+              parseFloat(deliveryFee) <= 0 ||
+              !deliveryDuration.trim()
             }
             className="w-full bg-orange-500 hover:bg-orange-600 text-white disabled:bg-gray-300"
           >
@@ -303,12 +322,15 @@ export default function DeliveryLocationSection({
                   <div className="flex items-center gap-3 flex-1">
                     <MapPin className="h-4 w-4 text-orange-500 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-medium text-neutral-800">
                           {location.state}
                         </span>
                         <span className="text-xs px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full">
                           ₦{location.fee.toLocaleString()}
+                        </span>
+                        <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-700 rounded-full">
+                          {location.duration}
                         </span>
                       </div>
                       <p className="text-xs text-neutral-500 mt-0.5">
@@ -340,7 +362,6 @@ export default function DeliveryLocationSection({
                   </div>
                 </div>
 
-                {/* Expanded LGA List */}
                 {isExpanded && !isAllLgas && (
                   <div className="px-3 pb-3 pt-0">
                     <div className="flex flex-wrap gap-1.5 pl-7">
@@ -361,13 +382,13 @@ export default function DeliveryLocationSection({
         </div>
       )}
 
+      {/* Empty State */}
       {locations.length === 0 && !showAddForm && (
         <div className="text-center py-8 border border-dashed border-neutral-300 rounded-lg">
           <MapPin className="h-8 w-8 text-neutral-400 mx-auto mb-2" />
           <p className="text-sm text-neutral-500">
             No delivery locations added
           </p>
-         
         </div>
       )}
     </div>
