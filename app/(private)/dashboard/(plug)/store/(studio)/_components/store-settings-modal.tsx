@@ -78,7 +78,7 @@ const [isDeliveryValid, setIsDeliveryValid] = useState(true);
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error("Failed to set policy");
+      if (!res.ok) throw new Error("Something went wrong!!");
 
       onUpdated?.();
       successToast(

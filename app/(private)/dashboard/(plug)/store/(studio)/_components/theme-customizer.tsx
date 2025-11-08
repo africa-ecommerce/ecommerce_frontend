@@ -152,39 +152,47 @@ const [pendingPublish, setPendingPublish] = useState(false);
     data: userConfig,
     error: userConfigError,
     mutate: mutateConfig,
-  } = useSWR(user?.plug?.configUrl ? user.plug.configUrl : null, fetcher, {
-    revalidateOnError: false,
-    retryOnError: false,
-    dedupingInterval: 5000,
-    revalidateOnFocus: false,
-    shouldRetryOnError: false, // Additional safeguard against retries
-    errorRetryCount: 0, // Ensure no retries happen
-    onSuccess: (data) => {
-      if (data) {
-        try {
-          // Parse and validate the config
-          const parsedConfig =
-            typeof data === "string" ? JSON.parse(data) : data;
+  } = useSWR(
+    user?.plug?.configUrl
+      ? user.plug.configUrl
+      : user?.supplier?.configUrl
+      ? user.supplier.configUrl
+      : null,
+    fetcher,
+    {
+      revalidateOnError: false,
+      retryOnError: false,
+      dedupingInterval: 5000,
+      revalidateOnFocus: false,
+      shouldRetryOnError: false, // Additional safeguard against retries
+      errorRetryCount: 0, // Ensure no retries happen
+      onSuccess: (data) => {
+        if (data) {
+          try {
+            // Parse and validate the config
+            const parsedConfig =
+              typeof data === "string" ? JSON.parse(data) : data;
 
-          if (parsedConfig && parsedConfig.templateId) {
-            setConfig(parsedConfig);
-            setHistory([parsedConfig]);
-            setHistoryIndex(0);
-            setIsEditing(true);
+            if (parsedConfig && parsedConfig.templateId) {
+              setConfig(parsedConfig);
+              setHistory([parsedConfig]);
+              setHistoryIndex(0);
+              setIsEditing(true);
+            }
+          } catch (error) {
+            console.error("Error parsing user config:", error);
+            // Silent error handling here - we'll let the component handle UI feedback
           }
-        } catch (error) {
-          console.error("Error parsing user config:", error);
-          // Silent error handling here - we'll let the component handle UI feedback
         }
-      }
-      setIsLoading(false);
-    },
-    onError: (err) => {
-      console.error("Error fetching user config:", err);
-      setIsLoading(false);
-      // Don't call errorToast here directly
-    },
-  });
+        setIsLoading(false);
+      },
+      onError: (err) => {
+        console.error("Error fetching user config:", err);
+        setIsLoading(false);
+        // Don't call errorToast here directly
+      },
+    }
+  );
 
   useEffect(() => {
     if (userConfigError) {

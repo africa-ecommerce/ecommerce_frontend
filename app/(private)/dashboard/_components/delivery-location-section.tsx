@@ -367,9 +367,7 @@ export default function DeliveryLocationSection({
           <p className="text-sm text-neutral-500">
             No delivery locations added
           </p>
-          <p className="text-xs text-neutral-400 mt-1">
-            Click "Add Location" to set delivery fees
-          </p>
+         
         </div>
       )}
     </div>

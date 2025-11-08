@@ -279,7 +279,7 @@ export default function ChannelView() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col md:pl-24">
       {/* Sticky Header */}
       <header className="sticky top-0 z-20 bg-white border-b border-neutral-100">
         <ChannelHeader channelId={channelData?.channelId} />
