@@ -1011,18 +1011,18 @@ export default function Inventory() {
                 {/* Sync Store Button */}
                 <Button
                   onClick={() => setSyncStoreModalOpen(true)}
-                  disabled={!user?.supplier?.verified}
+                 
                   variant="outline"
                   className="text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 px-3 max-w-[360px]:px-2 sm:px-4 whitespace-nowrap
         disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Package className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 sm:h-4 sm:w-4 mr-1.5 max-w-[360px]:mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Sync Store</span>
-                  <span className="sm:hidden">Sync</span>
+                  <span className="hidden xs:inline">Sync Store</span>
+                  <span className="xs:hidden">Sync</span>
                 </Button>
                 <Button
                   onClick={() => setAddProductModalOpen(true)}
-                  disabled={!user?.supplier?.verified}
+                  
                   className="bg-primary text-white hover:bg-primary/90 text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 px-3 max-w-[360px]:px-2 sm:px-4 whitespace-nowrap flex-shrink-0 min-w-0
     disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:bg-gray-300"
                 >
