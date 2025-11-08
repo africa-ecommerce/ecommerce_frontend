@@ -907,7 +907,7 @@ const stockAlerts = useMemo(() => {
         <section className="space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
             <h2 className="text-sm sm:text-base font-semibold">
-              Shipped Orders
+              Pending Orders
             </h2>
             <Button
               variant="outline"

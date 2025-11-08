@@ -59,7 +59,7 @@ export default function ChannelHeader({ channelId }: ChannelHeaderProps) {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white border-b border-neutral-200 shadow-sm z-50 animate-in slide-in-from-top duration-500">
+    <header className="fixed top-0 left-0 right-0 bg-white border-b border-neutral-200 shadow-sm z-50 animate-in slide-in-from-top duration-500  md:pl-24">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Left side: Avatar + info */}
         <div className="flex items-center gap-3">

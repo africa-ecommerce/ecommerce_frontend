@@ -73,6 +73,7 @@ import { UpdateProductModal } from "./update-product-modal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePathname, useRouter } from "next/navigation";
 import { ShareModal } from "../../(plug)/_components/share-modal";
+import { SyncStoreModal } from "./sync-store-modal";
 
 const LoadingSkeleton = () => (
   <Card>
@@ -152,16 +153,12 @@ const EmptyOrdersState = ({ status }: { status: string }) => {
       title: "No Pending Orders",
       description: "All your orders are either active or completed.",
     },
-    shipped: {
+    processed: {
       icon: <Truck className="h-12 w-12 text-muted-foreground" />,
-      title: "No Shipped Orders",
-      description: "You don't have any orders that have been shipped yet.",
+      title: "No Processed Orders",
+      description: "You don't have any orders processed yet.",
     },
-    delivered: {
-      icon: <PackageCheck className="h-12 w-12 text-muted-foreground" />,
-      title: "No Delivered Orders",
-      description: "Your delivered orders will appear here once completed.",
-    },
+   
     cancelled: {
       icon: <X className="h-12 w-12 text-muted-foreground" />,
       title: "No Cancelled Orders",
@@ -251,6 +248,7 @@ export default function Inventory() {
   // State management
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedFilter, setSelectedFilter] = useState("all");
+  const [syncStoreModalOpen, setSyncStoreModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   // Add state for delete confirmation
@@ -407,24 +405,16 @@ export default function Inventory() {
                 Pending
               </Badge>
             );
-          case "shipped":
+          case "processed":
             return (
               <Badge
                 variant="secondary"
                 className="bg-orange-500 hover:bg-orange-600"
               >
-                Shipped
+                Processed
               </Badge>
             );
-          case "delivered":
-            return (
-              <Badge
-                variant="outline"
-                className="bg-orange-500 hover:bg-orange-600"
-              >
-                Delivered
-              </Badge>
-            );
+          
           case "cancelled":
             return <Badge variant="destructive">Cancelled</Badge>;
           default:
@@ -590,7 +580,7 @@ export default function Inventory() {
   
           {/* Action Buttons */}
           <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
-            {activeOrderTab === "shipped" && (
+            {activeOrderTab === "processed" && (
               <>
                 <Button
                   variant="outline"
@@ -987,7 +977,6 @@ export default function Inventory() {
           </div>
         </section>
 
-        
         {/* Product Catalog Management */}
         <section className="space-y-2 max-w-[360px]:space-y-1 sm:space-y-3">
           {/* Filters and Search */}
@@ -1018,17 +1007,30 @@ export default function Inventory() {
                 )}
               </div>
 
-              {/* Add Product Button */}
-              <Button
-                onClick={() => setAddProductModalOpen(true)}
-                disabled={!user?.supplier?.verified}
-                className="bg-primary text-white hover:bg-primary/90 text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 px-3 max-w-[360px]:px-2 sm:px-4 whitespace-nowrap flex-shrink-0 min-w-0
+              <div className="flex gap-1.5 flex-shrink-0">
+                {/* Sync Store Button */}
+                <Button
+                  onClick={() => setSyncStoreModalOpen(true)}
+                  disabled={!user?.supplier?.verified}
+                  variant="outline"
+                  className="text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 px-3 max-w-[360px]:px-2 sm:px-4 whitespace-nowrap
+        disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Package className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 sm:h-4 sm:w-4 mr-1.5 max-w-[360px]:mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Sync Store</span>
+                  <span className="sm:hidden">Sync</span>
+                </Button>
+                <Button
+                  onClick={() => setAddProductModalOpen(true)}
+                  disabled={!user?.supplier?.verified}
+                  className="bg-primary text-white hover:bg-primary/90 text-xs sm:text-sm h-8 max-w-[360px]:h-7 sm:h-9 md:h-10 px-3 max-w-[360px]:px-2 sm:px-4 whitespace-nowrap flex-shrink-0 min-w-0
     disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-600 disabled:hover:bg-gray-300"
-              >
-                <Package className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 sm:h-4 sm:w-4 mr-1.5 max-w-[360px]:mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Add Product</span>
-                <span className="xs:hidden">Add</span>
-              </Button>
+                >
+                  <Package className="h-3 max-w-[360px]:h-2.5 w-3 max-w-[360px]:w-2.5 sm:h-4 sm:w-4 mr-1.5 max-w-[360px]:mr-1 sm:mr-2" />
+                  <span className="hidden xs:inline">Add Product</span>
+                  <span className="xs:hidden">Add</span>
+                </Button>
+              </div>
             </div>
 
             <div className="flex items-center gap-2 max-w-[360px]:gap-1 overflow-x-auto pb-1 scrollbar-hide">
@@ -1082,7 +1084,6 @@ export default function Inventory() {
                 >
                   In Stock
                 </Button>
-               
               </div>
               <div className="">
                 <Select
@@ -1347,7 +1348,7 @@ export default function Inventory() {
           </div>
 
           <Tabs value={activeOrderTab} onValueChange={setActiveOrderTab}>
-            <TabsList className="grid w-full grid-cols-4 h-9 sm:h-10 overflow-x-auto">
+            <TabsList className="grid w-full grid-cols-3 h-9 sm:h-10 overflow-x-auto">
               <TabsTrigger
                 value="active"
                 className="text-[10px] sm:text-xs whitespace-nowrap"
@@ -1355,17 +1356,12 @@ export default function Inventory() {
                 Pending
               </TabsTrigger>
               <TabsTrigger
-                value="shipped"
+                value="processed"
                 className="text-[10px] sm:text-xs whitespace-nowrap"
               >
-                Shipped
+                Processed
               </TabsTrigger>
-              <TabsTrigger
-                value="delivered"
-                className="text-[10px] sm:text-xs whitespace-nowrap"
-              >
-                Delivered
-              </TabsTrigger>
+
               <TabsTrigger
                 value="cancelled"
                 className="text-[10px] sm:text-xs whitespace-nowrap"
@@ -1390,29 +1386,13 @@ export default function Inventory() {
               )}
             </TabsContent>
 
-            <TabsContent value="shipped" className="mt-3 sm:mt-4">
+            <TabsContent value="processed" className="mt-3 sm:mt-4">
               {ordersLoading ? (
                 <LoadingOrdersSkeleton />
               ) : ordersError ? (
                 <ErrorOrdersState onRetry={() => ordersMutate()} />
               ) : orders.length === 0 ? (
-                <EmptyOrdersState status="shipped" />
-              ) : (
-                <div className={scrollableClasses}>
-                  {orders.map((order: any) => (
-                    <OrderCard key={order.id} order={order} />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="delivered" className="mt-3 sm:mt-4">
-              {ordersLoading ? (
-                <LoadingOrdersSkeleton />
-              ) : ordersError ? (
-                <ErrorOrdersState onRetry={() => ordersMutate()} />
-              ) : orders.length === 0 ? (
-                <EmptyOrdersState status="delivered" />
+                <EmptyOrdersState status="processed" />
               ) : (
                 <div className={scrollableClasses}>
                   {orders.map((order: any) => (
@@ -1459,6 +1439,11 @@ export default function Inventory() {
           onOpenChange={setEditModalOpen}
           productId={selectedProductId}
         />
+
+        <SyncStoreModal
+  open={syncStoreModalOpen}
+  onOpenChange={setSyncStoreModalOpen}
+/>
 
         {/* Delete Confirmation Dialog */}
         <DeleteDialog
