@@ -7,12 +7,22 @@ import { Button } from "@/components/ui/button";
 import RulesSection from "./rules-section";
 import SocialsSection from "./socials-section";
 import { successToast, errorToast } from "@/components/ui/use-toast-advanced";
+import DeliveryLocationSection from "../../../_components/delivery-location-section";
+// import DeliveryLocationSection, { DeliveryLocation } from "./delivery-location-section";
+
 
 interface CreateChannelModalProps {
   open: boolean;
   close: () => void;
   defaultData?: any;
   onUpdated?: () => void;
+}
+
+interface DeliveryLocation {
+  id: string;
+  state: string;
+  lgas: string[]; // "ALL" means all LGAs in that state
+  fee: number;
 }
 
 export default function CreateChannelModal({
@@ -26,6 +36,9 @@ export default function CreateChannelModal({
   const [rules, setRules] = useState<any>({});
   const [socials, setSocials] = useState<any>({});
   const [isRulesValid, setIsRulesValid] = useState(true); // ✅ track validation
+
+  const [deliveryLocations, setDeliveryLocations] = useState<DeliveryLocation[]>([]);
+const [isDeliveryValid, setIsDeliveryValid] = useState(true);
 
   useEffect(() => setMounted(true), []);
 
@@ -48,6 +61,8 @@ export default function CreateChannelModal({
         telegram: defaultData.telegram ?? "",
         instagram: defaultData.instagram ?? "",
       });
+
+      setDeliveryLocations(defaultData.deliveryLocations ?? []);
     }
   }, [defaultData]);
 
@@ -71,6 +86,7 @@ export default function CreateChannelModal({
         whatsapp: socials.whatsapp || "",
         telegram: socials.telegram || "",
         instagram: socials.instagram || "",
+         deliveryLocations: deliveryLocations, // ✅ Add this
       };
 
       const res = await fetch("/api/channel", {
@@ -102,6 +118,8 @@ export default function CreateChannelModal({
 
   const isDisabled =
     loading ||
+    
+  !isDeliveryValid ||
     !isRulesValid || // ✅ block when invalid
     (rules.returnPolicy &&
       (!rules.returnWindow ||
@@ -136,9 +154,6 @@ export default function CreateChannelModal({
                   <X className="h-5 w-5 text-neutral-600" />
                 </button>
               </div>
-              <p className="text-[10px] text-neutral-500 pl-[2px]">
-                Pluggn helps enforce your rules and policies.
-              </p>
             </div>
 
             {/* CONTENT */}
@@ -147,6 +162,12 @@ export default function CreateChannelModal({
                 onChange={handleRulesChange}
                 defaultData={rules}
                 onValidationChange={setIsRulesValid} // ✅ listen for validation
+              />
+
+              <DeliveryLocationSection
+                onChange={setDeliveryLocations}
+                defaultData={deliveryLocations}
+                onValidationChange={setIsDeliveryValid}
               />
               <SocialsSection
                 onChange={handleSocialsChange}

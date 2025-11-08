@@ -585,6 +585,7 @@ export const SingleProduct = ({
 
         referralId: currentReferralId,
         platform: currentPlatform,
+        
         pickupLocation,
         deliveryFee: 0,
       });

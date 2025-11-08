@@ -38,6 +38,7 @@ import useSWR from "swr";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSwrUser } from "@/hooks/use-current-user";
 import { errorToast } from "@/components/ui/use-toast-advanced";
+import StoreSettingsModal from "./store-settings-modal";
 
 // Default template configuration
 
@@ -109,7 +110,7 @@ export default function ThemeCustomizer() {
       INSTAGRAM_LINK: "https://instagram.com/pluggnhq",
       FACEBOOK_LINK: "https://facebook.com/pluggnhq",
       TWITTER_LINK: "https://twitter.com/pluggnhq",
-      PHONE_NUMBER: user?.plug?.phone || "09151425001",
+      PHONE_NUMBER: user?.plug?.phone || user?.supplier?.phone || "09151425001",
       MAIL: user?.email,
     },
     metadata: {
@@ -121,6 +122,9 @@ export default function ThemeCustomizer() {
   const [config, setConfig] = useState({ ...defaultConfig });
   const [selectedPage, setSelectedPage] = useState("index");
   const [history, setHistory] = useState<any[]>([{ ...defaultConfig }]);
+
+  const [isStoreSettingsOpen, setIsStoreSettingsOpen] = useState(false);
+const [pendingPublish, setPendingPublish] = useState(false);
 
   const close = () => {
     setPublishResult(null);
@@ -140,7 +144,7 @@ export default function ThemeCustomizer() {
 
   useEffect(() => {
     if (user) {
-      setSubdomain(user?.plug?.subdomain || "");
+      setSubdomain(user?.plug?.subdomain || user?.supplier?.subdomain || "");
     }
   }, [user]);
 
@@ -221,7 +225,7 @@ export default function ThemeCustomizer() {
     if (
       typeof window !== "undefined" &&
       !initialLoadRef.current &&
-      !user?.plug?.configUrl
+      !user?.plug?.configUrl || !user?.supplier?.configUrl
     ) {
       try {
         const loadedData = loadThemeCustomizerData(defaultConfig);
@@ -345,9 +349,40 @@ export default function ThemeCustomizer() {
     }
   }, []);
 
-  const handlePublish = async () => {
+const handlePublish = async () => {
+  // Check if supplier subdomain is empty
+  if (
+    user?.supplier &&
+    (!user.supplier.subdomain || user.supplier.subdomain === "")
+  ) {
+    // Open store settings modal first
+    setIsStoreSettingsOpen(true);
+    setPendingPublish(true);
+    return;
+  }
+
+  // If subdomain exists, proceed to publish dialog
+  setIsPublishDialogOpen(true);
+};
+
+
+// Add a new function to handle store settings completion:
+const handleStoreSettingsUpdated = () => {
+  setIsStoreSettingsOpen(false);
+  
+  // If publish was pending, now open the publish dialog
+  if (pendingPublish) {
+    setPendingPublish(false);
     setIsPublishDialogOpen(true);
-  };
+  }
+};
+
+// Add a function to handle store settings close:
+const handleStoreSettingsClose = () => {
+  setIsStoreSettingsOpen(false);
+  setPendingPublish(false);
+};
+
 
   const handleConfirmPublish = async () => {
     try {
@@ -633,6 +668,13 @@ export default function ThemeCustomizer() {
           </div>
         </div>
       </div>
+
+      <StoreSettingsModal
+        open={isStoreSettingsOpen}
+        close={handleStoreSettingsClose}
+        defaultData={user?.supplier}
+        onUpdated={handleStoreSettingsUpdated}
+      />
 
       {/* Publish Dialog */}
       <PublishDialog

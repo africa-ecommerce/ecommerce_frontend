@@ -6,12 +6,20 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { successToast, errorToast } from "@/components/ui/use-toast-advanced";
 import RulesSection from "@/app/(private)/dashboard/(supplier)/channel/components/rules-section";
+import DeliveryLocationSection from "@/app/(private)/dashboard/_components/delivery-location-section";
 
 interface StoreSettingsModalProps {
   open: boolean;
   close: () => void;
   defaultData?: any;
   onUpdated?: () => void;
+}
+
+interface DeliveryLocation {
+  id: string;
+  state: string;
+  lgas: string[]; // "ALL" means all LGAs in that state
+  fee: number;
 }
 
 
@@ -26,6 +34,8 @@ export default function StoreSettingsModal({
   const [loading, setLoading] = useState(false);
   const [rules, setRules] = useState<any>({});
   const [isRulesValid, setIsRulesValid] = useState(true); // ✅ track validation
+  const [deliveryLocations, setDeliveryLocations] = useState<DeliveryLocation[]>([]);
+const [isDeliveryValid, setIsDeliveryValid] = useState(true);
 
   useEffect(() => setMounted(true), []);
 
@@ -41,7 +51,7 @@ export default function StoreSettingsModal({
         supplierShare: defaultData.supplierShare,
       });
 
-      
+      setDeliveryLocations(defaultData.deliveryLocations ?? []);
     }
   }, [defaultData]);
 
@@ -59,7 +69,7 @@ export default function StoreSettingsModal({
         returnShippingFee: (rules.returnShippingFee || "BUYER").toUpperCase(),
         supplierShare:
           rules.returnShippingFee === "SHARED" ? rules.supplierShare : 0,
-        
+        deliveryLocations: deliveryLocations, // ✅ Add this
       };
 
       const res = await fetch("/api/site/policy", {
@@ -89,12 +99,13 @@ export default function StoreSettingsModal({
 
   if (!mounted) return null;
 
-  const isDisabled =
-    loading ||
-    !isRulesValid || // ✅ block when invalid
-    (rules.returnPolicy &&
-      (!rules.returnWindow ||
-        (rules.returnShippingFee === "SHARED" && !rules.supplierShare)));
+const isDisabled =
+  loading ||
+  !isRulesValid ||
+  !isDeliveryValid || // ✅ Add this
+  (rules.returnPolicy &&
+    (!rules.returnWindow ||
+      (rules.returnShippingFee === "SHARED" && !rules.supplierShare)));
 
   return (
     <AnimatePresence>
@@ -125,9 +136,7 @@ export default function StoreSettingsModal({
                 <X className="h-5 w-5 text-neutral-600" />
               </button>
             </div>
-            <p className="text-[10px] text-neutral-500 pl-[2px]">
-              Pluggn helps enforce your policies.
-            </p>
+            
           </div>
 
           {/* CONTENT */}
@@ -137,6 +146,12 @@ export default function StoreSettingsModal({
               defaultData={rules}
               onValidationChange={setIsRulesValid}
             />
+
+            <DeliveryLocationSection
+    onChange={setDeliveryLocations}
+    defaultData={deliveryLocations}
+    onValidationChange={setIsDeliveryValid}
+  />
           </div>
 
           {/* FOOTER BUTTON */}
