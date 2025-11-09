@@ -1650,11 +1650,18 @@ export default function CheckoutPage() {
   const [deliveryType, setDeliveryType] = useState<"terminal" | "home">(
     "terminal"
   );
-  const [supplierDeliverySelections, setSupplierDeliverySelections] = useState<Record<string, string>>({});
+  // Add this state near your other useState declarations
+  const [showAllLgasModal, setShowAllLgasModal] = useState(false);
+  const [selectedLocationForLgas, setSelectedLocationForLgas] =
+    useState<DeliveryLocation | null>(null);
+  const [supplierDeliverySelections, setSupplierDeliverySelections] = useState<
+    Record<string, string>
+  >({});
   const [selectedTerminal, setSelectedTerminal] = useState("");
   const [showTerminalAlert, setShowTerminalAlert] = useState(false);
   const [selectedDeliveryLocation, setSelectedDeliveryLocation] = useState("");
-  const [showDeliveryLocationAlert, setShowDeliveryLocationAlert] = useState(false);
+  const [showDeliveryLocationAlert, setShowDeliveryLocationAlert] =
+    useState(false);
   const router = useRouter();
   const [stagedOrder, setStagedOrder] = useState<null | {
     reference: string;
@@ -1737,11 +1744,10 @@ export default function CheckoutPage() {
   // }, [platform, orderSummaries]);
 
   const supplierGroups = useMemo(() => {
-  return groupOrdersBySupplier(orderSummaries);
-}, [orderSummaries]);
+    return groupOrdersBySupplier(orderSummaries);
+  }, [orderSummaries]);
 
-const hasMultipleSuppliers = supplierGroups.length > 1;
-
+  const hasMultipleSuppliers = supplierGroups.length > 1;
 
   const subtotal = useMemo(() => {
     return supplierGroups.reduce((sum, group) => {
@@ -1764,7 +1770,6 @@ const hasMultipleSuppliers = supplierGroups.length > 1;
 
   // Add after the cartItems useMemo
 
-
   // Watch address fields for SWR key generation
   const watchedState = watch("customerAddress.state");
   const watchedLga = watch("customerAddress.lga");
@@ -1773,10 +1778,10 @@ const hasMultipleSuppliers = supplierGroups.length > 1;
   const watchedEmail = watch("customerInfo.email");
   const watchedPhone = watch("customerInfo.phone");
 
-const availableDeliveryLocations = useMemo(() => {
-  if (!orderSummaries.length) return [];
-  return orderSummaries[0]?.deliveryLocations || [];
-}, [orderSummaries]);
+  const availableDeliveryLocations = useMemo(() => {
+    if (!orderSummaries.length) return [];
+    return orderSummaries[0]?.deliveryLocations || [];
+  }, [orderSummaries]);
 
   // SWR for buyer info fetching
   const buyerInfoKey =
@@ -1801,29 +1806,29 @@ const availableDeliveryLocations = useMemo(() => {
   );
 
   // Add this helper function before the return statement
-const getDeliveryLocationDisplay = (location: any) => {
-  const allStateLgas = getLgasForState(location.state);
-  
-  // Check if all LGAs in the state are covered
-  const coversAllLgas = allStateLgas.length > 0 && 
-    allStateLgas.every((lga: string) => location.lgas.includes(lga));
-  
-  if (coversAllLgas) {
-    return `All ${location.state}`;
-  }
-  
-  // If less than or equal to 20 LGAs, show all
-  if (location.lgas.length <= 20) {
-    return location.lgas.join(", ");
-  }
-  
-  // If more than 3, show first 3 with "show more" functionality
-  return {
-    preview: location.lgas.slice(0, 20).join(", "),
-    remaining: location.lgas.length - 20
-  };
-};
+  const getDeliveryLocationDisplay = (location: any) => {
+    const allStateLgas = getLgasForState(location.state);
 
+    // Check if all LGAs in the state are covered
+    const coversAllLgas =
+      allStateLgas.length > 0 &&
+      allStateLgas.every((lga: string) => location.lgas.includes(lga));
+
+    if (coversAllLgas) {
+      return `All ${location.state}`;
+    }
+
+    // If less than or equal to 20 LGAs, show all
+    if (location.lgas.length <= 20) {
+      return location.lgas.join(", ");
+    }
+
+    // If more than 3, show first 3 with "show more" functionality
+    return {
+      preview: location.lgas.slice(0, 20).join(", "),
+      remaining: location.lgas.length - 20,
+    };
+  };
 
   // Calculate delivery fee based on selected delivery location
   // const getDeliveryFee = () => {
@@ -1837,33 +1842,28 @@ const getDeliveryLocationDisplay = (location: any) => {
   //     }
   //   }
 
-   
-
-
   // };
 
-
   // Replace the getDeliveryFee function
-const getDeliveryFee = () => {
-  let totalFee = 0;
-  
-  supplierGroups.forEach((group) => {
-    const selectedLocationId = supplierDeliverySelections[group.supplierId];
-    if (selectedLocationId && group.deliveryLocations.length > 0) {
-      const selectedLocation = group.deliveryLocations.find(
-        (loc: any) => loc.id === selectedLocationId
-      );
-      if (selectedLocation) {
-        totalFee += selectedLocation.fee;
+  const getDeliveryFee = () => {
+    let totalFee = 0;
+
+    supplierGroups.forEach((group) => {
+      const selectedLocationId = supplierDeliverySelections[group.supplierId];
+      if (selectedLocationId && group.deliveryLocations.length > 0) {
+        const selectedLocation = group.deliveryLocations.find(
+          (loc: any) => loc.id === selectedLocationId
+        );
+        if (selectedLocation) {
+          totalFee += selectedLocation.fee;
+        }
       }
-    }
-  });
-  
-  return totalFee;
-};
+    });
 
-// Update subtotal to exclude items without delivery selection
+    return totalFee;
+  };
 
+  // Update subtotal to exclude items without delivery selection
 
   const deliveryFee = getDeliveryFee();
   const total = subtotal + (deliveryFee || 0);
@@ -2055,8 +2055,6 @@ const getDeliveryFee = () => {
     }
   }, [buyerInfoData, buyerInfoError, setValue, setCustomerAddress]);
 
-  
-
   // Reset delivery location when state or LGA changes
   useEffect(() => {
     setSelectedDeliveryLocation("");
@@ -2114,7 +2112,7 @@ const getDeliveryFee = () => {
                 }
               : undefined,
             deliveryFee: defaultDeliveryFee,
-            deliveryLocations: product.deliveryLocations
+            deliveryLocations: product.deliveryLocations,
           };
         });
 
@@ -2281,180 +2279,188 @@ const getDeliveryFee = () => {
     }
   }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors]);
 
-//  const continueToReview = async () => {
-//    // Check if delivery location is selected - this should always be checked
-//    if (!selectedDeliveryLocation) {
-//      setShowDeliveryLocationAlert(true);
-//      return;
-//    }
+  //  const continueToReview = async () => {
+  //    // Check if delivery location is selected - this should always be checked
+  //    if (!selectedDeliveryLocation) {
+  //      setShowDeliveryLocationAlert(true);
+  //      return;
+  //    }
 
-//    // For terminal delivery, validate customer info and check delivery fee
-//    if (deliveryType === "terminal") {
-//      const customerInfoValid = await trigger([
-//        "customerInfo.name",
-//        "customerInfo.email",
-//        "customerInfo.phone",
-//      ]);
-//      const stateValid = await trigger("customerAddress.state");
+  //    // For terminal delivery, validate customer info and check delivery fee
+  //    if (deliveryType === "terminal") {
+  //      const customerInfoValid = await trigger([
+  //        "customerInfo.name",
+  //        "customerInfo.email",
+  //        "customerInfo.phone",
+  //      ]);
+  //      const stateValid = await trigger("customerAddress.state");
 
-//      if (customerInfoValid && stateValid) {
-//        setCurrentStep("review");
-//        if (orderSummaries.length > 0) {
-//          orderSummaries.forEach((orderSummary) => {
-//            mutate(
-//              `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
-//            );
-//          });
-//        }
-//      } else {
-//        const firstError = document.querySelector(".border-red-500");
-//        if (firstError) {
-//          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-//        }
-//      }
-//      return;
-//    }
+  //      if (customerInfoValid && stateValid) {
+  //        setCurrentStep("review");
+  //        if (orderSummaries.length > 0) {
+  //          orderSummaries.forEach((orderSummary) => {
+  //            mutate(
+  //              `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
+  //            );
+  //          });
+  //        }
+  //      } else {
+  //        const firstError = document.querySelector(".border-red-500");
+  //        if (firstError) {
+  //          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+  //        }
+  //      }
+  //      return;
+  //    }
 
-//    // For home delivery, validate all fields and check delivery fee
-//    const isFormValid = await trigger();
+  //    // For home delivery, validate all fields and check delivery fee
+  //    const isFormValid = await trigger();
 
-//    // Check if delivery fee is available for home delivery
-//    if (deliveryFee === null) {
-//      errorToast(
-//        "Please wait for delivery fee calculation to complete before proceeding."
-//      );
-//      return;
-//    }
+  //    // Check if delivery fee is available for home delivery
+  //    if (deliveryFee === null) {
+  //      errorToast(
+  //        "Please wait for delivery fee calculation to complete before proceeding."
+  //      );
+  //      return;
+  //    }
 
-//    if (isFormValid) {
-//      setCurrentStep("review");
-//      if (orderSummaries.length > 0) {
-//        orderSummaries.forEach((orderSummary) => {
-//          mutate(
-//            `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
-//          );
-//        });
-//      }
-//    } else {
-//      const firstError = document.querySelector(".border-red-500");
-//      if (firstError) {
-//        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-//      }
-//    }
-//  };
+  //    if (isFormValid) {
+  //      setCurrentStep("review");
+  //      if (orderSummaries.length > 0) {
+  //        orderSummaries.forEach((orderSummary) => {
+  //          mutate(
+  //            `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
+  //          );
+  //        });
+  //      }
+  //    } else {
+  //      const firstError = document.querySelector(".border-red-500");
+  //      if (firstError) {
+  //        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+  //      }
+  //    }
+  //  };
 
+  // const continueToReview = async () => {
+  //   // Check if all supplier groups with delivery locations have a selection
+  //   const missingDeliverySelections = supplierGroups.filter(
+  //     group => group.deliveryLocations.length > 0 && !supplierDeliverySelections[group.supplierId]
+  //   );
 
-// const continueToReview = async () => {
-//   // Check if all supplier groups with delivery locations have a selection
-//   const missingDeliverySelections = supplierGroups.filter(
-//     group => group.deliveryLocations.length > 0 && !supplierDeliverySelections[group.supplierId]
-//   );
-  
-//   if (missingDeliverySelections.length > 0) {
-//     errorToast(
-//       hasMultipleSuppliers 
-//         ? "Please select delivery options for all delivery groups"
-//         : "Please select a delivery option"
-//     );
-//     return;
-//   }
+  //   if (missingDeliverySelections.length > 0) {
+  //     errorToast(
+  //       hasMultipleSuppliers
+  //         ? "Please select delivery options for all delivery groups"
+  //         : "Please select a delivery option"
+  //     );
+  //     return;
+  //   }
 
-//   // Rest of your existing validation...
-//   const customerInfoValid = await trigger([
-//     "customerInfo.name",
-//     "customerInfo.email",
-//     "customerInfo.phone",
-//   ]);
-  
-//   const isFormValid = await trigger();
+  //   // Rest of your existing validation...
+  //   const customerInfoValid = await trigger([
+  //     "customerInfo.name",
+  //     "customerInfo.email",
+  //     "customerInfo.phone",
+  //   ]);
 
-//   if (deliveryFee === null || deliveryFee === undefined) {
-//     errorToast("Please wait for delivery fee calculation to complete before proceeding.");
-//     return;
-//   }
+  //   const isFormValid = await trigger();
 
-//   if (isFormValid && customerInfoValid) {
-//     setCurrentStep("review");
-//     if (orderSummaries.length > 0) {
-//       orderSummaries.forEach((orderSummary) => {
-//         mutate(`/public/products/${orderSummary.item.id}${orderSummary.referralId}`);
-//       });
-//     }
-//   } else {
-//     const firstError = document.querySelector(".border-red-500");
-//     if (firstError) {
-//       firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-//     }
-//   }
-// };
+  //   if (deliveryFee === null || deliveryFee === undefined) {
+  //     errorToast("Please wait for delivery fee calculation to complete before proceeding.");
+  //     return;
+  //   }
 
+  //   if (isFormValid && customerInfoValid) {
+  //     setCurrentStep("review");
+  //     if (orderSummaries.length > 0) {
+  //       orderSummaries.forEach((orderSummary) => {
+  //         mutate(`/public/products/${orderSummary.item.id}${orderSummary.referralId}`);
+  //       });
+  //     }
+  //   } else {
+  //     const firstError = document.querySelector(".border-red-500");
+  //     if (firstError) {
+  //       firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+  //     }
+  //   }
+  // };
 
-const continueToReview = async () => {
-  // Check if there are any supplier groups with delivery locations
-  const groupsWithDeliveryLocations = supplierGroups.filter(
-    group => group.deliveryLocations.length > 0
-  );
-  
-  // Check if at least one delivery option has been selected
-  const selectedDeliveryGroups = groupsWithDeliveryLocations.filter(
-    group => supplierDeliverySelections[group.supplierId]
-  );
-  
-  // If there are groups with delivery locations but none selected, show error
-  if (groupsWithDeliveryLocations.length > 0 && selectedDeliveryGroups.length === 0) {
-    errorToast("Please select at least one delivery option to continue");
-    return;
-  }
-  
-  // Check if there are unselected groups
-  const missingDeliverySelections = groupsWithDeliveryLocations.filter(
-    group => !supplierDeliverySelections[group.supplierId]
-  );
-  
-  // If some groups are not selected, show info toast
-  if (missingDeliverySelections.length > 0) {
-    const unselectedItemsCount = missingDeliverySelections.reduce(
-      (count, group) => count + group.items.length, 
-      0
+  const continueToReview = async () => {
+    // Check if there are any supplier groups with delivery locations
+    const groupsWithDeliveryLocations = supplierGroups.filter(
+      (group) => group.deliveryLocations.length > 0
     );
-    
-    // Show info toast about excluded items
-    const { toast } = await import("@/components/ui/use-toast-advanced");
-    toast({
-      title: "Note",
-      description: `${unselectedItemsCount} item(s) without delivery selection will not be included in this order.`,
-      variant: "default",
-    });
-  }
 
-  // Rest of your existing validation...
-  const customerInfoValid = await trigger([
-    "customerInfo.name",
-    "customerInfo.email",
-    "customerInfo.phone",
-  ]);
-  
-  const isFormValid = await trigger();
+    // Check if at least one delivery option has been selected
+    const selectedDeliveryGroups = groupsWithDeliveryLocations.filter(
+      (group) => supplierDeliverySelections[group.supplierId]
+    );
 
-  if (selectedDeliveryGroups.length > 0 && (deliveryFee === null || deliveryFee === undefined)) {
-    errorToast("Please wait for delivery fee calculation to complete before proceeding.");
-    return;
-  }
+    // If there are groups with delivery locations but none selected, show error
+    if (
+      groupsWithDeliveryLocations.length > 0 &&
+      selectedDeliveryGroups.length === 0
+    ) {
+      errorToast("Please select at least one delivery option to continue");
+      return;
+    }
 
-  if (isFormValid && customerInfoValid) {
-    setCurrentStep("review");
-    if (orderSummaries.length > 0) {
-      orderSummaries.forEach((orderSummary) => {
-        mutate(`/public/products/${orderSummary.item.id}${orderSummary.referralId}`);
+    // Check if there are unselected groups
+    const missingDeliverySelections = groupsWithDeliveryLocations.filter(
+      (group) => !supplierDeliverySelections[group.supplierId]
+    );
+
+    // If some groups are not selected, show info toast
+    if (missingDeliverySelections.length > 0) {
+      const unselectedItemsCount = missingDeliverySelections.reduce(
+        (count, group) => count + group.items.length,
+        0
+      );
+
+      // Show info toast about excluded items
+      const { toast } = await import("@/components/ui/use-toast-advanced");
+      toast({
+        title: "Note",
+        description: `${unselectedItemsCount} item(s) without delivery selection will not be included in this order.`,
+        variant: "default",
       });
     }
-  } else {
-    const firstError = document.querySelector(".border-red-500");
-    if (firstError) {
-      firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // Rest of your existing validation...
+    const customerInfoValid = await trigger([
+      "customerInfo.name",
+      "customerInfo.email",
+      "customerInfo.phone",
+    ]);
+
+    const isFormValid = await trigger();
+
+    if (
+      selectedDeliveryGroups.length > 0 &&
+      (deliveryFee === null || deliveryFee === undefined)
+    ) {
+      errorToast(
+        "Please wait for delivery fee calculation to complete before proceeding."
+      );
+      return;
     }
-  }
-};
+
+    if (isFormValid && customerInfoValid) {
+      setCurrentStep("review");
+      if (orderSummaries.length > 0) {
+        orderSummaries.forEach((orderSummary) => {
+          mutate(
+            `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
+          );
+        });
+      }
+    } else {
+      const firstError = document.querySelector(".border-red-500");
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  };
 
   const showPaymentCancelledModal = () => {
     setShowCancelledModal(true);
@@ -2498,8 +2504,11 @@ const continueToReview = async () => {
 
   // Get selected delivery location details for display
   const selectedDeliveryLocationDetails = useMemo(() => {
-    if (!selectedDeliveryLocation || !availableDeliveryLocations.length) return null;
-    return availableDeliveryLocations.find((loc: any) => loc.id === selectedDeliveryLocation);
+    if (!selectedDeliveryLocation || !availableDeliveryLocations.length)
+      return null;
+    return availableDeliveryLocations.find(
+      (loc: any) => loc.id === selectedDeliveryLocation
+    );
   }, [selectedDeliveryLocation, availableDeliveryLocations]);
 
   return (
@@ -2961,149 +2970,197 @@ const continueToReview = async () => {
                         </>
                       )} */}
 
-
                       {/* Replace the existing Delivery Location Selection section with this */}
-{supplierGroups.some(group => group.deliveryLocations.length > 0) && (
-  <>
-    <Separator />
-    <div>
-      <div className="flex items-center gap-2 mb-3">
-        <h3 className="font-medium">Delivery Options</h3>
-        <span className="text-red-500">*</span>
-      </div>
-      
-      {hasMultipleSuppliers && (
-        <Alert className="mb-4">
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            Your items will be delivered separately as they come from different store with different delivery option. Please select a delivery option for each group.
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      <div className="space-y-6">
-        {supplierGroups.map((group, groupIndex) => {
-          if (group.deliveryLocations.length === 0) return null;
-          
-          const selectedLocationId = supplierDeliverySelections[group.supplierId];
-          const isSelected = !!selectedLocationId;
-          
-          return (
-            <div key={group.supplierId} className="space-y-3">
-              {hasMultipleSuppliers && (
-                <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                  <div className="flex-1">
-                    <p className="font-medium text-sm mb-2">
-                      Delivery Group {groupIndex + 1}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {group.items.map((summary: any, idx: number) => (
-                        <span key={idx} className="text-xs bg-background px-2 py-1 rounded-md border">
-                          {summary.item.name} {summary.item.variationName && `(${summary.item.variationName})`}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              <div className={`border rounded-lg p-3 ${!isSelected ? 'border-yellow-500/50 bg-yellow-50/50' : ''}`}>
-                {!isSelected && (
-                  <div className="flex items-center gap-2 text-sm text-yellow-600 mb-3">
-                    <Info className="h-4 w-4" />
-                    <span>Please select a delivery option for this group</span>
-                  </div>
-                )}
-                
-                <div className="max-h-[300px] overflow-y-auto pr-2 space-y-3">
-                  <RadioGroup
-                    value={selectedLocationId || ""}
-                    onValueChange={(value) => {
-                      setSupplierDeliverySelections(prev => ({
-                        ...prev,
-                        [group.supplierId]: value
-                      }));
-                    }}
-                    className="space-y-3"
-                  >
-                    {group.deliveryLocations.map((location: any) => {
-                      const lgaDisplay = getDeliveryLocationDisplay(location);
-                      const isString = typeof lgaDisplay === "string";
-                      const isThisSelected = selectedLocationId === location.id;
-
-                      return (
-                        <div
-                          key={location.id}
-                          className={`relative flex items-start space-x-3 rounded-lg border p-4 cursor-pointer transition-all ${
-                            isThisSelected
-                              ? "border-primary bg-primary/5"
-                              : "border-border hover:border-primary/50"
-                          }`}
-                          onClick={() => {
-                            setSupplierDeliverySelections(prev => ({
-                              ...prev,
-                              [group.supplierId]: location.id
-                            }));
-                          }}
-                        >
-                          <RadioGroupItem
-                            value={location.id}
-                            id={`${group.supplierId}-${location.id}`}
-                            className="mt-1"
-                          />
-                          <div className="flex-1 space-y-1">
-                            <Label
-                              htmlFor={`${group.supplierId}-${location.id}`}
-                              className="flex items-center gap-2 cursor-pointer font-medium"
-                            >
-                              <Truck className="h-4 w-4" />
-                              {location.state} Delivery
-                            </Label>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              {location.duration}
+                      {supplierGroups.some(
+                        (group) => group.deliveryLocations.length > 0
+                      ) && (
+                        <>
+                          <Separator />
+                          <div>
+                            <div className="flex items-center gap-2 mb-3">
+                              <h3 className="font-medium">Delivery Options</h3>
+                              <span className="text-red-500">*</span>
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                              Available for:{" "}
-                              {isString ? (
-                                lgaDisplay
-                              ) : (
-                                <>
-                                  {lgaDisplay.preview}
-                                  {lgaDisplay.remaining > 0 && (
-                                    <button
-                                      type="button"
-                                      className="ml-1 text-primary hover:underline"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        alert(
-                                          `All locations: ${location.lgas.join(", ")}`
-                                        );
-                                      }}
+
+                            {hasMultipleSuppliers && (
+                              <Alert className="mb-4">
+                                <Info className="h-4 w-4" />
+                                <AlertDescription>
+                                  Your items will be delivered separately as
+                                  they come from different store with different
+                                  delivery option. Please select a delivery
+                                  option for each group.
+                                </AlertDescription>
+                              </Alert>
+                            )}
+
+                            <div className="space-y-6">
+                              {supplierGroups.map((group, groupIndex) => {
+                                if (group.deliveryLocations.length === 0)
+                                  return null;
+
+                                const selectedLocationId =
+                                  supplierDeliverySelections[group.supplierId];
+                                const isSelected = !!selectedLocationId;
+
+                                return (
+                                  <div
+                                    key={group.supplierId}
+                                    className="space-y-3"
+                                  >
+                                    {hasMultipleSuppliers && (
+                                      <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                                        <div className="flex-1">
+                                          <p className="font-medium text-sm mb-2">
+                                            Delivery Group {groupIndex + 1}
+                                          </p>
+                                          <div className="flex flex-wrap gap-2">
+                                            {group.items.map(
+                                              (summary: any, idx: number) => (
+                                                <span
+                                                  key={idx}
+                                                  className="text-xs bg-background px-2 py-1 rounded-md border"
+                                                >
+                                                  {summary.item.name}{" "}
+                                                  {summary.item.variationName &&
+                                                    `(${summary.item.variationName})`}
+                                                </span>
+                                              )
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    <div
+                                      className={`border rounded-lg p-3 ${
+                                        !isSelected
+                                          ? "border-yellow-500/50 bg-yellow-50/50"
+                                          : ""
+                                      }`}
                                     >
-                                      +{lgaDisplay.remaining} more
-                                    </button>
-                                  )}
-                                </>
-                              )}
-                            </p>
-                            <p className="text-sm font-semibold text-primary">
-                              {formatPrice(location.fee)}
-                            </p>
+                                      {!isSelected && (
+                                        <div className="flex items-center gap-2 text-sm text-yellow-600 mb-3">
+                                          <Info className="h-4 w-4" />
+                                          <span>
+                                            Please select a delivery option for
+                                            this group
+                                          </span>
+                                        </div>
+                                      )}
+
+                                      <div className="max-h-[300px] overflow-y-auto pr-2 space-y-3">
+                                        <RadioGroup
+                                          value={selectedLocationId || ""}
+                                          onValueChange={(value) => {
+                                            setSupplierDeliverySelections(
+                                              (prev) => ({
+                                                ...prev,
+                                                [group.supplierId]: value,
+                                              })
+                                            );
+                                          }}
+                                          className="space-y-3"
+                                        >
+                                          {group.deliveryLocations.map(
+                                            (location: any) => {
+                                              const lgaDisplay =
+                                                getDeliveryLocationDisplay(
+                                                  location
+                                                );
+                                              const isString =
+                                                typeof lgaDisplay === "string";
+                                              const isThisSelected =
+                                                selectedLocationId ===
+                                                location.id;
+
+                                              return (
+                                                <div
+                                                  key={location.id}
+                                                  className={`relative flex items-start space-x-3 rounded-lg border p-4 cursor-pointer transition-all ${
+                                                    isThisSelected
+                                                      ? "border-primary bg-primary/5"
+                                                      : "border-border hover:border-primary/50"
+                                                  }`}
+                                                  onClick={() => {
+                                                    setSupplierDeliverySelections(
+                                                      (prev) => ({
+                                                        ...prev,
+                                                        [group.supplierId]:
+                                                          location.id,
+                                                      })
+                                                    );
+                                                  }}
+                                                >
+                                                  <RadioGroupItem
+                                                    value={location.id}
+                                                    id={`${group.supplierId}-${location.id}`}
+                                                    className="mt-1"
+                                                  />
+                                                  <div className="flex-1 space-y-1">
+                                                    <Label
+                                                      htmlFor={`${group.supplierId}-${location.id}`}
+                                                      className="flex items-center gap-2 cursor-pointer font-medium"
+                                                    >
+                                                      <Truck className="h-4 w-4" />
+                                                      {location.state} Delivery
+                                                    </Label>
+                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                      <Clock className="h-3 w-3" />
+                                                      {location.duration}
+                                                    </div>
+                                                    <p className="text-sm text-muted-foreground">
+                                                      Available for:{" "}
+                                                      {isString ? (
+                                                        lgaDisplay
+                                                      ) : (
+                                                        <>
+                                                          {lgaDisplay.preview}
+                                                          {lgaDisplay.remaining >
+                                                            0 && (
+                                                            <button
+                                                              type="button"
+                                                              className="ml-1 text-primary hover:underline"
+                                                              onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedLocationForLgas(
+                                                                  location
+                                                                );
+                                                                setShowAllLgasModal(
+                                                                  true
+                                                                );
+                                                              }}
+                                                            >
+                                                              +
+                                                              {
+                                                                lgaDisplay.remaining
+                                                              }{" "}
+                                                              more
+                                                            </button>
+                                                          )}
+                                                        </>
+                                                      )}
+                                                    </p>
+                                                    <p className="text-sm font-semibold text-primary">
+                                                      {formatPrice(
+                                                        location.fee
+                                                      )}
+                                                    </p>
+                                                  </div>
+                                                </div>
+                                              );
+                                            }
+                                          )}
+                                        </RadioGroup>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </RadioGroup>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  </>
-)}
+                        </>
+                      )}
 
                       <Separator />
 
@@ -3197,102 +3254,137 @@ const continueToReview = async () => {
                         </div>
                       </div> */}
 
-                      {currentStep === "review" && (
-  <Card>
-    <CardContent className="p-4 md:p-6">
-      <h2 className="text-xl font-semibold mb-4">Review Your Order</h2>
-      <div className="space-y-6">
-        <div>
-          <h3 className="font-medium mb-3">Items in Your Order</h3>
-          
-          {hasMultipleSuppliers && (
-            <Alert className="mb-4">
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                Your items will be delivered in {supplierGroups.length} separate shipments
-              </AlertDescription>
-            </Alert>
-          )}
-          
-          <div className="space-y-6">
-            {supplierGroups.map((group, groupIndex) => {
-              const hasDeliverySelected = supplierDeliverySelections[group.supplierId];
-              const selectedLocation = group.deliveryLocations.find(
-                (loc: any) => loc.id === supplierDeliverySelections[group.supplierId]
-              );
-              const willNotBePurchased = group.deliveryLocations.length > 0 && !hasDeliverySelected;
-              
-              return (
-                <div key={group.supplierId} className={`border rounded-lg p-4 ${willNotBePurchased ? 'bg-red-50/50 border-red-200' : ''}`}>
-                  {hasMultipleSuppliers && (
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="font-medium text-sm">Delivery Group {groupIndex + 1}</p>
-                      {willNotBePurchased && (
-                        <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-md">
-                          Won't be purchased - No delivery option selected
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  
-                  <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
-                    {group.items.map((summary: any) => (
-                      <div key={summary.item.id} className={`flex items-start space-x-3 ${willNotBePurchased ? 'opacity-50' : ''}`}>
-                        <div className="w-16 h-16 relative rounded-md overflow-hidden flex-shrink-0 bg-muted">
-                          <Image
-                            src={summary.item.image || "/placeholder.svg"}
-                            alt={summary.item.name}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm">
-                            <span className="capitalize">{summary.item.name}</span>
-                            {summary.item.variationName && (
-                              <span className="text-muted-foreground ml-2">
-                                ({summary.item.variationName})
-                              </span>
-                            )}
-                          </h4>
-                          <div className="flex justify-between mt-1">
-                            <span className="text-sm">
-                              {summary.item.quantity} x {formatPrice(summary.item.price)}
-                            </span>
-                            <span className="text-sm font-medium">
-                              {formatPrice(summary.item.price * summary.item.quantity)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {selectedLocation && (
-                    <div className="mt-4 p-3 bg-primary/5 rounded-md border border-primary/20">
-                      <p className="text-sm font-medium flex items-center gap-2">
-                        <Truck className="h-4 w-4" />
-                        Delivery Option for this group
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {selectedLocation.state} Delivery
-                      </p>
-                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        {selectedLocation.duration}
-                      </div>
-                      <p className="text-sm font-semibold text-primary mt-1">
-                        {formatPrice(selectedLocation.fee)}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+              {currentStep === "review" && (
+                <Card>
+                  <CardContent className="p-4 md:p-6">
+                    <h2 className="text-xl font-semibold mb-4">
+                      Review Your Order
+                    </h2>
+                    <div className="space-y-6">
+                      <div>
+                        <h3 className="font-medium mb-3">
+                          Items in Your Order
+                        </h3>
 
-        {/* Rest of the review section remains the same */}
+                        {hasMultipleSuppliers && (
+                          <Alert className="mb-4">
+                            <Info className="h-4 w-4" />
+                            <AlertDescription>
+                              Your items will be delivered in{" "}
+                              {supplierGroups.length} separate shipments
+                            </AlertDescription>
+                          </Alert>
+                        )}
+
+                        <div className="space-y-6">
+                          {supplierGroups.map((group, groupIndex) => {
+                            const hasDeliverySelected =
+                              supplierDeliverySelections[group.supplierId];
+                            const selectedLocation =
+                              group.deliveryLocations.find(
+                                (loc: any) =>
+                                  loc.id ===
+                                  supplierDeliverySelections[group.supplierId]
+                              );
+                            const willNotBePurchased =
+                              group.deliveryLocations.length > 0 &&
+                              !hasDeliverySelected;
+
+                            return (
+                              <div
+                                key={group.supplierId}
+                                className={`border rounded-lg p-4 ${
+                                  willNotBePurchased
+                                    ? "bg-red-50/50 border-red-200"
+                                    : ""
+                                }`}
+                              >
+                                {hasMultipleSuppliers && (
+                                  <div className="flex items-center justify-between mb-3">
+                                    <p className="font-medium text-sm">
+                                      Delivery Group {groupIndex + 1}
+                                    </p>
+                                    {willNotBePurchased && (
+                                      <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-md">
+                                        Won't be purchased - No delivery option
+                                        selected
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+
+                                <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
+                                  {group.items.map((summary: any) => (
+                                    <div
+                                      key={summary.item.id}
+                                      className={`flex items-start space-x-3 ${
+                                        willNotBePurchased ? "opacity-50" : ""
+                                      }`}
+                                    >
+                                      <div className="w-16 h-16 relative rounded-md overflow-hidden flex-shrink-0 bg-muted">
+                                        <Image
+                                          src={
+                                            summary.item.image ||
+                                            "/placeholder.svg"
+                                          }
+                                          alt={summary.item.name}
+                                          fill
+                                          className="object-cover"
+                                        />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <h4 className="font-medium text-sm">
+                                          <span className="capitalize">
+                                            {summary.item.name}
+                                          </span>
+                                          {summary.item.variationName && (
+                                            <span className="text-muted-foreground ml-2">
+                                              ({summary.item.variationName})
+                                            </span>
+                                          )}
+                                        </h4>
+                                        <div className="flex justify-between mt-1">
+                                          <span className="text-sm">
+                                            {summary.item.quantity} x{" "}
+                                            {formatPrice(summary.item.price)}
+                                          </span>
+                                          <span className="text-sm font-medium">
+                                            {formatPrice(
+                                              summary.item.price *
+                                                summary.item.quantity
+                                            )}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                {selectedLocation && (
+                                  <div className="mt-4 p-3 bg-primary/5 rounded-md border border-primary/20">
+                                    <p className="text-sm font-medium flex items-center gap-2">
+                                      <Truck className="h-4 w-4" />
+                                      Delivery Option for this group
+                                    </p>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                      {selectedLocation.state} Delivery
+                                    </p>
+                                    <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                                      <Clock className="h-3 w-3" />
+                                      {selectedLocation.duration}
+                                    </div>
+                                    <p className="text-sm font-semibold text-primary mt-1">
+                                      {formatPrice(selectedLocation.fee)}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Rest of the review section remains the same */}
 
                       <Separator />
 
@@ -3375,8 +3467,6 @@ const continueToReview = async () => {
                   </CardContent>
                 </Card>
               )}
-
-              
             </div>
 
             <div className="lg:col-span-1">
@@ -3400,7 +3490,9 @@ const continueToReview = async () => {
                           Delivery Fee
                         </span>
                         <span className="text-sm">
-                          {deliveryFee === undefined ? "Select a location" : formatPrice(deliveryFee)}
+                          {deliveryFee === undefined
+                            ? "Select a location"
+                            : formatPrice(deliveryFee)}
                         </span>
                       </div>
 
@@ -3446,7 +3538,7 @@ const continueToReview = async () => {
         </div>
       )}
 
-      <AlertDialog
+      {/* <AlertDialog
         open={showDeliveryLocationAlert}
         onOpenChange={setShowDeliveryLocationAlert}
       >
@@ -3463,6 +3555,38 @@ const continueToReview = async () => {
               onClick={() => setShowDeliveryLocationAlert(false)}
             >
               OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog> */}
+
+      {/* Add this modal after the showCancelledModal AlertDialog */}
+      <AlertDialog open={showAllLgasModal} onOpenChange={setShowAllLgasModal}>
+        <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              All Available Locations - {selectedLocationForLgas?.state}{" "}
+              Delivery
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This delivery option covers the following local government areas:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex-1 overflow-y-auto pr-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 py-4">
+              {selectedLocationForLgas?.lgas.map((lga, index) => (
+                <div
+                  key={index}
+                  className="text-sm p-2 bg-muted rounded-md border"
+                >
+                  {lga}
+                </div>
+              ))}
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowAllLgasModal(false)}>
+              Close
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
