@@ -13,6 +13,7 @@ import {
   RefreshCw,
   ShoppingBag,
   Truck,
+  Share2,
   Users,
   Wallet,
   X,
@@ -224,44 +225,24 @@ const OrderCard = ({ order }: { order: any }) => {
           <span className="font-bold">₦{totalAmount.toLocaleString()}</span>
         </div>
       </CardContent>
-       {/* <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
-          <Dialog open={delayModalOpen} onOpenChange={setDelayModalOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 h-8 text-xs"
-              >
-                <Clock className="h-3 w-3 mr-1" />
-                Delay
-              </Button>
-            </DialogTrigger>
-            <DelayOrderModal
-              open={delayModalOpen}
-              onOpenChange={setDelayModalOpen}
-              onDelaySelect={handleDelaySelect}
-            />
-          </Dialog>
-
+       <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
           <Button
-            variant="destructive"
-            size="sm"
-            className="flex-1 h-8 text-xs"
-            onClick={handleDecline}
-          >
-            <X className="h-3 w-3 mr-1" />
-            Decline
-          </Button>
-
-          <Button
-            size="sm"
-            className="flex-1 h-8 text-xs"
-            onClick={handleAccept}
-          >
-            <PackageCheck className="h-3 w-3 mr-1" />
-            Accept
-          </Button>
-        </CardFooter> */}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-8 text-xs"
+                  
+                >
+                  <Share2 className="h-3 w-3 mr-1" />
+                 Cancel Order
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1 h-8 text-xs"
+                >
+                  <Truck className="h-3 w-3 mr-1" />
+                  Process Order
+                </Button>
+        </CardFooter>
     </Card>
   );
 };

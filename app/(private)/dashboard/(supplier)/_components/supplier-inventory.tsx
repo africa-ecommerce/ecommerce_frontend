@@ -283,7 +283,7 @@ export default function Inventory() {
     return `/api/orders/supplier?orderStatus=${status.toUpperCase()}`;
   };
 
-  const {done
+  const {
     data: ordersData,
     error: ordersError,
     isLoading: ordersLoading,
@@ -581,27 +581,7 @@ export default function Inventory() {
   
           {/* Action Buttons */}
           <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
-            {activeOrderTab === "processed" && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 h-8 text-xs"
-                  onClick={handleShareTracking}
-                >
-                  <Share2 className="h-3 w-3 mr-1" />
-                  Share Tracking
-                </Button>
-                <Button
-                  size="sm"
-                  className="flex-1 h-8 text-xs"
-                  onClick={handleTrackOrder}
-                >
-                  <Truck className="h-3 w-3 mr-1" />
-                  Track Order
-                </Button>
-              </>
-            )}
+          
   
             {activeOrderTab === "active" && (
               <>
@@ -612,7 +592,7 @@ export default function Inventory() {
                   onClick={handleShareTracking}
                 >
                   <Share2 className="h-3 w-3 mr-1" />
-                  Share Tracking
+                 Cancel Order
                 </Button>
                 <Button
                   size="sm"
@@ -620,7 +600,7 @@ export default function Inventory() {
                   onClick={handleTrackOrder}
                 >
                   <Truck className="h-3 w-3 mr-1" />
-                  Track Order
+                  Process Order
                 </Button>
               </>
             )}
