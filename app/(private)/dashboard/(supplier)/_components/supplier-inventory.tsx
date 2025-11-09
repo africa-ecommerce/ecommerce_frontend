@@ -278,11 +278,12 @@ export default function Inventory() {
   const [itemsPerPage] = useState(6);
 
     const getOrdersUrl = (status: string) => {
-    if (status === "active") status = "pending"; // Map active to pending for API
-    return `/api/orders/plug?orderStatus=${status.toUpperCase()}`;
+    if (status === "active") status = "pending"; 
+    if (status === "processed") status = "shipped"
+    return `/api/orders/supplier?orderStatus=${status.toUpperCase()}`;
   };
 
-  const {
+  const {done
     data: ordersData,
     error: ordersError,
     isLoading: ordersLoading,

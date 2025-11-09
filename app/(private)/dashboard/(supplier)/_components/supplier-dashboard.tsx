@@ -924,7 +924,7 @@ const stockAlerts = useMemo(() => {
           ) : ordersError ? (
             <ErrorState onRetry={() => ordersMutate()} />
           ) : orders.length === 0 ? (
-            <EmptyState message="No shipped orders found" icon={Truck} />
+            <EmptyState message="No pending orders found" icon={Truck} />
           ) : (
             <div className="space-y-3 sm:space-y-4 max-h-[400px] overflow-y-auto">
               {orders.map((order: any) => (
