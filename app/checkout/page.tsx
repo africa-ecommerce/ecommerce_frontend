@@ -1718,15 +1718,15 @@ const getDeliveryLocationDisplay = (location: any) => {
     return `All ${location.state}`;
   }
   
-  // If less than or equal to 9 LGAs, show all
-  if (location.lgas.length <= 9) {
+  // If less than or equal to 20 LGAs, show all
+  if (location.lgas.length <= 20) {
     return location.lgas.join(", ");
   }
   
   // If more than 3, show first 3 with "show more" functionality
   return {
-    preview: location.lgas.slice(0, 9).join(", "),
-    remaining: location.lgas.length - 9
+    preview: location.lgas.slice(0, 20).join(", "),
+    remaining: location.lgas.length - 20
   };
 };
 
@@ -2927,9 +2927,7 @@ const getDeliveryLocationDisplay = (location: any) => {
                           Delivery Fee
                         </span>
                         <span className="text-sm">
-                          {deliveryFee !== null
-                            ? formatPrice(deliveryFee)
-                            : "Calculating..."}
+                          {deliveryFee === undefined ? "Select a location" : formatPrice(deliveryFee)}
                         </span>
                       </div>
 
