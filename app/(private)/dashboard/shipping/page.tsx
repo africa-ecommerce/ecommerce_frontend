@@ -3,20 +3,13 @@
 import React, { useState, useEffect } from "react";
 
 export default function ComingSoonPage() {
-  const [count, setCount] = useState(2847);
   const [isHovered, setIsHovered] = useState(false);
   const [joined, setJoined] = useState(false);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCount((prev) => prev + Math.floor(Math.random() * 3));
-    }, 8000);
-    return () => clearInterval(interval);
-  }, []);
+
 
   const handleJoin = () => {
     setJoined(true);
-    setCount((prev) => prev + 1);
   };
 
   return (
@@ -85,15 +78,13 @@ export default function ComingSoonPage() {
               <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
             </span>
             Join{" "}
-            <span className="font-bold text-primary mx-1 text-lg">
-              {count.toLocaleString()}
-            </span>{" "}
+            
             others anticipating launch
           </span>
         </div>
 
         {/* Mysterious hint */}
-        <div className="mt-16 text-muted-foreground/60 text-xs tracking-wider">
+        <div className="mt-16 text-muted-foreground/60 text-sm tracking-wider">
           <p className="opacity-60">Big things ahead...</p>
         </div>
       </div>
