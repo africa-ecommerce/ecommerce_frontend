@@ -2344,19 +2344,87 @@ const getDeliveryFee = () => {
 //  };
 
 
+// const continueToReview = async () => {
+//   // Check if all supplier groups with delivery locations have a selection
+//   const missingDeliverySelections = supplierGroups.filter(
+//     group => group.deliveryLocations.length > 0 && !supplierDeliverySelections[group.supplierId]
+//   );
+  
+//   if (missingDeliverySelections.length > 0) {
+//     errorToast(
+//       hasMultipleSuppliers 
+//         ? "Please select delivery options for all delivery groups"
+//         : "Please select a delivery option"
+//     );
+//     return;
+//   }
+
+//   // Rest of your existing validation...
+//   const customerInfoValid = await trigger([
+//     "customerInfo.name",
+//     "customerInfo.email",
+//     "customerInfo.phone",
+//   ]);
+  
+//   const isFormValid = await trigger();
+
+//   if (deliveryFee === null || deliveryFee === undefined) {
+//     errorToast("Please wait for delivery fee calculation to complete before proceeding.");
+//     return;
+//   }
+
+//   if (isFormValid && customerInfoValid) {
+//     setCurrentStep("review");
+//     if (orderSummaries.length > 0) {
+//       orderSummaries.forEach((orderSummary) => {
+//         mutate(`/public/products/${orderSummary.item.id}${orderSummary.referralId}`);
+//       });
+//     }
+//   } else {
+//     const firstError = document.querySelector(".border-red-500");
+//     if (firstError) {
+//       firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+//     }
+//   }
+// };
+
+
 const continueToReview = async () => {
-  // Check if all supplier groups with delivery locations have a selection
-  const missingDeliverySelections = supplierGroups.filter(
-    group => group.deliveryLocations.length > 0 && !supplierDeliverySelections[group.supplierId]
+  // Check if there are any supplier groups with delivery locations
+  const groupsWithDeliveryLocations = supplierGroups.filter(
+    group => group.deliveryLocations.length > 0
   );
   
-  if (missingDeliverySelections.length > 0) {
-    errorToast(
-      hasMultipleSuppliers 
-        ? "Please select delivery options for all delivery groups"
-        : "Please select a delivery option"
-    );
+  // Check if at least one delivery option has been selected
+  const selectedDeliveryGroups = groupsWithDeliveryLocations.filter(
+    group => supplierDeliverySelections[group.supplierId]
+  );
+  
+  // If there are groups with delivery locations but none selected, show error
+  if (groupsWithDeliveryLocations.length > 0 && selectedDeliveryGroups.length === 0) {
+    errorToast("Please select at least one delivery option to continue");
     return;
+  }
+  
+  // Check if there are unselected groups
+  const missingDeliverySelections = groupsWithDeliveryLocations.filter(
+    group => !supplierDeliverySelections[group.supplierId]
+  );
+  
+  // If some groups are not selected, show info toast
+  if (missingDeliverySelections.length > 0) {
+    const unselectedItemsCount = missingDeliverySelections.reduce(
+      (count, group) => count + group.items.length, 
+      0
+    );
+    
+    // Show info toast about excluded items
+    const { toast } = await import("@/components/ui/use-toast-advanced");
+    toast({
+      title: "Note",
+      description: `${unselectedItemsCount} item(s) without delivery selection will not be included in this order.`,
+      variant: "default",
+    });
   }
 
   // Rest of your existing validation...
@@ -2368,7 +2436,7 @@ const continueToReview = async () => {
   
   const isFormValid = await trigger();
 
-  if (deliveryFee === null || deliveryFee === undefined) {
+  if (selectedDeliveryGroups.length > 0 && (deliveryFee === null || deliveryFee === undefined)) {
     errorToast("Please wait for delivery fee calculation to complete before proceeding.");
     return;
   }
@@ -2908,7 +2976,7 @@ const continueToReview = async () => {
         <Alert className="mb-4">
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Your items will be delivered separately as they come from different vendors. Please select a delivery option for each group.
+            Your items will be delivered separately as they come from different store with different delivery option. Please select a delivery option for each group.
           </AlertDescription>
         </Alert>
       )}
