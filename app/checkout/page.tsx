@@ -1679,19 +1679,10 @@ export default function CheckoutPage() {
   const watchedEmail = watch("customerInfo.email");
   const watchedPhone = watch("customerInfo.phone");
 
-  // Get available delivery locations based on selected state and LGA
-  const availableDeliveryLocations = useMemo(() => {
-    if (!watchedState || !watchedLga || !orderSummaries.length) return [];
-    
-    const deliveryLocations = orderSummaries[0]?.deliveryLocations || [];
-    
-    // Filter delivery locations that match the selected state and include the selected LGA
-    return deliveryLocations.filter(
-      (location: any) => 
-        location.state === watchedState && 
-        location.lgas.includes(watchedLga)
-    );
-  }, [watchedState, watchedLga, orderSummaries]);
+const availableDeliveryLocations = useMemo(() => {
+  if (!orderSummaries.length) return [];
+  return orderSummaries[0]?.deliveryLocations || [];
+}, [orderSummaries]);
 
   // SWR for buyer info fetching
   const buyerInfoKey =
@@ -1715,26 +1706,30 @@ export default function CheckoutPage() {
     buyerInfoOptions
   );
 
-  // SWR for logistics pricing
-  const logisticsPricingKey =
-    watchedState &&
-    watchedLga &&
-    watchedStreetAddress &&
-    orderSummaries.length > 0 &&
-    orderSummaries[0]?.pickupLocation?.latitude &&
-    orderSummaries[0]?.pickupLocation?.longitude
-      ? `/api/logistics/pricing?state=${encodeURIComponent(
-          watchedState
-        )}&lga=${encodeURIComponent(
-          watchedLga
-        )}&streetAddress=${encodeURIComponent(watchedStreetAddress)}`
-      : null;
+  // Add this helper function before the return statement
+const getDeliveryLocationDisplay = (location: any) => {
+  const allStateLgas = getLgasForState(location.state);
+  
+  // Check if all LGAs in the state are covered
+  const coversAllLgas = allStateLgas.length > 0 && 
+    allStateLgas.every((lga: string) => location.lgas.includes(lga));
+  
+  if (coversAllLgas) {
+    return `All ${location.state}`;
+  }
+  
+  // If less than or equal to 9 LGAs, show all
+  if (location.lgas.length <= 9) {
+    return location.lgas.join(", ");
+  }
+  
+  // If more than 3, show first 3 with "show more" functionality
+  return {
+    preview: location.lgas.slice(0, 9).join(", "),
+    remaining: location.lgas.length - 9
+  };
+};
 
-  const {
-    data: logisticsPricingData,
-    error: logisticsPricingError,
-    isLoading: isLogisticsPricingLoading,
-  } = useSWR(logisticsPricingKey, fetcher, logisticsPricingOptions);
 
   // Calculate delivery fee based on selected delivery location
   const getDeliveryFee = () => {
@@ -1748,46 +1743,9 @@ export default function CheckoutPage() {
       }
     }
 
-    // For terminal pickup, use the fixed state pricing
-    if (deliveryType === "terminal" && selectedState) {
-      const terminalPrice =
-        TerminalPickupPrices[
-          selectedState as keyof typeof TerminalPickupPrices
-        ];
-      if (terminalPrice) {
-        return terminalPrice;
-      }
-    }
+   
 
-    // Check if we have the required data to fetch logistics pricing
-    const hasRequiredAddressData =
-      watchedState && watchedLga && watchedStreetAddress;
 
-    // If we don't have required address data, don't show any delivery fee yet
-    if (!hasRequiredAddressData) {
-      return null;
-    }
-
-    // If we're currently loading logistics pricing, don't show fee yet
-    if (isLogisticsPricingLoading) {
-      return null;
-    }
-
-    // If logistics pricing was successfully fetched, use that price
-    if (
-      logisticsPricingData?.data?.price !== undefined &&
-      !logisticsPricingError
-    ) {
-      return logisticsPricingData.data.price;
-    }
-
-    // If there was an error fetching logistics pricing, fallback to 1500
-    if (logisticsPricingError) {
-      return 1500;
-    }
-
-    // Default case - should not reach here, but fallback to null
-    return null;
   };
 
   const deliveryFee = getDeliveryFee();
@@ -1980,17 +1938,7 @@ export default function CheckoutPage() {
     }
   }, [buyerInfoData, buyerInfoError, setValue, setCustomerAddress]);
 
-  // Effect to handle logistics pricing updates
-  useEffect(() => {
-    if (logisticsPricingData?.data && !logisticsPricingError) {
-      const price = logisticsPricingData.data.price;
-      if (price !== undefined) {
-        updateDeliveryFee(price);
-      }
-    } else if (logisticsPricingError) {
-      console.error("Logistics pricing error:", logisticsPricingError);
-    }
-  }, [logisticsPricingData, logisticsPricingError, updateDeliveryFee]);
+  
 
   // Reset delivery location when state or LGA changes
   useEffect(() => {
@@ -2216,73 +2164,67 @@ export default function CheckoutPage() {
     }
   }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors]);
 
-  const continueToReview = async () => {
-    // Check if terminal is selected when delivery type is terminal
-    if (deliveryType === "terminal" && !selectedTerminal) {
-      setShowTerminalAlert(true);
-      return;
-    }
+ const continueToReview = async () => {
+   // Check if delivery location is selected - this should always be checked
+   if (!selectedDeliveryLocation) {
+     setShowDeliveryLocationAlert(true);
+     return;
+   }
 
-    // Check if delivery location is selected
-    if (availableDeliveryLocations.length > 0 && !selectedDeliveryLocation) {
-      setShowDeliveryLocationAlert(true);
-      return;
-    }
+   // For terminal delivery, validate customer info and check delivery fee
+   if (deliveryType === "terminal") {
+     const customerInfoValid = await trigger([
+       "customerInfo.name",
+       "customerInfo.email",
+       "customerInfo.phone",
+     ]);
+     const stateValid = await trigger("customerAddress.state");
 
-    // For terminal delivery, validate customer info and check delivery fee
-    if (deliveryType === "terminal") {
-      const customerInfoValid = await trigger([
-        "customerInfo.name",
-        "customerInfo.email",
-        "customerInfo.phone",
-      ]);
-      const stateValid = await trigger("customerAddress.state");
+     if (customerInfoValid && stateValid) {
+       setCurrentStep("review");
+       if (orderSummaries.length > 0) {
+         orderSummaries.forEach((orderSummary) => {
+           mutate(
+             `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
+           );
+         });
+       }
+     } else {
+       const firstError = document.querySelector(".border-red-500");
+       if (firstError) {
+         firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+       }
+     }
+     return;
+   }
 
-      if (customerInfoValid && stateValid) {
-        setCurrentStep("review");
-        if (orderSummaries.length > 0) {
-          orderSummaries.forEach((orderSummary) => {
-            mutate(
-              `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
-            );
-          });
-        }
-      } else {
-        const firstError = document.querySelector(".border-red-500");
-        if (firstError) {
-          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }
-      return;
-    }
+   // For home delivery, validate all fields and check delivery fee
+   const isFormValid = await trigger();
 
-    // For home delivery, validate all fields and check delivery fee
-    const isFormValid = await trigger();
+   // Check if delivery fee is available for home delivery
+   if (deliveryFee === null) {
+     errorToast(
+       "Please wait for delivery fee calculation to complete before proceeding."
+     );
+     return;
+   }
 
-    // Check if delivery fee is available for home delivery
-    if (deliveryFee === null) {
-      errorToast(
-        "Please wait for delivery fee calculation to complete before proceeding."
-      );
-      return;
-    }
-
-    if (isFormValid) {
-      setCurrentStep("review");
-      if (orderSummaries.length > 0) {
-        orderSummaries.forEach((orderSummary) => {
-          mutate(
-            `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
-          );
-        });
-      }
-    } else {
-      const firstError = document.querySelector(".border-red-500");
-      if (firstError) {
-        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
-  };
+   if (isFormValid) {
+     setCurrentStep("review");
+     if (orderSummaries.length > 0) {
+       orderSummaries.forEach((orderSummary) => {
+         mutate(
+           `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
+         );
+       });
+     }
+   } else {
+     const firstError = document.querySelector(".border-red-500");
+     if (firstError) {
+       firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+     }
+   }
+ };
 
   const showPaymentCancelledModal = () => {
     setShowCancelledModal(true);
@@ -2688,6 +2630,7 @@ export default function CheckoutPage() {
                       </div>
 
                       {/* Delivery Location Selection */}
+                      {/* Delivery Location Selection */}
                       {availableDeliveryLocations.length > 0 && (
                         <>
                           <Separator />
@@ -2699,52 +2642,91 @@ export default function CheckoutPage() {
                             <Alert className="mb-4">
                               <Info className="h-4 w-4" />
                               <AlertDescription>
-                                Select your preferred delivery option based on your location
+                                Select your preferred delivery option
                               </AlertDescription>
                             </Alert>
-                            <RadioGroup
-                              value={selectedDeliveryLocation}
-                              onValueChange={setSelectedDeliveryLocation}
-                              className="space-y-3"
-                            >
-                              {availableDeliveryLocations.map((location: any) => (
-                                <div
-                                  key={location.id}
-                                  className={`relative flex items-start space-x-3 rounded-lg border p-4 cursor-pointer transition-all ${
-                                    selectedDeliveryLocation === location.id
-                                      ? "border-primary bg-primary/5"
-                                      : "border-border hover:border-primary/50"
-                                  }`}
-                                  onClick={() => setSelectedDeliveryLocation(location.id)}
-                                >
-                                  <RadioGroupItem
-                                    value={location.id}
-                                    id={location.id}
-                                    className="mt-1"
-                                  />
-                                  <div className="flex-1 space-y-1">
-                                    <Label
-                                      htmlFor={location.id}
-                                      className="flex items-center gap-2 cursor-pointer font-medium"
-                                    >
-                                      <Truck className="h-4 w-4" />
-                                      {location.state} Delivery
-                                    </Label>
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                      <Clock className="h-3 w-3" />
-                                      {location.duration}
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">
-                                      Available for: {location.lgas.slice(0, 3).join(", ")}
-                                      {location.lgas.length > 3 && ` +${location.lgas.length - 3} more`}
-                                    </p>
-                                    <p className="text-sm font-semibold text-primary">
-                                      {formatPrice(location.fee)}
-                                    </p>
-                                  </div>
-                                </div>
-                              ))}
-                            </RadioGroup>
+                            <div className="max-h-[400px] overflow-y-auto pr-2 space-y-3">
+                              <RadioGroup
+                                value={selectedDeliveryLocation}
+                                onValueChange={setSelectedDeliveryLocation}
+                                className="space-y-3"
+                              >
+                                {availableDeliveryLocations.map(
+                                  (location: any) => {
+                                    const lgaDisplay =
+                                      getDeliveryLocationDisplay(location);
+                                    const isString =
+                                      typeof lgaDisplay === "string";
+
+                                    return (
+                                      <div
+                                        key={location.id}
+                                        className={`relative flex items-start space-x-3 rounded-lg border p-4 cursor-pointer transition-all ${
+                                          selectedDeliveryLocation ===
+                                          location.id
+                                            ? "border-primary bg-primary/5"
+                                            : "border-border hover:border-primary/50"
+                                        }`}
+                                        onClick={() =>
+                                          setSelectedDeliveryLocation(
+                                            location.id
+                                          )
+                                        }
+                                      >
+                                        <RadioGroupItem
+                                          value={location.id}
+                                          id={location.id}
+                                          className="mt-1"
+                                        />
+                                        <div className="flex-1 space-y-1">
+                                          <Label
+                                            htmlFor={location.id}
+                                            className="flex items-center gap-2 cursor-pointer font-medium"
+                                          >
+                                            <Truck className="h-4 w-4" />
+                                            {location.state} Delivery
+                                          </Label>
+                                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                            <Clock className="h-3 w-3" />
+                                            {location.duration}
+                                          </div>
+                                          <p className="text-sm text-muted-foreground">
+                                            Available for:{" "}
+                                            {isString ? (
+                                              lgaDisplay
+                                            ) : (
+                                              <>
+                                                {lgaDisplay.preview}
+                                                {lgaDisplay.remaining > 0 && (
+                                                  <button
+                                                    type="button"
+                                                    className="ml-1 text-primary hover:underline"
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      // You can implement a modal or expand inline here
+                                                      alert(
+                                                        `All locations: ${location.lgas.join(
+                                                          ", "
+                                                        )}`
+                                                      );
+                                                    }}
+                                                  >
+                                                    +{lgaDisplay.remaining} more
+                                                  </button>
+                                                )}
+                                              </>
+                                            )}
+                                          </p>
+                                          <p className="text-sm font-semibold text-primary">
+                                            {formatPrice(location.fee)}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                )}
+                              </RadioGroup>
+                            </div>
                           </div>
                         </>
                       )}
@@ -2879,14 +2861,17 @@ export default function CheckoutPage() {
                                   Delivery Option
                                 </p>
                                 <p className="text-sm text-muted-foreground mt-1">
-                                  {selectedDeliveryLocationDetails.state} Delivery
+                                  {selectedDeliveryLocationDetails.state}{" "}
+                                  Delivery
                                 </p>
                                 <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
                                   <Clock className="h-3 w-3" />
                                   {selectedDeliveryLocationDetails.duration}
                                 </div>
                                 <p className="text-sm font-semibold text-primary mt-1">
-                                  {formatPrice(selectedDeliveryLocationDetails.fee)}
+                                  {formatPrice(
+                                    selectedDeliveryLocationDetails.fee
+                                  )}
                                 </p>
                               </div>
                             )}
@@ -2942,7 +2927,9 @@ export default function CheckoutPage() {
                           Delivery Fee
                         </span>
                         <span className="text-sm">
-                          {deliveryFee !== null ? formatPrice(deliveryFee) : "Calculating..."}
+                          {deliveryFee !== null
+                            ? formatPrice(deliveryFee)
+                            : "Calculating..."}
                         </span>
                       </div>
 
@@ -2988,18 +2975,22 @@ export default function CheckoutPage() {
         </div>
       )}
 
-      
-      <AlertDialog open={showTerminalAlert} onOpenChange={setShowTerminalAlert}>
+      <AlertDialog
+        open={showDeliveryLocationAlert}
+        onOpenChange={setShowDeliveryLocationAlert}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delivery location Required</AlertDialogTitle>
+            <AlertDialogTitle>Delivery Location Required</AlertDialogTitle>
             <AlertDialogDescription>
-              Please select a delivery location before proceeding to
-              review your order.
+              Please select a delivery location before proceeding to review your
+              order.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowTerminalAlert(false)}>
+            <AlertDialogAction
+              onClick={() => setShowDeliveryLocationAlert(false)}
+            >
               OK
             </AlertDialogAction>
           </AlertDialogFooter>
