@@ -1530,6 +1530,70 @@ import { useProductFetching } from "@/hooks/use-product-fetcher";
 import { useProductStore } from "@/hooks/product-store";
 import { terminalAddresses, TerminalPickupPrices } from "../constant";
 
+// Add these type definitions after imports
+interface OrderItem {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice: number;
+  productId: string;
+  quantity: number;
+  image: string;
+  selectedColor?: string;
+  size?: string;
+  variationId?: string;
+  variationName?: string;
+  supplierId: string;
+}
+
+interface DeliveryLocation {
+  id: string;
+  state: string;
+  lgas: string[];
+  fee: number;
+  duration: string;
+}
+
+interface OrderSummary {
+  item: OrderItem;
+  subtotal: number;
+  total: number;
+  referralId: string;
+  platform: string;
+  pickupLocation?: {
+    latitude: number;
+    longitude: number;
+  };
+  deliveryFee: number;
+  deliveryLocations: DeliveryLocation[];
+}
+
+interface SupplierGroup {
+  supplierId: string;
+  items: OrderSummary[];
+  deliveryLocations: DeliveryLocation[];
+  selectedDeliveryLocation: string | null;
+}
+
+// Replace the groupOrdersBySupplier function
+const groupOrdersBySupplier = (orderSummaries: OrderSummary[]): SupplierGroup[] => {
+  const grouped = orderSummaries.reduce((acc, summary) => {
+    const supplierId = summary.item.supplierId;
+    if (!acc[supplierId]) {
+      acc[supplierId] = {
+        supplierId,
+        items: [],
+        deliveryLocations: summary.deliveryLocations || [],
+        selectedDeliveryLocation: null,
+      };
+    }
+    acc[supplierId].items.push(summary);
+    return acc;
+  }, {} as Record<string, SupplierGroup>);
+  
+  return Object.values(grouped);
+};
+
 // SWR fetcher function
 const fetcher = async (url: string) => {
   const response = await fetch(url);
@@ -1586,6 +1650,7 @@ export default function CheckoutPage() {
   const [deliveryType, setDeliveryType] = useState<"terminal" | "home">(
     "terminal"
   );
+  const [supplierDeliverySelections, setSupplierDeliverySelections] = useState<Record<string, string>>({});
   const [selectedTerminal, setSelectedTerminal] = useState("");
   const [showTerminalAlert, setShowTerminalAlert] = useState(false);
   const [selectedDeliveryLocation, setSelectedDeliveryLocation] = useState("");
@@ -1657,19 +1722,48 @@ export default function CheckoutPage() {
     return orderSummaries.map((summary) => summary.item) || [];
   }, [platform, orderSummaries]);
 
-  // Calculate subtotal from orderSummaries or fallback
+  // // Calculate subtotal from orderSummaries or fallback
+  // const subtotal = useMemo(() => {
+  //   if (platform === "store") {
+  //     return orderSummaries.reduce((sum, summary) => sum + summary.subtotal, 0);
+  //   }
+  //   // Fallback for non-store platforms
+  //   return (
+  //     orderSummaries?.reduce(
+  //       (sum, summary) => sum + summary.item.price * summary.item.quantity,
+  //       0
+  //     ) || 0
+  //   );
+  // }, [platform, orderSummaries]);
+
+  const supplierGroups = useMemo(() => {
+  return groupOrdersBySupplier(orderSummaries);
+}, [orderSummaries]);
+
+const hasMultipleSuppliers = supplierGroups.length > 1;
+
+
   const subtotal = useMemo(() => {
-    if (platform === "store") {
-      return orderSummaries.reduce((sum, summary) => sum + summary.subtotal, 0);
-    }
-    // Fallback for non-store platforms
-    return (
-      orderSummaries?.reduce(
-        (sum, summary) => sum + summary.item.price * summary.item.quantity,
+    return supplierGroups.reduce((sum, group) => {
+      // Only include items that have a delivery location selected
+      const hasDeliverySelected = supplierDeliverySelections[group.supplierId];
+      if (!hasDeliverySelected && group.deliveryLocations.length > 0) {
+        return sum; // Don't include this group's items
+      }
+
+      const groupSubtotal = group.items.reduce(
+        (groupSum: number, summary: any) => {
+          return groupSum + summary.subtotal;
+        },
         0
-      ) || 0
-    );
-  }, [platform, orderSummaries]);
+      );
+
+      return sum + groupSubtotal;
+    }, 0);
+  }, [supplierGroups, supplierDeliverySelections]);
+
+  // Add after the cartItems useMemo
+
 
   // Watch address fields for SWR key generation
   const watchedState = watch("customerAddress.state");
@@ -1732,21 +1826,44 @@ const getDeliveryLocationDisplay = (location: any) => {
 
 
   // Calculate delivery fee based on selected delivery location
-  const getDeliveryFee = () => {
-    // If a delivery location is selected, use its fee
-    if (selectedDeliveryLocation && availableDeliveryLocations.length > 0) {
-      const selectedLocation = availableDeliveryLocations.find(
-        (loc: any) => loc.id === selectedDeliveryLocation
-      );
-      if (selectedLocation) {
-        return selectedLocation.fee;
-      }
-    }
+  // const getDeliveryFee = () => {
+  //   // If a delivery location is selected, use its fee
+  //   if (selectedDeliveryLocation && availableDeliveryLocations.length > 0) {
+  //     const selectedLocation = availableDeliveryLocations.find(
+  //       (loc: any) => loc.id === selectedDeliveryLocation
+  //     );
+  //     if (selectedLocation) {
+  //       return selectedLocation.fee;
+  //     }
+  //   }
 
    
 
 
-  };
+  // };
+
+
+  // Replace the getDeliveryFee function
+const getDeliveryFee = () => {
+  let totalFee = 0;
+  
+  supplierGroups.forEach((group) => {
+    const selectedLocationId = supplierDeliverySelections[group.supplierId];
+    if (selectedLocationId && group.deliveryLocations.length > 0) {
+      const selectedLocation = group.deliveryLocations.find(
+        (loc: any) => loc.id === selectedLocationId
+      );
+      if (selectedLocation) {
+        totalFee += selectedLocation.fee;
+      }
+    }
+  });
+  
+  return totalFee;
+};
+
+// Update subtotal to exclude items without delivery selection
+
 
   const deliveryFee = getDeliveryFee();
   const total = subtotal + (deliveryFee || 0);
@@ -2164,67 +2281,112 @@ const getDeliveryLocationDisplay = (location: any) => {
     }
   }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors]);
 
- const continueToReview = async () => {
-   // Check if delivery location is selected - this should always be checked
-   if (!selectedDeliveryLocation) {
-     setShowDeliveryLocationAlert(true);
-     return;
-   }
+//  const continueToReview = async () => {
+//    // Check if delivery location is selected - this should always be checked
+//    if (!selectedDeliveryLocation) {
+//      setShowDeliveryLocationAlert(true);
+//      return;
+//    }
 
-   // For terminal delivery, validate customer info and check delivery fee
-   if (deliveryType === "terminal") {
-     const customerInfoValid = await trigger([
-       "customerInfo.name",
-       "customerInfo.email",
-       "customerInfo.phone",
-     ]);
-     const stateValid = await trigger("customerAddress.state");
+//    // For terminal delivery, validate customer info and check delivery fee
+//    if (deliveryType === "terminal") {
+//      const customerInfoValid = await trigger([
+//        "customerInfo.name",
+//        "customerInfo.email",
+//        "customerInfo.phone",
+//      ]);
+//      const stateValid = await trigger("customerAddress.state");
 
-     if (customerInfoValid && stateValid) {
-       setCurrentStep("review");
-       if (orderSummaries.length > 0) {
-         orderSummaries.forEach((orderSummary) => {
-           mutate(
-             `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
-           );
-         });
-       }
-     } else {
-       const firstError = document.querySelector(".border-red-500");
-       if (firstError) {
-         firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-       }
-     }
-     return;
-   }
+//      if (customerInfoValid && stateValid) {
+//        setCurrentStep("review");
+//        if (orderSummaries.length > 0) {
+//          orderSummaries.forEach((orderSummary) => {
+//            mutate(
+//              `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
+//            );
+//          });
+//        }
+//      } else {
+//        const firstError = document.querySelector(".border-red-500");
+//        if (firstError) {
+//          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+//        }
+//      }
+//      return;
+//    }
 
-   // For home delivery, validate all fields and check delivery fee
-   const isFormValid = await trigger();
+//    // For home delivery, validate all fields and check delivery fee
+//    const isFormValid = await trigger();
 
-   // Check if delivery fee is available for home delivery
-   if (deliveryFee === null) {
-     errorToast(
-       "Please wait for delivery fee calculation to complete before proceeding."
-     );
-     return;
-   }
+//    // Check if delivery fee is available for home delivery
+//    if (deliveryFee === null) {
+//      errorToast(
+//        "Please wait for delivery fee calculation to complete before proceeding."
+//      );
+//      return;
+//    }
 
-   if (isFormValid) {
-     setCurrentStep("review");
-     if (orderSummaries.length > 0) {
-       orderSummaries.forEach((orderSummary) => {
-         mutate(
-           `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
-         );
-       });
-     }
-   } else {
-     const firstError = document.querySelector(".border-red-500");
-     if (firstError) {
-       firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-     }
-   }
- };
+//    if (isFormValid) {
+//      setCurrentStep("review");
+//      if (orderSummaries.length > 0) {
+//        orderSummaries.forEach((orderSummary) => {
+//          mutate(
+//            `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
+//          );
+//        });
+//      }
+//    } else {
+//      const firstError = document.querySelector(".border-red-500");
+//      if (firstError) {
+//        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+//      }
+//    }
+//  };
+
+
+const continueToReview = async () => {
+  // Check if all supplier groups with delivery locations have a selection
+  const missingDeliverySelections = supplierGroups.filter(
+    group => group.deliveryLocations.length > 0 && !supplierDeliverySelections[group.supplierId]
+  );
+  
+  if (missingDeliverySelections.length > 0) {
+    errorToast(
+      hasMultipleSuppliers 
+        ? "Please select delivery options for all delivery groups"
+        : "Please select a delivery option"
+    );
+    return;
+  }
+
+  // Rest of your existing validation...
+  const customerInfoValid = await trigger([
+    "customerInfo.name",
+    "customerInfo.email",
+    "customerInfo.phone",
+  ]);
+  
+  const isFormValid = await trigger();
+
+  if (deliveryFee === null || deliveryFee === undefined) {
+    errorToast("Please wait for delivery fee calculation to complete before proceeding.");
+    return;
+  }
+
+  if (isFormValid && customerInfoValid) {
+    setCurrentStep("review");
+    if (orderSummaries.length > 0) {
+      orderSummaries.forEach((orderSummary) => {
+        mutate(`/public/products/${orderSummary.item.id}${orderSummary.referralId}`);
+      });
+    }
+  } else {
+    const firstError = document.querySelector(".border-red-500");
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+};
 
   const showPaymentCancelledModal = () => {
     setShowCancelledModal(true);
@@ -2631,7 +2793,7 @@ const getDeliveryLocationDisplay = (location: any) => {
 
                       {/* Delivery Location Selection */}
                       {/* Delivery Location Selection */}
-                      {availableDeliveryLocations.length > 0 && (
+                      {/* {availableDeliveryLocations.length > 0 && (
                         <>
                           <Separator />
                           <div>
@@ -2729,7 +2891,151 @@ const getDeliveryLocationDisplay = (location: any) => {
                             </div>
                           </div>
                         </>
-                      )}
+                      )} */}
+
+
+                      {/* Replace the existing Delivery Location Selection section with this */}
+{supplierGroups.some(group => group.deliveryLocations.length > 0) && (
+  <>
+    <Separator />
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        <h3 className="font-medium">Delivery Options</h3>
+        <span className="text-red-500">*</span>
+      </div>
+      
+      {hasMultipleSuppliers && (
+        <Alert className="mb-4">
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            Your items will be delivered separately as they come from different vendors. Please select a delivery option for each group.
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      <div className="space-y-6">
+        {supplierGroups.map((group, groupIndex) => {
+          if (group.deliveryLocations.length === 0) return null;
+          
+          const selectedLocationId = supplierDeliverySelections[group.supplierId];
+          const isSelected = !!selectedLocationId;
+          
+          return (
+            <div key={group.supplierId} className="space-y-3">
+              {hasMultipleSuppliers && (
+                <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                  <div className="flex-1">
+                    <p className="font-medium text-sm mb-2">
+                      Delivery Group {groupIndex + 1}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {group.items.map((summary: any, idx: number) => (
+                        <span key={idx} className="text-xs bg-background px-2 py-1 rounded-md border">
+                          {summary.item.name} {summary.item.variationName && `(${summary.item.variationName})`}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div className={`border rounded-lg p-3 ${!isSelected ? 'border-yellow-500/50 bg-yellow-50/50' : ''}`}>
+                {!isSelected && (
+                  <div className="flex items-center gap-2 text-sm text-yellow-600 mb-3">
+                    <Info className="h-4 w-4" />
+                    <span>Please select a delivery option for this group</span>
+                  </div>
+                )}
+                
+                <div className="max-h-[300px] overflow-y-auto pr-2 space-y-3">
+                  <RadioGroup
+                    value={selectedLocationId || ""}
+                    onValueChange={(value) => {
+                      setSupplierDeliverySelections(prev => ({
+                        ...prev,
+                        [group.supplierId]: value
+                      }));
+                    }}
+                    className="space-y-3"
+                  >
+                    {group.deliveryLocations.map((location: any) => {
+                      const lgaDisplay = getDeliveryLocationDisplay(location);
+                      const isString = typeof lgaDisplay === "string";
+                      const isThisSelected = selectedLocationId === location.id;
+
+                      return (
+                        <div
+                          key={location.id}
+                          className={`relative flex items-start space-x-3 rounded-lg border p-4 cursor-pointer transition-all ${
+                            isThisSelected
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:border-primary/50"
+                          }`}
+                          onClick={() => {
+                            setSupplierDeliverySelections(prev => ({
+                              ...prev,
+                              [group.supplierId]: location.id
+                            }));
+                          }}
+                        >
+                          <RadioGroupItem
+                            value={location.id}
+                            id={`${group.supplierId}-${location.id}`}
+                            className="mt-1"
+                          />
+                          <div className="flex-1 space-y-1">
+                            <Label
+                              htmlFor={`${group.supplierId}-${location.id}`}
+                              className="flex items-center gap-2 cursor-pointer font-medium"
+                            >
+                              <Truck className="h-4 w-4" />
+                              {location.state} Delivery
+                            </Label>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {location.duration}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              Available for:{" "}
+                              {isString ? (
+                                lgaDisplay
+                              ) : (
+                                <>
+                                  {lgaDisplay.preview}
+                                  {lgaDisplay.remaining > 0 && (
+                                    <button
+                                      type="button"
+                                      className="ml-1 text-primary hover:underline"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        alert(
+                                          `All locations: ${location.lgas.join(", ")}`
+                                        );
+                                      }}
+                                    >
+                                      +{lgaDisplay.remaining} more
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                            </p>
+                            <p className="text-sm font-semibold text-primary">
+                              {formatPrice(location.fee)}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </RadioGroup>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </>
+)}
 
                       <Separator />
 
@@ -2773,7 +3079,7 @@ const getDeliveryLocationDisplay = (location: any) => {
                 </Card>
               )}
 
-              {currentStep === "review" && (
+              {/* {currentStep === "review" && (
                 <Card>
                   <CardContent className="p-4 md:p-6">
                     <h2 className="text-xl font-semibold mb-4">
@@ -2821,7 +3127,104 @@ const getDeliveryLocationDisplay = (location: any) => {
                             </div>
                           ))}
                         </div>
+                      </div> */}
+
+                      {currentStep === "review" && (
+  <Card>
+    <CardContent className="p-4 md:p-6">
+      <h2 className="text-xl font-semibold mb-4">Review Your Order</h2>
+      <div className="space-y-6">
+        <div>
+          <h3 className="font-medium mb-3">Items in Your Order</h3>
+          
+          {hasMultipleSuppliers && (
+            <Alert className="mb-4">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Your items will be delivered in {supplierGroups.length} separate shipments
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          <div className="space-y-6">
+            {supplierGroups.map((group, groupIndex) => {
+              const hasDeliverySelected = supplierDeliverySelections[group.supplierId];
+              const selectedLocation = group.deliveryLocations.find(
+                (loc: any) => loc.id === supplierDeliverySelections[group.supplierId]
+              );
+              const willNotBePurchased = group.deliveryLocations.length > 0 && !hasDeliverySelected;
+              
+              return (
+                <div key={group.supplierId} className={`border rounded-lg p-4 ${willNotBePurchased ? 'bg-red-50/50 border-red-200' : ''}`}>
+                  {hasMultipleSuppliers && (
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="font-medium text-sm">Delivery Group {groupIndex + 1}</p>
+                      {willNotBePurchased && (
+                        <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-md">
+                          Won't be purchased - No delivery option selected
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
+                    {group.items.map((summary: any) => (
+                      <div key={summary.item.id} className={`flex items-start space-x-3 ${willNotBePurchased ? 'opacity-50' : ''}`}>
+                        <div className="w-16 h-16 relative rounded-md overflow-hidden flex-shrink-0 bg-muted">
+                          <Image
+                            src={summary.item.image || "/placeholder.svg"}
+                            alt={summary.item.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm">
+                            <span className="capitalize">{summary.item.name}</span>
+                            {summary.item.variationName && (
+                              <span className="text-muted-foreground ml-2">
+                                ({summary.item.variationName})
+                              </span>
+                            )}
+                          </h4>
+                          <div className="flex justify-between mt-1">
+                            <span className="text-sm">
+                              {summary.item.quantity} x {formatPrice(summary.item.price)}
+                            </span>
+                            <span className="text-sm font-medium">
+                              {formatPrice(summary.item.price * summary.item.quantity)}
+                            </span>
+                          </div>
+                        </div>
                       </div>
+                    ))}
+                  </div>
+                  
+                  {selectedLocation && (
+                    <div className="mt-4 p-3 bg-primary/5 rounded-md border border-primary/20">
+                      <p className="text-sm font-medium flex items-center gap-2">
+                        <Truck className="h-4 w-4" />
+                        Delivery Option for this group
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {selectedLocation.state} Delivery
+                      </p>
+                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {selectedLocation.duration}
+                      </div>
+                      <p className="text-sm font-semibold text-primary mt-1">
+                        {formatPrice(selectedLocation.fee)}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Rest of the review section remains the same */}
 
                       <Separator />
 
@@ -2904,6 +3307,8 @@ const getDeliveryLocationDisplay = (location: any) => {
                   </CardContent>
                 </Card>
               )}
+
+              
             </div>
 
             <div className="lg:col-span-1">
