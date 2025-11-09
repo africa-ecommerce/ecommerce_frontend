@@ -118,7 +118,7 @@ export function Footer() {
                   onClick={() => scrollToSection("features")}
                   className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
                 >
-                  Merchants
+                  For Suppliers
                 </button>
               </li>
               <li>
@@ -137,22 +137,8 @@ export function Footer() {
                   Contact
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="#"
-                  className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
-                >
-                  Documentation
-                </Link>
-              </li>
-               <li>
-                <Link
-                  href="#"
-                  className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
-                >
-                  API reference
-                </Link>
-              </li>
+             
+              
             </ul>
           </div>
           <div>
@@ -215,14 +201,7 @@ export function Footer() {
                   Privacy Policy
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/return"
-                  className="text-gray-400 hover:text-[#FF7A21] text-sm md:text-base"
-                >
-                  Return Policy
-                </Link>
-              </li>
+             
             </ul>
           </div>
         </div>

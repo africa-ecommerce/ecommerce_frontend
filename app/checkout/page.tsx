@@ -1579,24 +1579,7 @@ interface SupplierGroup {
   selectedPaymentMethod?: 'online' | 'pay-on-delivery'; // Add this
 }
 
-// Replace the groupOrdersBySupplier function
-// const groupOrdersBySupplier = (orderSummaries: OrderSummary[]): SupplierGroup[] => {
-//   const grouped = orderSummaries.reduce((acc, summary) => {
-//     const supplierId = summary.item.supplierId;
-//     if (!acc[supplierId]) {
-//       acc[supplierId] = {
-//         supplierId,
-//         items: [],
-//         deliveryLocations: summary.deliveryLocations || [],
-//         selectedDeliveryLocation: null,
-//       };
-//     }
-//     acc[supplierId].items.push(summary);
-//     return acc;
-//   }, {} as Record<string, SupplierGroup>);
-  
-//   return Object.values(grouped);
-// };
+
 
 
 const groupOrdersBySupplier = (orderSummaries: OrderSummary[]): SupplierGroup[] => {
@@ -1653,18 +1636,18 @@ const buyerInfoOptions = {
 };
 
 export default function CheckoutPage() {
-  // Replace local state with Zustand store
-  const {
-    checkoutData,
-    setCustomerInfo,
-    setCustomerAddress,
-    setDeliveryInstructions,
-    setCurrentStep,
-    clearCheckoutData,
-    setDeliveryMethod,
-    setTerminalAddress,
-  } = useCheckoutStore();
-
+ const {
+  checkoutData,
+  setCustomerInfo,
+  setCustomerAddress,
+  setDeliveryInstructions,
+  setCurrentStep,
+  clearCheckoutData,
+  setDeliveryMethod,
+  setTerminalAddress,
+  setSupplierDeliverySelection, // Add this
+  setSupplierPaymentMethod, // Add this
+} = useCheckoutStore();
   // Local state for UI-specific needs
   const [isClient, setIsClient] = useState(false);
   const [selectedState, setSelectedState] = useState<string>("");
@@ -1675,17 +1658,12 @@ export default function CheckoutPage() {
   const [deliveryType, setDeliveryType] = useState<"terminal" | "home">(
     "terminal"
   );
-  // Add this state near supplierDeliverySelections
-  const [supplierPaymentMethods, setSupplierPaymentMethods] = useState<
-    Record<string, "online" | "pay-on-delivery">
-  >({});
+
   // Add this state near your other useState declarations
   const [showAllLgasModal, setShowAllLgasModal] = useState(false);
   const [selectedLocationForLgas, setSelectedLocationForLgas] =
     useState<DeliveryLocation | null>(null);
-  const [supplierDeliverySelections, setSupplierDeliverySelections] = useState<
-    Record<string, string>
-  >({});
+
   const [selectedTerminal, setSelectedTerminal] = useState("");
   const [showTerminalAlert, setShowTerminalAlert] = useState(false);
   const [selectedDeliveryLocation, setSelectedDeliveryLocation] = useState("");
@@ -1699,6 +1677,8 @@ export default function CheckoutPage() {
 
   // Get values from store
   const currentStep = checkoutData.currentStep;
+  const supplierDeliverySelections = checkoutData.supplierDeliverySelections;
+  const supplierPaymentMethods = checkoutData.supplierPaymentMethods;
 
   // Form resolver for customer info and address
   const {
@@ -1758,19 +1738,7 @@ export default function CheckoutPage() {
     return orderSummaries.map((summary) => summary.item) || [];
   }, [platform, orderSummaries]);
 
-  // // Calculate subtotal from orderSummaries or fallback
-  // const subtotal = useMemo(() => {
-  //   if (platform === "store") {
-  //     return orderSummaries.reduce((sum, summary) => sum + summary.subtotal, 0);
-  //   }
-  //   // Fallback for non-store platforms
-  //   return (
-  //     orderSummaries?.reduce(
-  //       (sum, summary) => sum + summary.item.price * summary.item.quantity,
-  //       0
-  //     ) || 0
-  //   );
-  // }, [platform, orderSummaries]);
+
 
   const supplierGroups = useMemo(() => {
     return groupOrdersBySupplier(orderSummaries);
@@ -1778,24 +1746,7 @@ export default function CheckoutPage() {
 
   const hasMultipleSuppliers = supplierGroups.length > 1;
 
-  // const subtotal = useMemo(() => {
-  //   return supplierGroups.reduce((sum, group) => {
-  //     // Only include items that have a delivery location selected
-  //     const hasDeliverySelected = supplierDeliverySelections[group.supplierId];
-  //     if (!hasDeliverySelected && group.deliveryLocations.length > 0) {
-  //       return sum; // Don't include this group's items
-  //     }
 
-  //     const groupSubtotal = group.items.reduce(
-  //       (groupSum: number, summary: any) => {
-  //         return groupSum + summary.subtotal;
-  //       },
-  //       0
-  //     );
-
-  //     return sum + groupSubtotal;
-  //   }, 0);
-  // }, [supplierGroups, supplierDeliverySelections]);
 
 
   const subtotal = useMemo<number>(() => {
@@ -1915,38 +1866,9 @@ const payOnDeliveryAmount = useMemo<number>(() => {
     };
   };
 
-  // Calculate delivery fee based on selected delivery location
-  // const getDeliveryFee = () => {
-  //   // If a delivery location is selected, use its fee
-  //   if (selectedDeliveryLocation && availableDeliveryLocations.length > 0) {
-  //     const selectedLocation = availableDeliveryLocations.find(
-  //       (loc: any) => loc.id === selectedDeliveryLocation
-  //     );
-  //     if (selectedLocation) {
-  //       return selectedLocation.fee;
-  //     }
-  //   }
 
-  // };
 
-  // Replace the getDeliveryFee function
-  // const getDeliveryFee = () => {
-  //   let totalFee = 0;
-
-  //   supplierGroups.forEach((group) => {
-  //     const selectedLocationId = supplierDeliverySelections[group.supplierId];
-  //     if (selectedLocationId && group.deliveryLocations.length > 0) {
-  //       const selectedLocation = group.deliveryLocations.find(
-  //         (loc: any) => loc.id === selectedLocationId
-  //       );
-  //       if (selectedLocation) {
-  //         totalFee += selectedLocation.fee;
-  //       }
-  //     }
-  //   });
-
-  //   return totalFee;
-  // };
+ 
 
   const getDeliveryFee = (): number => {
   let totalFee = 0;
@@ -2007,38 +1929,13 @@ const payOnDeliveryFee = useMemo<number>(() => {
   return totalFee;
 }, [supplierGroups, supplierDeliverySelections, supplierPaymentMethods]);
 
-  // Update subtotal to exclude items without delivery selection
-
-  // const deliveryFee = getDeliveryFee();
-  // const total = subtotal + (deliveryFee || 0);
 
   const deliveryFee = getDeliveryFee();
   const total = subtotal + deliveryFee;
   const onlineTotal = onlinePaymentAmount + onlineDeliveryFee;
   const payOnDeliveryTotal = payOnDeliveryAmount + payOnDeliveryFee;
 
-  // const formatOrderItems = () => {
-  //   if (!orderSummaries.length) return [];
-  //   return orderSummaries.flatMap((summary) => ({
-  //     productId: summary.item.productId,
-  //     quantity: summary.item.quantity,
-  //     supplierPrice: summary.item.originalPrice,
-  //     plugPrice: summary.item.price,
-  //     productName: summary.item.name,
-  //     supplierId: summary.item.supplierId,
-  //     ...(summary.item.variationId && {
-  //       variantId: summary.item.variationId,
-  //       variantColor: summary.item.selectedColor,
-  //       variantSize: summary.item.size,
-  //     }),
-  //     // For non-variation items, use product-level color and size
-  //     ...(!summary.item.variationId && {
-  //       productColor: summary.item.selectedColor,
-  //       productSize: summary.item.size,
-  //     }),
-  //   }));
-  // };
-
+ 
 const formatOrderItems = () => {
   if (!orderSummaries.length) return [];
 
@@ -2163,63 +2060,6 @@ const formatOrderItems = () => {
     }
   };
 
-  // const handleStageOrder = async () => {
-  //   setIsLoading(true);
-  //   const staged = await stageOrder();
-  //   if (!staged) return;
-
-  //   setStagedOrder(staged);
-
-  //   if (typeof window === "undefined") return;
-
-  //   const { usePaystackPayment } = await import("react-paystack");
-
-  //   const config = {
-  //     email: watchedEmail || "",
-  //     amount: total * 100,
-  //     reference: staged.reference,
-  //     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-  //     metadata: {
-  //       custom_fields: [
-  //         {
-  //           display_name: "Name",
-  //           variable_name: "name",
-  //           value: watchedName || "",
-  //         },
-  //         {
-  //           display_name: "Phone",
-  //           variable_name: "phone",
-  //           value: watchedPhone || "",
-  //         },
-  //         {
-  //           display_name: "Address",
-  //           variable_name: "address",
-  //           value: watchedCustomerAddress
-  //             ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
-  //             : "",
-  //         },
-  //         {
-  //           display_name: "Order Number",
-  //           variable_name: "orderNumber",
-  //           value: staged.orderNumber,
-  //         },
-  //       ],
-  //     },
-  //   };
-
-  //   const initializePayment = usePaystackPayment(config);
-
-  //   initializePayment({
-  //     onSuccess: async (ref: { reference: string }) => {
-  //       await delay(3000);
-  //       await confirmOrder(ref.reference);
-  //     },
-  //     onClose: () => {
-  //       setIsLoading(false);
-  //       showPaymentCancelledModal();
-  //     },
-  //   });
-  // };
   
   const handleStageOrder = async () => {
   setIsLoading(true);
@@ -2325,67 +2165,19 @@ const formatOrderItems = () => {
     setSelectedDeliveryLocation("");
   }, [watchedState, watchedLga]);
 
+  useEffect(() => {
+    if (isClient && checkoutData.supplierDeliverySelections) {
+      // State is already loaded from localStorage via Zustand persist
+      // No need to manually set anything
+    }
+  }, [isClient, checkoutData.supplierDeliverySelections]);
+
   const handleBackNavigation = () => {
     if (platform !== "store") {
       router.back();
     }
   };
 
-  // Effect to transform fetched products into orderSummaries when platform is "store"
-  // useEffect(() => {
-  //   if (platform === "store" && productsData.length > 0 && !isProductsLoading) {
-  //     const transformedOrderSummaries = productsData
-  //       .filter(({ data, error }) => data && !error)
-  //       .map(({ item, data }) => {
-  //         const product = data.data || data;
-  //         const productItem = {
-  //           id: product.id || item.pid,
-  //           name: product.name || product.title || "Unknown Product",
-  //           price: product.price || 0,
-  //           originalPrice: product.originalPrice || product.price || 0,
-  //           productId: product.originalId,
-  //           quantity: item.qty,
-  //           image: product.image || product.images?.[0] || "/placeholder.svg",
-  //           selectedColor: item.color,
-  //           size: item.variation
-  //             ? product.variations?.find((v: any) => v.id === item.variation)
-  //                 ?.size
-  //             : undefined,
-  //           variationId: item.variation,
-  //           variationName: item.variation
-  //             ? getVariationDisplayName(
-  //                 product.variations?.find((v: any) => v.id === item.variation)
-  //               )
-  //             : undefined,
-  //           supplierId: product.supplierId || product.userId,
-  //         };
-
-  //         const subtotal = productItem.price * productItem.quantity;
-  //         const defaultDeliveryFee = 0;
-  //         const total = subtotal + defaultDeliveryFee;
-
-  //         return {
-  //           item: productItem,
-  //           subtotal,
-  //           total,
-  //           referralId: ref,
-  //           platform: platform,
-  //           pickupLocation: product.pickupLocation
-  //             ? {
-  //                 latitude: product.pickupLocation.latitude,
-  //                 longitude: product.pickupLocation.longitude,
-  //               }
-  //             : undefined,
-  //           deliveryFee: defaultDeliveryFee,
-  //           deliveryLocations: product.deliveryLocations,
-  //         };
-  //       });
-
-  //     if (transformedOrderSummaries.length > 0) {
-  //       setOrderSummaries(transformedOrderSummaries);
-  //     }
-  //   }
-  // }, [platform, productsData, isProductsLoading, ref, setOrderSummaries]);
 
   useEffect(() => {
   if (platform === "store" && productsData.length > 0 && !isProductsLoading) {
@@ -2599,111 +2391,7 @@ const formatOrderItems = () => {
     }
   }, [watchedCustomerInfo, watchedCustomerAddress, trigger, clearErrors]);
 
-  //  const continueToReview = async () => {
-  //    // Check if delivery location is selected - this should always be checked
-  //    if (!selectedDeliveryLocation) {
-  //      setShowDeliveryLocationAlert(true);
-  //      return;
-  //    }
-
-  //    // For terminal delivery, validate customer info and check delivery fee
-  //    if (deliveryType === "terminal") {
-  //      const customerInfoValid = await trigger([
-  //        "customerInfo.name",
-  //        "customerInfo.email",
-  //        "customerInfo.phone",
-  //      ]);
-  //      const stateValid = await trigger("customerAddress.state");
-
-  //      if (customerInfoValid && stateValid) {
-  //        setCurrentStep("review");
-  //        if (orderSummaries.length > 0) {
-  //          orderSummaries.forEach((orderSummary) => {
-  //            mutate(
-  //              `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
-  //            );
-  //          });
-  //        }
-  //      } else {
-  //        const firstError = document.querySelector(".border-red-500");
-  //        if (firstError) {
-  //          firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-  //        }
-  //      }
-  //      return;
-  //    }
-
-  //    // For home delivery, validate all fields and check delivery fee
-  //    const isFormValid = await trigger();
-
-  //    // Check if delivery fee is available for home delivery
-  //    if (deliveryFee === null) {
-  //      errorToast(
-  //        "Please wait for delivery fee calculation to complete before proceeding."
-  //      );
-  //      return;
-  //    }
-
-  //    if (isFormValid) {
-  //      setCurrentStep("review");
-  //      if (orderSummaries.length > 0) {
-  //        orderSummaries.forEach((orderSummary) => {
-  //          mutate(
-  //            `/public/products/${orderSummary.item.id}${orderSummary.referralId}`
-  //          );
-  //        });
-  //      }
-  //    } else {
-  //      const firstError = document.querySelector(".border-red-500");
-  //      if (firstError) {
-  //        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-  //      }
-  //    }
-  //  };
-
-  // const continueToReview = async () => {
-  //   // Check if all supplier groups with delivery locations have a selection
-  //   const missingDeliverySelections = supplierGroups.filter(
-  //     group => group.deliveryLocations.length > 0 && !supplierDeliverySelections[group.supplierId]
-  //   );
-
-  //   if (missingDeliverySelections.length > 0) {
-  //     errorToast(
-  //       hasMultipleSuppliers
-  //         ? "Please select delivery options for all delivery groups"
-  //         : "Please select a delivery option"
-  //     );
-  //     return;
-  //   }
-
-  //   // Rest of your existing validation...
-  //   const customerInfoValid = await trigger([
-  //     "customerInfo.name",
-  //     "customerInfo.email",
-  //     "customerInfo.phone",
-  //   ]);
-
-  //   const isFormValid = await trigger();
-
-  //   if (deliveryFee === null || deliveryFee === undefined) {
-  //     errorToast("Please wait for delivery fee calculation to complete before proceeding.");
-  //     return;
-  //   }
-
-  //   if (isFormValid && customerInfoValid) {
-  //     setCurrentStep("review");
-  //     if (orderSummaries.length > 0) {
-  //       orderSummaries.forEach((orderSummary) => {
-  //         mutate(`/public/products/${orderSummary.item.id}${orderSummary.referralId}`);
-  //       });
-  //     }
-  //   } else {
-  //     const firstError = document.querySelector(".border-red-500");
-  //     if (firstError) {
-  //       firstError.scrollIntoView({ behavior: "smooth", block: "center" });
-  //     }
-  //   }
-  // };
+  
 
   const continueToReview = async () => {
     // Check if there are any supplier groups with delivery locations
@@ -2812,16 +2500,7 @@ const formatOrderItems = () => {
     setDeliveryInstructions(instructions);
   };
 
-  // const renderPlaceOrderButton = () => (
-  //   <Button
-  //     onClick={handleStageOrder}
-  //     className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
-  //     disabled={isLoading}
-  //   >
-  //     {isLoading ? "Processing..." : "Place Order"}
-  //   </Button>
-  // );
-
+  
   const renderPlaceOrderButton = () => {
   const buttonText = onlineTotal === 0 && payOnDeliveryTotal > 0
     ? "Place Order"
@@ -3206,107 +2885,6 @@ const formatOrderItems = () => {
                         </div>
                       </div>
 
-                      {/* Delivery Location Selection */}
-                      {/* Delivery Location Selection */}
-                      {/* {availableDeliveryLocations.length > 0 && (
-                        <>
-                          <Separator />
-                          <div>
-                            <div className="flex items-center gap-2 mb-3">
-                              <h3 className="font-medium">Delivery Location</h3>
-                              <span className="text-red-500">*</span>
-                            </div>
-                            <Alert className="mb-4">
-                              <Info className="h-4 w-4" />
-                              <AlertDescription>
-                                Select your preferred delivery option
-                              </AlertDescription>
-                            </Alert>
-                            <div className="max-h-[400px] overflow-y-auto pr-2 space-y-3">
-                              <RadioGroup
-                                value={selectedDeliveryLocation}
-                                onValueChange={setSelectedDeliveryLocation}
-                                className="space-y-3"
-                              >
-                                {availableDeliveryLocations.map(
-                                  (location: any) => {
-                                    const lgaDisplay =
-                                      getDeliveryLocationDisplay(location);
-                                    const isString =
-                                      typeof lgaDisplay === "string";
-
-                                    return (
-                                      <div
-                                        key={location.id}
-                                        className={`relative flex items-start space-x-3 rounded-lg border p-4 cursor-pointer transition-all ${
-                                          selectedDeliveryLocation ===
-                                          location.id
-                                            ? "border-primary bg-primary/5"
-                                            : "border-border hover:border-primary/50"
-                                        }`}
-                                        onClick={() =>
-                                          setSelectedDeliveryLocation(
-                                            location.id
-                                          )
-                                        }
-                                      >
-                                        <RadioGroupItem
-                                          value={location.id}
-                                          id={location.id}
-                                          className="mt-1"
-                                        />
-                                        <div className="flex-1 space-y-1">
-                                          <Label
-                                            htmlFor={location.id}
-                                            className="flex items-center gap-2 cursor-pointer font-medium"
-                                          >
-                                            <Truck className="h-4 w-4" />
-                                            {location.state} Delivery
-                                          </Label>
-                                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                            <Clock className="h-3 w-3" />
-                                            {location.duration}
-                                          </div>
-                                          <p className="text-sm text-muted-foreground">
-                                            Available for:{" "}
-                                            {isString ? (
-                                              lgaDisplay
-                                            ) : (
-                                              <>
-                                                {lgaDisplay.preview}
-                                                {lgaDisplay.remaining > 0 && (
-                                                  <button
-                                                    type="button"
-                                                    className="ml-1 text-primary hover:underline"
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      // You can implement a modal or expand inline here
-                                                      alert(
-                                                        `All locations: ${location.lgas.join(
-                                                          ", "
-                                                        )}`
-                                                      );
-                                                    }}
-                                                  >
-                                                    +{lgaDisplay.remaining} more
-                                                  </button>
-                                                )}
-                                              </>
-                                            )}
-                                          </p>
-                                          <p className="text-sm font-semibold text-primary">
-                                            {formatPrice(location.fee)}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                )}
-                              </RadioGroup>
-                            </div>
-                          </div>
-                        </>
-                      )} */}
 
                       {/* Replace the existing Delivery Location Selection section with this */}
                       {supplierGroups.some(
@@ -3391,11 +2969,14 @@ const formatOrderItems = () => {
                                         <RadioGroup
                                           value={selectedLocationId || ""}
                                           onValueChange={(value) => {
-                                            setSupplierDeliverySelections(
-                                              (prev) => ({
-                                                ...prev,
-                                                [group.supplierId]: value,
-                                              })
+                                            // Toggle functionality: if clicking the same option, deselect it
+                                            const newValue =
+                                              value === selectedLocationId
+                                                ? null
+                                                : value;
+                                            setSupplierDeliverySelection(
+                                              group.supplierId,
+                                              newValue
                                             );
                                           }}
                                           className="space-y-3"
@@ -3421,12 +3002,15 @@ const formatOrderItems = () => {
                                                       : "border-border hover:border-primary/50"
                                                   }`}
                                                   onClick={() => {
-                                                    setSupplierDeliverySelections(
-                                                      (prev) => ({
-                                                        ...prev,
-                                                        [group.supplierId]:
-                                                          location.id,
-                                                      })
+                                                    // Toggle functionality
+                                                    const newValue =
+                                                      selectedLocationId ===
+                                                      location.id
+                                                        ? null
+                                                        : location.id;
+                                                    setSupplierDeliverySelection(
+                                                      group.supplierId,
+                                                      newValue
                                                     );
                                                   }}
                                                 >
@@ -3513,11 +3097,9 @@ const formatOrderItems = () => {
                                                   | "online"
                                                   | "pay-on-delivery"
                                               ) => {
-                                                setSupplierPaymentMethods(
-                                                  (prev) => ({
-                                                    ...prev,
-                                                    [group.supplierId]: value,
-                                                  })
+                                                setSupplierPaymentMethod(
+                                                  group.supplierId,
+                                                  value
                                                 );
                                               }}
                                               className="space-y-2"
@@ -3619,55 +3201,7 @@ const formatOrderItems = () => {
                 </Card>
               )}
 
-              {/* {currentStep === "review" && (
-                <Card>
-                  <CardContent className="p-4 md:p-6">
-                    <h2 className="text-xl font-semibold mb-4">
-                      Review Your Order
-                    </h2>
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="font-medium mb-3">
-                          Items in Your Order
-                        </h3>
-                        <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
-                          {cartItems?.map((item) => (
-                            <div
-                              key={item.id}
-                              className="flex items-start space-x-3"
-                            >
-                              <div className="w-16 h-16 relative rounded-md overflow-hidden flex-shrink-0 bg-muted">
-                                <Image
-                                  src={item.image || "/placeholder.svg"}
-                                  alt={item.name}
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-medium text-sm">
-                                  <span className="capitalize">
-                                    {item.name}
-                                  </span>
-                                  {item.variationName && (
-                                    <span className="text-muted-foreground ml-2">
-                                      ({item.variationName})
-                                    </span>
-                                  )}
-                                </h4>
-                                <div className="flex justify-between mt-1">
-                                  <span className="text-sm">
-                                    {item.quantity} x {formatPrice(item.price)}
-                                  </span>
-                                  <span className="text-sm font-medium">
-                                    {formatPrice(item.price * item.quantity)}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div> */}
+              
 
               {currentStep === "review" && (
                 <Card>
@@ -3775,24 +3309,7 @@ const formatOrderItems = () => {
                                   ))}
                                 </div>
 
-                                {/* {selectedLocation && (
-                                  <div className="mt-4 p-3 bg-primary/5 rounded-md border border-primary/20">
-                                    <p className="text-sm font-medium flex items-center gap-2">
-                                      <Truck className="h-4 w-4" />
-                                      Delivery Option for this group
-                                    </p>
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                      {selectedLocation.state} Delivery
-                                    </p>
-                                    <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                                      <Clock className="h-3 w-3" />
-                                      {selectedLocation.duration}
-                                    </div>
-                                    <p className="text-sm font-semibold text-primary mt-1">
-                                      {formatPrice(selectedLocation.fee)}
-                                    </p>
-                                  </div>
-                                )} */}
+                               
 
                                 {/* Inside the review step, update each group display */}
                                 {selectedLocation && (
@@ -3936,67 +3453,7 @@ const formatOrderItems = () => {
 
             <div className="lg:col-span-1">
               <div className="sticky top-20">
-                {/* <Card>
-                  <CardContent className="p-4 md:p-6">
-                    <h3 className="font-semibold text-lg mb-4">
-                      Order Summary
-                    </h3>
-                    <div className="space-y-3 mb-6">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground text-sm">
-                          Subtotal
-                        </span>
-                        <span className="text-sm">
-                          {formatPrice(subtotal!)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground text-sm">
-                          Delivery Fee
-                        </span>
-                        <span className="text-sm">
-                          {deliveryFee === undefined
-                            ? "Select a location"
-                            : formatPrice(deliveryFee)}
-                        </span>
-                      </div>
-
-                      <Separator className="my-4" />
-                      <div className="flex justify-between font-bold">
-                        <span>Total</span>
-                        <span>{formatPrice(total)}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex items-start space-x-2">
-                        <p className="text-xs text-muted-foreground">
-                          By continuing I agree to the{" "}
-                          <a
-                            href="/terms"
-                            className="text-primary hover:underline"
-                          >
-                            Terms of Service
-                          </a>{" "}
-                          and{" "}
-                          <a
-                            href="/privacy"
-                            className="text-primary hover:underline"
-                          >
-                            Privacy Policy
-                          </a>
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-6 text-center">
-                      <p className="text-xs text-muted-foreground">
-                        Need help?{" "}
-                        <a href="/help" className="text-primary">
-                          Contact Support
-                        </a>
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card> */}
+               
 
                 {/* Replace the Order Summary Card content */}
                 <Card>
@@ -4136,27 +3593,7 @@ const formatOrderItems = () => {
         </div>
       )}
 
-      {/* <AlertDialog
-        open={showDeliveryLocationAlert}
-        onOpenChange={setShowDeliveryLocationAlert}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delivery Location Required</AlertDialogTitle>
-            <AlertDialogDescription>
-              Please select a delivery location before proceeding to review your
-              order.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction
-              onClick={() => setShowDeliveryLocationAlert(false)}
-            >
-              OK
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog> */}
+      
 
       {/* Add this modal after the showCancelledModal AlertDialog */}
       <AlertDialog open={showAllLgasModal} onOpenChange={setShowAllLgasModal}>
