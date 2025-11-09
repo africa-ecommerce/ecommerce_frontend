@@ -1566,16 +1566,39 @@ interface OrderSummary {
   };
   deliveryFee: number;
   deliveryLocations: DeliveryLocation[];
+  payOnDelivery?: boolean; // Add this
 }
+
 
 interface SupplierGroup {
   supplierId: string;
   items: OrderSummary[];
   deliveryLocations: DeliveryLocation[];
   selectedDeliveryLocation: string | null;
+  payOnDelivery?: boolean; // Add this
+  selectedPaymentMethod?: 'online' | 'pay-on-delivery'; // Add this
 }
 
 // Replace the groupOrdersBySupplier function
+// const groupOrdersBySupplier = (orderSummaries: OrderSummary[]): SupplierGroup[] => {
+//   const grouped = orderSummaries.reduce((acc, summary) => {
+//     const supplierId = summary.item.supplierId;
+//     if (!acc[supplierId]) {
+//       acc[supplierId] = {
+//         supplierId,
+//         items: [],
+//         deliveryLocations: summary.deliveryLocations || [],
+//         selectedDeliveryLocation: null,
+//       };
+//     }
+//     acc[supplierId].items.push(summary);
+//     return acc;
+//   }, {} as Record<string, SupplierGroup>);
+  
+//   return Object.values(grouped);
+// };
+
+
 const groupOrdersBySupplier = (orderSummaries: OrderSummary[]): SupplierGroup[] => {
   const grouped = orderSummaries.reduce((acc, summary) => {
     const supplierId = summary.item.supplierId;
@@ -1585,6 +1608,8 @@ const groupOrdersBySupplier = (orderSummaries: OrderSummary[]): SupplierGroup[] 
         items: [],
         deliveryLocations: summary.deliveryLocations || [],
         selectedDeliveryLocation: null,
+        payOnDelivery: summary.payOnDelivery || false,
+        selectedPaymentMethod: 'online', // default to online payment
       };
     }
     acc[supplierId].items.push(summary);
@@ -1650,6 +1675,10 @@ export default function CheckoutPage() {
   const [deliveryType, setDeliveryType] = useState<"terminal" | "home">(
     "terminal"
   );
+  // Add this state near supplierDeliverySelections
+  const [supplierPaymentMethods, setSupplierPaymentMethods] = useState<
+    Record<string, "online" | "pay-on-delivery">
+  >({});
   // Add this state near your other useState declarations
   const [showAllLgasModal, setShowAllLgasModal] = useState(false);
   const [selectedLocationForLgas, setSelectedLocationForLgas] =
@@ -1749,24 +1778,80 @@ export default function CheckoutPage() {
 
   const hasMultipleSuppliers = supplierGroups.length > 1;
 
-  const subtotal = useMemo(() => {
-    return supplierGroups.reduce((sum, group) => {
-      // Only include items that have a delivery location selected
-      const hasDeliverySelected = supplierDeliverySelections[group.supplierId];
-      if (!hasDeliverySelected && group.deliveryLocations.length > 0) {
-        return sum; // Don't include this group's items
-      }
+  // const subtotal = useMemo(() => {
+  //   return supplierGroups.reduce((sum, group) => {
+  //     // Only include items that have a delivery location selected
+  //     const hasDeliverySelected = supplierDeliverySelections[group.supplierId];
+  //     if (!hasDeliverySelected && group.deliveryLocations.length > 0) {
+  //       return sum; // Don't include this group's items
+  //     }
 
-      const groupSubtotal = group.items.reduce(
-        (groupSum: number, summary: any) => {
-          return groupSum + summary.subtotal;
-        },
-        0
-      );
+  //     const groupSubtotal = group.items.reduce(
+  //       (groupSum: number, summary: any) => {
+  //         return groupSum + summary.subtotal;
+  //       },
+  //       0
+  //     );
 
-      return sum + groupSubtotal;
+  //     return sum + groupSubtotal;
+  //   }, 0);
+  // }, [supplierGroups, supplierDeliverySelections]);
+
+
+  const subtotal = useMemo<number>(() => {
+  return supplierGroups.reduce((sum, group) => {
+    // Only include items that have a delivery location selected
+    const hasDeliverySelected = supplierDeliverySelections[group.supplierId];
+    if (!hasDeliverySelected && group.deliveryLocations.length > 0) {
+      return sum; // Don't include this group's items
+    }
+    
+    const groupSubtotal = group.items.reduce((groupSum, summary) => {
+      return groupSum + summary.subtotal;
     }, 0);
-  }, [supplierGroups, supplierDeliverySelections]);
+    
+    return sum + groupSubtotal;
+  }, 0);
+}, [supplierGroups, supplierDeliverySelections]);
+
+// Add new calculation for online payment amount
+const onlinePaymentAmount = useMemo<number>(() => {
+  return supplierGroups.reduce((sum, group) => {
+    const hasDeliverySelected = supplierDeliverySelections[group.supplierId];
+    const paymentMethod = supplierPaymentMethods[group.supplierId] || 'online';
+    
+    // Skip if no delivery selected or payment is on delivery
+    if (!hasDeliverySelected || paymentMethod === 'pay-on-delivery') {
+      return sum;
+    }
+    
+    const groupSubtotal = group.items.reduce((groupSum, summary) => {
+      return groupSum + summary.subtotal;
+    }, 0);
+    
+    return sum + groupSubtotal;
+  }, 0);
+}, [supplierGroups, supplierDeliverySelections, supplierPaymentMethods]);
+
+// Add calculation for pay on delivery amount
+const payOnDeliveryAmount = useMemo<number>(() => {
+  return supplierGroups.reduce((sum, group) => {
+    const hasDeliverySelected = supplierDeliverySelections[group.supplierId];
+    const paymentMethod = supplierPaymentMethods[group.supplierId] || 'online';
+    
+    // Only include if delivery selected and payment is on delivery
+    if (!hasDeliverySelected || paymentMethod !== 'pay-on-delivery') {
+      return sum;
+    }
+    
+    const groupSubtotal = group.items.reduce((groupSum, summary) => {
+      return groupSum + summary.subtotal;
+    }, 0);
+    
+    return sum + groupSubtotal;
+  }, 0);
+}, [supplierGroups, supplierDeliverySelections, supplierPaymentMethods]);
+
 
   // Add after the cartItems useMemo
 
@@ -1845,50 +1930,157 @@ export default function CheckoutPage() {
   // };
 
   // Replace the getDeliveryFee function
-  const getDeliveryFee = () => {
-    let totalFee = 0;
+  // const getDeliveryFee = () => {
+  //   let totalFee = 0;
 
-    supplierGroups.forEach((group) => {
-      const selectedLocationId = supplierDeliverySelections[group.supplierId];
-      if (selectedLocationId && group.deliveryLocations.length > 0) {
-        const selectedLocation = group.deliveryLocations.find(
-          (loc: any) => loc.id === selectedLocationId
-        );
-        if (selectedLocation) {
-          totalFee += selectedLocation.fee;
-        }
+  //   supplierGroups.forEach((group) => {
+  //     const selectedLocationId = supplierDeliverySelections[group.supplierId];
+  //     if (selectedLocationId && group.deliveryLocations.length > 0) {
+  //       const selectedLocation = group.deliveryLocations.find(
+  //         (loc: any) => loc.id === selectedLocationId
+  //       );
+  //       if (selectedLocation) {
+  //         totalFee += selectedLocation.fee;
+  //       }
+  //     }
+  //   });
+
+  //   return totalFee;
+  // };
+
+  const getDeliveryFee = (): number => {
+  let totalFee = 0;
+  
+  supplierGroups.forEach((group) => {
+    const selectedLocationId = supplierDeliverySelections[group.supplierId];
+    if (selectedLocationId && group.deliveryLocations.length > 0) {
+      const selectedLocation = group.deliveryLocations.find(
+        (loc) => loc.id === selectedLocationId
+      );
+      if (selectedLocation) {
+        totalFee += selectedLocation.fee;
       }
-    });
+    }
+  });
+  
+  return totalFee;
+};
 
-    return totalFee;
-  };
+// Split delivery fee between online and pay on delivery
+const onlineDeliveryFee = useMemo<number>(() => {
+  let totalFee = 0;
+  
+  supplierGroups.forEach((group) => {
+    const selectedLocationId = supplierDeliverySelections[group.supplierId];
+    const paymentMethod = supplierPaymentMethods[group.supplierId] || 'online';
+    
+    if (paymentMethod === 'online' && selectedLocationId && group.deliveryLocations.length > 0) {
+      const selectedLocation = group.deliveryLocations.find(
+        (loc) => loc.id === selectedLocationId
+      );
+      if (selectedLocation) {
+        totalFee += selectedLocation.fee;
+      }
+    }
+  });
+  
+  return totalFee;
+}, [supplierGroups, supplierDeliverySelections, supplierPaymentMethods]);
+
+const payOnDeliveryFee = useMemo<number>(() => {
+  let totalFee = 0;
+  
+  supplierGroups.forEach((group) => {
+    const selectedLocationId = supplierDeliverySelections[group.supplierId];
+    const paymentMethod = supplierPaymentMethods[group.supplierId] || 'online';
+    
+    if (paymentMethod === 'pay-on-delivery' && selectedLocationId && group.deliveryLocations.length > 0) {
+      const selectedLocation = group.deliveryLocations.find(
+        (loc) => loc.id === selectedLocationId
+      );
+      if (selectedLocation) {
+        totalFee += selectedLocation.fee;
+      }
+    }
+  });
+  
+  return totalFee;
+}, [supplierGroups, supplierDeliverySelections, supplierPaymentMethods]);
 
   // Update subtotal to exclude items without delivery selection
 
-  const deliveryFee = getDeliveryFee();
-  const total = subtotal + (deliveryFee || 0);
+  // const deliveryFee = getDeliveryFee();
+  // const total = subtotal + (deliveryFee || 0);
 
-  const formatOrderItems = () => {
-    if (!orderSummaries.length) return [];
-    return orderSummaries.flatMap((summary) => ({
+  const deliveryFee = getDeliveryFee();
+  const total = subtotal + deliveryFee;
+  const onlineTotal = onlinePaymentAmount + onlineDeliveryFee;
+  const payOnDeliveryTotal = payOnDeliveryAmount + payOnDeliveryFee;
+
+  // const formatOrderItems = () => {
+  //   if (!orderSummaries.length) return [];
+  //   return orderSummaries.flatMap((summary) => ({
+  //     productId: summary.item.productId,
+  //     quantity: summary.item.quantity,
+  //     supplierPrice: summary.item.originalPrice,
+  //     plugPrice: summary.item.price,
+  //     productName: summary.item.name,
+  //     supplierId: summary.item.supplierId,
+  //     ...(summary.item.variationId && {
+  //       variantId: summary.item.variationId,
+  //       variantColor: summary.item.selectedColor,
+  //       variantSize: summary.item.size,
+  //     }),
+  //     // For non-variation items, use product-level color and size
+  //     ...(!summary.item.variationId && {
+  //       productColor: summary.item.selectedColor,
+  //       productSize: summary.item.size,
+  //     }),
+  //   }));
+  // };
+
+const formatOrderItems = () => {
+  if (!orderSummaries.length) return [];
+
+  return orderSummaries.flatMap((summary) => {
+    const hasDeliverySelected =
+      supplierDeliverySelections[summary.item.supplierId];
+    const group = supplierGroups.find(
+      (g) => g.supplierId === summary.item.supplierId
+    );
+
+    if (
+      group?.deliveryLocations.length &&
+      group.deliveryLocations.length > 0 &&
+      !hasDeliverySelected
+    ) {
+      return [];
+    }
+
+    const paymentMethod =
+      supplierPaymentMethods[summary.item.supplierId] || "online";
+
+    return {
       productId: summary.item.productId,
       quantity: summary.item.quantity,
       supplierPrice: summary.item.originalPrice,
       plugPrice: summary.item.price,
       productName: summary.item.name,
       supplierId: summary.item.supplierId,
+      deliveryLocationId: hasDeliverySelected || null,
+      paymentMethod: paymentMethod, // Add this
       ...(summary.item.variationId && {
         variantId: summary.item.variationId,
         variantColor: summary.item.selectedColor,
         variantSize: summary.item.size,
       }),
-      // For non-variation items, use product-level color and size
       ...(!summary.item.variationId && {
         productColor: summary.item.selectedColor,
         productSize: summary.item.size,
       }),
-    }));
-  };
+    };
+  });
+};
 
   const stageOrder = async () => {
     try {
@@ -1971,63 +2163,136 @@ export default function CheckoutPage() {
     }
   };
 
+  // const handleStageOrder = async () => {
+  //   setIsLoading(true);
+  //   const staged = await stageOrder();
+  //   if (!staged) return;
+
+  //   setStagedOrder(staged);
+
+  //   if (typeof window === "undefined") return;
+
+  //   const { usePaystackPayment } = await import("react-paystack");
+
+  //   const config = {
+  //     email: watchedEmail || "",
+  //     amount: total * 100,
+  //     reference: staged.reference,
+  //     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+  //     metadata: {
+  //       custom_fields: [
+  //         {
+  //           display_name: "Name",
+  //           variable_name: "name",
+  //           value: watchedName || "",
+  //         },
+  //         {
+  //           display_name: "Phone",
+  //           variable_name: "phone",
+  //           value: watchedPhone || "",
+  //         },
+  //         {
+  //           display_name: "Address",
+  //           variable_name: "address",
+  //           value: watchedCustomerAddress
+  //             ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
+  //             : "",
+  //         },
+  //         {
+  //           display_name: "Order Number",
+  //           variable_name: "orderNumber",
+  //           value: staged.orderNumber,
+  //         },
+  //       ],
+  //     },
+  //   };
+
+  //   const initializePayment = usePaystackPayment(config);
+
+  //   initializePayment({
+  //     onSuccess: async (ref: { reference: string }) => {
+  //       await delay(3000);
+  //       await confirmOrder(ref.reference);
+  //     },
+  //     onClose: () => {
+  //       setIsLoading(false);
+  //       showPaymentCancelledModal();
+  //     },
+  //   });
+  // };
+  
   const handleStageOrder = async () => {
-    setIsLoading(true);
-    const staged = await stageOrder();
-    if (!staged) return;
+  setIsLoading(true);
+  const staged = await stageOrder();
+  if (!staged) return;
 
-    setStagedOrder(staged);
+  setStagedOrder(staged);
 
-    if (typeof window === "undefined") return;
+  // If everything is pay on delivery, skip payment and confirm directly
+  if (onlineTotal === 0 && payOnDeliveryTotal > 0) {
+    await confirmOrder(staged.reference);
+    return;
+  }
 
-    const { usePaystackPayment } = await import("react-paystack");
+  // If there's an online payment amount, proceed with Paystack
+  if (typeof window === "undefined") return;
 
-    const config = {
-      email: watchedEmail || "",
-      amount: total * 100,
-      reference: staged.reference,
-      publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-      metadata: {
-        custom_fields: [
-          {
-            display_name: "Name",
-            variable_name: "name",
-            value: watchedName || "",
-          },
-          {
-            display_name: "Phone",
-            variable_name: "phone",
-            value: watchedPhone || "",
-          },
-          {
-            display_name: "Address",
-            variable_name: "address",
-            value: watchedCustomerAddress
-              ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
-              : "",
-          },
-          {
-            display_name: "Order Number",
-            variable_name: "orderNumber",
-            value: staged.orderNumber,
-          },
-        ],
-      },
-    };
+  const { usePaystackPayment } = await import("react-paystack");
 
-    const initializePayment = usePaystackPayment(config);
-
-    initializePayment({
-      onSuccess: async (ref: { reference: string }) => {
-        await delay(3000);
-        await confirmOrder(ref.reference);
-      },
-      onClose: () => {
-        setIsLoading(false);
-        showPaymentCancelledModal();
-      },
-    });
+  const config = {
+    email: watchedEmail || "",
+    amount: onlineTotal * 100, // Use online total instead of full total
+    reference: staged.reference,
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+    metadata: {
+      custom_fields: [
+        {
+          display_name: "Name",
+          variable_name: "name",
+          value: watchedName || "",
+        },
+        {
+          display_name: "Phone",
+          variable_name: "phone",
+          value: watchedPhone || "",
+        },
+        {
+          display_name: "Address",
+          variable_name: "address",
+          value: watchedCustomerAddress
+            ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
+            : "",
+        },
+        {
+          display_name: "Order Number",
+          variable_name: "orderNumber",
+          value: staged.orderNumber,
+        },
+        {
+          display_name: "Pay on Delivery Amount",
+          variable_name: "payOnDeliveryAmount",
+          value: payOnDeliveryTotal.toString(),
+        },
+      ],
+    },
   };
+
+  const initializePayment = usePaystackPayment(config);
+
+  initializePayment({
+    onSuccess: async (ref: { reference: string }) => {
+      await delay(3000);
+      await confirmOrder(ref.reference);
+    },
+    onClose: () => {
+      setIsLoading(false);
+      showPaymentCancelledModal();
+    },
+  });
+};
+
+
+
 
   // Effect to handle buyer info auto-fill
   useEffect(() => {
@@ -2067,60 +2332,115 @@ export default function CheckoutPage() {
   };
 
   // Effect to transform fetched products into orderSummaries when platform is "store"
+  // useEffect(() => {
+  //   if (platform === "store" && productsData.length > 0 && !isProductsLoading) {
+  //     const transformedOrderSummaries = productsData
+  //       .filter(({ data, error }) => data && !error)
+  //       .map(({ item, data }) => {
+  //         const product = data.data || data;
+  //         const productItem = {
+  //           id: product.id || item.pid,
+  //           name: product.name || product.title || "Unknown Product",
+  //           price: product.price || 0,
+  //           originalPrice: product.originalPrice || product.price || 0,
+  //           productId: product.originalId,
+  //           quantity: item.qty,
+  //           image: product.image || product.images?.[0] || "/placeholder.svg",
+  //           selectedColor: item.color,
+  //           size: item.variation
+  //             ? product.variations?.find((v: any) => v.id === item.variation)
+  //                 ?.size
+  //             : undefined,
+  //           variationId: item.variation,
+  //           variationName: item.variation
+  //             ? getVariationDisplayName(
+  //                 product.variations?.find((v: any) => v.id === item.variation)
+  //               )
+  //             : undefined,
+  //           supplierId: product.supplierId || product.userId,
+  //         };
+
+  //         const subtotal = productItem.price * productItem.quantity;
+  //         const defaultDeliveryFee = 0;
+  //         const total = subtotal + defaultDeliveryFee;
+
+  //         return {
+  //           item: productItem,
+  //           subtotal,
+  //           total,
+  //           referralId: ref,
+  //           platform: platform,
+  //           pickupLocation: product.pickupLocation
+  //             ? {
+  //                 latitude: product.pickupLocation.latitude,
+  //                 longitude: product.pickupLocation.longitude,
+  //               }
+  //             : undefined,
+  //           deliveryFee: defaultDeliveryFee,
+  //           deliveryLocations: product.deliveryLocations,
+  //         };
+  //       });
+
+  //     if (transformedOrderSummaries.length > 0) {
+  //       setOrderSummaries(transformedOrderSummaries);
+  //     }
+  //   }
+  // }, [platform, productsData, isProductsLoading, ref, setOrderSummaries]);
+
   useEffect(() => {
-    if (platform === "store" && productsData.length > 0 && !isProductsLoading) {
-      const transformedOrderSummaries = productsData
-        .filter(({ data, error }) => data && !error)
-        .map(({ item, data }) => {
-          const product = data.data || data;
-          const productItem = {
-            id: product.id || item.pid,
-            name: product.name || product.title || "Unknown Product",
-            price: product.price || 0,
-            originalPrice: product.originalPrice || product.price || 0,
-            productId: product.originalId,
-            quantity: item.qty,
-            image: product.image || product.images?.[0] || "/placeholder.svg",
-            selectedColor: item.color,
-            size: item.variation
-              ? product.variations?.find((v: any) => v.id === item.variation)
-                  ?.size
-              : undefined,
-            variationId: item.variation,
-            variationName: item.variation
-              ? getVariationDisplayName(
-                  product.variations?.find((v: any) => v.id === item.variation)
-                )
-              : undefined,
-            supplierId: product.supplierId || product.userId,
-          };
+  if (platform === "store" && productsData.length > 0 && !isProductsLoading) {
+    const transformedOrderSummaries = productsData
+      .filter(({ data, error }) => data && !error)
+      .map(({ item, data }) => {
+        const product = data.data || data;
+        const productItem = {
+          id: product.id || item.pid,
+          name: product.name || product.title || "Unknown Product",
+          price: product.price || 0,
+          originalPrice: product.originalPrice || product.price || 0,
+          productId: product.originalId,
+          quantity: item.qty,
+          image: product.image || product.images?.[0] || "/placeholder.svg",
+          selectedColor: item.color,
+          size: item.variation
+            ? product.variations?.find((v: any) => v.id === item.variation)?.size
+            : undefined,
+          variationId: item.variation,
+          variationName: item.variation
+            ? getVariationDisplayName(
+                product.variations?.find((v: any) => v.id === item.variation)
+              )
+            : undefined,
+          supplierId: product.supplierId || product.userId,
+        };
 
-          const subtotal = productItem.price * productItem.quantity;
-          const defaultDeliveryFee = 0;
-          const total = subtotal + defaultDeliveryFee;
+        const subtotal = productItem.price * productItem.quantity;
+        const defaultDeliveryFee = 0;
+        const total = subtotal + defaultDeliveryFee;
 
-          return {
-            item: productItem,
-            subtotal,
-            total,
-            referralId: ref,
-            platform: platform,
-            pickupLocation: product.pickupLocation
-              ? {
-                  latitude: product.pickupLocation.latitude,
-                  longitude: product.pickupLocation.longitude,
-                }
-              : undefined,
-            deliveryFee: defaultDeliveryFee,
-            deliveryLocations: product.deliveryLocations,
-          };
-        });
+        return {
+          item: productItem,
+          subtotal,
+          total,
+          referralId: ref,
+          platform: platform,
+          pickupLocation: product.pickupLocation
+            ? {
+                latitude: product.pickupLocation.latitude,
+                longitude: product.pickupLocation.longitude,
+              }
+            : undefined,
+          deliveryFee: defaultDeliveryFee,
+          deliveryLocations: product.deliveryLocations,
+          payOnDelivery: product.payOnDelivery || false, // Add this
+        };
+      });
 
-      if (transformedOrderSummaries.length > 0) {
-        setOrderSummaries(transformedOrderSummaries);
-      }
+    if (transformedOrderSummaries.length > 0) {
+      setOrderSummaries(transformedOrderSummaries);
     }
-  }, [platform, productsData, isProductsLoading, ref, setOrderSummaries]);
+  }
+}, [platform, productsData, isProductsLoading, ref, setOrderSummaries]);
 
   // Initialize states and form data
   useEffect(() => {
@@ -2492,15 +2812,33 @@ export default function CheckoutPage() {
     setDeliveryInstructions(instructions);
   };
 
-  const renderPlaceOrderButton = () => (
+  // const renderPlaceOrderButton = () => (
+  //   <Button
+  //     onClick={handleStageOrder}
+  //     className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
+  //     disabled={isLoading}
+  //   >
+  //     {isLoading ? "Processing..." : "Place Order"}
+  //   </Button>
+  // );
+
+  const renderPlaceOrderButton = () => {
+  const buttonText = onlineTotal === 0 && payOnDeliveryTotal > 0
+    ? "Place Order"
+    : onlineTotal > 0 && payOnDeliveryTotal > 0
+    ? `Pay ${formatPrice(onlineTotal)} Now`
+    : "Place Order";
+    
+  return (
     <Button
       onClick={handleStageOrder}
       className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
       disabled={isLoading}
     >
-      {isLoading ? "Processing..." : "Place Order"}
+      {isLoading ? "Processing..." : buttonText}
     </Button>
   );
+};
 
   // Get selected delivery location details for display
   const selectedDeliveryLocationDetails = useMemo(() => {
@@ -3154,6 +3492,83 @@ export default function CheckoutPage() {
                                         </RadioGroup>
                                       </div>
                                     </div>
+
+                                    {/* Add this after the delivery location RadioGroup and before the closing div of each group */}
+                                    {group.payOnDelivery &&
+                                      selectedLocationId && (
+                                        <div className="mt-4 space-y-3">
+                                          <Separator />
+                                          <div>
+                                            <Label className="text-sm font-medium mb-3 block">
+                                              Payment Method for this group
+                                            </Label>
+                                            <RadioGroup
+                                              value={
+                                                supplierPaymentMethods[
+                                                  group.supplierId
+                                                ] || "online"
+                                              }
+                                              onValueChange={(
+                                                value:
+                                                  | "online"
+                                                  | "pay-on-delivery"
+                                              ) => {
+                                                setSupplierPaymentMethods(
+                                                  (prev) => ({
+                                                    ...prev,
+                                                    [group.supplierId]: value,
+                                                  })
+                                                );
+                                              }}
+                                              className="space-y-2"
+                                            >
+                                              <div className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:border-primary/50">
+                                                <RadioGroupItem
+                                                  value="online"
+                                                  id={`online-${group.supplierId}`}
+                                                />
+                                                <Label
+                                                  htmlFor={`online-${group.supplierId}`}
+                                                  className="flex-1 cursor-pointer"
+                                                >
+                                                  <div className="flex items-center gap-2">
+                                                    <CreditCard className="h-4 w-4" />
+                                                    <span className="font-medium">
+                                                      Pay Online
+                                                    </span>
+                                                  </div>
+                                                  <p className="text-xs text-muted-foreground mt-1">
+                                                    Pay now with card, bank
+                                                    transfer or mobile money
+                                                  </p>
+                                                </Label>
+                                              </div>
+
+                                              <div className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:border-primary/50">
+                                                <RadioGroupItem
+                                                  value="pay-on-delivery"
+                                                  id={`pod-${group.supplierId}`}
+                                                />
+                                                <Label
+                                                  htmlFor={`pod-${group.supplierId}`}
+                                                  className="flex-1 cursor-pointer"
+                                                >
+                                                  <div className="flex items-center gap-2">
+                                                    <Truck className="h-4 w-4" />
+                                                    <span className="font-medium">
+                                                      Pay on Delivery
+                                                    </span>
+                                                  </div>
+                                                  <p className="text-xs text-muted-foreground mt-1">
+                                                    Pay with cash when your
+                                                    order arrives
+                                                  </p>
+                                                </Label>
+                                              </div>
+                                            </RadioGroup>
+                                          </div>
+                                        </div>
+                                      )}
                                   </div>
                                 );
                               })}
@@ -3360,7 +3775,7 @@ export default function CheckoutPage() {
                                   ))}
                                 </div>
 
-                                {selectedLocation && (
+                                {/* {selectedLocation && (
                                   <div className="mt-4 p-3 bg-primary/5 rounded-md border border-primary/20">
                                     <p className="text-sm font-medium flex items-center gap-2">
                                       <Truck className="h-4 w-4" />
@@ -3377,6 +3792,56 @@ export default function CheckoutPage() {
                                       {formatPrice(selectedLocation.fee)}
                                     </p>
                                   </div>
+                                )} */}
+
+                                {/* Inside the review step, update each group display */}
+                                {selectedLocation && (
+                                  <>
+                                    <div className="mt-4 p-3 bg-primary/5 rounded-md border border-primary/20">
+                                      <p className="text-sm font-medium flex items-center gap-2">
+                                        <Truck className="h-4 w-4" />
+                                        Delivery Option for this group
+                                      </p>
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        {selectedLocation.state} Delivery
+                                      </p>
+                                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                                        <Clock className="h-3 w-3" />
+                                        {selectedLocation.duration}
+                                      </div>
+                                      <p className="text-sm font-semibold text-primary mt-1">
+                                        {formatPrice(selectedLocation.fee)}
+                                      </p>
+                                    </div>
+
+                                    {/* Add payment method display */}
+                                    {group.payOnDelivery && (
+                                      <div className="mt-3 p-3 bg-muted/50 rounded-md border">
+                                        <p className="text-sm font-medium flex items-center gap-2">
+                                          {supplierPaymentMethods[
+                                            group.supplierId
+                                          ] === "pay-on-delivery" ? (
+                                            <>
+                                              <Truck className="h-4 w-4" />
+                                              Pay on Delivery
+                                            </>
+                                          ) : (
+                                            <>
+                                              <CreditCard className="h-4 w-4" />
+                                              Pay Online
+                                            </>
+                                          )}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                          {supplierPaymentMethods[
+                                            group.supplierId
+                                          ] === "pay-on-delivery"
+                                            ? "You'll pay with cash when your order arrives"
+                                            : "Payment processed securely online"}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </>
                                 )}
                               </div>
                             );
@@ -3471,7 +3936,7 @@ export default function CheckoutPage() {
 
             <div className="lg:col-span-1">
               <div className="sticky top-20">
-                <Card>
+                {/* <Card>
                   <CardContent className="p-4 md:p-6">
                     <h3 className="font-semibold text-lg mb-4">
                       Order Summary
@@ -3502,6 +3967,139 @@ export default function CheckoutPage() {
                         <span>{formatPrice(total)}</span>
                       </div>
                     </div>
+                    <div className="space-y-4">
+                      <div className="flex items-start space-x-2">
+                        <p className="text-xs text-muted-foreground">
+                          By continuing I agree to the{" "}
+                          <a
+                            href="/terms"
+                            className="text-primary hover:underline"
+                          >
+                            Terms of Service
+                          </a>{" "}
+                          and{" "}
+                          <a
+                            href="/privacy"
+                            className="text-primary hover:underline"
+                          >
+                            Privacy Policy
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-6 text-center">
+                      <p className="text-xs text-muted-foreground">
+                        Need help?{" "}
+                        <a href="/help" className="text-primary">
+                          Contact Support
+                        </a>
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card> */}
+
+                {/* Replace the Order Summary Card content */}
+                <Card>
+                  <CardContent className="p-4 md:p-6">
+                    <h3 className="font-semibold text-lg mb-4">
+                      Order Summary
+                    </h3>
+                    <div className="space-y-3 mb-6">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground text-sm">
+                          Subtotal
+                        </span>
+                        <span className="text-sm">{formatPrice(subtotal)}</span>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground text-sm">
+                          Delivery Fee
+                        </span>
+                        <span className="text-sm">
+                          {deliveryFee === undefined
+                            ? "Select a location"
+                            : formatPrice(deliveryFee)}
+                        </span>
+                      </div>
+
+                      <Separator className="my-4" />
+
+                      {/* Show breakdown if there's both online and pay on delivery */}
+                      {onlinePaymentAmount > 0 && payOnDeliveryAmount > 0 && (
+                        <>
+                          <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
+                            <div className="flex items-center gap-2 text-sm font-medium">
+                              <CreditCard className="h-4 w-4" />
+                              <span>Pay Online Now</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">
+                                Items
+                              </span>
+                              <span>{formatPrice(onlinePaymentAmount)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">
+                                Delivery
+                              </span>
+                              <span>{formatPrice(onlineDeliveryFee)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm font-semibold pt-2 border-t">
+                              <span>Online Total</span>
+                              <span>{formatPrice(onlineTotal)}</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
+                            <div className="flex items-center gap-2 text-sm font-medium">
+                              <Truck className="h-4 w-4" />
+                              <span>Pay on Delivery</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">
+                                Items
+                              </span>
+                              <span>{formatPrice(payOnDeliveryAmount)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-muted-foreground">
+                                Delivery
+                              </span>
+                              <span>{formatPrice(payOnDeliveryFee)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm font-semibold pt-2 border-t">
+                              <span>Pay on Delivery</span>
+                              <span>{formatPrice(payOnDeliveryTotal)}</span>
+                            </div>
+                          </div>
+
+                          <Separator className="my-4" />
+                        </>
+                      )}
+
+                      <div className="flex justify-between font-bold">
+                        <span>Total</span>
+                        <span>{formatPrice(total)}</span>
+                      </div>
+
+                      {onlinePaymentAmount > 0 && payOnDeliveryAmount > 0 && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          You'll pay {formatPrice(onlineTotal)} now and{" "}
+                          {formatPrice(payOnDeliveryTotal)} on delivery
+                        </p>
+                      )}
+
+                      {payOnDeliveryAmount > 0 && onlinePaymentAmount === 0 && (
+                        <Alert className="mt-2">
+                          <Info className="h-4 w-4" />
+                          <AlertDescription className="text-xs">
+                            You'll pay the full amount when your order arrives
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                    </div>
+
                     <div className="space-y-4">
                       <div className="flex items-start space-x-2">
                         <p className="text-xs text-muted-foreground">
