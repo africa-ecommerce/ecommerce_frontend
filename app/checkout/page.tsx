@@ -2071,7 +2071,6 @@ const formatOrderItems = () => {
     return;
   }
 
-  await confirmOrder(staged.reference);
 
   // If there's an online payment amount, proceed with Paystack
   if (typeof window === "undefined") return;
