@@ -2069,14 +2069,8 @@ const formatOrderItems = () => {
   if (onlineTotal === 0 && payOnDeliveryTotal > 0) {
      successToast("Order placed successfully");
    setIsLoading(false);
-
-      if (staged) {
-        sessionStorage.setItem("orderSuccess", JSON.stringify(staged));
-      }
-
-      clearCheckoutData();
-      clearOrderSummaries();
-      router.replace("/thank-you");
+await confirmOrder(staged.reference);
+     
     return;
   }
 
