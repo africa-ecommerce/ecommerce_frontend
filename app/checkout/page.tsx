@@ -2010,6 +2010,7 @@ const formatOrderItems = () => {
       if (!response.ok) {
         const err = await response.json();
         errorToast(err.error || "Failed to stage order");
+        router.push("/order-error");
         return null;
       }
 
@@ -2036,7 +2037,7 @@ const formatOrderItems = () => {
       if (!response.ok) {
         const err = await response.json();
         errorToast(err.error || "Failed to confirm order");
-        router.replace("/order-error");
+        router.push("/order-error");
         return;
       }
       const result = await response.json();
@@ -2063,13 +2064,24 @@ const formatOrderItems = () => {
   const staged = await stageOrder();
   if (!staged) return;
 
-  setStagedOrder(staged);
 
   // If everything is pay on delivery, skip payment and confirm directly
   if (onlineTotal === 0 && payOnDeliveryTotal > 0) {
-    
+     successToast("Order placed successfully");
+   setIsLoading(false);
+
+      if (staged) {
+        sessionStorage.setItem("orderSuccess", JSON.stringify(staged));
+      }
+
+      clearCheckoutData();
+      clearOrderSummaries();
+      router.replace("/thank-you");
     return;
   }
+
+    setStagedOrder(staged);
+
 
 
   // If there's an online payment amount, proceed with Paystack
