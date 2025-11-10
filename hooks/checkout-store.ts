@@ -24,7 +24,7 @@ interface CheckoutData {
   terminalAddress?: string;
   // Add new fields for delivery options
   supplierDeliverySelections: Record<string, string>;
-  supplierPaymentMethods: Record<string, "online" | "pay-on-delivery">;
+  supplierPaymentMethods: Record<string, "ONLINE" | "P_O_D">;
 }
 
 interface CheckoutStore {
@@ -46,7 +46,7 @@ interface CheckoutStore {
   ) => void;
   setSupplierPaymentMethod: (
     supplierId: string,
-    method: "online" | "pay-on-delivery"
+    method: "ONLINE" | "P_O_D"
   ) => void;
   clearSupplierDeliverySelection: (supplierId: string) => void;
 }

@@ -1576,7 +1576,7 @@ interface SupplierGroup {
   deliveryLocations: DeliveryLocation[];
   selectedDeliveryLocation: string | null;
   payOnDelivery?: boolean; // Add this
-  selectedPaymentMethod?: 'online' | 'pay-on-delivery'; // Add this
+  selectedPaymentMethod?: 'ONLINE' | 'P_O_D'; // Add this
 }
 
 
@@ -1592,7 +1592,7 @@ const groupOrdersBySupplier = (orderSummaries: OrderSummary[]): SupplierGroup[] 
         deliveryLocations: summary.deliveryLocations || [],
         selectedDeliveryLocation: null,
         payOnDelivery: summary.payOnDelivery || false,
-        selectedPaymentMethod: 'online', // default to online payment
+        selectedPaymentMethod: 'ONLINE', // default to online payment
       };
     }
     acc[supplierId].items.push(summary);
@@ -1769,10 +1769,10 @@ export default function CheckoutPage() {
 const onlinePaymentAmount = useMemo<number>(() => {
   return supplierGroups.reduce((sum, group) => {
     const hasDeliverySelected = supplierDeliverySelections[group.supplierId];
-    const paymentMethod = supplierPaymentMethods[group.supplierId] || 'online';
+    const paymentMethod = supplierPaymentMethods[group.supplierId] || 'ONLINE';
     
     // Skip if no delivery selected or payment is on delivery
-    if (!hasDeliverySelected || paymentMethod === 'pay-on-delivery') {
+    if (!hasDeliverySelected || paymentMethod === 'P_O_D') {
       return sum;
     }
     
@@ -1788,10 +1788,10 @@ const onlinePaymentAmount = useMemo<number>(() => {
 const payOnDeliveryAmount = useMemo<number>(() => {
   return supplierGroups.reduce((sum, group) => {
     const hasDeliverySelected = supplierDeliverySelections[group.supplierId];
-    const paymentMethod = supplierPaymentMethods[group.supplierId] || 'online';
+    const paymentMethod = supplierPaymentMethods[group.supplierId] || 'ONLINE';
     
     // Only include if delivery selected and payment is on delivery
-    if (!hasDeliverySelected || paymentMethod !== 'pay-on-delivery') {
+    if (!hasDeliverySelected || paymentMethod !== 'P_O_D') {
       return sum;
     }
     
@@ -1894,9 +1894,9 @@ const onlineDeliveryFee = useMemo<number>(() => {
   
   supplierGroups.forEach((group) => {
     const selectedLocationId = supplierDeliverySelections[group.supplierId];
-    const paymentMethod = supplierPaymentMethods[group.supplierId] || 'online';
+    const paymentMethod = supplierPaymentMethods[group.supplierId] || 'ONLINE';
     
-    if (paymentMethod === 'online' && selectedLocationId && group.deliveryLocations.length > 0) {
+    if (paymentMethod === 'ONLINE' && selectedLocationId && group.deliveryLocations.length > 0) {
       const selectedLocation = group.deliveryLocations.find(
         (loc) => loc.id === selectedLocationId
       );
@@ -1914,9 +1914,9 @@ const payOnDeliveryFee = useMemo<number>(() => {
   
   supplierGroups.forEach((group) => {
     const selectedLocationId = supplierDeliverySelections[group.supplierId];
-    const paymentMethod = supplierPaymentMethods[group.supplierId] || 'online';
+    const paymentMethod = supplierPaymentMethods[group.supplierId] || 'ONLINE';
     
-    if (paymentMethod === 'pay-on-delivery' && selectedLocationId && group.deliveryLocations.length > 0) {
+    if (paymentMethod === 'P_O_D' && selectedLocationId && group.deliveryLocations.length > 0) {
       const selectedLocation = group.deliveryLocations.find(
         (loc) => loc.id === selectedLocationId
       );
@@ -1955,16 +1955,15 @@ const formatOrderItems = () => {
     }
 
     const paymentMethod =
-      supplierPaymentMethods[summary.item.supplierId] || "online";
+      supplierPaymentMethods[summary.item.supplierId] || "ONLINE";
 
     return {
       productId: summary.item.productId,
       quantity: summary.item.quantity,
-      supplierPrice: summary.item.originalPrice,
-      plugPrice: summary.item.price,
-      productName: summary.item.name,
+      
       supplierId: summary.item.supplierId,
       deliveryLocationId: hasDeliverySelected || null,
+      deliveryFee,
       paymentMethod: paymentMethod, // Add this
       ...(summary.item.variationId && {
         variantId: summary.item.variationId,
@@ -1994,15 +1993,13 @@ const formatOrderItems = () => {
           buyerState: checkoutData.customerAddress.state,
           buyerDirections: checkoutData.customerAddress.directions || "",
           buyerInstructions: checkoutData.deliveryInstructions || "",
-          totalAmount: total,
-          deliveryFee,
-          deliveryLocationId: selectedDeliveryLocation || null,
+         
           platform: orderSummaries[0]?.platform || platform,
           subdomain:
             (orderSummaries[0].platform === "store" &&
               orderSummaries[0].referralId) ||
             "",
-          plugId:
+          id:
             (orderSummaries[0]?.platform !== "store" &&
               orderSummaries[0]?.referralId) ||
             "",
@@ -2070,9 +2067,11 @@ const formatOrderItems = () => {
 
   // If everything is pay on delivery, skip payment and confirm directly
   if (onlineTotal === 0 && payOnDeliveryTotal > 0) {
-    await confirmOrder(staged.reference);
+    
     return;
   }
+
+  await confirmOrder(staged.reference);
 
   // If there's an online payment amount, proceed with Paystack
   if (typeof window === "undefined") return;
@@ -3090,12 +3089,12 @@ const formatOrderItems = () => {
                                               value={
                                                 supplierPaymentMethods[
                                                   group.supplierId
-                                                ] || "online"
+                                                ] || "ONLINE"
                                               }
                                               onValueChange={(
                                                 value:
-                                                  | "online"
-                                                  | "pay-on-delivery"
+                                                  | "ONLINE"
+                                                  | "P_O_D"
                                               ) => {
                                                 setSupplierPaymentMethod(
                                                   group.supplierId,
@@ -3106,7 +3105,7 @@ const formatOrderItems = () => {
                                             >
                                               <div className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:border-primary/50">
                                                 <RadioGroupItem
-                                                  value="online"
+                                                  value="ONLINE"
                                                   id={`online-${group.supplierId}`}
                                                 />
                                                 <Label
@@ -3128,7 +3127,7 @@ const formatOrderItems = () => {
 
                                               <div className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:border-primary/50">
                                                 <RadioGroupItem
-                                                  value="pay-on-delivery"
+                                                  value="P_O_D"
                                                   id={`pod-${group.supplierId}`}
                                                 />
                                                 <Label
@@ -3337,7 +3336,7 @@ const formatOrderItems = () => {
                                         <p className="text-sm font-medium flex items-center gap-2">
                                           {supplierPaymentMethods[
                                             group.supplierId
-                                          ] === "pay-on-delivery" ? (
+                                          ] === "P_O_D" ? (
                                             <>
                                               <Truck className="h-4 w-4" />
                                               Pay on Delivery
@@ -3352,7 +3351,7 @@ const formatOrderItems = () => {
                                         <p className="text-xs text-muted-foreground mt-1">
                                           {supplierPaymentMethods[
                                             group.supplierId
-                                          ] === "pay-on-delivery"
+                                          ] === "P_O_D"
                                             ? "You'll pay with cash when your order arrives"
                                             : "Payment processed securely online"}
                                         </p>
