@@ -71,43 +71,44 @@ export const useProductStore = create<ProductStore>()(
           orderSummaries: [...state.orderSummaries, summary],
         })),
 
-      clearOrderSummaries: () =>
-        set({
-          orderSummaries: [],
-        }),
+      clearOrderSummaries: () => {
+        set({ orderSummaries: [] });
+        // Clear from storage immediately
+        sessionStorage.removeItem("product-store");
+      },
 
       updateDeliveryFee: (fee, orderIndex) => {
-        const state = get()
-        const targetIndex = orderIndex ?? 0
+        const state = get();
+        const targetIndex = orderIndex ?? 0;
 
         if (state.orderSummaries[targetIndex]) {
-          const updatedSummaries = [...state.orderSummaries]
-          const currentSummary = updatedSummaries[targetIndex]
+          const updatedSummaries = [...state.orderSummaries];
+          const currentSummary = updatedSummaries[targetIndex];
 
           const updatedSummary = {
             ...currentSummary,
             deliveryFee: fee,
             total: currentSummary.subtotal + fee,
-          }
+          };
 
-          updatedSummaries[targetIndex] = updatedSummary
+          updatedSummaries[targetIndex] = updatedSummary;
 
           set({
             orderSummaries: updatedSummaries,
-          })
+          });
         }
       },
 
       addProductToOrder: (
         product,
-        deliveryLocations,      
+        deliveryLocations,
         referralId,
         platform,
-        pickupLocation,
+        pickupLocation
       ) => {
-        const subtotal = product.price * product.quantity
-        const defaultDeliveryFee = 0
-        const total = subtotal + defaultDeliveryFee
+        const subtotal = product.price * product.quantity;
+        const defaultDeliveryFee = 0;
+        const total = subtotal + defaultDeliveryFee;
 
         const orderProduct: OrderProduct = {
           item: product, // Single item instead of array
@@ -118,16 +119,19 @@ export const useProductStore = create<ProductStore>()(
           platform,
           pickupLocation,
           deliveryFee: defaultDeliveryFee,
-        }
+        };
 
         set((state) => ({
           orderSummaries: [...state.orderSummaries, orderProduct],
-        }))
+        }));
       },
     }),
     {
       name: "product-store",
       storage: createJSONStorage(() => sessionStorage),
-    },
-  ),
-)
+      onRehydrateStorage: () => (state) => {
+        // Optional: You can add logic here if needed
+      },
+    }
+  )
+);

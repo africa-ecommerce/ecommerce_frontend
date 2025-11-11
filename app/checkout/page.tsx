@@ -1936,6 +1936,49 @@ const payOnDeliveryFee = useMemo<number>(() => {
   const payOnDeliveryTotal = payOnDeliveryAmount + payOnDeliveryFee;
 
  
+// const formatOrderItems = () => {
+//   if (!orderSummaries.length) return [];
+
+//   return orderSummaries.flatMap((summary) => {
+//     const hasDeliverySelected =
+//       supplierDeliverySelections[summary.item.supplierId];
+//     const group = supplierGroups.find(
+//       (g) => g.supplierId === summary.item.supplierId
+//     );
+
+//     if (
+//       group?.deliveryLocations.length &&
+//       group.deliveryLocations.length > 0 &&
+//       !hasDeliverySelected
+//     ) {
+//       return [];
+//     }
+
+//     const paymentMethod =
+//       supplierPaymentMethods[summary.item.supplierId] || "ONLINE";
+
+//     return {
+//       productId: summary.item.productId,
+//       quantity: summary.item.quantity,
+      
+//       supplierId: summary.item.supplierId,
+//       deliveryLocationId: hasDeliverySelected || null,
+//       deliveryFee,
+//       paymentMethod: paymentMethod, // Add this
+//       ...(summary.item.variationId && {
+//         variantId: summary.item.variationId,
+//         variantColor: summary.item.selectedColor,
+//         variantSize: summary.item.size,
+//       }),
+//       ...(!summary.item.variationId && {
+//         productColor: summary.item.selectedColor,
+//         productSize: summary.item.size,
+//       }),
+//     };
+//   });
+// };
+
+
 const formatOrderItems = () => {
   if (!orderSummaries.length) return [];
 
@@ -1957,14 +2000,24 @@ const formatOrderItems = () => {
     const paymentMethod =
       supplierPaymentMethods[summary.item.supplierId] || "ONLINE";
 
+    // Get the specific delivery fee for this supplier
+    let supplierDeliveryFee = 0;
+    if (hasDeliverySelected && group?.deliveryLocations.length > 0) {
+      const selectedLocation = group.deliveryLocations.find(
+        (loc) => loc.id === hasDeliverySelected
+      );
+      if (selectedLocation) {
+        supplierDeliveryFee = selectedLocation.fee;
+      }
+    }
+
     return {
       productId: summary.item.productId,
       quantity: summary.item.quantity,
-      
       supplierId: summary.item.supplierId,
       deliveryLocationId: hasDeliverySelected || null,
-      deliveryFee,
-      paymentMethod: paymentMethod, // Add this
+      deliveryFee: supplierDeliveryFee, // Use supplier-specific delivery fee
+      paymentMethod: paymentMethod,
       ...(summary.item.variationId && {
         variantId: summary.item.variationId,
         variantColor: summary.item.selectedColor,
@@ -2043,12 +2096,11 @@ const formatOrderItems = () => {
       const result = await response.json();
       successToast(result.message || "Order placed successfully");
 
-      if (result.data) {
-        sessionStorage.setItem("orderSuccess", JSON.stringify(result.data));
-      }
+     
 
       clearCheckoutData();
       clearOrderSummaries();
+       await new Promise(resolve => setTimeout(resolve, 2000));
       router.replace("/thank-you");
     } catch (error) {
       console.error("Error confirming order:", error);
@@ -2059,174 +2111,6 @@ const formatOrderItems = () => {
   };
 
   
-//   const handleStageOrder = async () => {
-//   setIsLoading(true);
-//   const staged = await stageOrder();
-//   if (!staged) return;
-
-
-//   // If everything is pay on delivery, skip payment and confirm directly
-//   if (onlineTotal === 0 && payOnDeliveryTotal > 0) {
-//      successToast("Order placed successfully");
-//    setIsLoading(false);
-// await confirmOrder(staged.reference);
-     
-//     return;
-//   }
-
-//     setStagedOrder(staged);
-
-
-
-//   // If there's an online payment amount, proceed with Paystack
-//   if (typeof window === "undefined") return;
-
-//   const { usePaystackPayment } = await import("react-paystack");
-
-//   const config = {
-//     email: watchedEmail || "",
-//     amount: onlineTotal * 100, // Use online total instead of full total
-//     reference: staged.reference,
-//     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-//     metadata: {
-//       custom_fields: [
-//         {
-//           display_name: "Name",
-//           variable_name: "name",
-//           value: watchedName || "",
-//         },
-//         {
-//           display_name: "Phone",
-//           variable_name: "phone",
-//           value: watchedPhone || "",
-//         },
-//         {
-//           display_name: "Address",
-//           variable_name: "address",
-//           value: watchedCustomerAddress
-//             ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
-//             : "",
-//         },
-//         {
-//           display_name: "Order Number",
-//           variable_name: "orderNumber",
-//           value: staged.orderNumber,
-//         },
-//         {
-//           display_name: "Pay on Delivery Amount",
-//           variable_name: "payOnDeliveryAmount",
-//           value: payOnDeliveryTotal.toString(),
-//         },
-//       ],
-//     },
-//   };
-
-//   const initializePayment = usePaystackPayment(config);
-
-//   initializePayment({
-//     onSuccess: async (ref: { reference: string }) => {
-//       await delay(3000);
-//       await confirmOrder(ref.reference);
-//     },
-//     onClose: () => {
-//       setIsLoading(false);
-//       showPaymentCancelledModal();
-//     },
-//   });
-// };
-
-
-
-// const handleStageOrder = async () => {
-//   // Prevent double submission
-//   if (isLoading) {
-//     console.log('Already processing order, ignoring duplicate call');
-//     return;
-//   }
-
-//   setIsLoading(true);
-  
-//   try {
-//     const staged = await stageOrder();
-//     if (!staged) {
-//       setIsLoading(false);
-//       return;
-//     }
-
-//     // If everything is pay on delivery, skip payment and confirm directly
-//     if (onlineTotal === 0 && payOnDeliveryTotal > 0) {
-//       successToast("Order placed successfully");
-//       await confirmOrder(staged.reference);
-//       return;
-//     }
-
-//     setStagedOrder(staged);
-
-//     // If there's an online payment amount, proceed with Paystack
-//     if (typeof window === "undefined") {
-//       setIsLoading(false);
-//       return;
-//     }
-
-//     const { usePaystackPayment } = await import("react-paystack");
-
-//     const config = {
-//       email: watchedEmail || "",
-//       amount: onlineTotal * 100,
-//       reference: staged.reference,
-//       publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-//       metadata: {
-//         custom_fields: [
-//           {
-//             display_name: "Name",
-//             variable_name: "name",
-//             value: watchedName || "",
-//           },
-//           {
-//             display_name: "Phone",
-//             variable_name: "phone",
-//             value: watchedPhone || "",
-//           },
-//           {
-//             display_name: "Address",
-//             variable_name: "address",
-//             value: watchedCustomerAddress
-//               ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
-//               : "",
-//           },
-//           {
-//             display_name: "Order Number",
-//             variable_name: "orderNumber",
-//             value: staged.orderNumber,
-//           },
-//           {
-//             display_name: "Pay on Delivery Amount",
-//             variable_name: "payOnDeliveryAmount",
-//             value: payOnDeliveryTotal.toString(),
-//           },
-//         ],
-//       },
-//     };
-
-//     const initializePayment = usePaystackPayment(config);
-
-//     initializePayment({
-//       onSuccess: async (ref: { reference: string }) => {
-//         await delay(3000);
-//         await confirmOrder(ref.reference);
-//       },
-//       onClose: () => {
-//         setIsLoading(false);
-//         showPaymentCancelledModal();
-//       },
-//     });
-//   } catch (error) {
-//     console.error('Error in handleStageOrder:', error);
-//     setIsLoading(false);
-//     errorToast("An error occurred while processing your order");
-//   }
-// };
-
 
 const handleStageOrder = async () => {
   // Prevent double submission
@@ -3130,192 +3014,163 @@ const renderPlaceOrderButton = () => {
                                         </div>
                                       )}
 
-                                      <div className="max-h-[300px] overflow-y-auto pr-2 space-y-3">
-                                        <RadioGroup
-                                          value={selectedLocationId || ""}
-                                          onValueChange={(value) => {
-                                            // Toggle functionality: if clicking the same option, deselect it
-                                            const newValue =
-                                              value === selectedLocationId
-                                                ? null
-                                                : value;
-                                            setSupplierDeliverySelection(
-                                              group.supplierId,
-                                              newValue
-                                            );
-                                          }}
-                                          className="space-y-3"
-                                        >
-                                          {group.deliveryLocations.map(
-                                            (location: any) => {
-                                              const lgaDisplay =
-                                                getDeliveryLocationDisplay(
-                                                  location
-                                                );
-                                              const isString =
-                                                typeof lgaDisplay === "string";
-                                              const isThisSelected =
-                                                selectedLocationId ===
-                                                location.id;
+                                    <div className="max-h-[300px] overflow-y-auto pr-2 space-y-3">
+  {group.deliveryLocations.map((location: any) => {
+    const lgaDisplay = getDeliveryLocationDisplay(location);
+    const isString = typeof lgaDisplay === "string";
+    const isThisSelected = selectedLocationId === location.id;
 
-                                              return (
-                                                <div
-                                                  key={location.id}
-                                                  className={`relative flex items-start space-x-3 rounded-lg border p-4 cursor-pointer transition-all ${
-                                                    isThisSelected
-                                                      ? "border-primary bg-primary/5"
-                                                      : "border-border hover:border-primary/50"
-                                                  }`}
-                                                  onClick={() => {
-                                                    // Toggle functionality
-                                                    const newValue =
-                                                      selectedLocationId ===
-                                                      location.id
-                                                        ? null
-                                                        : location.id;
-                                                    setSupplierDeliverySelection(
-                                                      group.supplierId,
-                                                      newValue
-                                                    );
-                                                  }}
-                                                >
-                                                  <RadioGroupItem
-                                                    value={location.id}
-                                                    id={`${group.supplierId}-${location.id}`}
-                                                    className="mt-1"
-                                                  />
-                                                  <div className="flex-1 space-y-1">
-                                                    <Label
-                                                      htmlFor={`${group.supplierId}-${location.id}`}
-                                                      className="flex items-center gap-2 cursor-pointer font-medium"
-                                                    >
-                                                      <Truck className="h-4 w-4" />
-                                                      {location.state} Delivery
-                                                    </Label>
-                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                      <Clock className="h-3 w-3" />
-                                                      {location.duration}
-                                                    </div>
-                                                    <p className="text-sm text-muted-foreground">
-                                                      Available for:{" "}
-                                                      {isString ? (
-                                                        lgaDisplay
-                                                      ) : (
-                                                        <>
-                                                          {lgaDisplay.preview}
-                                                          {lgaDisplay.remaining >
-                                                            0 && (
-                                                            <button
-                                                              type="button"
-                                                              className="ml-1 text-primary hover:underline"
-                                                              onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setSelectedLocationForLgas(
-                                                                  location
-                                                                );
-                                                                setShowAllLgasModal(
-                                                                  true
-                                                                );
-                                                              }}
-                                                            >
-                                                              +
-                                                              {
-                                                                lgaDisplay.remaining
-                                                              }{" "}
-                                                              more
-                                                            </button>
-                                                          )}
-                                                        </>
-                                                      )}
-                                                    </p>
-                                                    <p className="text-sm font-semibold text-primary">
-                                                      {formatPrice(
-                                                        location.fee
-                                                      )}
-                                                    </p>
-                                                  </div>
-                                                </div>
-                                              );
-                                            }
-                                          )}
-                                        </RadioGroup>
-                                      </div>
+    return (
+      <div
+        key={location.id}
+        className={`relative flex items-start space-x-3 rounded-lg border p-4 cursor-pointer transition-all ${
+          isThisSelected
+            ? "border-primary bg-primary/5"
+            : "border-border hover:border-primary/50"
+        }`}
+        onClick={() => {
+          // Toggle functionality
+          const newValue = selectedLocationId === location.id ? null : location.id;
+          setSupplierDeliverySelection(group.supplierId, newValue);
+        }}
+      >
+        <div className="flex-1 space-y-1">
+          <Label className="flex items-center gap-2 cursor-pointer font-medium">
+            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+              isThisSelected 
+                ? 'border-primary bg-primary' 
+                : 'border-muted-foreground'
+            }`}>
+              {isThisSelected && (
+                <svg className="w-3 h-3 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                  <path d="M5 13l4 4L19 7"></path>
+                </svg>
+              )}
+            </div>
+            <Truck className="h-4 w-4" />
+            {location.state} Delivery
+          </Label>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground ml-9">
+            <Clock className="h-3 w-3" />
+            {location.duration}
+          </div>
+          <p className="text-sm text-muted-foreground ml-9">
+            Available for:{" "}
+            {isString ? (
+              lgaDisplay
+            ) : (
+              <>
+                {lgaDisplay.preview}
+                {lgaDisplay.remaining > 0 && (
+                  <button
+                    type="button"
+                    className="ml-1 text-primary hover:underline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedLocationForLgas(location);
+                      setShowAllLgasModal(true);
+                    }}
+                  >
+                    +{lgaDisplay.remaining} more
+                  </button>
+                )}
+              </>
+            )}
+          </p>
+          <p className="text-sm font-semibold text-primary ml-9">
+            {formatPrice(location.fee)}
+          </p>
+        </div>
+      </div>
+    );
+  })}
+</div>
                                     </div>
 
                                     {/* Add this after the delivery location RadioGroup and before the closing div of each group */}
-                                    {group.payOnDelivery &&
-                                      selectedLocationId && (
-                                        <div className="mt-4 space-y-3">
-                                          <Separator />
-                                          <div>
-                                            <Label className="text-sm font-medium mb-3 block">
-                                              Payment Method for this group
-                                            </Label>
-                                            <RadioGroup
-                                              value={
-                                                supplierPaymentMethods[
-                                                  group.supplierId
-                                                ] || "ONLINE"
-                                              }
-                                              onValueChange={(
-                                                value:
-                                                  | "ONLINE"
-                                                  | "P_O_D"
-                                              ) => {
-                                                setSupplierPaymentMethod(
-                                                  group.supplierId,
-                                                  value
-                                                );
-                                              }}
-                                              className="space-y-2"
-                                            >
-                                              <div className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:border-primary/50">
-                                                <RadioGroupItem
-                                                  value="ONLINE"
-                                                  id={`online-${group.supplierId}`}
-                                                />
-                                                <Label
-                                                  htmlFor={`online-${group.supplierId}`}
-                                                  className="flex-1 cursor-pointer"
-                                                >
-                                                  <div className="flex items-center gap-2">
-                                                    <CreditCard className="h-4 w-4" />
-                                                    <span className="font-medium">
-                                                      Pay Online
-                                                    </span>
-                                                  </div>
-                                                  <p className="text-xs text-muted-foreground mt-1">
-                                                    Pay now with card, bank
-                                                    transfer or mobile money
-                                                  </p>
-                                                </Label>
-                                              </div>
+                                    {group.payOnDelivery && selectedLocationId && (
+  <div className="mt-4 space-y-3">
+    <Separator />
+    <div>
+      <Label className="text-sm font-medium mb-3 block">
+        Payment Method for this group
+      </Label>
+      <div className="space-y-2">
+        <div 
+          className={`flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-all ${
+            (supplierPaymentMethods[group.supplierId] || "ONLINE") === "ONLINE"
+              ? "border-primary bg-primary/5"
+              : "border-border hover:border-primary/50"
+          }`}
+          onClick={() => {
+            const currentMethod = supplierPaymentMethods[group.supplierId] || "ONLINE";
+            setSupplierPaymentMethod(
+              group.supplierId,
+              currentMethod === "ONLINE" ? null : "ONLINE"
+            );
+          }}
+        >
+          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+            (supplierPaymentMethods[group.supplierId] || "ONLINE") === "ONLINE"
+              ? 'border-primary bg-primary' 
+              : 'border-muted-foreground'
+          }`}>
+            {(supplierPaymentMethods[group.supplierId] || "ONLINE") === "ONLINE" && (
+              <svg className="w-3 h-3 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                <path d="M5 13l4 4L19 7"></path>
+              </svg>
+            )}
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              <span className="font-medium">Pay Online</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Pay now with card, bank transfer or mobile money
+            </p>
+          </div>
+        </div>
 
-                                              <div className="flex items-center space-x-2 p-3 border rounded-lg cursor-pointer hover:border-primary/50">
-                                                <RadioGroupItem
-                                                  value="P_O_D"
-                                                  id={`pod-${group.supplierId}`}
-                                                />
-                                                <Label
-                                                  htmlFor={`pod-${group.supplierId}`}
-                                                  className="flex-1 cursor-pointer"
-                                                >
-                                                  <div className="flex items-center gap-2">
-                                                    <Truck className="h-4 w-4" />
-                                                    <span className="font-medium">
-                                                      Pay on Delivery
-                                                    </span>
-                                                  </div>
-                                                  <p className="text-xs text-muted-foreground mt-1">
-                                                    Pay with cash when your
-                                                    order arrives
-                                                  </p>
-                                                </Label>
-                                              </div>
-                                            </RadioGroup>
-                                          </div>
-                                        </div>
-                                      )}
+        <div 
+          className={`flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-all ${
+            supplierPaymentMethods[group.supplierId] === "P_O_D"
+              ? "border-primary bg-primary/5"
+              : "border-border hover:border-primary/50"
+          }`}
+          onClick={() => {
+            const currentMethod = supplierPaymentMethods[group.supplierId];
+            setSupplierPaymentMethod(
+              group.supplierId,
+              currentMethod === "P_O_D" ? null : "P_O_D"
+            );
+          }}
+        >
+          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+            supplierPaymentMethods[group.supplierId] === "P_O_D"
+              ? 'border-primary bg-primary' 
+              : 'border-muted-foreground'
+          }`}>
+            {supplierPaymentMethods[group.supplierId] === "P_O_D" && (
+              <svg className="w-3 h-3 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                <path d="M5 13l4 4L19 7"></path>
+              </svg>
+            )}
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <Truck className="h-4 w-4" />
+              <span className="font-medium">Pay on Delivery</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Pay with cash when your order arrives
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
                                   </div>
                                 );
                               })}
@@ -3335,7 +3190,7 @@ const renderPlaceOrderButton = () => {
                               Card, Bank Transfer and Mobile Money
                             </span>
                             <p className="text-xs text-muted-foreground">
-                              Secure payment processing
+                              Secure payment processing by paystack
                             </p>
                           </div>
                         </div>

@@ -141,7 +141,11 @@ export const useCheckoutStore = create<CheckoutStore>()(
           checkoutData: { ...state.checkoutData, ...data },
         })),
 
-      clearCheckoutData: () => set({ checkoutData: defaultCheckoutData }),
+      clearCheckoutData: () => {
+        set({ checkoutData: defaultCheckoutData });
+        // Clear from storage immediately
+        localStorage.removeItem("checkout-store");
+      },
 
       getCheckoutData: () => get().checkoutData,
 
@@ -193,6 +197,9 @@ export const useCheckoutStore = create<CheckoutStore>()(
     {
       name: "checkout-store",
       storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        // Optional: You can add logic here if needed
+      },
     }
   )
 );

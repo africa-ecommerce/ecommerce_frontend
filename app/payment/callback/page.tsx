@@ -8,6 +8,8 @@ import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useProductStore } from "@/hooks/product-store";
+import { useCheckoutStore } from "@/hooks/checkout-store";
 
 export default function PaymentCallbackPage() {
   const router = useRouter();
@@ -15,6 +17,17 @@ export default function PaymentCallbackPage() {
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
   );
+
+  const {
+
+  clearCheckoutData,
+  
+} = useCheckoutStore();
+
+  const {
+   
+    clearOrderSummaries,
+  } = useProductStore();
   const [message, setMessage] = useState("Verifying your payment...");
 
   useEffect(() => {
@@ -46,9 +59,8 @@ export default function PaymentCallbackPage() {
         setMessage("Payment successful! Redirecting...");
 
         // Store order data for thank you page
-        if (result.data) {
-          sessionStorage.setItem("orderSuccess", JSON.stringify(result.data));
-        }
+        clearCheckoutData();
+      clearOrderSummaries();
 
         // Redirect to thank you page after 2 seconds
         setTimeout(() => {
