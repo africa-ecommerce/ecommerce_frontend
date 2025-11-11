@@ -20,6 +20,9 @@ import {
   Trash,
 } from "lucide-react";
 
+import { Phone } from "lucide-react"; // Add to existing imports
+import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -110,143 +113,146 @@ const DelayOrderModal = ({
 
 
 
-const OrderCard = ({ order }: { order: any }) => {
+// const OrderCard = ({ order }: { order: any }) => {
 
-  const [delayModalOpen, setDelayModalOpen] = useState(false);
+//   const [delayModalOpen, setDelayModalOpen] = useState(false);
 
-   const handleDelaySelect = (minutes: number) => {
-     console.log(`Delaying order ${order.id} by ${minutes} minutes`);
-     // Add your delay logic here
-   };
+//    const handleDelaySelect = (minutes: number) => {
+//      console.log(`Delaying order ${order.id} by ${minutes} minutes`);
+//      // Add your delay logic here
+//    };
 
-   const handleAccept = () => {
-     console.log(`Accepting order ${order.id}`);
-     // Add your accept logic here
-   };
+//    const handleAccept = () => {
+//      console.log(`Accepting order ${order.id}`);
+//      // Add your accept logic here
+//    };
 
-   const handleDecline = () => {
-     console.log(`Declining order ${order.id}`);
-     // Add your decline logic here
-   };
+//    const handleDecline = () => {
+//      console.log(`Declining order ${order.id}`);
+//      // Add your decline logic here
+//    };
   
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+//   const formatDate = (dateString: string) => {
+//     const date = new Date(dateString);
+//     return date.toLocaleDateString("en-US", {
+//       year: "numeric",
+//       month: "short",
+//       day: "numeric",
+//     });
+//   };
 
-  const capitalizeWords = (str: string) => {
-    return (
-      str
-        ?.split(" ")
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(" ") || ""
-    );
-  };
+//   const capitalizeWords = (str: string) => {
+//     return (
+//       str
+//         ?.split(" ")
+//         .map(
+//           (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+//         )
+//         .join(" ") || ""
+//     );
+//   };
 
-  // Calculate total amount
-  const totalAmount =
-    order.orderItems?.reduce((total: number, item: any) => {
-      return total + (item.supplierPrice || 0) * item.quantity;
-    }, 0) || 0;
+//   // Calculate total amount
+//   const totalAmount =
+//     order.orderItems?.reduce((total: number, item: any) => {
+//       return total + (item.supplierPrice || 0) * item.quantity;
+//     }, 0) || 0;
 
-  return (
-    <Card className="mb-3 sm:mb-4 last:mb-0">
-      <CardHeader className="p-3 sm:p-4 pb-2">
-        <div className="flex justify-between items-start gap-2">
-          <div className="min-w-0">
-            <CardTitle className="text-sm font-medium">
-              {order.orderId}
-            </CardTitle>
-            <CardDescription className="text-xs mt-1">
-              {formatDate(order.createdAt)}
-            </CardDescription>
-          </div>
-        </div>
-      </CardHeader>
+//   return (
+//     <Card className="mb-3 sm:mb-4 last:mb-0">
+//       <CardHeader className="p-3 sm:p-4 pb-2">
+//         <div className="flex justify-between items-start gap-2">
+//           <div className="min-w-0">
+//             <CardTitle className="text-sm font-medium">
+//               {order.orderId}
+//             </CardTitle>
+//             <CardDescription className="text-xs mt-1">
+//               {formatDate(order.createdAt)}
+//             </CardDescription>
+//           </div>
+//         </div>
+//       </CardHeader>
 
-      <CardContent className="p-3 sm:p-4 pt-0 space-y-3">
-        {/* Customer Info */}
-        <div className="flex items-center gap-2 text-sm">
-          <Users className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">
-            {truncateText(capitalizeWords(order.buyerName), 30)}
-          </span>
+//       <CardContent className="p-3 sm:p-4 pt-0 space-y-3">
+//         {/* Customer Info */}
+//         <div className="flex items-center gap-2 text-sm">
+//           <Users className="h-4 w-4 text-muted-foreground" />
+//           <span className="font-medium">
+//             {truncateText(capitalizeWords(order.buyerName), 30)}
+//           </span>
          
-        </div>
+//         </div>
 
-        {/* Products */}
-        <div className="space-y-2">
-          {order.orderItems?.map((item: any, index: number) => (
-            <div key={item.id} className="flex justify-between items-center">
-              <div className="flex-1">
-                <div className="text-sm font-medium capitalize">
-                  {truncateText(item.productName, 37)} <span className="lowercase">x</span> {item.quantity}
+//         {/* Products */}
+//         <div className="space-y-2">
+//           {order.orderItems?.map((item: any, index: number) => (
+//             <div key={item.id} className="flex justify-between items-center">
+//               <div className="flex-1">
+//                 <div className="text-sm font-medium capitalize">
+//                   {truncateText(item.productName, 37)} <span className="lowercase">x</span> {item.quantity}
 
-                </div>
-                {/* Show variant details if available */}
-                {item.variantId && (item.variantColor || item.variantSize) && (
-                  <div className="flex gap-2 text-xs text-muted-foreground mt-1">
-                    {item.variantColor && (
-                      <span className="capitalize">{item.variantColor}</span>
-                    )}
-                    {item.variantSize && (
-                      <span className="capitalize">({item.variantSize})</span>
-                    )}
-                  </div>
-                )}
-                {/* Show product color/size if no variant but has product color/size */}
-                {!item.variantId && (item.productColor || item.productSize) && (
-                  <div className="flex gap-2 text-xs text-muted-foreground mt-1">
-                    {item.productColor && (
-                      <span className="capitalize">{item.productColor}</span>
-                    )}
-                    {item.productSize && (
-                      <span className="capitalize">({item.productSize})</span>
-                    )}
-                  </div>
-                )}
-              </div>
-              <div className="text-sm font-medium">
-                ₦{((item.supplierPrice || 0) * item.quantity).toLocaleString()}
-              </div>
-            </div>
-          ))}
-        </div>
+//                 </div>
+//                 {/* Show variant details if available */}
+//                 {item.variantId && (item.variantColor || item.variantSize) && (
+//                   <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+//                     {item.variantColor && (
+//                       <span className="capitalize">{item.variantColor}</span>
+//                     )}
+//                     {item.variantSize && (
+//                       <span className="capitalize">({item.variantSize})</span>
+//                     )}
+//                   </div>
+//                 )}
+//                 {/* Show product color/size if no variant but has product color/size */}
+//                 {!item.variantId && (item.productColor || item.productSize) && (
+//                   <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+//                     {item.productColor && (
+//                       <span className="capitalize">{item.productColor}</span>
+//                     )}
+//                     {item.productSize && (
+//                       <span className="capitalize">({item.productSize})</span>
+//                     )}
+//                   </div>
+//                 )}
+//               </div>
+//               <div className="text-sm font-medium">
+//                 ₦{((item.supplierPrice || 0) * item.quantity).toLocaleString()}
+//               </div>
+//             </div>
+//           ))}
+//         </div>
 
-        {/* Total */}
-        <div className="flex justify-between items-center text-sm pt-2 border-t">
-          <span className="font-medium">Total</span>
-          <span className="font-bold">₦{totalAmount.toLocaleString()}</span>
-        </div>
-      </CardContent>
-       <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
-          <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 h-8 text-xs"
+//         {/* Total */}
+//         <div className="flex justify-between items-center text-sm pt-2 border-t">
+//           <span className="font-medium">Total</span>
+//           <span className="font-bold">₦{totalAmount.toLocaleString()}</span>
+//         </div>
+//       </CardContent>
+//        <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
+//           <Button
+//                   variant="outline"
+//                   size="sm"
+//                   className="flex-1 h-8 text-xs"
                   
-                >
-                  <Trash className="h-3 w-3 mr-1" />
-                 Cancel Order
-                </Button>
-                <Button
-                  size="sm"
-                  className="flex-1 h-8 text-xs"
-                >
-                  <Truck className="h-3 w-3 mr-1" />
-                  Process Order
-                </Button>
-        </CardFooter>
-    </Card>
-  );
-};
+//                 >
+//                   <Trash className="h-3 w-3 mr-1" />
+//                  Cancel Order
+//                 </Button>
+//                 <Button
+//                   size="sm"
+//                   className="flex-1 h-8 text-xs"
+//                 >
+//                   <Truck className="h-3 w-3 mr-1" />
+//                   Process Order
+//                 </Button>
+//         </CardFooter>
+//     </Card>
+//   );
+// };
+
+
+
 
 // Responsive Loading Skeleton
 const LoadingSkeleton = () => (
@@ -442,7 +448,12 @@ const ProductLoadingSkeleton = () => (
 
 export default function SupplierDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+const [buyerDetailsModalOpen, setBuyerDetailsModalOpen] = useState(false);
+const [selectedOrderDetails, setSelectedOrderDetails] = useState<any>(null);
+const [actionModalOpen, setActionModalOpen] = useState(false);
+const [actionType, setActionType] = useState<'process' | 'cancel'>('process');
+const [actionOrderId, setActionOrderId] = useState<string>('');
+const [isProcessing, setIsProcessing] = useState(false);
   
 
   const {
@@ -457,6 +468,52 @@ export default function SupplierDashboard() {
   } = useSWR("/api/products/supplier/");
 
   const products = Array.isArray(data?.data) ? data?.data : [];
+
+
+  const handleViewBuyerDetails = (order: any) => {
+    setSelectedOrderDetails(order);
+    setBuyerDetailsModalOpen(true);
+  };
+
+  const handleOrderAction = (orderId: string, action: "process" | "cancel") => {
+    setActionOrderId(orderId);
+    setActionType(action);
+    setActionModalOpen(true);
+  };
+
+  const confirmOrderAction = async () => {
+    setIsProcessing(true);
+    try {
+      const endpoint =
+        actionType === "process"
+          ? "/api/orders/supplier/process"
+          : "/api/orders/supplier/cancel";
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ orderId: actionOrderId }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        errorToast(result.error || `Failed to ${actionType} order`);
+        return;
+      }
+
+      successToast(result.message || `Order ${actionType}ed successfully`);
+      setActionModalOpen(false);
+      ordersMutate(); // Refresh orders
+    } catch (error) {
+      errorToast(`An error occurred while ${actionType}ing the order`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   function getProductPerformanceByAverage(productsArray: any) {
     const productsWithSales = productsArray.filter(
@@ -664,6 +721,166 @@ const stockAlerts = useMemo(() => {
      }, [analyticsData]);
 
 
+     
+const OrderCard = ({ order }: { order: any }) => {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const capitalizeWords = (str: string) => {
+    return (
+      str
+        ?.split(" ")
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join(" ") || ""
+    );
+  };
+
+  // Calculate order subtotal (without delivery fee)
+  const subtotal = order.orderItems?.reduce((total: number, item: any) => {
+    return total + (item.supplierPrice || 0) * item.quantity;
+  }, 0) || 0;
+
+  return (
+    <Card className="mb-3 sm:mb-4 last:mb-0">
+      <CardHeader className="p-3 sm:p-4 pb-2">
+        <div className="flex justify-between items-start gap-2">
+          <div className="min-w-0">
+            <CardTitle className="text-sm font-medium">
+              {order.orderNumber}
+            </CardTitle>
+            <CardDescription className="text-xs mt-1">
+              {formatDate(order.createdAt)}
+            </CardDescription>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <Badge variant="default" className="bg-orange-500 hover:bg-orange-600 text-xs py-0 px-2">
+              Pending
+            </Badge>
+            {order.paymentMethod === "ONLINE" && (
+              <Badge variant="outline" className="text-[10px] py-0 px-1.5 bg-green-50 text-green-700 border-green-200">
+                Paid
+              </Badge>
+            )}
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="p-3 sm:p-4 pt-0 space-y-3">
+        {/* Customer Info */}
+        <div className="flex items-center gap-2 text-sm">
+          <Users className="h-4 w-4 text-muted-foreground" />
+          <span className="font-medium">
+            {truncateText(capitalizeWords(order.buyerName), 30)}
+          </span>
+        </div>
+
+        {/* Phone Number */}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Phone className="h-4 w-4" />
+          <span>{order.buyerPhone}</span>
+        </div>
+
+        {/* Via Channel Badge - Only show if plugId exists */}
+        {order.plugId && (
+          <div className="flex items-center gap-1.5">
+            <Badge variant="outline" className="text-[10px] py-0.5 px-2 bg-blue-50 text-blue-700 border-blue-200">
+              <Share2 className="h-2.5 w-2.5 mr-1" />
+              Via Channel
+            </Badge>
+          </div>
+        )}
+
+        {/* Products */}
+        <div className="space-y-2">
+          {order.orderItems?.map((item: any) => (
+            <div key={item.id} className="flex justify-between items-center">
+              <div className="flex-1">
+                <div className="text-sm font-medium capitalize">
+                  {truncateText(item.productName, 37)}{" "}
+                  <span className="lowercase">x</span> {item.quantity}
+                </div>
+                {item.variantId && (item.variantColor || item.variantSize) && (
+                  <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+                    {item.variantColor && (
+                      <span className="capitalize">{item.variantColor}</span>
+                    )}
+                    {item.variantSize && (
+                      <span className="capitalize">({item.variantSize})</span>
+                    )}
+                  </div>
+                )}
+                {!item.variantId && (item.productColor || item.productSize) && (
+                  <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+                    {item.productColor && (
+                      <span className="capitalize">{item.productColor}</span>
+                    )}
+                    {item.productSize && (
+                      <span className="capitalize">({item.productSize})</span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="text-sm font-medium">
+                ₦{((item.supplierPrice || 0) * item.quantity).toLocaleString()}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Delivery Fee */}
+        <div className="flex justify-between items-center text-sm text-muted-foreground pt-2 border-t">
+          <span>Delivery Fee</span>
+          <span>₦{(order.deliveryFee || 0).toLocaleString()}</span>
+        </div>
+
+        {/* Total */}
+        <div className="flex justify-between items-center text-sm font-semibold">
+          <span>Total</span>
+          <span className="text-base">₦{(subtotal + (order.deliveryFee || 0)).toLocaleString()}</span>
+        </div>
+      </CardContent>
+
+      <CardFooter className="p-3 sm:p-4 pt-1 flex gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1 h-8 text-xs"
+          onClick={() => handleViewBuyerDetails(order)}
+        >
+          <Users className="h-3 w-3 mr-1" />
+          View Details
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex-1 h-8 text-xs text-destructive hover:bg-destructive hover:text-destructive-foreground"
+          onClick={() => handleOrderAction(order.id, 'cancel')}
+        >
+          <Trash className="h-3 w-3 mr-1" />
+          Cancel
+        </Button>
+        <Button
+          size="sm"
+          className="flex-1 h-8 text-xs"
+          onClick={() => handleOrderAction(order.id, 'process')}
+        >
+          <Truck className="h-3 w-3 mr-1" />
+          Process
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
+
+
   return (
     <TooltipProvider>
       <div className="flex flex-col min-h-screen bg-background p-3 sm:p-4 gap-3 sm:gap-4">
@@ -702,13 +919,13 @@ const stockAlerts = useMemo(() => {
               <Card className="h-full border rounded-lg">
                 <CardHeader className="p-2 sm:p-3 pb-0">
                   <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                    Total Earnings
+                    Total Revenue
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <HelpCircle className="h-3 w-3 text-muted-foreground" />
                       </TooltipTrigger>
                       <TooltipContent className="text-xs">
-                        <p>Total amount earned from sales</p>
+                        <p>Total revenue sales</p>
                       </TooltipContent>
                     </Tooltip>
                   </CardTitle>
@@ -798,7 +1015,7 @@ const stockAlerts = useMemo(() => {
                   ) : (
                     <div className="text-base sm:text-lg font-bold">
                       {paymentData
-                        ? formatPrice(String(paymentData.data.unlockedAmount))
+                        ? formatPrice(String(paymentData.data.unPaidAmount))
                         : "₦0"}
                     </div>
                   )}
@@ -1198,9 +1415,162 @@ const stockAlerts = useMemo(() => {
         <WithdrawalModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          unlockedPayment={paymentData?.data.unlockedAmount || 0}
+          unlockedPayment={paymentData?.data.unPaidAmount || 0}
           mutateKey={"/api/payments/supplier/earnings"}
         />
+
+        {/* Buyer Details Modal */}
+<Dialog open={buyerDetailsModalOpen} onOpenChange={setBuyerDetailsModalOpen}>
+  <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle className="text-lg font-semibold">Buyer Details</DialogTitle>
+    </DialogHeader>
+    
+    {selectedOrderDetails && (
+      <div className="space-y-4 py-2">
+        {/* Personal Information */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Personal Information
+          </h3>
+          
+          <div className="space-y-2">
+            <div className="flex items-start gap-2">
+              <Users className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Name</p>
+                <p className="text-sm font-medium capitalize">
+                  {selectedOrderDetails.buyerName}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <Phone className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Phone</p>
+                <p className="text-sm font-medium">
+                  {selectedOrderDetails.buyerPhone}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <svg className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="text-sm font-medium break-all">
+                  {selectedOrderDetails.buyerEmail}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Delivery Information */}
+        <div className="space-y-3 pt-2 border-t">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            Delivery Information
+          </h3>
+          
+          <div className="space-y-2">
+            <div className="flex items-start gap-2">
+              <svg className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Delivery Address</p>
+                <p className="text-sm font-medium leading-relaxed">
+                  {selectedOrderDetails.buyerAddress}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {selectedOrderDetails.buyerLga}, {selectedOrderDetails.buyerState}
+                </p>
+              </div>
+            </div>
+
+            {selectedOrderDetails.buyerDirections && (
+              <div className="flex items-start gap-2">
+                <svg className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Directions</p>
+                  <p className="text-sm leading-relaxed">
+                    {selectedOrderDetails.buyerDirections}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {selectedOrderDetails.buyerInstructions && (
+              <div className="flex items-start gap-2">
+                <svg className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Special Instructions</p>
+                  <p className="text-sm leading-relaxed">
+                    {selectedOrderDetails.buyerInstructions}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+  </DialogContent>
+</Dialog>
+
+{/* Order Action Confirmation Modal */}
+<Dialog open={actionModalOpen} onOpenChange={setActionModalOpen}>
+  <DialogContent className="max-w-md">
+    <DialogHeader>
+      <DialogTitle className="text-lg font-semibold">
+        {actionType === 'process' ? 'Process Order' : 'Cancel Order'}
+      </DialogTitle>
+    </DialogHeader>
+    
+    <div className="py-4">
+      <p className="text-sm text-muted-foreground">
+        {actionType === 'process' 
+          ? 'Are you sure you want to process this order? This will move the order to the processed state.'
+          : 'Are you sure you want to cancel this order? This action cannot be undone.'}
+      </p>
+    </div>
+
+    <div className="flex gap-2 justify-end">
+      <Button
+        variant="outline"
+        onClick={() => setActionModalOpen(false)}
+        disabled={isProcessing}
+      >
+        No, Go Back
+      </Button>
+      <Button
+        variant={actionType === 'cancel' ? 'destructive' : 'default'}
+        onClick={confirmOrderAction}
+        disabled={isProcessing}
+      >
+        {isProcessing ? (
+          <>
+            <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing...
+          </>
+        ) : (
+          `Yes, ${actionType === 'process' ? 'Process' : 'Cancel'} Order`
+        )}
+      </Button>
+    </div>
+  </DialogContent>
+</Dialog>
       </div>
     </TooltipProvider>
   );

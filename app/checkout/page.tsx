@@ -568,11 +568,13 @@ export default function CheckoutPage() {
       const result = await response.json();
       successToast(result.message || "Order placed successfully");
 
+       setTimeout(() => {
+         router.replace("/thank-you");
+       }, 2000);
+
       clearCheckoutData();
       clearOrderSummaries();
-      setTimeout(() => {
-          router.replace("/thank-you");
-        }, 2000);
+     
     } catch (error) {
       console.error("Error confirming order:", error);
       errorToast("An error occurred while confirming order");

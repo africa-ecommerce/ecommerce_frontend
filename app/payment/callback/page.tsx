@@ -59,13 +59,15 @@ export default function PaymentCallbackPage() {
         setMessage("Payment successful! Redirecting...");
 
         // Store order data for thank you page
+
+         setTimeout(() => {
+          router.replace("/thank-you");
+        }, 2000);
         clearCheckoutData();
       clearOrderSummaries();
 
         // Redirect to thank you page after 2 seconds
-        setTimeout(() => {
-          router.replace("/thank-you");
-        }, 2000);
+       
       } catch (error: any) {
         console.error("Payment verification error:", error);
         setStatus("error");
