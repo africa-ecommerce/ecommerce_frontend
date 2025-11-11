@@ -1541,18 +1541,13 @@ export default function CheckoutPage() {
                                                     : "border-border hover:border-primary/50"
                                                 }`}
                                                 onClick={() => {
-                                                  // Simple toggle - if selected, unselect; if not selected, select
-                                                  if (isThisSelected) {
-                                                    setSupplierDeliverySelection(
-                                                      group.supplierId,
-                                                      null
-                                                    );
-                                                  } else {
-                                                    setSupplierDeliverySelection(
-                                                      group.supplierId,
-                                                      location.id
-                                                    );
-                                                  }
+                                                  // Toggle behavior - select or deselect this location
+                                                  setSupplierDeliverySelection(
+                                                    group.supplierId,
+                                                    isThisSelected
+                                                      ? null
+                                                      : location.id
+                                                  );
                                                 }}
                                               >
                                                 <div className="flex-1 space-y-1">
@@ -1651,20 +1646,13 @@ export default function CheckoutPage() {
                                                     supplierPaymentMethods[
                                                       group.supplierId
                                                     ] || "ONLINE";
-                                                  // Simple toggle for Pay Online
-                                                  if (
+                                                  // Toggle to ONLINE or default to ONLINE if currently P_O_D
+                                                  setSupplierPaymentMethod(
+                                                    group.supplierId,
                                                     currentMethod === "ONLINE"
-                                                  ) {
-                                                    setSupplierPaymentMethod(
-                                                      group.supplierId,
-                                                      null
-                                                    );
-                                                  } else {
-                                                    setSupplierPaymentMethod(
-                                                      group.supplierId,
-                                                      "ONLINE"
-                                                    );
-                                                  }
+                                                      ? "ONLINE"
+                                                      : "ONLINE"
+                                                  );
                                                 }}
                                               >
                                                 <div
@@ -1720,20 +1708,13 @@ export default function CheckoutPage() {
                                                     supplierPaymentMethods[
                                                       group.supplierId
                                                     ];
-                                                  // Simple toggle for Pay on Delivery
-                                                  if (
+                                                  // Toggle to P_O_D or switch from ONLINE
+                                                  setSupplierPaymentMethod(
+                                                    group.supplierId,
                                                     currentMethod === "P_O_D"
-                                                  ) {
-                                                    setSupplierPaymentMethod(
-                                                      group.supplierId,
-                                                      null
-                                                    );
-                                                  } else {
-                                                    setSupplierPaymentMethod(
-                                                      group.supplierId,
-                                                      "P_O_D"
-                                                    );
-                                                  }
+                                                      ? "ONLINE"
+                                                      : "P_O_D"
+                                                  );
                                                 }}
                                               >
                                                 <div
@@ -2246,31 +2227,7 @@ export default function CheckoutPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* <AlertDialog
-        open={showCancelledModal}
-        onOpenChange={setShowCancelledModal}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Don't miss out!</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your items are still waiting for you. Complete your purchase now
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Maybe Later</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                setShowCancelledModal(false);
-                // Add your place order logic here
-              }}
-            >
-              {renderPlaceOrderButton()}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog> */}
-
+     
       <AlertDialog
         open={showCancelledModal}
         onOpenChange={setShowCancelledModal}

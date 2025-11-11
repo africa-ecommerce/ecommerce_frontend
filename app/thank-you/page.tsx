@@ -25,10 +25,7 @@ import {
 } from "lucide-react";
 
 export default function ThankYouPage() {
-  const [orderData, setOrderData] = useState(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const router = useRouter();
-  const searchParams = useSearchParams();
+
 
 
 
@@ -41,9 +38,8 @@ export default function ThankYouPage() {
       </div>
 
       <div
-        className={`relative z-10 min-h-screen p-4 transition-all duration-700 ${
-          isVisible ? "animate-fade-in" : "opacity-0"
-        }`}
+        className="relative z-10 min-h-screen p-4 transition-all duration-700 
+         animate-fade-in"
       >
         <div className="max-w-lg mx-auto pt-8 pb-12 space-y-6">
           {/* Success Header - Mobile Optimized */}
