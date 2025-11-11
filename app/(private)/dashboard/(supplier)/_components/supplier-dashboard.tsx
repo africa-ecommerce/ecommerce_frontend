@@ -765,13 +765,13 @@ const OrderCard = ({ order }: { order: any }) => {
               Pending
             </Badge>
             {order.paymentMethod === "ONLINE" && (
-              <Badge variant="outline" className="text-sm py-0 px-1.5 bg-green-50 text-green-700 border-green-200">
+              <Badge variant="outline" className="text-xs py-0 px-1.5 bg-green-50 text-green-700 border-green-200">
                 Paid
               </Badge>
             )}
 
              {order.paymentMethod === "P_O_D" && (
-              <Badge variant="outline" className="text-sm py-0 px-1.5 bg-green-50 text-green-700 border-green-200">
+              <Badge variant="outline" className="text-xs py-0 px-1.5 bg-green-50 text-green-700 border-green-200">
                 Pay on delivery
               </Badge>
             )}
@@ -805,20 +805,20 @@ const OrderCard = ({ order }: { order: any }) => {
                 {item.variantId && (item.variantColor || item.variantSize) && (
                   <div className="flex gap-2 text-xs text-muted-foreground mt-1">
                     {item.variantColor && (
-                      <span className="capitalize">{item.variantColor}</span>
+                      <span className="capitalize">color: {item.variantColor}</span>
                     )}
                     {item.variantSize && (
-                      <span className="capitalize">({item.variantSize})</span>
+                      <span className="capitalize">size: ({item.variantSize})</span>
                     )}
                   </div>
                 )}
                 {!item.variantId && (item.productColor || item.productSize) && (
                   <div className="flex gap-2 text-xs text-muted-foreground mt-1">
                     {item.productColor && (
-                      <span className="capitalize">{item.productColor}</span>
+                      <span className="capitalize">color: {item.productColor}</span>
                     )}
                     {item.productSize && (
-                      <span className="capitalize">({item.productSize})</span>
+                      <span className="capitalize">size: ({item.productSize})</span>
                     )}
                   </div>
                 )}
@@ -966,13 +966,13 @@ const OrderCard = ({ order }: { order: any }) => {
               <Card className="h-full border rounded-lg">
                 <CardHeader className="p-2 sm:p-3 pb-0">
                   <CardTitle className="text-xs sm:text-sm font-medium flex items-center gap-1">
-                    Pending Payments
+                    Pending Orders
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <HelpCircle className="h-3 w-3 text-muted-foreground" />
                       </TooltipTrigger>
                       <TooltipContent className="text-xs">
-                        <p>Money in escrow to be released</p>
+                        <p>Orders yet to be processed</p>
                       </TooltipContent>
                     </Tooltip>
                   </CardTitle>
@@ -982,9 +982,7 @@ const OrderCard = ({ order }: { order: any }) => {
                     <Skeleton className="h-6 w-16" />
                   ) : (
                     <div className="text-base sm:text-lg font-bold">
-                      {paymentData
-                        ? formatPrice(String(paymentData.data.lockedAmount))
-                        : "₦0"}
+                      {orders.length}
                     </div>
                   )}
                 </CardContent>

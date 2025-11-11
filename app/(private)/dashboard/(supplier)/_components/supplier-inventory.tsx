@@ -624,12 +624,12 @@ const confirmOrderAction = async () => {
                       <div className="flex gap-2 text-xs text-muted-foreground mt-1">
                         {item.variantColor && (
                           <span className="capitalize">
-                            {item.variantColor}
+                            color: {item.variantColor}
                           </span>
                         )}
                         {item.variantSize && (
                           <span className="capitalize">
-                            ({item.variantSize})
+                           size: ({item.variantSize})
                           </span>
                         )}
                       </div>
@@ -639,12 +639,12 @@ const confirmOrderAction = async () => {
                       <div className="flex gap-2 text-xs text-muted-foreground mt-1">
                         {item.productColor && (
                           <span className="capitalize">
-                            {item.productColor}
+                           color: {item.productColor}
                           </span>
                         )}
                         {item.productSize && (
                           <span className="capitalize">
-                            ({item.productSize})
+                           size: ({item.productSize})
                           </span>
                         )}
                       </div>
