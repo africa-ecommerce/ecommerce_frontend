@@ -151,21 +151,24 @@ export const useCheckoutStore = create<CheckoutStore>()(
 
       // New methods for delivery options
       setSupplierDeliverySelection: (supplierId, locationId) =>
-        set((state) => ({
-          checkoutData: {
-            ...state.checkoutData,
-            supplierDeliverySelections: {
-              ...state.checkoutData.supplierDeliverySelections,
-              ...(locationId
-                ? { [supplierId]: locationId }
-                : (() => {
-                    const { [supplierId]: _, ...rest } =
-                      state.checkoutData.supplierDeliverySelections;
-                    return rest;
-                  })()),
-            },
-          },
-        })),
+  set((state) => {
+    const newSelections = { ...state.checkoutData.supplierDeliverySelections };
+    
+    if (locationId === null) {
+      // Remove the supplier's selection
+      delete newSelections[supplierId];
+    } else {
+      // Add or update the supplier's selection
+      newSelections[supplierId] = locationId;
+    }
+    
+    return {
+      checkoutData: {
+        ...state.checkoutData,
+        supplierDeliverySelections: newSelections,
+      },
+    };
+  }),
 
       setSupplierPaymentMethod: (supplierId, method) =>
         set((state) => ({
