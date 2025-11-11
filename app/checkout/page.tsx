@@ -47,8 +47,7 @@ import { errorToast, successToast } from "@/components/ui/use-toast-advanced";
 import { getVariationDisplayName, parseCheckoutUrl } from "@/lib/url-parser";
 import { useProductFetching } from "@/hooks/use-product-fetcher";
 import { useProductStore } from "@/hooks/product-store";
-import { terminalAddresses, TerminalPickupPrices } from "../constant";
-
+import { Switch } from "@/components/ui/switch";
 // Add these type definitions after imports
 interface OrderItem {
   id: string;
@@ -1535,86 +1534,76 @@ export default function CheckoutPage() {
                                             return (
                                               <div
                                                 key={location.id}
-                                                className={`relative flex items-start space-x-3 rounded-lg border p-4 cursor-pointer transition-all ${
+                                                className={`relative rounded-lg border p-4 transition-all ${
                                                   isThisSelected
                                                     ? "border-primary bg-primary/5"
-                                                    : "border-border hover:border-primary/50"
+                                                    : "border-border"
                                                 }`}
-                                                onClick={() => {
-                                                  // Toggle behavior - select or deselect this location
-                                                  setSupplierDeliverySelection(
-                                                    group.supplierId,
-                                                    isThisSelected
-                                                      ? null
-                                                      : location.id
-                                                  );
-                                                }}
                                               >
-                                                <div className="flex-1 space-y-1">
-                                                  <Label className="flex items-center gap-2 cursor-pointer font-medium">
-                                                    <div
-                                                      className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                                                        isThisSelected
-                                                          ? "border-primary bg-primary"
-                                                          : "border-muted-foreground"
-                                                      }`}
-                                                    >
-                                                      {isThisSelected && (
-                                                        <svg
-                                                          className="w-3 h-3 text-white"
-                                                          fill="none"
-                                                          strokeLinecap="round"
-                                                          strokeLinejoin="round"
-                                                          strokeWidth="2"
-                                                          viewBox="0 0 24 24"
-                                                          stroke="currentColor"
-                                                        >
-                                                          <path d="M5 13l4 4L19 7"></path>
-                                                        </svg>
-                                                      )}
+                                                <div className="flex items-start justify-between gap-3">
+                                                  <div className="flex-1 space-y-1">
+                                                    <div className="flex items-center gap-2">
+                                                      <Truck className="h-4 w-4 text-muted-foreground" />
+                                                      <Label className="font-medium cursor-pointer">
+                                                        {location.state}{" "}
+                                                        Delivery
+                                                      </Label>
                                                     </div>
-                                                    <Truck className="h-4 w-4" />
-                                                    {location.state} Delivery
-                                                  </Label>
-                                                  <div className="flex items-center gap-2 text-sm text-muted-foreground ml-9">
-                                                    <Clock className="h-3 w-3" />
-                                                    {location.duration}
+                                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                      <Clock className="h-3 w-3" />
+                                                      {location.duration}
+                                                    </div>
+                                                    <p className="text-sm text-muted-foreground">
+                                                      Available for:{" "}
+                                                      {isString ? (
+                                                        lgaDisplay
+                                                      ) : (
+                                                        <>
+                                                          {lgaDisplay.preview}
+                                                          {lgaDisplay.remaining >
+                                                            0 && (
+                                                            <button
+                                                              type="button"
+                                                              className="ml-1 text-primary hover:underline"
+                                                              onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedLocationForLgas(
+                                                                  location
+                                                                );
+                                                                setShowAllLgasModal(
+                                                                  true
+                                                                );
+                                                              }}
+                                                            >
+                                                              +
+                                                              {
+                                                                lgaDisplay.remaining
+                                                              }{" "}
+                                                              more
+                                                            </button>
+                                                          )}
+                                                        </>
+                                                      )}
+                                                    </p>
+                                                    <p className="text-sm font-semibold text-primary">
+                                                      {formatPrice(
+                                                        location.fee
+                                                      )}
+                                                    </p>
                                                   </div>
-                                                  <p className="text-sm text-muted-foreground ml-9">
-                                                    Available for:{" "}
-                                                    {isString ? (
-                                                      lgaDisplay
-                                                    ) : (
-                                                      <>
-                                                        {lgaDisplay.preview}
-                                                        {lgaDisplay.remaining >
-                                                          0 && (
-                                                          <button
-                                                            type="button"
-                                                            className="ml-1 text-primary hover:underline"
-                                                            onClick={(e) => {
-                                                              e.stopPropagation();
-                                                              setSelectedLocationForLgas(
-                                                                location
-                                                              );
-                                                              setShowAllLgasModal(
-                                                                true
-                                                              );
-                                                            }}
-                                                          >
-                                                            +
-                                                            {
-                                                              lgaDisplay.remaining
-                                                            }{" "}
-                                                            more
-                                                          </button>
-                                                        )}
-                                                      </>
-                                                    )}
-                                                  </p>
-                                                  <p className="text-sm font-semibold text-primary ml-9">
-                                                    {formatPrice(location.fee)}
-                                                  </p>
+                                                  <Switch
+                                                    checked={isThisSelected}
+                                                    onCheckedChange={(
+                                                      checked
+                                                    ) => {
+                                                      setSupplierDeliverySelection(
+                                                        group.supplierId,
+                                                        checked
+                                                          ? location.id
+                                                          : null
+                                                      );
+                                                    }}
+                                                  />
                                                 </div>
                                               </div>
                                             );
@@ -1632,128 +1621,69 @@ export default function CheckoutPage() {
                                             <Label className="text-sm font-medium mb-3 block">
                                               Payment Method for this group
                                             </Label>
-                                            <div className="space-y-2">
-                                              <div
-                                                className={`flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-all ${
-                                                  (supplierPaymentMethods[
-                                                    group.supplierId
-                                                  ] || "ONLINE") === "ONLINE"
-                                                    ? "border-primary bg-primary/5"
-                                                    : "border-border hover:border-primary/50"
-                                                }`}
-                                                onClick={() => {
-                                                  const currentMethod =
-                                                    supplierPaymentMethods[
-                                                      group.supplierId
-                                                    ] || "ONLINE";
-                                                  // Toggle to ONLINE or default to ONLINE if currently P_O_D
-                                                  setSupplierPaymentMethod(
-                                                    group.supplierId,
-                                                    currentMethod === "ONLINE"
-                                                      ? "ONLINE"
-                                                      : "ONLINE"
-                                                  );
-                                                }}
-                                              >
-                                                <div
-                                                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                                            <div className="space-y-3">
+                                              <div className="flex items-center justify-between p-3 border rounded-lg">
+                                                <div className="flex items-center gap-2">
+                                                  <CreditCard className="h-4 w-4" />
+                                                  <div>
+                                                    <span className="font-medium block">
+                                                      Pay Online
+                                                    </span>
+                                                    <p className="text-xs text-muted-foreground">
+                                                      Pay now with card, bank
+                                                      transfer or mobile money
+                                                    </p>
+                                                  </div>
+                                                </div>
+                                                <Switch
+                                                  checked={
                                                     (supplierPaymentMethods[
                                                       group.supplierId
                                                     ] || "ONLINE") === "ONLINE"
-                                                      ? "border-primary bg-primary"
-                                                      : "border-muted-foreground"
-                                                  }`}
-                                                >
-                                                  {(supplierPaymentMethods[
-                                                    group.supplierId
-                                                  ] || "ONLINE") ===
-                                                    "ONLINE" && (
-                                                    <svg
-                                                      className="w-3 h-3 text-white"
-                                                      fill="none"
-                                                      strokeLinecap="round"
-                                                      strokeLinejoin="round"
-                                                      strokeWidth="2"
-                                                      viewBox="0 0 24 24"
-                                                      stroke="currentColor"
-                                                    >
-                                                      <path d="M5 13l4 4L19 7"></path>
-                                                    </svg>
-                                                  )}
-                                                </div>
-                                                <div className="flex-1">
-                                                  <div className="flex items-center gap-2">
-                                                    <CreditCard className="h-4 w-4" />
-                                                    <span className="font-medium">
-                                                      Pay Online
-                                                    </span>
-                                                  </div>
-                                                  <p className="text-xs text-muted-foreground mt-1">
-                                                    Pay now with card, bank
-                                                    transfer or mobile money
-                                                  </p>
-                                                </div>
+                                                  }
+                                                  onCheckedChange={(
+                                                    checked
+                                                  ) => {
+                                                    setSupplierPaymentMethod(
+                                                      group.supplierId,
+                                                      checked
+                                                        ? "ONLINE"
+                                                        : "P_O_D"
+                                                    );
+                                                  }}
+                                                />
                                               </div>
 
-                                              <div
-                                                className={`flex items-center space-x-2 p-3 border rounded-lg cursor-pointer transition-all ${
-                                                  supplierPaymentMethods[
-                                                    group.supplierId
-                                                  ] === "P_O_D"
-                                                    ? "border-primary bg-primary/5"
-                                                    : "border-border hover:border-primary/50"
-                                                }`}
-                                                onClick={() => {
-                                                  const currentMethod =
-                                                    supplierPaymentMethods[
-                                                      group.supplierId
-                                                    ];
-                                                  // Toggle to P_O_D or switch from ONLINE
-                                                  setSupplierPaymentMethod(
-                                                    group.supplierId,
-                                                    currentMethod === "P_O_D"
-                                                      ? "ONLINE"
-                                                      : "P_O_D"
-                                                  );
-                                                }}
-                                              >
-                                                <div
-                                                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                                              <div className="flex items-center justify-between p-3 border rounded-lg">
+                                                <div className="flex items-center gap-2">
+                                                  <Truck className="h-4 w-4" />
+                                                  <div>
+                                                    <span className="font-medium block">
+                                                      Pay on Delivery
+                                                    </span>
+                                                    <p className="text-xs text-muted-foreground">
+                                                      Pay with cash when your
+                                                      order arrives
+                                                    </p>
+                                                  </div>
+                                                </div>
+                                                <Switch
+                                                  checked={
                                                     supplierPaymentMethods[
                                                       group.supplierId
                                                     ] === "P_O_D"
-                                                      ? "border-primary bg-primary"
-                                                      : "border-muted-foreground"
-                                                  }`}
-                                                >
-                                                  {supplierPaymentMethods[
-                                                    group.supplierId
-                                                  ] === "P_O_D" && (
-                                                    <svg
-                                                      className="w-3 h-3 text-white"
-                                                      fill="none"
-                                                      strokeLinecap="round"
-                                                      strokeLinejoin="round"
-                                                      strokeWidth="2"
-                                                      viewBox="0 0 24 24"
-                                                      stroke="currentColor"
-                                                    >
-                                                      <path d="M5 13l4 4L19 7"></path>
-                                                    </svg>
-                                                  )}
-                                                </div>
-                                                <div className="flex-1">
-                                                  <div className="flex items-center gap-2">
-                                                    <Truck className="h-4 w-4" />
-                                                    <span className="font-medium">
-                                                      Pay on Delivery
-                                                    </span>
-                                                  </div>
-                                                  <p className="text-xs text-muted-foreground mt-1">
-                                                    Pay with cash when your
-                                                    order arrives
-                                                  </p>
-                                                </div>
+                                                  }
+                                                  onCheckedChange={(
+                                                    checked
+                                                  ) => {
+                                                    setSupplierPaymentMethod(
+                                                      group.supplierId,
+                                                      checked
+                                                        ? "P_O_D"
+                                                        : "ONLINE"
+                                                    );
+                                                  }}
+                                                />
                                               </div>
                                             </div>
                                           </div>
