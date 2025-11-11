@@ -337,7 +337,6 @@ const confirmOrderAction = async () => {
 
     const getOrdersUrl = (status: string) => {
     if (status === "active") status = "pending"; 
-    if (status === "processed") status = "shipped"
     return `/api/orders/supplier?orderStatus=${status.toUpperCase()}`;
   };
 
@@ -576,9 +575,18 @@ const confirmOrderAction = async () => {
               {order.paymentMethod === "ONLINE" && (
                 <Badge
                   variant="outline"
-                  className="text-[10px] py-0 px-1.5 bg-green-50 text-green-700 border-green-200"
+                  className="text-xs py-0 px-1.5 bg-green-50 text-green-700 border-green-200"
                 >
                   Paid
+                </Badge>
+              )}
+
+               {order.paymentMethod === "P_O_D" && (
+                <Badge
+                  variant="outline"
+                  className="text-xs py-0 px-1.5 bg-green-50 text-green-700 border-green-200"
+                >
+                  Pay on delivery
                 </Badge>
               )}
             </div>
@@ -587,27 +595,16 @@ const confirmOrderAction = async () => {
 
         <CardContent className="p-3 sm:p-4 pt-0 space-y-3">
           {/* Customer Info */}
-          <div className="flex items-center gap-2 text-sm">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium sm:text-base text-sm">
-              {truncateText(capitalizeWords(order.buyerName), 30)}
-            </span>
-          </div>
-
-          {/* Phone Number */}
-          <div className="flex items-center gap-2 sm:text-sm text-xs text-muted-foreground">
-            <Phone className="h-4 w-4" />
-            <span>{order.buyerPhone}</span>
-          </div>
+ 
 
           {/* Via Channel Badge - Only show if plugId exists */}
           {order.plugId && (
             <div className="flex items-center gap-1.5">
               <Badge
                 variant="outline"
-                className="text-[10px] py-0.5 px-2 bg-blue-50 text-blue-700 border-blue-200"
+                className="text-xs py-0.5 px-2 bg-blue-50 text-blue-700 border-blue-200"
               >
-                <Share2 className="h-2.5 w-2.5 mr-1" />
+                
                 Via Channel
               </Badge>
             </div>
@@ -685,7 +682,7 @@ const confirmOrderAction = async () => {
             onClick={() => handleViewBuyerDetails(order)}
           >
             <Users className="h-3 w-3 mr-1" />
-            View Buyer Details
+            View Details
           </Button>
 
           {activeOrderTab === "active" && (
