@@ -23,6 +23,7 @@ import {
   Truck,
   Phone,
   PackageCheck,
+  Trash,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -299,6 +300,8 @@ export default function Inventory() {
 
     const orders = Array.isArray(ordersData?.data) ? ordersData?.data : [];
 
+    console.log("supplierOrders", orders)
+
 
   const { deleteResource } = useDeleteResource(
     "/api/products/supplier/",
@@ -333,6 +336,8 @@ export default function Inventory() {
   // Fetch data
   const { data, error, isLoading, mutate } = useSWR("/api/products/supplier/");
   const products = Array.isArray(data?.data) ? data?.data : [];
+
+  console.log("products supplier", products)
 
   // Filter items based on selected category, filter, and search query
   const filteredItems = products?.filter((item: any) => {
@@ -591,7 +596,7 @@ export default function Inventory() {
                   className="flex-1 h-8 text-xs"
                   onClick={handleShareTracking}
                 >
-                  <Share2 className="h-3 w-3 mr-1" />
+                  <Trash className="h-3 w-3 mr-1" />
                  Cancel Order
                 </Button>
                 <Button

@@ -236,7 +236,6 @@ export default function CheckoutPage() {
     isLoading: isProductsLoading,
   } = useProductFetching(items, ref, platform, true);
 
-  console.log("checkoutProductsData", productsData);
 
   const {
     orderSummaries,
@@ -452,48 +451,7 @@ export default function CheckoutPage() {
   const onlineTotal = onlinePaymentAmount + onlineDeliveryFee;
   const payOnDeliveryTotal = payOnDeliveryAmount + payOnDeliveryFee;
 
-  // const formatOrderItems = () => {
-  //   if (!orderSummaries.length) return [];
-
-  //   return orderSummaries.flatMap((summary) => {
-  //     const hasDeliverySelected =
-  //       supplierDeliverySelections[summary.item.supplierId];
-  //     const group = supplierGroups.find(
-  //       (g) => g.supplierId === summary.item.supplierId
-  //     );
-
-  //     if (
-  //       group?.deliveryLocations.length &&
-  //       group.deliveryLocations.length > 0 &&
-  //       !hasDeliverySelected
-  //     ) {
-  //       return [];
-  //     }
-
-  //     const paymentMethod =
-  //       supplierPaymentMethods[summary.item.supplierId] || "ONLINE";
-
-  //     return {
-  //       productId: summary.item.productId,
-  //       quantity: summary.item.quantity,
-
-  //       supplierId: summary.item.supplierId,
-  //       deliveryLocationId: hasDeliverySelected || null,
-  //       deliveryFee,
-  //       paymentMethod: paymentMethod, // Add this
-  //       ...(summary.item.variationId && {
-  //         variantId: summary.item.variationId,
-  //         variantColor: summary.item.selectedColor,
-  //         variantSize: summary.item.size,
-  //       }),
-  //       ...(!summary.item.variationId && {
-  //         productColor: summary.item.selectedColor,
-  //         productSize: summary.item.size,
-  //       }),
-  //     };
-  //   });
-  // };
-
+  
   const formatOrderItems = () => {
     if (!orderSummaries.length) return [];
 
@@ -548,7 +506,6 @@ export default function CheckoutPage() {
 
   const stageOrder = async () => {
     try {
-      console.log("formatOrderItems", formatOrderItems);
       const response = await fetch("/api/orders/stage-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -613,8 +570,9 @@ export default function CheckoutPage() {
 
       clearCheckoutData();
       clearOrderSummaries();
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      router.replace("/thank-you");
+      setTimeout(() => {
+          router.replace("/thank-you");
+        }, 2000);
     } catch (error) {
       console.error("Error confirming order:", error);
       errorToast("An error occurred while confirming order");
@@ -626,7 +584,6 @@ export default function CheckoutPage() {
   const handleStageOrder = async () => {
     // Prevent double submission
     if (isLoading) {
-      console.log("Already processing order, ignoring duplicate call");
       return;
     }
 
@@ -641,7 +598,7 @@ export default function CheckoutPage() {
 
       // If everything is pay on delivery, skip payment and confirm directly
       if (onlineTotal === 0 && payOnDeliveryTotal > 0) {
-        successToast("Order placed successfully");
+        
         await confirmOrder(staged.reference);
         return;
       }

@@ -31,7 +31,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function ChannelView() {
   const [showModal, setShowModal] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [disabling, setDisabling] = useState(false);
   const { data, error, isLoading, mutate } = useSWR("/api/channel", fetcher);
 
   const channelData = data?.data || null;
@@ -42,7 +42,7 @@ export default function ChannelView() {
   // Confirm delete handler (called after user confirms in modal)
   const handleDeleteConfirmed = async () => {
     try {
-      setDeleting(true);
+      setDisabling(true);
       const res = await fetch("/api/channel", { method: "DELETE" });
       if (!res.ok) {
         // try to parse json message if available
@@ -53,14 +53,14 @@ export default function ChannelView() {
         } catch (e) {}
         throw new Error(msg);
       }
-      successToast("Channel deleted successfully");
+      successToast("Channel disabled successfully");
       await mutate();
       setConfirmOpen(false);
     } catch (err: any) {
       console.error("Delete error:", err);
-      errorToast(err?.message || "Failed to delete channel");
+      errorToast(err?.message || "Failed to disable channel");
     } finally {
-      setDeleting(false);
+      setDisabling(false);
     }
   };
 
@@ -323,10 +323,9 @@ export default function ChannelView() {
               onClick={() => setConfirmOpen(true)}
               size="sm"
               className="bg-white text-red-600 px-4 py-3 text-base rounded-xl border-black shadow-sm transition-all duration-200 flex items-center gap-2 hover:bg-white"
-              disabled={deleting}
+              disabled={disabling}
             >
-              <Trash2 className="w-4 h-4" />
-              {deleting ? "Deleting..." : "Delete Channel"}
+              {disabling ? "Disabling..." : "Disable Channel"}
             </Button>
             </>
           
@@ -441,26 +440,25 @@ export default function ChannelView() {
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete Channel</DialogTitle>
+            <DialogTitle>Disable Channel</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this channel? This action cannot
-              be undone and will remove all channel settings permanently.
+              Are you sure you want to disable this channel?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex justify-end gap-2">
             <Button
               variant="outline"
               onClick={() => setConfirmOpen(false)}
-              disabled={deleting}
+              disabled={disabling}
             >
               Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteConfirmed}
-              disabled={deleting}
+              disabled={disabling}
             >
-              {deleting ? "Deleting..." : "Delete Channel"}
+              {disabling ? "disabling..." : "Disable Channel"}
             </Button>
           </DialogFooter>
         </DialogContent>

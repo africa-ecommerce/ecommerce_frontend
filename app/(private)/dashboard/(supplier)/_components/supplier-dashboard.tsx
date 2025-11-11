@@ -17,6 +17,7 @@ import {
   Users,
   Wallet,
   X,
+  Trash,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -232,7 +233,7 @@ const OrderCard = ({ order }: { order: any }) => {
                   className="flex-1 h-8 text-xs"
                   
                 >
-                  <Share2 className="h-3 w-3 mr-1" />
+                  <Trash className="h-3 w-3 mr-1" />
                  Cancel Order
                 </Button>
                 <Button
