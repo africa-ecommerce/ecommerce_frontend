@@ -2059,80 +2059,172 @@ const formatOrderItems = () => {
   };
 
   
-  const handleStageOrder = async () => {
-  setIsLoading(true);
-  const staged = await stageOrder();
-  if (!staged) return;
+//   const handleStageOrder = async () => {
+//   setIsLoading(true);
+//   const staged = await stageOrder();
+//   if (!staged) return;
 
 
-  // If everything is pay on delivery, skip payment and confirm directly
-  if (onlineTotal === 0 && payOnDeliveryTotal > 0) {
-     successToast("Order placed successfully");
-   setIsLoading(false);
-await confirmOrder(staged.reference);
+//   // If everything is pay on delivery, skip payment and confirm directly
+//   if (onlineTotal === 0 && payOnDeliveryTotal > 0) {
+//      successToast("Order placed successfully");
+//    setIsLoading(false);
+// await confirmOrder(staged.reference);
      
+//     return;
+//   }
+
+//     setStagedOrder(staged);
+
+
+
+//   // If there's an online payment amount, proceed with Paystack
+//   if (typeof window === "undefined") return;
+
+//   const { usePaystackPayment } = await import("react-paystack");
+
+//   const config = {
+//     email: watchedEmail || "",
+//     amount: onlineTotal * 100, // Use online total instead of full total
+//     reference: staged.reference,
+//     publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+//     metadata: {
+//       custom_fields: [
+//         {
+//           display_name: "Name",
+//           variable_name: "name",
+//           value: watchedName || "",
+//         },
+//         {
+//           display_name: "Phone",
+//           variable_name: "phone",
+//           value: watchedPhone || "",
+//         },
+//         {
+//           display_name: "Address",
+//           variable_name: "address",
+//           value: watchedCustomerAddress
+//             ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
+//             : "",
+//         },
+//         {
+//           display_name: "Order Number",
+//           variable_name: "orderNumber",
+//           value: staged.orderNumber,
+//         },
+//         {
+//           display_name: "Pay on Delivery Amount",
+//           variable_name: "payOnDeliveryAmount",
+//           value: payOnDeliveryTotal.toString(),
+//         },
+//       ],
+//     },
+//   };
+
+//   const initializePayment = usePaystackPayment(config);
+
+//   initializePayment({
+//     onSuccess: async (ref: { reference: string }) => {
+//       await delay(3000);
+//       await confirmOrder(ref.reference);
+//     },
+//     onClose: () => {
+//       setIsLoading(false);
+//       showPaymentCancelledModal();
+//     },
+//   });
+// };
+
+
+
+const handleStageOrder = async () => {
+  // Prevent double submission
+  if (isLoading) {
+    console.log('Already processing order, ignoring duplicate call');
     return;
   }
 
+  setIsLoading(true);
+  
+  try {
+    const staged = await stageOrder();
+    if (!staged) {
+      setIsLoading(false);
+      return;
+    }
+
+    // If everything is pay on delivery, skip payment and confirm directly
+    if (onlineTotal === 0 && payOnDeliveryTotal > 0) {
+      successToast("Order placed successfully");
+      await confirmOrder(staged.reference);
+      return;
+    }
+
     setStagedOrder(staged);
 
-
-
-  // If there's an online payment amount, proceed with Paystack
-  if (typeof window === "undefined") return;
-
-  const { usePaystackPayment } = await import("react-paystack");
-
-  const config = {
-    email: watchedEmail || "",
-    amount: onlineTotal * 100, // Use online total instead of full total
-    reference: staged.reference,
-    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-    metadata: {
-      custom_fields: [
-        {
-          display_name: "Name",
-          variable_name: "name",
-          value: watchedName || "",
-        },
-        {
-          display_name: "Phone",
-          variable_name: "phone",
-          value: watchedPhone || "",
-        },
-        {
-          display_name: "Address",
-          variable_name: "address",
-          value: watchedCustomerAddress
-            ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
-            : "",
-        },
-        {
-          display_name: "Order Number",
-          variable_name: "orderNumber",
-          value: staged.orderNumber,
-        },
-        {
-          display_name: "Pay on Delivery Amount",
-          variable_name: "payOnDeliveryAmount",
-          value: payOnDeliveryTotal.toString(),
-        },
-      ],
-    },
-  };
-
-  const initializePayment = usePaystackPayment(config);
-
-  initializePayment({
-    onSuccess: async (ref: { reference: string }) => {
-      await delay(3000);
-      await confirmOrder(ref.reference);
-    },
-    onClose: () => {
+    // If there's an online payment amount, proceed with Paystack
+    if (typeof window === "undefined") {
       setIsLoading(false);
-      showPaymentCancelledModal();
-    },
-  });
+      return;
+    }
+
+    const { usePaystackPayment } = await import("react-paystack");
+
+    const config = {
+      email: watchedEmail || "",
+      amount: onlineTotal * 100,
+      reference: staged.reference,
+      publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+      metadata: {
+        custom_fields: [
+          {
+            display_name: "Name",
+            variable_name: "name",
+            value: watchedName || "",
+          },
+          {
+            display_name: "Phone",
+            variable_name: "phone",
+            value: watchedPhone || "",
+          },
+          {
+            display_name: "Address",
+            variable_name: "address",
+            value: watchedCustomerAddress
+              ? `${watchedCustomerAddress.streetAddress}, ${watchedCustomerAddress.lga}, ${watchedCustomerAddress.state}`
+              : "",
+          },
+          {
+            display_name: "Order Number",
+            variable_name: "orderNumber",
+            value: staged.orderNumber,
+          },
+          {
+            display_name: "Pay on Delivery Amount",
+            variable_name: "payOnDeliveryAmount",
+            value: payOnDeliveryTotal.toString(),
+          },
+        ],
+      },
+    };
+
+    const initializePayment = usePaystackPayment(config);
+
+    initializePayment({
+      onSuccess: async (ref: { reference: string }) => {
+        await delay(3000);
+        await confirmOrder(ref.reference);
+      },
+      onClose: () => {
+        setIsLoading(false);
+        showPaymentCancelledModal();
+      },
+    });
+  } catch (error) {
+    console.error('Error in handleStageOrder:', error);
+    setIsLoading(false);
+    errorToast("An error occurred while processing your order");
+  }
 };
 
 
@@ -2505,7 +2597,26 @@ await confirmOrder(staged.reference);
   };
 
   
-  const renderPlaceOrderButton = () => {
+//   const renderPlaceOrderButton = () => {
+//   const buttonText = onlineTotal === 0 && payOnDeliveryTotal > 0
+//     ? "Place Order"
+//     : onlineTotal > 0 && payOnDeliveryTotal > 0
+//     ? `Pay ${formatPrice(onlineTotal)} Now`
+//     : "Place Order";
+    
+//   return (
+//     <Button
+//       onClick={handleStageOrder}
+//       className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
+//       disabled={isLoading}
+//     >
+//       {isLoading ? "Processing..." : buttonText}
+//     </Button>
+//   );
+// };
+
+
+const renderPlaceOrderButton = () => {
   const buttonText = onlineTotal === 0 && payOnDeliveryTotal > 0
     ? "Place Order"
     : onlineTotal > 0 && payOnDeliveryTotal > 0
@@ -2517,8 +2628,16 @@ await confirmOrder(staged.reference);
       onClick={handleStageOrder}
       className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium transition-colors"
       disabled={isLoading}
+      type="button" // Add this to prevent form submission
     >
-      {isLoading ? "Processing..." : buttonText}
+      {isLoading ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Processing...
+        </>
+      ) : (
+        buttonText
+      )}
     </Button>
   );
 };
@@ -3631,7 +3750,7 @@ await confirmOrder(staged.reference);
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog
+      {/* <AlertDialog
         open={showCancelledModal}
         onOpenChange={setShowCancelledModal}
       >
@@ -3654,7 +3773,38 @@ await confirmOrder(staged.reference);
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+      </AlertDialog> */}
+
+      <AlertDialog
+  open={showCancelledModal}
+  onOpenChange={setShowCancelledModal}
+>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Don't miss out!</AlertDialogTitle>
+      <AlertDialogDescription>
+        Your items are still waiting for you. Complete your purchase now
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Maybe Later</AlertDialogCancel>
+      <AlertDialogAction onClick={handleStageOrder} disabled={isLoading}>
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          onlineTotal === 0 && payOnDeliveryTotal > 0
+            ? "Place Order"
+            : onlineTotal > 0 && payOnDeliveryTotal > 0
+            ? `Pay ${formatPrice(onlineTotal)} Now`
+            : "Place Order"
+        )}
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
     </div>
   );
 }
