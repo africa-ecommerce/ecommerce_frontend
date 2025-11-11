@@ -108,27 +108,7 @@ export default function ThankYouPage() {
           
          
 
-          {/* Quick Actions - Mobile Friendly */}
-          <div className="">
-           
-
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center justify-center space-x-2 py-6"
-              onClick={() => window.open("/help", "_blank")}
-            >
-              <MessageCircle className="h-4 w-4" />
-              <span className="text-sm">Get Help</span>
-            </Button>
-          </div>
-
-          {/* Footer - Minimal */}
-          <div className="text-center pt-4">
-            <p className="text-xs text-muted-foreground">
-              Questions? We're here to help 24/7
-            </p>
-          </div>
+         
         </div>
       </div>
     </div>
