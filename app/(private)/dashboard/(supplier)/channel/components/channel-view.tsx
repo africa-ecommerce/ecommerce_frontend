@@ -26,7 +26,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { DiscoveryModeDialog } from "@/app/(private)/marketplace/_components/discovery-mode-dialog";
-import { useProducts } from "@/hooks/use-products";
+import { ProductsFilter, useProducts } from "@/hooks/use-products";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -42,6 +42,10 @@ export default function ChannelView() {
 
   const onOpen = () => setShowModal(true);
   const onClose = () => setShowModal(false);
+
+    const filters = {
+    order: "desc",
+  };
 
   
   const {
