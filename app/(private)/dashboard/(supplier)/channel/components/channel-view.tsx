@@ -25,6 +25,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { DiscoveryModeDialog } from "@/app/(private)/marketplace/_components/discovery-mode-dialog";
+import { useProducts } from "@/hooks/use-products";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -34,10 +36,29 @@ export default function ChannelView() {
   const [disabling, setDisabling] = useState(false);
   const { data, error, isLoading, mutate } = useSWR("/api/channel", fetcher);
 
+  const [showDiscoveryMode, setShowDiscoveryMode] = useState(true);
+
   const channelData = data?.data || null;
 
   const onOpen = () => setShowModal(true);
   const onClose = () => setShowModal(false);
+
+  
+  const {
+    products,
+   
+    loading,
+    isLoadingMore,
+    hasNextPage,
+    isEmpty,
+    size,
+    setSize,
+    clearCache,
+    refreshData,
+  } = useProducts(filters, 20);
+
+  
+  const isInitialLoading = isLoading && products.length === 0;
 
   // Confirm delete handler (called after user confirms in modal)
   const handleDeleteConfirmed = async () => {
@@ -463,6 +484,17 @@ export default function ChannelView() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+
+       <DiscoveryModeDialog
+          open={showDiscoveryMode}
+          onOpenChange={setShowDiscoveryMode}
+          products={products}
+          isLoading={isInitialLoading}
+          isLoadingMore={isLoadingMore}
+          hasNextPage={hasNextPage}
+          loadMore={() => setSize(size + 1)}
+        />
     </div>
   );
 }

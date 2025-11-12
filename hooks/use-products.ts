@@ -106,9 +106,7 @@ if (previousPageData && !previousPageData?.meta?.hasNextPage) return null;
      .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
      .join("&");
 
-   const baseUrl = discover
-     ? "/api/discover/products"
-     : "/api/marketplace/products";
+   const baseUrl = "/api/products/supplier/";
 
    return `${baseUrl}?${queryString}`;
  };
@@ -203,7 +201,7 @@ if (previousPageData && !previousPageData?.meta?.hasNextPage) return null;
   return {
     products,
     error,
-    isLoading,
+    loading: isLoading,
     isLoadingMore,
     isValidating,
     isEmpty,
