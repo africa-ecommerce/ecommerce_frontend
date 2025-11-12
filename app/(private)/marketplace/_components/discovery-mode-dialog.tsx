@@ -895,7 +895,7 @@ export function DiscoveryModeDialog({
                               />
                             </div>
                           ))}
-                          
+
                           {/* Image indicators */}
                           {currentProduct.images.length > 1 && (
                             <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
