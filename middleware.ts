@@ -80,40 +80,30 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (authRoutes.includes(pathname)) {
+ if (authRoutes.includes(pathname)) {
     const accessToken = request.cookies.get("accessToken")?.value;
     const refreshToken = request.cookies.get("refreshToken")?.value;
 
-    // If user has a valid access token, redirect away from auth pages
     if (accessToken) {
       try {
-        await jwtVerify(accessToken, JWT_SECRET_KEY, { algorithms: ["HS256"] });
-        // ✅ Logged in → redirect away from login/register
-        return NextResponse.redirect(
-          new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
-        );
+        const { payload } = await jwtVerify(accessToken, JWT_SECRET_KEY, { algorithms: ["HS256"] });
+        const redirectTo = payload.userType === "SUPPLIER" ? "/dashboard" : DEFAULT_LOGIN_REDIRECT;
+        return NextResponse.redirect(new URL(redirectTo, nextUrl.origin));
       } catch {
-        // ❌ Token invalid/expired → continue to check refresh token
+        // Token invalid/expired → continue to check refresh token
       }
     }
 
-    console.log("refreshToken", refreshToken);
-    // If user has a refresh token (even without valid access token), redirect away from auth pages
     if (refreshToken) {
       try {
-        await jwtVerify(refreshToken, REFRESH_SECRET_KEY, {
-          algorithms: ["HS256"],
-        });
-        // ✅ Has valid refresh token → redirect away from login/register
-        return NextResponse.redirect(
-          new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
-        );
+        const { payload } = await jwtVerify(refreshToken, REFRESH_SECRET_KEY, { algorithms: ["HS256"] });
+        const redirectTo = payload.userType === "SUPPLIER" ? "/dashboard" : DEFAULT_LOGIN_REDIRECT;
+        return NextResponse.redirect(new URL(redirectTo, nextUrl.origin));
       } catch {
-        // ❌ Refresh token also invalid → let them access login/register
+        // Refresh token also invalid → let them access login/register
       }
     }
 
-    // ✅ No valid tokens → allow access to auth pages
     return NextResponse.next();
   }
 
