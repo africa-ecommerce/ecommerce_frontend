@@ -80,34 +80,43 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-if (authRoutes.includes(pathname)) {
-  const accessToken = request.cookies.get("accessToken")?.value;
-  const refreshToken = request.cookies.get("refreshToken")?.value;
+  if (authRoutes.includes(pathname)) {
+    const accessToken = request.cookies.get("accessToken")?.value;
+    const refreshToken = request.cookies.get("refreshToken")?.value;
 
-  if (accessToken) {
-    try {
-      const { payload } = await jwtVerify(accessToken, JWT_SECRET_KEY, { algorithms: ["HS256"] });
-      const userType = payload?.userType as string | undefined;
-      const redirectTo = userType === "SUPPLIER" ? "/dashboard" : DEFAULT_LOGIN_REDIRECT;
-      return NextResponse.redirect(new URL(redirectTo, nextUrl.origin));
-    } catch {
-      // Token invalid/expired → fall through to refresh token check
+    // If user has a valid access token, redirect away from auth pages
+    if (accessToken) {
+      try {
+        await jwtVerify(accessToken, JWT_SECRET_KEY, { algorithms: ["HS256"] });
+        // ✅ Logged in → redirect away from login/register
+        return NextResponse.redirect(
+          new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
+        );
+      } catch {
+        // ❌ Token invalid/expired → continue to check refresh token
+      }
     }
+
+    console.log("refreshToken", refreshToken);
+    // If user has a refresh token (even without valid access token), redirect away from auth pages
+    if (refreshToken) {
+      try {
+        await jwtVerify(refreshToken, REFRESH_SECRET_KEY, {
+          algorithms: ["HS256"],
+        });
+        // ✅ Has valid refresh token → redirect away from login/register
+        return NextResponse.redirect(
+          new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin)
+        );
+      } catch {
+        // ❌ Refresh token also invalid → let them access login/register
+      }
+    }
+
+    // ✅ No valid tokens → allow access to auth pages
+    return NextResponse.next();
   }
 
-  if (refreshToken) {
-    try {
-      await jwtVerify(refreshToken, REFRESH_SECRET_KEY, { algorithms: ["HS256"] });
-      // Refresh token is valid but we can't read userType from it safely
-      // Redirect to a neutral route — the page itself will handle role routing
-      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin));
-    } catch {
-      // Refresh token also invalid → let them access login/register
-    }
-  }
-
-  return NextResponse.next();
-}
   // Handle public routes or product detail pages
   if (
     isPublicRoute ||
@@ -150,7 +159,6 @@ if (authRoutes.includes(pathname)) {
     const encodedCallBackUrl = encodeURIComponent(callbackUrl);
     return NextResponse.redirect(
       new URL(`/auth/login?callbackUrl=${encodedCallBackUrl}`, nextUrl.origin)
-      
     );
   }
 
