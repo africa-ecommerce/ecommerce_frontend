@@ -44,7 +44,7 @@ export const plugRoutes = ["/dashboard/product"];
 export const apiAuthPrefix = "/api/auth";
 
 /**@type {string}*/
-export const DEFAULT_LOGIN_REDIRECT = "/marketplace";
+export const DEFAULT_LOGIN_REDIRECT = "/dashboard";
 
 // Helper function to check if a pathname starts with any of the routes in the array
 export function pathnameStartsWith(
