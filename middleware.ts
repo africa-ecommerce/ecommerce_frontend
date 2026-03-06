@@ -80,33 +80,34 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
- if (authRoutes.includes(pathname)) {
-    const accessToken = request.cookies.get("accessToken")?.value;
-    const refreshToken = request.cookies.get("refreshToken")?.value;
+if (authRoutes.includes(pathname)) {
+  const accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
 
-    if (accessToken) {
-      try {
-        const { payload } = await jwtVerify(accessToken, JWT_SECRET_KEY, { algorithms: ["HS256"] });
-        const redirectTo = payload.userType === "SUPPLIER" ? "/dashboard" : DEFAULT_LOGIN_REDIRECT;
-        return NextResponse.redirect(new URL(redirectTo, nextUrl.origin));
-      } catch {
-        // Token invalid/expired → continue to check refresh token
-      }
+  if (accessToken) {
+    try {
+      const { payload } = await jwtVerify(accessToken, JWT_SECRET_KEY, { algorithms: ["HS256"] });
+      const userType = payload?.userType as string | undefined;
+      const redirectTo = userType === "SUPPLIER" ? "/dashboard" : DEFAULT_LOGIN_REDIRECT;
+      return NextResponse.redirect(new URL(redirectTo, nextUrl.origin));
+    } catch {
+      // Token invalid/expired → fall through to refresh token check
     }
-
-    if (refreshToken) {
-      try {
-        const { payload } = await jwtVerify(refreshToken, REFRESH_SECRET_KEY, { algorithms: ["HS256"] });
-        const redirectTo = payload.userType === "SUPPLIER" ? "/dashboard" : DEFAULT_LOGIN_REDIRECT;
-        return NextResponse.redirect(new URL(redirectTo, nextUrl.origin));
-      } catch {
-        // Refresh token also invalid → let them access login/register
-      }
-    }
-
-    return NextResponse.next();
   }
 
+  if (refreshToken) {
+    try {
+      await jwtVerify(refreshToken, REFRESH_SECRET_KEY, { algorithms: ["HS256"] });
+      // Refresh token is valid but we can't read userType from it safely
+      // Redirect to a neutral route — the page itself will handle role routing
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl.origin));
+    } catch {
+      // Refresh token also invalid → let them access login/register
+    }
+  }
+
+  return NextResponse.next();
+}
   // Handle public routes or product detail pages
   if (
     isPublicRoute ||
