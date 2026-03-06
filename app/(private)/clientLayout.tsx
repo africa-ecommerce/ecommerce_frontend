@@ -303,33 +303,7 @@ function DesktopNavigation({
               showTooltip
             />
 
-            {/* 🆕 Updated Marketplace Icon */}
-            <NavItem
-              href="/dashboard/channel"
-              icon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-4 h-4"
-                >
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M3 15m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
-                  <path d="M15 15m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
-                  <path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
-                  <path d="M6 15v-1a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v1" />
-                  <path d="M12 9l0 3" />
-                </svg>
-              }
-              tip="Channel"
-              isActive={isPathActive(pathname, "/dashboard/channel") && !isMoreActive}
-              closeMorePage={closeMorePage}
-              showTooltip
-            />
+           
 
             <NavItem
               href="/dashboard/inventory"
@@ -461,33 +435,7 @@ function MobileNavigation({
               closeMorePage={closeMorePage}
             />
 
-            {/* 🆕 Updated Marketplace Icon */}
-            <NavItem
-              href="/dashboard/channel"
-              icon={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-4 h-4"
-                >
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M3 15m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
-                  <path d="M15 15m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
-                  <path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
-                  <path d="M6 15v-1a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v1" />
-                  <path d="M12 9l0 3" />
-                </svg>
-              }
-              label="Channel"
-              isActive={isPathActive(pathname, "/dashboard/channel") && !isMoreActive}
-              compact
-              closeMorePage={closeMorePage}
-            />
+           
 
             <NavItem
               href="/dashboard/inventory"
